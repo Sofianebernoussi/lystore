@@ -3,15 +3,18 @@
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {
-		"title": {
+		"name": {
 			"type": "string"
 		},
-	    "thumbnail": {
+	    "email": {
 			"type": "string"
 		},
-	    "content": {
+	    "phone": {
 			"type": "string"
-		}
+		},
+        "department": {
+            "type": "string"
+        }
  	},
-	"required": [ "title" ]
+	"required": [ "name", "email", "phone", "department" ]
 }

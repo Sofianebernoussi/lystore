@@ -1,0 +1,28 @@
+body.lystore {
+  @import 'components/index';
+
+  .heading-tabs {
+    overflow-x: inherit;
+  }
+
+  .agent-management {
+
+    table {
+      thead td {
+        padding: 8px;
+        position: relative;
+
+        i::before {
+          font-size: 10px !important;
+          margin-left: 5px;
+          position: absolute;
+        }
+
+        label.checkbox {
+          position: absolute;
+          top: 8px;
+        }
+      }
+    }
+  }
+}

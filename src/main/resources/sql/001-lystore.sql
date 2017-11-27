@@ -15,3 +15,12 @@ CREATE TABLE lystore.agent (
   phone character varying(45),
   CONSTRAINT agent_pkey PRIMARY KEY (id)
 );
+
+CREATE TABLE lystore.supplier (
+  id bigserial NOT NULL,
+  name character varying(100),
+  address character varying(255),
+  email character varying(255),
+  phone character varying(45),
+  CONSTRAINT holder_pkey PRIMARY KEY (id)
+);

@@ -14,10 +14,16 @@
   "lystore.agent.add": "Ajouter un correspondant",
   "lystore.locality.agents": "Correspondants région",
   "lystore.agent.name": "Nom du correspondant",
+  "lystore.suppliers": "Fournisseurs",
+  "lystore.supplier.add": "Ajouter un fournisseur",
+  "lystore.supplier.name": "Nom du fournisseur",
+  "lystore.supplier.delete": "Êtes-vous sur de vouloir supprimer le(s) fournisseur(s) : ",
   "name": "Nom",
   "department": "Service",
   "phone": "Tel",
-  "email": "email",
+  "email": "Email",
+  "address": "Adresse",
   "modify": "Modifier",
-  "delete": "Supprimer"
+  "delete": "Supprimer",
+  "cancel": "Annuler"
 }

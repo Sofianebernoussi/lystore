@@ -1,5 +1,5 @@
 <div class="row agent-management" ng-controller="administratorController">
-    <div class="twelve">
+    <div class="twelve" workflow="lystore.administrator">
         <button class="right-magnet" ng-click="openAgentForm()">
             <i18n>lystore.agent.add</i18n>
         </button>
@@ -9,7 +9,7 @@
         <article>
             <table class="twelve">
                 <thead>
-                <td>
+                <td workflow="lystore.administrator">
                     <label class="checkbox">
                         <input type="checkbox"
                                ng-change="switchAllAgent(allAgentSelected)"
@@ -44,7 +44,7 @@
                 </thead>
                 <tbody>
                 <tr ng-repeat="agent in agents.all | orderBy:sort.agent.type:sort.agent.reverse">
-                    <td>
+                    <td workflow="lystore.administrator">
                         <label class="checkbox">
                             <input type="checkbox" ng-model="agent.selected">
                             <span></span>

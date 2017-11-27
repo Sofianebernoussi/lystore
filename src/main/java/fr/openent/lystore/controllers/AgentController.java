@@ -1,6 +1,7 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.service.AgentService;
 import fr.openent.lystore.service.impl.DefaultAgentService;
 import fr.wseduc.rs.*;
@@ -8,6 +9,7 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 import org.vertx.java.core.Handler;
@@ -17,7 +19,8 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static fr.wseduc.webutils.http.response.DefaultResponseHandler.*;
+import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
+import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
 
 public class AgentController extends ControllerHelper {
 
@@ -30,15 +33,14 @@ public class AgentController extends ControllerHelper {
 
     @Get("/agents")
     @ApiDoc("Returns all agents in database")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @SecuredAction(Lystore.MANAGER_RIGHT)
     public void getAgents (HttpServerRequest request) {
         agentService.getAgents(arrayResponseHandler(request));
     }
 
-    //TODO Gérer la sécurité
     @Post("/agent")
     @ApiDoc("Create an agent")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @SecuredAction(Lystore.ADMINISTRATOR_RIGHT)
     public void createAgent (final HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
             public void handle(final UserInfos user) {
@@ -51,10 +53,10 @@ public class AgentController extends ControllerHelper {
         });
     }
 
-    //TODO Gérer la sécurité
     @Put("/agent/:id")
     @ApiDoc("Update an agent based on provided id")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
     public void updateAgent (final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "agent", new Handler<JsonObject>() {
             public void handle(JsonObject body) {
@@ -68,10 +70,10 @@ public class AgentController extends ControllerHelper {
         });
     }
 
-    //TODO Gérer la sécurité
     @Delete("/agent")
     @ApiDoc("Delete and agent based on provided id")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
     public void deleteAgent (HttpServerRequest request) {
         try{
             List<String> params = request.params().getAll("id");

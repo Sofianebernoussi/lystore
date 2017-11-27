@@ -1,6 +1,7 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.service.SupplierService;
 import fr.openent.lystore.service.impl.DefaultSupplierService;
 import fr.wseduc.rs.*;
@@ -8,6 +9,7 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 import org.vertx.java.core.Handler;
@@ -36,10 +38,10 @@ public class SupplierController extends ControllerHelper {
         supplierService.getSuppliers(arrayResponseHandler(request));
     }
 
-    //TODO Gérer la sécurité
     @Post("/supplier")
     @ApiDoc("Create a holder")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
     public void createHolder (final HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
             public void handle(final UserInfos user) {
@@ -52,10 +54,10 @@ public class SupplierController extends ControllerHelper {
         });
     }
 
-    //TODO Gérer la sécurité
     @Put("/supplier/:id")
     @ApiDoc("Update a holder based on provided id")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
     public void updateHolder (final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "holder", new Handler<JsonObject>() {
             public void handle(JsonObject body) {
@@ -69,10 +71,10 @@ public class SupplierController extends ControllerHelper {
         });
     }
 
-    //TODO Gérer la sécurité
     @Delete("/supplier")
     @ApiDoc("Delete a holder based on provided id")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
     public void deleteHolder (HttpServerRequest request) {
         try{
             List<String> params = request.params().getAll("id");

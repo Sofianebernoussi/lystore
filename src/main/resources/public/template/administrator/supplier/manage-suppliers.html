@@ -1,5 +1,5 @@
 <div class="row supplier-management" ng-controller="administratorController">
-    <div class="twelve">
+    <div class="twelve" workflow="lystore.administrator">
         <button class="right-magnet" ng-click="openSupplierForm()">
             <i18n>lystore.supplier.add</i18n>
         </button>
@@ -9,7 +9,7 @@
         <article>
             <table class="twelve">
                 <thead>
-                <td>
+                <td workflow="lystore.administrator">
                     <label class="checkbox">
                         <input type="checkbox"
                                ng-change="switchAllSupplier(allSupplierSelected)"
@@ -44,7 +44,7 @@
                 </thead>
                 <tbody>
                 <tr ng-repeat="supplier in suppliers.all | orderBy:sort.supplier.type:sort.supplier.reverse">
-                    <td>
+                    <td workflow="lystore.administrator">
                         <label class="checkbox">
                             <input type="checkbox" ng-model="supplier.selected">
                             <span></span>

@@ -19,7 +19,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         route({
             main: () => {},
             manageAgents: async () => {
-                template.open('administrator-main', 'administrator/manage-agents');
+                template.open('administrator-main', 'administrator/agent/manage-agents');
                 await $scope.agents.sync();
                 $scope.$apply();
             },

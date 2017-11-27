@@ -18,6 +18,7 @@
   "lystore.supplier.add": "Ajouter un fournisseur",
   "lystore.supplier.name": "Nom du fournisseur",
   "lystore.supplier.delete": "Êtes-vous sur de vouloir supprimer le(s) fournisseur(s) : ",
+  "lystore.agent.delete": "Êtes-vous sur de vouloir supprimer le(s) agent(s) : ",
   "name": "Nom",
   "department": "Service",
   "phone": "Tel",

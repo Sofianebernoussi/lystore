@@ -62,48 +62,16 @@
 
     <lightbox show="display.lightbox.agent"
               on-close="cancelAgentForm()">
-        <h2><i18n>lystore.agent.add</i18n></h2>
-        <form ng-submit="validAgent(agent)">
-            <div class="row">
-                <label class="cell twelve">
-                    <span class="four cell">
-                        <i18n>lystore.agent.name</i18n>
-                    </span>
-                    <input class="cell eight" type="text" ng-model="agent.name" required />
-                </label>
-                <label class="cell twelve">
-                    <span class="four cell">
-                        <i18n>department</i18n>
-                    </span>
-                    <input class="cell eight" type="text" ng-model="agent.department" required />
-                </label>
-                <label class="cell twelve">
-                    <span class="four cell">
-                        <i18n>phone</i18n>
-                    </span>
-                    <input class="cell eight" type="text" ng-model="agent.phone" required />
-                </label>
-                <label class="cell twelve">
-                    <span class="four cell">
-                        <i18n>email</i18n>
-                    </span>
-                    <input type="email" class="cell eight" ng-model="agent.email" required />
-                </label>
-            </div>
-            <div class="right-magnet">
-                <input type="button" class="cancel" ng-click="cancelAgentForm()" value="Annuler" />
-                <input type="submit" class="button" />
-            </div>
-        </form>
+        <container template="agent.lightbox"></container>
     </lightbox>
 
-    <section class="toggle-buttons" ng-class="{ hide: agents.selection().length === 0 }">
+    <section class="toggle-buttons" ng-class="{ hide: agents.selected.length === 0 }">
         <div class="toggle">
             <div class="row">
-                <button ng-click="openAgentForm(agents.selection()[0])" ng-show="agents.selection().length === 1">
+                <button ng-click="openAgentForm(agents.selected[0])" ng-show="agents.selected.length === 1">
                     <i18n>modify</i18n>
                 </button>
-                <button ng-click="deleteAgents(agents.selection())"><i18n>delete</i18n></button>
+                <button ng-click="openAgentsDeletion()"><i18n>delete</i18n></button>
             </div>
         </div>
     </section>

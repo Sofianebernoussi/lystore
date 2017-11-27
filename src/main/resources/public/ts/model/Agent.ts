@@ -1,8 +1,8 @@
 import { _ } from 'entcore';
 import http from 'axios';
-import { Mix } from 'entcore-toolkit';
+import { Mix, Selectable, Selection } from 'entcore-toolkit';
 
-export class Agent {
+export class Agent implements Selectable{
     id: string;
     email: string;
     name: string;
@@ -71,11 +71,10 @@ export class Agent {
 
 }
 
-export class Agents {
-    all: Agent[];
+export class Agents extends Selection<Agent> {
 
     constructor () {
-        this.all = [];
+        super([]);
     }
 
     async sync (): Promise<void> {
@@ -92,17 +91,5 @@ export class Agents {
         } catch (e) {
             //TODO Gérer le cas en erreur
         }
-    }
-
-    selection (): Agent[] {
-        return _.where(this.all, { selected: true });
-    }
-
-    selectAll (): void {
-        this.all.map((agent) => agent.selected = true);
-    }
-
-    deselectAll (): void {
-        this.all.map((agent) => agent.selected = false);
     }
 }

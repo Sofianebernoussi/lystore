@@ -23,6 +23,7 @@ export const administratorController = ng.controller('administratorController',
 
         $scope.openAgentForm = (agent?: Agent) => {
             $scope.agent = agent || new Agent();
+            template.open('agent.lightbox', 'administrator/agent/agent-form');
             $scope.display.lightbox.agent = true;
         };
 
@@ -44,6 +45,13 @@ export const administratorController = ng.controller('administratorController',
             await $scope.agents.delete(agents);
             await $scope.agents.sync();
             $scope.allAgentSelected = false;
+            $scope.display.lightbox.agent = false;
+            $scope.$apply();
+        };
+
+        $scope.openAgentsDeletion = () => {
+            template.open('agent.lightbox', 'administrator/agent/agent-delete-validation');
+            $scope.display.lightbox.agent = true;
             $scope.$apply();
         };
 

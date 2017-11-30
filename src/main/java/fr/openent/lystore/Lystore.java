@@ -1,10 +1,7 @@
 package fr.openent.lystore;
 
-import fr.openent.lystore.controllers.AgentController;
-import fr.openent.lystore.controllers.SupplierController;
+import fr.openent.lystore.controllers.*;
 import org.entcore.common.http.BaseServer;
-
-import fr.openent.lystore.controllers.LystoreController;
 
 public class Lystore extends BaseServer {
 
@@ -20,6 +17,9 @@ public class Lystore extends BaseServer {
         addController(new LystoreController());
         addController(new AgentController());
         addController(new SupplierController());
+        addController(new ProgramController());
+        addController(new ContractTypeController());
+        addController(new ContractController());
 	}
 
 }

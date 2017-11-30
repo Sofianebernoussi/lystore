@@ -1,12 +1,13 @@
-import { ng, template } from 'entcore';
-import { Agent, Supplier } from '../model';
+import { ng, template, moment } from 'entcore';
+import { Agent, Supplier, Contract } from '../model';
 
 export const administratorController = ng.controller('administratorController',
     ['$scope', ($scope) => {
         $scope.display = {
             lightbox : {
                 agent: false,
-                supplier: false
+                supplier: false,
+                contract: false
             }
         };
 
@@ -17,6 +18,10 @@ export const administratorController = ng.controller('administratorController',
             },
             supplier: {
                 type: 'name',
+                reverse: false
+            },
+            contract: {
+                type: 'start_date',
                 reverse: false
             }
         };
@@ -94,8 +99,67 @@ export const administratorController = ng.controller('administratorController',
         };
 
         $scope.openSuppliersDeletion = () => {
-          template.open('supplier.lightbox', 'administrator/supplier/supplier-delete-validation');
-          $scope.display.lightbox.supplier = true;
-          $scope.$apply();
+            template.open('supplier.lightbox', 'administrator/supplier/supplier-delete-validation');
+            $scope.display.lightbox.supplier = true;
+            $scope.$apply();
         };
+
+        $scope.openContractForm = (contract?: Contract) => {
+            $scope.contract = contract || new Contract();
+            $scope.contract.start_date = (contract !== undefined ? moment(contract.start_date) : new Date());
+            template.open('contract.lightbox', 'administrator/contract/contract-form');
+            $scope.display.lightbox.contract = true;
+        };
+
+        $scope.validContract = async (contract: Contract) => {
+            await contract.save();
+            await $scope.contracts.sync();
+            $scope.display.lightbox.contract = false;
+            delete $scope.contract;
+            $scope.$apply();
+        };
+
+        $scope.validContractForm = (contract: Contract) => {
+            if (contract !== undefined) {
+                return contract.name !== undefined
+                    && contract.name.trim() !== ''
+                    && contract.reference !== undefined
+                    && contract.reference.trim() !== ''
+                    && contract.start_date !== undefined
+                    && contract.nb_renewal !== undefined
+                    && contract.nb_renewal.trim() !== ''
+                    && contract.id_contract_type !== undefined
+                    && typeof contract.id_contract_type === 'number'
+                    && contract.id_supplier !== undefined
+                    && typeof contract.id_supplier === 'number'
+                    && contract.id_agent !== undefined
+                    && typeof contract.id_agent === 'number';
+            }
+        };
+
+        $scope.cancelContractForm = () => {
+            $scope.display.lightbox.contract = false;
+            template.close('lightbox.contract');
+            delete $scope.contract;
+        };
+
+        $scope.switchAllContract = (allContractSelected: boolean) => {
+            allContractSelected ? $scope.contracts.selectAll() : $scope.contracts.deselectAll();
+            $scope.$apply();
+        };
+
+        $scope.openContractsDeletion = () => {
+            template.open('contract.lightbox', 'administrator/contract/contract-delete-validation');
+            $scope.display.lightbox.contract = true;
+            $scope.$apply();
+        };
+
+        $scope.deleteContracts = async (contracts: Contract[]) => {
+            await $scope.contracts.delete(contracts);
+            await $scope.contracts.sync();
+            $scope.allContractSelected = false;
+            $scope.display.lightbox.contract = false;
+            $scope.$apply();
+        };
+
     }]);

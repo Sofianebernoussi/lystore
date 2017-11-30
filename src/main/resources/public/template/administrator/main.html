@@ -13,9 +13,9 @@
     <header class="horizontal-spacing"><i18n>lystore.equipments</i18n></header>
     <header class="horizontal-spacing"><i18n>lystore.campaigns</i18n></header>
     <header class="horizontal-spacing">
-        <drop-down-menu title="[[lang.translate('lystore.markets')]]">
+        <drop-down-menu title="[[lang.translate('lystore.contracts')]]">
             <opt ng-click="redirectTo('/suppliers')"><i18n>lystore.suppliers.management</i18n></opt>
-            <opt><i18n>lystore.markets.management</i18n></opt>
+            <opt ng-click="redirectTo('/contracts')"><i18n>lystore.contracts.management</i18n></opt>
             <opt ng-click="redirectTo('/agents')"><i18n>lystore.agents.management</i18n></opt>
         </drop-down-menu>
     </header>

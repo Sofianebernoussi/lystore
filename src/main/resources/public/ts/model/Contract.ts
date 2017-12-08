@@ -1,4 +1,4 @@
-import { moment } from 'entcore';
+import { moment, notify } from 'entcore';
 import { Selection, Selectable, Mix } from 'entcore-toolkit';
 import http from 'axios';
 
@@ -55,14 +55,10 @@ export class Contract implements Selectable {
     }
 
     async save (): Promise<void> {
-        try {
-            if (this.id) {
-                await this.update();
-            } else {
-                await this.create();
-            }
-        } catch (e) {
-            throw e;
+        if (this.id) {
+            await this.update();
+        } else {
+            await this.create();
         }
     }
 
@@ -71,8 +67,7 @@ export class Contract implements Selectable {
             let res = await http.post(`/lystore/contract`, this.toJson());
             this.id = res.data.id;
         } catch (e) {
-            //TODO lancer notification
-            throw e;
+            notify.error('lystore.contract.create.err');
         }
     }
 
@@ -80,8 +75,7 @@ export class Contract implements Selectable {
         try {
             await http.put(`/lystore/contract/${this.id}`, this.toJson());
         } catch (e) {
-            //TODO Lancer notification
-            throw e;
+            notify.error('lystore.contract.update.err');
         }
     }
 
@@ -89,8 +83,7 @@ export class Contract implements Selectable {
         try {
             await http.delete(`/lystore/contract?id=${this.id}`);
         } catch (e) {
-            //TODO Lancer notification
-            throw e;
+            notify.error('lystore.contract.delete.err');
         }
     }
 }
@@ -113,7 +106,7 @@ export class Contracts extends Selection<Contract> {
             filter = filter.slice(0, -1);
             await http.delete(`/lystore/contract?${filter}`);
         } catch (e) {
-            //TODO Gérer le cas en erreur
+            notify.error('lystore.contract.delete.err');
         }
     }
 }

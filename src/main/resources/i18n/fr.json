@@ -49,5 +49,19 @@
   "address": "Adresse",
   "modify": "Modifier",
   "delete": "Supprimer",
-  "cancel": "Annuler"
+  "cancel": "Annuler",
+
+
+  "lystore.agent.create.err":"E001 : Erreur lors de la création d'un correspondant région",
+  "lystore.agent.update.err":"E002 : Erreur lors de la mise à jour d'un correspondant région",
+  "lystore.agent.delete.err":"E003 : Erreur lors de la suppression d'un correspondant région",
+  "lystore.supplier.create.err":"E004 : Erreur lors de la création d'un fournisseur",
+  "lystore.supplier.update.err":"E005 : Erreur lors de la mise à jour d'un fournisseur",
+  "lystore.supplier.delete.err":"E006 : Erreur lors de la suppression d'un fournisseur",
+  "lystore.contract.create.err":"E007 : Erreur lors de la création d'un marché",
+  "lystore.contract.update.err":"E008 : Erreur lors de la mise à jour d'un marché",
+  "lystore.contract.delete.err":"E009 : Erreur lors de la suppression d'un marché",
+  "lystore.tag.create.err":"E010 : Erreur lors de la création d'un label",
+  "lystore.tag.update.err":"E011 : Erreur lors de la mise à jour d'un label",
+  "lystore.tag.delete.err":"E012 : Erreur lors de la suppression d'un label"
 }

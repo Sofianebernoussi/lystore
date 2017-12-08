@@ -1,4 +1,5 @@
 import http from 'axios';
+import { notify } from 'entcore';
 import { Mix, Selection, Selectable } from 'entcore-toolkit';
 import { TAG_COLORS } from './index';
 
@@ -34,7 +35,7 @@ export class Tag implements Selectable {
         try {
             await http.post(`/lystore/tag`, this.toJson());
         } catch (e) {
-            //TODO manage errors
+            notify.error('lystore.tag.create.err');
         }
     }
 
@@ -42,7 +43,7 @@ export class Tag implements Selectable {
         try {
             await http.put(`/lystore/tag/${this.id}`, this.toJson());
         } catch (e) {
-            //TODO manage errors
+            notify.error('lystore.tag.update.err');
         }
     }
 
@@ -50,7 +51,7 @@ export class Tag implements Selectable {
         try {
             await http.delete(`/lystore/tag/${this.id}`);
         } catch (e) {
-            //TODO manage errors
+            notify.error('lystore.tag.delete.err');
         }
     }
 }
@@ -76,7 +77,7 @@ export class Tags extends Selection<Tag> {
             filter = filter.slice(0, -1);
             await http.delete(`/lystore/tag?${filter}`);
         } catch (e) {
-            //TODO manage error
+            notify.error('lystore.tag.delete.err');
         }
     }
 }

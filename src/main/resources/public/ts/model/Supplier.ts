@@ -1,4 +1,4 @@
-import { _ } from 'entcore';
+import { _, notify } from 'entcore';
 import http from 'axios';
 import { Mix, Selectable, Selection } from 'entcore-toolkit';
 
@@ -30,12 +30,8 @@ export class Supplier implements Selectable{
     }
 
     async save (): Promise<void> {
-        try {
-            if (this.id) await this.update();
-            else await this.create();
-        } catch (e) {
-            //TODO Que faire de l'erreur ? Gestion des codes erreurs ?
-        }
+        if (this.id) await this.update();
+        else await this.create();
     }
 
     async create (): Promise<void> {
@@ -43,7 +39,7 @@ export class Supplier implements Selectable{
             let supplier = await http.post(`/lystore/supplier`, this.toJson());
             this.id = supplier.data.id;
         } catch (e) {
-            //TODO Que faire de l'erreur ? Gestion des codes erreurs ?
+            notify.error('lystore.supplier.create.err');
         }
 
     }
@@ -57,7 +53,7 @@ export class Supplier implements Selectable{
             this.email = email;
             this.address = address;
         } catch (e) {
-            //TODO Que faire de l'erreur ? Gestion des codes erreurs ?
+            notify.error('lystore.supplier.update.err');
         }
     }
 
@@ -65,7 +61,7 @@ export class Supplier implements Selectable{
         try {
             await http.delete(`/lystore/supplier?id=${this.id}`);
         } catch (e) {
-            //TODO Que faire de l'erreur ? Gestion des codes erreurs ?
+            notify.error('lystore.supplier.delete.err');
         }
     }
 
@@ -89,7 +85,7 @@ export class Suppliers extends Selection<Supplier> {
             filter = filter.slice(0, -1);
             await http.delete(`/lystore/supplier?${filter}`);
         } catch (e) {
-            //TODO Gérer le cas en erreur
+            notify.error('lystore.supplier.delete.err');
         }
     }
 }

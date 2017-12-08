@@ -65,6 +65,7 @@ public class SupplierController extends ControllerHelper {
                     supplierService.updateSupplier(Integer.parseInt(request.params().get("id")), body,
                             defaultResponseHandler(request));
                 } catch (ClassCastException e) {
+                    log.error("E016 : An error occurred when casting supplier id");
                     badRequest(request);
                 }
             }
@@ -89,6 +90,7 @@ public class SupplierController extends ControllerHelper {
             }
         }
         catch (ClassCastException e) {
+            log.error("E019 : An error occurred when casting supplier id");
             badRequest(request);
         }
     }

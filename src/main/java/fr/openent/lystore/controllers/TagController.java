@@ -58,7 +58,8 @@ public class TagController extends ControllerHelper {
                     Integer id = Integer.parseInt(request.params().get("id"));
                     tagService.update(id, tag, defaultResponseHandler(request));
                 } catch (ClassCastException e) {
-                    //TODO MANAGE ERROR
+                    log.error("E013 : An error occurred when casting tag id");
+                    badRequest(request);
                 }
             }
         });
@@ -82,6 +83,7 @@ public class TagController extends ControllerHelper {
             }
         }
         catch (ClassCastException e) {
+            log.error("E020 : An error occurred when casting tag id");
             badRequest(request);
         }
     }

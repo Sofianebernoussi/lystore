@@ -5,7 +5,8 @@ import {
     Suppliers,
     Programs,
     ContractTypes,
-    Contracts
+    Contracts,
+    Tags
 } from '../model';
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location',
@@ -18,6 +19,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.contractTypes = new ContractTypes();
         $scope.programs = new Programs();
         $scope.contracts = new Contracts();
+        $scope.tags = new Tags();
         $scope.structures.sync().then(() => {
             if ($scope.structures.all.length > 0) {
                 $scope.structure = $scope.structures.all[0];
@@ -39,12 +41,17 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.$apply();
             },
             manageContracts: async () => {
-                await $scope.contracts.sync();
                 template.open('administrator-main', 'administrator/contract/manage-contract');
+                await $scope.contracts.sync();
                 $scope.agents.sync();
                 $scope.suppliers.sync();
                 $scope.contractTypes.sync();
                 $scope.programs.sync();
+                $scope.$apply();
+            },
+            manageEquipmentTags: async () => {
+                template.open('administrator-main', 'administrator/tag/manage-tags');
+                await $scope.tags.sync();
                 $scope.$apply();
             }
         });

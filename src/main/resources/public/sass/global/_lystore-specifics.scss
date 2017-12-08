@@ -5,7 +5,7 @@ body.lystore {
     overflow-x: inherit;
   }
 
-  .agent-management, .supplier-management, .contract-management {
+  .agent-management, .supplier-management, .contract-management, .tag-management {
 
     table {
       thead td {
@@ -23,6 +23,29 @@ body.lystore {
           top: 8px;
         }
       }
+    }
+  }
+
+  .color-tag {
+    width: 25px;
+    height: 25px;
+    display: block;
+    border-radius: 4px;
+    transition: all 0.5s ease;
+
+    &.large {
+      width: 35px;
+      height:35px;
+    }
+  }
+
+  .color-list {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+
+    li {
+      display: inline-block;
     }
   }
 }

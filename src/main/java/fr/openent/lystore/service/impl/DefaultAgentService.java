@@ -54,16 +54,6 @@ public class DefaultAgentService extends SqlCrudService implements AgentService 
     }
 
     public void deleteAgent(List<Integer> ids, Handler<Either<String, JsonObject>> handler) {
-        StringBuilder query = new StringBuilder("DELETE FROM " + Lystore.LYSTORE_SCHEMA + ".agent WHERE ");
-        JsonArray params = new JsonArray();
-        for (int i = 0; i < ids.size(); i++) {
-            if (i > 0) {
-                query.append("OR ");
-            }
-            query.append("id = ? ");
-            params.addNumber(ids.get(i));
-        }
-
-        sql.prepared(query.toString(), params, SqlResult.validUniqueResultHandler(handler));
+        SqlUtils.deleteIds("agent", ids, handler);
     }
 }

@@ -10,7 +10,11 @@
             <opt><i18n>lystore.end.expedited.requests</i18n></opt>
         </drop-down-menu>
     </header>
-    <header class="horizontal-spacing"><i18n>lystore.equipments</i18n></header>
+    <header class="horizontal-spacing">
+        <drop-down-menu title="[[lang.translate('lystore.equipments')]]">
+            <opt ng-click="redirectTo('/tags')"><i18n>lystore.tag.management</i18n></opt>
+            <opt><i18n>lystore.catalog.management</i18n></opt>
+        </drop-down-menu></header>
     <header class="horizontal-spacing"><i18n>lystore.campaigns</i18n></header>
     <header class="horizontal-spacing">
         <drop-down-menu title="[[lang.translate('lystore.contracts')]]">

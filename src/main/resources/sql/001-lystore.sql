@@ -67,3 +67,18 @@ CREATE TABLE lystore.contract (
   REFERENCES lystore.supplier (id) MATCH SIMPLE
   ON UPDATE NO ACTION ON DELETE CASCADE
 );
+
+CREATE TABLE lystore.tag (
+  id bigserial NOT NULL,
+  name character varying(255),
+  color character varying(7),
+  CONSTRAINT tag_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE lystore.rel_equipment_tag (
+  id_equipment bigint,
+  id_equipment_tag bigint,
+  CONSTRAINT fk_tag_id FOREIGN KEY (id_equipment_tag)
+  REFERENCES lystore.tag (id) MATCH SIMPLE
+  ON UPDATE NO ACTION ON DELETE CASCADE
+);

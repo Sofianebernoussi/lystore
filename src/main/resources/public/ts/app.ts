@@ -24,6 +24,9 @@ routes.define(($routeProvider) => {
         .when('/contracts', {
             action: 'manageContracts'
         })
+        .when('/tags', {
+            action: 'manageEquipmentTags'
+        })
         .otherwise({
             redirectTo: '/'
         });

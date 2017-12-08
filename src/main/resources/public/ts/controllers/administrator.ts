@@ -1,5 +1,5 @@
 import { ng, template, moment } from 'entcore';
-import { Agent, Supplier, Contract } from '../model';
+import { Agent, Supplier, Contract, Tag } from '../model';
 
 export const administratorController = ng.controller('administratorController',
     ['$scope', ($scope) => {
@@ -7,7 +7,8 @@ export const administratorController = ng.controller('administratorController',
             lightbox : {
                 agent: false,
                 supplier: false,
-                contract: false
+                contract: false,
+                tag: false
             }
         };
 
@@ -22,6 +23,10 @@ export const administratorController = ng.controller('administratorController',
             },
             contract: {
                 type: 'start_date',
+                reverse: false
+            },
+            tag: {
+                type: 'name',
                 reverse: false
             }
         };
@@ -160,6 +165,51 @@ export const administratorController = ng.controller('administratorController',
             $scope.allContractSelected = false;
             $scope.display.lightbox.contract = false;
             $scope.$apply();
+        };
+
+        $scope.openTagForm = (tag?: Tag) => {
+            $scope.tag = tag || new Tag();
+            template.open('tag.lightbox', 'administrator/tag/tag-form');
+            $scope.display.lightbox.tag = true;
+        };
+
+        $scope.cancelTagForm = () => {
+            $scope.display.lightbox.tag = false;
+            template.close('tag.lightbox');
+            delete $scope.tag;
+        };
+
+        $scope.validTag = async (tag: Tag) => {
+            await tag.save();
+            await $scope.tags.sync();
+            $scope.display.lightbox.tag = false;
+            $scope.$apply();
+            delete $scope.tag;
+            template.close('tag.lightbox');
+        };
+
+        $scope.validTagForm = (tag: Tag) => {
+            return tag.name !== undefined
+                && tag.name.trim() !== ''
+                && tag.color !== undefined
+                && tag.color.trim() !== ''
+        };
+
+        $scope.openTagsDeletion = () => {
+            template.open('tag.lightbox', 'administrator/tag/tag-delete-validation');
+            $scope.display.lightbox.tag = true;
+        };
+
+        $scope.deleteTags = async (tags: Tag[]) => {
+            await $scope.tags.delete(tags);
+            await $scope.tags.sync();
+            $scope.allTagSelected = false;
+            $scope.display.lightbox.tag = false;
+            $scope.$apply();
+        };
+
+        $scope.switchAllTag = () => {
+            $scope.allTagSelected ? $scope.tags.selectAll() : $scope.tags.deselectAll();
         };
 
     }]);

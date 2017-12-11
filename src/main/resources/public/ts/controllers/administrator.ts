@@ -1,5 +1,5 @@
 import { ng, template, moment } from 'entcore';
-import { Agent, Supplier, Contract, Tag } from '../model';
+import { Agent, Supplier, Contract, Tag, Utils } from '../model';
 
 export const administratorController = ng.controller('administratorController',
     ['$scope', ($scope) => {
@@ -31,10 +31,11 @@ export const administratorController = ng.controller('administratorController',
             }
         };
 
-        $scope.openAgentForm = (agent?: Agent) => {
-            $scope.agent = agent || new Agent();
+        $scope.openAgentForm = (agent: Agent = new Agent()) => {
+            $scope.agent = agent;
             template.open('agent.lightbox', 'administrator/agent/agent-form');
             $scope.display.lightbox.agent = true;
+            Utils.safeApply($scope);
         };
 
         $scope.validAgent = async (agent: Agent) => {
@@ -43,7 +44,7 @@ export const administratorController = ng.controller('administratorController',
             delete $scope.agent;
             $scope.allAgentSelected = false;
             $scope.display.lightbox.agent = false;
-            $scope.$apply();
+            Utils.safeApply($scope);
         };
 
         $scope.cancelAgentForm = () => {
@@ -56,24 +57,25 @@ export const administratorController = ng.controller('administratorController',
             await $scope.agents.sync();
             $scope.allAgentSelected = false;
             $scope.display.lightbox.agent = false;
-            $scope.$apply();
+            Utils.safeApply($scope);
         };
 
         $scope.openAgentsDeletion = () => {
             template.open('agent.lightbox', 'administrator/agent/agent-delete-validation');
             $scope.display.lightbox.agent = true;
-            $scope.$apply();
+            Utils.safeApply($scope);
         };
 
         $scope.switchAllAgent = (allAgentSelected: boolean) => {
             allAgentSelected ? $scope.agents.selectAll() : $scope.agents.deselectAll();
-            $scope.$apply();
+            Utils.safeApply($scope);
         };
 
-        $scope.openSupplierForm = (supplier?: Supplier) => {
-            $scope.supplier = supplier || new Supplier();
+        $scope.openSupplierForm = (supplier: Supplier = new Supplier()) => {
+            $scope.supplier = supplier;
             template.open('supplier.lightbox', 'administrator/supplier/supplier-form');
             $scope.display.lightbox.supplier = true;
+            Utils.safeApply($scope);
         };
 
         $scope.validSupplier = async (supplier: Supplier) => {
@@ -82,7 +84,7 @@ export const administratorController = ng.controller('administratorController',
             delete $scope.supplier;
             $scope.allHolderSelected = false;
             $scope.display.lightbox.supplier = false;
-            $scope.$apply();
+            Utils.safeApply($scope);
         };
 
         $scope.cancelSupplierForm = () => {
@@ -95,25 +97,26 @@ export const administratorController = ng.controller('administratorController',
             await $scope.suppliers.sync();
             $scope.allSupplierSelected = false;
             $scope.display.lightbox.supplier = false;
-            $scope.$apply();
+            Utils.safeApply($scope);
         };
 
         $scope.switchAllSupplier = (allSupplierSelected: boolean) => {
             allSupplierSelected ? $scope.suppliers.selectAll() : $scope.suppliers.deselectAll();
-            $scope.$apply();
+            Utils.safeApply($scope);
         };
 
         $scope.openSuppliersDeletion = () => {
             template.open('supplier.lightbox', 'administrator/supplier/supplier-delete-validation');
             $scope.display.lightbox.supplier = true;
-            $scope.$apply();
+            Utils.safeApply($scope);
         };
 
-        $scope.openContractForm = (contract?: Contract) => {
-            $scope.contract = contract || new Contract();
+        $scope.openContractForm = (contract: Contract = new Contract()) => {
+            $scope.contract = contract;
             $scope.contract.start_date = (contract !== undefined ? moment(contract.start_date) : new Date());
             template.open('contract.lightbox', 'administrator/contract/contract-form');
             $scope.display.lightbox.contract = true;
+            Utils.safeApply($scope);
         };
 
         $scope.validContract = async (contract: Contract) => {
@@ -121,7 +124,7 @@ export const administratorController = ng.controller('administratorController',
             await $scope.contracts.sync();
             $scope.display.lightbox.contract = false;
             delete $scope.contract;
-            $scope.$apply();
+            Utils.safeApply($scope);
         };
 
         $scope.validContractForm = (contract: Contract) => {
@@ -150,13 +153,13 @@ export const administratorController = ng.controller('administratorController',
 
         $scope.switchAllContract = (allContractSelected: boolean) => {
             allContractSelected ? $scope.contracts.selectAll() : $scope.contracts.deselectAll();
-            $scope.$apply();
+            Utils.safeApply($scope);
         };
 
         $scope.openContractsDeletion = () => {
             template.open('contract.lightbox', 'administrator/contract/contract-delete-validation');
             $scope.display.lightbox.contract = true;
-            $scope.$apply();
+            Utils.safeApply($scope);
         };
 
         $scope.deleteContracts = async (contracts: Contract[]) => {
@@ -164,7 +167,7 @@ export const administratorController = ng.controller('administratorController',
             await $scope.contracts.sync();
             $scope.allContractSelected = false;
             $scope.display.lightbox.contract = false;
-            $scope.$apply();
+            Utils.safeApply($scope);
         };
 
         $scope.openTagForm = (tag?: Tag) => {
@@ -183,7 +186,7 @@ export const administratorController = ng.controller('administratorController',
             await tag.save();
             await $scope.tags.sync();
             $scope.display.lightbox.tag = false;
-            $scope.$apply();
+            Utils.safeApply($scope);
             delete $scope.tag;
             template.close('tag.lightbox');
         };
@@ -205,7 +208,7 @@ export const administratorController = ng.controller('administratorController',
             await $scope.tags.sync();
             $scope.allTagSelected = false;
             $scope.display.lightbox.tag = false;
-            $scope.$apply();
+            Utils.safeApply($scope);
         };
 
         $scope.switchAllTag = () => {

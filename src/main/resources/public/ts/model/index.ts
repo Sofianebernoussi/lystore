@@ -6,3 +6,4 @@ export * from './ContractType';
 export * from './Contract';
 export * from './Tag';
 export * from './colors';
+export * from './Utils';

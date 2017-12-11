@@ -77,8 +77,8 @@ CREATE TABLE lystore.tag (
 
 CREATE TABLE lystore.rel_equipment_tag (
   id_equipment bigint,
-  id_equipment_tag bigint,
-  CONSTRAINT fk_tag_id FOREIGN KEY (id_equipment_tag)
+  id_tag bigint,
+  CONSTRAINT fk_tag_id FOREIGN KEY (id_tag)
   REFERENCES lystore.tag (id) MATCH SIMPLE
   ON UPDATE NO ACTION ON DELETE CASCADE
 );

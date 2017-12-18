@@ -5,7 +5,11 @@ body.lystore {
     overflow-x: inherit;
   }
 
-  .agent-management, .supplier-management, .contract-management, .tag-management {
+  .agent-management,
+  .supplier-management,
+  .contract-management,
+  .tag-management,
+  .equipment-management{
 
     table {
       thead td {

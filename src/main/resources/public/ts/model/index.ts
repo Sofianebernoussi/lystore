@@ -7,3 +7,6 @@ export * from './Contract';
 export * from './Tag';
 export * from './colors';
 export * from './Utils';
+export * from './Equipment';
+export * from './Tax';
+export * from './comboLabels';

@@ -68,14 +68,17 @@ export class Supplier implements Selectable{
 }
 
 export class Suppliers extends Selection<Supplier> {
+    mapping: {};
 
     constructor () {
         super([]);
+        this.mapping = {};
     }
 
     async sync (): Promise<void> {
         let agents = await http.get(`/lystore/suppliers`);
         this.all = Mix.castArrayAs(Supplier, agents.data);
+        this.all.map((supplier) => this.mapping[supplier.id] = supplier);
     }
 
     async delete (suppliers: Supplier[]): Promise<void> {
@@ -87,5 +90,9 @@ export class Suppliers extends Selection<Supplier> {
         } catch (e) {
             notify.error('lystore.supplier.delete.err');
         }
+    }
+
+    get (id: number) {
+        return this.mapping[id];
     }
 }

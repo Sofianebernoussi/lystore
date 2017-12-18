@@ -1,0 +1,102 @@
+<h1><i18n>lystore.catalog.management</i18n></h1>
+<div class="row">
+    <div class="cell flex-row horizontal-spacing search-pagination six">
+        <div class="row twelve vertical-spacing">
+            <input type="text" class="twelve" i18n-placeholder="search" ng-model="search.equipment">
+            <i class="search flex-row"></i>
+        </div>
+    </div>
+    <div class="right-magnet">
+        <button workflow="lystore.administrator"
+                ng-click="openEquipmentForm()">
+            <i18n>lystore.equipment.add</i18n>
+        </button>
+    </div>
+</div>
+<article>
+    <h2>
+        <i18n>lystore.catalog</i18n>
+    </h2>
+    <table class="twelve">
+        <thead>
+        <tr>
+            <td workflow="lystore.administrator">
+                <label class="checkbox">
+                    <input type="checkbox"
+                           ng-change="switchAll(allEquipmentSelected, equipments)"
+                           ng-model="allEquipmentSelected">
+                    <span></span>
+                </label>
+            </td>
+            <td ng-click="sort.equipment.type = 'name';
+                    sort.equipment.reverse = !sort.equipment.reverse">
+                <i18n>name</i18n>
+                <i class="up-open" ng-show="sort.equipment.type === 'name' && !sort.equipment.reverse"></i>
+                <i class="down-open" ng-show="sort.equipment.type === 'name' && sort.equipment.reverse"></i>
+            </td>
+            <td ng-click="sort.equipment.type = 'price';
+                    sort.equipment.reverse = !sort.equipment.reverse">
+                <i18n>price</i18n>
+                <i class="up-open" ng-show="sort.equipment.type === 'price' && !sort.equipment.reverse"></i>
+                <i class="down-open" ng-show="sort.equipment.type === 'price' && sort.equipment.reverse"></i>
+            </td>
+            <td ng-click="sort.equipment.type = 'id_contract';
+                    sort.equipment.reverse = !sort.equipment.reverse">
+                <i18n>supplier</i18n>
+                <i class="up-open" ng-show="sort.equipment.type === 'id_contract' && !sort.equipment.reverse"></i>
+                <i class="down-open" ng-show="sort.equipment.type === 'id_contract' && sort.equipment.reverse"></i>
+            </td>
+            <td ng-click="sort.equipment.type = 'id_contract';
+                    sort.equipment.reverse = !sort.equipment.reverse">
+                <i18n>contract</i18n>
+                <i class="up-open" ng-show="sort.equipment.type === 'id_contract' && !sort.equipment.reverse"></i>
+                <i class="down-open" ng-show="sort.equipment.type === 'id_contract' && sort.equipment.reverse"></i>
+            </td>
+            <td ng-click="sort.equipment.type = 'status';
+                    sort.equipment.reverse = !sort.equipment.reverse">
+                <i18n>lystore.availability</i18n>
+                <i class="up-open" ng-show="sort.equipment.type === 'availability' && !sort.equipment.reverse"></i>
+                <i class="down-open" ng-show="sort.equipment.type === 'availability' && sort.equipment.reverse"></i>
+            </td>
+            <td ng-click="sort.equipment.type = 'id_campaign';
+                    sort.equipment.reverse = !sort.equipment.reverse">
+                <i18n>campaign</i18n>
+                <i class="up-open" ng-show="sort.equipment.type === 'campaign' && !sort.equipment.reverse"></i>
+                <i class="down-open" ng-show="sort.equipment.type === 'campaign' && sort.equipment.reverse"></i>
+            </td>
+        </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="equipment in equipments.all | filter:equipmentSearchFilter | orderBy:sort.equipment.type:sort.equipment.reverse">
+            <td workflow="lystore.administrator">
+                <label class="checkbox">
+                    <input type="checkbox" ng-model="equipment.selected">
+                    <span></span>
+                </label>
+            </td>
+            <td>[[ equipment.name ]]</td>
+            <td><span ng-bind="equipment.price | currency:'€'"></span></td>
+            <td>[[ contracts.get(equipment.id_contract).supplier_display_name ]]</td>
+            <td>[[ contracts.get(equipment.id_contract).name ]]</td>
+            <td>[[ lang.translate('lystore.' + equipment.status) ]]</td>
+            <td>...</td>
+        </tr>
+        </tbody>
+    </table>
+</article>
+
+<lightbox on-close="display.lightbox.equipment = false;"
+          show="display.lightbox.equipment">
+    <container template="equipment.lightbox"></container>
+</lightbox>
+
+<section class="toggle-buttons" ng-class="{ hide: equipments.selected.length === 0 }">
+    <div class="toggle">
+        <div class="row">
+            <button ng-click="openEquipmentForm(equipments.selected[0])" ng-show="equipments.selected.length === 1">
+                <i18n>modify</i18n>
+            </button>
+            <button ng-click="openEquipmentsDeletion()"><i18n>delete</i18n></button>
+        </div>
+    </div>
+</section>

@@ -1,6 +1,6 @@
 import http from 'axios';
 import { notify } from 'entcore';
-import { Mix, Selection, Selectable } from 'entcore-toolkit';
+import { Selection, Selectable, Provider } from 'entcore-toolkit';
 import { TAG_COLORS } from './index';
 
 export class Tag implements Selectable {
@@ -57,17 +57,18 @@ export class Tag implements Selectable {
 }
 
 export class Tags extends Selection<Tag> {
-
+    provider: Provider<Tag>;
     colors: string[];
 
     constructor () {
         super([]);
         this.colors = TAG_COLORS;
+        this.provider = new Provider(`/lystore/tags`, Tag);
     }
 
-    async sync () {
-        let tags = await http.get(`/lystore/tags`);
-        this.all = Mix.castArrayAs(Tag, tags.data);
+    async sync (force: boolean) {
+        if (this.provider.isSynced) this.provider.isSynced = !force;
+        this.all = await this.provider.data();
     }
 
     async delete (tags: Tag[]): Promise<void> {

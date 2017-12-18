@@ -27,6 +27,12 @@ routes.define(($routeProvider) => {
         .when('/tags', {
             action: 'manageEquipmentTags'
         })
+        .when('/equipments', {
+            action: 'manageEquipments'
+        })
+        .when('/equipments/create', {
+            action: 'createEquipment'
+        })
         .otherwise({
             redirectTo: '/'
         });

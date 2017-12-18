@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "summary": {
+      "type": [ "string", "null" ]
+    },
+    "description": {
+      "type": [ "string", "null" ]
+    },
+    "price": {
+      "type": "number"
+    },
+    "id_tax": {
+      "type": "integer"
+    },
+    "image": {
+      "type": [ "string", "null" ]
+    },
+    "id_contract": {
+      "type": "integer"
+    },
+    "status": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array"
+    }
+  },
+  "required": [
+    "name",
+    "price",
+    "id_tax",
+    "id_contract",
+    "tags"
+  ]
+}

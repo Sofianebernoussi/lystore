@@ -71,6 +71,7 @@ public class AgentController extends ControllerHelper {
         });
     }
 
+
     @Delete("/agent")
     @ApiDoc("Delete and agent based on provided id")
     @SecuredAction(value = "", type = ActionType.RESOURCE)

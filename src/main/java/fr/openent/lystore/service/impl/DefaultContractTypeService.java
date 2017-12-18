@@ -15,7 +15,7 @@ public class DefaultContractTypeService extends SqlCrudService implements Contra
         this.sql = Sql.getInstance();
     }
 
-    public void lisContractTypes(Handler<Either<String, JsonArray>> handler) {
+    public void listContractTypes(Handler<Either<String, JsonArray>> handler) {
         super.list(handler);
     }
 }

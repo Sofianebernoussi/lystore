@@ -4,6 +4,7 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.service.TagService;
 import fr.openent.lystore.service.impl.DefaultTagService;
+import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -73,10 +74,7 @@ public class TagController extends ControllerHelper {
         try{
             List<String> params = request.params().getAll("id");
             if (params.size() > 0) {
-                List<Integer> ids = new ArrayList<Integer>();
-                for (String param : params) {
-                    ids.add(Integer.parseInt(param));
-                }
+                List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
                 tagService.delete(ids, defaultResponseHandler(request));
             } else {
                 badRequest(request);

@@ -75,9 +75,38 @@ CREATE TABLE lystore.tag (
   CONSTRAINT tag_pkey PRIMARY KEY (id)
 );
 
+CREATE TABLE lystore.tax (
+  id bigserial NOT NULL,
+  name character varying(255),
+  value numeric,
+  CONSTRAINT tax_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE lystore.equipment (
+  id bigserial NOT NULL,
+  name character varying(255) NOT NULL,
+  summary character varying(300),
+  description text,
+  price numeric NOT NULL,
+  id_tax bigint NOT NULL,
+  image character varying(100),
+  id_contract bigint NOT NULL,
+  status character varying(50),
+  CONSTRAINT equipment_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_contract_id FOREIGN KEY (id_contract)
+  REFERENCES lystore.contract (id) MATCH SIMPLE
+  ON UPDATE NO ACTION ON DELETE CASCADE ,
+  CONSTRAINT fk_tax_id FOREIGN KEY (id_tax)
+  REFERENCES lystore.tax (id) MATCH SIMPLE
+  ON UPDATE NO ACTION ON DELETE CASCADE
+);
+
 CREATE TABLE lystore.rel_equipment_tag (
   id_equipment bigint,
   id_tag bigint,
+  CONSTRAINT fk_equipment_id FOREIGN KEY (id_equipment)
+  REFERENCES lystore.equipment (id) MATCH SIMPLE
+  ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT fk_tag_id FOREIGN KEY (id_tag)
   REFERENCES lystore.tag (id) MATCH SIMPLE
   ON UPDATE NO ACTION ON DELETE CASCADE

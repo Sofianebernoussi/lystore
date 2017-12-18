@@ -10,5 +10,5 @@ public interface ContractTypeService {
      * List all contract types in database
      * @param handler Function handler returning data
      */
-    public void lisContractTypes (Handler<Either<String, JsonArray>> handler);
+    public void listContractTypes(Handler<Either<String, JsonArray>> handler);
 }

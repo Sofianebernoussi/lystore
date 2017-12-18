@@ -1,14 +1,24 @@
-import { ng, template, moment } from 'entcore';
-import { Agent, Supplier, Contract, Tag, Utils } from '../model';
+import { ng, template, moment, _, idiom as lang } from 'entcore';
+import {
+Agent,
+Supplier,
+Contract,
+Tag,
+Equipment,
+COMBO_LABELS,
+Utils
+} from '../model';
 
 export const administratorController = ng.controller('administratorController',
     ['$scope', ($scope) => {
+        $scope.COMBO_LABELS = COMBO_LABELS;
         $scope.display = {
             lightbox : {
                 agent: false,
                 supplier: false,
                 contract: false,
-                tag: false
+                tag: false,
+                equipment: false
             }
         };
 
@@ -28,8 +38,14 @@ export const administratorController = ng.controller('administratorController',
             tag: {
                 type: 'name',
                 reverse: false
+            },
+            equipment: {
+                type: 'name',
+                reverse: false
             }
         };
+
+        $scope.search = {};
 
         $scope.openAgentForm = (agent: Agent = new Agent()) => {
             $scope.agent = agent;
@@ -66,11 +82,6 @@ export const administratorController = ng.controller('administratorController',
             Utils.safeApply($scope);
         };
 
-        $scope.switchAllAgent = (allAgentSelected: boolean) => {
-            allAgentSelected ? $scope.agents.selectAll() : $scope.agents.deselectAll();
-            Utils.safeApply($scope);
-        };
-
         $scope.openSupplierForm = (supplier: Supplier = new Supplier()) => {
             $scope.supplier = supplier;
             template.open('supplier.lightbox', 'administrator/supplier/supplier-form');
@@ -100,11 +111,6 @@ export const administratorController = ng.controller('administratorController',
             Utils.safeApply($scope);
         };
 
-        $scope.switchAllSupplier = (allSupplierSelected: boolean) => {
-            allSupplierSelected ? $scope.suppliers.selectAll() : $scope.suppliers.deselectAll();
-            Utils.safeApply($scope);
-        };
-
         $scope.openSuppliersDeletion = () => {
             template.open('supplier.lightbox', 'administrator/supplier/supplier-delete-validation');
             $scope.display.lightbox.supplier = true;
@@ -121,7 +127,7 @@ export const administratorController = ng.controller('administratorController',
 
         $scope.validContract = async (contract: Contract) => {
             await contract.save();
-            await $scope.contracts.sync();
+            await $scope.contracts.sync(true);
             $scope.display.lightbox.contract = false;
             delete $scope.contract;
             Utils.safeApply($scope);
@@ -151,10 +157,6 @@ export const administratorController = ng.controller('administratorController',
             delete $scope.contract;
         };
 
-        $scope.switchAllContract = (allContractSelected: boolean) => {
-            allContractSelected ? $scope.contracts.selectAll() : $scope.contracts.deselectAll();
-            Utils.safeApply($scope);
-        };
 
         $scope.openContractsDeletion = () => {
             template.open('contract.lightbox', 'administrator/contract/contract-delete-validation');
@@ -164,7 +166,7 @@ export const administratorController = ng.controller('administratorController',
 
         $scope.deleteContracts = async (contracts: Contract[]) => {
             await $scope.contracts.delete(contracts);
-            await $scope.contracts.sync();
+            await $scope.contracts.sync(true);
             $scope.allContractSelected = false;
             $scope.display.lightbox.contract = false;
             Utils.safeApply($scope);
@@ -211,8 +213,72 @@ export const administratorController = ng.controller('administratorController',
             Utils.safeApply($scope);
         };
 
-        $scope.switchAllTag = () => {
-            $scope.allTagSelected ? $scope.tags.selectAll() : $scope.tags.deselectAll();
+        $scope.openEquipmentForm = (equipment: Equipment = new Equipment()) => {
+            $scope.redirectTo('/equipments/create');
+            $scope.equipment = equipment;
+            $scope.equipment.tags = $scope.equipment.tags.map(
+                (tagId) => _.findWhere($scope.tags.all, { id: tagId })
+            );
+            Utils.safeApply($scope);
+        };
+
+        $scope.addTagToEquipment = (tag: Tag) => {
+            if (!_.contains($scope.equipment.tags, tag)) {
+                $scope.equipment.tags.push(tag);
+            }
+        };
+
+        $scope.removeTagToEquipment = (tag: Tag) => {
+            $scope.equipment.tags = _.without($scope.equipment.tags, tag);
+        };
+
+        $scope.validEquipmentForm = (equipment: Equipment) => {
+            return equipment.name !== undefined
+                && equipment.name.trim() !== ''
+                && equipment.price !== undefined
+                && equipment.price.toString().trim() !== ''
+                && !isNaN(parseFloat(equipment.price.toString()))
+                && equipment.id_contract !== undefined
+                && equipment.id_tax !== undefined
+                && equipment.tags.length > 0;
+        };
+
+        $scope.validEquipment = async (equipment: Equipment) => {
+            await equipment.save();
+            $scope.redirectTo('/equipments');
+            Utils.safeApply($scope);
+        };
+
+        $scope.tagFilter = function (tag) {
+            return _.findWhere($scope.equipment.tags, { id : tag.id }) === undefined;
+        };
+
+        $scope.openEquipmentsDeletion = () => {
+            template.open('equipment.lightbox', 'administrator/equipment/equipment-delete-validation');
+            $scope.display.lightbox.equipment = true;
+        };
+
+        $scope.deleteEquipments = async (equipments) => {
+            await $scope.equipments.delete(equipments);
+            await $scope.equipments.sync();
+            $scope.allEquipmentSelected = false;
+            $scope.display.lightbox.equipment = false;
+            Utils.safeApply($scope);
+        };
+
+        $scope.switchAll = (model: boolean, collection) => {
+            model ? collection.selectAll() : collection.deselectAll();
+            Utils.safeApply($scope);
+        };
+
+        $scope.equipmentSearchFilter = (equipment: Equipment) => {
+            return $scope.search.equipment !== undefined
+                ? equipment.name.toLowerCase().includes($scope.search.equipment.toLowerCase())
+                || equipment.price.toString().includes($scope.search.equipment.toLowerCase())
+                || $scope.contracts.get(equipment.id_contract).supplier_display_name.toLowerCase().includes($scope.search.equipment.toLowerCase())
+                || $scope.contracts.get(equipment.id_contract).name.toLowerCase().includes($scope.search.equipment.toLowerCase())
+                || lang.translate('lystore.' + equipment.status).toLowerCase().includes($scope.search.equipment.toLowerCase())
+                : true;
         };
 
     }]);

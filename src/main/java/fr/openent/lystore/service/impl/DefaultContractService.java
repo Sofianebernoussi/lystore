@@ -82,13 +82,6 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
     }
 
     public void deleteContract(List<Integer> ids, Handler<Either<String, JsonObject>> handler) {
-        StringBuilder query = new StringBuilder("DELETE FROM " + Lystore.LYSTORE_SCHEMA + ".contract WHERE ")
-                .append(SqlQueryUtils.prepareMultipleIds(ids));
-        JsonArray params = new JsonArray();
-        for (Integer id : ids) {
-            params.addNumber(id);
-        }
-
-        sql.prepared(query.toString(), params, SqlResult.validUniqueResultHandler(handler));
+        SqlUtils.deleteIds(this.table, ids, handler);
     }
 }

@@ -1,5 +1,5 @@
 import { moment, notify } from 'entcore';
-import { Selection, Selectable, Mix } from 'entcore-toolkit';
+import { Selection, Selectable, Mix, Provider } from 'entcore-toolkit';
 import http from 'axios';
 
 export class Contract implements Selectable {
@@ -17,6 +17,7 @@ export class Contract implements Selectable {
     id_program: number;
     end_date: string;
     renewal_end: string;
+    supplier_display_name: string;
 
     selected: false;
     annual_min_enabled: boolean;
@@ -89,14 +90,19 @@ export class Contract implements Selectable {
 }
 
 export class Contracts extends Selection<Contract> {
+    provider: Provider<Contract>;
+    mapping: {};
 
     constructor () {
         super([]);
+        this.provider = new Provider(`/lystore/contracts`, Contract);
+        this.mapping = {};
     }
 
-    async sync () {
-        let contracts = await http.get(`/lystore/contracts`);
-        this.all = Mix.castArrayAs(Contract, contracts.data);
+    async sync (force: boolean) {
+        if (this.provider.isSynced) this.provider.isSynced = !force;
+        this.all = await this.provider.data();
+        this.all.map((contract) => this.mapping[contract.id] = contract);
     }
 
     async delete (contracts: Contract[]): Promise<void> {
@@ -108,5 +114,9 @@ export class Contracts extends Selection<Contract> {
         } catch (e) {
             notify.error('lystore.contract.delete.err');
         }
+    }
+
+    get (id: number) {
+        return this.mapping[id];
     }
 }

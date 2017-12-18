@@ -6,7 +6,10 @@ import {
     Programs,
     ContractTypes,
     Contracts,
-    Tags
+    Tags,
+    Equipments,
+    Taxes,
+    Utils
 } from '../model';
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location',
@@ -20,6 +23,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.programs = new Programs();
         $scope.contracts = new Contracts();
         $scope.tags = new Tags();
+        $scope.equipments = new Equipments();
+        $scope.taxes = new Taxes();
         $scope.structures.sync().then(() => {
             if ($scope.structures.all.length > 0) {
                 $scope.structure = $scope.structures.all[0];
@@ -33,12 +38,12 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             manageAgents: async () => {
                 template.open('administrator-main', 'administrator/agent/manage-agents');
                 await $scope.agents.sync();
-                $scope.$apply();
+                Utils.safeApply($scope);
             },
             manageSuppliers: async () => {
                 template.open('administrator-main', 'administrator/supplier/manage-suppliers');
                 await $scope.suppliers.sync();
-                $scope.$apply();
+                Utils.safeApply($scope);
             },
             manageContracts: async () => {
                 template.open('administrator-main', 'administrator/contract/manage-contract');
@@ -47,12 +52,24 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.suppliers.sync();
                 $scope.contractTypes.sync();
                 $scope.programs.sync();
-                $scope.$apply();
+                Utils.safeApply($scope);
             },
             manageEquipmentTags: async () => {
                 template.open('administrator-main', 'administrator/tag/manage-tags');
                 await $scope.tags.sync();
-                $scope.$apply();
+                Utils.safeApply($scope);
+            },
+            manageEquipments: async () => {
+                template.open('administrator-main', 'administrator/equipment/equipment-container');
+                template.open('equipments-main', 'administrator/equipment/manage-equipments');
+                await $scope.equipments.sync();
+                await $scope.contracts.sync();
+                $scope.taxes.sync();
+                $scope.tags.sync();
+                Utils.safeApply($scope);
+            },
+            createEquipment: async () => {
+                template.open('equipments-main', 'administrator/equipment/equipment-form');
             }
         });
 

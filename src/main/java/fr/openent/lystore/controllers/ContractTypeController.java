@@ -27,6 +27,6 @@ public class ContractTypeController extends ContractController {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void listMarketTypes (HttpServerRequest request) {
-        contractTypeService.lisContractTypes(arrayResponseHandler(request));
+        contractTypeService.listContractTypes(arrayResponseHandler(request));
     }
 }

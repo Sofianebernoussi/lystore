@@ -1,5 +1,6 @@
 package fr.openent.lystore.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SqlQueryUtils {
@@ -14,5 +15,14 @@ public class SqlQueryUtils {
         }
 
         return filter;
+    }
+
+    public static List<Integer> getIntegerIds (List<String> params) {
+        List<Integer> ids = new ArrayList<Integer>();
+        for (String param : params) {
+            ids.add(Integer.parseInt(param));
+        }
+
+        return ids;
     }
 }

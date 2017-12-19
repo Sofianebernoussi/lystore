@@ -1,2 +1,2 @@
 export * from './main';
-export * from './administrator';
+export * from './administration/configuration';

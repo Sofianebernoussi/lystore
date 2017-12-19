@@ -8,9 +8,9 @@ Tag,
 Equipment,
 COMBO_LABELS,
 Utils
-} from '../model';
+} from '../../model';
 
-export const administratorController = ng.controller('administratorController',
+export const configurationController = ng.controller('configurationController',
     ['$scope', ($scope) => {
         $scope.COMBO_LABELS = COMBO_LABELS;
         $scope.display = {

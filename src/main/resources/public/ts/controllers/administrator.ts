@@ -1,4 +1,5 @@
 import { ng, template, moment, _, idiom as lang } from 'entcore';
+import { Mix } from 'entcore-toolkit';
 import {
 Agent,
 Supplier,
@@ -48,7 +49,8 @@ export const administratorController = ng.controller('administratorController',
         $scope.search = {};
 
         $scope.openAgentForm = (agent: Agent = new Agent()) => {
-            $scope.agent = agent;
+            $scope.agent = new Agent();
+            Mix.extend($scope.agent, agent);
             template.open('agent.lightbox', 'administrator/agent/agent-form');
             $scope.display.lightbox.agent = true;
             Utils.safeApply($scope);
@@ -83,7 +85,8 @@ export const administratorController = ng.controller('administratorController',
         };
 
         $scope.openSupplierForm = (supplier: Supplier = new Supplier()) => {
-            $scope.supplier = supplier;
+            $scope.supplier = new Supplier();
+            Mix.extend($scope.supplier, supplier);
             template.open('supplier.lightbox', 'administrator/supplier/supplier-form');
             $scope.display.lightbox.supplier = true;
             Utils.safeApply($scope);
@@ -118,7 +121,8 @@ export const administratorController = ng.controller('administratorController',
         };
 
         $scope.openContractForm = (contract: Contract = new Contract()) => {
-            $scope.contract = contract;
+            $scope.contract = new Contract();
+            Mix.extend($scope.contract, contract);
             $scope.contract.start_date = (contract !== undefined ? moment(contract.start_date) : new Date());
             template.open('contract.lightbox', 'administrator/contract/contract-form');
             $scope.display.lightbox.contract = true;
@@ -172,8 +176,9 @@ export const administratorController = ng.controller('administratorController',
             Utils.safeApply($scope);
         };
 
-        $scope.openTagForm = (tag?: Tag) => {
-            $scope.tag = tag || new Tag();
+        $scope.openTagForm = (tag: Tag = new Tag()) => {
+            $scope.tag = new Tag();
+            Mix.extend($scope.tag, tag);
             template.open('tag.lightbox', 'administrator/tag/tag-form');
             $scope.display.lightbox.tag = true;
         };
@@ -215,7 +220,8 @@ export const administratorController = ng.controller('administratorController',
 
         $scope.openEquipmentForm = (equipment: Equipment = new Equipment()) => {
             $scope.redirectTo('/equipments/create');
-            $scope.equipment = equipment;
+            $scope.equipment = new Equipment();
+            Mix.extend($scope.equipment, equipment);
             $scope.equipment.tags = $scope.equipment.tags.map(
                 (tagId) => _.findWhere($scope.tags.all, { id: tagId })
             );

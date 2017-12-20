@@ -9,7 +9,8 @@ body.lystore {
   .supplier-management,
   .contract-management,
   .tag-management,
-  .equipment-management{
+  .equipment-management,
+  .log-view{
 
     table {
       thead td {
@@ -27,6 +28,12 @@ body.lystore {
           top: 8px;
         }
       }
+    }
+  }
+
+  .log-view {
+    table {
+      table-layout: fixed;
     }
   }
 
@@ -51,5 +58,15 @@ body.lystore {
     li {
       display: inline-block;
     }
+  }
+
+  .ellipsis {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .overflow-y {
+    overflow-y: auto;
   }
 }

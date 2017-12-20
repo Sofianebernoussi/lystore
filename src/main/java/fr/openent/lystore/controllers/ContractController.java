@@ -1,6 +1,9 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.logging.Actions;
+import fr.openent.lystore.logging.Contexts;
+import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.ContractService;
@@ -45,7 +48,13 @@ public class ContractController extends ControllerHelper {
         RequestUtils.bodyToJson(request, pathPrefix + "contract",
                 new Handler<JsonObject>() {
                     public void handle(JsonObject contract) {
-                        contractService.createContract(contract, defaultResponseHandler(request));
+                        contractService.createContract(contract,
+                                Logging.defaultResponseHandler(eb,
+                                        request,
+                                        Contexts.CONTRACT.toString(),
+                                        Actions.CREATE.toString(),
+                                        null,
+                                        contract));
                     }
                 });
     }
@@ -61,7 +70,12 @@ public class ContractController extends ControllerHelper {
                         try {
                             contractService.updateContract(contract,
                                     Integer.parseInt(request.params().get("id")),
-                                    defaultResponseHandler(request));
+                                    Logging.defaultResponseHandler(eb,
+                                            request,
+                                            Contexts.CONTRACT.toString(),
+                                            Actions.UPDATE.toString(),
+                                            request.params().get("id"),
+                                            contract));
                         } catch (ClassCastException e) {
                             log.error("E014 : An error occurred when casting contract id");
                             badRequest(request);
@@ -82,7 +96,12 @@ public class ContractController extends ControllerHelper {
                 for (String param : params) {
                     ids.add(Integer.parseInt(param));
                 }
-                contractService.deleteContract(ids, defaultResponseHandler(request));
+                contractService.deleteContract(ids, Logging.defaultResponseHandler(eb,
+                        request,
+                        Contexts.CONTRACT.toString(),
+                        Actions.DELETE.toString(),
+                        Logging.mergeItemsIds(params),
+                        null));
             } else {
                 badRequest(request);
             }

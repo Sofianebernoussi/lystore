@@ -1,6 +1,9 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.logging.Actions;
+import fr.openent.lystore.logging.Contexts;
+import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.service.AgentService;
 import fr.openent.lystore.service.impl.DefaultAgentService;
@@ -46,7 +49,12 @@ public class AgentController extends ControllerHelper {
             public void handle(final UserInfos user) {
                 RequestUtils.bodyToJson(request, pathPrefix + "agent", new Handler<JsonObject>() {
                     public void handle(JsonObject body) {
-                        agentService.createAgent(body, defaultResponseHandler(request));
+                        agentService.createAgent(body, Logging.defaultResponseHandler(eb,
+                                request,
+                                Contexts.AGENT.toString(),
+                                Actions.CREATE.toString(),
+                                null,
+                                body));
                     }
                 });
             }
@@ -62,7 +70,12 @@ public class AgentController extends ControllerHelper {
             public void handle(JsonObject body) {
                 try {
                     agentService.updateAgent(Integer.parseInt(request.params().get("id")), body,
-                            defaultResponseHandler(request));
+                            Logging.defaultResponseHandler(eb,
+                                    request,
+                                    Contexts.AGENT.toString(),
+                                    Actions.UPDATE.toString(),
+                                    request.params().get("id"),
+                                    body));
                 } catch (ClassCastException e) {
                     log.error("E017 : An error occurred when casting agent id");
                     badRequest(request);
@@ -81,10 +94,15 @@ public class AgentController extends ControllerHelper {
             List<String> params = request.params().getAll("id");
             if (params.size() > 0) {
                 List<Integer> ids = new ArrayList<Integer>();
-                for (int i = 0; i < params.size(); i++) {
-                    ids.add(Integer.parseInt(params.get(i)));
+                for (String param : params) {
+                    ids.add(Integer.parseInt(param));
                 }
-                agentService.deleteAgent(ids, defaultResponseHandler(request));
+                agentService.deleteAgent(ids, Logging.defaultResponseHandler(eb,
+                        request,
+                        Contexts.AGENT.toString(),
+                        Actions.DELETE.toString(),
+                        Logging.mergeItemsIds(params),
+                        null));
             } else {
                 badRequest(request);
             }

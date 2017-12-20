@@ -33,6 +33,9 @@ routes.define(($routeProvider) => {
         .when('/equipments/create', {
             action: 'createEquipment'
         })
+        .when('/logs', {
+            action: 'viewLogs'
+        })
         .otherwise({
             redirectTo: '/'
         });

@@ -1,6 +1,9 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.logging.Actions;
+import fr.openent.lystore.logging.Contexts;
+import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.service.SupplierService;
 import fr.openent.lystore.service.impl.DefaultSupplierService;
@@ -47,7 +50,13 @@ public class SupplierController extends ControllerHelper {
             public void handle(final UserInfos user) {
                 RequestUtils.bodyToJson(request, pathPrefix + "supplier", new Handler<JsonObject>() {
                     public void handle(JsonObject body) {
-                        supplierService.createSupplier(body, defaultResponseHandler(request));
+                        supplierService.createSupplier(body,
+                                Logging.defaultResponseHandler(eb,
+                                        request,
+                                        Contexts.SUPPLIER.toString(),
+                                        Actions.CREATE.toString(),
+                                        null,
+                                        body));
                     }
                 });
             }
@@ -59,11 +68,16 @@ public class SupplierController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
     public void updateHolder (final HttpServerRequest request) {
-        RequestUtils.bodyToJson(request, pathPrefix + "holder", new Handler<JsonObject>() {
+        RequestUtils.bodyToJson(request, pathPrefix + "supplier", new Handler<JsonObject>() {
             public void handle(JsonObject body) {
                 try {
                     supplierService.updateSupplier(Integer.parseInt(request.params().get("id")), body,
-                            defaultResponseHandler(request));
+                            Logging.defaultResponseHandler(eb,
+                                    request,
+                                    Contexts.SUPPLIER.toString(),
+                                    Actions.UPDATE.toString(),
+                                    request.params().get("id"),
+                                    body));
                 } catch (ClassCastException e) {
                     log.error("E016 : An error occurred when casting supplier id");
                     badRequest(request);
@@ -81,10 +95,15 @@ public class SupplierController extends ControllerHelper {
             List<String> params = request.params().getAll("id");
             if (params.size() > 0) {
                 List<Integer> ids = new ArrayList<Integer>();
-                for (int i = 0; i < params.size(); i++) {
-                    ids.add(Integer.parseInt(params.get(i)));
+                for (String param : params) {
+                    ids.add(Integer.parseInt(param));
                 }
-                supplierService.deleteSupplier(ids, defaultResponseHandler(request));
+                supplierService.deleteSupplier(ids, Logging.defaultResponseHandler(eb,
+                        request,
+                        Contexts.SUPPLIER.toString(),
+                        Actions.DELETE.toString(),
+                        Logging.mergeItemsIds(params),
+                        null));
             } else {
                 badRequest(request);
             }

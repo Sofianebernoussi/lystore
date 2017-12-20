@@ -9,6 +9,7 @@ import {
     Tags,
     Equipments,
     Taxes,
+    Logs,
     Utils
 } from '../model';
 
@@ -25,6 +26,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.tags = new Tags();
         $scope.equipments = new Equipments();
         $scope.taxes = new Taxes();
+        $scope.logs = new Logs();
         $scope.structures.sync().then(() => {
             if ($scope.structures.all.length > 0) {
                 $scope.structure = $scope.structures.all[0];
@@ -70,6 +72,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
             createEquipment: async () => {
                 template.open('equipments-main', 'administrator/equipment/equipment-form');
+            },
+            viewLogs: async () => {
+                template.open('administrator-main', 'administrator/log/view-logs');
             }
         });
 

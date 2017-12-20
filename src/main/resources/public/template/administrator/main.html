@@ -23,7 +23,10 @@
             <opt ng-click="redirectTo('/agents')"><i18n>lystore.agents.management</i18n></opt>
         </drop-down-menu>
     </header>
-    <header class="horizontal-spacing"><i18n>lystore.logs</i18n></header>
+    <header class="horizontal-spacing" ng-click="redirectTo('/logs')"
+            workflow="lystore.administrator">
+        <i18n>lystore.logs</i18n>
+    </header>
 </div>
 
 <container template="administrator-main"></container>

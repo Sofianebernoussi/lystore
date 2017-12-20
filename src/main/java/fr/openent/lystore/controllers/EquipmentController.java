@@ -1,6 +1,9 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.logging.Actions;
+import fr.openent.lystore.logging.Contexts;
+import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.service.EquipmentService;
 import fr.openent.lystore.service.impl.DefaultEquipmentService;
@@ -18,7 +21,6 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.List;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
-import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
 
 public class EquipmentController extends ControllerHelper {
 
@@ -43,7 +45,12 @@ public class EquipmentController extends ControllerHelper {
     public void create(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "equipment", new Handler<JsonObject>() {
             public void handle(JsonObject equipment) {
-                equipmentService.create(equipment, defaultResponseHandler(request));
+                equipmentService.create(equipment, Logging.defaultResponseHandler(eb,
+                        request,
+                        Contexts.EQUIPMENT.toString(),
+                        Actions.CREATE.toString(),
+                        null,
+                        equipment));
             }
         });
     }
@@ -57,7 +64,12 @@ public class EquipmentController extends ControllerHelper {
             public void handle(JsonObject equipment) {
                 try {
                     Integer id = Integer.parseInt(request.params().get("id"));
-                    equipmentService.update(id, equipment, defaultResponseHandler(request));
+                    equipmentService.update(id, equipment, Logging.defaultResponseHandler(eb,
+                            request,
+                            Contexts.EQUIPMENT.toString(),
+                            Actions.UPDATE.toString(),
+                            request.params().get("id"),
+                            equipment));
                 } catch (ClassCastException e) {
                     log.error("E026 : An error occurred when casting equipment id");
                 }
@@ -74,7 +86,12 @@ public class EquipmentController extends ControllerHelper {
             List<String> params = request.params().getAll("id");
             if (params.size() > 0) {
                 List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
-                equipmentService.delete(ids, defaultResponseHandler(request));
+                equipmentService.delete(ids, Logging.defaultResponseHandler(eb,
+                        request,
+                        Contexts.EQUIPMENT.toString(),
+                        Actions.DELETE.toString(),
+                        Logging.mergeItemsIds(params),
+                        null));
             } else {
                 badRequest(request);
             }

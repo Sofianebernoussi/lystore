@@ -191,7 +191,7 @@ export const configurationController = ng.controller('configurationController',
 
         $scope.validTag = async (tag: Tag) => {
             await tag.save();
-            await $scope.tags.sync();
+            await $scope.tags.sync(true);
             $scope.display.lightbox.tag = false;
             Utils.safeApply($scope);
             delete $scope.tag;

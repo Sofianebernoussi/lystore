@@ -6,6 +6,7 @@ Supplier,
 Contract,
 Tag,
 Equipment,
+EquipmentOption,
 COMBO_LABELS,
 Utils
 } from '../../model';
@@ -237,7 +238,29 @@ export const configurationController = ng.controller('configurationController',
         $scope.removeTagToEquipment = (tag: Tag) => {
             $scope.equipment.tags = _.without($scope.equipment.tags, tag);
         };
-
+        $scope.validEquipmentOptions = (options : EquipmentOption[]) =>{
+            if( options.length > 0 ){
+                let valid = true;
+                for(let i=0;i<options.length;i++){
+                    if( options[i].name === undefined
+                        || options[i].name.trim() === ''
+                        || options[i].price === undefined
+                        || options[i].price.toString().trim() === ''
+                        || isNaN(parseFloat(options[i].price.toString()))
+                        || options[i].amount === undefined
+                        || options[i].amount.toString().trim() === ''
+                        || isNaN(parseInt(options[i].amount.toString()))
+                        || typeof(options[i].required ) !== 'boolean'
+                        || options[i].id_tax === undefined ){
+                        valid = false;
+                        break;
+                    }
+                }
+                return valid
+            }else{
+                return true;
+            }
+        };
         $scope.validEquipmentForm = (equipment: Equipment) => {
             return equipment.name !== undefined
                 && equipment.name.trim() !== ''
@@ -246,7 +269,8 @@ export const configurationController = ng.controller('configurationController',
                 && !isNaN(parseFloat(equipment.price.toString()))
                 && equipment.id_contract !== undefined
                 && equipment.id_tax !== undefined
-                && equipment.tags.length > 0;
+                && equipment.tags.length > 0
+                && $scope.validEquipmentOptions (equipment.options);
         };
 
         $scope.validEquipment = async (equipment: Equipment) => {
@@ -286,5 +310,12 @@ export const configurationController = ng.controller('configurationController',
                 || lang.translate('lystore.' + equipment.status).toLowerCase().includes($scope.search.equipment.toLowerCase())
                 : true;
         };
-
+        $scope.calculatePrice = (price,amount) => {
+            return price * amount;
+        };
+        $scope.addOptionLigne= () => {
+            let option = new EquipmentOption();
+            $scope.equipment.options.push(option);
+            Utils.safeApply($scope);
+        }
     }]);

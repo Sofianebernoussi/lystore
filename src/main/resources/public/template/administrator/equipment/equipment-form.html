@@ -3,7 +3,7 @@
         <i18n>lystore.equipment.add</i18n>
     </h1>
     <article>
-        <form ng-submit="validEquipment(equipment)">
+        <form >
             <div class="row horizontal-spacing vertical-spacing">
                 <div class="cell four horizontal-spacing">
                     <div class="eight row centered">
@@ -60,6 +60,67 @@
                 <h2>
                     <i18n>lystore.equipment.options</i18n>
                 </h2>
+                <article>
+                    <table class="twelve">
+                        <thead>
+                            <td class="two"><i18n>name</i18n></td>
+                            <td class="two"><i18n>lystore.unit.price.ht</i18n></td>
+                            <td class="two"><i18n>lystore.amount</i18n></td>
+                            <td class="ona aligne-text-center"><i18n>lystore.price</i18n></td>
+                            <td class="two"><i18n>lystore.tax</i18n></td>
+                            <td class="two aligne-text-center"><i18n>lystore.required</i18n></td>
+                            <td class="one aligne-text-center">&nbsp;</td>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="option in equipment.options track by $index ">
+                                <td class="two"><input type="text" class="twelve"  ng-model="option.name"/></td>
+                                <td class="two"><input type="text" class="twelve"  ng-model="option.price"/></td>
+                                <td class="one"><input type="text" class="twelve"  ng-model="option.amount"/></td>
+                                <td class="two aligne-text-center">[[calculatePrice(option.price,option.amount)]]</td>
+                                <td class="two">
+                                    <select ng-model="option.id_tax" class="twelve"
+                                            ng-init="option.id_tax = option.id_tax || (taxes.all.length > 0 ? taxes.all[0].id : null)"
+                                            ng-options="tax.id as tax.value + '%' for tax in taxes.all" required></select>
+                                </td>
+                                <td class="two aligne-text-center"><switch ng-model="option.required" ></switch></td>
+                                <td class="one aligne-text-center" ng-click="equipment.options.splice($index, 1);"><i  class="trash"></i></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <input type="button"  ng-click="addOptionLigne()" i18n-value="add" />
+                </article>
+            </div>
+            <div class="row twelve">
+                <h2 class="vertical-spacing">
+                    <i18n>lystore.equipment.tag</i18n>
+                </h2>
+                <div class="row twelve vertical-spacing"
+                     ng-init="equipment.tags = equipment.tags || []">
+                    <div class="cell two">
+                        <i18n>lystore.equipment.tags</i18n>
+                    </div>
+                    <div class="cell nine">
+                        <!--<multi-combo title="lystore.equipment.tags.multi-combo.title"-->
+                        <!--combo-model="tags.all" search-on="name" order-by="name"-->
+                        <!--filtered-model="equipment.tags" labels="COMBO_LABELS"></multi-combo>-->
+                        <div class="row">
+                            <select ng-model="equipment._tag" class="six"
+                                    ng-change="addTagToEquipment(equipment._tag)"
+                                    ng-options="tag as tag.name for tag in tags.all | filter:tagFilter"></select>
+                        </div>
+                        <div class="row">
+                            <div class="select-blocks">
+                                <div ng-repeat="tag in equipment.tags"
+                                     ng-click="removeTagToEquipment(tag)">[[ tag.name ]]</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row twelve">
+                <h2>
+                    <i18n>lystore.equipment.administration</i18n>
+                </h2>
                 <div class="row">
                     <div class="two cell twelve-mobile vertical-spacing"><i18n>lystore.equipment.contract</i18n></div>
                     <div class="nine cell twelve-mobile vertical-spacing">
@@ -96,37 +157,10 @@
                     </div>
                 </div>
             </div>
-            <div class="row twelve">
-                <h2 class="vertical-spacing">
-                    <i18n>lystore.equipment.tag</i18n>
-                </h2>
-                <div class="row twelve vertical-spacing"
-                     ng-init="equipment.tags = equipment.tags || []">
-                    <div class="cell two">
-                        <i18n>lystore.equipment.tags</i18n>
-                    </div>
-                    <div class="cell nine">
-                        <!--<multi-combo title="lystore.equipment.tags.multi-combo.title"-->
-                        <!--combo-model="tags.all" search-on="name" order-by="name"-->
-                        <!--filtered-model="equipment.tags" labels="COMBO_LABELS"></multi-combo>-->
-                        <div class="row">
-                            <select ng-model="equipment._tag" class="six"
-                                    ng-change="addTagToEquipment(equipment._tag)"
-                                    ng-options="tag as tag.name for tag in tags.all | filter:tagFilter"></select>
-                        </div>
-                        <div class="row">
-                            <div class="select-blocks">
-                                <div ng-repeat="tag in equipment.tags"
-                                     ng-click="removeTagToEquipment(tag)">[[ tag.name ]]</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
             <div class="row">
                 <div class="right-magnet">
                     <input type="button" class="cancel" ng-click="redirectTo('/equipments')" i18n-value="cancel"/>
-                    <input type="submit" class="button" ng-disabled="!validEquipmentForm(equipment)"/>
+                    <input type="submit" class="button" ng-click="validEquipment(equipment)" ng-disabled="!validEquipmentForm(equipment)" />
                 </div>
             </div>
         </form>

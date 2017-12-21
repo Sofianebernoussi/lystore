@@ -26,13 +26,15 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     }
 
     public void listEquipments(Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT *, array_to_json((" +
+        String query = "SELECT e.*,  array_to_json(array_agg(opts)) as options , array_to_json((" +
                 "SELECT array_agg(id_tag) " +
                 "FROM " + Lystore.LYSTORE_SCHEMA + ".equipment " +
                 "INNER JOIN " + Lystore.LYSTORE_SCHEMA + ".rel_equipment_tag ON (equipment.id = rel_equipment_tag.id_equipment) " +
                 "WHERE e.id = rel_equipment_tag.id_equipment " +
                 ")) as tags " +
-                "FROM " + Lystore.LYSTORE_SCHEMA + ".equipment e";
+                "FROM " + Lystore.LYSTORE_SCHEMA + ".equipment e " +
+                "Left join " + Lystore.LYSTORE_SCHEMA + ".equipment_option opts ON opts.id_equipment = e.id " +
+                "group by (e.id)";
 
         sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
     }
@@ -51,7 +53,10 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                         for (int i = 0; i < tags.size(); i++) {
                             statements.add(getEquipmentTagRelationshipStatement(id, (Number) tags.get(i)));
                         }
-
+                        JsonArray options = equipment.getArray("options");
+                        for (int j = 0; j < options.size(); j++) {
+                            statements.add(getEquipmentOptionRelationshipStatement(id, (JsonObject) options.get(j)));
+                        }
                         sql.transaction(statements, new Handler<Message<JsonObject>>() {
                             public void handle(Message<JsonObject> event) {
                                 handler.handle(getTransactionHandler(event, id));
@@ -72,13 +77,17 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     public void update(final Integer id, JsonObject equipment, final Handler<Either<String, JsonObject>> handler) {
         JsonArray statements = new JsonArray()
                 .addObject(getEquipmentUpdateStatement(id, equipment))
-                .addObject(getEquipmentTagRelationshipDeletion(id));
+                .addObject(getEquipmentTagRelationshipDeletion(id))
+                .addObject(getEquipmentOptionsRelationshipDeletion(id));
 
         JsonArray tags = equipment.getArray("tags");
         for (int i = 0; i < tags.size(); i++) {
             statements.add(getEquipmentTagRelationshipStatement(id, (Number) tags.get(i)));
         }
-
+        JsonArray options = equipment.getArray("options");
+        for (int j = 0; j < options.size(); j++) {
+            statements.add(getEquipmentOptionRelationshipStatement(id, (JsonObject) options.get(j)));
+        }
         sql.transaction(statements, new Handler<Message<JsonObject>>() {
             public void handle(Message<JsonObject> event) {
                 handler.handle(getTransactionHandler(event, id));
@@ -86,13 +95,22 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         });
     }
 
-    public void delete(List<Integer> ids, Handler<Either<String, JsonObject>> handler) {
-        SqlUtils.deleteIds(this.table, ids, handler);
+    public void delete(final List<Integer> ids, final Handler<Either<String, JsonObject>> handler) {
+        JsonArray statements = new JsonArray()
+                .addObject(getEquipmentsOptionsRelationshipDeletion(ids))
+                .addObject(getEquipmentsDeletion(ids));
+
+        sql.transaction(statements, new Handler<Message<JsonObject>>() {
+            public void handle(Message<JsonObject> event) {
+                handler.handle(getTransactionHandler(event,ids.get(0)));
+            }
+        });
     }
 
     /**
      * Returns an equipment creation statement
-     * @param id equipment id
+     *
+     * @param id        equipment id
      * @param equipment equipment to create
      * @return equipment creation statement
      */
@@ -120,7 +138,8 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
 
     /**
      * Returns an equipment tag relationship transaction statement
-     * @param id equipment Id
+     *
+     * @param id    equipment Id
      * @param tagId tag id
      * @return equipment tag relationship transaction statement
      */
@@ -140,8 +159,35 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     }
 
     /**
+     * Create an option for an equipment
+     * @param id of the equipment
+     * @param option
+     * @return
+     */
+    private JsonObject getEquipmentOptionRelationshipStatement(Number id, JsonObject option) {
+        String insertTagEquipmentRelationshipQuery =
+                "INSERT INTO " + Lystore.LYSTORE_SCHEMA + ".equipment_option(name, price, amount, required, id_tax, id_equipment) " +
+                        "VALUES ( ?, ?, ?, ?, ?, ?);";
+
+        JsonArray params = new JsonArray()
+                .addString(option.getString("name"))
+                .addNumber(option.getNumber("price"))
+                .addNumber(option.getNumber("amount"))
+                .addBoolean(option.getBoolean("required"))
+                .addNumber(option.getNumber("id_tax"))
+                .addNumber(id);
+
+
+        return new JsonObject()
+                .putString("statement", insertTagEquipmentRelationshipQuery)
+                .putArray("values", params)
+                .putString("action", "prepared");
+    }
+
+    /**
      * Returns the update statement.
-     * @param id resource Id
+     *
+     * @param id        resource Id
      * @param equipment equipment to update
      * @return Update statement
      */
@@ -168,7 +214,67 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 .putString("action", "prepared");
     }
 
-    private JsonObject getEquipmentTagRelationshipDeletion (Number id) {
+    /**
+     * Delete options of an equipment
+     * @param id : equipment id
+     * @return
+     */
+    private JsonObject getEquipmentOptionsRelationshipDeletion(Number id) {
+        String query = "DELETE FROM " + Lystore.LYSTORE_SCHEMA + ".equipment_option " +
+                " WHERE id_equipment = ?;";
+
+        return new JsonObject()
+                .putString("statement", query)
+                .putArray("values", new JsonArray().addNumber(id))
+                .putString("action", "prepared");
+    }
+    /**
+     * Delete options of  equipments
+     * @param id : equipment id
+     * @return
+     */
+    private JsonObject getEquipmentsOptionsRelationshipDeletion(List<Integer> ids) {
+        StringBuilder query = new StringBuilder();
+        JsonArray value = new JsonArray();
+        query.append("DELETE FROM " + Lystore.LYSTORE_SCHEMA + ".equipment_option ")
+                .append(" WHERE id_equipment in ( ");
+        for(int z=0; z<ids.size(); z++ ){
+            if(z==ids.size()-1){
+                query.append(" ?); ");
+            }else{
+                query.append(" ?, ");
+            }
+            value.addNumber(ids.get(z));
+        }
+        return new JsonObject()
+                .putString("statement", query.toString())
+                .putArray("values", value)
+                .putString("action", "prepared");
+    }
+    /**
+     * Delete equipments
+     * @param id : ids equipment
+     * @return
+     */
+    private JsonObject getEquipmentsDeletion(List<Integer> ids) {
+        StringBuilder query = new StringBuilder();
+        JsonArray value = new JsonArray();
+        query.append("DELETE FROM " + Lystore.LYSTORE_SCHEMA + ".equipment ")
+                .append(" WHERE id in ( ");
+        for(int z=0; z<ids.size(); z++ ){
+            if(z==ids.size()-1){
+                query.append(" ?); ");
+            }else{
+                query.append(" ?, ");
+            }
+            value.addNumber(ids.get(z));
+        }
+        return new JsonObject()
+                .putString("statement", query.toString())
+                .putArray("values", value)
+                .putString("action", "prepared");
+    }
+    private JsonObject getEquipmentTagRelationshipDeletion(Number id) {
         String query = "DELETE FROM " + Lystore.LYSTORE_SCHEMA + ".rel_equipment_tag " +
                 " WHERE id_equipment = ?;";
 
@@ -180,8 +286,9 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
 
     /**
      * Returns transaction handler. Manage response based on PostgreSQL event
+     *
      * @param event PostgreSQL event
-     * @param id resource Id
+     * @param id    resource Id
      * @return Transaction handler
      */
     private Either<String, JsonObject> getTransactionHandler(Message<JsonObject> event, Number id) {

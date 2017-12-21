@@ -29,6 +29,9 @@
     },
     "tags": {
       "type": "array"
+    },
+    "options":{
+      "type": "array"
     }
   },
   "required": [

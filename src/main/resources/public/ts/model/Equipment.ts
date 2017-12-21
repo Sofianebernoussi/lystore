@@ -14,13 +14,14 @@ export class Equipment implements Selectable {
     status: string;
     image: string;
     tags: Tag[];
-
     selected: boolean;
+    options : EquipmentOption[];
 
     constructor (name?: string, price?: number) {
         if (name) this.name = name;
         if (price) this.price = price;
         this.tags = [];
+        this.options= [];
     }
 
     toJson () {
@@ -33,7 +34,8 @@ export class Equipment implements Selectable {
             status: this.status,
             image: this.image || null,
             id_contract: this.id_contract,
-            tags: this.tags.map((tag: Tag) => tag.id)
+            tags: this.tags.map((tag: Tag) => tag.id),
+            options : this.options.map((option: EquipmentOption) => option.toJson())
         }
     }
 
@@ -91,9 +93,41 @@ export class Equipments extends Selection<Equipment> {
         try {
             let { data } = await http.get(`/lystore/equipments`);
             this.all = Mix.castArrayAs(Equipment, data);
-            this.all.map((equipment) => equipment.tags = JSON.parse(equipment.tags.toString()));
+            this.all.map((equipment) => {
+                equipment.tags = JSON.parse(equipment.tags.toString());
+                equipment.options = JSON.parse(equipment.options.toString()) ;
+                equipment.options !== [null] && equipment.options[0] !== null ? equipment.options = Mix.castArrayAs(EquipmentOption, equipment.options) : equipment.options = [];
+            });
         } catch (e) {
             notify.error('lystore.equipment.sync.err');
         }
     }
+}
+
+export class EquipmentOption   {
+
+    id?: number;
+    name: string;
+    price: number;
+    amount: number;
+    required: boolean;
+    id_tax: number;
+
+    constructor () {
+        this.name ="";
+        this.amount = 1;
+        this.required = false;
+
+    }
+
+    toJson () {
+        return {
+            name: this.name,
+            price: parseFloat(this.price.toString()),
+            amount: parseInt(this.price.toString()),
+            required : this.required,
+            id_tax: this.id_tax
+        }
+    }
+
 }

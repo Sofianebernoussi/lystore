@@ -117,8 +117,8 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     private JsonObject getEquipmentCreationStatement(Number id, JsonObject equipment) {
         String insertEquipmentQuery =
                 "INSERT INTO " + Lystore.LYSTORE_SCHEMA + ".equipment(id, name, summary, description, price, id_tax," +
-                        " image, id_contract, status) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id;";
+                        " image, id_contract, status, technical_specs) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, to_json(?)) RETURNING id;";
         JsonArray params = new JsonArray()
                 .addNumber(id)
                 .addString(equipment.getString("name"))
@@ -128,7 +128,8 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 .addNumber(equipment.getNumber("id_tax"))
                 .addString(equipment.getString("image"))
                 .addNumber(equipment.getNumber("id_contract"))
-                .addString(equipment.getString("status"));
+                .addString(equipment.getString("status"))
+                .addArray(equipment.getArray("technical_specs"));
 
         return new JsonObject()
                 .putString("statement", insertEquipmentQuery)
@@ -194,7 +195,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     private JsonObject getEquipmentUpdateStatement(Number id, JsonObject equipment) {
         String query = "UPDATE " + Lystore.LYSTORE_SCHEMA + ".equipment SET " +
                 "name = ?, summary = ?, description = ?, price = ?, id_tax = ?, image = ?, " +
-                "id_contract = ?, status = ? " +
+                "id_contract = ?, status = ?, technical_specs = to_json(?) " +
                 "WHERE id = ?";
 
         JsonArray params = new JsonArray()
@@ -206,6 +207,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 .addString(equipment.getString("image"))
                 .addNumber(equipment.getNumber("id_contract"))
                 .addString(equipment.getString("status"))
+                .addArray(equipment.getArray("technical_specs"))
                 .addNumber(id);
 
         return new JsonObject()

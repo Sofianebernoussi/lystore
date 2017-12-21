@@ -71,4 +71,23 @@ body.lystore {
   .overflow-y {
     overflow-y: auto;
   }
+
+  .technical-specs {
+    border: solid 1px $neutral-grey;
+
+    .technical-spec {
+      padding: 5px;
+
+      &:nth-child(2n) {
+        background-color: $lightest-grey;
+      }
+
+
+      .cell.one {
+        text-align: center;
+        color: $grey;
+        margin-top: 5px;
+      }
+    }
+  }
 }

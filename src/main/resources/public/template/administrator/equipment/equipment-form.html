@@ -57,7 +57,36 @@
                 </label>
             </div>
             <div class="row twelve">
-                <h2>
+                <h2 class="vertical-spacing">
+                    <i18n>lystore.equipment.technical.specifications</i18n>
+                </h2>
+                <div class="row technical-specs">
+                    <div class="twelve row">
+                        <div class="technical-spec twelve row"
+                             ng-repeat="technicalSpec in equipment.technical_specs">
+                            <div class="five cell horizontal-spacing">
+                                <input type="text" class="twelve"
+                                       ng-model="technicalSpec.name">
+                            </div>
+                            <div class="six cell horizontal-spacing">
+                                <input type="text" class="twelve"
+                                       ng-model="technicalSpec.value">
+                            </div>
+                            <div class="one cell">
+                                <i class="trash"
+                                    ng-click="dropTechnicalSpec(equipment, technicalSpec)"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row vertical-spacing">
+                        <div class="right-magnet horizontal-spacing">
+                            <input type="button" ng-click="addTechnicalSpec(equipment)" class="cancel" i18n-value="add">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row twelve">
+                <h2 class="vertical-spacing">
                     <i18n>lystore.equipment.options</i18n>
                 </h2>
                 <article>

@@ -92,6 +92,7 @@ CREATE TABLE lystore.equipment (
   image character varying(100),
   id_contract bigint NOT NULL,
   status character varying(50),
+  technical_specs json,
   CONSTRAINT equipment_pkey PRIMARY KEY (id),
   CONSTRAINT fk_contract_id FOREIGN KEY (id_contract)
   REFERENCES lystore.contract (id) MATCH SIMPLE

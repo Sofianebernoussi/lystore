@@ -1,4 +1,4 @@
-import { Tag } from './index';
+import { Tag, Utils } from './index';
 import { notify } from 'entcore';
 import { Selectable, Selection, Mix } from 'entcore-toolkit';
 import http from 'axios';
@@ -13,13 +13,16 @@ export class Equipment implements Selectable {
     id_contract: number;
     status: string;
     image: string;
+    technical_specs: TechnicalSpec[];
     tags: Tag[];
+
     selected: boolean;
     options : EquipmentOption[];
 
     constructor (name?: string, price?: number) {
         if (name) this.name = name;
         if (price) this.price = price;
+        this.technical_specs = [];
         this.tags = [];
         this.options= [];
     }
@@ -34,6 +37,7 @@ export class Equipment implements Selectable {
             status: this.status,
             image: this.image || null,
             id_contract: this.id_contract,
+            technical_specs: this.technical_specs.map((spec: TechnicalSpec) => spec.toJson()),
             tags: this.tags.map((tag: Tag) => tag.id),
             options : this.options.map((option: EquipmentOption) => option.toJson())
         }
@@ -60,6 +64,7 @@ export class Equipment implements Selectable {
            await http.put(`/lystore/equipment/${this.id}`, this.toJson())
         } catch (e) {
             notify.error('lystore.equipment.update.err');
+            throw e;
         }
     }
 
@@ -68,6 +73,18 @@ export class Equipment implements Selectable {
             await http.delete(`/lystore/equipment/${this.id}`);
         } catch (e) {
             notify.error('lystore.equipment.delete.err');
+        }
+    }
+}
+
+export class TechnicalSpec {
+    name: string;
+    value: string;
+
+    toJson () {
+        return {
+            name: this.name,
+            value: this.value
         }
     }
 }
@@ -98,6 +115,8 @@ export class Equipments extends Selection<Equipment> {
                 equipment.options = JSON.parse(equipment.options.toString()) ;
                 equipment.options !== [null] && equipment.options[0] !== null ? equipment.options = Mix.castArrayAs(EquipmentOption, equipment.options) : equipment.options = [];
             });
+            this.all.map((equipment) =>
+                equipment.technical_specs = Mix.castArrayAs(TechnicalSpec, Utils.parsePostgreSQLJson(equipment.technical_specs.toString())));
         } catch (e) {
             notify.error('lystore.equipment.sync.err');
         }

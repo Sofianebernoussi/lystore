@@ -7,6 +7,7 @@ Contract,
 Tag,
 Equipment,
 EquipmentOption,
+TechnicalSpec,
 COMBO_LABELS,
 Utils
 } from '../../model';
@@ -310,10 +311,21 @@ export const configurationController = ng.controller('configurationController',
                 || lang.translate('lystore.' + equipment.status).toLowerCase().includes($scope.search.equipment.toLowerCase())
                 : true;
         };
+
+        $scope.addTechnicalSpec = (equipment: Equipment) => {
+            equipment.technical_specs.push(new TechnicalSpec());
+            Utils.safeApply($scope);
+        };
+
+        $scope.dropTechnicalSpec = (equipment: Equipment, technicalSpec: TechnicalSpec) => {
+            equipment.technical_specs = _.without(equipment.technical_specs, technicalSpec);
+            Utils.safeApply($scope);
+        };
+
         $scope.calculatePrice = (price,amount) => {
             return price * amount;
         };
-        $scope.addOptionLigne= () => {
+        $scope.addOptionLigne = () => {
             let option = new EquipmentOption();
             $scope.equipment.options.push(option);
             Utils.safeApply($scope);

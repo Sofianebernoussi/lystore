@@ -32,6 +32,9 @@
     },
     "options":{
       "type": "array"
+    },
+    "technical_specs": {
+      "type": "array"
     }
   },
   "required": [

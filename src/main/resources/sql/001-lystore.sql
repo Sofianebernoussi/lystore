@@ -129,3 +129,15 @@ CREATE TABLE lystore.equipment_option (
   REFERENCES lystore.tax (id) MATCH SIMPLE
   ON UPDATE NO ACTION ON DELETE NO ACTION
 );
+
+CREATE TABLE lystore.logs (
+  id bigserial NOT NULL,
+  date timestamp without time zone DEFAULT now(),
+  action character varying(30),
+  context character varying(30),
+  value json,
+  id_user character varying(36),
+  username character varying(50),
+  item text,
+  CONSTRAINT logs_pkey PRIMARY KEY (id)
+);

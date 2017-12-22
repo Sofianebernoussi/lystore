@@ -232,22 +232,20 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     }
     /**
      * Delete options of  equipments
-     * @param id : equipment id
+     * @param ids : equipment ids
      * @return
      */
     private JsonObject getEquipmentsOptionsRelationshipDeletion(List<Integer> ids) {
         StringBuilder query = new StringBuilder();
         JsonArray value = new JsonArray();
         query.append("DELETE FROM " + Lystore.LYSTORE_SCHEMA + ".equipment_option ")
-                .append(" WHERE id_equipment in ( ");
-        for(int z=0; z<ids.size(); z++ ){
-            if(z==ids.size()-1){
-                query.append(" ?); ");
-            }else{
-                query.append(" ?, ");
-            }
-            value.addNumber(ids.get(z));
+                .append(" WHERE id_equipment in ")
+                .append(Sql.listPrepared(ids.toArray()));
+
+        for (Integer id : ids) {
+            value.addNumber(id);
         }
+
         return new JsonObject()
                 .putString("statement", query.toString())
                 .putArray("values", value)
@@ -255,22 +253,20 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     }
     /**
      * Delete equipments
-     * @param id : ids equipment
+     * @param ids : equipment ids
      * @return
      */
     private JsonObject getEquipmentsDeletion(List<Integer> ids) {
         StringBuilder query = new StringBuilder();
         JsonArray value = new JsonArray();
         query.append("DELETE FROM " + Lystore.LYSTORE_SCHEMA + ".equipment ")
-                .append(" WHERE id in ( ");
-        for(int z=0; z<ids.size(); z++ ){
-            if(z==ids.size()-1){
-                query.append(" ?); ");
-            }else{
-                query.append(" ?, ");
-            }
-            value.addNumber(ids.get(z));
+                .append(" WHERE id in ")
+                .append(Sql.listPrepared(ids.toArray()));
+
+        for (Integer id : ids) {
+            value.addNumber(id);
         }
+
         return new JsonObject()
                 .putString("statement", query.toString())
                 .putArray("values", value)

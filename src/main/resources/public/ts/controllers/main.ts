@@ -74,7 +74,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('equipments-main', 'administrator/equipment/equipment-form');
             },
             viewLogs: async () => {
+                $scope.logs.reset();
                 template.open('administrator-main', 'administrator/log/view-logs');
+                Utils.safeApply($scope);
             }
         });
 

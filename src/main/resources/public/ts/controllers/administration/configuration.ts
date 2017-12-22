@@ -214,7 +214,7 @@ export const configurationController = ng.controller('configurationController',
 
         $scope.deleteTags = async (tags: Tag[]) => {
             await $scope.tags.delete(tags);
-            await $scope.tags.sync();
+            await $scope.tags.sync(true);
             $scope.allTagSelected = false;
             $scope.display.lightbox.tag = false;
             Utils.safeApply($scope);

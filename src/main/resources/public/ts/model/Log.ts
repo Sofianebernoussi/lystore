@@ -34,4 +34,8 @@ export class Logs {
     export () {
         location.replace(`/lystore/logs/export`);
     }
+
+    reset () {
+        this.all = [];
+    }
 }

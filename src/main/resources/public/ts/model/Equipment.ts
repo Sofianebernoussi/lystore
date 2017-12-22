@@ -111,7 +111,7 @@ export class Equipments extends Selection<Equipment> {
             let { data } = await http.get(`/lystore/equipments`);
             this.all = Mix.castArrayAs(Equipment, data);
             this.all.map((equipment) => {
-                equipment.tags = JSON.parse(equipment.tags.toString());
+                equipment.tags = equipment.tags !== null ? JSON.parse(equipment.tags.toString()) : [];
                 equipment.options = JSON.parse(equipment.options.toString()) ;
                 equipment.options !== [null] && equipment.options[0] !== null ? equipment.options = Mix.castArrayAs(EquipmentOption, equipment.options) : equipment.options = [];
             });

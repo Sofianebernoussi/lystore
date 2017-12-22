@@ -112,3 +112,20 @@ CREATE TABLE lystore.rel_equipment_tag (
   REFERENCES lystore.tag (id) MATCH SIMPLE
   ON UPDATE NO ACTION ON DELETE CASCADE
 );
+
+CREATE TABLE lystore.equipment_option (
+  id bigserial NOT NULL,
+  name character varying(100) NOT NULL,
+  price numeric NOT NULL,
+  amount integer NOT NULL,
+  required boolean NOT NULL,
+  id_tax bigint NOT NULL,
+  id_equipment bigint NOT NULL,
+  CONSTRAINT id PRIMARY KEY (id),
+  CONSTRAINT fk_equipment_id FOREIGN KEY (id_equipment)
+  REFERENCES lystore.equipment (id) MATCH SIMPLE
+  ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT fk_tax_id FOREIGN KEY (id_tax)
+  REFERENCES lystore.tax (id) MATCH SIMPLE
+  ON UPDATE NO ACTION ON DELETE NO ACTION
+);

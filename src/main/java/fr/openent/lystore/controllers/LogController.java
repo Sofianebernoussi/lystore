@@ -37,7 +37,7 @@ public class LogController extends ControllerHelper {
                 : null;
             logService.list(page, arrayResponseHandler(request));
         } catch (ClassCastException e) {
-            log.error("E032 : An error occurred when casting page number");
+            log.error("An error occurred when casting page number");
         }
     }
 

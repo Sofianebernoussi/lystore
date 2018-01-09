@@ -77,7 +77,7 @@ public class ContractController extends ControllerHelper {
                                             request.params().get("id"),
                                             contract));
                         } catch (ClassCastException e) {
-                            log.error("E014 : An error occurred when casting contract id");
+                            log.error("An error occurred when casting contract id");
                             badRequest(request);
                         }
                     }
@@ -107,7 +107,7 @@ public class ContractController extends ControllerHelper {
             }
         }
         catch (ClassCastException e) {
-            log.error("E015 : An error occurred when casting contract id");
+            log.error("An error occurred when casting contract id");
             badRequest(request);
         }
     }

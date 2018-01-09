@@ -63,11 +63,11 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                             }
                         });
                     } catch (ClassCastException e) {
-                        log.error("E028 : An error occurred when casting tags ids");
+                        log.error("An error occurred when casting tags ids");
                         handler.handle(new Either.Left<String, JsonObject>(""));
                     }
                 } else {
-                    log.error("E029 : An error occurred when selecting next val");
+                    log.error("An error occurred when selecting next val");
                     handler.handle(new Either.Left<String, JsonObject>(""));
                 }
             }
@@ -297,7 +297,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                     .putNumber("id", id);
             either = new Either.Right<String, JsonObject>(returns);
         } else {
-            log.error("E030 : An error occurred when launching transaction");
+            log.error("An error occurred when launching transaction");
             either = new Either.Left<String, JsonObject>("");
         }
         return either;

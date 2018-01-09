@@ -71,7 +71,7 @@ public class EquipmentController extends ControllerHelper {
                             request.params().get("id"),
                             equipment));
                 } catch (ClassCastException e) {
-                    log.error("E026 : An error occurred when casting equipment id");
+                    log.error("An error occurred when casting equipment id");
                 }
             }
         });
@@ -96,7 +96,7 @@ public class EquipmentController extends ControllerHelper {
                 badRequest(request);
             }
         } catch (ClassCastException e) {
-            log.error("E027 : An error occurred when casting equipment(s) id(s)");
+            log.error("An error occurred when casting equipment(s) id(s)");
             badRequest(request);
         }
     }

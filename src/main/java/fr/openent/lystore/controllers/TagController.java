@@ -72,7 +72,7 @@ public class TagController extends ControllerHelper {
                             request.params().get("id"),
                             tag));
                 } catch (ClassCastException e) {
-                    log.error("E013 : An error occurred when casting tag id");
+                    log.error("An error occurred when casting tag id");
                     badRequest(request);
                 }
             }
@@ -99,7 +99,7 @@ public class TagController extends ControllerHelper {
             }
         }
         catch (ClassCastException e) {
-            log.error("E020 : An error occurred when casting tag id");
+            log.error("An error occurred when casting tag id");
             badRequest(request);
         }
     }

@@ -77,7 +77,7 @@ public class AgentController extends ControllerHelper {
                                     request.params().get("id"),
                                     body));
                 } catch (ClassCastException e) {
-                    log.error("E017 : An error occurred when casting agent id");
+                    log.error("An error occurred when casting agent id");
                     badRequest(request);
                 }
             }
@@ -108,7 +108,7 @@ public class AgentController extends ControllerHelper {
             }
         }
         catch (ClassCastException e) {
-            log.error("E018 : An error occurred when casting agent id");
+            log.error("An error occurred when casting agent id");
             badRequest(request);
         }
     }

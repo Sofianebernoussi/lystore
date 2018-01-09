@@ -79,7 +79,7 @@ public class SupplierController extends ControllerHelper {
                                     request.params().get("id"),
                                     body));
                 } catch (ClassCastException e) {
-                    log.error("E016 : An error occurred when casting supplier id");
+                    log.error("An error occurred when casting supplier id");
                     badRequest(request);
                 }
             }
@@ -109,7 +109,7 @@ public class SupplierController extends ControllerHelper {
             }
         }
         catch (ClassCastException e) {
-            log.error("E019 : An error occurred when casting supplier id");
+            log.error("An error occurred when casting supplier id");
             badRequest(request);
         }
     }

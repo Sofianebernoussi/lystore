@@ -35,7 +35,7 @@
                         <span class="eight cell">
                             <select ng-model="equipment.id_tax" class="twelve"
                                     ng-init="equipment.id_tax = equipment.id_tax || (taxes.all.length > 0 ? taxes.all[0].id : null)"
-                                    ng-options="tax.id as tax.value for tax in taxes.all" required></select>
+                                    ng-options="tax.id as tax.value + '%' for tax in taxes.all" required></select>
                         </span>
                     </label>
                     <label class="five twelve-mobile horizontal-spacing vertical-spacing cell">

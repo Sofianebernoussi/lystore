@@ -235,6 +235,7 @@ export const configurationController = ng.controller('configurationController',
             if (!_.contains($scope.equipment.tags, tag)) {
                 $scope.equipment.tags.push(tag);
             }
+            delete $scope.equipment._tag;
         };
 
         $scope.removeTagToEquipment = (tag: Tag) => {

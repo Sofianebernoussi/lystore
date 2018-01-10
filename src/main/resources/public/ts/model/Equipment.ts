@@ -116,7 +116,9 @@ export class Equipments extends Selection<Equipment> {
                 equipment.options !== [null] && equipment.options[0] !== null ? equipment.options = Mix.castArrayAs(EquipmentOption, equipment.options) : equipment.options = [];
             });
             this.all.map((equipment) =>
-                equipment.technical_specs = Mix.castArrayAs(TechnicalSpec, Utils.parsePostgreSQLJson(equipment.technical_specs.toString())));
+                equipment.technical_specs = equipment.technical_specs !== null
+                    ? Mix.castArrayAs(TechnicalSpec, Utils.parsePostgreSQLJson(equipment.technical_specs.toString()))
+                    : equipment.technical_specs);
         } catch (e) {
             notify.error('lystore.equipment.sync.err');
         }

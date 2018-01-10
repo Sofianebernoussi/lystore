@@ -145,7 +145,7 @@ export class EquipmentOption   {
         return {
             name: this.name,
             price: parseFloat(this.price.toString()),
-            amount: parseInt(this.price.toString()),
+            amount: parseInt(this.amount.toString()),
             required : this.required,
             id_tax: this.id_tax
         }

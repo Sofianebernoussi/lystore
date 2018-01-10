@@ -132,6 +132,7 @@ export const configurationController = ng.controller('configurationController',
         };
 
         $scope.validContract = async (contract: Contract) => {
+            contract.end_date = moment(contract.start_date).add(1, 'y').format('YYYY-MM-DD');
             await contract.save();
             await $scope.contracts.sync(true);
             $scope.display.lightbox.contract = false;

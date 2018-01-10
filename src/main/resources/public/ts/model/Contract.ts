@@ -46,7 +46,7 @@ export class Contract implements Selectable {
             id_contract_type: this.id_contract_type,
             id_supplier: this.id_supplier,
             id_agent: this.id_agent,
-            end_date: moment(this.start_date).add(1, 'y').format('YYYY-MM-DD'),
+            end_date: moment(this.end_date).format('YYYY-MM-DD'),
             renewal_end: moment(this.end_date).add(this.nb_renewal, 'y').format('YYYY-MM-DD'),
             annual_min: this.annual_min_enabled ? parseFloat(this.annual_min.toString()) : null,
             annual_max: this.annual_max_enabled ? parseFloat(this.annual_max.toString()) : null,

@@ -9,8 +9,12 @@ Equipment,
 EquipmentOption,
 TechnicalSpec,
 COMBO_LABELS,
-Utils
+Utils,
 } from '../../model';
+import {Campaign} from "../../model/Campaign";
+
+
+
 
 export const configurationController = ng.controller('configurationController',
     ['$scope', ($scope) => {
@@ -21,7 +25,11 @@ export const configurationController = ng.controller('configurationController',
                 supplier: false,
                 contract: false,
                 tag: false,
-                equipment: false
+                equipment: false,
+                campaign : false
+            },
+            input : {
+                group : []
             }
         };
 
@@ -48,7 +56,8 @@ export const configurationController = ng.controller('configurationController',
             }
         };
 
-        $scope.search = {};
+        $scope.search = {
+        };
 
         $scope.openAgentForm = (agent: Agent = new Agent()) => {
             $scope.agent = new Agent();
@@ -331,5 +340,58 @@ export const configurationController = ng.controller('configurationController',
             let option = new EquipmentOption();
             $scope.equipment.options.push(option);
             Utils.safeApply($scope);
-        }
-    }]);
+        };
+
+        $scope.openCampaignForm =  (campaign: Campaign = new Campaign()) => {
+            let id = campaign.id ;
+            id ? $scope.redirectTo('/campaigns/update') :  $scope.redirectTo('/campaigns/create');
+            $scope.campaign = new Campaign();
+            Mix.extend($scope.campaign, campaign);
+            id?   $scope.updateSelectedCampaign(id):  null ;
+            Utils.safeApply($scope);
+        };
+
+        $scope.updateSelectedCampaign = async (id) => {
+            await $scope.tags.sync();
+            await $scope.campaign.sync(id,$scope.tags.all);
+            await $scope.structureGroups.sync();
+            $scope.structureGroups.all =  $scope.structureGroups.all.map((group)=>{
+                let Cgroup =  _.findWhere($scope.campaign.groups, {id: group.id});
+                if(Cgroup !== undefined){ group.selected = true ;group.tags = Cgroup.tags ;}
+                return group;
+            })
+        };
+        $scope.openCampaignsDeletion = () => {
+            template.open('campaign.lightbox', 'administrator/campaign/campaign-delete-validation');
+            $scope.display.lightbox.campaign = true;
+        };
+        $scope.validCampaignForm = (campaign: Campaign) => {
+            return campaign.name !== undefined
+                && campaign.name.trim() !== ''
+                && _.findWhere($scope.structureGroups.all, {selected: true}) !== undefined;
+        };
+
+        $scope.addTagToCampaign= (index) => {
+            $scope.structureGroups.all[index].tags.push($scope.search.tag[index]);
+            $scope.structureGroups.all[index].tags = _.uniq($scope.structureGroups.all[index].tags);
+            $scope.display.input.group[index] = false;
+            Utils.safeApply($scope);
+        };
+        $scope.deleteTagFromCampaign = (index,tag) => {
+            $scope.structureGroups.all[index].tags= _.without($scope.structureGroups.all[index].tags,tag);
+            Utils.safeApply($scope);
+        };
+        $scope.validCampaign = async(campaign : Campaign) => {
+            campaign.groups = $scope.structureGroups.selected;
+            await campaign.save();
+            $scope.redirectTo('/campaigns');
+            Utils.safeApply($scope);
+        };
+        $scope.deleteCampaigns = async (campaigns) => {
+            await $scope.campaigns.delete(campaigns);
+            await $scope.campaigns.sync();
+            $scope.allCampaignSelected = false;
+            $scope.display.lightbox.campaign = false;
+            Utils.safeApply($scope);
+        };
+ }]);

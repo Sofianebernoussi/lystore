@@ -24,6 +24,7 @@ public class Lystore extends BaseServer {
         addController(new EquipmentController());
         addController(new TaxController());
         addController(new LogController());
+        addController(new CampaignController());
 	}
 
 }

@@ -5,11 +5,22 @@ export const Switch = ng.directive('switch', () => {
         restrict: 'E',
         scope: {
             ngModel: '=',
-            disabled: '@'
+            ngChange: '&',
+            ngDisabled: '@'
         },
         template: '<label class="switch">' +
-        '<input type="checkbox" ng-model="ngModel" ng-disabled="disabled"/>' +
+        '<input type="checkbox" ng-model="ngModel" ng-change="valueChange()" ng-disabled="ngDisabled"/>' +
         '<span class="tick"></span>' +
-        '</label>'
+        '</label>',
+        link: function ($scope, $element, $attrs, ngModel)
+        {
+            $scope.valueChange = function()
+            {
+                setTimeout(function()
+                {
+                    if ($attrs.ngChange) $scope.$parent.$eval($attrs.ngChange);
+                }, 0);
+            };
+        }
     }
 });

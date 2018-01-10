@@ -7,7 +7,6 @@ export class Tag implements Selectable {
     selected: boolean;
     id?: number;
     name: string;
-
     color: string;
     nb_equipments: number;
 
@@ -54,6 +53,7 @@ export class Tag implements Selectable {
             notify.error('lystore.tag.delete.err');
         }
     }
+    toString = () => {return this.name ;}
 }
 
 export class Tags extends Selection<Tag> {

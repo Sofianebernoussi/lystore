@@ -1,0 +1,44 @@
+
+<div workflow="lystore.administrator">
+    <input type="button"  ng-click="openCampaignForm()" class="right-magnet" i18n-value="lystore.campaigns.add"/>
+</div>
+<div class="twelve cell"  workflow="lystore.manager">
+    <article class="twelve cell " ng-repeat="campaign in campaigns.all track by $index ">
+        <div class="twelve cell" workflow="lystore.administrator">
+            <label class="checkbox">
+                <input type="checkbox" ng-model="campaign.selected" >
+                <span></span>
+            </label>
+        </div>
+        <card class="two cell">
+            <img ng-src="[[campaign.image]]">
+            </img>
+        </card>
+        <div class="nine cell right-magnet">
+            <h3>[[campaign.name]]</h3>
+            <p> [[campaign.nb_structures]] <i18n>structures</i18n> </p>
+            <p> [[campaign.nb_equipments]] <i18n>lystore.equipments.available</i18n> </p>
+            <div class="right-magnet" workflow="lystore.administrator">
+                <switch ng-model="campaign.accessible" ng-change="campaign.updateAccessibility()"></switch>
+            </div>
+        </div>
+
+    </article>
+</div>
+
+<lightbox on-close="display.lightbox.campaign = false;"
+          show="display.lightbox.campaign"
+          workflow="lystore.administrator">
+    <container template="campaign.lightbox"></container>
+</lightbox>
+
+<section class="toggle-buttons" ng-class="{ hide: campaigns.selected.length === 0 }" workflow="lystore.administrator">
+    <div class="toggle">
+        <div class="row">
+            <button ng-click="openCampaignForm(campaigns.selected[0])" ng-show="campaigns.selected.length === 1">
+                <i18n>modify</i18n>
+            </button>
+            <button ng-click="openCampaignsDeletion()"><i18n>delete</i18n></button>
+        </div>
+    </div>
+</section>

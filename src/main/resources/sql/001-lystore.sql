@@ -141,3 +141,47 @@ CREATE TABLE lystore.logs (
   item text,
   CONSTRAINT logs_pkey PRIMARY KEY (id)
 );
+
+	CREATE TABLE lystore.structure_group
+(
+    id bigserial NOT NULL,
+    name character varying NOT NULL,
+    description text,
+    CONSTRAINT structure_group_pkey PRIMARY KEY (id)
+);
+
+	CREATE TABLE lystore.campaign
+(
+    id bigserial NOT NULL,
+    name character varying(255) NOT NULL,
+    description text,
+    image character varying(100),
+    accessible boolean NOT NULL,
+    CONSTRAINT campaign_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE lystore.rel_group_campaign
+(
+    id_campaign bigint NOT NULL,
+    id_structure_group bigint NOT NULL,
+    id_tag bigint NOT NULL,
+    CONSTRAINT fk_campaign_id FOREIGN KEY (id_campaign)
+        REFERENCES lystore.campaign (id) MATCH SIMPLE
+        ON UPDATE NO ACTION ON DELETE NO ACTION,
+    CONSTRAINT fk_structure_group FOREIGN KEY (id_structure_group)
+        REFERENCES lystore.structure_group (id) MATCH SIMPLE
+        ON UPDATE NO ACTION ON DELETE NO ACTION,
+    CONSTRAINT fk_tag_id FOREIGN KEY (id_tag)
+        REFERENCES lystore.tag (id) MATCH SIMPLE
+        ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+CREATE TABLE lystore.rel_group_structure
+(
+    id_structure character varying(50) NOT NULL,
+    id_structure_group bigint NOT NULL,
+    CONSTRAINT rel_structure_group_pkey PRIMARY KEY (id_structure, id_structure_group),
+    CONSTRAINT fk_id_structure_group FOREIGN KEY (id_structure_group)
+        REFERENCES lystore.structure_group (id) MATCH SIMPLE
+        ON UPDATE NO ACTION ON DELETE NO ACTION
+);

@@ -71,6 +71,10 @@ body.lystore {
   .overflow-y {
     overflow-y: auto;
   }
+  .labels-in-ligne{
+    display: inline-flex;
+  }
+
 
   .technical-specs {
     border: solid 1px $neutral-grey;

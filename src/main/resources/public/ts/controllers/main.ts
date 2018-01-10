@@ -10,6 +10,8 @@ import {
     Equipments,
     Taxes,
     Logs,
+    StructureGroups,
+    Campaigns,
     Utils
 } from '../model';
 
@@ -25,6 +27,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.contracts = new Contracts();
         $scope.tags = new Tags();
         $scope.equipments = new Equipments();
+        $scope.campaigns = new Campaigns();
+        $scope.structureGroups = new StructureGroups();
         $scope.taxes = new Taxes();
         $scope.logs = new Logs();
         $scope.structures.sync().then(() => {
@@ -77,6 +81,26 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.logs.reset();
                 template.open('administrator-main', 'administrator/log/view-logs');
                 Utils.safeApply($scope);
+            },
+            manageCampaigns: async () => {
+                template.open('administrator-main','administrator/campaign/campaign_container');
+                template.open('campaigns-main', 'administrator/campaign/manage-campaign');
+                await $scope.campaigns.sync();
+
+                Utils.safeApply($scope);
+            },
+            createCampaigns: async () => {
+                template.open('campaigns-main','administrator/campaign/campaign_form');
+                await $scope.tags.sync();
+                await $scope.structureGroups.sync();
+                Utils.safeApply($scope);
+            },
+            updateCampaigns: async () => {
+                template.open('campaigns-main','administrator/campaign/campaign_form');
+                Utils.safeApply($scope);
+            },
+            structuregroups: async () => {
+                template.open('','')
             }
         });
 

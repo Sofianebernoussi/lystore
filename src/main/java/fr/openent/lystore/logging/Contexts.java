@@ -5,7 +5,8 @@ public enum Contexts {
     SUPPLIER  ("SUPPLIER"),
     CONTRACT ("CONTRACT"),
     TAG ("TAG"),
-    EQUIPMENT ("EQUIPMENT");
+    EQUIPMENT ("EQUIPMENT"),
+    CAMPAIGN ("CAMPAIGN");
 
     private final String contextName;
 

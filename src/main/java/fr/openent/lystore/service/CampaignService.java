@@ -39,7 +39,7 @@ public interface CampaignService {
     /**
      * Update an accessibility campaign
      * @param id campaign id to update
-     * @param accessible campaign accessibility
+     * @param campaign campaign object
      * @param handler function handler returning data
      */
     public void updateAccessibility(Integer id, JsonObject campaign , Handler<Either<String, JsonObject>> handler);

@@ -333,8 +333,8 @@ export const configurationController = ng.controller('configurationController',
             Utils.safeApply($scope);
         };
 
-        $scope.calculatePrice = (price,amount) => {
-            return price * amount;
+        $scope.calculatePrice = (price ,amount ) => {
+            return (( price + ((price *  amount)/100)).toString());
         };
         $scope.addOptionLigne = () => {
             let option = new EquipmentOption();

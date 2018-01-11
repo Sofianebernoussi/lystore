@@ -26,7 +26,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     }
 
     public void listEquipments(Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT e.*,  array_to_json(array_agg(opts)) as options , array_to_json((" +
+        String query = "SELECT e.*, tax.value tax_amount, array_to_json(array_agg(opts)) as options , array_to_json((" +
                 "SELECT array_agg(id_tag) " +
                 "FROM " + Lystore.LYSTORE_SCHEMA + ".equipment " +
                 "INNER JOIN " + Lystore.LYSTORE_SCHEMA + ".rel_equipment_tag ON (equipment.id = rel_equipment_tag.id_equipment) " +
@@ -34,7 +34,8 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 ")) as tags " +
                 "FROM " + Lystore.LYSTORE_SCHEMA + ".equipment e " +
                 "Left join " + Lystore.LYSTORE_SCHEMA + ".equipment_option opts ON opts.id_equipment = e.id " +
-                "group by (e.id)";
+                "INNER JOIN " + Lystore.LYSTORE_SCHEMA + ".tax on tax.id = e.id_tax "+
+                "group by (e.id, tax.id)";
 
         sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
     }

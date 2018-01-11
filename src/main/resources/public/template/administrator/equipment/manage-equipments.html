@@ -75,7 +75,7 @@
                 </label>
             </td>
             <td>[[ equipment.name ]]</td>
-            <td><span ng-bind="equipment.price | currency:'€'"></span></td>
+            <td>[[calculatePrice(equipment.price, equipment.tax_amount) ]] €</td>
             <td>[[ contracts.get(equipment.id_contract).supplier_display_name ]]</td>
             <td>[[ contracts.get(equipment.id_contract).name ]]</td>
             <td>[[ lang.translate('lystore.' + equipment.status) ]]</td>

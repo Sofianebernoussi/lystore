@@ -15,7 +15,7 @@ export class Equipment implements Selectable {
     image: string;
     technical_specs: TechnicalSpec[];
     tags: Tag[];
-
+    tax_amount: number;
     selected: boolean;
     options : EquipmentOption[];
 
@@ -111,6 +111,8 @@ export class Equipments extends Selection<Equipment> {
             let { data } = await http.get(`/lystore/equipments`);
             this.all = Mix.castArrayAs(Equipment, data);
             this.all.map((equipment) => {
+                equipment.price = parseFloat(equipment.price.toString());
+                equipment.tax_amount = parseFloat(equipment.tax_amount.toString());
                 equipment.tags = equipment.tags !== null ? JSON.parse(equipment.tags.toString()) : [];
                 equipment.options = JSON.parse(equipment.options.toString()) ;
                 equipment.options !== [null] && equipment.options[0] !== null ? equipment.options = Mix.castArrayAs(EquipmentOption, equipment.options) : equipment.options = [];

@@ -95,17 +95,17 @@
                             <td class="two"><i18n>name</i18n></td>
                             <td class="two"><i18n>lystore.unit.price.ht</i18n></td>
                             <td class="two"><i18n>lystore.amount</i18n></td>
-                            <td class="ona aligne-text-center"><i18n>lystore.price</i18n></td>
+                            <td class="one aligne-text-center "><i18n>lystore.price.TTC</i18n></td>
                             <td class="two"><i18n>lystore.tax</i18n></td>
-                            <td class="two aligne-text-center"><i18n>lystore.required</i18n></td>
+                            <td class="two "><i18n>lystore.required</i18n></td>
                             <td class="one aligne-text-center">&nbsp;</td>
                         </thead>
                         <tbody>
                             <tr ng-repeat="option in equipment.options track by $index ">
                                 <td class="two"><input type="text" class="twelve"  ng-model="option.name"/></td>
-                                <td class="two"><input type="text" class="twelve"  ng-model="option.price"/></td>
-                                <td class="one"><input type="text" class="twelve"  ng-model="option.amount"/></td>
-                                <td class="two aligne-text-center">[[calculatePriceOption(option.price,option.amount)]]</td>
+                                <td class="two"><input type="number" class="twelve"  ng-model="option.price"/></td>
+                                <td class="one"><input type="text" ng-model="option.amount" integer-input class="twelve"/></td>
+                                <td class="two aligne-text-center">[[ calculatePriceOption(option.price,option.id_tax,option.amount) ]]</td>
                                 <td class="two">
                                     <select ng-model="option.id_tax" class="twelve"
                                             ng-init="option.id_tax = option.id_tax || (taxes.all.length > 0 ? taxes.all[0].id : null)"

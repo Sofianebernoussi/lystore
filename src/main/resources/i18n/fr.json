@@ -52,6 +52,7 @@
   "lystore.equipment.delete": "Êtes-vous sur de vouloir supprimer le(s) équipment(s) : ",
   "lystore.tax": "TVA",
   "lystore.price": "Prix (HT)",
+  "lystore.price.TTC": "Prix (TTC)",
   "lystore.information": "Informations",
   "lystore.availability": "Disponibilité",
   "lystore.AVAILABLE": "Disponible",

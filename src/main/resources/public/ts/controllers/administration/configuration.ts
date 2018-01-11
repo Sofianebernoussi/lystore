@@ -333,11 +333,21 @@ export const configurationController = ng.controller('configurationController',
             Utils.safeApply($scope);
         };
 
-        $scope.calculatePriceTTC = (price ,amount ) => {
-            return (( price + ((price *  amount)/100)));
+        $scope.calculatePriceTTC = (price ,tax_value ) => {
+            let priceFloat = parseFloat(price);
+            let taxFloat = parseFloat(tax_value);
+            let price_TTC = (( priceFloat + ((priceFloat *  taxFloat)/100)));
+            if(!isNaN(price_TTC)) return price_TTC; else return "";
         };
-        $scope.calculatePriceOption = (price ,amount ) => {
-            return (price* amount);
+        $scope.calculatePriceOption = (price ,tax_id,amount ) => {
+            let tax_value= parseFloat(_.findWhere($scope.taxes.all,{id: tax_id}).value) ;
+            if(tax_value!= undefined ){
+                let priceFloat = parseFloat(price);
+                let price_TTC = $scope.calculatePriceTTC(priceFloat,tax_value);
+                let Price_TTC_QTe =  (price_TTC * parseFloat(amount));
+                if(!isNaN(Price_TTC_QTe) && price_TTC !== "") return Price_TTC_QTe ; else return "";
+            }else
+                return NaN;
         };
         $scope.addOptionLigne = () => {
             let option = new EquipmentOption();

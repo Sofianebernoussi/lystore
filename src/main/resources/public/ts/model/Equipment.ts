@@ -139,7 +139,7 @@ export class EquipmentOption   {
     constructor () {
         this.name ="";
         this.amount = 1;
-        this.required = false;
+        this.required = true;
 
     }
 

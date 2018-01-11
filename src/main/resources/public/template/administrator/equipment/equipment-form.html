@@ -105,7 +105,7 @@
                                 <td class="two"><input type="text" class="twelve"  ng-model="option.name"/></td>
                                 <td class="two"><input type="text" class="twelve"  ng-model="option.price"/></td>
                                 <td class="one"><input type="text" class="twelve"  ng-model="option.amount"/></td>
-                                <td class="two aligne-text-center">[[calculatePrice(option.price,option.amount)]]</td>
+                                <td class="two aligne-text-center">[[calculatePriceOption(option.price,option.amount)]]</td>
                                 <td class="two">
                                     <select ng-model="option.id_tax" class="twelve"
                                             ng-init="option.id_tax = option.id_tax || (taxes.all.length > 0 ? taxes.all[0].id : null)"

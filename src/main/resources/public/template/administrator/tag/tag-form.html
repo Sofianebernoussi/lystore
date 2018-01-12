@@ -1,4 +1,5 @@
-<h2><i18n>lystore.tag.add</i18n></h2>
+<h2><i18n ng-show="tag.id == undefined">lystore.tag.add</i18n><i18n ng-show="tag.id !== undefined">lystore.tag.modify</i18n></h2>
+
 <form ng-submit="validTag(tag)">
     <div class="row">
         <label class="cell twelve">

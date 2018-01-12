@@ -1,6 +1,7 @@
 <div class="row ten centered"  workflow="lystore.administrator">
     <h1>
-        <i18n>lystore.campaigns.add</i18n>
+        <i18n ng-show="campaign.id == undefined">lystore.campaigns.add</i18n>
+        <i18n ng-show="campaign.id !== undefined">lystore.campaigns.modify</i18n>
     </h1>
     <article>
         <form >

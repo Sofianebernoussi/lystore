@@ -1,4 +1,4 @@
-<h2><i18n>lystore.agent.add</i18n></h2>
+<h2><i18n ng-show="agent.id == undefined">lystore.agent.add</i18n><i18n ng-show="agent.id !== undefined">lystore.agent.modify</i18n></h2>
 <form ng-submit="validAgent(agent)">
     <div class="row">
         <label class="cell twelve">

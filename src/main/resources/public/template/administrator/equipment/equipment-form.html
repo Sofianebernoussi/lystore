@@ -1,6 +1,7 @@
 <div class="row ten centered">
     <h1>
-        <i18n>lystore.equipment.add</i18n>
+        <i18n ng-show="equipment.id == undefined">lystore.equipment.add</i18n>
+        <i18n ng-show="equipment.id !== undefined">lystore.equipment.modify</i18n>
     </h1>
     <article>
         <form >

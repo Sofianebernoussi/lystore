@@ -1,5 +1,6 @@
 <h1>
-    <i18n>lystore.contract.add</i18n>
+    <i18n ng-show="contract.id == undefined">lystore.contract.add</i18n>
+    <i18n ng-show="contract.id !== undefined">lystore.contract.modify</i18n>
 </h1>
 <form ng-submit="validContract(contract)">
     <div class="row">

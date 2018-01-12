@@ -62,7 +62,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
             manageEquipmentTags: async () => {
                 template.open('administrator-main', 'administrator/tag/manage-tags');
-                await $scope.tags.sync();
+                await $scope.tags.sync(true);
                 Utils.safeApply($scope);
             },
             manageEquipments: async () => {

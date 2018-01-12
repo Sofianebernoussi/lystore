@@ -1,4 +1,4 @@
-<h2><i18n>lystore.supplier.add</i18n></h2>
+<h2><i18n ng-show="supplier.id == undefined">lystore.supplier.add</i18n><i18n ng-show="supplier.id !== undefined">lystore.supplier.modify</i18n></h2>
 <form ng-submit="validSupplier(supplier)">
     <div class="row">
         <label class="cell twelve">

@@ -84,7 +84,7 @@ public class LogController extends ControllerHelper {
                 log.getString("action") + ";" +
                 I18n.getInstance().translate(log.getString("context"), getHost(request), I18n.acceptLanguage(request)) + ";" +
                 log.getString("item") + ";" +
-                (log.getString("value") != null ? log.getString("value") : "")
+                (log.getString("value") != null ? log.getString("value").replace("\\\"", "\"") : "")
                 + "\n";
     }
 }

@@ -56,14 +56,18 @@
                                     <span></span>
                                 </label></td>
                             <td class="tree">[[group.name]]</td>
-                            <td class="eight labels-in-ligne">
-
+                            <td class="label-row">
                                     <div class="select-blocks"  ng-show="group.selected" >
                                         <div ng-repeat="tag in group.tags track by tag.id"
-                                             ng-click="deleteTagFromCampaign($parent.$index, tag)">[[ tag.name ]]</div>
+                                             ng-click="deleteTagFromCampaign($parent.$index, tag)"
+                                             class="labels-in-ligne">
+                                              <div><span class="color-tag" ng-style="{ 'background-color': tag.color }">
+                                                &nbsp;
+                                              </span></div>
+                                            <div>[[ tag.name ]]</div></div>
                                     </div>
-                                    <autocomplete class="two"
-                                                  options="tags.all"
+                                    <autocomplete
+                                                  options="tags.all|tagFilter:group.tags"
                                                   ng-model="search.tag[$index]"
                                                   ng-change="addTagToCampaign($index)"
                                                   ng-show="display.input.group[$index] && group.selected" >

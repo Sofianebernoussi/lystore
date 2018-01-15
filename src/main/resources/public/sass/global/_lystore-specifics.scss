@@ -73,8 +73,24 @@ body.lystore {
   }
   .labels-in-ligne{
     display: inline-flex;
+
+    div{
+      margin-left: 2px;
+      display: inline-table;
+      margin-right: 2px;
+    }
   }
 
+.label-row{
+  display: inline-flex;
+  input{
+    margin-top: 10%;
+    margin-left: 5%;
+  }
+  .row{
+    width: auto !important;
+  }
+}
 
   .technical-specs {
     border: solid 1px $neutral-grey;

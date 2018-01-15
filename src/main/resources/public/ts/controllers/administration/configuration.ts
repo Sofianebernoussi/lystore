@@ -9,12 +9,9 @@ Equipment,
 EquipmentOption,
 TechnicalSpec,
 COMBO_LABELS,
+Campaign,
 Utils,
 } from '../../model';
-import {Campaign} from "../../model/Campaign";
-
-
-
 
 export const configurationController = ng.controller('configurationController',
     ['$scope', ($scope) => {
@@ -290,11 +287,6 @@ export const configurationController = ng.controller('configurationController',
             $scope.redirectTo('/equipments');
             Utils.safeApply($scope);
         };
-
-        $scope.tagFilter = function (tag) {
-            return _.findWhere($scope.equipment.tags, { id : tag.id }) === undefined;
-        };
-
         $scope.openEquipmentsDeletion = () => {
             template.open('equipment.lightbox', 'administrator/equipment/equipment-delete-validation');
             $scope.display.lightbox.equipment = true;

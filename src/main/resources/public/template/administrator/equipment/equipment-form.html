@@ -136,12 +136,18 @@
                         <div class="row">
                             <select ng-model="equipment._tag" class="six"
                                     ng-change="addTagToEquipment(equipment._tag)"
-                                    ng-options="tag as tag.name for tag in tags.all | filter:tagFilter"></select>
+                                    ng-options="tag as tag.name for tag in tags.all |tagFilter:equipment.tags"></select>
                         </div>
                         <div class="row">
                             <div class="select-blocks">
                                 <div ng-repeat="tag in equipment.tags"
-                                     ng-click="removeTagToEquipment(tag)">[[ tag.name ]]</div>
+                                     ng-click="removeTagToEquipment(tag)"
+                                     class="labels-in-ligne">
+                                    <span class="color-tag" ng-style="{ 'background-color': tag.color }">
+                                        &nbsp;
+                                    </span>
+                                    <div > [[ tag.name ]] </div>
+                                </div>
                             </div>
                         </div>
                     </div>

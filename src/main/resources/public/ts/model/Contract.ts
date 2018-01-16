@@ -26,15 +26,21 @@ export class Contract implements Selectable {
 
     constructor (name?: string, reference?: string, annual_min?: number, annual_max?: number,
                  start_date?: string | Date, max_brink?: number) {
-        if (name) this.name = name;
-        if (reference) this.reference = reference;
-        if (annual_min) this.annual_min = annual_min;
-        this.annual_min_enabled = this.annual_min !== undefined;
-        if (annual_max) this.annual_max = annual_max;
-        this.annual_max_enabled = this.annual_max !== undefined;
-        if (start_date) this.start_date = start_date;
-        if (max_brink) this.max_brink = max_brink;
-        this.max_brink_enabled = this.max_brink !== undefined;
+        if ( name ) this.name = name;
+        if ( reference ) this.reference = reference;
+        if ( annual_min ) {
+            this.annual_min = annual_min;
+            this.annual_min_enabled = true;
+        }
+        if ( annual_max ) {
+            this.annual_max = annual_max;
+            this.annual_max_enabled = true;
+        }
+        if ( max_brink ) {
+            this.max_brink = max_brink;
+            this.max_brink_enabled =true;
+        }
+        if ( start_date ) this.start_date = start_date;
     }
 
     toJson() {
@@ -48,12 +54,13 @@ export class Contract implements Selectable {
             id_agent: this.id_agent,
             end_date: moment(this.end_date).format('YYYY-MM-DD'),
             renewal_end: moment(this.end_date).add(this.nb_renewal, 'y').format('YYYY-MM-DD'),
-            annual_min: this.annual_min_enabled ? parseFloat(this.annual_min.toString()) : null,
-            annual_max: this.annual_max_enabled ? parseFloat(this.annual_max.toString()) : null,
-            max_brink: this.max_brink_enabled ? parseFloat(this.max_brink.toString()) : null,
+            annual_min: this.annual_min_enabled && this.annual_min!== null ? parseFloat(this.annual_min.toString()) : null,
+            annual_max: this.annual_max_enabled && this.annual_max!== null ? parseFloat(this.annual_max.toString()) : null,
+            max_brink: this.max_brink_enabled && this.max_brink!== null ? parseFloat(this.max_brink.toString()) : null,
             id_program: this.id_program || null
         };
     }
+
 
     async save (): Promise<void> {
         if (this.id) {
@@ -87,6 +94,11 @@ export class Contract implements Selectable {
             notify.error('lystore.contract.delete.err');
         }
     }
+    syncBooleans = async () => {
+        this.annual_min_enabled = this.annual_min !== undefined && this.annual_min !== null ;
+        this.annual_max_enabled = this.annual_max !== undefined && this.annual_max !== null;
+        this.max_brink_enabled = this.max_brink !== undefined && this.max_brink !== null;
+    };
 }
 
 export class Contracts extends Selection<Contract> {
@@ -102,7 +114,7 @@ export class Contracts extends Selection<Contract> {
     async sync (force: boolean) {
         if (this.provider.isSynced) this.provider.isSynced = !force;
         this.all = await this.provider.data();
-        this.all.map((contract) => this.mapping[contract.id] = contract);
+        this.all.map((contract) => this.mapping[contract.id] = Mix.castAs(Contract,contract) );
     }
 
     async delete (contracts: Contract[]): Promise<void> {

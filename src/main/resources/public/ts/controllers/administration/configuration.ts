@@ -129,6 +129,7 @@ export const configurationController = ng.controller('configurationController',
         };
 
         $scope.openContractForm = (contract: Contract = new Contract()) => {
+            if(contract) contract.syncBooleans();
             $scope.contract = new Contract();
             Mix.extend($scope.contract, contract);
             $scope.contract.start_date = (contract !== undefined ? moment(contract.start_date) : new Date());

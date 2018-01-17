@@ -127,11 +127,11 @@ public class CampaignController extends ControllerHelper {
             List<String> params = request.params().getAll("id");
             if (params.size() > 0) {
                 List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
-                campaignService.delete(ids, Logging.defaultResponseHandler(eb,
+                campaignService.delete(ids, Logging.defaultResponsesHandler(eb,
                         request,
                         Contexts.CAMPAIGN.toString(),
                         Actions.DELETE.toString(),
-                        Logging.mergeItemsIds(params),
+                        params,
                         null));
             } else {
                 badRequest(request);

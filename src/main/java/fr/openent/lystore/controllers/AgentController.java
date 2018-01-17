@@ -7,6 +7,7 @@ import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.service.AgentService;
 import fr.openent.lystore.service.impl.DefaultAgentService;
+import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -93,15 +94,12 @@ public class AgentController extends ControllerHelper {
         try{
             List<String> params = request.params().getAll("id");
             if (params.size() > 0) {
-                List<Integer> ids = new ArrayList<Integer>();
-                for (String param : params) {
-                    ids.add(Integer.parseInt(param));
-                }
-                agentService.deleteAgent(ids, Logging.defaultResponseHandler(eb,
+                List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
+                agentService.deleteAgent(ids, Logging.defaultResponsesHandler(eb,
                         request,
                         Contexts.AGENT.toString(),
                         Actions.DELETE.toString(),
-                        Logging.mergeItemsIds(params),
+                        params,
                         null));
             } else {
                 badRequest(request);

@@ -7,6 +7,7 @@ import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.service.SupplierService;
 import fr.openent.lystore.service.impl.DefaultSupplierService;
+import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -94,15 +95,12 @@ public class SupplierController extends ControllerHelper {
         try{
             List<String> params = request.params().getAll("id");
             if (params.size() > 0) {
-                List<Integer> ids = new ArrayList<Integer>();
-                for (String param : params) {
-                    ids.add(Integer.parseInt(param));
-                }
-                supplierService.deleteSupplier(ids, Logging.defaultResponseHandler(eb,
+                List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
+                supplierService.deleteSupplier(ids, Logging.defaultResponsesHandler(eb,
                         request,
                         Contexts.SUPPLIER.toString(),
                         Actions.DELETE.toString(),
-                        Logging.mergeItemsIds(params),
+                        params,
                         null));
             } else {
                 badRequest(request);

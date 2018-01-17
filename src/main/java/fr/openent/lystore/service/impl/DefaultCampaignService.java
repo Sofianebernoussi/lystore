@@ -165,8 +165,8 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
      * @return Update statement
      */
     private JsonObject getCampaignUpdateStatement(Number id, JsonObject campaign) {
-        String query = "UPDATE " + Lystore.LYSTORE_SCHEMA + ".campaign SET " +
-                "name=?, description=?, image=? " +
+        String query = "UPDATE " + Lystore.LYSTORE_SCHEMA + ".campaign " +
+                "SET  name=?, description=?, image=? " +
                 "WHERE id = ?";
 
         JsonArray params = new JsonArray()
@@ -182,13 +182,15 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
     }
     private JsonObject getCampaignCreationStatement(Number id, JsonObject campaign) {
         String insertCampaignQuery =
-                "INSERT INTO " + Lystore.LYSTORE_SCHEMA + ".campaign( id, name, description,image )"+
-                        "VALUES (?, ?, ?, ?) RETURNING id;";
+                "INSERT INTO " + Lystore.LYSTORE_SCHEMA + ".campaign(id, name, description, image, accessible )"+
+                        "VALUES (?, ?, ?, ?, ?) RETURNING id; ";
         JsonArray params = new JsonArray()
                 .addNumber(id)
                 .addString(campaign.getString("name"))
                 .addString(campaign.getString("description"))
-                .addString(campaign.getString("image")) ;
+                .addString(campaign.getString("image"))
+                .addBoolean(campaign.getBoolean("accessible"))
+                ;
 
         return new JsonObject()
                 .putString("statement", insertCampaignQuery)

@@ -8,6 +8,7 @@ import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.ContractService;
 import fr.openent.lystore.service.impl.DefaultContractService;
+import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -92,15 +93,12 @@ public class ContractController extends ControllerHelper {
         try{
             List<String> params = request.params().getAll("id");
             if (params.size() > 0) {
-                List<Integer> ids = new ArrayList<Integer>();
-                for (String param : params) {
-                    ids.add(Integer.parseInt(param));
-                }
-                contractService.deleteContract(ids, Logging.defaultResponseHandler(eb,
+                List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
+                contractService.deleteContract(ids, Logging.defaultResponsesHandler(eb,
                         request,
                         Contexts.CONTRACT.toString(),
                         Actions.DELETE.toString(),
-                        Logging.mergeItemsIds(params),
+                        params,
                         null));
             } else {
                 badRequest(request);

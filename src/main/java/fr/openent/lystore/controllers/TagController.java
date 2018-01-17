@@ -88,11 +88,11 @@ public class TagController extends ControllerHelper {
             List<String> params = request.params().getAll("id");
             if (params.size() > 0) {
                 List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
-                tagService.delete(ids, Logging.defaultResponseHandler(eb,
+                tagService.delete(ids, Logging.defaultResponsesHandler(eb,
                         request,
                         Contexts.TAG.toString(),
                         Actions.DELETE.toString(),
-                        Logging.mergeItemsIds(params),
+                        params,
                         null));
             } else {
                 badRequest(request);

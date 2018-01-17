@@ -10,7 +10,12 @@ import org.vertx.java.core.json.JsonArray;
 
 public class DefaultLogService implements LogService {
     public void list(Integer page, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + Lystore.LYSTORE_SCHEMA + ".logs";
+        String query = "SELECT id, date, action, context , CASE " +
+                " WHEN value is null THEN "+
+                " (SELECT value FROM " + Lystore.LYSTORE_SCHEMA + ".logs where logs.item = log.item AND logs.context = log.context AND logs.value is not null  ORDER BY date DESC  LIMIT 1)::json " +
+                " ELSE value END, " +
+                " id_user, username, item "+
+                "FROM " + Lystore.LYSTORE_SCHEMA + ".logs log ";
         JsonArray params = new JsonArray();
 
         if (page != null) {

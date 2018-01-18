@@ -2,36 +2,5 @@
     <i18n>lystore.title</i18n>
 </h1>
 
-<div class="twelve tabs vertical-spacing heading-tabs">
-    <header class="horizontal-spacing">
-        <drop-down-menu title="[[lang.translate('lystore.orders')]]">
-            <opt><i18n>lystore.orders.validations.waiting</i18n></opt>
-            <opt><i18n>lystore.order.form.generate</i18n></opt>
-            <opt><i18n>lystore.end.expedited.requests</i18n></opt>
-        </drop-down-menu>
-    </header>
-    <header class="horizontal-spacing">
-        <drop-down-menu title="[[lang.translate('lystore.equipments')]]">
-            <opt ng-click="redirectTo('/tags')"><i18n>lystore.tag.management</i18n></opt>
-            <opt ng-click="redirectTo('/equipments')"><i18n>lystore.catalog.management</i18n></opt>
-        </drop-down-menu></header>
-    <header class="horizontal-spacing">
-        <drop-down-menu title="[[lang.translate('lystore.campaigns')]]">
-            <opt ng-click="redirectTo('/campaigns')"><i18n>lystore.manage.campaigns</i18n></opt>
-            <opt ng-click="redirectTo('/structuregroups')"><i18n>lystore.manage.structure.groups</i18n></opt>
-        </drop-down-menu>
-    </header>
-    <header class="horizontal-spacing">
-        <drop-down-menu title="[[lang.translate('lystore.contracts')]]">
-            <opt ng-click="redirectTo('/suppliers')"><i18n>lystore.suppliers.management</i18n></opt>
-            <opt ng-click="redirectTo('/contracts')"><i18n>lystore.contracts.management</i18n></opt>
-            <opt ng-click="redirectTo('/agents')"><i18n>lystore.agents.management</i18n></opt>
-        </drop-down-menu>
-    </header>
-    <header class="horizontal-spacing" ng-click="redirectTo('/logs')"
-            workflow="lystore.administrator">
-        <i18n>lystore.logs</i18n>
-    </header>
-</div>
+<container template="profil-main"></container>
 
-<container template="administrator-main"></container>

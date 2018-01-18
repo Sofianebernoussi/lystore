@@ -1,6 +1,7 @@
 package fr.openent.lystore.service;
 
 import fr.wseduc.webutils.Either;
+import org.entcore.common.user.UserInfos;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -14,7 +15,7 @@ public interface CampaignService {
      * List all campaigns in database
      * @param handler function handler returning data
      */
-   public void listCampaigns(Handler<Either<String, JsonArray>> handler);
+   public void listCampaigns(UserInfos user, Handler<Either<String, JsonArray>> handler);
     /**
      * Get a campaign information
      * @param id id campaign to get

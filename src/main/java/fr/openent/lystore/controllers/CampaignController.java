@@ -1,5 +1,7 @@
 package fr.openent.lystore.controllers;
 
+import org.entcore.common.user.UserInfos;
+import org.entcore.common.user.UserUtils;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonObject;
@@ -7,8 +9,7 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
-import fr.openent.lystore.security.AdministratorRight;
-import fr.openent.lystore.security.ManagerRight ;
+import fr.openent.lystore.security.*;
 import fr.openent.lystore.service.CampaignService;
 import fr.openent.lystore.service.impl.DefaultCampaignService;
 import fr.openent.lystore.utils.SqlQueryUtils;
@@ -40,9 +41,14 @@ public class CampaignController extends ControllerHelper {
     @Get("/campaigns")
     @ApiDoc("List all campaigns in database")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
-    @ResourceFilter(ManagerRight.class )
-    public void list(HttpServerRequest request) {
-        campaignService.listCampaigns(arrayResponseHandler(request));
+    @ResourceFilter(ManagerOrPersonnelRight.class)
+    public void list(final HttpServerRequest  request) {
+        UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+            @Override
+            public void handle(UserInfos user) {
+                campaignService.listCampaigns(user, arrayResponseHandler(request));
+            }
+        });
     }
 
     @Get("/campaigns/:id")

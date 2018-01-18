@@ -1,4 +1,4 @@
-import { ng, template, notify, idiom as lang, moment } from 'entcore';
+import { ng, template, notify, idiom as lang, moment, model, Behaviours} from 'entcore';
 import {
     Structures,
     Agents,
@@ -40,7 +40,16 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         });
 
         route({
-            main: () => {},
+            main:  async() => {
+                if($scope.isManager() || $scope.isAdministrator()){
+                    template.open('profil-main', 'administrator/management-main');
+                }
+                else if($scope.isPersonnel() && !$scope.isManager() && !$scope.isAdministrator()){
+                    template.open('profil-main', 'administrator/viewer-main');
+                    await $scope.campaigns.sync();
+                    Utils.safeApply($scope);
+                }
+            },
             manageAgents: async () => {
                 template.open('administrator-main', 'administrator/agent/manage-agents');
                 await $scope.agents.sync();
@@ -86,7 +95,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('administrator-main','administrator/campaign/campaign_container');
                 template.open('campaigns-main', 'administrator/campaign/manage-campaign');
                 await $scope.campaigns.sync();
-
                 Utils.safeApply($scope);
             },
             createCampaigns: async () => {
@@ -103,7 +111,15 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('','')
             }
         });
-
+        $scope.isPersonnel = () =>{
+            return model.me.type === "PERSEDUCNAT";
+        };
+        $scope.isManager= () => {
+           return model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.manager);
+        };
+        $scope.isAdministrator = () => {
+            return model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.administrator) ;
+        };
         $scope.redirectTo = (path: string) => {
             $location.path(path);
         };

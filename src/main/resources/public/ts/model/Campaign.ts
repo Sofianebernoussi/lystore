@@ -36,7 +36,7 @@ export class Campaign implements Selectable  {
 
     async save () {
         if (this.id) {
-            await this.update()
+            await this.update();
         } else {
             await this.create();
         }
@@ -52,7 +52,7 @@ export class Campaign implements Selectable  {
 
     async update () {
         try {
-            await http.put(`/lystore/campaign/${this.id}`, this.toJson())
+            await http.put(`/lystore/campaign/${this.id}`, this.toJson());
         } catch (e) {
             notify.error('lystore.campaign.update.err');
         }
@@ -67,7 +67,7 @@ export class Campaign implements Selectable  {
     }
     async updateAccessibility() {
         try {
-            await http.put(`/lystore/campaign/accessibility/${this.id}`, this.toJson())
+            await http.put(`/lystore/campaign/accessibility/${this.id}`, this.toJson());
         } catch (e) {
             notify.error('lystore.campaign.update.err');
         }

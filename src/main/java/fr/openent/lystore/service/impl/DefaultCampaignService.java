@@ -6,6 +6,8 @@ import fr.openent.lystore.service.CampaignService;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
+import org.entcore.common.user.UserInfos;
+import org.entcore.common.user.UserUtils;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonArray;
@@ -24,22 +26,23 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
         this.sql = Sql.getInstance();
     }
 
-    public void listCampaigns(Handler<Either<String, JsonArray>> handler) {
-        String query = " SELECT campaign.*, COUNT(distinct rel_group_structure.id_structure) as nb_structures, COUNT(distinct rel_equipment_tag.id_equipment) as nb_equipments "+
-                " FROM lystore.campaign "+
-                " LEFT JOIN lystore.rel_group_campaign ON (campaign.id = rel_group_campaign.id_campaign) "+
-                " LEFT JOIN lystore.rel_group_structure ON (rel_group_campaign.id_structure_group = rel_group_structure.id_structure_group) "+
-                " LEFT JOIN lystore.rel_equipment_tag ON (rel_equipment_tag.id_tag = rel_group_campaign.id_tag) "+
-                " GROUP BY campaign.id " ;
-
-        sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
+    public void listCampaigns(UserInfos user, Handler<Either<String, JsonArray>> handler) {
+        JsonObject param = getCampaignsSelectionParameters(user);
+        StringBuilder query = new StringBuilder()
+                .append(" SELECT ").append(param.getString("selection"))
+                .append(" FROM " + Lystore.LYSTORE_SCHEMA + ".campaign ")
+                .append(" LEFT JOIN " + Lystore.LYSTORE_SCHEMA + ".rel_group_campaign ON (campaign.id = rel_group_campaign.id_campaign) ")
+                .append(param.getString("structureClause"))
+                .append(" LEFT JOIN " + Lystore.LYSTORE_SCHEMA + ".rel_equipment_tag ON (rel_equipment_tag.id_tag = rel_group_campaign.id_tag) ")
+                .append(" GROUP BY campaign.id ;" );
+        sql.prepared(query.toString(), param.getArray("values"), SqlResult.validResultHandler(handler));
     }
     public void getCampaign(Integer id, Handler<Either<String, JsonObject>> handler){
         String query = "  SELECT campaign.*,array_to_json(array_agg(groupe)) as  groups     "+
-                "                 FROM  lystore.campaign campaign  "+
+                "                 FROM  " + Lystore.LYSTORE_SCHEMA + ".campaign campaign  "+
                 "                 LEFT JOIN  "+
-                "                (SELECT rel_group_campaign.id_campaign, structure_group.*,  array_to_json(array_agg(id_tag))as  tags FROM lystore.structure_group  "+
-                "                 INNER JOIN lystore.rel_group_campaign  on  structure_group.id = rel_group_campaign.id_structure_group   "+
+                "                (SELECT rel_group_campaign.id_campaign, structure_group.*,  array_to_json(array_agg(id_tag))as  tags FROM " + Lystore.LYSTORE_SCHEMA + ".structure_group  "+
+                "                 INNER JOIN " + Lystore.LYSTORE_SCHEMA + ".rel_group_campaign  on  structure_group.id = rel_group_campaign.id_structure_group   "+
                 "                 where rel_group_campaign.id_campaign = ?  "+
                 "                 group By (rel_group_campaign.id_campaign, structure_group.id) ) as groupe  on groupe.id_campaign = campaign.id     "+
                 "                 where campaign.id = ?  "+
@@ -250,5 +253,19 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
         }
         return either;
     }
-
+    private  JsonObject getCampaignsSelectionParameters(UserInfos user){
+        JsonObject param = new JsonObject();
+        param.putString("selection", " campaign.*, COUNT(distinct rel_group_structure.id_structure) as nb_structures, COUNT(distinct rel_equipment_tag.id_equipment) as nb_equipments ");
+        param.putArray("values",new JsonArray()) ;
+        if(user.getType().equals("Personnel")){
+             param.putString("structureClause"," INNER JOIN " + Lystore.LYSTORE_SCHEMA + ".rel_group_structure ON (rel_group_campaign.id_structure_group = rel_group_structure.id_structure_group) "+
+                     " AND  rel_group_structure.id_structure in " + Sql.listPrepared(user.getStructures().toArray()));
+            for (String structure : user.getStructures()) {
+                param.getArray("values").addString(structure);
+            }
+        }else{
+            param.putString("structureClause"," LEFT JOIN " + Lystore.LYSTORE_SCHEMA + ".rel_group_structure ON (rel_group_campaign.id_structure_group = rel_group_structure.id_structure_group) ");
+        }
+        return param;
+    }
 }

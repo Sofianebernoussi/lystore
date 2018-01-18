@@ -52,7 +52,7 @@
                         <tr ng-repeat="group in structureGroups.all track by $index ">
                             <td class="one">
                                 <label class="checkbox">
-                                    <input type="checkbox" ng-model="group.selected"  ng-change="campaign.groups = structureGroups.selected">
+                                    <input type="checkbox" ng-model="group.selected"  >
                                     <span></span>
                                 </label></td>
                             <td class="tree">[[group.name]]</td>

@@ -365,7 +365,8 @@ export const configurationController = ng.controller('configurationController',
                 let Cgroup =  _.findWhere($scope.campaign.groups, {id: group.id});
                 if(Cgroup !== undefined){ group.selected = true ;group.tags = Cgroup.tags ;}
                 return group;
-            })
+            });
+            $scope.structureGroups.updateSelected();
         };
         $scope.openCampaignsDeletion = () => {
             template.open('campaign.lightbox', 'administrator/campaign/campaign-delete-validation');
@@ -388,7 +389,9 @@ export const configurationController = ng.controller('configurationController',
             Utils.safeApply($scope);
         };
         $scope.validCampaign = async(campaign : Campaign) => {
-            campaign.groups = $scope.structureGroups.selected;
+            $scope.campaign.groups = [];
+            $scope.structureGroups.all.map((group)=>{$scope.selectCampaignsStructureGroup(group)});
+            _.uniq($scope.campaign.groups);
             await campaign.save();
             $scope.redirectTo('/campaigns');
             Utils.safeApply($scope);
@@ -400,4 +403,8 @@ export const configurationController = ng.controller('configurationController',
             $scope.display.lightbox.campaign = false;
             Utils.safeApply($scope);
         };
+        $scope.selectCampaignsStructureGroup = (group) => {
+            group.selected ? $scope.campaign.groups.push(group) : $scope.campaign.groups = _.reject($scope.campaign.groups,(groups)=>{ return groups.id === group.id;});
+        };
+
  }]);

@@ -17,7 +17,7 @@ export class ContractType implements Selectable {
     }
 }
 
-export class ContractTypes extends Selection<ContractType>{
+export class ContractTypes extends Selection<ContractType> {
 
     constructor () {
         super([]);

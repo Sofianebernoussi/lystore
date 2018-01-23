@@ -32,5 +32,5 @@ export const dropDownMenu = ng.directive('dropDownMenu', () => {
                 element.children('.options').addClass('hidden');
             });
         }
-    }
+    };
 });

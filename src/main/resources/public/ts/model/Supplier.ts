@@ -2,7 +2,7 @@ import { _, notify } from 'entcore';
 import http from 'axios';
 import { Mix, Selectable, Selection } from 'entcore-toolkit';
 
-export class Supplier implements Selectable{
+export class Supplier implements Selectable {
     id: string;
     email: string;
     name: string;
@@ -26,7 +26,7 @@ export class Supplier implements Selectable{
             name: this.name,
             phone: this.phone,
             address: this.address
-        }
+        };
     }
 
     async save (): Promise<void> {

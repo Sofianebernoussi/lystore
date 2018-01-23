@@ -19,7 +19,7 @@ export class Tag implements Selectable {
         return {
             name: this.name,
             color: this.color
-        }
+        };
     }
 
     async save () {

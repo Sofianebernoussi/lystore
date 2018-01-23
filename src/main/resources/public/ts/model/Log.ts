@@ -25,7 +25,7 @@ export class Logs {
         try {
             let { data } = await http.get(`/lystore/logs?page=${pageNumber}`);
             this.all = [...this.all, ...Mix.castArrayAs(Log, data)];
-            this.all.map((log) => log.selected = false)
+            this.all.map((log) => log.selected = false);
         } catch (e) {
             notify.error('lystore.logs.sync.err');
         }

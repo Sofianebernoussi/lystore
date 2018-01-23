@@ -3,7 +3,7 @@ import * as controllers from './controllers';
 import * as directives from './directives';
 import * as filters from './filters'
 
-for(let controller in controllers) {
+for (let controller in controllers) {
     ng.controllers.push(controllers[controller]);
 }
 

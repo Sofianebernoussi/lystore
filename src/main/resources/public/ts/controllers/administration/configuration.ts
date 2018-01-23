@@ -53,8 +53,7 @@ export const configurationController = ng.controller('configurationController',
             }
         };
 
-        $scope.search = {
-        };
+        $scope.search = {};
 
         $scope.openAgentForm = (agent: Agent = new Agent()) => {
             $scope.agent = new Agent();
@@ -212,7 +211,7 @@ export const configurationController = ng.controller('configurationController',
             return tag.name !== undefined
                 && tag.name.trim() !== ''
                 && tag.color !== undefined
-                && tag.color.trim() !== ''
+                && tag.color.trim() !== '';
         };
 
         $scope.openTagsDeletion = () => {
@@ -248,11 +247,11 @@ export const configurationController = ng.controller('configurationController',
         $scope.removeTagToEquipment = (tag: Tag) => {
             $scope.equipment.tags = _.without($scope.equipment.tags, tag);
         };
-        $scope.validEquipmentOptions = (options : EquipmentOption[]) =>{
-            if( options.length > 0 ){
+        $scope.validEquipmentOptions = (options: EquipmentOption[]) => {
+            if ( options.length > 0 ) {
                 let valid = true;
-                for(let i=0;i<options.length;i++){
-                    if( options[i].name === undefined
+                for (let i = 0; i < options.length; i++) {
+                    if ( options[i].name === undefined
                         || options[i].name.trim() === ''
                         || options[i].price === undefined
                         || options[i].price.toString().trim() === ''
@@ -261,13 +260,13 @@ export const configurationController = ng.controller('configurationController',
                         || options[i].amount.toString().trim() === ''
                         || isNaN(parseInt(options[i].amount.toString()))
                         || typeof(options[i].required ) !== 'boolean'
-                        || options[i].id_tax === undefined ){
+                        || options[i].id_tax === undefined ) {
                         valid = false;
                         break;
                     }
                 }
-                return valid
-            }else{
+                return valid;
+            } else {
                 return true;
             }
         };
@@ -326,13 +325,13 @@ export const configurationController = ng.controller('configurationController',
             Utils.safeApply($scope);
         };
 
-        $scope.calculatePriceTTC = (price ,tax_value ) => {
+        $scope.calculatePriceTTC = (price,tax_value) => {
             let priceFloat = parseFloat(price);
             let taxFloat = parseFloat(tax_value);
             let price_TTC = (( priceFloat + ((priceFloat *  taxFloat)/100)));
-            if(!isNaN(price_TTC)) return price_TTC; else return "";
+            if(!isNaN(price_TTC))return price_TTC; else return "";
         };
-        $scope.calculatePriceOption = (price ,tax_id,amount ) => {
+        $scope.calculatePriceOption = (price ,tax_id, amount) => {
             let tax_value= parseFloat(_.findWhere($scope.taxes.all,{id: tax_id}).value) ;
             if(tax_value!= undefined ){
                 let priceFloat = parseFloat(price);

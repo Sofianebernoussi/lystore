@@ -17,14 +17,14 @@ export class Equipment implements Selectable {
     tags: Tag[];
     tax_amount: number;
     selected: boolean;
-    options : EquipmentOption[];
+    options: EquipmentOption[];
 
     constructor (name?: string, price?: number) {
         if (name) this.name = name;
         if (price) this.price = price;
         this.technical_specs = [];
         this.tags = [];
-        this.options= [];
+        this.options = [];
     }
 
     toJson () {
@@ -40,12 +40,12 @@ export class Equipment implements Selectable {
             technical_specs: this.technical_specs.map((spec: TechnicalSpec) => spec.toJson()),
             tags: this.tags.map((tag: Tag) => tag.id),
             options : this.options.map((option: EquipmentOption) => option.toJson())
-        }
+        };
     }
 
     async save () {
         if (this.id) {
-            await this.update()
+            await this.update();
         } else {
             await this.create();
         }
@@ -61,7 +61,7 @@ export class Equipment implements Selectable {
 
     async update () {
         try {
-           await http.put(`/lystore/equipment/${this.id}`, this.toJson())
+           await http.put(`/lystore/equipment/${this.id}`, this.toJson());
         } catch (e) {
             notify.error('lystore.equipment.update.err');
             throw e;
@@ -85,7 +85,7 @@ export class TechnicalSpec {
         return {
             name: this.name,
             value: this.value
-        }
+        };
     }
 }
 
@@ -137,7 +137,7 @@ export class EquipmentOption   {
     id_tax: number;
 
     constructor () {
-        this.name ="";
+        this.name = '';
         this.amount = 1;
         this.required = true;
 
@@ -150,7 +150,7 @@ export class EquipmentOption   {
             amount: parseInt(this.amount.toString()),
             required : this.required,
             id_tax: this.id_tax
-        }
+        };
     }
 
 }

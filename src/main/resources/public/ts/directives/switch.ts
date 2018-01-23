@@ -22,5 +22,5 @@ export const Switch = ng.directive('switch', () => {
                 }, 0);
             };
         }
-    }
+    };
 });

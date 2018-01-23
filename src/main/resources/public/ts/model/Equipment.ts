@@ -87,6 +87,9 @@ export class TechnicalSpec {
             value: this.value
         };
     }
+    toString () {
+        return this.name+" "+this.value;
+    }
 }
 
 export class Equipments extends Selection<Equipment> {
@@ -106,16 +109,18 @@ export class Equipments extends Selection<Equipment> {
         }
     }
 
-    async sync () {
+    async sync (idCampaign?:number ) {
         try {
-            let { data } = await http.get(`/lystore/equipments`);
+            let { data } =idCampaign? await http.get(`/lystore/equipments/campaign/${idCampaign}`) :await http.get(`/lystore/equipments`) ;
             this.all = Mix.castArrayAs(Equipment, data);
             this.all.map((equipment) => {
                 equipment.price = parseFloat(equipment.price.toString());
                 equipment.tax_amount = parseFloat(equipment.tax_amount.toString());
-                equipment.tags = equipment.tags !== null ? JSON.parse(equipment.tags.toString()) : [];
-                equipment.options = JSON.parse(equipment.options.toString()) ;
-                equipment.options !== [null] && equipment.options[0] !== null ? equipment.options = Mix.castArrayAs(EquipmentOption, equipment.options) : equipment.options = [];
+                equipment.tags = equipment.tags !== null && equipment.tags.toString() !==  "[null]"? JSON.parse(equipment.tags.toString()) : [];
+                equipment.options.toString() !== "[null]" && equipment.options !== null?
+                    equipment.options = Mix.castArrayAs(EquipmentOption, JSON.parse(equipment.options.toString()))
+                    :equipment.options = [];
+
             });
             this.all.map((equipment) =>
                 equipment.technical_specs = equipment.technical_specs !== null

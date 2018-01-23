@@ -2,7 +2,7 @@
 <div workflow="lystore.administrator">
     <input type="button"  ng-click="openCampaignForm()" class="right-magnet" i18n-value="lystore.campaigns.add"/>
 </div>
-<div class="twelve cell"  workflow="lystore.manager">
+<div class="twelve cell manage-campaign"  workflow="lystore.manager">
     <article class="twelve cell " ng-repeat="campaign in campaigns.all track by $index ">
         <div class="twelve cell" workflow="lystore.administrator">
             <label class="checkbox">
@@ -11,8 +11,8 @@
             </label>
         </div>
         <card class="two cell">
-            <img ng-src="[[campaign.image]]">
-            </img>
+            <img ng-src="[[campaign.image]]" ng-show="campaign.image!==null && campaign.image!==undefined " />
+            <img skin-src="/img/illustrations/pages-default.png" ng-show="campaign.image===null || campaign.image===undefined "/>
         </card>
         <div class="nine cell right-magnet">
             <h3>[[campaign.name]]</h3>

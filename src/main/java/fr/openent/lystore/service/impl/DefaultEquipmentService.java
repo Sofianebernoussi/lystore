@@ -6,10 +6,12 @@ import fr.wseduc.webutils.Either;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
+import org.entcore.common.user.UserInfos;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.core.json.impl.Json;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.core.logging.impl.LoggerFactory;
 
@@ -38,6 +40,30 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 "group by (e.id, tax.id)";
 
         sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
+    }
+
+    public void listEquipments(UserInfos user, Integer idCampaign, Handler<Either<String, JsonArray>> handler) {
+        JsonArray values = new JsonArray();
+        String query = "SELECT e.*, tax.value tax_amount, array_to_json(array_agg(opts)) as options, array_to_json(array_agg(DISTINCT  rel_equipment_tag.id_tag)) tags " +
+                "                FROM " + Lystore.LYSTORE_SCHEMA + ".equipment e " +
+                "                Left join " + Lystore.LYSTORE_SCHEMA + ".equipment_option opts ON opts.id_equipment = e.id " +
+                "                INNER JOIN " + Lystore.LYSTORE_SCHEMA + ".tax on tax.id = e.id_tax " +
+                "                INNER JOIN " + Lystore.LYSTORE_SCHEMA + ".rel_equipment_tag ON (e.id = rel_equipment_tag.id_equipment) " +
+                "                INNER JOIN " + Lystore.LYSTORE_SCHEMA + ".rel_group_campaign ON " +
+                "                (rel_group_campaign.id_tag = rel_equipment_tag.id_tag " +
+                "                AND rel_group_campaign.id_campaign = ? " +
+                "                AND rel_group_campaign.id_structure_group in " +
+                "                (select structure_group.id from " + Lystore.LYSTORE_SCHEMA + ".structure_group " +
+                "                INNER JOIN " + Lystore.LYSTORE_SCHEMA + ".rel_group_structure ON rel_group_structure.id_structure_group = structure_group.id " +
+                "                WHERE rel_group_structure.id_structure in " + Sql.listPrepared(user.getStructures().toArray()) + "))  " +
+                "                group by (e.id, tax.id) ";
+        values.addNumber(idCampaign);
+
+        for (String structure : user.getStructures()) {
+            values.addString(structure);
+        }
+
+        sql.prepared(query, values, SqlResult.validResultHandler(handler));
     }
 
     public void create(final JsonObject equipment, final Handler<Either<String, JsonObject>> handler) {

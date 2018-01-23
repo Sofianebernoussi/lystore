@@ -14,6 +14,8 @@ import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.user.UserInfos;
+import org.entcore.common.user.UserUtils;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonObject;
@@ -36,6 +38,25 @@ public class EquipmentController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void list(HttpServerRequest request) {
         equipmentService.listEquipments(arrayResponseHandler(request));
+    }
+
+    @Get("/equipments/campaign/:idCampaign")
+    @ApiDoc("List equipments of campaign in database")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void listEquipmentFromCampaign(final HttpServerRequest request) {
+            UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+                @Override
+                public void handle(UserInfos user) {
+                    try {
+                        Integer idCampaign = request.params().contains("idCampaign")
+                                ? Integer.parseInt(request.params().get("idCampaign"))
+                                : null;
+                        equipmentService.listEquipments(user, idCampaign, arrayResponseHandler(request));
+                    } catch (ClassCastException e) {
+                        log.error("An error occurred casting campaign id");
+                    }
+                }
+            });
     }
 
     @Post("/equipment")

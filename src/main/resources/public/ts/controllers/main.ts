@@ -12,6 +12,7 @@ import {
     Logs,
     StructureGroups,
     Campaigns,
+    Campaign,
     Utils
 } from '../model';
 
@@ -28,6 +29,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.tags = new Tags();
         $scope.equipments = new Equipments();
         $scope.campaigns = new Campaigns();
+        $scope.campaign = new Campaign();
         $scope.structureGroups = new StructureGroups();
         $scope.taxes = new Taxes();
         $scope.logs = new Logs();
@@ -42,10 +44,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         route({
             main:  async() => {
                 if($scope.isManager() || $scope.isAdministrator()){
-                    template.open('profil-main', 'administrator/management-main');
+                    template.open('main-profile', 'administrator/management-main');
                 }
                 else if($scope.isPersonnel() && !$scope.isManager() && !$scope.isAdministrator()){
-                    template.open('profil-main', 'administrator/viewer-main');
+                    template.open('main-profile', 'customer/campaign/campaign-list');
                     await $scope.campaigns.sync();
                     Utils.safeApply($scope);
                 }
@@ -109,8 +111,41 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
             structuregroups: async () => {
                 template.open('','')
+            },
+            campaignCatalog : async (params) => {
+                let id = params.idCampaign;
+                $scope.idCampaignIsInteger(id);
+                await $scope.tags.sync();
+                await $scope.equipments.sync(id);
+                template.open('main-profile','customer/campaign/campaign-detail');
+                template.open('campaign-main','customer/campaign/catalog/catalog-list');
+                Utils.safeApply($scope);
+            },
+            campaignOrder : async (params) => {
+                let id = params.idCampaign;
+                $scope.idCampaignIsInteger(id);
+                await $scope.campaign.sync(id);
+                template.open('main-profile','customer/campaign/campaign-detail');
+                //template.open('campaign-main','customer/campaign/');
+                Utils.safeApply($scope);
+            },
+            campaignBasket : async (params) => {
+                let id = params.idCampaign;
+                $scope.idCampaignIsInteger(id);
+                await $scope.campaign.sync(id);
+                template.open('main-profile','customer/campaign/campaign-detail');
+               // template.open('campaign-main','customer/campaign/');
+                Utils.safeApply($scope);
             }
         });
+        $scope.idCampaignIsInteger=(id)=>{
+            try{
+                parseInt(id) ;
+            }catch (e){
+                $scope.redirectTo(`/`);
+                Utils.safeApply($scope);
+            }
+        };
         $scope.isPersonnel = () =>{
             return model.me.type === "PERSEDUCNAT";
         };

@@ -1,0 +1,11 @@
+<div class="twelve cell campaign-personnel-list "  ng-controller="campaignsListController">
+    <article class="twelve cell " ng-repeat="campaign in campaigns.all track by $index " ng-click="openCampaign(campaign)">
+        <card class="two cell">
+            <img ng-src="[[campaign.image]]" ng-show="campaign.image!==null && campaign.image!==undefined " />
+            <img skin-src="/img/illustrations/pages-default.png" ng-show="campaign.image===null || campaign.image===undefined "/>
+        </card>
+        <div class="nine cell right-magnet" >
+            <h3>[[campaign.name]]</h3>
+        </div>
+    </article>
+</div>

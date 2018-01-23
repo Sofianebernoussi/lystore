@@ -58,8 +58,19 @@ routes.define(($routeProvider) => {
             action: 'manageCampaigns'
         })
     }
+    if(model.me.type === "PERSEDUCNAT"){
+        $routeProvider
+            .when('/campaign/:idCampaign/catalog', {
+                action: 'campaignCatalog'
+            })
 
-
+            .when('/campaign/:idCampaign/order', {
+                action: 'campaignOrder'
+            })
+            .when('/campaign/:idCampaign/basket', {
+                action: 'campaignBasket'
+            });
+    }
 
     $routeProvider.otherwise({
             redirectTo: '/'

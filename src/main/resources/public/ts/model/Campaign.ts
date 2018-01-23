@@ -1,6 +1,3 @@
-/**
- * Created by rahnir on 27/12/2017.
- */
 import http from 'axios';
 import { notify, _ } from 'entcore';
 import { Selectable, Selection, Mix } from 'entcore-toolkit';
@@ -78,11 +75,11 @@ export class Campaign implements Selectable  {
             let groups = JSON.parse(data.groups.toString());
             if(groups[0] !== null ){
                 data.groups = Mix.castArrayAs(StructureGroup, groups) ;
+                if(tags)
                 data.groups.map((group)=>{
                     group.tags =  group.tags.map( (tag)=>{
                         return _.findWhere(tags, {id: tag});
                     });
-
                 });
             } else data.groups = [];
             Mix.extend(this, Mix.castAs(Campaign,data) );

@@ -1,6 +1,7 @@
 package fr.openent.lystore.service;
 
 import fr.wseduc.webutils.Either;
+import org.entcore.common.user.UserInfos;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -15,6 +16,12 @@ public interface EquipmentService {
      * @param handler function handler returning data
      */
     public void listEquipments(Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * List equipments of Campaign in database
+     * @param handler function handler returning data
+     */
+    public void listEquipments(UserInfos user, Integer idCampaign, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Create an equipment

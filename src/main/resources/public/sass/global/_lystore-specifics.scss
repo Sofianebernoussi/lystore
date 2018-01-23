@@ -81,16 +81,16 @@ body.lystore {
     }
   }
 
-.label-row{
-  display: inline-flex;
-  input{
-    margin-top: 10%;
-    margin-left: 5%;
+  .label-row{
+    display: inline-flex;
+    input{
+      margin-top: 10%;
+      margin-left: 5%;
+    }
+    .row{
+      width: auto !important;
+    }
   }
-  .row{
-    width: auto !important;
-  }
-}
 
   .technical-specs {
     border: solid 1px $neutral-grey;
@@ -108,6 +108,81 @@ body.lystore {
         color: $grey;
         margin-top: 5px;
       }
+    }
+  }
+  .manage-campaign{
+    card{
+      text-align:center;
+    }
+  }
+  .catalog-list{
+    .dominos .item{
+
+      article.desabled{
+        opacity: 0.4 !important;
+      }
+      article{
+        border: 1px #ddd solid;
+      }
+
+      div.desabled{
+        height: 94%;
+        width: 98%;
+        z-index: 1;
+        border: 2px $grey dashed;
+        background: #a3a1a1;
+        opacity: 0.5;
+        position: absolute;
+      }
+      h1.desabled{
+        text-align: center;
+        margin-top: 50%;
+        position: absolute;
+        z-index: 2;
+        font-size: larger;
+        color: black;
+        left: 0;
+        right: 0;
+        text-shadow: 0.5px 0.25px #ccc;
+      }
+      max-width: 300px !important;
+      width: 16% !important;
+      padding:0px !important;
+      margin:7px 7px 0px 7px ;
+      h2{
+        margin-left: 5%;
+      }
+      .top{
+        padding-left: 5%;
+        padding-right: 5%;
+        height:200px;
+        img{
+          position: relative;
+          height: auto;
+          width: auto;
+          margin-left: auto !important;
+          margin-right: auto !important;
+          display: block;
+        }
+        h4{
+          position: relative;
+          margin: 0px;
+        }
+        p.description{
+          font-size: 14px;
+          margin: initial;
+          color: #555;
+        }
+      }
+    }
+  }
+  .campaign-personnel-list{
+    article:hover{
+      box-shadow: 0 1px 3px #666;
+      cursor: pointer;
+    }
+    card{
+      text-align: center;
     }
   }
 }

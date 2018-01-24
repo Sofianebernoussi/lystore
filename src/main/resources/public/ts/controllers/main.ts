@@ -43,10 +43,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
         route({
             main:  async() => {
-                if($scope.isManager() || $scope.isAdministrator()){
+                if ($scope.isManager() || $scope.isAdministrator()) {
                     template.open('main-profile', 'administrator/management-main');
                 }
-                else if($scope.isPersonnel() && !$scope.isManager() && !$scope.isAdministrator()){
+                else if ($scope.isPersonnel() && !$scope.isManager() && !$scope.isAdministrator()) {
                     template.open('main-profile', 'customer/campaign/campaign-list');
                     await $scope.campaigns.sync();
                     Utils.safeApply($scope);
@@ -94,62 +94,62 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             manageCampaigns: async () => {
-                template.open('administrator-main','administrator/campaign/campaign_container');
+                template.open('administrator-main', 'administrator/campaign/campaign_container');
                 template.open('campaigns-main', 'administrator/campaign/manage-campaign');
                 await $scope.campaigns.sync();
                 Utils.safeApply($scope);
             },
             createCampaigns: async () => {
-                template.open('campaigns-main','administrator/campaign/campaign_form');
+                template.open('campaigns-main', 'administrator/campaign/campaign_form');
                 await $scope.tags.sync();
                 await $scope.structureGroups.sync();
                 Utils.safeApply($scope);
             },
             updateCampaigns: async () => {
-                template.open('campaigns-main','administrator/campaign/campaign_form');
+                template.open('campaigns-main', 'administrator/campaign/campaign_form');
                 Utils.safeApply($scope);
             },
             structuregroups: async () => {
-                template.open('','')
+                template.open('', '');
             },
             campaignCatalog : async (params) => {
                 let id = params.idCampaign;
                 $scope.idCampaignIsInteger(id);
                 await $scope.tags.sync();
                 await $scope.equipments.sync(id);
-                template.open('main-profile','customer/campaign/campaign-detail');
-                template.open('campaign-main','customer/campaign/catalog/catalog-list');
+                template.open('main-profile', 'customer/campaign/campaign-detail');
+                template.open('campaign-main', 'customer/campaign/catalog/catalog-list');
                 Utils.safeApply($scope);
             },
             campaignOrder : async (params) => {
                 let id = params.idCampaign;
                 $scope.idCampaignIsInteger(id);
                 await $scope.campaign.sync(id);
-                template.open('main-profile','customer/campaign/campaign-detail');
-                //template.open('campaign-main','customer/campaign/');
+                template.open('main-profile', 'customer/campaign/campaign-detail');
+                // template.open('campaign-main', 'customer/campaign/');
                 Utils.safeApply($scope);
             },
             campaignBasket : async (params) => {
                 let id = params.idCampaign;
                 $scope.idCampaignIsInteger(id);
                 await $scope.campaign.sync(id);
-                template.open('main-profile','customer/campaign/campaign-detail');
+                template.open('main-profile', 'customer/campaign/campaign-detail');
                // template.open('campaign-main','customer/campaign/');
                 Utils.safeApply($scope);
             }
         });
-        $scope.idCampaignIsInteger=(id)=>{
-            try{
+        $scope.idCampaignIsInteger = (id) => {
+            try {
                 parseInt(id) ;
-            }catch (e){
+            } catch (e) {
                 $scope.redirectTo(`/`);
                 Utils.safeApply($scope);
             }
         };
-        $scope.isPersonnel = () =>{
-            return model.me.type === "PERSEDUCNAT";
+        $scope.isPersonnel = () => {
+            return model.me.type === 'PERSEDUCNAT';
         };
-        $scope.isManager= () => {
+        $scope.isManager = () => {
            return model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.manager);
         };
         $scope.isAdministrator = () => {

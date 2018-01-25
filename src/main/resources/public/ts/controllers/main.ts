@@ -13,6 +13,7 @@ import {
     StructureGroups,
     Campaigns,
     Campaign,
+    StructureGroup,
     Utils
 } from '../model';
 
@@ -33,13 +34,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.structureGroups = new StructureGroups();
         $scope.taxes = new Taxes();
         $scope.logs = new Logs();
-        $scope.structures.sync().then(() => {
+       /* $scope.structures.sync().then(() => {
             if ($scope.structures.all.length > 0) {
                 $scope.structure = $scope.structures.all[0];
             }  else {
                 notify.error('Aucune structure');
             }
-        });
+        });*/
 
         route({
             main:  async() => {
@@ -114,8 +115,16 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('campaigns-main', 'administrator/campaign/purse/manage-purse');
                 Utils.safeApply($scope);
             },
-            structuregroups: async () => {
-                template.open('', '');
+            manageStructureGroups: async () => {
+                template.open('administrator-main', 'administrator/structureGroup/structureGroup-container');
+                await $scope.structureGroups.sync();
+                template.open('structureGroups-main', 'administrator/structureGroup/manage-structureGroup');
+                await $scope.structures.sync();
+                Utils.safeApply($scope);
+            },
+            createStructureGroup: async () => {
+                template.open('structureGroups-main', 'administrator/structureGroup/structureGroup-form');
+                Utils.safeApply($scope);
             },
             campaignCatalog : async (params) => {
                 let id = params.idCampaign;

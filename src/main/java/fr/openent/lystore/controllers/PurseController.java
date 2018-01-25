@@ -297,5 +297,5 @@ public class PurseController extends ControllerHelper {
         renderError(request, new JsonObject().putString("message", cause.getMessage()));
     }
 
-    @Get("/")
+   // @Get("/")
 }

@@ -8,8 +8,23 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
+import java.util.Map;
+
+/**
+ * Created by agnes.lapeyronnie on 09/01/2018.
+ */
 public class DefaultStructureService implements StructureService {
 
+    private Neo4j neo4j;
+
+    public DefaultStructureService(){
+        this.neo4j = Neo4j.getInstance();
+    }
+    @Override
+    public void getStructures(Handler<Either<String, JsonArray>> handler) {
+        String query = "MATCH (s:Structure) RETURN s.id as id, s.name as name,s.city as city,s.UAI as uai";
+        neo4j.execute(query, new JsonObject(), Neo4jResult.validResultHandler(handler));
+    }
     @Override
     public void getStructureByUAI(JsonArray uais, Handler<Either<String, JsonArray>> handler) {
         String query = "MATCH (s:Structure) WHERE s.UAI IN {uais} return s.id as id, s.UAI as uai";

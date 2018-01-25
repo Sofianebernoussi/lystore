@@ -49,7 +49,7 @@ body.lystore {
 
     &.large {
       width: 35px;
-      height:35px;
+      height: 35px;
     }
   }
 
@@ -72,23 +72,23 @@ body.lystore {
   .overflow-y {
     overflow-y: auto;
   }
-  .labels-in-ligne{
+  .labels-in-ligne {
     display: inline-flex;
 
-    div{
+    div {
       margin-left: 2px;
       display: inline-table;
       margin-right: 2px;
     }
   }
 
-  .label-row{
+  .label-row {
     display: inline-flex;
-    input{
+    input {
       margin-top: 10%;
       margin-left: 5%;
     }
-    .row{
+    .row {
       width: auto !important;
     }
   }
@@ -103,7 +103,6 @@ body.lystore {
         background-color: $lightest-grey;
       }
 
-
       .cell.one {
         text-align: center;
         color: $grey;
@@ -111,22 +110,22 @@ body.lystore {
       }
     }
   }
-  .manage-campaign{
+  .manage-campaign {
     card{
       text-align:center;
     }
   }
-  .catalog-list{
-    .dominos .item{
+  .catalog-list {
+    .dominos .item {
 
-      article.desabled{
+      article.desabled {
         opacity: 0.4 !important;
       }
-      article{
+      article {
         border: 1px #ddd solid;
       }
 
-      div.desabled{
+      div.desabled {
         height: 94%;
         width: 98%;
         z-index: 1;
@@ -135,7 +134,7 @@ body.lystore {
         opacity: 0.5;
         position: absolute;
       }
-      h1.desabled{
+      h1.desabled {
         text-align: center;
         margin-top: 50%;
         position: absolute;
@@ -150,14 +149,14 @@ body.lystore {
       width: 16% !important;
       padding:0px !important;
       margin:7px 7px 0px 7px ;
-      h2{
+      h2 {
         margin-left: 5%;
       }
-      .top{
+      .top {
         padding-left: 5%;
         padding-right: 5%;
         height:200px;
-        img{
+        img {
           position: relative;
           height: auto;
           width: auto;
@@ -165,11 +164,11 @@ body.lystore {
           margin-right: auto !important;
           display: block;
         }
-        h4{
+        h4 {
           position: relative;
           margin: 0px;
         }
-        p.description{
+        p.description {
           font-size: 14px;
           margin: initial;
           color: #555;
@@ -177,12 +176,12 @@ body.lystore {
       }
     }
   }
-  .campaign-personnel-list{
+  .campaign-personnel-list {
     article:hover{
       box-shadow: 0 1px 3px #666;
       cursor: pointer;
     }
-    card{
+    card {
       text-align: center;
     }
   }
@@ -190,6 +189,90 @@ body.lystore {
   .campaign-image {
     img {
       max-width: 75%;
+    }
+  }
+  .list_structureGroup-form {
+    height: 420px;
+
+    .five {
+      height: 100%;
+
+      ul {
+        height: 100%;
+        margin: 0px;
+        overflow: auto;
+      }
+      ul > li {
+        margin-right: 3%;
+      }
+      li > span {
+        float: right;
+      }
+    }
+    .two {
+      height: 100%;
+    }
+    .arrow {
+      width: 16%;
+      height: 22.16%;
+      position: relative;
+      top: 38.92%;
+      left: 42%;
+    }
+    button {
+      margin-left: 0px;
+      margin-right: 0px;
+    }
+  }
+  .structureGroups-management {
+    .twelve {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    article {
+      margin: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      width: 283px;
+      height: 283px;
+    }
+
+    article > p,h3 {
+      text-align: center;
+      width: 100%;
+      word-wrap: break-word;
+    }
+
+    .two-icons {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      height: 20%;
+    }
+
+    i.edit, i.delete {
+      width: 50%;
+      display: flex;
+      justify-content: center;
+      &:before {
+        font-size: 200%;
+      }
+    }
+
+    i.add-group:before {
+      content: "\e85e";
+      font-size: 200%;
+    }
+    i.edit:before {
+      content: "\e858";
+    }
+    i.delete:before {
+      content: "\e866";
     }
   }
 }

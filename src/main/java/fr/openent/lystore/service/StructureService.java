@@ -6,5 +6,7 @@ import org.vertx.java.core.json.JsonArray;
 
 public interface StructureService {
 
+    public void getStructures(Handler<Either<String,JsonArray>> handler);
+
     void getStructureByUAI(JsonArray uais, Handler<Either<String, JsonArray>> handler);
 }

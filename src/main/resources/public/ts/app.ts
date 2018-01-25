@@ -27,9 +27,7 @@ routes.define(($routeProvider) => {
             .when('/campaigns/update', {
                 action: 'updateCampaigns'
             })
-            .when('/structuregroups', {
-                action: ''
-            })
+
             .when('/agents', {
                 action: 'manageAgents'
             })
@@ -50,7 +48,14 @@ routes.define(($routeProvider) => {
             })
             .when('/logs', {
                 action: 'viewLogs'
-            });
+            })
+            .when('/structureGroups', {
+                action: 'manageStructureGroups'
+            })
+            .when('/structureGroups/create', {
+                action: 'createStructureGroup'
+                }
+            );
     }
     if (model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.manager)) {
         $routeProvider.when('/campaigns', {

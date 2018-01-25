@@ -11,6 +11,8 @@ TechnicalSpec,
 COMBO_LABELS,
 Campaign,
 Utils,
+Structure,
+StructureGroup
 } from '../../model';
 
 export const configurationController = ng.controller('configurationController',
@@ -23,7 +25,8 @@ export const configurationController = ng.controller('configurationController',
                 contract: false,
                 tag: false,
                 equipment: false,
-                campaign : false
+                campaign : false,
+                structureGroup : false
             },
             input : {
                 group : []
@@ -128,7 +131,7 @@ export const configurationController = ng.controller('configurationController',
         };
 
         $scope.openContractForm = (contract: Contract = new Contract()) => {
-            if(contract) contract.syncBooleans();
+            if (contract) contract.syncBooleans();
             $scope.contract = new Contract();
             Mix.extend($scope.contract, contract);
             $scope.contract.start_date = (contract !== undefined ? moment(contract.start_date) : new Date());
@@ -325,21 +328,22 @@ export const configurationController = ng.controller('configurationController',
             Utils.safeApply($scope);
         };
 
-        $scope.calculatePriceTTC = (price,tax_value) => {
+        $scope.calculatePriceTTC = (price, tax_value) => {
             let priceFloat = parseFloat(price);
             let taxFloat = parseFloat(tax_value);
-            let price_TTC = (( priceFloat + ((priceFloat *  taxFloat)/100)));
-            if(!isNaN(price_TTC))return price_TTC; else return "";
+            let price_TTC = (( priceFloat + ((priceFloat *  taxFloat) / 100)));
+            if (!isNaN(price_TTC))return price_TTC; else return '';
         };
-        $scope.calculatePriceOption = (price ,tax_id, amount) => {
-            let tax_value= parseFloat(_.findWhere($scope.taxes.all,{id: tax_id}).value) ;
-            if(tax_value!= undefined ){
+        $scope.calculatePriceOption = (price , tax_id, amount) => {
+            let tax_value = parseFloat(_.findWhere($scope.taxes.all, {id: tax_id}).value) ;
+            if (tax_value !== undefined ) {
                 let priceFloat = parseFloat(price);
-                let price_TTC = $scope.calculatePriceTTC(priceFloat,tax_value);
+                let price_TTC = $scope.calculatePriceTTC(priceFloat, tax_value);
                 let Price_TTC_QTe =  (price_TTC * parseFloat(amount));
-                if(!isNaN(Price_TTC_QTe) && price_TTC !== "") return Price_TTC_QTe ; else return "";
-            }else
+                if (!isNaN(Price_TTC_QTe) && price_TTC !== '') return Price_TTC_QTe ; else return '';
+            } else {
                 return NaN;
+            }
         };
         $scope.addOptionLigne = () => {
             let option = new EquipmentOption();
@@ -352,17 +356,17 @@ export const configurationController = ng.controller('configurationController',
             id ? $scope.redirectTo('/campaigns/update') :  $scope.redirectTo('/campaigns/create');
             $scope.campaign = new Campaign();
             Mix.extend($scope.campaign, campaign);
-            id?   $scope.updateSelectedCampaign(id):  null ;
+            id ? $scope.updateSelectedCampaign(id) : null ;
             Utils.safeApply($scope);
         };
 
         $scope.updateSelectedCampaign = async (id) => {
             await $scope.tags.sync();
-            await $scope.campaign.sync(id,$scope.tags.all);
+            await $scope.campaign.sync(id, $scope.tags.all);
             await $scope.structureGroups.sync();
-            $scope.structureGroups.all =  $scope.structureGroups.all.map((group)=>{
+            $scope.structureGroups.all =  $scope.structureGroups.all.map((group) => {
                 let Cgroup =  _.findWhere($scope.campaign.groups, {id: group.id});
-                if(Cgroup !== undefined){ group.selected = true ;group.tags = Cgroup.tags ;}
+                if (Cgroup !== undefined) { group.selected = true ; group.tags = Cgroup.tags ; }
                 return group;
             });
             $scope.structureGroups.updateSelected();
@@ -377,19 +381,19 @@ export const configurationController = ng.controller('configurationController',
                 && _.findWhere($scope.structureGroups.all, {selected: true}) !== undefined;
         };
 
-        $scope.addTagToCampaign= (index) => {
+        $scope.addTagToCampaign = (index) => {
             $scope.structureGroups.all[index].tags.push($scope.search.tag[index]);
             $scope.structureGroups.all[index].tags = _.uniq($scope.structureGroups.all[index].tags);
             $scope.display.input.group[index] = false;
             Utils.safeApply($scope);
         };
-        $scope.deleteTagFromCampaign = (index,tag) => {
-            $scope.structureGroups.all[index].tags= _.without($scope.structureGroups.all[index].tags,tag);
+        $scope.deleteTagFromCampaign = (index, tag) => {
+            $scope.structureGroups.all[index].tags = _.without($scope.structureGroups.all[index].tags, tag);
             Utils.safeApply($scope);
         };
-        $scope.validCampaign = async(campaign : Campaign) => {
+        $scope.validCampaign = async(campaign: Campaign) => {
             $scope.campaign.groups = [];
-            $scope.structureGroups.all.map((group)=>{$scope.selectCampaignsStructureGroup(group)});
+            $scope.structureGroups.all.map((group) => $scope.selectCampaignsStructureGroup(group) );
             _.uniq($scope.campaign.groups);
             await campaign.save();
             $scope.redirectTo('/campaigns');
@@ -403,7 +407,50 @@ export const configurationController = ng.controller('configurationController',
             Utils.safeApply($scope);
         };
         $scope.selectCampaignsStructureGroup = (group) => {
-            group.selected ? $scope.campaign.groups.push(group) : $scope.campaign.groups = _.reject($scope.campaign.groups,(groups)=>{ return groups.id === group.id;});
+            group.selected ? $scope.campaign.groups.push(group) : $scope.campaign.groups = _.reject($scope.campaign.groups, (groups) => { return groups.id === group.id; } );
         };
-
+        $scope.openStructureGroupForm = (structureGroup: StructureGroup = new StructureGroup()) => {
+            $scope.redirectTo('/structureGroups/create');
+            $scope.structureGroup = new StructureGroup();
+            Mix.extend($scope.structureGroup, structureGroup);
+            $scope.structureGroup.structureIdToObject(structureGroup.structures, $scope.structures);
+            Utils.safeApply($scope);
+        };
+        $scope.structuresFilter = (structureRight) => {
+            return _.findWhere($scope.structureGroup.structures, {id : structureRight.id}) === undefined;
+        };
+        $scope.addStructuresInGroup = () => {
+            $scope.structures.deselectAll($scope.structures.selected);
+            $scope.structureGroup.structures.push.apply($scope.structureGroup.structures, $scope.structures.selectedElements);
+            $scope.structureGroup.structures = _.uniq($scope.structureGroup.structures);
+            $scope.structures.selectedElements = [];
+            Utils.safeApply($scope);
+        };
+        $scope.deleteStructuresofGroup = () => {
+            $scope.structureGroup.structures = _.difference($scope.structureGroup.structures, $scope.structureGroup.structures.filter(structureRight => structureRight.selected));
+            $scope.structures.deselectAll($scope.structures.selectedElements);
+            $scope.structures.selectedElements = [];
+            Utils.safeApply($scope);
+        };
+        $scope.validStructureGroupForm  = (structureGroup: StructureGroup) => {
+            return structureGroup.name !== undefined
+                && structureGroup.name !== ''
+                && structureGroup.structures.length > 0;
+        };
+        $scope.validStructureGroup = async (structureGroup: StructureGroup) => {
+            await structureGroup.save();
+            $scope.redirectTo('/structureGroups');
+            Utils.safeApply($scope);
+        };
+        $scope.openStructureGroupDeletion = (structureGroup: StructureGroup) => {
+            $scope.structureGroup = structureGroup;
+            template.open('structureGroup.lightbox', 'administrator/structureGroup/structureGroup-delete');
+            $scope.display.lightbox.structureGroup = true;
+        };
+        $scope.deleteStructureGroup = async () => {
+            await $scope.structureGroup.delete();
+            await $scope.structureGroups.sync();
+            $scope.display.lightbox.structureGroup = false;
+            Utils.safeApply($scope);
+        };
  }]);

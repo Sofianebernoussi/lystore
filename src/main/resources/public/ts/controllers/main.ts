@@ -109,6 +109,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('campaigns-main', 'administrator/campaign/campaign_form');
                 Utils.safeApply($scope);
             },
+            managePurse: (params) => {
+                $scope.campaign = $scope.campaigns.get(parseInt(params.idCampaign));
+                template.open('campaigns-main', 'administrator/campaign/purse/manage-purse');
+                Utils.safeApply($scope);
+            },
             structuregroups: async () => {
                 template.open('', '');
             },

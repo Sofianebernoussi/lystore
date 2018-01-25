@@ -117,4 +117,8 @@ export class Campaigns extends Selection<Campaign> {
             notify.error('lystore.campaigns.sync.err');
         }
     }
+
+    get (idCampaign: number): Campaign {
+        return _.findWhere(this.all, { id: idCampaign });
+    }
 }

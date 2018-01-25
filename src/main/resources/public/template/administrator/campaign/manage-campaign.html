@@ -4,25 +4,29 @@
 </div>
 <div class="twelve cell manage-campaign"  workflow="lystore.manager">
     <article class="twelve cell " ng-repeat="campaign in campaigns.all track by $index ">
-        <div class="twelve cell" workflow="lystore.administrator">
-            <label class="checkbox">
-                <input type="checkbox" ng-model="campaign.selected" >
-                <span></span>
-            </label>
+        <div class="row">
+            <div class="twelve cell" workflow="lystore.administrator">
+                <label class="checkbox">
+                    <input type="checkbox" ng-model="campaign.selected" >
+                    <span></span>
+                </label>
+            </div>
+            <div class="two cell campaign-image">
+                <img ng-src="[[campaign.image]]" ng-show="campaign.image!==null && campaign.image!==undefined " />
+                <img skin-src="/img/illustrations/pages-default.png" ng-show="campaign.image===null || campaign.image===undefined "/>
+            </div>
+            <div class="nine cell right-magnet">
+                <h3>[[campaign.name]]</h3>
+                <p> [[campaign.nb_structures]] <i18n>structures</i18n> </p>
+                <p> [[campaign.nb_equipments]] <i18n>lystore.equipments.available</i18n> </p>
+            </div>
         </div>
-        <card class="two cell">
-            <img ng-src="[[campaign.image]]" ng-show="campaign.image!==null && campaign.image!==undefined " />
-            <img skin-src="/img/illustrations/pages-default.png" ng-show="campaign.image===null || campaign.image===undefined "/>
-        </card>
-        <div class="nine cell right-magnet">
-            <h3>[[campaign.name]]</h3>
-            <p> [[campaign.nb_structures]] <i18n>structures</i18n> </p>
-            <p> [[campaign.nb_equipments]] <i18n>lystore.equipments.available</i18n> </p>
-            <div class="right-magnet" workflow="lystore.administrator">
+        <div class="row" workflow="lystore.administrator">
+            <button ng-click="redirectTo('/campaigns/' + campaign.id + '/purse')"><i18n>lystore.campaign.purse.manage</i18n></button>
+            <div class="right-magnet">
                 <switch ng-model="campaign.accessible" ng-change="campaign.updateAccessibility()"></switch>
             </div>
         </div>
-
     </article>
 </div>
 

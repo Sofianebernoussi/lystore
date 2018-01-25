@@ -54,8 +54,10 @@ routes.define(($routeProvider) => {
     }
     if (model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.manager)) {
         $routeProvider.when('/campaigns', {
-
             action: 'manageCampaigns'
+        })
+        .when('/campaigns/:idCampaign/purse', {
+            action: 'managePurse'
         });
     }
     if (model.me.type === 'PERSEDUCNAT') {

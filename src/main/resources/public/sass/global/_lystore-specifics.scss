@@ -12,7 +12,8 @@ body.lystore {
   .contract-management,
   .tag-management,
   .equipment-management,
-  .log-view{
+  .log-view,
+  .purse-management{
 
     table {
       thead td {
@@ -183,6 +184,12 @@ body.lystore {
     }
     card{
       text-align: center;
+    }
+  }
+
+  .campaign-image {
+    img {
+      max-width: 75%;
     }
   }
 }

@@ -44,7 +44,7 @@ export class PurseImporter {
         formData.append('file', this.files[0], this.files[0].name);
         let response;
         try {
-            response = await http.post(`/lystore/campaign/${this.id_campaign}/purse/import`,
+            response = await http.post(`/lystore/campaign/${this.id_campaign}/purses/import`,
                 formData, {'headers' : { 'Content-Type': 'multipart/form-data' }});
         } catch (err) {
             throw err.response.data;

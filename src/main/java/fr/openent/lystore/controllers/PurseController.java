@@ -9,6 +9,7 @@ import fr.openent.lystore.service.StructureService;
 import fr.openent.lystore.service.impl.DefaultPurseService;
 import fr.openent.lystore.service.impl.DefaultStructureService;
 import fr.wseduc.rs.ApiDoc;
+import fr.wseduc.rs.Get;
 import fr.wseduc.rs.Post;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -48,7 +49,7 @@ public class PurseController extends ControllerHelper {
         this.purseService = new DefaultPurseService();
     }
 
-    @Post("/campaign/:id/purse/import")
+    @Post("/campaign/:id/purses/import")
     @ApiDoc("Import purse for a specific campaign")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
@@ -295,4 +296,6 @@ public class PurseController extends ControllerHelper {
     private static void renderErrorMessage(HttpServerRequest request, Throwable cause) {
         renderError(request, new JsonObject().putString("message", cause.getMessage()));
     }
+
+    @Get("/")
 }

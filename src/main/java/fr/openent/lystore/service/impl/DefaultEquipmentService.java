@@ -35,7 +35,8 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 "WHERE e.id = rel_equipment_tag.id_equipment " +
                 ")) as tags " +
                 "FROM " + Lystore.LYSTORE_SCHEMA + ".equipment e " +
-                "Left join " + Lystore.LYSTORE_SCHEMA + ".equipment_option opts ON opts.id_equipment = e.id " +
+                "Left join ( select option.*, tax.value tax_amount from " + Lystore.LYSTORE_SCHEMA + ".equipment_option option " +
+                "INNER JOIN  " + Lystore.LYSTORE_SCHEMA + ".tax on tax.id = option.id_tax  ) opts ON opts.id_equipment = e.id " +
                 "INNER JOIN " + Lystore.LYSTORE_SCHEMA + ".tax on tax.id = e.id_tax "+
                 "group by (e.id, tax.id)";
 

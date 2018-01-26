@@ -7,7 +7,7 @@
         </div>
         <div class="eight cell" >
             <div class="add-basket  row cell">
-                <h1>[[calculatePriceOfEquipment(equipment, true)]]€</h1>
+                <h1>[[calculatePriceOfEquipment(equipment, true, 2)]]€</h1>
                 <div class=" in-ligne">
                     <h4><i18n>lystore.quantity</i18n></h4>
                     <div><i class="plus" ng-click=""></i> <input type="text" ng-model="" class="two"/> <i class="moins" ng-click=""></i> </div>
@@ -68,7 +68,7 @@
                     </label>
                 </td>
                 <td >[[option.name]]</td>
-                <td class="three">[[calculatePriceTTC(option.price, option.tax_amount)]]</td>
+                <td class="three">[[calculatePriceTTC(option.price, option.tax_amount, 2)]]</td>
             </tr>
             </tbody>
         </table>

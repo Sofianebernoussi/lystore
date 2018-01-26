@@ -52,20 +52,11 @@ export const catalogController = ng.controller('catalogController',
                 $scope.display.equipment = true;
             }
         };
-        $scope.calculatePriceOfEquipment = (equipment: Equipment, selectedOptions: boolean) => {
-            let price = parseFloat( $scope.calculatePriceTTC(equipment.price , equipment.tax_amount) );
-            equipment.options.map((option) => {
-                (option.required === true  || (selectedOptions ? option.selected === true : false) )
-                    ? price += parseFloat($scope.calculatePriceTTC(option.price , option.tax_amount) )
-                    : null ;
-            });
-            return price;
-        };
         $scope.validArticle = (equipment: Equipment) => {
             return !isNaN(parseFloat($scope.calculatePriceOfEquipment(equipment)));
         };
         $scope.switchAll = (model: boolean, collection) => {
-           collection.forEach((col) => {col.required ? null : col.selected = model; });
+           collection.forEach((col) => {col.selected = col.required ? false : col.selected = model; });
             Utils.safeApply($scope);
         };
         $scope.thereAreOptionalOptions = (equipment: Equipment) => {

@@ -14,7 +14,8 @@ import {
     Campaigns,
     Campaign,
     StructureGroup,
-    Utils
+    Utils,
+    Equipment
 } from '../model';
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location',
@@ -185,10 +186,19 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.formatDate = (date: string | Date, format: string) => {
             return moment(date).format(format);
         };
-        $scope.calculatePriceTTC = (price, tax_value) => {
+        $scope.calculatePriceTTC = (price, tax_value, roundNumber?: number) => {
             let priceFloat = parseFloat(price);
             let taxFloat = parseFloat(tax_value);
             let price_TTC = (( priceFloat + ((priceFloat *  taxFloat) / 100)));
-            if (!isNaN(price_TTC))return price_TTC; else return '';
+            return (!isNaN(price_TTC)) ? (roundNumber ? price_TTC.toFixed(roundNumber) : price_TTC ) : '';
+        };
+        $scope.calculatePriceOfEquipment = (equipment: Equipment, selectedOptions: boolean, roundNumber?: number) => {
+            let price = parseFloat( $scope.calculatePriceTTC(equipment.price , equipment.tax_amount) );
+            equipment.options.map((option) => {
+                (option.required === true  || (selectedOptions ? option.selected === true : false) )
+                    ? price += parseFloat($scope.calculatePriceTTC(option.price , option.tax_amount) )
+                    : null ;
+            });
+            return (!isNaN(price)) ? (roundNumber ? price.toFixed(roundNumber) : price ) : price ;
         };
     }]);

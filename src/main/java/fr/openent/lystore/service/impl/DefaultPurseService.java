@@ -4,6 +4,7 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.PurseService;
 import fr.wseduc.webutils.Either;
 import org.entcore.common.sql.Sql;
+import org.entcore.common.sql.SqlResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonArray;
@@ -32,6 +33,17 @@ public class DefaultPurseService implements PurseService {
                 }
             }
         });
+    }
+
+    @Override
+    public void getPursesByCampaignId(Integer campaignId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT id_structure, amount FROM " + Lystore.LYSTORE_SCHEMA + ".purse" +
+                " WHERE id_campaign = ?;";
+
+        JsonArray params = new JsonArray()
+                .addNumber(campaignId);
+
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
     private JsonObject getImportStatement(Integer campaignId, String structureId, String amount) {

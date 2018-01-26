@@ -3,7 +3,7 @@
         <h1 class="centered-text">[[campaign.name]]</h1>
         <div class="tools right-magnet">
             <button ng-click="openPurseImporter()"><i18n>lystore.campaign.purse.import</i18n></button>
-            <button><i18n>lystore.campaign.purse.export</i18n></button>
+            <button ng-click="exportPurses(campaign.id)"><i18n>lystore.campaign.purse.export</i18n></button>
         </div>
         <article class="row">
             <table class="twelve">

@@ -1,6 +1,8 @@
 import { ng, template, notify, moment, _ } from 'entcore';
 import { PurseImporter, Utils } from '../../model';
 
+declare let window: any;
+
 export const purseController = ng.controller('PurseController',
     ['$scope', ($scope) => {
         $scope.lightbox = {
@@ -26,5 +28,9 @@ export const purseController = ng.controller('PurseController',
                 }
                 Utils.safeApply($scope);
             }
+        };
+
+        $scope.exportPurses = (id: number) => {
+            window.location = `/lystore/campaign/${id}/purses/export`;
         };
     }]);

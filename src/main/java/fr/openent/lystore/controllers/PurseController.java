@@ -15,6 +15,7 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.DefaultAsyncResult;
 import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.http.Renders;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
@@ -297,5 +298,116 @@ public class PurseController extends ControllerHelper {
         renderError(request, new JsonObject().putString("message", cause.getMessage()));
     }
 
-   // @Get("/")
+   @Get("/campaign/:id/purses/export")
+    @ApiDoc("Export purses for a specific campaign")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
+    public void export(final HttpServerRequest request) {
+        try {
+            Integer idCampaign = Integer.parseInt(request.params().get("id"));
+            purseService.getPursesByCampaignId(idCampaign, new Handler<Either<String, JsonArray>>() {
+                @Override
+                public void handle(Either<String, JsonArray> event) {
+                    if (event.isRight()) {
+                        JsonArray ids = new JsonArray();
+                        JsonObject exportValues = new JsonObject();
+                        JsonArray purses = event.right().getValue();
+                        JsonObject purse;
+                        for (int i = 0; i < purses.size(); i++) {
+                            purse = purses.get(i);
+                            exportValues.putNumber(purse.getString("id_structure"),
+                                    Float.parseFloat(purse.getString("amount")));
+                            ids.addString(purse.getString("id_structure"));
+                        }
+                        retrieveUAIs(ids, exportValues, request);
+                    } else {
+                        badRequest(request);
+                    }
+                }
+            });
+        } catch (ClassCastException e) {
+            log.error("[Lystore@CSVExport] : An error occurred when casting campaign id", e);
+            badRequest(request);
+        }
+    }
+
+    /**
+     * Retrieve structure uais based on ids list
+     * @param ids JsonArray containing ids list
+     * @param exportValues Values to exports
+     * @param request Http request
+     */
+    private void retrieveUAIs(JsonArray ids, final JsonObject exportValues,
+                              final HttpServerRequest request) {
+        structureService.getStructureById(ids, new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(Either<String, JsonArray> event) {
+                if (event.isRight()) {
+                    JsonObject values = new JsonObject();
+                    JsonArray uais = event.right().getValue();
+                    JsonObject uai;
+                    for (int i = 0; i < uais.size(); i++) {
+                        uai = uais.get(i);
+                        values.putNumber(uai.getString("uai"),
+                                exportValues.getNumber(uai.getString("id")));
+                    }
+                    launchExport(values, request);
+                } else {
+                    renderError(request, new JsonObject().putString("message",
+                            event.left().getValue()));
+                }
+            }
+        });
+    }
+
+    /**
+     * Launch export. Build CSV based on values parameter
+     * @param values values to export
+     * @param request Http request
+     */
+    private static void launchExport(JsonObject values, HttpServerRequest request) {
+        String[] uais = values.getFieldNames().toArray(new String[0]);
+        StringBuilder exportString = new StringBuilder(getCSVHeader(request));
+        for (String uai : uais) {
+            exportString.append(getCSVLine(uai, values.getNumber(uai)));
+        }
+        request.response()
+                .putHeader("Content-Type", "text/csv; charset=utf-8")
+                .putHeader("Content-Disposition", "attachment; filename=" + getFileExportName(request))
+                .end(exportString.toString());
+    }
+
+    /**
+     * Get CSV Header using internationalization
+     * @param request Http request
+     * @return CSV file Header
+     */
+    private static String getCSVHeader(HttpServerRequest request) {
+        return I18n.getInstance().translate("UAI", getHost(request), I18n.acceptLanguage(request)) +
+                ";" +
+                I18n.getInstance().translate("purse", getHost(request), I18n.acceptLanguage(request)) +
+                "\n";
+    }
+
+    /**
+     * Get CSV Line
+     * @param uai Structure UAI
+     * @param amount Structure purse amount
+     * @return CSV Line
+     */
+    private static String getCSVLine(String uai, Number amount) {
+        return uai + ";" + amount + "\n";
+    }
+
+    /**
+     * Get File Export Name. It use internationalization to build the name.
+     * @param request Http request
+     * @return File name
+     */
+    private static String getFileExportName(HttpServerRequest request) {
+        return I18n.getInstance().translate("campaign", getHost(request), I18n.acceptLanguage(request)) +
+                "-" + request.params().get("id") + "-" +
+                I18n.getInstance().translate("purse", getHost(request), I18n.acceptLanguage(request)) +
+                ".csv";
+    }
 }

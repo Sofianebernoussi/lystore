@@ -2,6 +2,7 @@ package fr.openent.lystore.service;
 
 import fr.wseduc.webutils.Either;
 import org.vertx.java.core.Handler;
+import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 public interface PurseService {
@@ -13,4 +14,11 @@ public interface PurseService {
      * @param handler Function handler
      */
     void launchImport(Integer campaignId, JsonObject statementsValues, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Get purses by campaign id
+     * @param campaignId campaign id
+     * @param handler handler function returning data
+     */
+    void getPursesByCampaignId(Integer campaignId, Handler<Either<String, JsonArray>> handler);
 }

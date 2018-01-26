@@ -185,3 +185,15 @@ CREATE TABLE lystore.rel_group_structure
         REFERENCES lystore.structure_group (id) MATCH SIMPLE
         ON UPDATE NO ACTION ON DELETE NO ACTION
 );
+
+CREATE TABLE lystore.purse(
+  id bigserial NOT NULL,
+  id_structure character varying(36),
+  amount numeric,
+  id_campaign bigint,
+  CONSTRAINT purse_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_campaign_id FOREIGN KEY (id_campaign)
+  REFERENCES lystore.campaign (id) MATCH SIMPLE
+  ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT purse_id_structure_id_campaign_key UNIQUE (id_structure, id_campaign)
+);

@@ -44,9 +44,11 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
 
     public void listEquipments(UserInfos user, Integer idCampaign, Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new JsonArray();
-        String query = "SELECT e.*, tax.value tax_amount, array_to_json(array_agg(opts)) as options, array_to_json(array_agg(DISTINCT  rel_equipment_tag.id_tag)) tags " +
+        String query = "SELECT e.*, tax.value tax_amount, array_to_json(array_agg(DISTINCT opts)) as options, array_to_json(array_agg(DISTINCT  rel_equipment_tag.id_tag)) tags " +
                 "                FROM " + Lystore.LYSTORE_SCHEMA + ".equipment e " +
-                "                Left join " + Lystore.LYSTORE_SCHEMA + ".equipment_option opts ON opts.id_equipment = e.id " +
+                "                Left join " +
+                "                 ( select option.*, tax.value tax_amount from " + Lystore.LYSTORE_SCHEMA + ".equipment_option option " +
+                "                   INNER JOIN  " + Lystore.LYSTORE_SCHEMA + ".tax on tax.id = option.id_tax  ) opts ON opts.id_equipment = e.id " +
                 "                INNER JOIN " + Lystore.LYSTORE_SCHEMA + ".tax on tax.id = e.id_tax " +
                 "                INNER JOIN " + Lystore.LYSTORE_SCHEMA + ".rel_equipment_tag ON (e.id = rel_equipment_tag.id_equipment) " +
                 "                INNER JOIN " + Lystore.LYSTORE_SCHEMA + ".rel_group_campaign ON " +

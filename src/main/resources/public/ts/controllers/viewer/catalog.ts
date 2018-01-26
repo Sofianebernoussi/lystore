@@ -52,10 +52,12 @@ export const catalogController = ng.controller('catalogController',
                 $scope.display.equipment = true;
             }
         };
-        $scope.calculatePriceOfEquipment = (equipment: Equipment) => {
+        $scope.calculatePriceOfEquipment = (equipment: Equipment, selectedOptions: boolean) => {
             let price = parseFloat( $scope.calculatePriceTTC(equipment.price , equipment.tax_amount) );
             equipment.options.map((option) => {
-                (option.required === true || option.selected === true) ? price += parseFloat($scope.calculatePriceTTC(option.price , option.tax_amount) )  : null ;
+                (option.required === true  || (selectedOptions ? option.selected === true : false) )
+                    ? price += parseFloat($scope.calculatePriceTTC(option.price , option.tax_amount) )
+                    : null ;
             });
             return price;
         };

@@ -129,7 +129,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             campaignCatalog : async (params) => {
                 let id = params.idCampaign;
                 $scope.idIsInteger(id);
-                await $scope.tags.sync();
+                await $scope.taxes.sync();
                 await $scope.equipments.sync(id);
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/catalog/catalog-list');
@@ -141,7 +141,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 let idEquipment = params.idEquipment;
                 $scope.idIsInteger(idCampaign);
                 $scope.idIsInteger(idEquipment);
-                await $scope.taxes.sync();
                 template.open('right-side', 'customer/campaign/catalog/equipment-detail');
                 Utils.safeApply($scope);
             },

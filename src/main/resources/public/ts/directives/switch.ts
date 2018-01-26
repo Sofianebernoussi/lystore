@@ -12,12 +12,9 @@ export const Switch = ng.directive('switch', () => {
         '<input type="checkbox" ng-model="ngModel" ng-change="valueChange()" ng-disabled="ngDisabled"/>' +
         '<span class="tick"></span>' +
         '</label>',
-        link: function ($scope, $element, $attrs, ngModel)
-        {
-            $scope.valueChange = function()
-            {
-                setTimeout(function()
-                {
+        link: function ($scope, $element, $attrs, ngModel) {
+            $scope.valueChange = function() {
+                setTimeout(function() {
                     if ($attrs.ngChange) $scope.$parent.$eval($attrs.ngChange);
                 }, 0);
             };

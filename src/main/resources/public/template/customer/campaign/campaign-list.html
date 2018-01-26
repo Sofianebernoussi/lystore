@@ -1,11 +1,16 @@
-<div class="twelve cell campaign-personnel-list "  ng-controller="campaignsListController">
-    <article class="twelve cell " ng-repeat="campaign in campaigns.all track by $index " ng-click="openCampaign(campaign)">
-        <card class="two cell">
-            <img ng-src="[[campaign.image]]" ng-show="campaign.image!==null && campaign.image!==undefined " />
-            <img skin-src="/img/illustrations/pages-default.png" ng-show="campaign.image===null || campaign.image===undefined "/>
-        </card>
-        <div class="nine cell right-magnet" >
-            <h3>[[campaign.name]]</h3>
+<div class="twelve cell campaign-personnel-list  "  ng-controller="campaignsListController">
+    <article class="twelve cell " ng-repeat="campaign in campaigns.all track by $index " ng-click="openCampaign(campaign)" >
+        <div  ng-class="{desabled : !campaign.accessible}">
+            <div class="two card cell">
+                <img ng-src="[[campaign.image]]" ng-show="campaign.image!==null && campaign.image!==undefined " />
+                <img skin-src="/img/illustrations/pages-default.png" ng-show="campaign.image===null || campaign.image===undefined "/>
+            </div>
+            <div class="nine cell right-magnet" >
+                <h3>[[campaign.name]]</h3>
+            </div>
         </div>
+            <div class="info row" ng-show="!campaign.accessible" >
+                <i18n>lystore.catalog.desabled</i18n>
+            </div>
     </article>
 </div>

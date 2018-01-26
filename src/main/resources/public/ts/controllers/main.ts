@@ -130,7 +130,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             campaignCatalog : async (params) => {
                 let id = params.idCampaign;
                 $scope.idIsInteger(id);
-                await $scope.taxes.sync();
                 await $scope.equipments.sync(id);
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/catalog/catalog-list');
@@ -146,19 +145,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             campaignOrder : async (params) => {
-                let id = params.idCampaign;
-                $scope.idIsInteger(id);
-                await $scope.campaign.sync(id);
-                template.open('main-profile', 'customer/campaign/campaign-detail');
-                // template.open('campaign-main', 'customer/campaign/');
                 Utils.safeApply($scope);
             },
             campaignBasket : async (params) => {
-                let id = params.idCampaign;
-                $scope.idIsInteger(id);
-                await $scope.campaign.sync(id);
-                template.open('main-profile', 'customer/campaign/campaign-detail');
-               // template.open('campaign-main','customer/campaign/');
                 Utils.safeApply($scope);
             }
         });

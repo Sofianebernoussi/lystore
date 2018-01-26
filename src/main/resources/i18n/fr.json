@@ -43,6 +43,7 @@
   "lystore.contract.agent": "Correspondant région",
   "lystore.contract.supplier": "Titulaire du marché",
   "lystore.calendar": "Calendrier",
+  "lystore.catalog.desabled":"Catalogue inaccessible",
   "lystore.reference": "Référence",
   "lystore.contract.delete": "Êtes-vous sur de vouloir supprimer le(s) marché(s) : ",
   "lystore.equipment.add": "Ajouter un article",

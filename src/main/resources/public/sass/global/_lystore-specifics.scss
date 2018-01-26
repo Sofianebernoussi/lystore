@@ -266,6 +266,11 @@ body.lystore {
       cursor: pointer;
     }
     card {
+    div.desabled{
+      opacity: 0.5;
+      cursor: context-menu;
+    }
+    div.card{
       text-align: center;
     }
   }

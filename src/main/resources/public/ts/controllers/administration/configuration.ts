@@ -333,7 +333,7 @@ export const configurationController = ng.controller('configurationController',
                 let priceFloat = parseFloat(price);
                 let price_TTC = $scope.calculatePriceTTC(priceFloat, tax_value);
                 let Price_TTC_QTe =  (price_TTC * parseFloat(amount));
-                if (!isNaN(Price_TTC_QTe) && price_TTC !== '') return Price_TTC_QTe ; else return '';
+                return (!isNaN(Price_TTC_QTe) && price_TTC !== '') ?  Price_TTC_QTe.toFixed(2) : '';
             } else {
                 return NaN;
             }

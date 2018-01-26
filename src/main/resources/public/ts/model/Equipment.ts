@@ -132,7 +132,7 @@ export class Equipments extends Selection<Equipment> {
     }
 }
 
-export class EquipmentOption   {
+export class EquipmentOption implements Selectable  {
 
     id?: number;
     name: string;
@@ -140,6 +140,8 @@ export class EquipmentOption   {
     amount: number;
     required: boolean;
     id_tax: number;
+    tax_amount: number;
+    selected: boolean;
 
     constructor () {
         this.name = '';

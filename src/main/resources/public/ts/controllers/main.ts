@@ -128,16 +128,26 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
             campaignCatalog : async (params) => {
                 let id = params.idCampaign;
-                $scope.idCampaignIsInteger(id);
+                $scope.idIsInteger(id);
                 await $scope.tags.sync();
                 await $scope.equipments.sync(id);
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/catalog/catalog-list');
+                template.close('right-side');
+                Utils.safeApply($scope);
+            },
+            equipmentDetail : async (params) => {
+                let idCampaign = params.idCampaign;
+                let idEquipment = params.idEquipment;
+                $scope.idIsInteger(idCampaign);
+                $scope.idIsInteger(idEquipment);
+                await $scope.taxes.sync();
+                template.open('right-side', 'customer/campaign/catalog/equipment-detail');
                 Utils.safeApply($scope);
             },
             campaignOrder : async (params) => {
                 let id = params.idCampaign;
-                $scope.idCampaignIsInteger(id);
+                $scope.idIsInteger(id);
                 await $scope.campaign.sync(id);
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 // template.open('campaign-main', 'customer/campaign/');
@@ -145,14 +155,14 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
             campaignBasket : async (params) => {
                 let id = params.idCampaign;
-                $scope.idCampaignIsInteger(id);
+                $scope.idIsInteger(id);
                 await $scope.campaign.sync(id);
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                // template.open('campaign-main','customer/campaign/');
                 Utils.safeApply($scope);
             }
         });
-        $scope.idCampaignIsInteger = (id) => {
+        $scope.idIsInteger = (id) => {
             try {
                 parseInt(id) ;
             } catch (e) {
@@ -175,5 +185,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
         $scope.formatDate = (date: string | Date, format: string) => {
             return moment(date).format(format);
+        };
+        $scope.calculatePriceTTC = (price, tax_value) => {
+            let priceFloat = parseFloat(price);
+            let taxFloat = parseFloat(tax_value);
+            let price_TTC = (( priceFloat + ((priceFloat *  taxFloat) / 100)));
+            if (!isNaN(price_TTC))return price_TTC; else return '';
         };
     }]);

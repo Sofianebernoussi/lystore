@@ -5,16 +5,24 @@
  * Created by rahnir on 18/01/2018.
  */
 import { ng, template, _ } from 'entcore';
+import {Mix} from 'entcore-toolkit';
 import {
+    Equipment,
     Utils
 } from '../../model';
 
 
+
 export const catalogController = ng.controller('catalogController',
-    ['$scope', ($scope) => {
+    ['$scope', '$routeParams', ($scope, $routeParams) => {
         $scope.search = {
             filterWrod: '',
             filterWrods: []
+        };
+        $scope.alloptionsSelected = false;
+        $scope.equipment = new Equipment();
+        $scope.display = {
+          equipment: false
         };
         $scope.addFilter = (filterWrod: string, event?) => {
             if (event && (event.which === 13 || event.keyCode === 13 )) {
@@ -32,5 +40,33 @@ export const catalogController = ng.controller('catalogController',
         };
         $scope.pullFilterWord = (filterWord) => {
             $scope.search.filterWrods = _.without( $scope.search.filterWrods , filterWord);
+        };
+        $scope.openEquipment = (equipment: Equipment) => {
+            if (equipment.status === 'AVAILABLE') {
+                $scope.redirectTo(`/campaign/${$routeParams.idCampaign}/catalog/equipment/${equipment.id}`);
+                $scope.equipment = Mix.castAs(Equipment, equipment);
+                $scope.equipment.options.forEach((option) => {
+                  let tax = _.findWhere($scope.taxes.all, {id : option.id_tax} );
+                  tax === undefined ? option.tax_amount = NaN : option.tax_amount = tax.value;
+                });
+                $scope.display.equipment = true;
+            }
+        };
+        $scope.calculatePriceOfEquipment = (equipment: Equipment) => {
+            let price = parseFloat( $scope.calculatePriceTTC(equipment.price , equipment.tax_amount) );
+            equipment.options.map((option) => {
+                (option.required === true || option.selected === true) ? price += parseFloat($scope.calculatePriceTTC(option.price , option.tax_amount) )  : null ;
+            });
+            return price;
+        };
+        $scope.validArticle = (equipment: Equipment) => {
+            return !isNaN(parseFloat($scope.calculatePriceOfEquipment(equipment)));
+        };
+        $scope.switchAll = (model: boolean, collection) => {
+           collection.forEach((col) => {col.required ? null : col.selected = model; });
+            Utils.safeApply($scope);
+        };
+        $scope.thereAreOptionalOptions = (equipment: Equipment) => {
+            return !(_.findWhere(equipment.options, {required : false}) === undefined) ;
         };
     }]);

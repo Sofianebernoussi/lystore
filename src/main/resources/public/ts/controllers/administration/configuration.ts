@@ -256,9 +256,9 @@ export const configurationController = ng.controller('configurationController',
                 for (let i = 0; i < options.length; i++) {
                     if ( options[i].name === undefined
                         || options[i].name.trim() === ''
-                        || options[i].price === undefined
-                        || options[i].price.toString().trim() === ''
-                        || isNaN(parseFloat(options[i].price.toString()))
+                        || options[i].name === null
+                        || options[i].price === (undefined || null)
+                        || isNaN(options[i].price)
                         || options[i].amount === undefined
                         || options[i].amount.toString().trim() === ''
                         || isNaN(parseInt(options[i].amount.toString()))
@@ -326,13 +326,6 @@ export const configurationController = ng.controller('configurationController',
         $scope.dropTechnicalSpec = (equipment: Equipment, technicalSpec: TechnicalSpec) => {
             equipment.technical_specs = _.without(equipment.technical_specs, technicalSpec);
             Utils.safeApply($scope);
-        };
-
-        $scope.calculatePriceTTC = (price, tax_value) => {
-            let priceFloat = parseFloat(price);
-            let taxFloat = parseFloat(tax_value);
-            let price_TTC = (( priceFloat + ((priceFloat *  taxFloat) / 100)));
-            if (!isNaN(price_TTC))return price_TTC; else return '';
         };
         $scope.calculatePriceOption = (price , tax_id, amount) => {
             let tax_value = parseFloat(_.findWhere($scope.taxes.all, {id: tax_id}).value) ;

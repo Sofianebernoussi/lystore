@@ -20,7 +20,7 @@ routes.define(($routeProvider) => {
         .when('/', {
             action: 'main'
         });
-    if (model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.administrator)) {
+    if (model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.manager)) {
         $routeProvider.when('/campaigns/create', {
             action: 'createCampaigns'
         })
@@ -70,7 +70,9 @@ routes.define(($routeProvider) => {
             .when('/campaign/:idCampaign/catalog', {
                 action: 'campaignCatalog'
             })
-
+            .when('/campaign/:idCampaign/catalog/equipment/:idEquipment', {
+                action: 'equipmentDetail'
+            })
             .when('/campaign/:idCampaign/order', {
                 action: 'campaignOrder'
             })

@@ -46,18 +46,14 @@ public class AgentController extends ControllerHelper {
     @ApiDoc("Create an agent")
     @SecuredAction(Lystore.ADMINISTRATOR_RIGHT)
     public void createAgent (final HttpServerRequest request) {
-        UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-            public void handle(final UserInfos user) {
-                RequestUtils.bodyToJson(request, pathPrefix + "agent", new Handler<JsonObject>() {
-                    public void handle(JsonObject body) {
-                        agentService.createAgent(body, Logging.defaultResponseHandler(eb,
-                                request,
-                                Contexts.AGENT.toString(),
-                                Actions.CREATE.toString(),
-                                null,
-                                body));
-                    }
-                });
+        RequestUtils.bodyToJson(request, pathPrefix + "agent", new Handler<JsonObject>() {
+            public void handle(JsonObject body) {
+                agentService.createAgent(body, Logging.defaultResponseHandler(eb,
+                        request,
+                        Contexts.AGENT.toString(),
+                        Actions.CREATE.toString(),
+                        null,
+                        body));
             }
         });
     }

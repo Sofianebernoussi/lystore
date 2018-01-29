@@ -53,9 +53,9 @@ public class Logging {
             public void handle(Either<String, JsonObject> event) {
                 if (event.isRight()) {
                     Renders.renderJson(request, event.right().getValue(), 200);
-                    JsonObject statment = add(eb, request, context, action,
+                    JsonObject statement = add(eb, request, context, action,
                             item == null ? event.right().getValue().getNumber("id").toString() : item, object);
-                    Sql.getInstance().prepared(statment.getString("statement"),statment.getArray("values"),null);
+                    Sql.getInstance().prepared(statement.getString("statement"),statement.getArray("values"),null);
 
                 } else {
                     JsonObject error = new JsonObject()

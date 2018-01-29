@@ -196,16 +196,19 @@ body.lystore {
     color: #2a9cc8;
     margin: 0 2% 0 2%;
   }
-  .catalog-list{
-    .dominos .item{
-
+  .catalog-list {
+    .dominos .item {
+      max-width: 300px !important;
+      width: 16% !important;
+      padding: 0px !important;
+      margin: 7px 7px 0px 7px;
+      min-width: 250px;
       article.desabled {
         opacity: 0.4 !important;
       }
       article {
         border: 1px #ddd solid;
       }
-
       div.desabled {
         height: 94%;
         width: 98%;
@@ -227,19 +230,15 @@ body.lystore {
         right: 0;
         text-shadow: 0.5px 0.25px #ccc;
       }
-      max-width: 300px !important;
-      width: 16% !important;
-      padding:0px !important;
-      margin:7px 7px 0px 7px ;
+
+
       h2 {
-      min-width: 250px;
-      h2{
         margin-left: 5%;
       }
       .top {
         padding-left: 5%;
         padding-right: 5%;
-        height:200px;
+        height: 200px;
         img {
           position: relative;
           height: auto;
@@ -259,22 +258,21 @@ body.lystore {
         }
       }
     }
+
   }
   .campaign-personnel-list {
-    article:hover{
+    article:hover {
       box-shadow: 0 1px 3px #666;
       cursor: pointer;
     }
-    card {
-    div.desabled{
-      opacity: 0.5;
-      cursor: context-menu;
-    }
-    div.card{
-      text-align: center;
-    }
+      div.desabled {
+        opacity: 0.5;
+        cursor: context-menu;
+      }
+      div.card {
+        text-align: center;
+      }
   }
-
   .campaign-image {
     img {
       max-width: 75%;

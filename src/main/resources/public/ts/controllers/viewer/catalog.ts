@@ -45,10 +45,6 @@ export const catalogController = ng.controller('catalogController',
             if (equipment.status === 'AVAILABLE') {
                 $scope.redirectTo(`/campaign/${$routeParams.idCampaign}/catalog/equipment/${equipment.id}`);
                 $scope.equipment = Mix.castAs(Equipment, equipment);
-                $scope.equipment.options.forEach((option) => {
-                  let tax = _.findWhere($scope.taxes.all, {id : option.id_tax} );
-                  tax === undefined ? option.tax_amount = NaN : option.tax_amount = tax.value;
-                });
                 $scope.display.equipment = true;
             }
         };

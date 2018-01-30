@@ -11,7 +11,6 @@ import {
     COMBO_LABELS,
     Campaign,
     Utils,
-    Structure,
     StructureGroup
 } from '../../model';
 
@@ -378,7 +377,9 @@ export const configurationController = ng.controller('configurationController',
         $scope.validCampaignForm = (campaign: Campaign) => {
             return campaign.name !== undefined
                 && campaign.name.trim() !== ''
-                && _.findWhere($scope.structureGroups.all, {selected: true}) !== undefined;
+                && _.findWhere($scope.structureGroups.all, {selected: true}) !== undefined
+                && (_.where($scope.structureGroups.all, {selected : true } ).length > 0 ) ? _.every(_.where($scope.structureGroups.all, {selected : true}), (structureGroup) => { return structureGroup.tags.length > 0; } ) : false ;
+
         };
 
         $scope.addTagToCampaign = (index) => {

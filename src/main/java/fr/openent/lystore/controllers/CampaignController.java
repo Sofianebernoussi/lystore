@@ -26,6 +26,8 @@ import java.util.List;
 import fr.openent.lystore.service.CampaignService;
 import fr.openent.lystore.service.impl.DefaultCampaignService;
 
+import javax.naming.ldap.ManageReferralControl;
+
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
 
@@ -39,14 +41,14 @@ public class CampaignController extends ControllerHelper {
     }
 
     @Get("/campaigns")
-    @ApiDoc("List all campaigns in database")
+    @ApiDoc("List all campaigns")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     @ResourceFilter(ManagerOrPersonnelRight.class)
     public void list(final HttpServerRequest  request) {
         UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
             @Override
             public void handle(UserInfos user) {
-                if(user.getType().equals("Personnel")){
+                if(! (WorkflowActionUtils.hasRight(user, WorkflowActions.MANAGER_RIGHT.toString()))){
                     String idStructure = request.params().contains("idStructure")
                             ? request.params().get("idStructure")
                             : null;

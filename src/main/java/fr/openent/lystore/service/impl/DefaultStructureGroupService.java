@@ -32,8 +32,8 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
     @Override
     public void listStructureGroups(Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT id, name, description, array_to_json(array_agg(id_structure)) as structures FROM "
-                + Lystore.LYSTORE_SCHEMA + ".structure_group "+
-                "INNER JOIN " +Lystore.LYSTORE_SCHEMA + ".rel_group_structure"+
+                + Lystore.LYSTORE_SCHEMA + ".structure_group " +
+                "INNER JOIN " + Lystore.LYSTORE_SCHEMA + ".rel_group_structure" +
                 " on structure_group.id = rel_group_structure.id_structure_group group by (id, name , description ) " +
                 "ORDER BY id;";
 
@@ -43,10 +43,10 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
     @Override
     public void create(final JsonObject structureGroup, final Handler<Either<String, JsonObject>> handler) {
         String getIdQuery = "Select nextval('"+ Lystore.LYSTORE_SCHEMA + ".structure_group_id_seq') as id";
-        sql.raw(getIdQuery, SqlResult.validUniqueResultHandler(new Handler<Either<String, JsonObject>>() {
+        sql.raw(getIdQuery, SqlResult.validUniqueResultHandler( new Handler<Either<String, JsonObject>>() {
             @Override
             public void handle(Either<String, JsonObject> event) {
-                if(event.isRight()){
+                if(event.isRight()) {
                     try{
                         final Number id = event.right().getValue().getNumber("id");
                         JsonArray statements = new JsonArray()
@@ -63,12 +63,10 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
                         });
 
                     }catch(ClassCastException e){
-                        //TODO
-                        log.error("An error occured when casting structures ids");
+                        log.error("An error occured when casting structures ids " + e);
                         handler.handle(new Either.Left<String, JsonObject>(""));
                     }
                 }else{
-                    //TODO
                    log.error("An error occurred when selecting next val");
                     handler.handle(new Either.Left<String, JsonObject>(""));
                 }
@@ -90,8 +88,6 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
             }
         });
     }
-
-
 
     @Override
     public void delete(final List<Integer> ids, final Handler<Either<String, JsonObject>> handler) {
@@ -134,7 +130,7 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
     private JsonObject getGroupStructureRelationshipStatement(Number id_structure_group, JsonArray idsStructure) {
         StringBuilder insertGroupStructureRelationshipQuery = new StringBuilder();
         JsonArray params = new JsonArray();
-        insertGroupStructureRelationshipQuery.append("INSERT INTO "+Lystore.LYSTORE_SCHEMA +".rel_group_structure(id_structure,id_structure_group) VALUES ");
+        insertGroupStructureRelationshipQuery.append("INSERT INTO "+ Lystore.LYSTORE_SCHEMA + ".rel_group_structure(id_structure,id_structure_group) VALUES ");
 
         for(int i = 0; i < idsStructure.size();i++ ){
             String idStructure = idsStructure.get(i);
@@ -146,7 +142,6 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
             }else{
                 insertGroupStructureRelationshipQuery.append(";");
             }
-
         }
         return new JsonObject()
                 .putString("statement",insertGroupStructureRelationshipQuery.toString())
@@ -196,7 +191,7 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
         String query = "DELETE FROM " + Lystore.LYSTORE_SCHEMA + ".rel_group_structure WHERE id_structure_group IN " +Sql.listPrepared(ids.toArray());
         JsonArray params = new JsonArray();
 
-        for(Integer id : ids){
+        for (Integer id : ids) {
             params.addNumber(id);
         }
         return new JsonObject()
@@ -215,7 +210,7 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
         String query = "DELETE FROM "+ Lystore.LYSTORE_SCHEMA +".structure_group WHERE id IN "+Sql.listPrepared(ids.toArray());
         JsonArray params = new JsonArray();
 
-        for(Integer id : ids){
+        for (Integer id : ids) {
             params.addNumber(id);
         }
         return new JsonObject()
@@ -233,11 +228,11 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
     private Either<String,JsonObject> getTransactionHandler (Message<JsonObject> event, Number id){
         Either<String,JsonObject> either;
         JsonObject result =  event.body();
-        if(result.containsField("status") && "ok".equals(result.getString("status"))){
+        if (result.containsField("status") && "ok".equals(result.getString("status"))) {
             JsonObject returns = new JsonObject()
                     .putNumber("id",id);
             either = new Either.Right<String,JsonObject>(returns);
-        }else{
+        } else {
             //TODO
             log.error("An error occurred when launching transaction");
             either = new Either.Left<String,JsonObject>("");

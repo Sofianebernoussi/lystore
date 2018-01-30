@@ -21,7 +21,6 @@ public class StructureController extends ControllerHelper {
     public StructureController(){
         super();
         this.structureService = new DefaultStructureService();
-
     }
 
     @Get("/structures")
@@ -30,6 +29,5 @@ public class StructureController extends ControllerHelper {
     public void getStructures(HttpServerRequest request){
         structureService.getStructures(arrayResponseHandler(request));
     }
-
 
 }

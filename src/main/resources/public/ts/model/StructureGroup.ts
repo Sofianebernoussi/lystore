@@ -31,6 +31,7 @@ export class StructureGroup implements Selectable {
             tags: this.tags.map((tag) => tag.id)
         };
     }
+
     async save () {
         if (this.id) {
             await this.update();
@@ -38,6 +39,7 @@ export class StructureGroup implements Selectable {
             await this.create();
         }
     }
+
     async create () {
         try {
             await http.post(`/lystore/structure/group`, this.toJson());
@@ -45,6 +47,7 @@ export class StructureGroup implements Selectable {
             notify.error('lystore.structureGroup.create.err');
         }
     }
+
     async update () {
         try {
             await http.put(`/lystore/structure/group/${this.id}`, this.toJson());
@@ -53,6 +56,7 @@ export class StructureGroup implements Selectable {
             notify.error('lystore.structureGroup.update.err');
         }
     }
+
     async delete () {
         try {
             let id = `id=${this.id}`;
@@ -61,14 +65,15 @@ export class StructureGroup implements Selectable {
             notify.error('lystore.structureGroup.delete.err');
         }
     }
+
     structureIdToObject(idsStructure: String[], structures: Structures) {
         this.structures = [];
         idsStructure.forEach((idStructure) => {
             let structure = new Structure();
             structure = _.findWhere(structures.all, {id: idStructure});
-           if (structure !== undefined ) {
-               this.structures.push(structure);
-           }
+            if (structure !== undefined ) {
+                this.structures.push(structure);
+            }
         });
     }
 }
@@ -79,6 +84,7 @@ export class StructureGroups extends Selection<StructureGroup> {
     constructor () {
         super([]);
     }
+
     async delete (structureGroups: StructureGroup[]): Promise<void> {
         try {
             let filter = '';
@@ -89,6 +95,7 @@ export class StructureGroups extends Selection<StructureGroup> {
             notify.error('lystore.structureGroup.sync.err');
         }
     }
+
     async sync() {
         let {data} = await http.get(`/lystore/structure/groups`);
         this.all = Mix.castArrayAs(StructureGroup, data);

@@ -1,16 +1,16 @@
-<div workflow="lystore.administrator">
+<div >
     <h1>
         <i18n>lystore.manage.structureGroups</i18n>
     </h1>
     <div class="row structureGroups-management">
         <div class ="twelve">
-            <article >
-                <i class="add-group" ng-click="openStructureGroupForm()"></i>
+            <article workflow="lystore.administrator">
+                <i  class="add-group" ng-click="openStructureGroupForm()"></i>
             </article>
             <article ng-repeat="structureGroup in structureGroups.all">
                     <h3>[[structureGroup.name]]</h3>
                     <p> [[structureGroup.structures.length]] <i18n>structures</i18n> </p>
-                    <div class="two-icons">
+                    <div workflow="lystore.administrator" class="two-icons">
                         <i class="edit" ng-click="openStructureGroupForm(structureGroup)"></i>
                         <i class="delete" ng-click="openStructureGroupDeletion(structureGroup)"></i>
                     </div>

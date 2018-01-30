@@ -29,7 +29,7 @@ public class StructureGroupController extends ControllerHelper{
 
     private StructureGroupService structureGroupService;
 
-    public StructureGroupController (){
+    public StructureGroupController () {
         super();
         this.structureGroupService = new DefaultStructureGroupService(Lystore.LYSTORE_SCHEMA,"structure_group");
     }
@@ -45,7 +45,7 @@ public class StructureGroupController extends ControllerHelper{
     @ApiDoc("Create a group of Structures")
     @SecuredAction(value="", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
-    public void create(final HttpServerRequest request){
+    public void create (final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "structureGroup", new Handler<JsonObject>() {
             @Override
             public void handle(JsonObject structureGroup) {
@@ -64,7 +64,7 @@ public class StructureGroupController extends ControllerHelper{
     @ApiDoc("Update a group of strctures")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
-    public void update (final HttpServerRequest request){
+    public void update (final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "structureGroup", new Handler<JsonObject>() {
             @Override
             public void handle(JsonObject structureGroup) {
@@ -76,9 +76,8 @@ public class StructureGroupController extends ControllerHelper{
                             Actions.UPDATE.toString(),
                             request.params().get("id"),
                             structureGroup));
-                }catch (ClassCastException e){
-                    //TODO
-                    log.error("An error occured when casting structureGroup id");
+                } catch (ClassCastException e) {
+                    log.error("An error occured when casting structureGroup id" + e);
                     badRequest(request);
                 }
             }
@@ -89,10 +88,10 @@ public class StructureGroupController extends ControllerHelper{
     @ApiDoc("Delete a group of Structures")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
-    public void delete(final HttpServerRequest request){
-        try{
+    public void delete (final HttpServerRequest request) {
+        try {
             List<String> params = request.params().getAll("id");
-            if(params.size() > 0){
+            if (params.size() > 0) {
                 List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
                 structureGroupService.delete(ids,Logging.defaultResponsesHandler(eb,
                         request,
@@ -100,10 +99,11 @@ public class StructureGroupController extends ControllerHelper{
                         Actions.DELETE.toString(),
                        params,
                         null));
+            } else {
+                badRequest(request);
             }
-        }catch(ClassCastException e){
-            //TODO
-            log.error("An error occurred when casting group(s) of structures id(s)");
+        } catch (ClassCastException e) {
+            log.error("An error occurred when casting group(s) of structures id(s)" + e);
             badRequest(request);
         }
     }

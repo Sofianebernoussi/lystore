@@ -11,10 +11,10 @@ export class Structure implements Selectable {
     selected: boolean;
 
     constructor (name?: string, uai?: string, city?: string) {
-        this.name = name;
-        this.uai = uai;
-        this.city = city;
-        this.selected = false;
+       if (name) this.name = name;
+       if (uai) this.uai = uai;
+       if (city) this.city = city;
+       this.selected = false;
     }
 
     toJson () {
@@ -29,7 +29,6 @@ export class Structure implements Selectable {
 }
 
 export class Structures  extends Selection<Structure> {
-
 
     constructor () {
         super([]);

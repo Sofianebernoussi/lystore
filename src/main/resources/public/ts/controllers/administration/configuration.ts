@@ -1,18 +1,18 @@
 import { ng, template, moment, _, idiom as lang } from 'entcore';
 import { Mix } from 'entcore-toolkit';
 import {
-Agent,
-Supplier,
-Contract,
-Tag,
-Equipment,
-EquipmentOption,
-TechnicalSpec,
-COMBO_LABELS,
-Campaign,
-Utils,
-Structure,
-StructureGroup
+    Agent,
+    Supplier,
+    Contract,
+    Tag,
+    Equipment,
+    EquipmentOption,
+    TechnicalSpec,
+    COMBO_LABELS,
+    Campaign,
+    Utils,
+    Structure,
+    StructureGroup
 } from '../../model';
 
 export const configurationController = ng.controller('configurationController',
@@ -250,6 +250,7 @@ export const configurationController = ng.controller('configurationController',
         $scope.removeTagToEquipment = (tag: Tag) => {
             $scope.equipment.tags = _.without($scope.equipment.tags, tag);
         };
+
         $scope.validEquipmentOptions = (options: EquipmentOption[]) => {
             if ( options.length > 0 ) {
                 let valid = true;
@@ -273,6 +274,7 @@ export const configurationController = ng.controller('configurationController',
                 return true;
             }
         };
+
         $scope.validEquipmentForm = (equipment: Equipment) => {
             return equipment.name !== undefined
                 && equipment.name.trim() !== ''
@@ -290,6 +292,7 @@ export const configurationController = ng.controller('configurationController',
             $scope.redirectTo('/equipments');
             Utils.safeApply($scope);
         };
+
         $scope.openEquipmentsDeletion = () => {
             template.open('equipment.lightbox', 'administrator/equipment/equipment-delete-validation');
             $scope.display.lightbox.equipment = true;
@@ -327,6 +330,7 @@ export const configurationController = ng.controller('configurationController',
             equipment.technical_specs = _.without(equipment.technical_specs, technicalSpec);
             Utils.safeApply($scope);
         };
+
         $scope.calculatePriceOption = (price , tax_id, amount) => {
             let tax_value = parseFloat(_.findWhere($scope.taxes.all, {id: tax_id}).value) ;
             if (tax_value !== undefined ) {
@@ -338,6 +342,7 @@ export const configurationController = ng.controller('configurationController',
                 return NaN;
             }
         };
+
         $scope.addOptionLigne = () => {
             let option = new EquipmentOption();
             $scope.equipment.options.push(option);
@@ -364,10 +369,12 @@ export const configurationController = ng.controller('configurationController',
             });
             $scope.structureGroups.updateSelected();
         };
+
         $scope.openCampaignsDeletion = () => {
             template.open('campaign.lightbox', 'administrator/campaign/campaign-delete-validation');
             $scope.display.lightbox.campaign = true;
         };
+
         $scope.validCampaignForm = (campaign: Campaign) => {
             return campaign.name !== undefined
                 && campaign.name.trim() !== ''
@@ -380,10 +387,12 @@ export const configurationController = ng.controller('configurationController',
             $scope.display.input.group[index] = false;
             Utils.safeApply($scope);
         };
+
         $scope.deleteTagFromCampaign = (index, tag) => {
             $scope.structureGroups.all[index].tags = _.without($scope.structureGroups.all[index].tags, tag);
             Utils.safeApply($scope);
         };
+
         $scope.validCampaign = async(campaign: Campaign) => {
             $scope.campaign.groups = [];
             $scope.structureGroups.all.map((group) => $scope.selectCampaignsStructureGroup(group) );
@@ -392,6 +401,7 @@ export const configurationController = ng.controller('configurationController',
             $scope.redirectTo('/campaigns');
             Utils.safeApply($scope);
         };
+
         $scope.deleteCampaigns = async (campaigns) => {
             await $scope.campaigns.delete(campaigns);
             await $scope.campaigns.sync();
@@ -399,9 +409,11 @@ export const configurationController = ng.controller('configurationController',
             $scope.display.lightbox.campaign = false;
             Utils.safeApply($scope);
         };
+
         $scope.selectCampaignsStructureGroup = (group) => {
             group.selected ? $scope.campaign.groups.push(group) : $scope.campaign.groups = _.reject($scope.campaign.groups, (groups) => { return groups.id === group.id; } );
         };
+
         $scope.openStructureGroupForm = (structureGroup: StructureGroup = new StructureGroup()) => {
             $scope.redirectTo('/structureGroups/create');
             $scope.structureGroup = new StructureGroup();
@@ -409,9 +421,11 @@ export const configurationController = ng.controller('configurationController',
             $scope.structureGroup.structureIdToObject(structureGroup.structures, $scope.structures);
             Utils.safeApply($scope);
         };
+
         $scope.structuresFilter = (structureRight) => {
             return _.findWhere($scope.structureGroup.structures, {id : structureRight.id}) === undefined;
         };
+
         $scope.addStructuresInGroup = () => {
             $scope.structures.deselectAll($scope.structures.selected);
             $scope.structureGroup.structures.push.apply($scope.structureGroup.structures, $scope.structures.selectedElements);
@@ -419,31 +433,36 @@ export const configurationController = ng.controller('configurationController',
             $scope.structures.selectedElements = [];
             Utils.safeApply($scope);
         };
+
         $scope.deleteStructuresofGroup = () => {
             $scope.structureGroup.structures = _.difference($scope.structureGroup.structures, $scope.structureGroup.structures.filter(structureRight => structureRight.selected));
             $scope.structures.deselectAll($scope.structures.selectedElements);
             $scope.structures.selectedElements = [];
             Utils.safeApply($scope);
         };
+
         $scope.validStructureGroupForm  = (structureGroup: StructureGroup) => {
             return structureGroup.name !== undefined
-                && structureGroup.name !== ''
+                && structureGroup.name.trim() !== ''
                 && structureGroup.structures.length > 0;
         };
+
         $scope.validStructureGroup = async (structureGroup: StructureGroup) => {
             await structureGroup.save();
             $scope.redirectTo('/structureGroups');
             Utils.safeApply($scope);
         };
+
         $scope.openStructureGroupDeletion = (structureGroup: StructureGroup) => {
             $scope.structureGroup = structureGroup;
             template.open('structureGroup.lightbox', 'administrator/structureGroup/structureGroup-delete');
             $scope.display.lightbox.structureGroup = true;
         };
+
         $scope.deleteStructureGroup = async () => {
             await $scope.structureGroup.delete();
             await $scope.structureGroups.sync();
             $scope.display.lightbox.structureGroup = false;
             Utils.safeApply($scope);
         };
- }]);
+    }]);

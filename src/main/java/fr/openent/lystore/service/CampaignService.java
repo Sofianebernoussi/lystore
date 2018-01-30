@@ -19,7 +19,7 @@ public interface CampaignService {
 
  /**
   * List all campaigns of a structure
-  * @idStructure id of the structure
+  * @param  idStructure of the structure
   * @param handler function handler returning data
   */
  public void listCampaigns(String idStructure, Handler<Either<String, JsonArray>> handler);

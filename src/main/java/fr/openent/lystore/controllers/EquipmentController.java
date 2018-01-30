@@ -51,7 +51,10 @@ public class EquipmentController extends ControllerHelper {
                         Integer idCampaign = request.params().contains("idCampaign")
                                 ? Integer.parseInt(request.params().get("idCampaign"))
                                 : null;
-                        equipmentService.listEquipments(user, idCampaign, arrayResponseHandler(request));
+                        String idStructure = request.params().contains("idStructure")
+                                ? request.params().get("idStructure")
+                                : null;
+                        equipmentService.listEquipments(user, idCampaign, idStructure, arrayResponseHandler(request));
                     } catch (ClassCastException e) {
                         log.error("An error occurred casting campaign id");
                     }

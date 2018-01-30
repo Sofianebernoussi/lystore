@@ -46,13 +46,21 @@ public class CampaignController extends ControllerHelper {
         UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
             @Override
             public void handle(UserInfos user) {
-                campaignService.listCampaigns(user, arrayResponseHandler(request));
+                if(user.getType().equals("Personnel")){
+                    String idStructure = request.params().contains("idStructure")
+                            ? request.params().get("idStructure")
+                            : null;
+                    campaignService.listCampaigns(idStructure, arrayResponseHandler(request));
+                }else{
+                    campaignService.listCampaigns(arrayResponseHandler(request));
+                }
+
             }
         });
     }
 
     @Get("/campaigns/:id")
-    @ApiDoc("List all campaigns in database")
+    @ApiDoc("Get campaign in database")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     @ResourceFilter(ManagerRight.class )
     public void campaign(HttpServerRequest request) {

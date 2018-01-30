@@ -1,4 +1,5 @@
 import { ng, template, _ } from 'entcore';
+import { Mix } from 'entcore-toolkit';
 import {
     Campaign,
     Utils
@@ -6,13 +7,15 @@ import {
 
 
 export const campaignsListController = ng.controller('campaignsListController',
-    ['$scope', ($scope) => {
-
+    ['$scope', '$rootScope', ($scope, $rootScope) => {
         $scope.openCampaign = (campaign: Campaign) => {
             if (campaign.accessible) {
+                $scope.emitCampaign(campaign);
                 $scope.redirectTo(`/campaign/${campaign.id}/catalog`);
                 Utils.safeApply($scope);
             }
         };
-
+        $scope.emitCampaign = function(campaign) {
+            $scope.$emit('eventEmitedCampaign', campaign);
+        };
     }]);

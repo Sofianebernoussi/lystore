@@ -109,9 +109,9 @@ export class Equipments extends Selection<Equipment> {
         }
     }
 
-    async sync (idCampaign?: number ) {
+    async sync (idCampaign?: number , idStructure?: string ) {
         try {
-            let { data } = idCampaign ? await http.get(`/lystore/equipments/campaign/${idCampaign}`) : await http.get(`/lystore/equipments`) ;
+            let { data } = idCampaign ? await http.get(`/lystore/equipments/campaign/${idCampaign}?idStructure=${idStructure}`) : await http.get(`/lystore/equipments`) ;
             this.all = Mix.castArrayAs(Equipment, data);
             this.all.map((equipment) => {
                 equipment.price = parseFloat(equipment.price.toString());

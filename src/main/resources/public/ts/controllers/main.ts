@@ -1,4 +1,4 @@
-import { ng, template, notify, idiom as lang, moment, model, Behaviours} from 'entcore';
+import { ng, template, notify, idiom as lang, moment, model, Behaviours, _} from 'entcore';
 import {
     Structures,
     Agents,
@@ -14,12 +14,13 @@ import {
     Campaigns,
     Campaign,
     StructureGroup,
+    Structure,
     Utils,
     Equipment
 } from '../model';
 
-export const mainController = ng.controller('MainController', ['$scope', 'route', '$location',
-    ($scope, route, $location) => {
+export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', '$rootScope',
+    ($scope, route, $location, $rootScope) => {
         template.open('main', 'administrator/main');
         $scope.lang = lang;
         $scope.agents = new Agents();
@@ -35,13 +36,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.structureGroups = new StructureGroups();
         $scope.taxes = new Taxes();
         $scope.logs = new Logs();
-       /* $scope.structures.sync().then(() => {
-            if ($scope.structures.all.length > 0) {
-                $scope.structure = $scope.structures.all[0];
-            }  else {
-                notify.error('Aucune structure');
-            }
-        });*/
+        $scope.structure = new Structure;
 
         route({
             main:  async() => {
@@ -49,8 +44,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                     template.open('main-profile', 'administrator/management-main');
                 }
                 else if ($scope.isPersonnel() && !$scope.isManager() && !$scope.isAdministrator()) {
+                    $scope.structure = model.me.structures[0];
                     template.open('main-profile', 'customer/campaign/campaign-list');
-                    await $scope.campaigns.sync();
+                    await $scope.campaigns.sync($scope.structure);
                     Utils.safeApply($scope);
                 }
             },
@@ -130,7 +126,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             campaignCatalog : async (params) => {
                 let id = params.idCampaign;
                 $scope.idIsInteger(id);
-                await $scope.equipments.sync(id);
+                await $scope.equipments.sync(id, $scope.structure);
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/catalog/catalog-list');
                 template.close('right-side');
@@ -171,7 +167,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.redirectTo = (path: string) => {
             $location.path(path);
         };
-
+        $rootScope.$on('eventEmitedCampaign', function(event, data) {
+            $scope.campaign = data;
+        });
         $scope.formatDate = (date: string | Date, format: string) => {
             return moment(date).format(format);
         };

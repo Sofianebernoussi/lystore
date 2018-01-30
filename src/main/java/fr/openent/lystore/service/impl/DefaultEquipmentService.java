@@ -43,7 +43,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
     }
 
-    public void listEquipments(UserInfos user, Integer idCampaign, Handler<Either<String, JsonArray>> handler) {
+    public void listEquipments(UserInfos user, Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new JsonArray();
         String query = "SELECT e.*, tax.value tax_amount, array_to_json(array_agg(DISTINCT opts)) as options, array_to_json(array_agg(DISTINCT  rel_equipment_tag.id_tag)) tags " +
                 "                FROM " + Lystore.LYSTORE_SCHEMA + ".equipment e " +
@@ -58,13 +58,9 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 "                AND rel_group_campaign.id_structure_group in " +
                 "                (select structure_group.id from " + Lystore.LYSTORE_SCHEMA + ".structure_group " +
                 "                INNER JOIN " + Lystore.LYSTORE_SCHEMA + ".rel_group_structure ON rel_group_structure.id_structure_group = structure_group.id " +
-                "                WHERE rel_group_structure.id_structure in " + Sql.listPrepared(user.getStructures().toArray()) + "))  " +
+                "                WHERE rel_group_structure.id_structure = ?))  " +
                 "                group by (e.id, tax.id) ";
-        values.addNumber(idCampaign);
-
-        for (String structure : user.getStructures()) {
-            values.addString(structure);
-        }
+        values.addNumber(idCampaign).addString(idStructure);
 
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
     }

@@ -21,7 +21,7 @@ public interface EquipmentService {
      * List equipments of Campaign in database
      * @param handler function handler returning data
      */
-    public void listEquipments(UserInfos user, Integer idCampaign, Handler<Either<String, JsonArray>> handler);
+    public void listEquipments(UserInfos user, Integer idCampaign,String idStructure, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Create an equipment

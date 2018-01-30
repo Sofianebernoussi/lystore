@@ -12,6 +12,7 @@ export class Campaign implements Selectable  {
     accessible: boolean;
     groups: StructureGroup[];
     selected: boolean;
+    purse_amount: number;
     nb_structures: number;
     nb_equipments: number;
     constructor (name?: string, description?: string) {
@@ -109,9 +110,9 @@ export class Campaigns extends Selection<Campaign> {
         }
     }
 
-    async sync () {
+    async sync (idStructure?: string) {
         try {
-            let { data } = await http.get(`/lystore/campaigns`);
+            let { data } = await http.get( idStructure ? `/lystore/campaigns?idStructure=${idStructure}`  : `/lystore/campaigns`  );
             this.all = Mix.castArrayAs(Campaign, data);
         } catch (e) {
             notify.error('lystore.campaigns.sync.err');

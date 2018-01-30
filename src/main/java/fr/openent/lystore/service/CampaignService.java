@@ -15,7 +15,14 @@ public interface CampaignService {
      * List all campaigns in database
      * @param handler function handler returning data
      */
-   public void listCampaigns(UserInfos user, Handler<Either<String, JsonArray>> handler);
+   public void listCampaigns( Handler<Either<String, JsonArray>> handler);
+
+ /**
+  * List all campaigns of a structure
+  * @idStructure id of the structure
+  * @param handler function handler returning data
+  */
+ public void listCampaigns(String idStructure, Handler<Either<String, JsonArray>> handler);
     /**
      * Get a campaign information
      * @param id id campaign to get

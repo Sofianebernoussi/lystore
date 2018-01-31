@@ -15,16 +15,21 @@
                 <img ng-src="[[campaign.image]]" ng-show="campaign.image!==null && campaign.image!==undefined " />
                 <img skin-src="/img/illustrations/pages-default.png" ng-show="campaign.image===null || campaign.image===undefined "/>
             </div>
-            <div class="nine cell right-magnet">
+            <div class="ten cell">
                 <h3>[[campaign.name]]</h3>
-                <p> [[campaign.nb_structures]] <i18n>structures</i18n> </p>
-                <p> [[campaign.nb_equipments]] <i18n>lystore.equipments.available</i18n> </p>
+                <p ng-bind-html="campaign.description"></p>
+                <p>
+                    <div class="small-text"><i18n>lystore.campaign.amount</i18n> : [[campaign.purse_amount]] <i18n>money.symbol</i18n><div>
+                    <div class="small-text">[[campaign.nb_structures]] <i18n>structures</i18n></div>
+                    <div class="small-text">[[campaign.nb_equipments]] <i18n>lystore.equipments.available</i18n></div>
+                </p>
             </div>
         </div>
         <div class="row" workflow="lystore.administrator">
             <button ng-click="redirectTo('/campaigns/' + campaign.id + '/purse')"><i18n>lystore.campaign.purse.manage</i18n></button>
             <div class="right-magnet">
-                <switch ng-model="campaign.accessible" ng-change="campaign.updateAccessibility()"></switch>
+                <span class="horizontal-spacing cell"><i18n>lystore.campaign.accessibility</i18n></span>
+                <switch ng-model="campaign.accessible" ng-change="campaign.updateAccessibility()" class="cell"></switch>
             </div>
         </div>
     </article>

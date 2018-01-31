@@ -23,19 +23,24 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
     }
 
     public void listCampaigns( Handler<Either<String, JsonArray>> handler) {
-        StringBuilder query = new StringBuilder()
-                .append(" SELECT ")
-                .append(" campaign.*, COUNT(distinct rel_group_structure.id_structure) as nb_structures,")
-                .append(" COUNT(distinct rel_equipment_tag.id_equipment) as nb_equipments")
-                .append(" FROM " + Lystore.lystoreSchema + ".campaign")
-                .append(" LEFT JOIN " + Lystore.lystoreSchema + ".rel_group_campaign")
-                .append(" ON (campaign.id = rel_group_campaign.id_campaign) ")
-                .append(" LEFT JOIN " + Lystore.lystoreSchema + ".rel_group_structure")
-                .append(" ON (rel_group_campaign.id_structure_group = rel_group_structure.id_structure_group)")
-                .append(" LEFT JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag")
-                .append(" ON (rel_equipment_tag.id_tag = rel_group_campaign.id_tag) ")
-                .append(" GROUP BY campaign.id ;" );
-        sql.prepared(query.toString(), new JsonArray(), SqlResult.validResultHandler(handler));
+        String query = "WITH campaign_amounts AS (" +
+                " SELECT SUM(amount) as sum, purse.id_campaign" +
+                " FROM lystore.purse" +
+                " GROUP BY id_campaign )" +
+                " SELECT " +
+                " campaign.*, COUNT(distinct rel_group_structure.id_structure) as nb_structures," +
+                " campaign_amounts.sum as purse_amount," +
+                " COUNT(distinct rel_equipment_tag.id_equipment) as nb_equipments" +
+                " FROM " + Lystore.lystoreSchema + ".campaign" +
+                " INNER JOIN campaign_amounts ON (campaign.id = campaign_amounts.id_campaign)" +
+                " LEFT JOIN " + Lystore.lystoreSchema + ".rel_group_campaign" +
+                " ON (campaign.id = rel_group_campaign.id_campaign)" +
+                " LEFT JOIN " + Lystore.lystoreSchema + ".rel_group_structure" +
+                " ON (rel_group_campaign.id_structure_group = rel_group_structure.id_structure_group)" +
+                " LEFT JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag" +
+                " ON (rel_equipment_tag.id_tag = rel_group_campaign.id_tag) " +
+                " GROUP BY campaign.id, campaign_amounts.sum;";
+        sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
     }
 
     public void listCampaigns(String idStructure,  Handler<Either<String, JsonArray>> handler) {

@@ -313,6 +313,7 @@ export const configurationController = ng.controller('configurationController',
         $scope.equipmentSearchFilter = (equipment: Equipment) => {
             return $scope.search.equipment !== undefined
                 ? equipment.name.toLowerCase().includes($scope.search.equipment.toLowerCase())
+                || $scope.calculatePriceOfEquipment(equipment, false, 2).toString().includes($scope.search.equipment.toLowerCase())
                 || equipment.price.toString().includes($scope.search.equipment.toLowerCase())
                 || $scope.contracts.get(equipment.id_contract).supplier_display_name.toLowerCase().includes($scope.search.equipment.toLowerCase())
                 || $scope.contracts.get(equipment.id_contract).name.toLowerCase().includes($scope.search.equipment.toLowerCase())

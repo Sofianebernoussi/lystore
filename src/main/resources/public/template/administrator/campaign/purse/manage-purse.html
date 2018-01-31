@@ -13,7 +13,7 @@
                     <td workflow="lystore.administrator">
                         <label class="checkbox">
                             <input type="checkbox"
-                                   ng-change="switchAll(allPurseSelected, purses)"
+                                   ng-change="switchAll(allPurseSelected, campaign.purses)"
                                    ng-model="allPurseSelected">
                             <span></span>
                         </label>
@@ -59,7 +59,7 @@
         <container template="purse.lightbox"></container>
     </lightbox>
 
-    <section class="toggle-buttons" ng-class="{ hide: campaign.purses.selected.length === 0 }">
+    <section class="toggle-buttons" ng-class="{ hide: campaign.purses.selected.length === 0 || campaign.purses.selected.length > 1}">
         <div class="toggle">
             <div class="row">
                 <button ng-click="openEditPurseForm(campaign.purses.selected[0])" ng-show="campaign.purses.selected.length === 1">

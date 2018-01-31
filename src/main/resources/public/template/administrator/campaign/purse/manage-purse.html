@@ -1,47 +1,71 @@
 <div ng-controller="PurseController" class="purse-management">
+
+    <div class="tools right-magnet">
+        <button ng-click="openPurseImporter()"><i18n>lystore.campaign.purse.import</i18n></button>
+        <button ng-click="exportPurses(campaign.id)"><i18n>lystore.campaign.purse.export</i18n></button>
+    </div>
+
     <div class="six centered twelve-mobile">
         <h1 class="centered-text">[[campaign.name]]</h1>
-        <div class="tools right-magnet">
-            <button ng-click="openPurseImporter()"><i18n>lystore.campaign.purse.import</i18n></button>
-            <button ng-click="exportPurses(campaign.id)"><i18n>lystore.campaign.purse.export</i18n></button>
-        </div>
-        <article class="row">
+        <article>
             <table class="twelve">
                 <thead>
-                <tr>
-                    <td>checkbox</td>
-                    <td><i18n>UAI</i18n></td>
-                    <td><i18n>name</i18n></td>
-                    <td><i18n>lystore.campaign.purse</i18n></td>
-                </tr>
+                    <td workflow="lystore.administrator">
+                        <label class="checkbox">
+                            <input type="checkbox"
+                                   ng-change="switchAll(allPurseSelected, purses)"
+                                   ng-model="allPurseSelected">
+                            <span></span>
+                        </label>
+                    </td>
+                    <td ng-click="sort.purse.type = 'uai';
+                        sort.purse.reverse = !sort.purse.reverse">
+                        <i18n>UAI</i18n>
+                        <i class="up-open" ng-show="sort.purse.type === 'uai' && !sort.purse.reverse"></i>
+                        <i class="down-open" ng-show="sort.purse.type === 'uai' && sort.purse.reverse"></i>
+                    </td>
+                    <td ng-click="sort.purse.type = 'name';
+                        sort.purse.reverse = !sort.purse.reverse">
+                        <i18n>name</i18n>
+                        <i class="up-open" ng-show="sort.purse.type === 'name' && !sort.purse.reverse"></i>
+                        <i class="down-open" ng-show="sort.purse.type === 'name' && sort.purse.reverse"></i>
+                    </td>
+                    <td ng-click="sort.purse.type = 'amount';
+                        sort.purse.reverse = !sort.purse.reverse">
+                        <i18n>lystore.campaign.purse</i18n>
+                        <i class="up-open" ng-show="sort.purse.type === 'amount' && !sort.purse.reverse"></i>
+                        <i class="down-open" ng-show="sort.purse.type === 'amount' && sort.purse.reverse"></i>
+                    </td>
                 </thead>
+                <tbody>
+                <tr ng-repeat="purse in campaign.purses.all | orderBy:sort.purse.type:sort.purse.reverse">
+                    <td workflow="lystore.administrator">
+                        <label class="checkbox">
+                            <input type="checkbox" ng-model="purse.selected">
+                            <span></span>
+                        </label>
+                    </td>
+                    <td>[[purse.uai]]</td>
+                    <td>[[purse.name]]</td>
+                    <td>[[purse.amount]]</td>
+                </tr>
+                </tbody>
             </table>
         </article>
+
     </div>
+
     <lightbox show="lightbox.open" on-close="lightbox.open = false">
-        <form ng-submit="importPurses(importer)">
-            <h2><i18n>lystore.campaign.purse.import.title</i18n> [[campaign.name]]</h2>
-            <div class="info">
-                <p><i18n>lystore.campaign.purse.import.definition</i18n></p>
-                <p>
-                    <i18n>lystore.campaign.purse.import.skeleton</i18n>
-                    <a href="/lystore/public/import/skeleton.csv">skeleton.csv</a>
-                </p>
-            </div>
-            <div class="warning" ng-if="importer.message">
-                <p>[[lang.translate(importer.message)]]</p>
-            </div>
-            <div class="vertical-spacing">
-                <p class="six centered">
-                    <i18n>csv.file</i18n>
-                    <input type="file" files-input-change ng-model="importer.files">
-                </p>
-                </p>
-                <div class="row">
-                    <button class="right-magnet" ng-disabled="!importer.isValid()">
-                        <i18n>import</i18n>
-                    </button>
-                </div>
-        </form>
+        <container template="purse.lightbox"></container>
     </lightbox>
+
+    <section class="toggle-buttons" ng-class="{ hide: campaign.purses.selected.length === 0 }">
+        <div class="toggle">
+            <div class="row">
+                <button ng-click="openEditPurseForm(campaign.purses.selected[0])" ng-show="campaign.purses.selected.length === 1">
+                    <i18n>modify</i18n>
+                </button>
+            </div>
+        </div>
+    </section>
 </div>

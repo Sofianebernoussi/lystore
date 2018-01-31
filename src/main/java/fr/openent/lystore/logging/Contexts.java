@@ -7,7 +7,8 @@ public enum Contexts {
     TAG ("TAG"),
     EQUIPMENT ("EQUIPMENT"),
     CAMPAIGN ("CAMPAIGN"),
-    STRUCTUREGROUP("STRUCTUREGROUP") ;
+    STRUCTUREGROUP("STRUCTUREGROUP"),
+    PURSE ("PURSE");
 
     private final String contextName;
 

@@ -21,4 +21,12 @@ public interface PurseService {
      * @param handler handler function returning data
      */
     void getPursesByCampaignId(Integer campaignId, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Update a purse based on his id
+     * @param id Purse id
+     * @param purse purse object
+     * @param handler Function handler returning data
+     */
+     void update(Integer id, JsonObject purse, Handler<Either<String, JsonObject>> handler);
 }

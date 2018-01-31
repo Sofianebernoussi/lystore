@@ -101,6 +101,7 @@
   "lystore.form.structureGroups.name":"Nom du regroupement : ",
   "lystore.form.structureGroups.description": "Description : ",
   "lystore.structureGroup.delete":"Êtes-vous sûr de vouloir supprimer ce regroupement d'établissement ?",
+  "lystore.purse.modify": "Modifier une cagnotte",
   "multi-combo.deselectAll": "Tout déselectionner",
   "multi-combo.options": "Options",
   "multi-combo.searchPlaceholder": "Chercher",
@@ -171,5 +172,6 @@
   "lystore.structureGroup.create.err":"Erreur lors de la création du regroupement",
   "lystore.structureGroup.update.err":"Erreur lors de la mise à jour de regroupemnt",
   "lystore.structureGroup.delete.err":"Erreur lors de la suppression des regroupements",
-  "lystore.structureGroup.sync.err":"Erreur lors de la récupération des regroupements"
+  "lystore.structureGroup.sync.err":"Erreur lors de la récupération des regroupements",
+  "lystore.purse.update.err":"Erreur lors de la mise à jour d'une cagnotte"
 }

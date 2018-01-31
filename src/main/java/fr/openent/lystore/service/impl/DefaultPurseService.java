@@ -37,7 +37,7 @@ public class DefaultPurseService implements PurseService {
 
     @Override
     public void getPursesByCampaignId(Integer campaignId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT id_structure, amount FROM " + Lystore.LYSTORE_SCHEMA + ".purse" +
+        String query = "SELECT * FROM " + Lystore.LYSTORE_SCHEMA + ".purse" +
                 " WHERE id_campaign = ?;";
 
         JsonArray params = new JsonArray()
@@ -67,5 +67,16 @@ public class DefaultPurseService implements PurseService {
                 .putString("statement", statement)
                 .putArray("values", params)
                 .putString("action", "prepared");
+    }
+
+    public void update(Integer id, JsonObject purse, Handler<Either<String, JsonObject>> handler) {
+        String query = "UPDATE " + Lystore.LYSTORE_SCHEMA + ".purse " +
+                "SET amount = ? WHERE id = ? RETURNING *;";
+
+        JsonArray params = new JsonArray()
+                .addNumber(purse.getNumber("amount"))
+                .addNumber(id);
+
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 }

@@ -2,6 +2,7 @@ import http from 'axios';
 import { notify, _ } from 'entcore';
 import { Selectable, Selection, Mix } from 'entcore-toolkit';
 import {StructureGroup,  Tags} from './index';
+import {Purses} from "./Purse";
 
 
 export class Campaign implements Selectable  {
@@ -15,11 +16,14 @@ export class Campaign implements Selectable  {
     purse_amount: number;
     nb_structures: number;
     nb_equipments: number;
+    purses: Purses;
+
     constructor (name?: string, description?: string) {
         if (name) this.name = name;
         if (description) this.description = description;
         this.groups = [];
         this.image = '';
+        this.purses = new Purses();
     }
 
     toJson () {

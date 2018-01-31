@@ -1,17 +1,53 @@
+import { notify } from 'entcore';
 import http from 'axios';
+import {Mix, Selectable, Selection} from "entcore-toolkit";
 
-export class Purse {
+export class Purse implements Selectable {
     id?: number;
     id_structure: string;
     amount: number;
     id_campaign: number;
+
+    selected: boolean;
+
+    constructor (id_structure?: string, amount?: number, id_campaign?: number) {
+        if (id_structure) this.id_structure = id_structure;
+        if (amount) this.amount = amount;
+        if (id_campaign) this.id_campaign = id_campaign;
+
+        this.selected = false;
+    }
+
+    async save (): Promise<void> {
+        try {
+            let purse = await http.put(`/lystore/purse/${this.id}`, this.toJson());
+            let { amount } = purse.data;
+            this.amount = amount;
+        } catch (e) {
+            notify.error('lystore.purse.update.err');
+        }
+    }
+
+    toJson () {
+        return {
+            id_structure: this.id_structure,
+            amount: this.amount,
+            id_campaign: this.id_campaign
+        };
+    }
 }
 
-export class Purses {
+export class Purses extends Selection<Purse> {
     all: Purse[];
 
     constructor () {
+        super([]);
         this.all = [];
+    }
+
+    async sync (id_campaign): Promise<void> {
+        let purses = await http.get(`/lystore/campaign/${id_campaign}/purses/list`);
+        this.all = Mix.castArrayAs(Purse, purses.data);
     }
 }
 

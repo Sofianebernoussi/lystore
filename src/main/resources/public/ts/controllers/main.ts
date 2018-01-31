@@ -16,7 +16,8 @@ import {
     StructureGroup,
     Structure,
     Utils,
-    Equipment
+    Equipment,
+    Purses
 } from '../model';
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', '$rootScope',
@@ -107,8 +108,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('campaigns-main', 'administrator/campaign/campaign_form');
                 Utils.safeApply($scope);
             },
-            managePurse: (params) => {
+            managePurse: async (params) => {
                 $scope.campaign = $scope.campaigns.get(parseInt(params.idCampaign));
+                $scope.campaign.purses = new Purses();
+                await $scope.campaign.purses.sync($scope.campaign.id);
                 template.open('campaigns-main', 'administrator/campaign/purse/manage-purse');
                 Utils.safeApply($scope);
             },

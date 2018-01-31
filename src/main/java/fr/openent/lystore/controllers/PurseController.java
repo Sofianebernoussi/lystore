@@ -1,6 +1,9 @@
 package fr.openent.lystore.controllers;
 
 import com.opencsv.CSVReader;
+import fr.openent.lystore.logging.Actions;
+import fr.openent.lystore.logging.Contexts;
+import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.security.WorkflowActionUtils;
 import fr.openent.lystore.security.WorkflowActions;
@@ -11,12 +14,14 @@ import fr.openent.lystore.service.impl.DefaultStructureService;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
 import fr.wseduc.rs.Post;
+import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.DefaultAsyncResult;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.http.Renders;
+import fr.wseduc.webutils.request.RequestUtils;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserInfos;
@@ -298,7 +303,7 @@ public class PurseController extends ControllerHelper {
         renderError(request, new JsonObject().putString("message", cause.getMessage()));
     }
 
-   @Get("/campaign/:id/purses/export")
+    @Get("/campaign/:id/purses/export")
     @ApiDoc("Export purses for a specific campaign")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
@@ -329,6 +334,103 @@ public class PurseController extends ControllerHelper {
             log.error("[Lystore@CSVExport] : An error occurred when casting campaign id", e);
             badRequest(request);
         }
+    }
+
+    @Put("/purse/:id")
+    @ApiDoc("Update a purse based on his id")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
+    public void updateHolder (final HttpServerRequest request) {
+        RequestUtils.bodyToJson(request, pathPrefix + "purse", new Handler<JsonObject>() {
+            public void handle(JsonObject body) {
+                try {
+                    purseService.update(Integer.parseInt(request.params().get("id")), body,
+                            Logging.defaultResponseHandler(eb,
+                                    request,
+                                    Contexts.PURSE.toString(),
+                                    Actions.UPDATE.toString(),
+                                    request.params().get("id"),
+                                    body));
+                } catch (ClassCastException e) {
+                    log.error("An error occurred when casting purse id");
+                    badRequest(request);
+                }
+            }
+        });
+    }
+
+    @Get("/campaign/:id/purses/list")
+    @ApiDoc("Get purses for a specific campaign")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
+    public void list(final HttpServerRequest request) {
+        try {
+            Integer idCampaign = Integer.parseInt(request.params().get("id"));
+            purseService.getPursesByCampaignId(idCampaign, new Handler<Either<String, JsonArray>>() {
+                @Override
+                public void handle(Either<String, JsonArray> event) {
+                    if (event.isRight()) {
+                        JsonArray ids = new JsonArray();
+                        JsonArray purses = event.right().getValue();
+                        JsonObject purse;
+                        for (int i = 0; i < purses.size(); i++) {
+                            purse = purses.get(i);
+                            ids.addString(purse.getString("id_structure"));
+                        }
+                        retrieveStructuresData(ids, purses, request);
+                    } else {
+                        badRequest(request);
+                    }
+                }
+            });
+        } catch (ClassCastException e) {
+            log.error("[Lystore@purses] : An error occurred when casting campaign id", e);
+            badRequest(request);
+        }
+    }
+
+    /**
+     * Retrieve structure uais and name based on ids list
+     * @param ids JsonArray containing ids list
+     * @param purses JsonArray containing purses list
+     * @param request Http request
+     */
+    private void retrieveStructuresData(JsonArray ids, final JsonArray purses, final HttpServerRequest request) {
+        structureService.getStructureById(ids, new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(Either<String, JsonArray> event) {
+                if (event.isRight()) {
+                    JsonObject values = new JsonObject();
+                    JsonArray structures = event.right().getValue();
+                    JsonObject structure;
+                    JsonObject purse;
+
+                    // put structure name / uai on the purse according to structure id
+                    for (int i = 0; i < structures.size(); i++) {
+                        structure = structures.get(i);
+                        for (int j = 0; j < purses.size(); j++) {
+                            purse = purses.get(j);
+
+                            if(purse.getField("id_structure").equals(structure.getField("id"))) {
+                                purse.putString("name", structure.getField("name").toString());
+                                purse.putString("uai", structure.getField("uai").toString());
+
+                                // we also convert amount to get a number instead of a string
+                                String amount = purse.getString("amount");
+                                purse.removeField("amount");
+                                purse.putNumber("amount",Double.parseDouble(amount));
+                            }
+                        }
+                    }
+
+                    Renders.renderJson(request, purses);
+
+                } else {
+                    renderError(request, new JsonObject().putString("message",
+                            event.left().getValue()));
+                }
+            }
+        });
     }
 
     /**

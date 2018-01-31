@@ -1,5 +1,6 @@
 import { ng, template, notify, moment, _ } from 'entcore';
-import { PurseImporter, Utils } from '../../model';
+import { PurseImporter, Utils, Purse } from '../../model';
+import {Mix} from "entcore-toolkit";
 
 declare let window: any;
 
@@ -9,9 +10,40 @@ export const purseController = ng.controller('PurseController',
             open: false
         };
 
+        $scope.sort = {
+            purse: {
+                type: 'name',
+                reverse: false
+            }
+        };
+
+        $scope.openEditPurseForm = (purse: Purse = new Purse()) => {
+            $scope.purse = new Purse();
+            Mix.extend($scope.purse, purse);
+            template.open('purse.lightbox', 'administrator/campaign/purse/edit-purse-form');
+            $scope.lightbox.open = true;
+            Utils.safeApply($scope);
+        };
+
+        $scope.cancelPurseForm = () => {
+            $scope.lightbox.open = false;
+            delete $scope.purse;
+        };
+
+        $scope.validPurse = async (purse: Purse) => {
+            await purse.save();
+            await $scope.campaign.purses.sync($scope.campaign.id);
+            delete $scope.purse;
+            // $scope.allHolderSelected = false;
+            $scope.lightbox.open = false;
+            Utils.safeApply($scope);
+        };
+
         $scope.openPurseImporter = (): void => {
             $scope.importer = new PurseImporter($scope.campaign.id);
+            template.open('purse.lightbox', 'administrator/campaign/purse/import-purses-form');
             $scope.lightbox.open = true;
+            Utils.safeApply($scope);
         };
 
         $scope.importPurses = async (importer: PurseImporter): Promise<void> => {
@@ -31,6 +63,6 @@ export const purseController = ng.controller('PurseController',
         };
 
         $scope.exportPurses = (id: number) => {
-            window.location = `/lystore/campaign/${id}/purses/export`;
+            window.location = `/lystore/campaign/${id}/purses/list`;
         };
     }]);

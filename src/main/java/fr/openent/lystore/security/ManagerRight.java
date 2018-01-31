@@ -7,7 +7,10 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
 
 public class ManagerRight implements ResourcesProvider {
-    public void authorize(HttpServerRequest resourceRequest, Binding binding, UserInfos user, Handler<Boolean> handler) {
+
+    @Override
+    public void authorize(HttpServerRequest resourceRequest, Binding binding,
+                          UserInfos user, Handler<Boolean> handler) {
         handler.handle(WorkflowActionUtils.hasRight(user, WorkflowActions.MANAGER_RIGHT.toString()));
     }
 }

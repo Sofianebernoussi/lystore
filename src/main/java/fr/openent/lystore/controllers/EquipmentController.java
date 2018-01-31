@@ -8,7 +8,11 @@ import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.service.EquipmentService;
 import fr.openent.lystore.service.impl.DefaultEquipmentService;
 import fr.openent.lystore.utils.SqlQueryUtils;
-import fr.wseduc.rs.*;
+import fr.wseduc.rs.ApiDoc;
+import fr.wseduc.rs.Delete;
+import fr.wseduc.rs.Get;
+import fr.wseduc.rs.Post;
+import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
@@ -30,12 +34,13 @@ public class EquipmentController extends ControllerHelper {
 
     public EquipmentController () {
         super();
-        this.equipmentService = new DefaultEquipmentService(Lystore.LYSTORE_SCHEMA, "equipment");
+        this.equipmentService = new DefaultEquipmentService(Lystore.lystoreSchema, "equipment");
     }
 
     @Get("/equipments")
     @ApiDoc("List all equipments in database")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @Override
     public void list(HttpServerRequest request) {
         equipmentService.listEquipments(arrayResponseHandler(request));
     }
@@ -56,7 +61,7 @@ public class EquipmentController extends ControllerHelper {
                                 : null;
                         equipmentService.listEquipments(user, idCampaign, idStructure, arrayResponseHandler(request));
                     } catch (ClassCastException e) {
-                        log.error("An error occurred casting campaign id");
+                        log.error("An error occurred casting campaign id", e);
                     }
                 }
             });
@@ -66,8 +71,10 @@ public class EquipmentController extends ControllerHelper {
     @ApiDoc("Create an equipment")
     @SecuredAction(value =  "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
+    @Override
     public void create(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "equipment", new Handler<JsonObject>() {
+            @Override
             public void handle(JsonObject equipment) {
                 equipmentService.create(equipment, Logging.defaultResponseHandler(eb,
                         request,
@@ -83,8 +90,10 @@ public class EquipmentController extends ControllerHelper {
     @ApiDoc("Update an equipment")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
+    @Override
     public void update(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "equipment", new Handler<JsonObject>() {
+            @Override
             public void handle(JsonObject equipment) {
                 try {
                     Integer id = Integer.parseInt(request.params().get("id"));
@@ -95,7 +104,7 @@ public class EquipmentController extends ControllerHelper {
                             request.params().get("id"),
                             equipment));
                 } catch (ClassCastException e) {
-                    log.error("An error occurred when casting equipment id");
+                    log.error("An error occurred when casting equipment id", e);
                 }
             }
         });
@@ -105,10 +114,11 @@ public class EquipmentController extends ControllerHelper {
     @ApiDoc("Delete an equipment")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
+    @Override
     public void delete(HttpServerRequest request) {
         try{
             List<String> params = request.params().getAll("id");
-            if (params.size() > 0) {
+            if (!params.isEmpty()) {
                 List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
                 equipmentService.delete(ids, Logging.defaultResponsesHandler(eb,
                         request,
@@ -120,7 +130,7 @@ public class EquipmentController extends ControllerHelper {
                 badRequest(request);
             }
         } catch (ClassCastException e) {
-            log.error("An error occurred when casting equipment(s) id(s)");
+            log.error("An error occurred when casting equipment(s) id(s)", e);
             badRequest(request);
         }
     }

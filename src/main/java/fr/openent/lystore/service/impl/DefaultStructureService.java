@@ -8,8 +8,6 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.Map;
-
 /**
  * Created by agnes.lapeyronnie on 09/01/2018.
  */

@@ -19,7 +19,7 @@ public class ContractTypeController extends ContractController {
 
     public ContractTypeController() {
         super();
-        this.contractTypeService = new DefaultContractTypeService(Lystore.LYSTORE_SCHEMA, "contract_type");
+        this.contractTypeService = new DefaultContractTypeService(Lystore.lystoreSchema, "contract_type");
     }
 
     @Get("/contract/types")

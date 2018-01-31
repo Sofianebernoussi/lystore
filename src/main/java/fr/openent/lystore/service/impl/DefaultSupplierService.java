@@ -22,7 +22,7 @@ public class DefaultSupplierService extends SqlCrudService implements SupplierSe
     }
 
     public void createSupplier(JsonObject agent, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + Lystore.LYSTORE_SCHEMA + ".supplier (email, address, name, phone) " +
+        String query = "INSERT INTO " + Lystore.lystoreSchema + ".supplier (email, address, name, phone) " +
                 "VALUES (?, ?, ?, ?) RETURNING id;";
 
         JsonArray params = new JsonArray()
@@ -35,7 +35,7 @@ public class DefaultSupplierService extends SqlCrudService implements SupplierSe
     }
 
     public void updateSupplier(Integer id, JsonObject supplier, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + Lystore.LYSTORE_SCHEMA + ".supplier " +
+        String query = "UPDATE " + Lystore.lystoreSchema + ".supplier " +
                 "SET email = ?, address = ?, name = ?, phone = ? " +
                 "WHERE id = ? RETURNING *;";
 

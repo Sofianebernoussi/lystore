@@ -11,5 +11,5 @@ public interface LogService {
      * @param page page log
      * @param handler function handler returning data
      */
-    public void list(Integer page, Handler<Either<String, JsonArray>> handler);
+    void list(Integer page, Handler<Either<String, JsonArray>> handler);
 }

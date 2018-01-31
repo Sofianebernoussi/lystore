@@ -16,9 +16,9 @@ public class DefaultPurseService implements PurseService {
                              final Handler<Either<String, JsonObject>> handler) {
         JsonArray statements = new JsonArray();
         String[] fields = statementsValues.getFieldNames().toArray(new String[0]);
-        for (int i = 0; i < fields.length; i++) {
-            statements.addObject(getImportStatement(campaignId, fields[i],
-                    statementsValues.getString(fields[i])));
+        for (String field : fields) {
+            statements.addObject(getImportStatement(campaignId, field,
+                    statementsValues.getString(field)));
         }
         Sql.getInstance().transaction(statements, new Handler<Message<JsonObject>>() {
             @Override
@@ -37,7 +37,7 @@ public class DefaultPurseService implements PurseService {
 
     @Override
     public void getPursesByCampaignId(Integer campaignId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + Lystore.LYSTORE_SCHEMA + ".purse" +
+        String query = "SELECT * FROM " + Lystore.lystoreSchema + ".purse" +
                 " WHERE id_campaign = ?;";
 
         JsonArray params = new JsonArray()
@@ -47,7 +47,7 @@ public class DefaultPurseService implements PurseService {
     }
 
     private JsonObject getImportStatement(Integer campaignId, String structureId, String amount) {
-        String statement = "INSERT INTO " + Lystore.LYSTORE_SCHEMA + ".purse(id_structure, amount, id_campaign) " +
+        String statement = "INSERT INTO " + Lystore.lystoreSchema + ".purse(id_structure, amount, id_campaign) " +
                 "VALUES (?, ?, ?) " +
                 "ON CONFLICT (id_structure, id_campaign) DO UPDATE " +
                 "SET amount = ? " +
@@ -70,7 +70,7 @@ public class DefaultPurseService implements PurseService {
     }
 
     public void update(Integer id, JsonObject purse, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + Lystore.LYSTORE_SCHEMA + ".purse " +
+        String query = "UPDATE " + Lystore.lystoreSchema + ".purse " +
                 "SET amount = ? WHERE id = ? RETURNING *;";
 
         JsonArray params = new JsonArray()

@@ -13,14 +13,14 @@ public interface SupplierService {
      * List all holders in database
      * @param handler Function handler returning data
      */
-    public void getSuppliers(Handler<Either<String, JsonArray>> handler);
+    void getSuppliers(Handler<Either<String, JsonArray>> handler);
 
     /**
      * Create an agent based on agent object
      * @param holder object containing data
      * @param handler Function handler returning data
      */
-    public void createSupplier(JsonObject holder, Handler<Either<String, JsonObject>> handler);
+    void createSupplier(JsonObject holder, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Update an agent based on agent object
@@ -28,12 +28,12 @@ public interface SupplierService {
      * @param supplier supplier object
      * @param handler Function handler returning data
      */
-    public void updateSupplier(Integer id, JsonObject supplier, Handler<Either<String, JsonObject>> handler);
+    void updateSupplier(Integer id, JsonObject supplier, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Delete an Agent based on ids
      * @param ids holder ids to delete
      * @param handler Function handler returning data
      */
-    public void deleteSupplier(List<Integer> ids, Handler<Either<String, JsonObject>> handler);
+    void deleteSupplier(List<Integer> ids, Handler<Either<String, JsonObject>> handler);
 }

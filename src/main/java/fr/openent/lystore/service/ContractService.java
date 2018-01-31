@@ -13,14 +13,14 @@ public interface ContractService {
      * List all contracts in database
      * @param handler Function handler returning data
      */
-    public void getContracts (Handler<Either<String, JsonArray>> handler);
+    void getContracts (Handler<Either<String, JsonArray>> handler);
 
     /**
      * Create a contract
      * @param contract contract to create
      * @param handler Function handler returning data
      */
-    public void createContract (JsonObject contract, Handler<Either<String, JsonObject>> handler);
+    void createContract (JsonObject contract, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Update a contract
@@ -28,13 +28,13 @@ public interface ContractService {
      * @param id contract id
      * @param handler Function handler returning data
      */
-    public void updateContract (JsonObject contract, Integer id, Handler<Either<String, JsonObject>> handler);
+    void updateContract (JsonObject contract, Integer id, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Delete one or more contract
      * @param ids contracts to delete
      * @param handler Function handler returning data
      */
-    public void deleteContract (List<Integer> ids, Handler<Either<String, JsonObject>> handler);
+    void deleteContract (List<Integer> ids, Handler<Either<String, JsonObject>> handler);
 
 }

@@ -18,7 +18,7 @@ public class TaxController extends ControllerHelper {
 
     public TaxController () {
         super();
-        this.taxService = new DefaultTaxService(Lystore.LYSTORE_SCHEMA, "tax");
+        this.taxService = new DefaultTaxService(Lystore.lystoreSchema, "tax");
     }
 
     @Get("/taxes")

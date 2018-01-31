@@ -19,7 +19,7 @@ public class ProgramController extends ContractController {
 
     public ProgramController () {
         super();
-        this.programService = new DefaultProgramService(Lystore.LYSTORE_SCHEMA, "program");
+        this.programService = new DefaultProgramService(Lystore.lystoreSchema, "program");
     }
 
     @Get("/programs")

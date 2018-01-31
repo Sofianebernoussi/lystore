@@ -18,7 +18,6 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.*;
@@ -29,7 +28,7 @@ public class TagController extends ControllerHelper {
 
     public TagController() {
         super();
-        this.tagService = new DefaultTagService(Lystore.LYSTORE_SCHEMA, "tag");
+        this.tagService = new DefaultTagService(Lystore.lystoreSchema, "tag");
     }
 
     @Get("/tags")

@@ -30,6 +30,7 @@ public class LogController extends ControllerHelper {
     @ApiDoc("List all Logs")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
+    @Override
     public void list (HttpServerRequest request) {
         try {
             Integer page = request.params().contains("page")
@@ -37,7 +38,7 @@ public class LogController extends ControllerHelper {
                 : null;
             logService.list(page, arrayResponseHandler(request));
         } catch (ClassCastException e) {
-            log.error("An error occurred when casting page number");
+            log.error("An error occurred when casting page number", e);
         }
     }
 
@@ -47,6 +48,7 @@ public class LogController extends ControllerHelper {
     @ResourceFilter(AdministratorRight.class)
     public void export (final HttpServerRequest request) {
         logService.list(null, new Handler<Either<String, JsonArray>>() {
+            @Override
             public void handle(Either<String, JsonArray> event) {
                 if (event.isRight()) {
                     request.response()
@@ -60,7 +62,7 @@ public class LogController extends ControllerHelper {
         });
     }
 
-    private String generateExport (HttpServerRequest request, JsonArray logs) {
+    private static String generateExport (HttpServerRequest request, JsonArray logs) {
         StringBuilder report = new StringBuilder(getExportHeader(request));
         for (int i = 0; i < logs.size(); i++) {
           report.append(generateExportLine(request, (JsonObject) logs.get(i)));
@@ -68,7 +70,7 @@ public class LogController extends ControllerHelper {
         return report.toString();
     }
 
-    private String getExportHeader (HttpServerRequest request) {
+    private static String getExportHeader (HttpServerRequest request) {
         return I18n.getInstance().translate("date", getHost(request), I18n.acceptLanguage(request)) + ";" +
                 I18n.getInstance().translate("user", getHost(request), I18n.acceptLanguage(request)) + ";" +
                 I18n.getInstance().translate("action", getHost(request), I18n.acceptLanguage(request)) + ";" +
@@ -78,11 +80,12 @@ public class LogController extends ControllerHelper {
                 + "\n";
     }
 
-    private String generateExportLine (HttpServerRequest request, JsonObject log) {
+    private static String generateExportLine (HttpServerRequest request, JsonObject log) {
         return log.getString("date") + ";" +
                 log.getString("username") + ";" +
                 log.getString("action") + ";" +
-                I18n.getInstance().translate(log.getString("context"), getHost(request), I18n.acceptLanguage(request)) + ";" +
+                I18n.getInstance().translate(log.getString("context"), getHost(request),
+                        I18n.acceptLanguage(request)) + ";" +
                 log.getString("item") + ";" +
                 (log.getString("value") != null ? log.getString("value").replace("\\\"", "\"") : "")
                 + "\n";

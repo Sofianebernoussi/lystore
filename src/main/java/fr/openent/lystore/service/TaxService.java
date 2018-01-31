@@ -10,5 +10,5 @@ public interface TaxService {
      * List all taxes in database
      * @param handler function handler returning data
      */
-    public void list (Handler<Either<String, JsonArray>> handler);
+    void list (Handler<Either<String, JsonArray>> handler);
 }

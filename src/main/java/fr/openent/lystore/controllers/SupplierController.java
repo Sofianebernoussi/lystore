@@ -20,7 +20,6 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
@@ -32,7 +31,7 @@ public class SupplierController extends ControllerHelper {
 
     public SupplierController() {
         super();
-        this.supplierService = new DefaultSupplierService(Lystore.LYSTORE_SCHEMA, "supplier");
+        this.supplierService = new DefaultSupplierService(Lystore.lystoreSchema, "supplier");
     }
 
     @Get("/suppliers")

@@ -14,12 +14,24 @@ import org.vertx.java.core.json.JsonObject;
 
 import java.util.List;
 
-public class Logging {
-    public static JsonObject add(EventBus eb, HttpServerRequest request, final String context, final String action, final String item, final JsonObject object) {
+public final class Logging {
+
+    private static final int BAD_REQUEST_STATUS = 400;
+    private static final int OK_STATUS = 200;
+
+    private Logging() {
+        throw new IllegalAccessError("Utility class");
+    }
+
+    public static JsonObject add(EventBus eb, HttpServerRequest request, final String context,
+                                 final String action, final String item, final JsonObject object) {
        final JsonObject statment = new JsonObject();
         UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+            @Override
             public void handle(UserInfos user) {
-                StringBuilder query = new StringBuilder("INSERT INTO " + Lystore.LYSTORE_SCHEMA + ".logs(id_user, username, action, context, item" );
+                StringBuilder query = new StringBuilder("INSERT INTO ")
+                        .append(Lystore.lystoreSchema)
+                .append(".logs(id_user, username, action, context, item" );
                 if (object != null) {
                     query.append(", value");
                 }
@@ -34,7 +46,7 @@ public class Logging {
                         .add(user.getUsername())
                         .addString(action)
                         .addString(context)
-                        .addString(item.contains("id = ") ? item : "id = " + item);
+                        .addString(item.contains("id = ") ? item : ("id = " + item));
                         if (object != null) {
                             params.addObject(object);
                         }
@@ -50,9 +62,10 @@ public class Logging {
                       final HttpServerRequest request, final String context, final String action,
                       final String item, final JsonObject object) {
         return new Handler<Either<String, JsonObject>>() {
+            @Override
             public void handle(Either<String, JsonObject> event) {
                 if (event.isRight()) {
-                    Renders.renderJson(request, event.right().getValue(), 200);
+                    Renders.renderJson(request, event.right().getValue(), OK_STATUS);
                     JsonObject statement = add(eb, request, context, action,
                             item == null ? event.right().getValue().getNumber("id").toString() : item, object);
                     Sql.getInstance().prepared(statement.getString("statement"),statement.getArray("values"),null);
@@ -60,18 +73,19 @@ public class Logging {
                 } else {
                     JsonObject error = new JsonObject()
                             .putString("error", event.left().getValue());
-                    Renders.renderJson(request, error, 400);
+                    Renders.renderJson(request, error, BAD_REQUEST_STATUS);
                 }
             }
         };
     }
-    public static Handler<Either<String, JsonObject>> defaultResponsesHandler (final EventBus eb,
-                                                                              final HttpServerRequest request, final String context, final String action,
-                                                                              final  List<String> items, final JsonObject object) {
+    public static Handler<Either<String, JsonObject>> defaultResponsesHandler
+            (final EventBus eb, final HttpServerRequest request, final String context, final String action,
+             final  List<String> items, final JsonObject object) {
         return new Handler<Either<String, JsonObject>>() {
+            @Override
             public void handle(Either<String, JsonObject> event) {
                 if (event.isRight()) {
-                    Renders.renderJson(request, event.right().getValue(), 200);
+                    Renders.renderJson(request, event.right().getValue(), OK_STATUS);
                     JsonArray statements = new JsonArray();
                     for(int i=0; i<items.size(); i++){
 
@@ -81,7 +95,7 @@ public class Logging {
                 } else {
                     JsonObject error = new JsonObject()
                             .putString("error", event.left().getValue());
-                    Renders.renderJson(request, error, 400);
+                    Renders.renderJson(request, error, BAD_REQUEST_STATUS);
                 }
             }
         };

@@ -19,7 +19,6 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonObject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.*;
@@ -30,7 +29,7 @@ public class ContractController extends ControllerHelper {
 
     public ContractController () {
         super();
-        this.contractService = new DefaultContractService(Lystore.LYSTORE_SCHEMA, "contract");
+        this.contractService = new DefaultContractService(Lystore.lystoreSchema, "contract");
     }
 
     @Get("/contracts")

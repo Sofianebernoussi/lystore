@@ -10,5 +10,5 @@ public interface ProgramService {
      * List all programs in database
      * @param handler Function handler returning data
      */
-    public void listPrograms (Handler<Either<String, JsonArray>> handler);
+    void listPrograms (Handler<Either<String, JsonArray>> handler);
 }

@@ -342,6 +342,7 @@ public class PurseController extends ControllerHelper {
     @ResourceFilter(AdministratorRight.class)
     public void updateHolder (final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "purse", new Handler<JsonObject>() {
+            @Override
             public void handle(JsonObject body) {
                 try {
                     purseService.update(Integer.parseInt(request.params().get("id")), body,
@@ -352,7 +353,7 @@ public class PurseController extends ControllerHelper {
                                     request.params().get("id"),
                                     body));
                 } catch (ClassCastException e) {
-                    log.error("An error occurred when casting purse id");
+                    log.error("An error occurred when casting purse id", e);
                     badRequest(request);
                 }
             }
@@ -363,6 +364,7 @@ public class PurseController extends ControllerHelper {
     @ApiDoc("Get purses for a specific campaign")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
+    @Override
     public void list(final HttpServerRequest request) {
         try {
             Integer idCampaign = Integer.parseInt(request.params().get("id"));
@@ -400,7 +402,6 @@ public class PurseController extends ControllerHelper {
             @Override
             public void handle(Either<String, JsonArray> event) {
                 if (event.isRight()) {
-                    JsonObject values = new JsonObject();
                     JsonArray structures = event.right().getValue();
                     JsonObject structure;
                     JsonObject purse;

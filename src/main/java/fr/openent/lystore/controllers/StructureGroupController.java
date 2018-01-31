@@ -8,7 +8,11 @@ import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.service.StructureGroupService;
 import fr.openent.lystore.service.impl.DefaultStructureGroupService;
 import fr.openent.lystore.utils.SqlQueryUtils;
-import fr.wseduc.rs.*;
+import fr.wseduc.rs.ApiDoc;
+import fr.wseduc.rs.Delete;
+import fr.wseduc.rs.Get;
+import fr.wseduc.rs.Post;
+import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
@@ -31,12 +35,13 @@ public class StructureGroupController extends ControllerHelper{
 
     public StructureGroupController () {
         super();
-        this.structureGroupService = new DefaultStructureGroupService(Lystore.LYSTORE_SCHEMA,"structure_group");
+        this.structureGroupService = new DefaultStructureGroupService(Lystore.lystoreSchema,"structure_group");
     }
 
     @Get("/structure/groups")
     @ApiDoc("List all goups of structures")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @Override
     public void list(final HttpServerRequest request){
         structureGroupService.listStructureGroups(arrayResponseHandler(request));
     }
@@ -45,6 +50,7 @@ public class StructureGroupController extends ControllerHelper{
     @ApiDoc("Create a group of Structures")
     @SecuredAction(value="", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
+    @Override
     public void create (final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "structureGroup", new Handler<JsonObject>() {
             @Override
@@ -64,6 +70,7 @@ public class StructureGroupController extends ControllerHelper{
     @ApiDoc("Update a group of strctures")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
+    @Override
     public void update (final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "structureGroup", new Handler<JsonObject>() {
             @Override
@@ -88,10 +95,11 @@ public class StructureGroupController extends ControllerHelper{
     @ApiDoc("Delete a group of Structures")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
+    @Override
     public void delete (final HttpServerRequest request) {
         try {
             List<String> params = request.params().getAll("id");
-            if (params.size() > 0) {
+            if (!params.isEmpty()) {
                 List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
                 structureGroupService.delete(ids,Logging.defaultResponsesHandler(eb,
                         request,

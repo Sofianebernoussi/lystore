@@ -9,15 +9,15 @@ import org.vertx.java.core.http.HttpServerRequest;
 
 public class LystoreController extends ControllerHelper {
 
-	public LystoreController() {
-		super();
-	}
+    public LystoreController() {
+        super();
+    }
 
-	@Get("")
+    @Get("")
     @ApiDoc("Display the home view")
-	@SecuredAction("lystore.access")
-	public void view(HttpServerRequest request) {
-		renderView(request);
-	}
+    @SecuredAction("lystore.access")
+    public void view(HttpServerRequest request) {
+        renderView(request);
+    }
 
 }

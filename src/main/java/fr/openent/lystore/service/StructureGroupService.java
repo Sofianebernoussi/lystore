@@ -16,14 +16,14 @@ public interface StructureGroupService {
      * List all Structure Groups in database
      * @param handler Function handler returning data
      */
-    public void listStructureGroups(Handler<Either<String, JsonArray>> handler);
+    void listStructureGroups(Handler<Either<String, JsonArray>> handler);
 
     /**
      * Create a structure group
      * @param structureGroup structureGroup to create
      * @param handler Function handler returning data
      */
-    public void create (JsonObject structureGroup, Handler<Either<String, JsonObject>> handler);
+    void create(JsonObject structureGroup, Handler<Either<String, JsonObject>> handler);
 
 
     /**
@@ -32,7 +32,7 @@ public interface StructureGroupService {
      * @param structureGroup structureGroup to update
      * @param handler Function handler returning data
      */
-    public void update (Integer id, JsonObject structureGroup, Handler<Either<String, JsonObject>> handler);
+    void update(Integer id, JsonObject structureGroup, Handler<Either<String, JsonObject>> handler);
 
 
     /**
@@ -40,7 +40,7 @@ public interface StructureGroupService {
      * @param ids structure groups to delete
      * @param handler Function handler returning data
      */
-    public void delete (List<Integer> ids, Handler<Either<String, JsonObject>> handler);
+    void delete(List<Integer> ids, Handler<Either<String, JsonObject>> handler);
 
 
 }

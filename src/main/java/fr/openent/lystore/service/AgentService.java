@@ -13,14 +13,14 @@ public interface AgentService {
      * List all agents in database
      * @param handler Function handler returning data
      */
-    public void getAgents (Handler<Either<String, JsonArray>> handler);
+    void getAgents (Handler<Either<String, JsonArray>> handler);
 
     /**
      * Create an agent based on agent object
      * @param agent object containing data
      * @param handler Function handler returning data
      */
-    public void createAgent (JsonObject agent, Handler<Either<String, JsonObject>> handler);
+    void createAgent (JsonObject agent, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Update an agent based on agent object
@@ -28,12 +28,12 @@ public interface AgentService {
      * @param agent agent object
      * @param handler Function handler returning data
      */
-    public void updateAgent (Integer id, JsonObject agent, Handler<Either<String, JsonObject>> handler);
+    void updateAgent (Integer id, JsonObject agent, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Delete an Agent based on ids
      * @param ids agent ids to delete
      * @param handler Function handler returning data
      */
-    public void deleteAgent (List<Integer> ids, Handler<Either<String, JsonObject>> handler);
+    void deleteAgent (List<Integer> ids, Handler<Either<String, JsonObject>> handler);
 }

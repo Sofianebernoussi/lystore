@@ -53,7 +53,7 @@ export class Tag implements Selectable {
             notify.error('lystore.tag.delete.err');
         }
     }
-    toString = () => {return this.name ;}
+    toString = () => this.name;
 }
 
 export class Tags extends Selection<Tag> {

@@ -50,8 +50,8 @@ body.lystore {
     margin-right: 6px;
 
     &.large {
-      width: 35px;
-      height: 35px;
+      width: 25px;
+      height: 25px;
     }
   }
 
@@ -62,6 +62,11 @@ body.lystore {
 
     li {
       display: inline-block;
+
+      .color-tag {
+        width: 35px;
+        height: 35px;
+      }
     }
   }
 

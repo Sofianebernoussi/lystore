@@ -64,6 +64,6 @@ export const purseController = ng.controller('PurseController',
         };
 
         $scope.exportPurses = (id: number) => {
-            window.location = `/lystore/campaign/${id}/purses/list`;
+            window.location = `/lystore/campaign/${id}/purses/export`;
         };
     }]);

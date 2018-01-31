@@ -53,6 +53,7 @@ export const purseController = ng.controller('PurseController',
                 importer.message = err.message;
             } finally {
                 if (!importer.message) {
+                    await $scope.campaign.purses.sync($scope.campaign.id);
                     $scope.lightbox.open = false;
                     delete $scope.importer;
                 } else {

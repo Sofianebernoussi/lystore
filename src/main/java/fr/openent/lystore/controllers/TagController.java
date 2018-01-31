@@ -8,7 +8,11 @@ import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.service.TagService;
 import fr.openent.lystore.service.impl.DefaultTagService;
 import fr.openent.lystore.utils.SqlQueryUtils;
-import fr.wseduc.rs.*;
+import fr.wseduc.rs.ApiDoc;
+import fr.wseduc.rs.Delete;
+import fr.wseduc.rs.Get;
+import fr.wseduc.rs.Post;
+import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
@@ -42,8 +46,10 @@ public class TagController extends ControllerHelper {
     @ApiDoc("Create a tag")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
+    @Override
     public void create(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "tag", new Handler<JsonObject>() {
+            @Override
             public void handle(JsonObject tag) {
                 tagService.create(tag, Logging.defaultResponseHandler(eb,
                         request,
@@ -59,8 +65,10 @@ public class TagController extends ControllerHelper {
     @ApiDoc("Update a tag")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
+    @Override
     public void update(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "tag", new Handler<JsonObject>() {
+            @Override
             public void handle(JsonObject tag) {
                 try {
                     Integer id = Integer.parseInt(request.params().get("id"));
@@ -71,7 +79,7 @@ public class TagController extends ControllerHelper {
                             request.params().get("id"),
                             tag));
                 } catch (ClassCastException e) {
-                    log.error("An error occurred when casting tag id");
+                    log.error("An error occurred when casting tag id", e);
                     badRequest(request);
                 }
             }
@@ -82,10 +90,11 @@ public class TagController extends ControllerHelper {
     @ApiDoc("Delete a tag")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
+    @Override
     public void delete(HttpServerRequest request) {
         try{
             List<String> params = request.params().getAll("id");
-            if (params.size() > 0) {
+            if (!params.isEmpty()) {
                 List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
                 tagService.delete(ids, Logging.defaultResponsesHandler(eb,
                         request,
@@ -96,9 +105,8 @@ public class TagController extends ControllerHelper {
             } else {
                 badRequest(request);
             }
-        }
-        catch (ClassCastException e) {
-            log.error("An error occurred when casting tag id");
+        } catch (ClassCastException e) {
+            log.error("An error occurred when casting tag id", e);
             badRequest(request);
         }
     }

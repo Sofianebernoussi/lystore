@@ -8,7 +8,11 @@ import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.service.SupplierService;
 import fr.openent.lystore.service.impl.DefaultSupplierService;
 import fr.openent.lystore.utils.SqlQueryUtils;
-import fr.wseduc.rs.*;
+import fr.wseduc.rs.ApiDoc;
+import fr.wseduc.rs.Delete;
+import fr.wseduc.rs.Get;
+import fr.wseduc.rs.Post;
+import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
@@ -47,8 +51,10 @@ public class SupplierController extends ControllerHelper {
     @ResourceFilter(AdministratorRight.class)
     public void createHolder (final HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+            @Override
             public void handle(final UserInfos user) {
                 RequestUtils.bodyToJson(request, pathPrefix + "supplier", new Handler<JsonObject>() {
+                    @Override
                     public void handle(JsonObject body) {
                         supplierService.createSupplier(body,
                                 Logging.defaultResponseHandler(eb,
@@ -69,6 +75,7 @@ public class SupplierController extends ControllerHelper {
     @ResourceFilter(AdministratorRight.class)
     public void updateHolder (final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "supplier", new Handler<JsonObject>() {
+            @Override
             public void handle(JsonObject body) {
                 try {
                     supplierService.updateSupplier(Integer.parseInt(request.params().get("id")), body,
@@ -79,7 +86,7 @@ public class SupplierController extends ControllerHelper {
                                     request.params().get("id"),
                                     body));
                 } catch (ClassCastException e) {
-                    log.error("An error occurred when casting supplier id");
+                    log.error("An error occurred when casting supplier id", e);
                     badRequest(request);
                 }
             }
@@ -93,7 +100,7 @@ public class SupplierController extends ControllerHelper {
     public void deleteHolder (HttpServerRequest request) {
         try{
             List<String> params = request.params().getAll("id");
-            if (params.size() > 0) {
+            if (!params.isEmpty()) {
                 List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
                 supplierService.deleteSupplier(ids, Logging.defaultResponsesHandler(eb,
                         request,
@@ -104,9 +111,8 @@ public class SupplierController extends ControllerHelper {
             } else {
                 badRequest(request);
             }
-        }
-        catch (ClassCastException e) {
-            log.error("An error occurred when casting supplier id");
+        } catch (ClassCastException e) {
+            log.error("An error occurred when casting supplier id", e);
             badRequest(request);
         }
     }

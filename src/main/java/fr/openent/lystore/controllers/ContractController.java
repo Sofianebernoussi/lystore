@@ -9,7 +9,11 @@ import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.ContractService;
 import fr.openent.lystore.service.impl.DefaultContractService;
 import fr.openent.lystore.utils.SqlQueryUtils;
-import fr.wseduc.rs.*;
+import fr.wseduc.rs.ApiDoc;
+import fr.wseduc.rs.Delete;
+import fr.wseduc.rs.Get;
+import fr.wseduc.rs.Post;
+import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
@@ -47,6 +51,7 @@ public class ContractController extends ControllerHelper {
     public void createContract (final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "contract",
                 new Handler<JsonObject>() {
+                    @Override
                     public void handle(JsonObject contract) {
                         contractService.createContract(contract,
                                 Logging.defaultResponseHandler(eb,
@@ -66,6 +71,7 @@ public class ContractController extends ControllerHelper {
     public void updateContract (final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "contract",
                 new Handler<JsonObject>() {
+                    @Override
                     public void handle(JsonObject contract) {
                         try {
                             contractService.updateContract(contract,
@@ -77,7 +83,7 @@ public class ContractController extends ControllerHelper {
                                             request.params().get("id"),
                                             contract));
                         } catch (ClassCastException e) {
-                            log.error("An error occurred when casting contract id");
+                            log.error("An error occurred when casting contract id", e);
                             badRequest(request);
                         }
                     }
@@ -91,7 +97,7 @@ public class ContractController extends ControllerHelper {
     public void deleteContracts (HttpServerRequest request) {
         try{
             List<String> params = request.params().getAll("id");
-            if (params.size() > 0) {
+            if (!params.isEmpty()) {
                 List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
                 contractService.deleteContract(ids, Logging.defaultResponsesHandler(eb,
                         request,
@@ -102,9 +108,8 @@ public class ContractController extends ControllerHelper {
             } else {
                 badRequest(request);
             }
-        }
-        catch (ClassCastException e) {
-            log.error("An error occurred when casting contract id");
+        } catch (ClassCastException e) {
+            log.error("An error occurred when casting contract id", e);
             badRequest(request);
         }
     }

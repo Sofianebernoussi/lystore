@@ -1,32 +1,32 @@
 <div class="card cell left-detail-box" ng-show="display.equipment">
-    <h1 class="row">[[equipment.name]] </h1>
+    <h1 class="row">[[basket.equipment.name]] </h1>
     <div class="twelve cell">
         <div class="four cell">
-            <img class="img-equipment" ng-src="[[equipment.image]]" ng-show="equipment.image!==null && equipment.image!==undefined " />
-            <img class="img-equipment" skin-src="/img/illustrations/pages-default.png" ng-show="equipment.image===null || equipment.image===undefined "/>
+            <img class="img-equipment" ng-src="[[basket.equipment.image]]" ng-show="basket.equipment.image!==null && basket.equipment.image!==undefined " />
+            <img class="img-equipment" skin-src="/img/illustrations/pages-default.png" ng-show="basket.equipment.image===null || basket.equipment.image===undefined "/>
         </div>
         <div class="eight cell" >
             <div class="add-basket  row cell">
-                <h1>[[calculatePriceOfEquipment(equipment, true, 2)]]€</h1>
+                <h1>[[calculatePriceOfEquipment( basket.equipment, true, 2)]]€</h1>
                 <div class=" in-ligne">
                     <h4><i18n>lystore.quantity</i18n></h4>
-                    <div><i class="plus" ng-click=""></i> <input type="text" ng-model="" class="two"/> <i class="moins" ng-click=""></i> </div>
+                    <div><i class="plus" ng-click="amountIncrease()"></i> <input type="number" step="10" min="0" ng-model="basket.amount"  class="three "/> <i class="moins" ng-click="amountDecrease()"></i> </div>
                 </div>
-                <div ><input type="button" i18n-value="lystore.add.to.backet" ng-disabled="!validArticle(equipment)" /> </div>
+                <div ><input type="button"  ng-click="addBasketItem(basket)" i18n-value="lystore.add.to.basket" ng-disabled="!validArticle(basket.equipment)" /> </div>
             </div>
-            <div class="summary" ng-show="equipment.description !== null" >
-                <p ng-bind-html="[[equipment.description]]"></p>
+            <div class="summary" ng-show="basket.equipment.description !== null" >
+                <p ng-bind-html="[[basket.equipment.description]]"></p>
             </div>
         </div>
     </div>
 
-    <div ng-show="equipment.technical_specs.length !== 0">
+    <div ng-show="basket.equipment.technical_specs.length !== 0">
         <h2>
             <i18n>SPECIFICATIONS</i18n>
         </h2>
         <div class="row technical-specs">
             <div class="technical-spec twelve row"
-                 ng-repeat="technicalSpec in equipment.technical_specs">
+                 ng-repeat="technicalSpec in basket.equipment.technical_specs">
                 <div class="five cell horizontal-spacing bold">
                     [[technicalSpec.name]]
                 </div>
@@ -36,14 +36,14 @@
             </div>
         </div>
     </div>
-    <div ng-show="equipment.options.length !== 0">
+    <div ng-show="basket.equipment.options.length !== 0">
         <h2><i18n>lystore.equipment.options</i18n></h2>
         <table class="twelve">
             <thead>
             <td  class="one">
-                <label class="checkbox" ng-show="thereAreOptionalOptions(equipment)">
+                <label class="checkbox" ng-show="thereAreOptionalOptions(basket.equipment)">
                     <input type="checkbox"
-                           ng-change="switchAll(alloptionsSelected, equipment.options)"
+                           ng-change="switchAll(alloptionsSelected, basket.equipment.options)"
                            ng-model="alloptionsSelected">
                     <span></span>
                 </label>
@@ -56,7 +56,7 @@
             </td>
             </thead>
             <tbody>
-            <tr  ng-repeat="option in equipment.options">
+            <tr  ng-repeat="option in basket.equipment.options">
                 <td  class="one">
                     <label class="checkbox"  ng-show="!option.required">
                         <input type="checkbox" ng-model="option.selected">

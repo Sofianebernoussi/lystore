@@ -13,10 +13,10 @@ import {
     StructureGroups,
     Campaigns,
     Campaign,
-    StructureGroup,
-    Structure,
     Utils,
     Equipment,
+    Baskets,
+    Basket,
     Purses
 } from '../model';
 
@@ -37,8 +37,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.structureGroups = new StructureGroups();
         $scope.taxes = new Taxes();
         $scope.logs = new Logs();
-        $scope.structure = new Structure;
-
+        $scope.baskets = new Baskets();
         route({
             main:  async() => {
                 if ($scope.isManager() || $scope.isAdministrator()) {
@@ -140,6 +139,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 let idEquipment = params.idEquipment;
                 $scope.idIsInteger(idCampaign);
                 $scope.idIsInteger(idEquipment);
+                await $scope.initBasketItem( parseInt(idEquipment), parseInt(idCampaign), $scope.structure );
                 template.open('right-side', 'customer/campaign/catalog/equipment-detail');
                 Utils.safeApply($scope);
             },
@@ -150,9 +150,21 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             }
         });
+        $scope.initBasketItem = async (idEquipment: number, idCampaign: number, structure) => {
+            $scope.equipment = _.findWhere( $scope.equipments.all, {id: idEquipment});
+            if ($scope.equipment === undefined && !isNaN(idEquipment)) {
+                $scope.equipment = new Equipment();
+                await $scope.equipment.sync(idEquipment);
+            }
+            $scope.basket = new Basket($scope.equipment , idCampaign, structure);
+        };
         $scope.idIsInteger = (id) => {
             try {
-                parseInt(id) ;
+              id = parseInt(id) ;
+              if (isNaN(id) ) {
+                  $scope.redirectTo(`/`);
+                Utils.safeApply($scope);
+              }
             } catch (e) {
                 $scope.redirectTo(`/`);
                 Utils.safeApply($scope);

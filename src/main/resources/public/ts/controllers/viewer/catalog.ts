@@ -5,9 +5,9 @@
  * Created by rahnir on 18/01/2018.
  */
 import { ng, template, _ } from 'entcore';
-import {Mix} from 'entcore-toolkit';
 import {
     Equipment,
+    Basket,
     Utils
 } from '../../model';
 
@@ -44,12 +44,12 @@ export const catalogController = ng.controller('catalogController',
         $scope.openEquipment = (equipment: Equipment) => {
             if (equipment.status === 'AVAILABLE') {
                 $scope.redirectTo(`/campaign/${$routeParams.idCampaign}/catalog/equipment/${equipment.id}`);
-                $scope.equipment = Mix.castAs(Equipment, equipment);
                 $scope.display.equipment = true;
             }
         };
         $scope.validArticle = (equipment: Equipment) => {
-            return !isNaN(parseFloat($scope.calculatePriceOfEquipment(equipment)));
+            return !isNaN(parseFloat($scope.calculatePriceOfEquipment(equipment)))
+                && $scope.basket.amount > 0;
         };
         $scope.switchAll = (model: boolean, collection) => {
            collection.forEach((col) => {col.selected = col.required ? false : col.selected = model; });
@@ -57,5 +57,14 @@ export const catalogController = ng.controller('catalogController',
         };
         $scope.thereAreOptionalOptions = (equipment: Equipment) => {
             return !(_.findWhere(equipment.options, {required : false}) === undefined) ;
+        };
+        $scope.addBasketItem = (basket: Basket) => {
+            basket.save();
+        };
+        $scope.amountIncrease = () => {
+            $scope.basket.amount += 1;
+        };
+        $scope.amountDecrease = () => {
+            $scope.basket.amount -= 1;
         };
     }]);

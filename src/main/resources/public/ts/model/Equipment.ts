@@ -75,6 +75,19 @@ export class Equipment implements Selectable {
             notify.error('lystore.equipment.delete.err');
         }
     }
+    async sync (id) {
+        try {
+            let { data } =  await http.get(`/lystore/equipment/${id}`);
+            Mix.extend(this, data[0]);
+            this.price = parseFloat(this.price.toString());
+            this.tax_amount = parseFloat(this.tax_amount.toString());
+            this.options.toString() !== '[null]' && this.options !== null ?
+                this.options = Mix.castArrayAs(EquipmentOption, JSON.parse(this.options.toString()))
+                : this.options = [];
+        } catch (e) {
+            notify.error('lystore.equipment.sync.err');
+        }
+    }
 }
 
 export class TechnicalSpec {

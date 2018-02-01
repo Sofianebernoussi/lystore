@@ -43,7 +43,20 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
 
         sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
     }
+    public void equipment(Integer idEquipment,  Handler<Either<String, JsonArray>> handler){
+        String query = "SELECT e.*, tax.value tax_amount, array_to_json(array_agg(opts)) as options \n" +
+                "                FROM " + Lystore.lystoreSchema + ".equipment e " +
+                "                Left join " +
+                "                ( select option.*, tax.value tax_amount " +
+                "                from " + Lystore.lystoreSchema + ".equipment_option option " +
+                "                INNER JOIN  " + Lystore.lystoreSchema + ".tax on tax.id = option.id_tax  )" +
+                "                 opts ON opts.id_equipment = e.id " +
+                "                INNER JOIN " + Lystore.lystoreSchema + ".tax on tax.id = e.id_tax " +
+                "                where e.id = ? " +
+                "                group by (e.id, tax.id) ";
 
+        this.sql.prepared(query, new JsonArray().addNumber(idEquipment), SqlResult.validResultHandler(handler));
+    }
     public void listEquipments(UserInfos user, Integer idCampaign, String idStructure,
                                Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new JsonArray();

@@ -73,7 +73,7 @@
   "lystore.amount":"Qte",
   "lystore.quantity":"Quantité",
   "lystore.required":"Obligatoire",
-  "lystore.add.to.backet":"Ajouter au panier",
+  "lystore.add.to.basket":"Ajouter au panier",
   "lystore.log": "Traces d'utilisations",
   "lystore.logs.csv.export": "Export CSV",
   "lystore.manage.campaigns":"gestion des campagnes",

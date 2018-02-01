@@ -24,6 +24,13 @@ public interface EquipmentService {
                         Handler<Either<String, JsonArray>> handler);
 
     /**
+     * Get an Equipment informations
+     * @param idEquipment
+     * @param handler
+     */
+    void equipment(Integer idEquipment,  Handler<Either<String, JsonArray>> handler);
+
+    /**
      * Create an equipment
      * @param equipment equipment to create
      * @param handler function handler returning data

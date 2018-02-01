@@ -8,7 +8,8 @@ public enum Contexts {
     EQUIPMENT ("EQUIPMENT"),
     CAMPAIGN ("CAMPAIGN"),
     STRUCTUREGROUP("STRUCTUREGROUP"),
-    PURSE ("PURSE");
+    PURSE ("PURSE"),
+    BASKET("BASKET");
 
     private final String contextName;
 

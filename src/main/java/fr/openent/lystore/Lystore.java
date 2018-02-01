@@ -1,19 +1,6 @@
 package fr.openent.lystore;
 
-import fr.openent.lystore.controllers.AgentController;
-import fr.openent.lystore.controllers.CampaignController;
-import fr.openent.lystore.controllers.ContractController;
-import fr.openent.lystore.controllers.ContractTypeController;
-import fr.openent.lystore.controllers.EquipmentController;
-import fr.openent.lystore.controllers.LogController;
-import fr.openent.lystore.controllers.LystoreController;
-import fr.openent.lystore.controllers.ProgramController;
-import fr.openent.lystore.controllers.PurseController;
-import fr.openent.lystore.controllers.StructureController;
-import fr.openent.lystore.controllers.StructureGroupController;
-import fr.openent.lystore.controllers.SupplierController;
-import fr.openent.lystore.controllers.TagController;
-import fr.openent.lystore.controllers.TaxController;
+import fr.openent.lystore.controllers.*;
 import org.entcore.common.http.BaseServer;
 
 public class Lystore extends BaseServer {
@@ -41,5 +28,6 @@ public class Lystore extends BaseServer {
         addController(new PurseController());
         addController(new StructureGroupController());
         addController(new StructureController());
+        addController(new BasketController());
     }
 }

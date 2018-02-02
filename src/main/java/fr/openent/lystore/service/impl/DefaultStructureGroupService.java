@@ -123,21 +123,21 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
 
     /**
      * Returns  a structureGroup idStructure relationship transaction statement
-     * @param idStructureGroup group id
+     * @param id_structure_group group id
      * @param idsStructure structure ids
      * @return structureGroup idStructure relationship transaction statement
      */
-    private JsonObject getGroupStructureRelationshipStatement(Number idStructureGroup, JsonArray idsStructure) {
+    private JsonObject getGroupStructureRelationshipStatement(Number id_structure_group, JsonArray idsStructure) {
         StringBuilder insertGroupStructureRelationshipQuery = new StringBuilder();
         JsonArray params = new JsonArray();
         insertGroupStructureRelationshipQuery.append("INSERT INTO ").append(Lystore.lystoreSchema)
-        .append(".rel_group_structure(id_structure,idStructureGroup) VALUES ");
+        .append(".rel_group_structure(id_structure,id_structure_group) VALUES ");
 
         for(int i = 0; i < idsStructure.size();i++ ){
             String idStructure = idsStructure.get(i);
             insertGroupStructureRelationshipQuery.append("(?,?)");
             params.addString(idStructure)
-                    .addNumber(idStructureGroup);
+                    .addNumber(id_structure_group);
             if(i != idsStructure.size()-1){
                 insertGroupStructureRelationshipQuery.append(",");
             }else{
@@ -171,15 +171,15 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
 
     /**
      * Delete in rel_group_structure
-     * @param idStructureGroup of structureGroup
+     * @param id_structure_group of structureGroup
      * @return Delete statement
      */
-    private JsonObject getStrctureGroupRelationshipDeletion(Number idStructureGroup){
-        String query = "DELETE FROM " + Lystore.lystoreSchema + ".rel_group_structure WHERE idStructureGroup = ?;";
+    private JsonObject getStrctureGroupRelationshipDeletion(Number id_structure_group){
+        String query = "DELETE FROM " + Lystore.lystoreSchema + ".rel_group_structure WHERE id_structure_group = ?;";
 
         return new JsonObject()
                 .putString("statement", query)
-                .putArray("values", new JsonArray().addNumber(idStructureGroup))
+                .putArray("values", new JsonArray().addNumber(id_structure_group))
                 .putString("action", "prepared");
 
     }

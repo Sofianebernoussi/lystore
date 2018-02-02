@@ -1,6 +1,6 @@
 import { ng, template, notify, moment, _ } from 'entcore';
 import { PurseImporter, Utils, Purse } from '../../model';
-import {Mix} from "entcore-toolkit";
+import { Mix } from 'entcore-toolkit';
 
 declare let window: any;
 

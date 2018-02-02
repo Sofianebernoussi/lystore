@@ -13,6 +13,7 @@ import {
     StructureGroups,
     Campaigns,
     Campaign,
+    Structure,
     Utils,
     Equipment,
     Baskets,
@@ -22,7 +23,8 @@ import {
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', '$rootScope',
     ($scope, route, $location, $rootScope) => {
-        template.open('main', 'administrator/main');
+        template.open('main', 'main');
+
         $scope.lang = lang;
         $scope.agents = new Agents();
         $scope.suppliers = new Suppliers();
@@ -37,18 +39,15 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.structureGroups = new StructureGroups();
         $scope.taxes = new Taxes();
         $scope.logs = new Logs();
+        $scope.structure = new Structure;
         $scope.baskets = new Baskets();
         route({
             main:  async() => {
-                if ($scope.isManager() || $scope.isAdministrator()) {
-                    template.open('main-profile', 'administrator/management-main');
-                }
-                else if ($scope.isPersonnel() && !$scope.isManager() && !$scope.isAdministrator()) {
+                if ($scope.isPersonnel() && !$scope.isManager() && !$scope.isAdministrator()) {
                     $scope.structure = model.me.structures[0];
-                    template.open('main-profile', 'customer/campaign/campaign-list');
                     await $scope.campaigns.sync($scope.structure);
-                    Utils.safeApply($scope);
                 }
+                Utils.safeApply($scope);
             },
             manageAgents: async () => {
                 template.open('administrator-main', 'administrator/agent/manage-agents');
@@ -84,6 +83,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             createEquipment: async () => {
+                if (template.isEmpty('administrator-main')) { $scope.redirectTo('/equipments'); }
                 template.open('equipments-main', 'administrator/equipment/equipment-form');
             },
             viewLogs: async () => {
@@ -98,16 +98,19 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             createCampaigns: async () => {
+                if (template.isEmpty('administrator-main')) { $scope.redirectTo('/campaigns'); }
                 template.open('campaigns-main', 'administrator/campaign/campaign_form');
                 await $scope.tags.sync();
                 await $scope.structureGroups.sync();
                 Utils.safeApply($scope);
             },
             updateCampaigns: async () => {
+                if (template.isEmpty('administrator-main')) { $scope.redirectTo('/campaigns'); }
                 template.open('campaigns-main', 'administrator/campaign/campaign_form');
                 Utils.safeApply($scope);
             },
             managePurse: async (params) => {
+                if (template.isEmpty('administrator-main')) { $scope.redirectTo('/campaigns'); }
                 $scope.campaign = $scope.campaigns.get(parseInt(params.idCampaign));
                 $scope.campaign.purses = new Purses();
                 await $scope.campaign.purses.sync($scope.campaign.id);
@@ -122,6 +125,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             createStructureGroup: async () => {
+                if (template.isEmpty('administrator-main')) { $scope.redirectTo('/structureGroups'); }
                 template.open('structureGroups-main', 'administrator/structureGroup/structureGroup-form');
                 Utils.safeApply($scope);
             },
@@ -150,6 +154,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             }
         });
+
         $scope.initBasketItem = async (idEquipment: number, idCampaign: number, structure) => {
             $scope.equipment = _.findWhere( $scope.equipments.all, {id: idEquipment});
             if ($scope.equipment === undefined && !isNaN(idEquipment)) {
@@ -158,42 +163,51 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             }
             $scope.basket = new Basket($scope.equipment , idCampaign, structure);
         };
+
         $scope.idIsInteger = (id) => {
             try {
-              id = parseInt(id) ;
-              if (isNaN(id) ) {
-                  $scope.redirectTo(`/`);
-                Utils.safeApply($scope);
-              }
+                id = parseInt(id) ;
+                if (isNaN(id) ) {
+                    $scope.redirectTo(`/`);
+                    Utils.safeApply($scope);
+                }
             } catch (e) {
                 $scope.redirectTo(`/`);
                 Utils.safeApply($scope);
             }
         };
+
         $scope.isPersonnel = () => {
             return model.me.type === 'PERSEDUCNAT';
         };
+
         $scope.isManager = () => {
-           return model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.manager);
+            return model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.manager);
         };
+
         $scope.isAdministrator = () => {
             return model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.administrator) ;
         };
+
         $scope.redirectTo = (path: string) => {
             $location.path(path);
         };
+
         $rootScope.$on('eventEmitedCampaign', function(event, data) {
             $scope.campaign = data;
         });
+
         $scope.formatDate = (date: string | Date, format: string) => {
             return moment(date).format(format);
         };
+
         $scope.calculatePriceTTC = (price, tax_value, roundNumber?: number) => {
             let priceFloat = parseFloat(price);
             let taxFloat = parseFloat(tax_value);
             let price_TTC = (( priceFloat + ((priceFloat *  taxFloat) / 100)));
             return (!isNaN(price_TTC)) ? (roundNumber ? price_TTC.toFixed(roundNumber) : price_TTC ) : '';
         };
+
         $scope.calculatePriceOfEquipment = (equipment: Equipment, selectedOptions: boolean, roundNumber?: number) => {
             let price = parseFloat( $scope.calculatePriceTTC(equipment.price , equipment.tax_amount) );
             equipment.options.map((option) => {
@@ -203,4 +217,12 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             });
             return (!isNaN(price)) ? (roundNumber ? price.toFixed(roundNumber) : price ) : price ;
         };
+
+        if ($scope.isManager() || $scope.isAdministrator()) {
+            template.open('main-profile', 'administrator/management-main');
+        }
+        else if ($scope.isPersonnel() && !$scope.isManager() && !$scope.isAdministrator()) {
+            template.open('main-profile', 'customer/campaign/campaign-list');
+        }
+        Utils.safeApply($scope);
     }]);

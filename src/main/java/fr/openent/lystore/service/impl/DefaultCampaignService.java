@@ -32,7 +32,7 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 " campaign_amounts.sum as purse_amount," +
                 " COUNT(distinct rel_equipment_tag.id_equipment) as nb_equipments" +
                 " FROM " + Lystore.lystoreSchema + ".campaign" +
-                " INNER JOIN campaign_amounts ON (campaign.id = campaign_amounts.id_campaign)" +
+                " LEFT JOIN campaign_amounts ON (campaign.id = campaign_amounts.id_campaign)" +
                 " LEFT JOIN " + Lystore.lystoreSchema + ".rel_group_campaign" +
                 " ON (campaign.id = rel_group_campaign.id_campaign)" +
                 " LEFT JOIN " + Lystore.lystoreSchema + ".rel_group_structure" +

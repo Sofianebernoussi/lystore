@@ -46,7 +46,7 @@ export class Campaign implements Selectable  {
 
     async create () {
         try {
-           await http.post(`/lystore/campaign`, this.toJson());
+            await http.post(`/lystore/campaign`, this.toJson());
         } catch (e) {
             notify.error('lystore.campaign.create.err');
         }

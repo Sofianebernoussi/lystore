@@ -239,7 +239,7 @@ public class PurseController extends ControllerHelper {
      * @param expectedIds expected ids
      * @return JsonArray containing structure campaign ids specified in CSV file.
      */
-    private JsonArray deleteWrongIds(JsonArray realIds, JsonArray expectedIds) {
+    private static JsonArray deleteWrongIds(JsonArray realIds, JsonArray expectedIds) {
         JsonArray ids = new JsonArray();
         JsonArray correctIds = new JsonArray();
         JsonObject structure;
@@ -276,7 +276,6 @@ public class PurseController extends ControllerHelper {
                         @Override
                         public void handle(Either<String, JsonArray> event) {
                             if (event.isRight()) {
-                                event.right().getValue();
                                 JsonArray correctIds = deleteWrongIds(ids, event.right().getValue());
                                 if (correctIds.size() == 0) {
                                     returnErrorMessage(request, new Throwable("lystore.statements.empty"), path);

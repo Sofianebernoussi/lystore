@@ -1,16 +1,23 @@
+<div ng-controller="campaignMainController" >
+    <div class="twelve tabs vertical-spacing heading-tabs" >
+        <header class="horizontal-spacing"  ng-click="backHome()"  >
+            <i class="home"></i>
+        </header>
+        <header class="horizontal-spacing"  ng-click="openCatalog()"  >
+            <i18n>CATALOG</i18n>
+        </header>
+        <header class="horizontal-spacing" ng-click="openOrder()" >
+            <i18n>lystore.order.tracking</i18n>
+        </header>
+        <header class="horizontal-spacing" ng-click="openBasket()">
+            <i18n>BASKET</i18n>
+            <span class="notification-bull right-magnet" ng-model="campaign.nb_panier" ng-change=" ">
+                    [[campaign.nb_panier]]
+            </span>
+        </header>
+        <div class="purse-in-menue"><h4><i18n>purse</i18n></h4><h2> : <span ng-bind="[[campaign.purse_amount]]"></span><i18n>money.symbol</i18n>  </h2></div>
+    </div>
 
-<div class="twelve tabs vertical-spacing heading-tabs">
-    <header class="horizontal-spacing"  >
-        <i18n>CATALOG</i18n>
-    </header>
-    <header class="horizontal-spacing" ng-click="redirectTo('/order')" >
-        <i18n>lystore.order.tracking</i18n>
-    </header>
-    <header class="horizontal-spacing" ng-click="redirectTo('/basket')">
-        <i18n>BASKET</i18n>
-    </header>
-    <div class="purse-in-menue"><h4><i18n>purse</i18n></h4><h2>: <span ng-bind="[[campaign.purse_amount]]"></span> € </h2></div>
+
+    <container template="campaign-main"></container>
 </div>
-
-
-<container template="campaign-main"></container>

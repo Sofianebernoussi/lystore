@@ -48,7 +48,10 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 .append(" SELECT ")
                 .append(" campaign.*, purse.amount purse_amount, COUNT(distinct rel_group_structure.id_structure)")
                 .append(" as nb_structures, COUNT(distinct rel_equipment_tag.id_equipment) as nb_equipments")
+                .append(" , count(DISTINCT  basket_equipment.id) nb_panier")
                 .append(" FROM " + Lystore.lystoreSchema + ".campaign")
+                .append(" LEFT JOIN " + Lystore.lystoreSchema + ".basket_equipment ")
+                .append(" ON (basket_equipment.id_campaign = campaign.id AND basket_equipment.id_structure = ? ) ")
                 .append(" LEFT JOIN Lystore.purse ON purse.id_campaign = campaign.id AND purse.id_structure = ? ")
                 .append(" LEFT JOIN " + Lystore.lystoreSchema + ".rel_group_campaign")
                 .append(" ON (campaign.id = rel_group_campaign.id_campaign) ")
@@ -58,7 +61,8 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 .append(" LEFT JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag")
                 .append(" ON (rel_equipment_tag.id_tag = rel_group_campaign.id_tag)")
                 .append(" GROUP BY campaign.id, purse.amount ;" );
-        sql.prepared(query.toString(), new JsonArray().addString(idStructure).addString(idStructure),
+        sql.prepared(query.toString(),
+                new JsonArray().addString(idStructure).addString(idStructure).addString(idStructure),
                 SqlResult.validResultHandler(handler));
     }
 

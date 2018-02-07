@@ -104,6 +104,7 @@
   "lystore.form.structureGroups.description": "Description : ",
   "lystore.structureGroup.delete":"Êtes-vous sûr de vouloir supprimer ce regroupement d'établissement ?",
   "lystore.purse.modify": "Modifier une cagnotte",
+  "lystore.expected.delivery":"Livraison prévue : ",
   "multi-combo.deselectAll": "Tout déselectionner",
   "multi-combo.options": "Options",
   "multi-combo.searchPlaceholder": "Chercher",
@@ -153,6 +154,8 @@
   "UAI": "UAI",
   "create":"Créer",
   "money.symbol": "€",
+  "total":"totale",
+  "lystore.basket.delete.message":"l'équipement suivant sera retiré de votre panier",
   "lystore.agent.create.err":"Erreur lors de la création d'un correspondant région",
   "lystore.agent.update.err":"Erreur lors de la mise à jour d'un correspondant région",
   "lystore.agent.delete.err":"Erreur lors de la suppression d'un correspondant région",
@@ -183,5 +186,9 @@
   "lystore.structureGroup.update.err":"Erreur lors de la mise à jour de regroupemnt",
   "lystore.structureGroup.delete.err":"Erreur lors de la suppression des regroupements",
   "lystore.structureGroup.sync.err":"Erreur lors de la récupération des regroupements",
-  "lystore.purse.update.err":"Erreur lors de la mise à jour d'une cagnotte"
+  "lystore.purse.update.err":"Erreur lors de la mise à jour d'une cagnotte",
+  "lystore.basket.sync.err":"Erreur lors de la récupération des paniers",
+  "lystore.basket.delete.err":"Erreur lors de la suppression des paniers",
+  "lystore.basket.update.err":"Erreur lors de la mise à jour des paniers",
+  "lystore.basket.create.err":"Erreur lors de la création des paniers"
 }

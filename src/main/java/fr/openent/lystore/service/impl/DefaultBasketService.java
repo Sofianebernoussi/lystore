@@ -20,6 +20,34 @@ public class DefaultBasketService  extends SqlCrudService implements BasketServi
     public DefaultBasketService(String schema, String table) {
         super(schema, table);
     }
+
+    public void listBasket(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler){
+        JsonArray values = new JsonArray();
+        String query = "SELECT basket.id, basket.amount, basket.processing_date," +
+                "     basket.id_campaign, basket.id_structure " +
+                "    , array_to_json(array_agg( e.* )) as equipment " +
+                "    , array_to_json(array_agg(DISTINCT ep.*)) as options " +
+                "    FROM " + Lystore.lystoreSchema + ".basket_equipment basket " +
+                "    LEFT JOIN " + Lystore.lystoreSchema + ".basket_option " +
+                "    ON basket_option.id_basket_equipment = basket.id " +
+                "    LEFT JOIN " +
+                "       (Select equipment_option.*, tax.value tax_amount " +
+                "       FROM lystore.equipment_option " +
+                "       INNER JOIN  lystore.tax on tax.id = equipment_option.id_tax ) ep "+
+                "    ON basket_option.id_option = ep.id " +
+                "    INNER JOIN " +
+                "       (Select equipment.*, tax.value tax_amount " +
+                "       FROM lystore.equipment INNER JOIN  lystore.tax " +
+                "       ON tax.id = equipment.id_tax ) as e"+
+                "    ON e.id = basket.id_equipment " +
+                "    WHERE basket.id_campaign = ? " +
+                "    AND basket.id_structure = ? " +
+                "    GROUP BY " +
+                "    (basket.id, basket.amount, basket.processing_date, basket.id_campaign, basket.id_structure ); ";
+        values.addNumber(idCampaign).addString(idStructure);
+
+        sql.prepared(query, values, SqlResult.validResultHandler(handler));
+    }
     public void create(final JsonObject basket, final Handler<Either<String, JsonObject>> handler) {
         String getIdQuery = "SELECT nextval('" + Lystore.lystoreSchema + ".basket_equipment_id_seq') as id";
         sql.raw(getIdQuery, SqlResult.validUniqueResultHandler(new Handler<Either<String, JsonObject>>() {
@@ -55,6 +83,54 @@ public class DefaultBasketService  extends SqlCrudService implements BasketServi
             }
         }));
     }
+    public void delete(final Integer idBasket,final Handler<Either<String, JsonObject>> handler){
+        JsonArray statements = new JsonArray()
+                .addObject(getOptionsBasketDeletion(idBasket))
+                .addObject(getEquipmentBasketDeletion(idBasket));
+
+        sql.transaction(statements, new Handler<Message<JsonObject>>() {
+            @Override
+            public void handle(Message<JsonObject> event) {
+                handler.handle(SqlQueryUtils.getTransactionHandler(event, idBasket));
+            }
+        });
+    }
+    public void updateAmount(Integer idBasket, Integer amount, Handler<Either<String, JsonObject>> handler ) {
+        JsonArray values = new JsonArray();
+        String query = " UPDATE " + Lystore.lystoreSchema + ".basket_equipment " +
+                " SET  amount = ? " +
+                " WHERE id = ?; ";
+        values.addNumber(amount).addNumber(idBasket);
+
+        sql.prepared(query, values, SqlResult.validRowsResultHandler(handler) );
+    }
+    private JsonObject getOptionsBasketDeletion(Integer idBasket) {
+        String insertBasketEquipmentRelationshipQuery =
+                "DELETE FROM " + Lystore.lystoreSchema + ".basket_option " +
+                        " WHERE id_basket_equipment = ? ;";
+
+        JsonArray params = new JsonArray()
+                .addNumber(idBasket);
+
+        return new JsonObject()
+                .putString("statement", insertBasketEquipmentRelationshipQuery)
+                .putArray("values", params)
+                .putString("action", "prepared");
+    }
+    private JsonObject getEquipmentBasketDeletion(Integer idBasket) {
+        String insertBasketEquipmentRelationshipQuery =
+                "DELETE FROM " + Lystore.lystoreSchema + ".basket_equipment " +
+                        "WHERE id= ? ;";
+
+        JsonArray params = new JsonArray()
+                .addNumber(idBasket);
+
+        return new JsonObject()
+                .putString("statement", insertBasketEquipmentRelationshipQuery)
+                .putArray("values", params)
+                .putString("action", "prepared");
+    }
+
     /**
      * Returns a basket equipment insert statement
      *

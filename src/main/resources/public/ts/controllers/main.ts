@@ -151,10 +151,14 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             campaignBasket : async (params) => {
+                let idCampaign = params.idCampaign;
+                $scope.idIsInteger(idCampaign);
+                await $scope.baskets.sync(idCampaign, $scope.structure );
+                template.open('main-profile', 'customer/campaign/campaign-detail');
+                template.open('campaign-main', 'customer/campaign/basket/manage-basket');
                 Utils.safeApply($scope);
             }
         });
-
         $scope.initBasketItem = async (idEquipment: number, idCampaign: number, structure) => {
             $scope.equipment = _.findWhere( $scope.equipments.all, {id: idEquipment});
             if ($scope.equipment === undefined && !isNaN(idEquipment)) {
@@ -163,7 +167,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             }
             $scope.basket = new Basket($scope.equipment , idCampaign, structure);
         };
-
         $scope.idIsInteger = (id) => {
             try {
                 id = parseInt(id) ;
@@ -208,6 +211,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             return (!isNaN(price_TTC)) ? (roundNumber ? price_TTC.toFixed(roundNumber) : price_TTC ) : '';
         };
 
+        /**
+         * Calculate the price of an equipment
+         * @param {Equipment} equipment
+         * @param {boolean} selectedOptions [Consider selected options or not)
+         * @param {number} roundNumber [number of digits after the decimal point]
+         * @returns {string | number}
+         */
         $scope.calculatePriceOfEquipment = (equipment: Equipment, selectedOptions: boolean, roundNumber?: number) => {
             let price = parseFloat( $scope.calculatePriceTTC(equipment.price , equipment.tax_amount) );
             equipment.options.map((option) => {

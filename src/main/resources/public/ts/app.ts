@@ -20,14 +20,28 @@ routes.define(($routeProvider) => {
         .when('/', {
             action: 'main'
         });
-    if (model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.manager)) {
+    if (model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.administrator)) {
         $routeProvider.when('/campaigns/create', {
             action: 'createCampaigns'
         })
             .when('/campaigns/update', {
                 action: 'updateCampaigns'
             })
-
+            .when('/equipments/create', {
+                action: 'createEquipment'
+            })
+            .when('/logs', {
+                action: 'viewLogs'
+            })
+            .when('/structureGroups/create', {
+                    action: 'createStructureGroup'
+                }
+            );
+    }
+    if (model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.manager)) {
+        $routeProvider.when('/campaigns', {
+            action: 'manageCampaigns'
+        })
             .when('/agents', {
                 action: 'manageAgents'
             })
@@ -43,27 +57,12 @@ routes.define(($routeProvider) => {
             .when('/equipments', {
                 action: 'manageEquipments'
             })
-            .when('/equipments/create', {
-                action: 'createEquipment'
-            })
-            .when('/logs', {
-                action: 'viewLogs'
-            })
             .when('/structureGroups', {
                 action: 'manageStructureGroups'
             })
-            .when('/structureGroups/create', {
-                action: 'createStructureGroup'
-                }
-            );
-    }
-    if (model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.manager)) {
-        $routeProvider.when('/campaigns', {
-            action: 'manageCampaigns'
-        })
-        .when('/campaigns/:idCampaign/purse', {
-            action: 'managePurse'
-        });
+            .when('/campaigns/:idCampaign/purse', {
+                action: 'managePurse'
+            });
     }
     if (model.me.type === 'PERSEDUCNAT') {
         $routeProvider
@@ -82,6 +81,6 @@ routes.define(($routeProvider) => {
     }
 
     $routeProvider.otherwise({
-            redirectTo: '/'
-        });
+        redirectTo: '/'
+    });
 });

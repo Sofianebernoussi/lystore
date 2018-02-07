@@ -1,8 +1,7 @@
 import http from 'axios';
 import { notify, _ } from 'entcore';
 import { Selectable, Selection, Mix } from 'entcore-toolkit';
-import {StructureGroup,  Tags} from './index';
-import {Purses} from "./Purse";
+import {StructureGroup,  Tags, Purses} from './index';
 
 
 export class Campaign implements Selectable  {
@@ -17,6 +16,7 @@ export class Campaign implements Selectable  {
     nb_structures: number;
     nb_equipments: number;
     purses: Purses;
+    nb_panier?: number;
 
     constructor (name?: string, description?: string) {
         if (name) this.name = name;
@@ -46,7 +46,7 @@ export class Campaign implements Selectable  {
 
     async create () {
         try {
-            await http.post(`/lystore/campaign`, this.toJson());
+           await http.post(`/lystore/campaign`, this.toJson());
         } catch (e) {
             notify.error('lystore.campaign.create.err');
         }

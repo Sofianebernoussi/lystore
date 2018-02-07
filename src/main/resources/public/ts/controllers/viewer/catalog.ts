@@ -58,8 +58,10 @@ export const catalogController = ng.controller('catalogController',
         $scope.thereAreOptionalOptions = (equipment: Equipment) => {
             return !(_.findWhere(equipment.options, {required : false}) === undefined) ;
         };
-        $scope.addBasketItem = (basket: Basket) => {
-            basket.save();
+        $scope.addBasketItem = async (basket: Basket) => {
+            let { status } = await basket.create();
+            $scope.campaign.nb_panier += status === 200 ? 1 : 0;
+            Utils.safeApply($scope);
         };
         $scope.amountIncrease = () => {
             $scope.basket.amount += 1;

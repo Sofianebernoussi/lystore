@@ -1,0 +1,46 @@
+<div class="delete-confirmation">
+    <i18n>lystore.basket.delete.message</i18n>
+    <div class="basket-item twelve cell card " >
+        <div class="row article-equipment">
+            <div class="two cell basket-image">
+                <img ng-src="[[basketToDelete.equipment.image]]" ng-show="basketToDelete.equipment.image!==null && basketToDelete.equipment.image!==undefined " />
+                <img skin-src="/img/illustrations/pages-default.png" ng-show="basketToDelete.equipment.image===null || basketToDelete.equipment.image===undefined "/>
+            </div>
+            <div class="five cell basket-delivery">
+                <h3>
+                    <i18n>
+                        lystore.expected.delivery
+                    </i18n>
+                </h3>
+                [[calculeDeliveryDate()]]
+            </div>
+            <div class="four cell basket-amount">
+                <div class="row ">
+                    <p>  <i18n>lystore.quantity</i18n> :  [[basketToDelete.amount]]</p>
+                </div>
+                <div class="row ">
+                    <p>  <i18n>price</i18n> : [[calculatePriceOfBasket(basketToDelete , 2)]] <i18n>money.symbol</i18n> <p>
+                </div>
+            </div>
+            <div class="nine cell basket-equipment">
+                <h3>[[basketToDelete.equipment.name]]</h3>
+                <p ng-bind-html="basketToDelete.equipment.summary" ></p>
+                <p>
+            </div>
+
+        </div>
+        <div class="row options-head" ng-show="basketToDelete.options.length > 0">
+            <h4><i18n>multi-combo.options</i18n></h4>
+        </div>
+
+        <div class="twelve row option-table" ng-repeat="option in basketToDelete.options " ng-show="basketToDelete.options.length > 0">
+            <div class="six row">[[option.amount]] - [[option.name]] </div>
+            <div class="six row">[[calculatePriceTTC(option.price, option.tax_amount, 2) ]]</div>
+        </div>
+
+    </div>
+    <div class="right-magnet">
+        <input type="button" class="cancel" ng-click="cancelBasketDelete()" i18n-value="cancel"/>
+        <input type="submit" class="button" ng-click="deleteBasket(basketToDelete)"/>
+    </div>
+</div>

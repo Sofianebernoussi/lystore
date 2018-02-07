@@ -7,7 +7,6 @@ import fr.wseduc.webutils.Either;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
-import org.entcore.common.user.UserInfos;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonArray;
@@ -57,7 +56,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
 
         this.sql.prepared(query, new JsonArray().addNumber(idEquipment), SqlResult.validResultHandler(handler));
     }
-    public void listEquipments(UserInfos user, Integer idCampaign, String idStructure,
+    public void listEquipments(Integer idCampaign, String idStructure,
                                Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new JsonArray();
         String query = "SELECT e.*, tax.value tax_amount, array_to_json(array_agg(DISTINCT opts)) as options," +

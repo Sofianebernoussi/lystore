@@ -282,13 +282,13 @@ body.lystore {
       box-shadow: 0 1px 3px #666;
       cursor: pointer;
     }
-      div.desabled {
-        opacity: 0.5;
-        cursor: context-menu;
-      }
-      div.card {
-        text-align: center;
-      }
+    div.desabled {
+      opacity: 0.5;
+      cursor: context-menu;
+    }
+    div.card {
+      text-align: center;
+    }
   }
   .campaign-image {
     text-align: center;
@@ -385,5 +385,89 @@ body.lystore {
     display: inline-flex;
     border-left: 1px #ccc dotted;
     padding-left: 20px;
+  }
+  span.notification-bull {
+    box-shadow: 3px 1px 2px 1px #ddd;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    border: 2px $primary-dark solid;
+    display: inline-block;
+    text-align: center;
+    margin: 0 5px;
+    padding-right: 1px;
+    padding-bottom: 1px;
+  }
+  .delete-confirmation{
+    .basket-item{
+      margin: 20px 0;
+    }
+    .basket-image{
+      margin: 10px;
+    }
+    .option-table{
+      display: inline-flex;
+      padding: 3px;
+      margin: 1px 5px;
+      border-bottom: 2px #f0f0f0 solid;
+    }
+  }
+  .basket-list{
+    .basket-item{
+      margin-bottom: 15px;
+      height: 245px;
+      &.openedOptions{
+
+        height: auto !important;
+      }
+      .article-equipment {
+        height: 185px;
+        .basket-image {
+          img{
+            max-height: 185px;
+          }
+          max-height: 185px;
+          text-align: center;
+        }
+        .basket-equipment {
+        }
+        .basket-delivery {
+          text-align: center;
+        }
+        .basket-amount {
+          padding: 0.75%;
+          p {
+            display: inline-block;
+            font-weight: bold;
+            font-size: 15px;
+            margin-left: 10px;
+          }
+          .row {
+            margin-bottom: 10px;
+          }
+        }
+      }
+      .options-head {
+        border-bottom: 2px #f0f0f0 solid;
+        padding: 0px 10px 0 10px;
+
+
+        h4 {
+          display: inline;
+        }
+        i {
+          display: inline;
+        }
+      }
+      .options-head:hover {
+        background: #eee;
+      }
+      .option-table{
+        display: inline-flex;
+        padding: 3px;
+        margin: 1px 5px;
+        border-bottom: 2px #f0f0f0 solid;
+      }
+    }
   }
 }

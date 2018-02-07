@@ -1,13 +1,14 @@
 import { Selectable, Selection, Mix } from 'entcore-toolkit';
 import { notify, _ } from 'entcore';
 import http from 'axios';
-import {Equipment} from './index';
+import {Equipment, EquipmentOption} from './index';
 
 export class Basket implements Selectable {
     id?: number;
     amount: number;
     processing_date: string| Date;
     equipment: Equipment ;
+    options: EquipmentOption[];
     id_campaign: number;
     id_structure: string;
     selected: boolean;
@@ -41,7 +42,7 @@ export class Basket implements Selectable {
 
     async create () {
         try {
-            http.post(`/lystore/basket`, this.toJson());
+          return await  http.post(`/lystore/basket`, this.toJson());
         } catch (e) {
             notify.error('lystore.basket.create.err');
         }
@@ -55,9 +56,17 @@ export class Basket implements Selectable {
             throw e;
         }
     }
+    async updateAmount () {
+        try {
+            http.put(`/lystore/basket/${this.id}/amount`, this.toJson());
+        } catch (e) {
+            notify.error('lystore.basket.update.err');
+            throw e;
+        }
+    }
     async delete () {
         try {
-            await http.delete(`/lystore/basket/${this.id}`);
+            return await  http.delete(`/lystore/basket/${this.id}`);
         } catch (e) {
             notify.error('lystore.basket.delete.err');
         }
@@ -68,5 +77,20 @@ export class Baskets extends Selection<Basket> {
 
     constructor() {
         super([]);
+    }
+    async sync (idCampaign: number , idStructure: string ) {
+        try {
+            let { data } = await http.get(`/lystore/basket/${idCampaign}/${idStructure}`);
+            this.all = Mix.castArrayAs(Basket, data);
+            this.all.map((basket) => {
+                basket.equipment = Mix.castAs(Equipment, JSON.parse(basket.equipment.toString())[0]);
+                basket.options.toString() !== '[null]' && basket.options !== null ?
+                    basket.options = Mix.castArrayAs(EquipmentOption, JSON.parse(basket.options.toString()))
+                    : basket.options = [];
+                basket.equipment.options = basket.options;
+            });
+        } catch (e) {
+            notify.error('lystore.basket.sync.err');
+        }
     }
 }

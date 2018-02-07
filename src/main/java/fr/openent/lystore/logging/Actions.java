@@ -3,7 +3,8 @@ package fr.openent.lystore.logging;
 public enum Actions {
     CREATE ("CREATE"),
     UPDATE ("UPDATE"),
-    DELETE ("DELETE");
+    DELETE ("DELETE"),
+    IMPORT ("IMPORT");
 
     private final String actionName;
 

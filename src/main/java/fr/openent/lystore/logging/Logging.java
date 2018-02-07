@@ -1,9 +1,11 @@
 package fr.openent.lystore.logging;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
 import org.entcore.common.sql.Sql;
+import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 import org.vertx.java.core.Handler;
@@ -25,7 +27,7 @@ public final class Logging {
 
     public static JsonObject add(EventBus eb, HttpServerRequest request, final String context,
                                  final String action, final String item, final JsonObject object) {
-       final JsonObject statment = new JsonObject();
+       final JsonObject statement = new JsonObject();
         UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
             @Override
             public void handle(UserInfos user) {
@@ -50,12 +52,12 @@ public final class Logging {
                         if (object != null) {
                             params.addObject(object);
                         }
-                statment.putString("statement", query.toString())
+                statement.putString("statement", query.toString())
                         .putArray("values",params)
                         .putString("action", "prepared");
             }
         });
-        return statment;
+        return statement;
     }
 
     public static Handler<Either<String, JsonObject>> defaultResponseHandler (final EventBus eb,
@@ -99,6 +101,38 @@ public final class Logging {
                 }
             }
         };
+    }
+
+    public static void insert (EventBus eb, HttpServerRequest request, final String context,
+                               final String action, final String item, final JsonObject object) {
+        UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+            @Override
+            public void handle(UserInfos user) {
+                String query = "INSERT INTO " + Lystore.lystoreSchema + ".logs" +
+                        "(id_user, username, action, context, item, value) " +
+                        "VALUES (?, ?, ?, ?, ?, ";
+
+                if (object != null) {
+                    query += "to_json(?)";
+                } else {
+                    query += "null";
+                }
+
+                query += ")";
+
+                JsonArray params = new JsonArray()
+                        .addString(user.getUserId())
+                        .addString(user.getUsername())
+                        .addString(action)
+                        .addString(context)
+                        .addString(item.contains("id = ") ? item : ("id = " + item));
+                if (object != null) {
+                    params.addObject(object);
+                }
+
+                Sql.getInstance().prepared(query, params, null);
+            }
+        });
     }
 
 }

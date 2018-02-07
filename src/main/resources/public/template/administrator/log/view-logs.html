@@ -29,13 +29,23 @@
                 <td class="one">[[lang.translate(log.context)]]</td>
                 <td class="one">[[log.item]]</td>
                 <td class="five">
-                    <pre class="twelve"
+                    <pre class="twelve" ng-if="log.action !== 'IMPORT'"
                          ng-class="{ ellipsis: !log.selected, 'overflow-y': log.selected }">
                         [[formatJson(log.value, log.selected ? 2 : 0)]]
                     </pre>
+                    <div class="twelve" ng-if="log.action === 'IMPORT'">
+                        <a ng-click="showFile(log)"><i18n>show.file</i18n></a>
+                    </div>
                 </td>
             </tr>
             </tbody>
         </table>
     </article>
+    <lightbox show="display.lightbox" on-close="lightbox.display = false">
+        <h2><i18n>lystore.log.purse.import</i18n> [[formatDate(log.date, 'DD/MM/YYYY HH:mm:ss')]]</h2>
+        <h4><i18n>lystore.log.purse.import.file</i18n> :</h4>
+        <pre class="pre-file-import">
+            [[parseJson(log.value).content.trim()]]
+        </pre>
+    </lightbox>
 </div>

@@ -55,4 +55,11 @@ public interface CampaignService {
      * @param handler function handler returning data
      */
     void delete(List<Integer> ids, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Get structure list ids based on provided campaign id
+     * @param campaignId campaign id
+     * @param handler function handler returning data
+     */
+    void getCampaignStructures(Integer campaignId, Handler<Either<String, JsonArray>> handler);
 }

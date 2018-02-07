@@ -20,19 +20,24 @@ public class DefaultPurseService implements PurseService {
             statements.addObject(getImportStatement(campaignId, field,
                     statementsValues.getString(field)));
         }
-        Sql.getInstance().transaction(statements, new Handler<Message<JsonObject>>() {
-            @Override
-            public void handle(Message<JsonObject> message) {
-                if(message.body().containsField("status") &&
-                        "ok".equals(message.body().getString("status"))) {
-                    handler.handle(new Either.Right<String, JsonObject>(
-                            new JsonObject().putString("status", "ok")));
-                } else {
-                    handler.handle(new Either.Left<String, JsonObject>
-                            ("lystore.statements.error"));
+        if (statements.size() > 0) {
+            Sql.getInstance().transaction(statements, new Handler<Message<JsonObject>>() {
+                @Override
+                public void handle(Message<JsonObject> message) {
+                    if (message.body().containsField("status") &&
+                            "ok".equals(message.body().getString("status"))) {
+                        handler.handle(new Either.Right<String, JsonObject>(
+                                new JsonObject().putString("status", "ok")));
+                    } else {
+                        handler.handle(new Either.Left<String, JsonObject>
+                                ("lystore.statements.error"));
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            handler.handle(new Either.Left<String, JsonObject>
+                    ("lystore.statements.empty"));
+        }
     }
 
     @Override

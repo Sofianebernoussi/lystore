@@ -38,6 +38,13 @@ body.lystore {
     table {
       table-layout: fixed;
     }
+
+    .pre-file-import {
+      white-space: pre-line;
+      border: solid 1px $light-grey;
+      background-color: $lightest-grey;
+      padding: 15px;
+    }
   }
 
   .color-tag {

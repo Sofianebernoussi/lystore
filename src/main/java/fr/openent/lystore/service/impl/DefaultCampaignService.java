@@ -138,6 +138,17 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
         });
     }
 
+    @Override
+    public void getCampaignStructures(Integer campaignId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT distinct id_structure FROM lystore.campaign " +
+                "INNER JOIN lystore.rel_group_campaign ON (campaign.id = rel_group_campaign.id_campaign) " +
+                "INNER JOIN lystore.rel_group_structure " +
+                "ON (rel_group_structure.id_structure_group = rel_group_campaign.id_structure_group) " +
+                "WHERE campaign.id = ?;";
+
+        sql.prepared(query, new JsonArray().addNumber(campaignId), SqlResult.validResultHandler(handler));
+    }
+
 
     public void updateAccessibility(final Integer id,final JsonObject campaign,
                                     final Handler<Either<String, JsonObject>> handler){

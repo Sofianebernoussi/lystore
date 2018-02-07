@@ -197,3 +197,38 @@ CREATE TABLE lystore.purse(
   ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT purse_id_structure_id_campaign_key UNIQUE (id_structure, id_campaign)
 );
+
+CREATE TABLE lystore.basket_equipment
+(
+    id bigserial NOT NULL,
+    amount integer NOT NULL,
+    processing_date date,
+    id_equipment bigint NOT NULL,
+    id_campaign bigint NOT NULL,
+    id_structure character varying NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_equipment_id FOREIGN KEY (id_equipment)
+        REFERENCES lystore.equipment (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fk_campaign_id FOREIGN KEY (id_campaign)
+        REFERENCES lystore.campaign (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
+
+CREATE TABLE lystore.basket_option
+(
+    id bigserial NOT NULL,
+    id_basket_equipment bigint,
+    id_option bigint,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_basket_equipment_id FOREIGN KEY (id_basket_equipment)
+        REFERENCES lystore.basket_equipment (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fk_option_id FOREIGN KEY (id_option)
+        REFERENCES lystore.equipment_option (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);

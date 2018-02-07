@@ -15,6 +15,11 @@
         "mode" : "${mode}",
         "entcore.port" : 8009,
         "sql": true,
-        "db-schema": "lystore"
+        "db-schema": "lystore",
+        "slack": {
+            "token": "",
+            "api-uri": "",
+            "bot-username": "Lystore Bot"
+        }
       }
     }

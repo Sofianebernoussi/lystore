@@ -15,3 +15,4 @@ export * from './Campaign';
 export * from './StructureGroup';
 export * from './Purse';
 export * from './basket';
+export * from './Purse';

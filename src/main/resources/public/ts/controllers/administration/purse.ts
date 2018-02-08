@@ -1,11 +1,14 @@
 import { ng, template, notify, moment, _ } from 'entcore';
-import { PurseImporter, Utils, Purse } from '../../model';
+import { PurseImporter, Utils, Purse, Purses } from '../../model';
 import { Mix } from 'entcore-toolkit';
 
 declare let window: any;
 
 export const purseController = ng.controller('PurseController',
     ['$scope', ($scope) => {
+        $scope.campaign.purses = new Purses($scope.campaign.id);
+        $scope.campaign.purses.sync().then(() => Utils.safeApply($scope));
+
         $scope.lightbox = {
             open: false
         };

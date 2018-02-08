@@ -15,7 +15,7 @@ export class Campaign implements Selectable  {
     purse_amount: number;
     nb_structures: number;
     nb_equipments: number;
-    purses: Purses;
+    purses?: Purses;
     nb_panier?: number;
 
     constructor (name?: string, description?: string) {
@@ -23,7 +23,6 @@ export class Campaign implements Selectable  {
         if (description) this.description = description;
         this.groups = [];
         this.image = '';
-        this.purses = new Purses();
     }
 
     toJson () {
@@ -77,18 +76,17 @@ export class Campaign implements Selectable  {
     async sync (id, tags?: Tags) {
         try {
             let { data } = await http.get(`/lystore/campaigns/${id}`);
-            let groups = JSON.parse(data.groups.toString());
-            if (groups[0] !== null ) {
-                data.groups = Mix.castArrayAs(StructureGroup, groups) ;
+            Mix.extend(this, Mix.castAs(Campaign, data));
+            if (this.groups[0] !== null ) {
+                this.groups = Mix.castArrayAs(StructureGroup, JSON.parse(this.groups.toString())) ;
                 if (tags) {
-                data.groups.map((group) => {
+                this.groups.map((group) => {
                     group.tags =  group.tags.map( (tag) => {
                         return _.findWhere(tags, {id: tag});
                     });
                 });
                 }
-            } else data.groups = [];
-            Mix.extend(this, Mix.castAs(Campaign, data) );
+            } else this.groups = [];
 
         } catch (e) {
             notify.error('lystore.campaign.sync.err');

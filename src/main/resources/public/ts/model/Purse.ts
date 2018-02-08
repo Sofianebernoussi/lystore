@@ -1,6 +1,6 @@
 import { notify } from 'entcore';
 import http from 'axios';
-import {Mix, Selectable, Selection} from "entcore-toolkit";
+import {Mix, Selectable, Selection} from 'entcore-toolkit';
 
 export class Purse implements Selectable {
     id?: number;
@@ -38,16 +38,16 @@ export class Purse implements Selectable {
 }
 
 export class Purses extends Selection<Purse> {
-    all: Purse[];
 
-    constructor () {
+    id_campaign: number;
+    constructor (id_campaign: number) {
         super([]);
-        this.all = [];
+        this.id_campaign = id_campaign;
     }
 
-    async sync (id_campaign): Promise<void> {
-        let purses = await http.get(`/lystore/campaign/${id_campaign}/purses/list`);
-        this.all = Mix.castArrayAs(Purse, purses.data);
+    async sync () {
+        let {data} = await http.get(`/lystore/campaign/${this.id_campaign}/purses/list`);
+        this.all = Mix.castArrayAs(Purse, data);
     }
 }
 

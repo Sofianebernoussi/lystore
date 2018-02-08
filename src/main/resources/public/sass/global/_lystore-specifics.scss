@@ -217,28 +217,28 @@ body.lystore {
     .dominos .item {
       max-width: 300px !important;
       width: 16% !important;
-      padding: 0px !important;
-      margin: 7px 7px 0px 7px;
-      min-width: 250px;
-      article.desabled {
+      margin: 7px 0;
+
+      &.list-item {
+        width: 90% !important;
+        box-sizing: content-box;
+        margin: 0 auto;
+      }
+
+      &.disabled {
+        cursor: initial;
+      }
+
+      article.disabled {
         opacity: 0.4 !important;
       }
       article {
         border: 1px #ddd solid;
       }
-      div.desabled {
-        height: 94%;
-        width: 98%;
-        z-index: 1;
-        border: 2px $grey dashed;
-        background: #a3a1a1;
-        opacity: 0.5;
-        position: absolute;
-        cursor: initial;
-      }
-      h1.desabled {
+      h1.disabled {
         text-align: center;
-        margin-top: 50%;
+        top: 50%;
+        margin-top: -20px;
         position: absolute;
         z-index: 2;
         font-size: larger;
@@ -256,13 +256,24 @@ body.lystore {
         padding-left: 5%;
         padding-right: 5%;
         height: 200px;
+
+        &.item {
+          padding-left: 5% !important;
+          padding-right: 5% !important;
+          min-height: 200px;
+          padding-bottom: 5% !important;
+          height: auto !important;
+          width: 100% !important;
+        }
+
         img {
           position: relative;
           height: auto;
-          width: auto;
-          margin-left: auto !important;
-          margin-right: auto !important;
+          width: 80%;
           display: block;
+          margin: 0 auto;
+          max-height: 130px;
+          max-width: 160px;
         }
         h4 {
           position: relative;
@@ -282,7 +293,7 @@ body.lystore {
       box-shadow: 0 1px 3px #666;
       cursor: pointer;
     }
-    div.desabled {
+    div.disabled {
       opacity: 0.5;
       cursor: context-menu;
     }

@@ -20,18 +20,23 @@
             </div>
         </div>
     </div>
-    <div class="cell catalog-list" ng-class="{twelve: !display.equipment, ' card border-list': display.equipment}">
+    <div class="cell catalog-list" ng-class="{twelve: !display.equipment, 'border-list': display.equipment}">
         <div class="dominos">
-            <div class="item" ng-repeat="equipment in equipments.all|catalogSearchFilter:search.filterWrods" ng-click="openEquipment(equipment)">
+            <div class="item" ng-class="{
+                    disabled: equipment.status!== 'AVAILABLE',
+                    'list-item': display.equipment
+                 }"
+                 ng-repeat="equipment in equipments.all|catalogSearchFilter:search.filterWrods"
+                 ng-click="openEquipment(equipment)">
 
-                <div ng-class="{desabled: equipment.status!== 'AVAILABLE'} "></div>
-                <h1 ng-class="{desabled: equipment.status !== 'AVAILABLE'} " ng-show="equipment.status!== 'AVAILABLE'">
+                <div ng-class="{disabled: equipment.status!== 'AVAILABLE'} "></div>
+                <h1 ng-class="{disabled: equipment.status !== 'AVAILABLE'} " ng-show="equipment.status!== 'AVAILABLE'">
                     <i18n ng-show="equipment.status === 'UNAVAILABLE'">lystore.UNAVAILABLE</i18n>
                     <i18n ng-show="equipment.status === 'OUT_OF_STOCK'">lystore.OUT_OF_STOCK</i18n></h1>
 
-                <article class="domino"  ng-class="{desabled: equipment.status !== 'AVAILABLE'}">
+                <article class="domino"  ng-class="{ disabled: equipment.status !== 'AVAILABLE' }">
                     <h2>[[calculatePriceOfEquipment(equipment, false, 2)]] €</h2>
-                    <div class="top">
+                    <div class="top" ng-class="{ item: display.equipment }">
                         <img ng-src="[[equipment.image]]" ng-show="equipment.image!==null && equipment.image!==undefined " />
                         <img skin-src="/img/illustrations/pages-default.png" ng-show="equipment.image===null || equipment.image===undefined "/>
                         <h4>[[equipment.name]]</h4>

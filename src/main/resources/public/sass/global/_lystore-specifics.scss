@@ -394,8 +394,12 @@ body.lystore {
   }
   .purse-in-menue{
     display: inline-flex;
-    border-left: 1px #ccc dotted;
-    padding-left: 20px;
+    padding-right: 20px;
+    margin-left: auto;
+
+    h2 {
+      color: $accent;
+    }
   }
   span.notification-bull {
     background-color: $accent;

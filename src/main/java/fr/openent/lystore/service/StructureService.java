@@ -8,7 +8,7 @@ public interface StructureService {
 
     /**
      * list all Structures in database
-     * @param handler
+     * @param handler function handler returning data
      */
     void getStructures(Handler<Either<String,JsonArray>> handler);
 

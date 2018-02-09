@@ -14,17 +14,17 @@ public interface BasketService {
      void create(JsonObject basket, Handler<Either<String, JsonObject>> handler);
 
     /**
-     * List  basket liste of a campaigne and a structure
-     * @param idCampaign
-     * @param idStructure
-     * @param handler
+     * List  basket list of a campaign and a structure
+     * @param idCampaign campaign identifier
+     * @param idStructure structure identifier
+     * @param handler function handler returning data
      */
      void listBasket(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Delete a basket item
      * @param idBasket id of the basket item
-     * @param handler
+     * @param handler function handler returning data
      */
      void delete(Integer idBasket, Handler<Either<String, JsonObject>> handler);
 
@@ -32,7 +32,7 @@ public interface BasketService {
      * Update a basket's amount
      * @param idBasket id of a basket item
      * @param amount the new amount
-     * @param handler
+     * @param handler function handler returning data
      */
      void updateAmount(Integer idBasket, Integer amount,Handler<Either<String, JsonObject>> handler );
 }

@@ -17,17 +17,17 @@ public interface EquipmentService {
 
     /**
      * List equipments of Campaign and a structure  in database
-     * @param idCampaign
-     * @param idStructure
-     * @param handler
+     * @param idCampaign campaign identifier
+     * @param idStructure structure identifier
+     * @param handler function handler returning data
      */
     void listEquipments( Integer idCampaign, String idStructure,
                         Handler<Either<String, JsonArray>> handler);
 
     /**
      * Get an Equipment informations
-     * @param idEquipment
-     * @param handler
+     * @param idEquipment equipment identifier
+     * @param handler function handler returning data
      */
     void equipment(Integer idEquipment,  Handler<Either<String, JsonArray>> handler);
 

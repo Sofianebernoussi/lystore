@@ -155,7 +155,7 @@
   "UAI": "UAI",
   "create":"Créer",
   "money.symbol": "€",
-  "total":"totale",
+  "total":"total",
   "lystore.basket.delete.message":"l'équipement suivant sera retiré de votre panier",
   "lystore.agent.create.err":"Erreur lors de la création d'un correspondant région",
   "lystore.agent.update.err":"Erreur lors de la mise à jour d'un correspondant région",

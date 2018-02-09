@@ -398,16 +398,20 @@ body.lystore {
     padding-left: 20px;
   }
   span.notification-bull {
-    box-shadow: 3px 1px 2px 1px #ddd;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    border: 2px $primary-dark solid;
-    display: inline-block;
+    background-color: $accent;
+    display: block;
+    color: $white;
+    height: 15px;
+    width: 15px;
+    line-height: 16px;
+    font-size: 12px;
     text-align: center;
-    margin: 0 5px;
-    padding-right: 1px;
-    padding-bottom: 1px;
+    border-radius: 7px;
+    padding: 1px;
+    position: relative;
+    left: 0;
+    top: -10px;
+    font-weight: bold;
   }
   .delete-confirmation{
     .basket-item{

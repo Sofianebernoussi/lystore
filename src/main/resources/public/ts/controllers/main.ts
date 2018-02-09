@@ -44,8 +44,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             main:  async() => {
                 if ($scope.isManager() || $scope.isAdministrator()) {
                     template.open('main-profile', 'administrator/management-main');
-                }
-                else if ($scope.isPersonnel() && !$scope.isManager() && !$scope.isAdministrator()) {
+                } else {
                     template.open('main-profile', 'customer/campaign/campaign-list');
                     $scope.structure = model.me.structures[0];
                     await $scope.campaigns.sync($scope.structure);

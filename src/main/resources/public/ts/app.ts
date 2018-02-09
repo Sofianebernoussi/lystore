@@ -63,8 +63,7 @@ routes.define(($routeProvider) => {
             .when('/campaigns/:idCampaign/purse', {
                 action: 'managePurse'
             });
-    }
-    if (model.me.type === 'PERSEDUCNAT') {
+    } else {
         $routeProvider
             .when('/campaign/:idCampaign/catalog', {
                 action: 'campaignCatalog'

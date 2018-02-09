@@ -42,7 +42,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.baskets = new Baskets();
         route({
             main:  async() => {
-                if ($scope.isPersonnel() && !$scope.isManager() && !$scope.isAdministrator()) {
+                if ($scope.isManager() || $scope.isAdministrator()) {
+                    template.open('main-profile', 'administrator/management-main');
+                }
+                else if ($scope.isPersonnel() && !$scope.isManager() && !$scope.isAdministrator()) {
+                    template.open('main-profile', 'customer/campaign/campaign-list');
                     $scope.structure = model.me.structures[0];
                     await $scope.campaigns.sync($scope.structure);
                 }

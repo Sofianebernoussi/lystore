@@ -24,6 +24,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
     ($scope, route, $location, $rootScope) => {
         template.open('main', 'main');
 
+        $scope.display = {
+            equipment: false
+        };
+
         $scope.lang = lang;
         $scope.agents = new Agents();
         $scope.suppliers = new Suppliers();
@@ -136,6 +140,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/catalog/catalog-list');
                 template.close('right-side');
+                $scope.display.equipment = false;
                 Utils.safeApply($scope);
             },
             equipmentDetail : async (params) => {

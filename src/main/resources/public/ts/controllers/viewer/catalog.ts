@@ -21,9 +21,6 @@ export const catalogController = ng.controller('catalogController',
         };
         $scope.alloptionsSelected = false;
         $scope.equipment = new Equipment();
-        $scope.display = {
-          equipment: false
-        };
         $scope.addFilter = (filterWrod: string, event?) => {
             if (event && (event.which === 13 || event.keyCode === 13 )) {
                 $scope.addfilterWords(filterWrod);

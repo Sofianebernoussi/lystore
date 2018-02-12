@@ -1,6 +1,8 @@
 <div  ng-controller="basketController">
+
     <div class="right-magnet">
-        <h4><i18n>total</i18n> : [[calculatePriceOfEquipments(baskets)]] </h4>
+        <h4><i18n>total</i18n> : [[calculatePriceOfEquipments(baskets, 2)]] </h4>
+        <input type="button"  ng-click="takeClientOrder(baskets)" i18n-value="lystore.take.order" ng-disabled="!validOrder(baskets)" />
     </div>
     <div class="basket-list">
         <article class="basket-item twelve cell card" ng-repeat="basket in baskets.all track by $index " ng-class="{openedOptions: display.equipmentOption[$index]}">
@@ -23,8 +25,8 @@
                 </div>
                 <div class="three cell basket-amount">
                     <div class="row ">
-                        <input type="number" step="10" min="0" ng-model="basket.amount"  ng-blur="updateBasketAmount(basket)" class="three  "/>
-                        <p> [[calculatePriceOfBasket(basket , 2)]] <i18n>money.symbol</i18n> <p>
+                        <input type="number" step="1" min="0" ng-model="basket.amount"  ng-blur="updateBasketAmount(basket)" class="three  "/>
+                        <p> [[calculatePriceOfBasket(basket , 2, true)]] <i18n>money.symbol</i18n> <p>
                     </div>
                     <div class="row">
                         <input type="button"  ng-click="displayLightboxDelete(basket)" i18n-value="delete"/>
@@ -46,6 +48,10 @@
 
     <lightbox show="display.lightbox.deleteBasket" on-close="cancelBasketDelete()">
         <container template="basket.delete"></container>
+    </lightbox>
+
+    <lightbox show="display.lightbox.confirmOrder" on-close="cancelConfirmOrder()">
+        <container template="basket.order"></container>
     </lightbox>
 </div>
 

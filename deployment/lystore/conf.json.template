@@ -19,7 +19,8 @@
         "slack": {
             "token": "",
             "api-uri": "",
-            "bot-username": "Lystore Bot"
+            "bot-username": "Lystore Bot",
+            "channel": ""
         }
       }
     }

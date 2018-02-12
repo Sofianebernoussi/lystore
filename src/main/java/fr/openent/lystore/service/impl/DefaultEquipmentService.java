@@ -211,7 +211,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
      * Create an option for an equipment
      * @param id of the equipment
      * @param option
-     * @return
+     * @return Insert statement
      */
     private JsonObject getEquipmentOptionRelationshipStatement(Number id, JsonObject option) {
         String insertTagEquipmentRelationshipQuery =
@@ -268,7 +268,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     /**
      * Delete options of an equipment
      * @param id : equipment id
-     * @return
+     * @return Delete statement
      */
     private JsonObject getEquipmentOptionsRelationshipDeletion(Number id) {
         String query = "DELETE FROM " + Lystore.lystoreSchema + ".equipment_option " +
@@ -279,10 +279,11 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 .putArray("values", new JsonArray().addNumber(id))
                 .putString("action", "prepared");
     }
+
     /**
      * Delete options of  equipments
      * @param ids : equipment ids
-     * @return
+     * @return Delete statement
      */
     private JsonObject getEquipmentsOptionsRelationshipDeletion(List<Integer> ids) {
         StringBuilder query = new StringBuilder();
@@ -300,10 +301,11 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 .putArray("values", value)
                 .putString("action", "prepared");
     }
+
     /**
      * Delete equipments
      * @param ids : equipment ids
-     * @return
+     * @return Delete statement
      */
     private JsonObject getEquipmentsDeletion(List<Integer> ids) {
         StringBuilder query = new StringBuilder();

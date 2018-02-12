@@ -196,6 +196,7 @@ CREATE TABLE lystore.purse(
   REFERENCES lystore.campaign (id) MATCH SIMPLE
   ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT purse_id_structure_id_campaign_key UNIQUE (id_structure, id_campaign)
+  CONSTRAINT "Check_amount_positive" CHECK (amount >= 0::numeric)
 );
 
 CREATE TABLE lystore.basket_equipment
@@ -228,6 +229,44 @@ CREATE TABLE lystore.basket_option
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
     CONSTRAINT fk_option_id FOREIGN KEY (id_option)
+        REFERENCES lystore.equipment_option (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
+CREATE TABLE lystore.order_client_equipment
+(
+    id bigserial NOT NULL,
+    price numeric NOT NULL,
+    tax_amount numeric NOT NULL,
+    amount bigint NOT NULL,
+    creation_date date NOT NULL DEFAULT CURRENT_DATE,
+    id_campaign bigint NOT NULL,
+    id_equipment bigint NOT NULL,
+    id_structure character varying NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_equipment_id FOREIGN KEY (id_equipment)
+        REFERENCES lystore.equipment (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fk_campaign_id FOREIGN KEY (id_campaign)
+        REFERENCES lystore.campaign (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);
+
+CREATE TABLE lystore.order_client_options
+(
+    id bigserial NOT NULL,
+    tax_amount numeric,
+    price numeric,
+    id_order_client_equipment bigint,
+    id_option bigint,
+    CONSTRAINT "Pk_id_ordet_client_option" PRIMARY KEY (id),
+    CONSTRAINT "FK_order-client-equipment_id" FOREIGN KEY (id_order_client_equipment)
+        REFERENCES lystore.order_client_equipment (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT "FK_options_id" FOREIGN KEY (id_option)
         REFERENCES lystore.equipment_option (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION

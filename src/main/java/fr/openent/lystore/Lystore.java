@@ -2,6 +2,7 @@ package fr.openent.lystore;
 
 import fr.openent.lystore.controllers.*;
 import org.entcore.common.http.BaseServer;
+import org.vertx.java.core.json.JsonObject;
 
 public class Lystore extends BaseServer {
 
@@ -28,6 +29,6 @@ public class Lystore extends BaseServer {
         addController(new PurseController());
         addController(new StructureGroupController());
         addController(new StructureController());
-        addController(new BasketController());
+        addController(new BasketController(vertx, container.config().getObject("slack", new JsonObject()) ));
     }
 }

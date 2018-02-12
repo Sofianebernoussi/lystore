@@ -1,11 +1,9 @@
 package fr.openent.lystore.logging;
 
 import fr.openent.lystore.Lystore;
-import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
 import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 import org.vertx.java.core.Handler;
@@ -90,8 +88,7 @@ public final class Logging {
                     Renders.renderJson(request, event.right().getValue(), OK_STATUS);
                     JsonArray statements = new JsonArray();
                     for(int i=0; i<items.size(); i++){
-
-                        statements.add( add(eb, request, context, action,items.get(i), object));
+                        statements.add( add(eb, request, context, action,items.get(i), object ));
                     }
                     Sql.getInstance().transaction(statements, null);
                 } else {
@@ -103,6 +100,30 @@ public final class Logging {
         };
     }
 
+    public static Handler<Either<String, JsonObject>> defaultCreateResponsesHandler
+            (final EventBus eb, final HttpServerRequest request,
+             final String context, final String action,final String item, final JsonArray objects) {
+        return new Handler<Either<String, JsonObject>>() {
+            @Override
+            public void handle(Either<String, JsonObject> event) {
+                if (event.isRight()) {
+                    JsonObject object;
+                    Renders.renderJson(request, event.right().getValue(), OK_STATUS);
+                    JsonArray statements = new JsonArray();
+                    for(int i=0; i<objects.size(); i++){
+                        object = objects.get(i);
+                        statements.add( add(eb, request, context, action,
+                                object.getNumber(item).toString(), (JsonObject) object));
+                    }
+                    Sql.getInstance().transaction(statements, null);
+                } else {
+                    JsonObject error = new JsonObject()
+                            .putString("error", event.left().getValue());
+                    Renders.renderJson(request, error, BAD_REQUEST_STATUS);
+                }
+            }
+        };
+    }
     public static void insert (EventBus eb, HttpServerRequest request, final String context,
                                final String action, final String item, final JsonObject object) {
         UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {

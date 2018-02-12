@@ -10,20 +10,22 @@ export const basketController = ng.controller('basketController',
             equipmentOption : [],
 
             lightbox : {
-                deleteBasket : false
+                deleteBasket : false,
+                confirmOrder : false
             }
         };
-        $scope.calculatePriceOfEquipments = (baskets: Baskets) => {
+        $scope.calculatePriceOfEquipments = (baskets: Baskets, roundNumber?: number) => {
             let totalPrice = 0;
             baskets.all.map((basket) => {
-                let basketItemPrice = $scope.calculatePriceOfBasket(basket, 2);
-                totalPrice += !isNaN(basketItemPrice) ?  basketItemPrice : 0;
+                let basketItemPrice = $scope.calculatePriceOfBasket(basket, 2, false);
+                totalPrice += !isNaN(basketItemPrice) ? parseFloat( basketItemPrice ) : 0;
             });
-            return totalPrice;
+            return (!isNaN(totalPrice)) ? (roundNumber ? totalPrice.toFixed(roundNumber) : totalPrice ) : '';
         };
-        $scope.calculatePriceOfBasket = (basket: Basket, roundNumber: number ) => {
+        $scope.calculatePriceOfBasket = (basket: Basket, roundNumber?: number,  toDisplay?: boolean ) => {
             let equipmentPrice =  $scope.calculatePriceOfEquipment(basket.equipment, false, roundNumber);
-            return equipmentPrice * basket.amount;
+            equipmentPrice = basket.amount === 0 && toDisplay  ? equipmentPrice : equipmentPrice * basket.amount;
+            return (!isNaN(equipmentPrice)) ? (roundNumber ? equipmentPrice.toFixed(roundNumber) : equipmentPrice ) : '';
         };
         $scope.calculeDeliveryDate = () => {
             return moment().add(60, 'days').calendar();
@@ -42,7 +44,7 @@ export const basketController = ng.controller('basketController',
             let { status } = await basket.delete();
             $scope.campaign.nb_panier -= status === 200 ? 1 : 0;
             $scope.cancelBasketDelete();
-            await $scope.baskets.sync($routeParams.idCampaign, $scope.structure);
+            await $scope.baskets.sync($routeParams.idCampaign, $scope.current.structure.id);
             Utils.safeApply($scope);
         };
         $scope.cancelBasketDelete = () => {
@@ -58,8 +60,30 @@ export const basketController = ng.controller('basketController',
             else if (basket.amount > 0) {
                 basket.updateAmount();
             }
-            else {
-
-            }
+        };
+        $scope.takeClientOrder = async (baskets: Baskets) => {
+            let { status, data } = await baskets.takeOrder(parseInt($routeParams.idCampaign), $scope.current.structure);
+            $scope.totalPrice = $scope.calculatePriceOfEquipments(baskets, 2);
+            await baskets.sync(parseInt($routeParams.idCampaign), $scope.current.structure);
+            status === 200 ?  $scope.confirmOrder(data) :  null ;
+            Utils.safeApply($scope);
+        };
+        $scope.confirmOrder = (data) => {
+            $scope.campaign.nb_panier = $scope.baskets.all.length;
+            $scope.campaign.purse_amount = data.amount;
+            template.open('basket.order', 'customer/campaign/basket/order-confirmation');
+            $scope.display.lightbox.confirmOrder = true;
+            Utils.safeApply($scope);
+        };
+        $scope.cancelConfirmOrder = () => {
+            $scope.display.lightbox.confirmOrder = false;
+            template.close('basket.order');
+            Utils.safeApply($scope);
+        };
+        $scope.validOrder = (baskets: Baskets) => {
+            let equipmentsBasket = _.pluck(baskets.all, 'equipment' );
+          return $scope.calculatePriceOfEquipments(baskets) <= $scope.campaign.purse_amount
+              && _.findWhere( equipmentsBasket, {status : 'OUT_OF_STOCK'}) === undefined
+              &&  _.findWhere( equipmentsBasket, {status : 'UNAVAILABLE'}) === undefined;
         };
     }]);

@@ -112,9 +112,9 @@ export class Campaigns extends Selection<Campaign> {
         }
     }
 
-    async sync (idStructure?: string) {
+    async sync (Structure?: string) {
         try {
-            let { data } = await http.get( idStructure ? `/lystore/campaigns?idStructure=${idStructure}`  : `/lystore/campaigns`  );
+            let { data } = await http.get( Structure ? `/lystore/campaigns?idStructure=${Structure}`  : `/lystore/campaigns`  );
             this.all = Mix.castArrayAs(Campaign, data);
         } catch (e) {
             notify.error('lystore.campaigns.sync.err');

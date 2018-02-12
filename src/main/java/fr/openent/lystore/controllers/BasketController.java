@@ -1,18 +1,25 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.logging.Actions;
+import fr.openent.lystore.logging.Contexts;
+import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.PersonnelRight;
 import fr.openent.lystore.service.BasketService;
 import fr.openent.lystore.service.impl.DefaultBasketService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.request.RequestUtils;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.vertx.java.core.Handler;
+import org.vertx.java.core.Vertx;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.entcore.common.controller.ControllerHelper;
+import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
+
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
@@ -20,9 +27,9 @@ import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultRes
 public class BasketController extends ControllerHelper {
     private final BasketService basketService;
 
-    public BasketController () {
+    public BasketController (Vertx vertx, JsonObject slackConfiguration) {
         super();
-        this.basketService = new DefaultBasketService(Lystore.lystoreSchema, "basket");
+        this.basketService = new DefaultBasketService(Lystore.lystoreSchema, "basket", vertx, slackConfiguration);
     }
     @Get("/basket/:idCampaign/:idStructure")
     @ApiDoc("List  basket liste of a campaigne and a structure")
@@ -69,7 +76,7 @@ public class BasketController extends ControllerHelper {
             basketService.delete( idCampaign, defaultResponseHandler(request));
 
         } catch (ClassCastException e) {
-            log.error("An error occurred when casting equipment(s) id(s)", e);
+            log.error("An error occurred when casting basket id", e);
             badRequest(request);
         }
     }
@@ -86,7 +93,45 @@ public class BasketController extends ControllerHelper {
                     Integer amount = basket.getInteger("amount") ;
                     basketService.updateAmount(id, amount,  defaultResponseHandler(request));
                 } catch (ClassCastException e) {
-                    log.error("An error occurred when casting equipment id", e);
+                    log.error("An error occurred when casting basket id", e);
+                }
+            }
+        });
+    }
+    @Post("/baskets/to/orders")
+    @ApiDoc("crearte an order liste from basket")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(PersonnelRight.class)
+    public void takeOrder(final HttpServerRequest  request){
+        RequestUtils.bodyToJson( request, pathPrefix + "basketToOrder", new Handler<JsonObject>() {
+            @Override
+            public void handle(JsonObject object) {
+                try {
+                    final Integer idCampaign = object.getInteger("id_campaign");
+                    final String idStructure = object.getString("id_structure");
+                    final String nameStructure = object.getString("structure_name");
+                    basketService.listebasketItemForOrder(idCampaign, idStructure,
+                            new Handler<Either<String, JsonArray>>() {
+                        @Override
+                        public void handle(Either<String, JsonArray> listBasket) {
+                            if(listBasket.isRight()){
+                                basketService.takeOrder(request , listBasket.right().getValue(),
+                                        idCampaign , idStructure, nameStructure,
+                                        Logging.defaultCreateResponsesHandler(eb,
+                                        request,
+                                        Contexts.ORDER.toString(),
+                                        Actions.CREATE.toString(),
+                                        "id_order",
+                                        listBasket.right().getValue()));
+
+                            }else{
+                                log.error("An error occurred when listing Baskets");
+                            }
+                        }
+                    });
+
+                } catch (ClassCastException e) {
+                    log.error("An error occurred when casting Basket informations", e);
                 }
             }
         });

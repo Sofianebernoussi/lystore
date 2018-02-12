@@ -450,6 +450,15 @@ body.lystore {
       border-bottom: 2px #f0f0f0 solid;
     }
   }
+  .confirm-order {
+    i {
+      text-align: center;
+      font-size: 80px;
+    }
+    input {
+      margin: 5px 0px;
+    }
+  }
   .basket-list{
     .basket-item{
       margin-bottom: 15px;

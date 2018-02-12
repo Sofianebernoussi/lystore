@@ -1,6 +1,5 @@
 import { ng, template, notify, idiom as lang, moment, model, Behaviours, _} from 'entcore';
 import {
-    Structures,
     Agents,
     Suppliers,
     Programs,
@@ -13,7 +12,6 @@ import {
     StructureGroups,
     Campaigns,
     Campaign,
-    Structure,
     Utils,
     Equipment,
     Baskets,
@@ -27,13 +25,12 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.display = {
             equipment: false
         };
-
+        $scope.structures = [];
+        $scope.current = {};
         $scope.notifications = [];
-
         $scope.lang = lang;
         $scope.agents = new Agents();
         $scope.suppliers = new Suppliers();
-        $scope.structures = new Structures();
         $scope.contractTypes = new ContractTypes();
         $scope.programs = new Programs();
         $scope.contracts = new Contracts();
@@ -44,16 +41,15 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.structureGroups = new StructureGroups();
         $scope.taxes = new Taxes();
         $scope.logs = new Logs();
-        $scope.structure = new Structure;
         $scope.baskets = new Baskets();
         route({
             main:  async() => {
                 if ($scope.isManager() || $scope.isAdministrator()) {
                     template.open('main-profile', 'administrator/management-main');
                 } else {
+                    await $scope.initStructures();
+                    await $scope.initCampaign($scope.current.structure);
                     template.open('main-profile', 'customer/campaign/campaign-list');
-                    $scope.structure = model.me.structures[0];
-                    await $scope.campaigns.sync($scope.structure);
                 }
                 Utils.safeApply($scope);
             },
@@ -138,7 +134,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             campaignCatalog : async (params) => {
                 let id = params.idCampaign;
                 $scope.idIsInteger(id);
-                await $scope.equipments.sync(id, $scope.structure);
+                await $scope.equipments.sync(id, $scope.current.structure.id);
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/catalog/catalog-list');
                 template.close('right-side');
@@ -150,7 +146,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 let idEquipment = params.idEquipment;
                 $scope.idIsInteger(idCampaign);
                 $scope.idIsInteger(idEquipment);
-                await $scope.initBasketItem( parseInt(idEquipment), parseInt(idCampaign), $scope.structure );
+                await $scope.initBasketItem( parseInt(idEquipment), parseInt(idCampaign), $scope.current.structure.id );
                 template.open('right-side', 'customer/campaign/catalog/equipment-detail');
                 Utils.safeApply($scope);
             },
@@ -160,7 +156,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             campaignBasket : async (params) => {
                 let idCampaign = params.idCampaign;
                 $scope.idIsInteger(idCampaign);
-                await $scope.baskets.sync(idCampaign, $scope.structure );
+                await $scope.baskets.sync(idCampaign, $scope.current.structure.id );
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/basket/manage-basket');
                 Utils.safeApply($scope);
@@ -234,7 +230,20 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             });
             return (!isNaN(price)) ? (roundNumber ? price.toFixed(roundNumber) : price ) : price ;
         };
+        $scope.initStructures = async () => {
+            for ( let i = 0 ; i < model.me.structures.length ; i++) {
+                $scope.structures[i] = {
+                    id: model.me.structures[i],
+                    name : model.me.structureNames[i]
+                };
+            }
+           $scope.current.structure = $scope.structures.length > 0 ? $scope.structures[0] : null;
+        };
 
+        $scope. initCampaign = async (structure) => {
+            await $scope.campaigns.sync(structure.id);
+            Utils.safeApply($scope);
+        };
         if ($scope.isManager() || $scope.isAdministrator()) {
             template.open('main-profile', 'administrator/management-main');
         }

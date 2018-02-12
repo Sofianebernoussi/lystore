@@ -8,7 +8,6 @@ import org.vertx.java.core.http.HttpClientRequest;
 import org.vertx.java.core.http.HttpClientResponse;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.core.logging.impl.LoggerFactory;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,22 +22,24 @@ public class SlackService implements NotificationService {
     private String apiUri;
     private String apiToken;
     private String botUsername;
+    private String channel;
 
     private static final Integer httpsPort = 443;
     private static final Integer httpPort = 80;
 
-    public SlackService(Vertx vertx, String apiUri, String apiToken, String botUsername) {
+    public SlackService(Vertx vertx, String apiUri, String apiToken, String botUsername, String channel) {
         this.vertx = vertx;
         this.apiUri = apiUri;
         this.apiToken = apiToken;
         this.botUsername = botUsername;
+        this.channel = channel;
     }
 
     @Override
-    public void sendMessage(String text, String channel) {
+    public void sendMessage(String text) {
         try {
             String address = this.apiUri + "chat.postMessage?token=" + this.apiToken
-                    + "&channel=" + encodeParam(channel) + "&text=" + encodeParam(text)
+                    + "&channel=" + encodeParam(this.channel) + "&text=" + encodeParam(text)
                     + "&username=" + encodeParam(this.botUsername)
                     + "&pretty=1";
             HttpClient httpClient = generateHttpClient(new URI(address));

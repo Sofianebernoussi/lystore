@@ -1,7 +1,7 @@
 import { Selectable, Selection, Mix } from 'entcore-toolkit';
 import { notify, _ } from 'entcore';
 import http from 'axios';
-import {Equipment, EquipmentOption} from './index';
+import {Equipment, EquipmentOption, Structure} from './index';
 
 export class Basket implements Selectable {
     id?: number;
@@ -74,10 +74,10 @@ export class Basket implements Selectable {
 }
 
 export class Baskets extends Selection<Basket> {
-
     constructor() {
         super([]);
     }
+
     async sync (idCampaign: number , idStructure: string ) {
         try {
             let { data } = await http.get(`/lystore/basket/${idCampaign}/${idStructure}`);
@@ -91,6 +91,13 @@ export class Baskets extends Selection<Basket> {
             });
         } catch (e) {
             notify.error('lystore.basket.sync.err');
+        }
+    }
+    async takeOrder (idCampaign: number , Structure: Structure ) {
+        try {
+           return await http.post(`/lystore/baskets/to/orders`, {id_campaign : idCampaign, id_structure: Structure.id, structure_name: Structure.name  });
+        } catch (e) {
+            notify.error('lystore.order.create.err');
         }
     }
 }

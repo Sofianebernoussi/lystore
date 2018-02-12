@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id_campaign":{
+      "type": "number"
+    },
+    "id_structure":{
+      "type": "string"
+    },
+    "structure_name":{
+      "type": "string"
+    }
+  },
+  "required": [ "id_campaign", "id_structure", "structure_name" ]
+}

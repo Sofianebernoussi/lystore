@@ -19,7 +19,7 @@
                 <h3>[[campaign.name]]</h3>
                 <p ng-bind-html="campaign.description"></p>
                 <p>
-                    <div class="small-text"><i18n>lystore.campaign.amount</i18n> : [[campaign.purse_amount]] <i18n>money.symbol</i18n><div>
+                    <div class="small-text"><i18n>lystore.campaign.amount</i18n> : [[campaign.purse_amount || 0]] <i18n>money.symbol</i18n><div>
                     <div class="small-text">[[campaign.nb_structures]] <i18n>structures</i18n></div>
                     <div class="small-text">[[campaign.nb_equipments]] <i18n>lystore.equipments.available</i18n></div>
                 </p>

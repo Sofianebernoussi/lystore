@@ -289,16 +289,29 @@ body.lystore {
 
   }
   .campaign-personnel-list {
-    article:hover {
-      box-shadow: 0 1px 3px #666;
-      cursor: pointer;
-    }
-    div.disabled {
-      opacity: 0.5;
-      cursor: context-menu;
-    }
-    div.card {
-      text-align: center;
+    article {
+      transition: all 0.2s ease-in-out;
+      border: solid 2px $white;
+
+      &:hover {
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+        cursor: pointer;
+        border-color: $accent;
+      }
+
+      &.disabled {
+        opacity: 0.5;
+        cursor: initial !important;
+
+        &:hover {
+          border: solid 2px $white;
+          @include material-card();
+        }
+      }
+
+      em.small-text {
+        color: $primary;
+      }
     }
   }
   .campaign-image {

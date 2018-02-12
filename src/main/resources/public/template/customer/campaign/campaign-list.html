@@ -1,16 +1,23 @@
-<div class="twelve cell campaign-personnel-list  "  ng-controller="campaignsListController">
-    <article class="twelve cell " ng-repeat="campaign in campaigns.all track by $index " ng-click="openCampaign(campaign)" >
-        <div  ng-class="{desabled : !campaign.accessible}">
-            <div class="two card cell">
+<div class="twelve cell campaign-personnel-list" ng-controller="campaignsListController">
+    <article class="twelve cell"
+             ng-class="{disabled : !campaign.accessible}"
+             ng-repeat="campaign in campaigns.all track by $index"
+             ng-click="openCampaign(campaign)" >
+            <div class="two cell campaign-image">
                 <img ng-src="[[campaign.image]]" ng-show="campaign.image!==null && campaign.image!==undefined " />
                 <img skin-src="/img/illustrations/pages-default.png" ng-show="campaign.image===null || campaign.image===undefined "/>
             </div>
-            <div class="nine cell right-magnet" >
+            <div class="ten cell" >
                 <h3>[[campaign.name]]</h3>
-            </div>
-        </div>
-            <div class="info row" ng-show="!campaign.accessible" >
-                <i18n>lystore.catalog.desabled</i18n>
+                <div ng-if="campaign.accessible">
+                    <p ng-bind-html="campaign.description" class="small-text"></p>
+                    <p>
+                        <em class="small-text"><i18n>lystore.campaign.amount</i18n> : [[campaign.purse_amount]] <i18n>money.symbol</i18n></em>
+                    </p>
+                </div>
+                <div class="warning row" ng-show="!campaign.accessible" >
+                    <i18n>lystore.catalog.disabled</i18n>
+                </div>
             </div>
     </article>
 </div>

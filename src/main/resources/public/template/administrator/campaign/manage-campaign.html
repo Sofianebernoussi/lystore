@@ -2,7 +2,7 @@
 <div workflow="lystore.administrator">
     <input type="button"  ng-click="openCampaignForm()" class="right-magnet" i18n-value="lystore.campaigns.add"/>
 </div>
-<div class="twelve cell manage-campaign"  workflow="lystore.manager">
+<div class="twelve cell manage-campaign campaign-list"  workflow="lystore.manager">
     <article class="twelve cell " ng-repeat="campaign in campaigns.all track by $index ">
         <div class="row">
             <div class="twelve cell" workflow="lystore.administrator">

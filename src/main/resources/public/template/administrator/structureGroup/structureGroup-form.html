@@ -23,8 +23,10 @@
                 </div>
             </div>
         <br>
-            <div class="row list_structureGroup-form">
-                <div class="five cell">
+        <div class="row list_structureGroup-form">
+            <div class="five cell">
+                <h2 class="">[[structures.all.length]] <i18n>lystor.form.structureGroups.structures.no.affect</i18n></h2>
+                <div class="card listStructure ">
                     <ul class="selectable-list">
                         <li class= "ellipsis"
                             ng-repeat = "structureLeft in structures.all | filter:structuresFilter"
@@ -34,13 +36,16 @@
                         </li>
                     </ul>
                 </div>
-                <div class="two cell ">
-                    <div class="arrow ">
-                        <button ng-click="addStructuresInGroup()" ><i class="open-right"></i></button>
-                        <button ng-click="deleteStructuresofGroup()"><i class="left-open"></i></button>
-                    </div>
+            </div>
+            <div class="two cell ">
+                <div class="arrow ">
+                    <button ng-click="addStructuresInGroup()" ><i class="open-right"></i></button>
+                    <button ng-click="deleteStructuresofGroup()"><i class="left-open"></i></button>
                 </div>
-                <div class="five cell">
+            </div>
+            <div class="five cell">
+                <h2 class="row">[[structureGroup.structures.length]] <i18n>lystor.form.structureGroups.structures.affect</i18n></h2>
+                <div class="card listStructure ">
                     <ul class="selectable-list" >
                         <li class= "ellipsis" ng-repeat="structureRight in structureGroup.structures"
                             ng-click="structureRight.selected = !structureRight.selected"
@@ -48,13 +53,14 @@
                     </ul>
                 </div>
             </div>
+        </div>
         <br>
-            <div class="row">
-                <div class="right-magnet">
-                    <input type="button" class="cancel" ng-click="redirectTo('/structureGroups')" i18n-value="cancel"/>
-                    <input type="submit" class="button" ng-click="validStructureGroup(structureGroup)" ng-disabled="!validStructureGroupForm(structureGroup)"/>
-                </div>
+        <div class="row">
+            <div class="right-magnet">
+                <input type="button" class="cancel" ng-click="redirectTo('/structureGroups')" i18n-value="cancel"/>
+                <input type="submit" class="button" ng-click="validStructureGroup(structureGroup)" ng-disabled="!validStructureGroupForm(structureGroup)"/>
             </div>
+        </div>
         </form>
     </article>
 </div>

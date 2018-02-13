@@ -322,10 +322,13 @@ body.lystore {
     }
   }
   .list_structureGroup-form {
-    height: 420px;
-
+    height: 450px;
     .five {
       height: 100%;
+    }
+    .listStructure {
+      height: 85%;
+      padding: 5px;
 
       ul {
         height: 100%;
@@ -348,10 +351,13 @@ body.lystore {
       position: relative;
       top: 38.92%;
       left: 42%;
+      button {
+        margin-left: 0px;
+        margin-right: 0px;
+      }
     }
-    button {
-      margin-left: 0px;
-      margin-right: 0px;
+    div h2{
+      text-align: center;
     }
   }
   .structureGroups-management {

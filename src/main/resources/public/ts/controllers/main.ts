@@ -28,6 +28,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             equipment: false
         };
 
+        $scope.notifications = [];
+
         $scope.lang = lang;
         $scope.agents = new Agents();
         $scope.suppliers = new Suppliers();

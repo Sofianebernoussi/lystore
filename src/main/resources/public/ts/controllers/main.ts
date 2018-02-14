@@ -15,7 +15,7 @@ import {
     Utils,
     Equipment,
     Baskets,
-    Basket,
+    Basket, Notification,
 } from '../model';
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', '$rootScope',
@@ -239,6 +239,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                     i : i
                 };
             }
+        };
+        $scope.notifyBasket = (action: String, basket: Basket) => {
+            let messageForOne =  basket.amount + ' ' + lang.translate('article') + ' "'
+                + basket.equipment.name  + '" ' + lang.translate('lystore.basket.' + action + '.article');
+            let messageForMany = basket.amount + ' ' + lang.translate('articles') + ' "'
+                + basket.equipment.name  + '" ' + lang.translate('lystore.basket.'  + action + '.articles');
+            $scope.notifications.push(new Notification(basket.amount === 1 ?  messageForOne : messageForMany , 'confirm'));
         };
         $scope. initCampaign = async (structure) => {
             if (structure) {

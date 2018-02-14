@@ -1,4 +1,4 @@
-import {moment, ng, template, _ } from 'entcore';
+import {moment, ng, template, _} from 'entcore';
 import {
     Basket,
     Baskets,
@@ -42,7 +42,10 @@ export const basketController = ng.controller('basketController',
         };
         $scope.deleteBasket = async (basket: Basket) => {
             let { status } = await basket.delete();
-            $scope.campaign.nb_panier -= status === 200 ? 1 : 0;
+            if (status === 200) {
+                $scope.campaign.nb_panier -= 1;
+              await $scope.notifyBasket('deleted', basket);
+            }
             $scope.cancelBasketDelete();
             await $scope.baskets.sync($routeParams.idCampaign, $scope.current.structure.id);
             Utils.safeApply($scope);

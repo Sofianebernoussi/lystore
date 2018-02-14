@@ -1,13 +1,14 @@
-<div class="twelve-mobile ten centered row item_hover_accent_list" ng-controller="campaignsListController">
-    <span class="five cell right-magnet">
-        <select ng-model="current.structure" class="twelve"
+<div class="twelve-mobile ten centered row" ng-controller="campaignsListController">
+    <div class="row">
+        <select ng-model="current.structure" class="right-magnet"
                 ng-change="initCampaign(current.structure)"
                 ng-options="structure.name for structure in structures" ></select>
-    </span>
-    <article class="twelve cell"
-             ng-class="{disabled : !campaign.accessible}"
-             ng-repeat="campaign in campaigns.all track by $index"
-             ng-click="openCampaign(campaign)" >
+    </div>
+    <div class="item_hover_accent_list">
+        <article class="twelve cell"
+                 ng-class="{disabled : !campaign.accessible}"
+                 ng-repeat="campaign in campaigns.all track by $index"
+                 ng-click="openCampaign(campaign)" >
             <div class="two cell campaign-image">
                 <img ng-src="[[campaign.image]]" ng-show="campaign.image!==null && campaign.image!==undefined " />
                 <img skin-src="/img/illustrations/pages-default.png" ng-show="campaign.image===null || campaign.image===undefined "/>
@@ -24,5 +25,11 @@
                     <i18n>lystore.catalog.disabled</i18n>
                 </div>
             </div>
+        </article>
+    </div>
+    <article ng-if="campaigns.isEmpty()">
+        <h4 class="centered-text">
+            <i class="sad-face horizontal-margin"></i>
+            <i18n>lystore.campaigns.empty</i18n></h4>
     </article>
 </div>

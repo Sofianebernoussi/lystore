@@ -124,4 +124,8 @@ export class Campaigns extends Selection<Campaign> {
     get (idCampaign: number): Campaign {
         return _.findWhere(this.all, { id: idCampaign });
     }
+
+    isEmpty (): boolean {
+        return this.all.length === 0;
+    }
 }

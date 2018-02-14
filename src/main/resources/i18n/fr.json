@@ -3,6 +3,7 @@
   "lystore.orders": "Commandes",
   "lystore.equipments": "Équipements",
   "lystore.campaigns": "Campagnes",
+  "lystore.campaigns.empty": "Aucune campagne n'est actuellement affectée à l'établissement",
   "lystore.contracts": "Marchés",
   "lystore.logs": "Logs",
   "lystore.orders.validations.waiting": "Valider les demandes en attente",

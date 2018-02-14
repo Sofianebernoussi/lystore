@@ -304,7 +304,7 @@ body.lystore {
         cursor: initial !important;
 
         &:hover {
-          border: solid 2px $white;
+          border: solid 2px $white !important;
           @include material-card();
         }
       }

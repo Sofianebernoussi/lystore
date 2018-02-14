@@ -233,7 +233,7 @@ body.lystore {
         opacity: 0.4 !important;
       }
       article {
-        border: 1px #ddd solid;
+        border: 2px #fff solid;
       }
       h1.disabled {
         text-align: center;
@@ -288,7 +288,7 @@ body.lystore {
     }
 
   }
-  .campaign-list {
+  .item_hover_accent_list {
     article {
       transition: all 0.2s ease-in-out;
       border: solid 2px $white;
@@ -296,7 +296,7 @@ body.lystore {
       &:hover {
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
         cursor: pointer;
-        border-color: $accent;
+        border-color: $accent !important;
       }
 
       &.disabled {

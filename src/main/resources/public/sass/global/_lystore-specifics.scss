@@ -179,39 +179,55 @@ body.lystore {
         display: inline-flex;
       }
       .add-basket{
-        margin: 0 3% 2% 2%;
+        height:130px;
         h1{
-          float: left;
-          margin: 0 3% 0 0;
+          margin:0;
+          line-height: 100px;
         }
-        .nine{
-          float: left;
-          display: inline-flex;
-        }
-        input{
-          text-align: center;
-        }
-        h4{
-          font-weight: 400 !important;
-          margin-right: 6%;
-          margin-left: 1%;
+        .quantity{
+          height: 50px;
+          line-height: 30px;
+          width: auto;
+          float: right;
+
+          input{
+            text-align: center;
+          }
+          h4{
+            font-weight: 400 !important;
+            margin-right: 5px;
+            margin-top: 0;
+            width: auto;
+          }
         }
       }
     }
   }
-
+  i.moins{
+    height: 21px;
+    display: inline-block;
+    width: 15px;
+    position: relative;
+  }
   i.plus::before{
-    content: '+';
-    font-size: 2em;
+    content: '\e85e';
     font-weight: bolder;
     color: #2a9cc8;
-    margin: 0 2% 0 2%;
+    height: 21px;
+    display: inline-block;
+    line-height: 21px;
   }
   i.moins::before{
     content: '-';
     font-size: 3em;
     color: #2a9cc8;
-    margin: 0 2% 0 2%;
+    position: absolute;
+    right: auto;
+    width: 15px;
+    height: 21px;
+    text-align: center;
+    top: -4px;
+    left: 0;
   }
   .catalog-list {
     .dominos .item {

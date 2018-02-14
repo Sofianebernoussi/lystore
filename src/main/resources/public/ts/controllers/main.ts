@@ -148,6 +148,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.idIsInteger(idEquipment);
                 await $scope.initBasketItem( parseInt(idEquipment), parseInt(idCampaign), $scope.current.structure.id );
                 template.open('right-side', 'customer/campaign/catalog/equipment-detail');
+                window.scrollTo(0, 0);
                 Utils.safeApply($scope);
             },
             campaignOrder : async (params) => {

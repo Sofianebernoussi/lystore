@@ -4,10 +4,11 @@
 /**
  * Created by rahnir on 18/01/2018.
  */
-import { ng, template, _ } from 'entcore';
+import { ng, template, _, idiom as lang } from 'entcore';
 import {
     Equipment,
     Basket,
+    Notification,
     Utils
 } from '../../model';
 
@@ -57,7 +58,15 @@ export const catalogController = ng.controller('catalogController',
         };
         $scope.addBasketItem = async (basket: Basket) => {
             let { status } = await basket.create();
-            $scope.campaign.nb_panier += status === 200 ? 1 : 0;
+            if (status === 200 && basket.amount > 0 ) {
+                $scope.campaign.nb_panier += 1;
+                let messageForOne =  basket.amount + ' ' + lang.translate('article') + ' "'
+                    + basket.equipment.name  + '" ' + lang.translate('lystore.article.added.to.basket');
+                let messageForMany = basket.amount + ' ' + lang.translate('articles') + ' "'
+                    + basket.equipment.name  + '" ' + lang.translate('lystore.articles.added.to.basket');
+                $scope.notifications.push(new Notification(basket.amount === 1 ?  messageForOne : messageForMany , 'confirm'));
+            }
+
             Utils.safeApply($scope);
         };
         $scope.amountIncrease = () => {

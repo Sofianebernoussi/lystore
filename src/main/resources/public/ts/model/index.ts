@@ -16,3 +16,4 @@ export * from './StructureGroup';
 export * from './Purse';
 export * from './basket';
 export * from './Purse';
+export * from './Notification';

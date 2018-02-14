@@ -11,7 +11,8 @@ import {
     COMBO_LABELS,
     Campaign,
     Utils,
-    StructureGroup
+    StructureGroup,
+    Notification
 } from '../../model';
 
 export const configurationController = ng.controller('configurationController',
@@ -465,6 +466,14 @@ export const configurationController = ng.controller('configurationController',
             await $scope.structureGroup.delete();
             await $scope.structureGroups.sync();
             $scope.display.lightbox.structureGroup = false;
+            Utils.safeApply($scope);
+        };
+
+        $scope.setStatus = async (status: string) => {
+            await $scope.equipments.setStatus(status);
+            await $scope.equipments.sync();
+            $scope.allEquipmentSelected = false;
+            $scope.notifications.push(new Notification('lystore.status.update.ok', 'confirm'));
             Utils.safeApply($scope);
         };
     }]);

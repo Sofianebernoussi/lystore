@@ -52,4 +52,12 @@ public interface EquipmentService {
      * @param handler function handler returning data
      */
     void delete(List<Integer> ids, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Update status for ids list
+     * @param ids Ids list
+     * @param status Status
+     * @param handler Function handler returning data
+     */
+    void setStatus(List<Integer> ids, String status, Handler<Either<String, JsonObject>> handler);
 }

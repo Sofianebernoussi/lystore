@@ -18,4 +18,10 @@ export class Utils {
             $scope.$apply();
         }
     }
+
+    static formatKeyToParameter (values: any[], key: string): string {
+        let params: string = '';
+        values.map((value) => params += value.hasOwnProperty(key) ? `${key}=${value[key]}&` : '');
+        return params.slice(0, -1);
+    }
 }

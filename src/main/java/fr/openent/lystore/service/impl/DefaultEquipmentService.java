@@ -155,6 +155,20 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         });
     }
 
+    @Override
+    public void setStatus(List<Integer> ids, String status, Handler<Either<String, JsonObject>> handler) {
+        String query = "UPDATE " + Lystore.lystoreSchema + ".equipment SET status = ? " +
+                "WHERE equipment.id IN " + Sql.listPrepared(ids.toArray());
+        JsonArray params = new JsonArray()
+                .addString(status);
+
+        for (Integer id: ids) {
+            params.addNumber(id);
+        }
+
+        sql.prepared(query, params, SqlResult.validRowsResultHandler(handler));
+    }
+
     /**
      * Returns an equipment creation statement
      *

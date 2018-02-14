@@ -22,9 +22,11 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
+import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
 
 public class EquipmentController extends ControllerHelper {
 
@@ -115,6 +117,28 @@ public class EquipmentController extends ControllerHelper {
                 }
             }
         });
+    }
+
+    @Put("/equipments/:status")
+    @ApiDoc("Update equipments to provided status")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
+    public void setStatus(final HttpServerRequest request) {
+        try {
+            String status = request.params().get("status");
+            List<String> ids = request.params().getAll("id");
+            List<Integer> equipmentIds = new ArrayList<>();
+            for (String id : ids) {
+                equipmentIds.add(Integer.parseInt(id));
+            }
+            if (!ids.isEmpty()) {
+                equipmentService.setStatus(equipmentIds, status, defaultResponseHandler(request));
+            } else {
+                badRequest(request);
+            }
+        } catch (NumberFormatException e) {
+            log.error("An error occurred when parsing equipments ids", e);
+        }
     }
 
     @Delete("/equipment")

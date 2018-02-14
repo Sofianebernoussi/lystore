@@ -143,9 +143,19 @@ export class Equipments extends Selection<Equipment> {
             notify.error('lystore.equipment.sync.err');
         }
     }
+
+    async setStatus (status: string): Promise<void> {
+        try {
+            let params = Utils.formatKeyToParameter(this.selected, 'id');
+            await http.put(`/lystore/equipments/${status}?${params}`);
+        } catch (e) {
+            notify.error('lystore.equipment.update.err');
+            throw e;
+        }
+    }
 }
 
-export class EquipmentOption implements Selectable  {
+export class EquipmentOption implements Selectable {
 
     id?: number;
     name: string;

@@ -15,6 +15,7 @@ import {
     Utils,
     Equipment,
     Baskets,
+    Structures,
     Basket, Notification,
 } from '../model';
 
@@ -123,6 +124,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('administrator-main', 'administrator/structureGroup/structureGroup-container');
                 await $scope.structureGroups.sync();
                 template.open('structureGroups-main', 'administrator/structureGroup/manage-structureGroup');
+                $scope.structures = new Structures();
                 await $scope.structures.sync();
                 Utils.safeApply($scope);
             },

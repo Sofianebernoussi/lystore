@@ -1,6 +1,12 @@
 body.lystore {
   @import 'components/index';
 
+  h4{
+    &.highlighted {
+      border-bottom: solid 1px $solid-grey;
+    }
+  }
+
   .heading-tabs {
     overflow-x: inherit;
   }
@@ -453,17 +459,15 @@ body.lystore {
     font-weight: bold;
   }
   .delete-confirmation{
-    .basket-item{
-      margin: 20px 0;
-    }
     .basket-image{
       margin: 10px;
     }
     .option-table{
-      display: inline-flex;
-      padding: 3px;
-      margin: 1px 5px;
-      border-bottom: 2px #f0f0f0 solid;
+      thead {
+        td {
+          padding: 5px 10px;
+        }
+      }
     }
   }
   .confirm-order {

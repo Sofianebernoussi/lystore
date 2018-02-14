@@ -1,41 +1,61 @@
 <div class="delete-confirmation">
-    <i18n>lystore.basket.delete.message</i18n>
-    <div class="basket-item twelve cell card " >
+    <h2>
+        <i18n>lystore.basket.delete.title</i18n>
+    </h2>
+    <p>
+        <i18n>lystore.basket.delete.message</i18n> :
+    </p>
+
+    <div class="cell twelve">
         <div class="row article-equipment">
+            <h4 class="highlighted"><i18n>description</i18n></h4>
             <div class="two cell basket-image">
                 <img ng-src="[[basketToDelete.equipment.image]]" ng-show="basketToDelete.equipment.image!==null && basketToDelete.equipment.image!==undefined " />
                 <img skin-src="/img/illustrations/pages-default.png" ng-show="basketToDelete.equipment.image===null || basketToDelete.equipment.image===undefined "/>
-            </div>
-            <div class="five cell basket-delivery">
-                <h3>
-                    <i18n>
-                        lystore.expected.delivery
-                    </i18n>
-                </h3>
-                [[calculeDeliveryDate()]]
-            </div>
-            <div class="four cell basket-amount">
-                <div class="row ">
-                    <p>  <i18n>lystore.quantity</i18n> :  [[basketToDelete.amount]]</p>
-                </div>
-                <div class="row ">
-                    <p>  <i18n>price</i18n> : [[calculatePriceOfBasket(basketToDelete , 2, true)]] <i18n>money.symbol</i18n> <p>
-                </div>
             </div>
             <div class="nine cell basket-equipment">
                 <h3>[[basketToDelete.equipment.name]]</h3>
                 <p ng-bind-html="basketToDelete.equipment.summary" ></p>
                 <p>
             </div>
-
         </div>
         <div class="row options-head" ng-show="basketToDelete.options.length > 0">
-            <h4><i18n>multi-combo.options</i18n></h4>
+            <h4 class="highlighted"><i18n>multi-combo.options</i18n></h4>
+            <table class="twelve option-table">
+                <thead>
+                <tr>
+                    <td>Nom</td>
+                    <td>Prix Unitaire</td>
+                    <td>Quantité</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="option in basketToDelete.options">
+                    <td>[[option.name]]</td>
+                    <td>[[calculatePriceTTC(option.price, option.tax_amount, 2) ]]</td>
+                    <td>[[option.amount]]</td>
+                </tr>
+                </tbody>
+            </table>
         </div>
 
-        <div class="twelve row option-table" ng-repeat="option in basketToDelete.options " ng-show="basketToDelete.options.length > 0">
-            <div class="six row">[[option.amount]] - [[option.name]] </div>
-            <div class="six row">[[calculatePriceTTC(option.price, option.tax_amount, 2) ]]</div>
+
+        <div class="twelve">
+            <h4 class="highlighted">
+                <i18n>lystore.order</i18n>
+            </h4>
+            <p>
+                <i18n>
+                    lystore.expected.delivery
+                </i18n>
+                <strong>[[calculeDeliveryDate()]]</strong>
+            </p>
+            <p>
+                <span> <i18n>lystore.quantity</i18n> :</span><strong>[[basketToDelete.amount]]</strong>
+            </p>
+            <p>
+                <span><i18n>price</i18n> :</span><strong>[[calculatePriceOfBasket(basketToDelete , 2, true)]] <i18n>money.symbol</i18n></strong>
+            </p>
         </div>
 
     </div>

@@ -255,6 +255,14 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             }
         };
+        $rootScope.$on('$routeChangeSuccess', ( $currentRoute, $previousRoute, $location ) => {
+            if ( $location === undefined) {
+                $scope.redirectTo('/');
+            }
+        });
+       /* $rootScope.$on('$routeChangeStart', ( event, next , current ) => {
+
+        });*/
         if ($scope.isManager() || $scope.isAdministrator()) {
             template.open('main-profile', 'administrator/management-main');
         }

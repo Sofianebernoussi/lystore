@@ -235,15 +235,16 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             for ( let i = 0 ; i < model.me.structures.length ; i++) {
                 $scope.structures[i] = {
                     id: model.me.structures[i],
-                    name : model.me.structureNames[i]
+                    name : model.me.structureNames[i],
+                    i : i
                 };
             }
-           $scope.current.structure = $scope.structures.length > 0 ? $scope.structures[0] : null;
         };
-
         $scope. initCampaign = async (structure) => {
-            await $scope.campaigns.sync(structure.id);
-            Utils.safeApply($scope);
+            if (structure) {
+                await $scope.campaigns.sync(structure.id);
+                Utils.safeApply($scope);
+            }
         };
         if ($scope.isManager() || $scope.isAdministrator()) {
             template.open('main-profile', 'administrator/management-main');

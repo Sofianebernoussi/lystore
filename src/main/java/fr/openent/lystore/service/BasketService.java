@@ -39,16 +39,20 @@ public interface BasketService {
 
     /**
      * transform basket to an order
-     * @param baskets
-     * @param handler
+     * @param request the request
+     * @param baskets list of basket's items to transform
+     * @param idCampaign the id of the campaign
+     * @param idStructure the id of the structure
+     * @param nameStructure the name of the structure
+     * @param handler function handler returning data
      */
     void takeOrder(HttpServerRequest request, JsonArray baskets, Integer idCampaign,
                    String idStructure, String nameStructure , Handler<Either<String, JsonObject>> handler );
     /**
-     * List  basket liste of a campaigne and a structure to transform to an order
-     * @param idCampaign
-     * @param idStructure
-     * @param handler
+     * List  basket list of a campaign and a structure to transform to an order
+     * @param idCampaign id of the campaign
+     * @param idStructure id of the structure
+     * @param handler function handler returning data
      */
     void listebasketItemForOrder( Integer idCampaign, String idStructure,  Handler<Either<String, JsonArray>> handler );
 }

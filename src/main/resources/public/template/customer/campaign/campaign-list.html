@@ -2,7 +2,11 @@
     <div class="row">
         <select ng-model="current.structure" class="right-magnet"
                 ng-change="initCampaign(current.structure)"
-                ng-options="structure.name for structure in structures" ></select>
+                ng-init="current.structure =
+                (current.structure === undefined
+               ? (structures.length > 0 ? structures[0] : null)
+               : structures[current.structure.i])"
+                ng-options="structure.name for structure in structures " ></select>
     </div>
     <div class="item_hover_accent_list">
         <article class="twelve cell"

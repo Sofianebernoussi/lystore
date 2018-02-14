@@ -16,7 +16,8 @@ import {
     Equipment,
     Baskets,
     Structures,
-    Basket, Notification,
+    Basket,
+    Notification
 } from '../model';
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', '$rootScope',
@@ -136,7 +137,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             campaignCatalog : async (params) => {
                 let id = params.idCampaign;
                 $scope.idIsInteger(id);
-                await $scope.equipments.sync(id, $scope.current.structure.id);
+                $scope.current.structure ? await $scope.equipments.sync(id, $scope.current.structure.id) : null ;
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/catalog/catalog-list');
                 template.close('right-side');
@@ -148,7 +149,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 let idEquipment = params.idEquipment;
                 $scope.idIsInteger(idCampaign);
                 $scope.idIsInteger(idEquipment);
-                await $scope.initBasketItem( parseInt(idEquipment), parseInt(idCampaign), $scope.current.structure.id );
+                $scope.current.structure
+                    ? await $scope.initBasketItem( parseInt(idEquipment), parseInt(idCampaign), $scope.current.structure.id )
+                    : null;
                 template.open('right-side', 'customer/campaign/catalog/equipment-detail');
                 window.scrollTo(0, 0);
                 Utils.safeApply($scope);
@@ -159,7 +162,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             campaignBasket : async (params) => {
                 let idCampaign = params.idCampaign;
                 $scope.idIsInteger(idCampaign);
-                await $scope.baskets.sync(idCampaign, $scope.current.structure.id );
+                $scope.current.structure
+                ? await $scope.baskets.sync(idCampaign, $scope.current.structure.id )
+                : null;
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/basket/manage-basket');
                 Utils.safeApply($scope);

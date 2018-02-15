@@ -394,6 +394,15 @@ body.lystore {
       text-align: center;
     }
   }
+
+  .option-table{
+    thead {
+      td {
+        padding: 5px 10px;
+      }
+    }
+  }
+
   .structureGroups-management {
     .twelve {
       display: flex;
@@ -474,13 +483,6 @@ body.lystore {
     .basket-image{
       margin: 10px;
     }
-    .option-table{
-      thead {
-        td {
-          padding: 5px 10px;
-        }
-      }
-    }
   }
   .confirm-order {
     i {
@@ -494,13 +496,9 @@ body.lystore {
   .basket-list{
     .basket-item{
       margin-bottom: 15px;
-      height: 245px;
-      &.openedOptions{
+      height: auto;
 
-        height: auto !important;
-      }
       .article-equipment {
-        height: 185px;
         .basket-image {
           img{
             max-height: 185px;
@@ -537,15 +535,6 @@ body.lystore {
         i {
           display: inline;
         }
-      }
-      .options-head:hover {
-        background: #eee;
-      }
-      .option-table{
-        display: inline-flex;
-        padding: 3px;
-        margin: 1px 5px;
-        border-bottom: 2px #f0f0f0 solid;
       }
     }
   }

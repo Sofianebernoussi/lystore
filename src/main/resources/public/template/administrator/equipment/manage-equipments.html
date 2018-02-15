@@ -72,7 +72,7 @@
             <td>[[ calculatePriceOfEquipment(equipment, false , 2) ]] €</td>
             <td>[[ contracts.get(equipment.id_contract).supplier_display_name ]]</td>
             <td>[[ contracts.get(equipment.id_contract).name ]]</td>
-            <td>[[ lang.translate('lystore.' + equipment.status) ]]</td>
+            <td ng-class="{'color-red': equipment.status === 'OUT_OF_STOCK', 'color-orange': equipment.status === 'UNAVAILABLE'}">[[ lang.translate('lystore.' + equipment.status) ]]</td>
         </tr>
         </tbody>
     </table>

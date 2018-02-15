@@ -112,7 +112,12 @@ body.lystore {
       width: auto !important;
     }
   }
-
+  .color-red {
+    color: $red;
+  }
+  .color-orange {
+    color: $orange;
+  }
   .technical-specs {
     border: solid 1px $neutral-grey;
 
@@ -226,7 +231,7 @@ body.lystore {
   i.moins::before{
     content: '-';
     font-size: 3em;
-    color: #2a9cc8;
+    color: $primary-dark;
     position: absolute;
     right: auto;
     width: 15px;

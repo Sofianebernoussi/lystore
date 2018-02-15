@@ -125,6 +125,7 @@
   "lystore.confirm.order.message2":" est désormais en attente de traitement par votre Région. Consultez l'onglet '",
   "lystore.confirm.order.message3":"' pour connaître l'état d'avancement des traitements  de vos futurs équipements ",
   "lystore.confirm.order.title":"Commande effectuée avec succès",
+  "lystore.info.empty.basket":"Le panier est vide",
   "the.structure":"l'établissement",
   "lystore.slack.order.message1":" a passé une commande d'un montant de ",
   "multi-combo.deselectAll": "Tout déselectionner",

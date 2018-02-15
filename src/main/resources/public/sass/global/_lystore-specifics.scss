@@ -485,9 +485,9 @@ body.lystore {
     }
   }
   .confirm-order {
-    i {
-      text-align: center;
-      font-size: 80px;
+    img {
+      float: unset;
+      display: block;
     }
     input {
       margin: 5px 0px;
@@ -536,6 +536,18 @@ body.lystore {
           display: inline;
         }
       }
+    }
+  }
+  .empty-basket-message{
+    float: unset;
+    img{
+      margin: 25px;
+    }
+    .four{
+      height: 207px
+    }
+    h4{
+      line-height: 207px;
     }
   }
 }

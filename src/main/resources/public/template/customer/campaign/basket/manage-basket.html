@@ -1,8 +1,7 @@
 <div  ng-controller="basketController">
-
-    <div class="right-magnet vertical-spacing-twice">
-        <h3 class="cell horizontal-margin horizontal-spacing ng-binding"><i18n>total</i18n> :
-            <span class="color-orange">[[calculatePriceOfEquipments(baskets, 2)]] <i18n>money.symbol</i18n></span>
+<div ng-show="baskets.all.length > 0">
+    <div class="right-magnetvertical-spacing-twice">
+        <h3 class="cell horizontal-margin horizontal-spacing ng-binding"><i18n>total</i18n> : <span class="color-orange">[[calculatePriceOfEquipments(baskets, 2)]] <i18n>money.symbol</i18n> </span>
         </h3>
         <input type="button"  ng-click="takeClientOrder(baskets)" i18n-value="lystore.take.order" ng-disabled="!validOrder(baskets)" />
     </div>
@@ -18,11 +17,11 @@
                         <img ng-src="[[basket.equipment.image]]" ng-show="basket.equipment.image!==null && basket.equipment.image!==undefined " />
                         <img skin-src="/img/illustrations/pages-default.png" ng-show="basket.equipment.image===null || basket.equipment.image===undefined "/>
                     </div>
-                    <div class="three cell basket-equipment horizontal-spacing-twice">
+                    <div class="three cell basket-equipmenthorizontal-spacing-twice">
                         <h3>[[basket.equipment.name]]</h3>
                         <p ng-bind-html="basket.equipment.summary" ></p>
-                        <div>
-                            <a ng-init="display.equipmentOption[$index] = false" ng-click="displayOptions($index)" ng-show="basket.options.length > 0">
+                    <div>
+                    <a ng-init="display.equipmentOption[$index] = false" ng-click="displayOptions($index)" ng-show="basket.options.length > 0">
                                 [[lang.translate(display.equipmentOption[$index] ? 'lystore.options.hide' : 'lystore.options.show')]]
                             </a>
                         </div>
@@ -36,18 +35,16 @@
                         [[calculeDeliveryDate()]]
                     </div>
                     <div class="four cell basket-amount">
-                        <div class="right-magnet">
-                            <input type="number" step="1" min="0" ng-model="basket.amount"
-                                   ng-blur="updateBasketAmount(basket)"/>
+                        <div class="right-magnet ">
+                            <input type="number" step="1" min="0" ng-model="basket.amount"  ng-blur="updateBasketAmount(basket)" />
                             <p> [[calculatePriceOfBasket(basket , 2, true)]] <i18n>money.symbol</i18n> </p>
                         </div>
                         <div class="row">
-                            <input type="button"  ng-click="displayLightboxDelete(basket)"
-                                   class="right-magnet cancel vertical-spacing" i18n-value="delete"/>
+                            <input type="button"  ng-click="displayLightboxDelete(basket)"class="right-magnet cancel vertical-spacing" i18n-value="delete"/>
                         </div>
                     </div>
                 </div>
-                <div ng-show="basket.options.length > 0 && display.equipmentOption[$index]" >
+                <div  ng-show="basket.options.length > 0 && display.equipmentOption[$index]" >
                     <table class="centered ten vertical-spacing option-table">
                         <thead>
                             <tr>
@@ -57,18 +54,25 @@
                             </tr>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="option in basket.options">
-                            <td>[[option.name]]</td>
-                            <td>[[option.amount]]</td>
-                            <td>[[calculatePriceTTC(option.price, option.tax_amount, 2)]]</td>
+                        <tr ng-repeat="option in basket.options ">
+                        <td> [[option.name]] </td>
+                        <td>[[option.amount]]</td>
+                            <td>[[calculatePriceTTC(option.price, option.tax_amount, 2) ]]</td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
-            </article>
+            </article></div>
         </div>
     </div>
-
+    <div ng-show="baskets.all.length === 0" class="card row ten cell centered empty-basket-message">
+        <div>
+            <img class="tree cell" src="/lystore/public/img/basket.png" />
+        </div> 
+        <div class="cell four" >
+            <h4><i18n>lystore.info.empty.basket</i18n></h4>
+        </div>
+    </div>
     <lightbox show="display.lightbox.deleteBasket" on-close="cancelBasketDelete()">
         <container template="basket.delete"></container>
     </lightbox>

@@ -128,38 +128,27 @@ public class DefaultBasketService  extends SqlCrudService implements BasketServi
                                          Handler<Either<String, JsonArray>> handler ){
         JsonArray values = new JsonArray();
         String query = "SELECT  basket.id id_basket, basket.amount, basket.processing_date,  " +
-                "                     basket.id_campaign, basket.id_structure, " +
-                "                     e.id id_equipment , e.price, e.tax_amount, " +
-                "                    nextval('" + Lystore.lystoreSchema + ".order_client_equipment_id_seq' )" +
-                "                    as id_order " +
-                "                      , Case Count(ep) " +
-                "                      when 0 then  ROUND(e.price + ((e.price *  e.tax_amount) /100) , 3 )  " +
-                "                      else ROUND(e.price + ((e.price *  e.tax_amount) /100)  " +
-                "                               + SUM(ep.total_option_price)  , 3 )" +
-                "                       END as total_price" +
-                "                    , array_to_json(array_agg(DISTINCT ep.*)) as options  " +
-                "                    FROM  " + Lystore.lystoreSchema + ".basket_equipment basket  " +
-                "                    LEFT JOIN  " + Lystore.lystoreSchema + ".basket_option  " +
-                "                    ON basket_option.id_basket_equipment = basket.id  " +
-                "                    LEFT JOIN  " +
-                "                       (Select equipment_option.*, tax.value tax_amount," +
-                "                        equipment_option.price + ((equipment_option.price * tax.value )/100)" +
-                "                        as total_option_price  " +
-                "                       FROM " + Lystore.lystoreSchema + ".equipment_option  " +
-                "                       INNER JOIN  " + Lystore.lystoreSchema + ".tax " +
-                "                       ON tax.id = equipment_option.id_tax ) ep  " +
-                "                    ON basket_option.id_option = ep.id  " +
-                "                    INNER JOIN  " +
-                "                       (Select equipment.*,  tax.value tax_amount  " +
-                "                       FROM " + Lystore.lystoreSchema + ".equipment " +
-                "                       INNER JOIN  " + Lystore.lystoreSchema + ".tax  " +
-                "                       ON tax.id = equipment.id_tax ) as e " +
-                "                    ON e.id = basket.id_equipment  " +
-                "                    WHERE basket.id_campaign = ? " +
-                "                    AND basket.id_structure = ? " +
-                "                    GROUP BY  " +
-                "                    (basket.id, basket.amount, basket.processing_date," +
-                "                     basket.id_campaign, basket.id_structure, e.id, e.price, e.tax_amount );  ";
+                "basket.id_campaign, basket.id_structure, e.id id_equipment , e.price, e.tax_amount, " +
+                "nextval('" + Lystore.lystoreSchema + ".order_client_equipment_id_seq' ) as id_order, " +
+                "Case Count(ep) when 0 " +
+                "then ROUND(e.price + ((e.price *  e.tax_amount) /100) , 3 )  " +
+                "else ROUND(e.price + ((e.price *  e.tax_amount) /100) + SUM(ep.total_option_price)  , 3 )" +
+                "END as total_price, array_to_json(array_agg(DISTINCT ep.*)) as options  " +
+                "FROM  " + Lystore.lystoreSchema + ".basket_equipment basket  " +
+                "LEFT JOIN " + Lystore.lystoreSchema + ".basket_option " +
+                "ON basket_option.id_basket_equipment = basket.id  " +
+                "LEFT JOIN (Select equipment_option.*, tax.value tax_amount, " +
+                "equipment_option.price + ((equipment_option.price * tax.value )/100) as total_option_price  " +
+                "FROM " + Lystore.lystoreSchema + ".equipment_option  " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".tax ON tax.id = equipment_option.id_tax ) ep " +
+                "ON basket_option.id_option = ep.id INNER JOIN (Select equipment.*,  tax.value tax_amount  " +
+                "FROM " + Lystore.lystoreSchema + ".equipment INNER JOIN  " + Lystore.lystoreSchema + ".tax  " +
+                "ON tax.id = equipment.id_tax " +
+                "WHERE equipment.status = 'AVAILABLE') as e " +
+                "ON e.id = basket.id_equipment " +
+                "WHERE basket.id_campaign = ? AND basket.id_structure = ? " +
+                "GROUP BY (basket.id, basket.amount, basket.processing_date," +
+                "basket.id_campaign, basket.id_structure, e.id, e.price, e.tax_amount );  ";
         values.addNumber(idCampaign).addString(idStructure);
 
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
@@ -302,7 +291,7 @@ public class DefaultBasketService  extends SqlCrudService implements BasketServi
             .addNumber(Float.valueOf(basket.getString("tax_amount")))
             .addNumber(basket.getInteger("amount"))
             .addNumber(basket.getNumber("id_campaign"))
-            .addNumber((Number) basket.getNumber("id_equipment"))
+            .addNumber(basket.getNumber("id_equipment"))
             .addString(basket.getString("id_structure"));
 
     return new JsonObject()

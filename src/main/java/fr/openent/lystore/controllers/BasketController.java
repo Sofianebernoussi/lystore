@@ -114,7 +114,7 @@ public class BasketController extends ControllerHelper {
                             new Handler<Either<String, JsonArray>>() {
                         @Override
                         public void handle(Either<String, JsonArray> listBasket) {
-                            if(listBasket.isRight()){
+                            if(listBasket.isRight() && listBasket.right().getValue().size() > 0){
                                 basketService.takeOrder(request , listBasket.right().getValue(),
                                         idCampaign , idStructure, nameStructure,
                                         Logging.defaultCreateResponsesHandler(eb,
@@ -126,12 +126,14 @@ public class BasketController extends ControllerHelper {
 
                             }else{
                                 log.error("An error occurred when listing Baskets");
+                                badRequest(request);
                             }
                         }
                     });
 
                 } catch (ClassCastException e) {
-                    log.error("An error occurred when casting Basket informations", e);
+                    log.error("An error occurred when casting Basket information", e);
+                    renderError(request);
                 }
             }
         });

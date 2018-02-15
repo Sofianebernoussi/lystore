@@ -240,6 +240,25 @@ body.lystore {
     top: -4px;
     left: 0;
   }
+
+  article.disabled {
+    cursor: initial;
+    opacity: 0.4 !important;
+  }
+
+  h1.disabled {
+    text-align: center;
+    top: 50%;
+    margin-top: -20px;
+    position: absolute;
+    z-index: 2;
+    font-size: larger;
+    color: black;
+    left: 0;
+    right: 0;
+    text-shadow: 0.5px 0.25px #ccc;
+  }
+
   .catalog-list {
     .dominos .item {
       max-width: 300px !important;
@@ -252,29 +271,10 @@ body.lystore {
         margin: 0 auto;
       }
 
-      &.disabled {
-        cursor: initial;
-      }
 
-      article.disabled {
-        opacity: 0.4 !important;
-      }
       article {
         border: 2px #fff solid;
       }
-      h1.disabled {
-        text-align: center;
-        top: 50%;
-        margin-top: -20px;
-        position: absolute;
-        z-index: 2;
-        font-size: larger;
-        color: black;
-        left: 0;
-        right: 0;
-        text-shadow: 0.5px 0.25px #ccc;
-      }
-
 
       h2 {
         margin-left: 5%;

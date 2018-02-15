@@ -1,49 +1,55 @@
 <div  ng-controller="basketController">
 
     <div class="right-magnet">
-        <h4><i18n>total</i18n> : [[calculatePriceOfEquipments(baskets, 2)]] </h4>
+        <h4><i18n>total</i18n> : [[calculatePriceOfEquipments(baskets, 2)]] <i18n>money.symbol</i18n> </h4>
         <input type="button"  ng-click="takeClientOrder(baskets)" i18n-value="lystore.take.order" ng-disabled="!validOrder(baskets)" />
     </div>
     <div class="basket-list">
-        <article class="basket-item twelve cell card" ng-repeat="basket in baskets.all track by $index " ng-class="{openedOptions: display.equipmentOption[$index]}">
-            <div class="row article-equipment">
-                <div class="two cell basket-image">
-                    <img ng-src="[[basket.equipment.image]]" ng-show="basket.equipment.image!==null && basket.equipment.image!==undefined " />
-                    <img skin-src="/img/illustrations/pages-default.png" ng-show="basket.equipment.image===null || basket.equipment.image===undefined "/>
-                </div>
-                <div class="three cell basket-equipment">
-                    <h3>[[basket.equipment.name]]</h3>
-                    <p ng-bind-html="basket.equipment.summary" ></p>
-                </div>
-                <div class="four cell basket-delivery">
-                    <h3>
-                        <i18n>
-                            lystore.expected.delivery
-                        </i18n>
-                    </h3>
-                    [[calculeDeliveryDate()]]
-                </div>
-                <div class="three cell basket-amount">
-                    <div class="row ">
-                        <input type="number" step="1" min="0" ng-model="basket.amount"  ng-blur="updateBasketAmount(basket)" class="three  "/>
-                        <p> [[calculatePriceOfBasket(basket , 2, true)]] <i18n>money.symbol</i18n> <p>
+        <div ng-repeat="basket in baskets.all track by $index" class="row">
+            <h1 ng-class="{disabled: equipment.status !== 'AVAILABLE'} " ng-show="basket.equipment.status !== 'AVAILABLE'">
+                <i18n ng-show="basket.equipment.status === 'UNAVAILABLE'">lystore.UNAVAILABLE</i18n>
+                <i18n ng-show="basket.equipment.status === 'OUT_OF_STOCK'">lystore.OUT_OF_STOCK</i18n></h1>
+            <article class="basket-item twelve cell"
+                     ng-class="{ openedOptions: display.equipmentOption[$index], disabled: basket.equipment.status !== 'AVAILABLE' }">
+                <div class="row article-equipment">
+                    <div class="two cell basket-image">
+                        <img ng-src="[[basket.equipment.image]]" ng-show="basket.equipment.image!==null && basket.equipment.image!==undefined " />
+                        <img skin-src="/img/illustrations/pages-default.png" ng-show="basket.equipment.image===null || basket.equipment.image===undefined "/>
                     </div>
-                    <div class="row">
-                        <input type="button"  ng-click="displayLightboxDelete(basket)" i18n-value="delete"/>
+                    <div class="three cell basket-equipment">
+                        <h3>[[basket.equipment.name]]</h3>
+                        <p ng-bind-html="basket.equipment.summary" ></p>
+                    </div>
+                    <div class="four cell basket-delivery">
+                        <h3>
+                            <i18n>
+                                lystore.expected.delivery
+                            </i18n>
+                        </h3>
+                        [[calculeDeliveryDate()]]
+                    </div>
+                    <div class="three cell basket-amount">
+                        <div class="row ">
+                            <input type="number" step="1" min="0" ng-model="basket.amount"  ng-blur="updateBasketAmount(basket)" class="three  "/>
+                            <p> [[calculatePriceOfBasket(basket , 2, true)]] <i18n>money.symbol</i18n> <p>
+                        </div>
+                        <div class="row">
+                            <input type="button"  ng-click="displayLightboxDelete(basket)" i18n-value="delete"/>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="row options-head" ng-init="display.equipmentOption[$index] = false" ng-click="displayOptions($index)" ng-show="basket.options.length > 0">
-                <h4><i18n>multi-combo.options</i18n></h4>
-                <i class="right-magnet" ng-class="{'down-open': display.equipmentOption[$index], 'open-right': !display.equipmentOption[$index]}"></i>
-            </div>
-            <div ng-show="basket.options.length > 0 && display.equipmentOption[$index]" >
-                <div class="twelve row option-table" ng-repeat="option in basket.options ">
-                    <div class="six row">[[option.amount]] - [[option.name]] </div>
-                    <div class="six row">[[calculatePriceTTC(option.price, option.tax_amount, 2) ]]</div>
+                <div class="row options-head" ng-init="display.equipmentOption[$index] = false" ng-click="displayOptions($index)" ng-show="basket.options.length > 0">
+                    <h4><i18n>multi-combo.options</i18n></h4>
+                    <i class="right-magnet" ng-class="{'down-open': display.equipmentOption[$index], 'open-right': !display.equipmentOption[$index]}"></i>
                 </div>
-            </div>
-        </article>
+                <div ng-show="basket.options.length > 0 && display.equipmentOption[$index]" >
+                    <div class="twelve row option-table" ng-repeat="option in basket.options ">
+                        <div class="six row">[[option.amount]] - [[option.name]] </div>
+                        <div class="six row">[[calculatePriceTTC(option.price, option.tax_amount, 2) ]]</div>
+                    </div>
+                </div>
+            </article>
+        </div>
     </div>
 
     <lightbox show="display.lightbox.deleteBasket" on-close="cancelBasketDelete()">

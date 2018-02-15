@@ -58,12 +58,6 @@
                 <i class="up-open" ng-show="sort.equipment.type === 'availability' && !sort.equipment.reverse"></i>
                 <i class="down-open" ng-show="sort.equipment.type === 'availability' && sort.equipment.reverse"></i>
             </td>
-            <td ng-click="sort.equipment.type = 'id_campaign';
-                    sort.equipment.reverse = !sort.equipment.reverse">
-                <i18n>campaign</i18n>
-                <i class="up-open" ng-show="sort.equipment.type === 'campaign' && !sort.equipment.reverse"></i>
-                <i class="down-open" ng-show="sort.equipment.type === 'campaign' && sort.equipment.reverse"></i>
-            </td>
         </tr>
         </thead>
         <tbody>
@@ -79,7 +73,6 @@
             <td>[[ contracts.get(equipment.id_contract).supplier_display_name ]]</td>
             <td>[[ contracts.get(equipment.id_contract).name ]]</td>
             <td>[[ lang.translate('lystore.' + equipment.status) ]]</td>
-            <td>...</td>
         </tr>
         </tbody>
     </table>

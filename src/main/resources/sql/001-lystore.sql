@@ -66,6 +66,10 @@ CREATE TABLE lystore.contract (
   CONSTRAINT fk_supplier_id FOREIGN KEY (id_supplier)
   REFERENCES lystore.supplier (id) MATCH SIMPLE
   ON UPDATE NO ACTION ON DELETE CASCADE
+   CONSTRAINT "Check_annual_min_positive" CHECK (annual_min >= 0::numeric)
+   CONSTRAINT "Check_annual_max_positive" CHECK (annual_max >= 0::numeric)
+   CONSTRAINT "Check_annual_max_max" CHECK (annual_max >= annual_min::numeric)
+
 );
 
 CREATE TABLE lystore.tag (
@@ -80,6 +84,7 @@ CREATE TABLE lystore.tax (
   name character varying(255),
   value numeric,
   CONSTRAINT tax_pkey PRIMARY KEY (id)
+  CONSTRAINT "Check_tax_value" CHECK (value >= 0::numeric)
 );
 
 CREATE TABLE lystore.equipment (
@@ -100,6 +105,7 @@ CREATE TABLE lystore.equipment (
   CONSTRAINT fk_tax_id FOREIGN KEY (id_tax)
   REFERENCES lystore.tax (id) MATCH SIMPLE
   ON UPDATE NO ACTION ON DELETE CASCADE
+  CONSTRAINT "Check_price_positive" CHECK (price >= 0::numeric)
 );
 
 CREATE TABLE lystore.rel_equipment_tag (
@@ -128,6 +134,8 @@ CREATE TABLE lystore.equipment_option (
   CONSTRAINT fk_tax_id FOREIGN KEY (id_tax)
   REFERENCES lystore.tax (id) MATCH SIMPLE
   ON UPDATE NO ACTION ON DELETE NO ACTION
+  CONSTRAINT "Check_price_positive" CHECK (price >= 0::numeric)
+  CONSTRAINT "Check_amount_positive" CHECK (amount >= 0::numeric)
 );
 
 CREATE TABLE lystore.logs (
@@ -216,6 +224,7 @@ CREATE TABLE lystore.basket_equipment
         REFERENCES lystore.campaign (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
+    CONSTRAINT "Check_amount_positive" CHECK (amount >= 0::numeric)
 );
 
 CREATE TABLE lystore.basket_option
@@ -252,6 +261,8 @@ CREATE TABLE lystore.order_client_equipment
         REFERENCES lystore.campaign (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
+    CONSTRAINT "Check_price_positive" CHECK (price >= 0::numeric)
+    CONSTRAINT "Check_amount_positive" CHECK (amount >= 0::numeric)
 );
 
 CREATE TABLE lystore.order_client_options
@@ -270,4 +281,6 @@ CREATE TABLE lystore.order_client_options
         REFERENCES lystore.equipment_option (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
+    CONSTRAINT "Check_price_positive" CHECK (price >= 0::numeric)
+    CONSTRAINT "Check_tax_amount_positive" CHECK (tax_amount >= 0::numeric)
 );

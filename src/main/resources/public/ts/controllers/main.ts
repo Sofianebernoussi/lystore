@@ -265,9 +265,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.redirectTo('/');
             }
         });
-       /* $rootScope.$on('$routeChangeStart', ( event, next , current ) => {
-
-        });*/
         if ($scope.isManager() || $scope.isAdministrator()) {
             template.open('main-profile', 'administrator/management-main');
         }

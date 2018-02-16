@@ -176,9 +176,9 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 public void handle(Message<JsonObject> event) {
                     JsonObject results = event.body().getArray("results")
                             .get(event.body().getArray("results").size()-1);
-                   JsonArray objectResult = results.getArray("results").get(0);
-                    handler.handle(getTransactionHandler(request, nameStructure, getTotalPriceOfBasketList(baskets),
-                            event, new JsonObject((String) objectResult.get(0) )));
+                    JsonArray objectResult = results.getArray("results").get(0);
+                    getTransactionHandler(request, nameStructure, getTotalPriceOfBasketList(baskets),
+                            event, new JsonObject((String) objectResult.get(0) ), handler);
                 }
             });
         }catch (ClassCastException e) {
@@ -280,23 +280,23 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
 
     private static JsonObject getInsertEquipmentOrderStatement (JsonObject basket){
 
-    StringBuilder queryEquipmentOrder = new StringBuilder()
-            .append(" INSERT INTO lystore.order_client_equipment ")
-            .append(" (id, price, tax_amount, amount, id_campaign, id_equipment, id_structure) VALUES ")
-            .append(" (?, ?, ?, ?, ?, ?, ?); ");
-    JsonArray params = new JsonArray();
-    params.addNumber(basket.getNumber("id_order"))
-            .addNumber(Float.valueOf(basket.getString("price")))
-            .addNumber(Float.valueOf(basket.getString("tax_amount")))
-            .addNumber(basket.getInteger("amount"))
-            .addNumber(basket.getNumber("id_campaign"))
-            .addNumber(basket.getNumber("id_equipment"))
-            .addString(basket.getString("id_structure"));
+        StringBuilder queryEquipmentOrder = new StringBuilder()
+                .append(" INSERT INTO lystore.order_client_equipment ")
+                .append(" (id, price, tax_amount, amount, id_campaign, id_equipment, id_structure) VALUES ")
+                .append(" (?, ?, ?, ?, ?, ?, ?); ");
+        JsonArray params = new JsonArray();
+        params.addNumber(basket.getNumber("id_order"))
+                .addNumber(Float.valueOf(basket.getString("price")))
+                .addNumber(Float.valueOf(basket.getString("tax_amount")))
+                .addNumber(basket.getInteger("amount"))
+                .addNumber(basket.getNumber("id_campaign"))
+                .addNumber(basket.getNumber("id_equipment"))
+                .addString(basket.getString("id_structure"));
 
-    return new JsonObject()
-            .putString("statement", queryEquipmentOrder.toString())
-            .putArray("values", params)
-            .putString("action", "prepared");
+        return new JsonObject()
+                .putString("statement", queryEquipmentOrder.toString())
+                .putArray("values", params)
+                .putString("action", "prepared");
 
     }
 
@@ -361,20 +361,17 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
      * @param basicBDObject
      * @return Transaction handler
      */
-    private static Either<String, JsonObject>
-    getTransactionHandler(HttpServerRequest request, String nameStructure, Float totalPrice,
-                          Message<JsonObject> event, JsonObject basicBDObject) {
-        Either<String, JsonObject> either;
+    private void getTransactionHandler(HttpServerRequest request, String nameStructure, Float totalPrice,
+                          Message<JsonObject> event, JsonObject basicBDObject, Handler<Either<String, JsonObject>> handler) {
         JsonObject result = event.body();
         if (result.containsField("status") && "ok".equals(result.getString("status"))) {
-
                 JsonObject returns = new JsonObject()
                         .putNumber("amount", basicBDObject.getNumber("f1"))
                         .putNumber("nb_order", basicBDObject.getNumber("f2"));
                 DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                 final double cons = 100.0;
                 Number total =  Math.round(totalPrice * cons)/cons;
-                either = new Either.Right<>(returns);
+                handler.handle( new Either.Right<String, JsonObject>(returns));
                 notificationService.sendMessage(
                         I18n.getInstance().translate( "the.structure" ,
                                 getHost(request) , I18n.acceptLanguage(request) )
@@ -390,14 +387,13 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                                 +" "+ format.format(new Date())+" ");
         } else {
             LOGGER.error("An error occurred when launching 'order' transaction");
-            either = new Either.Left<>("");
+            handler.handle(new Either.Left<String, JsonObject>(""));
         }
-        return either;
     }
 
     private static Float getTotalPriceOfBasketList(JsonArray baskets) {
         Float total = Float.valueOf(0);
-            for(int i = 0; i < baskets.size(); i++) {
+        for(int i = 0; i < baskets.size(); i++) {
             total += Float.valueOf(( (JsonObject) baskets.get(i)).getString("total_price"));
         }
         return total;

@@ -24,9 +24,9 @@ import java.util.Date;
 
 import static fr.wseduc.webutils.http.Renders.getHost;
 
-public class DefaultBasketService  extends SqlCrudService implements BasketService {
+public class DefaultBasketService extends SqlCrudService implements BasketService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultEquipmentService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBasketService.class);
 
     private static NotificationService notificationService;
 

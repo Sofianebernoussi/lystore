@@ -38,7 +38,6 @@ import org.vertx.java.core.http.HttpServerFileUpload;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -285,7 +284,7 @@ public class PurseController extends ControllerHelper {
                                 JsonObject statementsValues = new JsonObject();
                                 JsonObject id;
                                 for (int i = 0; i < correctIds.size(); i++) {
-                                    id = ids.get(i);
+                                    id = correctIds.get(i);
                                     statementsValues.putString(id.getString("id"),
                                             amount.getString(id.getString("uai")));
                                 }

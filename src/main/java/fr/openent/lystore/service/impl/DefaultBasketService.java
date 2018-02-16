@@ -1,6 +1,5 @@
 package fr.openent.lystore.service.impl;
 
-
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.BasketService;
 import fr.openent.lystore.service.NotificationService;
@@ -179,7 +178,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                             .get(event.body().getArray("results").size()-1);
                    JsonArray objectResult = results.getArray("results").get(0);
                     handler.handle(getTransactionHandler(request, nameStructure, getTotalPriceOfBasketList(baskets),
-                            event, Float.valueOf((String) objectResult.get(0))));
+                            event, new JsonObject((String) objectResult.get(0) )));
                 }
             });
         }catch (ClassCastException e) {
@@ -304,7 +303,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
     private static JsonObject getInsertEquipmentOptionsStatement (JsonObject basket){
         JsonArray options = new JsonArray(basket.getString("options"))  ;
         StringBuilder queryEOptionEquipmentOrder = new StringBuilder()
-                .append( " INSERT INTO lystore.order_client_options " )
+                .append( " INSERT INTO " + Lystore.lystoreSchema + ".order_client_options " )
                 .append(" ( tax_amount, price, id_order_client_equipment, id_option) VALUES ") ;
         JsonArray params = new JsonArray();
         for (int i=0; i<options.size(); i++){
@@ -324,7 +323,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
 
     private static JsonObject getDeletionBasketsOptionsStatments (Number idBasketEquipment){
         StringBuilder queryEquipmentOrder = new StringBuilder()
-                .append( " DELETE FROM lystore.basket_option " )
+                .append( " DELETE FROM " + Lystore.lystoreSchema + ".basket_option " )
                 .append( "WHERE id_basket_equipment = ? ;");
 
         return new JsonObject()
@@ -334,30 +333,44 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
     }
     private static JsonObject getDeletionBasketsEquipmentStatments(Integer idCampaign, String idStructure){
         StringBuilder queryEquipmentOrder = new StringBuilder()
-                .append( " DELETE FROM lystore.basket_equipment " )
-                .append( " WHERE id_campaign = ? AND id_structure = ? RETURNING (SELECT  amount ")
-                .append(" FROM lystore.purse where id_campaign= ? and id_structure= ? );");
-        JsonArray params = new JsonArray().addNumber(idCampaign).addString(idStructure)
+                .append( " DELETE FROM " + Lystore.lystoreSchema + ".basket_equipment " )
+                .append( " WHERE id_campaign = ? AND id_structure = ? RETURNING ")
+                .append(getReturningQueryOfTakeOrder()) ;
+        JsonArray params = new JsonArray()
+                .addNumber(idCampaign).addString(idStructure)
+                .addNumber(idCampaign).addString(idStructure)
                 .addNumber(idCampaign).addString(idStructure);
         return new JsonObject()
                 .putString("statement", queryEquipmentOrder.toString())
                 .putArray("values", params )
                 .putString("action", "prepared");
     }
+    private static String getReturningQueryOfTakeOrder() {
+        return "( SELECT row_to_json(row(p.amount, count(o.id ) )) " +
+                " FROM " + Lystore.lystoreSchema + ".purse p, " + Lystore.lystoreSchema + ".order_client_equipment o " +
+                " where p.id_campaign = ? " +
+                " AND p.id_structure = ? " +
+                " AND  o.id_campaign = ? " +
+                " AND o.id_structure = ? " +
+                " GROUP BY(p.amount) )";
+    }
     /**
      * Returns the amount of purse from an order transactions.
      *
      * @param event PostgreSQL event
+     * @param basicBDObject
      * @return Transaction handler
      */
     private static Either<String, JsonObject>
     getTransactionHandler(HttpServerRequest request, String nameStructure, Float totalPrice,
-                          Message<JsonObject> event, Float amount) {
+                          Message<JsonObject> event, JsonObject basicBDObject) {
         Either<String, JsonObject> either;
         JsonObject result = event.body();
         if (result.containsField("status") && "ok".equals(result.getString("status"))) {
+
                 JsonObject returns = new JsonObject()
-                        .putNumber("amount", amount);
+                        .putNumber("amount", basicBDObject.getNumber("f1"))
+                        .putNumber("nb_order", basicBDObject.getNumber("f2"));
                 DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                 final double cons = 100.0;
                 Number total =  Math.round(totalPrice * cons)/cons;

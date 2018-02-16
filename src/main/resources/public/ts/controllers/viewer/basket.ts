@@ -68,12 +68,13 @@ export const basketController = ng.controller('basketController',
         $scope.takeClientOrder = async (baskets: Baskets) => {
             let { status, data } = await baskets.takeOrder(parseInt($routeParams.idCampaign), $scope.current.structure);
             $scope.totalPrice = $scope.calculatePriceOfEquipments(baskets, 2);
-            await baskets.sync(parseInt($routeParams.idCampaign), $scope.current.structure);
+            await baskets.sync(parseInt($routeParams.idCampaign), $scope.current.structure.id);
             status === 200 ?  $scope.confirmOrder(data) :  null ;
             Utils.safeApply($scope);
         };
         $scope.confirmOrder = (data) => {
             $scope.campaign.nb_panier = $scope.baskets.all.length;
+            $scope.campaign.nb_order = data.nb_order;
             $scope.campaign.purse_amount = data.amount;
             template.open('basket.order', 'customer/campaign/basket/order-confirmation');
             $scope.display.lightbox.confirmOrder = true;

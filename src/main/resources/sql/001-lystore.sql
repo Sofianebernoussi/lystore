@@ -65,10 +65,10 @@ CREATE TABLE lystore.contract (
   ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT fk_supplier_id FOREIGN KEY (id_supplier)
   REFERENCES lystore.supplier (id) MATCH SIMPLE
-  ON UPDATE NO ACTION ON DELETE CASCADE
-   CONSTRAINT "Check_annual_min_positive" CHECK (annual_min >= 0::numeric)
-   CONSTRAINT "Check_annual_max_positive" CHECK (annual_max >= 0::numeric)
-   CONSTRAINT "Check_annual_max_max" CHECK (annual_max >= annual_min::numeric)
+  ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "Check_annual_min_positive" CHECK (annual_min >= 0::numeric),
+  CONSTRAINT "Check_annual_max_positive" CHECK (annual_max >= 0::numeric),
+  CONSTRAINT "Check_annual_max_max" CHECK (annual_max >= annual_min::numeric)
 
 );
 
@@ -83,7 +83,7 @@ CREATE TABLE lystore.tax (
   id bigserial NOT NULL,
   name character varying(255),
   value numeric,
-  CONSTRAINT tax_pkey PRIMARY KEY (id)
+  CONSTRAINT tax_pkey PRIMARY KEY (id),
   CONSTRAINT "Check_tax_value" CHECK (value >= 0::numeric)
 );
 
@@ -104,7 +104,7 @@ CREATE TABLE lystore.equipment (
   ON UPDATE NO ACTION ON DELETE CASCADE ,
   CONSTRAINT fk_tax_id FOREIGN KEY (id_tax)
   REFERENCES lystore.tax (id) MATCH SIMPLE
-  ON UPDATE NO ACTION ON DELETE CASCADE
+  ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT "Check_price_positive" CHECK (price >= 0::numeric)
 );
 
@@ -133,8 +133,8 @@ CREATE TABLE lystore.equipment_option (
   ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT fk_tax_id FOREIGN KEY (id_tax)
   REFERENCES lystore.tax (id) MATCH SIMPLE
-  ON UPDATE NO ACTION ON DELETE NO ACTION
-  CONSTRAINT "Check_price_positive" CHECK (price >= 0::numeric)
+  ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT "Check_price_positive" CHECK (price >= 0::numeric),
   CONSTRAINT "Check_amount_positive" CHECK (amount >= 0::numeric)
 );
 
@@ -203,12 +203,11 @@ CREATE TABLE lystore.purse(
   CONSTRAINT fk_campaign_id FOREIGN KEY (id_campaign)
   REFERENCES lystore.campaign (id) MATCH SIMPLE
   ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT purse_id_structure_id_campaign_key UNIQUE (id_structure, id_campaign)
+  CONSTRAINT purse_id_structure_id_campaign_key UNIQUE (id_structure, id_campaign),
   CONSTRAINT "Check_amount_positive" CHECK (amount >= 0::numeric)
 );
 
-CREATE TABLE lystore.basket_equipment
-(
+CREATE TABLE lystore.basket_equipment (
     id bigserial NOT NULL,
     amount integer NOT NULL,
     processing_date date,
@@ -223,12 +222,11 @@ CREATE TABLE lystore.basket_equipment
     CONSTRAINT fk_campaign_id FOREIGN KEY (id_campaign)
         REFERENCES lystore.campaign (id) MATCH SIMPLE
         ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON DELETE NO ACTION,
     CONSTRAINT "Check_amount_positive" CHECK (amount >= 0::numeric)
 );
 
-CREATE TABLE lystore.basket_option
-(
+CREATE TABLE lystore.basket_option (
     id bigserial NOT NULL,
     id_basket_equipment bigint,
     id_option bigint,
@@ -242,8 +240,7 @@ CREATE TABLE lystore.basket_option
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 );
-CREATE TABLE lystore.order_client_equipment
-(
+CREATE TABLE lystore.order_client_equipment (
     id bigserial NOT NULL,
     price numeric NOT NULL,
     tax_amount numeric NOT NULL,
@@ -260,13 +257,12 @@ CREATE TABLE lystore.order_client_equipment
     CONSTRAINT fk_campaign_id FOREIGN KEY (id_campaign)
         REFERENCES lystore.campaign (id) MATCH SIMPLE
         ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-    CONSTRAINT "Check_price_positive" CHECK (price >= 0::numeric)
+        ON DELETE NO ACTION,
+    CONSTRAINT "Check_price_positive" CHECK (price >= 0::numeric),
     CONSTRAINT "Check_amount_positive" CHECK (amount >= 0::numeric)
 );
 
-CREATE TABLE lystore.order_client_options
-(
+CREATE TABLE lystore.order_client_options (
     id bigserial NOT NULL,
     tax_amount numeric,
     price numeric,
@@ -280,7 +276,7 @@ CREATE TABLE lystore.order_client_options
     CONSTRAINT "FK_options_id" FOREIGN KEY (id_option)
         REFERENCES lystore.equipment_option (id) MATCH SIMPLE
         ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-    CONSTRAINT "Check_price_positive" CHECK (price >= 0::numeric)
+        ON DELETE NO ACTION,
+    CONSTRAINT "Check_price_positive" CHECK (price >= 0::numeric),
     CONSTRAINT "Check_tax_amount_positive" CHECK (tax_amount >= 0::numeric)
 );

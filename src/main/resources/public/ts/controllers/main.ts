@@ -246,6 +246,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                     i : i
                 };
             }
+            $scope.current.structure = $scope.structures[0];
         };
         $scope.notifyBasket = (action: String, basket: Basket) => {
             let messageForOne =  basket.amount + ' ' + lang.translate('article') + ' "'

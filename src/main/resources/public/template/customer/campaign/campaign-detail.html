@@ -8,13 +8,13 @@
         </header>
         <header class="horizontal-spacing" ng-click="openOrder()" >
             <i18n>lystore.order.tracking</i18n>
-            <span class="notification-bull right-magnet" ng-model="campaign.nb_panier" ng-change=" ">
+            <span class="notification-bull right-magnet" ng-if="campaign.nb_order > 0">
                     [[campaign.nb_order]]
             </span>
         </header>
         <header class="horizontal-spacing" ng-click="openBasket()">
             <i18n>BASKET</i18n>
-            <span class="notification-bull right-magnet" ng-model="campaign.nb_panier" ng-change=" ">
+            <span class="notification-bull right-magnet" ng-if="campaign.nb_panier > 0">
                     [[campaign.nb_panier]]
             </span>
         </header>

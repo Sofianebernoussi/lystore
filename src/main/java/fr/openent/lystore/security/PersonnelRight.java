@@ -10,6 +10,6 @@ public class PersonnelRight  implements ResourcesProvider {
     @Override
     public void authorize(HttpServerRequest resourceRequest, Binding binding, UserInfos user,
                           Handler<Boolean> handler) {
-        handler.handle("Personnel".equals(user.getType()));
+        handler.handle(WorkflowActionUtils.hasRight(user, WorkflowActions.ACCESS_RIGHT.toString()));
     }
 }

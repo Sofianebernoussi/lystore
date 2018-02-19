@@ -1,6 +1,7 @@
 package fr.openent.lystore.security;
 
 public enum WorkflowActions {
+    ACCESS_RIGHT ("lystore.access"),
     ADMINISTRATOR_RIGHT ("lystore.administrator"),
     MANAGER_RIGHT ("lystore.manager");
 

@@ -1,12 +1,14 @@
 <div class="twelve-mobile ten centered row" ng-controller="campaignsListController">
-    <div class="row">
-        <select ng-model="current.structure" class="right-magnet"
-                ng-change="initCampaign(current.structure)"
-                ng-init="current.structure =
+    <div class="row" ng-if="structures.length > 1">
+        <h4 class="right-magnet"><i18n>multi-structures.choice</i18n> :
+            <select ng-model="current.structure"
+                    ng-change="initCampaign(current.structure)"
+                    ng-init="current.structure =
                 (current.structure === undefined
                ? (structures.length > 0 ? structures[0] : null)
                : structures[current.structure.i])"
-                ng-options="structure.name for structure in structures " ></select>
+                    ng-options="structure.name for structure in structures " ></select>
+        </h4>
     </div>
     <div class="item_hover_accent_list">
         <article class="twelve cell"
@@ -22,7 +24,7 @@
                 <div ng-if="campaign.accessible">
                     <p ng-bind-html="campaign.description" class="small-text"></p>
                     <p>
-                        <em class="small-text"><i18n>lystore.campaign.amount</i18n> : [[campaign.purse_amount]] <i18n>money.symbol</i18n></em>
+                        <em class="small-text"><i18n>lystore.campaign.amount</i18n> : [[campaign.purse_amount || 0]] <i18n>money.symbol</i18n></em>
                     </p>
                 </div>
                 <div class="warning row" ng-show="!campaign.accessible" >

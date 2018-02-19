@@ -191,8 +191,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             }
         };
 
-        $scope.isPersonnel = () => {
-            return model.me.type === 'PERSEDUCNAT';
+        $scope.hasAccess = () => {
+            return model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.access);
         };
 
         $scope.isManager = () => {
@@ -269,7 +269,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         if ($scope.isManager() || $scope.isAdministrator()) {
             template.open('main-profile', 'administrator/management-main');
         }
-        else if ($scope.isPersonnel() && !$scope.isManager() && !$scope.isAdministrator()) {
+        else if ($scope.hasAccess() && !$scope.isManager() && !$scope.isAdministrator()) {
             template.open('main-profile', 'customer/campaign/campaign-list');
         }
         Utils.safeApply($scope);

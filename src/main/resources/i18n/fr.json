@@ -183,6 +183,7 @@
   "money.symbol": "€",
   "total":"total",
   "ok":"ok",
+  "multi-structures.choice": "Choix de la structure",
   "lystore.basket.delete.title": "Suppression d'un équipement du panier",
   "lystore.basket.delete.message":"L'équipement suivant sera retiré de votre panier",
   "lystore.agent.create.err":"Erreur lors de la création d'un correspondant région",

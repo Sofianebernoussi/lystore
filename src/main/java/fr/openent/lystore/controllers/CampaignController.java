@@ -38,12 +38,12 @@ public class CampaignController extends ControllerHelper {
 
     public CampaignController () {
         super();
-        this.campaignService = new DefaultCampaignService(Lystore.lystoreSchema, "campagne");
+        this.campaignService = new DefaultCampaignService(Lystore.lystoreSchema, "campaign");
     }
 
     @Get("/campaigns")
     @ApiDoc("List all campaigns")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerOrPersonnelRight.class)
     @Override
     public void list(final HttpServerRequest  request) {
@@ -65,8 +65,8 @@ public class CampaignController extends ControllerHelper {
 
     @Get("/campaigns/:id")
     @ApiDoc("Get campaign in database")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
-    @ResourceFilter(ManagerRight.class )
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
     public void campaign(HttpServerRequest request) {
         try {
             Integer id = Integer.parseInt(request.params().get("id"));

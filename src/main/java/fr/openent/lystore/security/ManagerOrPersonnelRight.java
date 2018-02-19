@@ -15,7 +15,7 @@ public class ManagerOrPersonnelRight implements ResourcesProvider {
     public void authorize(HttpServerRequest resourceRequest, Binding binding, UserInfos user,
                           Handler<Boolean> handler) {
         handler.handle(WorkflowActionUtils.hasRight(user, WorkflowActions.MANAGER_RIGHT.toString())
-                || "Personnel".equals(user.getType()));
+                || WorkflowActionUtils.hasRight(user, WorkflowActions.ACCESS_RIGHT.toString()));
     }
 
 }

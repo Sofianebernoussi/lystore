@@ -20,6 +20,8 @@ import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayRespo
 
 public class LogController extends ControllerHelper {
 
+    public static final String UTF8_BOM = "\uFEFF";
+
     private final LogService logService;
 
     public LogController () {
@@ -63,7 +65,7 @@ public class LogController extends ControllerHelper {
     }
 
     private static String generateExport (HttpServerRequest request, JsonArray logs) {
-        StringBuilder report = new StringBuilder(getExportHeader(request));
+        StringBuilder report = new StringBuilder(UTF8_BOM).append(getExportHeader(request));
         for (int i = 0; i < logs.size(); i++) {
           report.append(generateExportLine(request, (JsonObject) logs.get(i)));
         }

@@ -126,28 +126,29 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
     public void listebasketItemForOrder( Integer idCampaign, String idStructure,
                                          Handler<Either<String, JsonArray>> handler ){
         JsonArray values = new JsonArray();
-        String query = "SELECT  basket.id id_basket, basket.amount, basket.processing_date,  " +
-                "basket.id_campaign, basket.id_structure, e.id id_equipment , e.price, e.tax_amount, " +
-                "nextval('" + Lystore.lystoreSchema + ".order_client_equipment_id_seq' ) as id_order, " +
-                "Case Count(ep) when 0 " +
+        String query = "SELECT  basket.id id_basket, basket.amount, basket.processing_date,  basket.id_campaign, " +
+                "basket.id_structure, e.id id_equipment, e.name,e.summary, e.description, e.price, e.image, " +
+                "e.id_contract, e.status, jsonb(e.technical_specs) technical_specs, e.tax_amount, " +
+                " nextval('lystore.order_client_equipment_id_seq' ) as id_order, " +
+                "Case Count(ep) " +
+                "when 0 " +
                 "then ROUND(e.price + ((e.price *  e.tax_amount) /100) , 3 )  " +
-                "else ROUND(e.price + ((e.price *  e.tax_amount) /100) + SUM(ep.total_option_price)  , 3 )" +
+                "else ROUND(e.price + ((e.price *  e.tax_amount) /100) + SUM(ep.total_option_price)  , 3 ) " +
                 "END as total_price, array_to_json(array_agg(DISTINCT ep.*)) as options  " +
-                "FROM  " + Lystore.lystoreSchema + ".basket_equipment basket  " +
-                "LEFT JOIN " + Lystore.lystoreSchema + ".basket_option " +
-                "ON basket_option.id_basket_equipment = basket.id  " +
-                "LEFT JOIN (Select equipment_option.*, tax.value tax_amount, " +
-                "equipment_option.price + ((equipment_option.price * tax.value )/100) as total_option_price  " +
-                "FROM " + Lystore.lystoreSchema + ".equipment_option  " +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".tax ON tax.id = equipment_option.id_tax ) ep " +
-                "ON basket_option.id_option = ep.id INNER JOIN (Select equipment.*,  tax.value tax_amount  " +
-                "FROM " + Lystore.lystoreSchema + ".equipment INNER JOIN  " + Lystore.lystoreSchema + ".tax  " +
-                "ON tax.id = equipment.id_tax " +
-                "WHERE equipment.status = 'AVAILABLE') as e " +
-                "ON e.id = basket.id_equipment " +
-                "WHERE basket.id_campaign = ? AND basket.id_structure = ? " +
-                "GROUP BY (basket.id, basket.amount, basket.processing_date," +
-                "basket.id_campaign, basket.id_structure, e.id, e.price, e.tax_amount );  ";
+                "FROM  lystore.basket_equipment basket  " +
+                "LEFT JOIN lystore.basket_option ON basket_option.id_basket_equipment = basket.id " +
+                "LEFT JOIN (Select equipment_option.*, tax.value tax_amount, equipment_option.price + " +
+                "((equipment_option.price * tax.value )/100) as total_option_price " +
+                "FROM lystore.equipment_option  " +
+                "INNER JOIN  lystore.tax ON tax.id = equipment_option.id_tax ) " +
+                "ep ON basket_option.id_option = ep.id " +
+                "INNER JOIN (Select equipment.*,  tax.value tax_amount  FROM lystore.equipment " +
+                "INNER JOIN  lystore.tax  ON tax.id = equipment.id_tax " +
+                "WHERE equipment.status = 'AVAILABLE') as e ON e.id = basket.id_equipment " +
+                "WHERE basket.id_campaign = ?   AND basket.id_structure = ? " +
+                "GROUP BY (basket.id, basket.amount, basket.processing_date,basket.id_campaign, basket.id_structure, " +
+                "e.id, e.price, e.name, e.summary, e.description, e.price, e.image, e.id_contract, e.status," +
+                " jsonb(e.technical_specs),  e.tax_amount );   ";
         values.addNumber(idCampaign).addString(idStructure);
 
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
@@ -282,16 +283,25 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
 
         StringBuilder queryEquipmentOrder = new StringBuilder()
                 .append(" INSERT INTO lystore.order_client_equipment ")
-                .append(" (id, price, tax_amount, amount, id_campaign, id_equipment, id_structure) VALUES ")
-                .append(" (?, ?, ?, ?, ?, ?, ?); ");
+                .append(" (id, price, tax_amount, amount,  id_campaign, id_structure, name, summary," +
+                        " description, image, technical_spec, status, " +
+                        " id_contract, equipment_key ) VALUES ")
+                .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?), ?, ?, ?); ");
         JsonArray params = new JsonArray();
         params.addNumber(basket.getNumber("id_order"))
                 .addNumber(Float.valueOf(basket.getString("price")))
                 .addNumber(Float.valueOf(basket.getString("tax_amount")))
                 .addNumber(basket.getInteger("amount"))
                 .addNumber(basket.getNumber("id_campaign"))
-                .addNumber(basket.getNumber("id_equipment"))
-                .addString(basket.getString("id_structure"));
+                .addString(basket.getString("id_structure"))
+                .addString(basket.getString("name"))
+                .addString(basket.getString("summary"))
+                .addString(basket.getString("description"))
+                .addString(basket.getString("image"))
+                .addString(basket.getString("technical_specs"))
+                .addString("WAITING")
+                .addNumber(basket.getNumber("id_contract"))
+                .addNumber(basket.getNumber("id_equipment")) ;
 
         return new JsonObject()
                 .putString("statement", queryEquipmentOrder.toString())
@@ -304,16 +314,18 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
         JsonArray options = new JsonArray(basket.getString("options"))  ;
         StringBuilder queryEOptionEquipmentOrder = new StringBuilder()
                 .append( " INSERT INTO " + Lystore.lystoreSchema + ".order_client_options " )
-                .append(" ( tax_amount, price, id_order_client_equipment, id_option) VALUES ") ;
+                .append(" ( tax_amount, price, id_order_client_equipment, name_opt, amount_opt, required_opt) VALUES ");
         JsonArray params = new JsonArray();
         for (int i=0; i<options.size(); i++){
-            queryEOptionEquipmentOrder.append("(?, ?, ?, ?)");
+            queryEOptionEquipmentOrder.append("( ?, ?, ?, ?, ?, ?)");
             queryEOptionEquipmentOrder.append( i == options.size()-1 ? "; " : ", ");
             JsonObject option = options.get(i);
             params.addNumber( option.getNumber("tax_amount"))
                     .addNumber(option.getNumber("price"))
                     .addNumber( basket.getNumber("id_order"))
-                    .addNumber( option.getNumber("id"));
+                    .addString(option.getString("name"))
+                    .addNumber(option.getNumber("amount"))
+                    .addBoolean(option.getBoolean("required"));
         }
         return new JsonObject()
                 .putString("statement", queryEOptionEquipmentOrder.toString())
@@ -361,8 +373,9 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
      * @param basicBDObject
      * @return Transaction handler
      */
-    private void getTransactionHandler(HttpServerRequest request, String nameStructure, Float totalPrice,
-                          Message<JsonObject> event, JsonObject basicBDObject, Handler<Either<String, JsonObject>> handler) {
+    private static void getTransactionHandler(HttpServerRequest request, String nameStructure, Float totalPrice,
+                          Message<JsonObject> event, JsonObject basicBDObject,
+                                              Handler<Either<String, JsonObject>> handler) {
         JsonObject result = event.body();
         if (result.containsField("status") && "ok".equals(result.getString("status"))) {
                 JsonObject returns = new JsonObject()

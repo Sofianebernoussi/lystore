@@ -16,15 +16,17 @@ export class Log {
 
 export class Logs {
     all: Log[];
+    numberOfPages: number;
 
     constructor () {
         this.all = [];
     }
 
-    async loadPage (pageNumber: number = 0) {
+    async loadPage (pageNumber: number = 1) {
         try {
-            let { data } = await http.get(`/lystore/logs?page=${pageNumber}`);
-            this.all = [...this.all, ...Mix.castArrayAs(Log, data)];
+            let { data } = await http.get(`/lystore/logs?page=${--pageNumber}`);
+            this.all = Mix.castArrayAs(Log, data.logs);
+            this.numberOfPages = Math.floor(data.number_logs / 100) + 1;
             this.all.map((log) => log.selected = false);
         } catch (e) {
             notify.error('lystore.logs.sync.err');

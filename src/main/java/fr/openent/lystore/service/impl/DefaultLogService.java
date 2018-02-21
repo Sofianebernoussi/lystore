@@ -7,6 +7,7 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
+import org.vertx.java.core.json.JsonObject;
 
 public class DefaultLogService implements LogService {
 
@@ -29,5 +30,12 @@ public class DefaultLogService implements LogService {
         }
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void getLogsNumber(Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT count(id) as number_logs FROM " + Lystore.lystoreSchema + ".logs";
+
+        Sql.getInstance().prepared(query, new JsonArray(), SqlResult.validUniqueResultHandler(handler));
     }
 }

@@ -551,4 +551,11 @@ body.lystore {
       line-height: 207px;
     }
   }
+
+  .pagination {
+    button, > div {
+      float: none;
+      display: inline-block;
+    }
+  }
 }

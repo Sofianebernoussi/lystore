@@ -5,7 +5,7 @@
         "port" : 8140,
         "app-name" : "Lystore",
     	"app-address" : "/lystore",
-    	"app-icon" : "Lystore-large",
+    	"app-icon" : "${host}/lystore/public/img/logo.png",
         "host": "${host}",
         "ssl" : $ssl,
         "auto-redeploy": false,

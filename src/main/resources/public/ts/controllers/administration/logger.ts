@@ -3,7 +3,9 @@ import { Utils } from '../../model';
 
 export const loggerController = ng.controller('loggerController', [
     '$scope', async ($scope) => {
-        $scope.currentPage = 0;
+        $scope.current = {
+            page: 1
+        };
         $scope.JSON = JSON;
         $scope.display = {
             lightbox: false
@@ -16,9 +18,18 @@ export const loggerController = ng.controller('loggerController', [
 
         $scope.parseJson = (json: string) => Utils.parsePostgreSQLJson(json);
 
-        $scope.loadMoreLogs = async () => {
-            await $scope.logs.loadPage(++$scope.currentPage);
+        $scope.loadMoreLogs = async (page: number) => {
+            $scope.current.page = page;
+            await $scope.logs.loadPage(page);
             Utils.safeApply($scope);
+        };
+
+        $scope.nextPage = () => {
+            $scope.loadMoreLogs(++$scope.current.page);
+        };
+
+        $scope.previousPage = () => {
+            $scope.loadMoreLogs(--$scope.current.page);
         };
 
         $scope.showFile = (log: Log) => {
@@ -26,7 +37,16 @@ export const loggerController = ng.controller('loggerController', [
             $scope.display.lightbox = true;
         };
 
-        await $scope.logs.loadPage($scope.currentPage);
+        $scope.getNumber = (size: number) => {
+            let arr = [];
+            for (let i = 1; i <= size; i++) {
+                arr.push(i);
+            }
+
+            return arr;
+        };
+
+        await $scope.logs.loadPage($scope.current.page);
         Utils.safeApply($scope);
     }
 ]);

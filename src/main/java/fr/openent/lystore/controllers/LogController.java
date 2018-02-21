@@ -33,12 +33,37 @@ public class LogController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
     @Override
-    public void list (HttpServerRequest request) {
+    public void list (final HttpServerRequest request) {
         try {
             Integer page = request.params().contains("page")
                 ? Integer.parseInt(request.params().get("page"))
                 : null;
-            logService.list(page, arrayResponseHandler(request));
+            logService.list(page, new Handler<Either<String, JsonArray>>() {
+                @Override
+                public void handle(Either<String, JsonArray> res) {
+                    if (res.isRight()) {
+                        final JsonArray logs = res.right().getValue();
+                        logService.getLogsNumber(new Handler<Either<String, JsonObject>>() {
+                            @Override
+                            public void handle(Either<String, JsonObject> event) {
+                                if (event.isRight()) {
+                                    Integer numberLogs = event.right().getValue().getInteger("number_logs");
+                                    JsonObject response = new JsonObject();
+                                    response.putNumber("number_logs", numberLogs)
+                                            .putArray("logs", logs);
+                                    renderJson(request, response, 200);
+                                } else {
+                                    log.error("An error occurred when collecting numbers of log");
+                                    renderError(request);
+                                }
+                            }
+                        });
+                    } else {
+                        log.error("An error occurred when collecting logs");
+                        renderError(request);
+                    }
+                }
+            });
         } catch (ClassCastException e) {
             log.error("An error occurred when casting page number", e);
         }

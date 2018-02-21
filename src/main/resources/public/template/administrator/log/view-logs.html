@@ -10,7 +10,7 @@
         </div>
     </div>
     <article>
-        <table class="twelve" bottom-scroll="loadMoreLogs()">
+        <table class="twelve">
             <thead>
             <tr>
                 <td class="two"><i18n>date</i18n></td>
@@ -41,6 +41,28 @@
             </tbody>
         </table>
     </article>
+    <div class="row" ng-if="(logs.numberOfPages !== undefined) && (logs.numberOfPages > 1)">
+        <div class="pagination centered-text centered">
+            <button ng-click="previousPage()" class="horizontal-margin-twice"
+                    ng-disabled="current.page === 1"><i18n>previous</i18n></button>
+            <div class="cell" ng-if="logs.numberOfPages < 10">
+                <button ng-repeat="number in getNumber(logs.numberOfPages)"
+                        ng-click="loadMoreLogs(number)"
+                        ng-disabled="current.page === number">
+                    [[number]]
+                </button>
+            </div>
+            <div class="cell" ng-if="logs.numberOfPages > 10">
+                <h4>
+                    <i18n>page</i18n> :
+                    <select ng-model="current.page" ng-change="loadMoreLogs(current.page)"
+                            ng-options="number as (number) for number in getNumber(logs.numberOfPages)"></select>
+                </h4>
+            </div>
+            <button ng-click="nextPage()" class="horizontal-margin-twice"
+                    ng-disabled="current.page === logs.numberOfPages"><i18n>next</i18n></button>
+        </div>
+    </div>
     <lightbox show="display.lightbox" on-close="lightbox.display = false">
         <h2><i18n>lystore.log.purse.import</i18n> [[formatDate(log.date, 'DD/MM/YYYY HH:mm:ss')]]</h2>
         <h4><i18n>lystore.log.purse.import.file</i18n> :</h4>

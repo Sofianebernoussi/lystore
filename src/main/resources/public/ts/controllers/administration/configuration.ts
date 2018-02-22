@@ -429,6 +429,10 @@ export const configurationController = ng.controller('configurationController',
             return _.findWhere($scope.structureGroup.structures, {id : structureRight.id}) === undefined;
         };
 
+        $scope.getStructureNumber = () => {
+          return _.without($scope.structures.all, ...$scope.structureGroup.structures).length;
+        };
+
         $scope.addStructuresInGroup = () => {
             $scope.structures.deselectAll($scope.structures.selected);
             $scope.structureGroup.structures.push.apply($scope.structureGroup.structures, $scope.structures.selectedElements);

@@ -11,7 +11,7 @@
             </div>
             <article class="add-basket centered row six vertical-spacing">
                 <div class="six cell">
-                    <h1 class="centered-text ">[[calculatePriceOfEquipment( basket.equipment, true, 2)]] €</h1>
+                    <h1 class="centered-text" ng-bind="calculatePriceOfEquipment(basket.equipment, true, 2) | currency"></h1>
                 </div>
                 <div class="six cell">
                     <div class="centered-text quantity">
@@ -72,7 +72,7 @@
                     </label>
                 </td>
                 <td >[[option.name]]</td>
-                <td class="three">[[calculatePriceTTC(option.price, option.tax_amount, 2)]]</td>
+                <td class="three"><span ng-bind="calculatePriceTTC(option.price, option.tax_amount, 2) | currency"></span></td>
             </tr>
             </tbody>
         </table>

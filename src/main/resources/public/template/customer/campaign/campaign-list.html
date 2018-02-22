@@ -24,7 +24,7 @@
                 <div ng-if="campaign.accessible">
                     <p ng-bind-html="campaign.description" class="small-text"></p>
                     <p>
-                        <em class="small-text"><i18n>lystore.campaign.amount</i18n> : [[campaign.purse_amount || 0]] <i18n>money.symbol</i18n></em>
+                        <em class="small-text"><i18n>lystore.campaign.amount</i18n> : <span ng-bind="campaign.purse_amount || 0 | currency"></span></em>
                     </p>
                 </div>
                 <div class="warning row" ng-show="!campaign.accessible" >

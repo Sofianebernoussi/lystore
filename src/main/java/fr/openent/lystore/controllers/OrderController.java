@@ -11,8 +11,9 @@ import fr.wseduc.security.SecuredAction;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.vertx.java.core.http.HttpServerRequest;
-import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 
+import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
+import static javax.swing.text.html.HTML.Tag.HEAD;
 
 
 public class OrderController extends ControllerHelper {

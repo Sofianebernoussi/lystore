@@ -30,5 +30,6 @@ public class Lystore extends BaseServer {
         addController(new StructureGroupController());
         addController(new StructureController());
         addController(new BasketController(vertx, container.config().getObject("slack", new JsonObject()) ));
+        addController(new OrderController());
     }
 }

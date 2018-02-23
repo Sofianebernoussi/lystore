@@ -17,3 +17,4 @@ export * from './Purse';
 export * from './basket';
 export * from './Purse';
 export * from './Notification';
+export * from './OrderEquipment';

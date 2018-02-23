@@ -564,6 +564,24 @@ body.lystore {
       line-height: 207px;
     }
   }
+  .order-equipment-manage{
+
+    .order-amount-price{
+      h3{
+        display: inline-block;
+        font-style: normal;
+      }
+      p{
+        display: inline-block;
+        float: right;
+        font-size: 1.5em;
+        margin: 10px;
+      }
+    }
+
+    @import "fragments/statusBar";
+
+  }
 
   .pagination {
     button, > div {

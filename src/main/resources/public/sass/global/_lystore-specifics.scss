@@ -40,6 +40,19 @@ body.lystore {
     }
   }
 
+  .instantButtons {
+    @include fonticon();
+    padding: 5px 10px;
+
+    &.deselect::after {
+      content: '\e848'
+    }
+
+    &.select::after {
+      content: '\e916'
+    }
+  }
+
   .log-view {
     table {
       table-layout: fixed;
@@ -365,7 +378,7 @@ body.lystore {
       padding: 5px;
 
       ul {
-        height: 100%;
+        height: 80%;
         margin: 0px;
         overflow: auto;
       }

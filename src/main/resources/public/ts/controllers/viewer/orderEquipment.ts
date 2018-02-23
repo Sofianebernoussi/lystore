@@ -22,8 +22,9 @@ export const orderEquipmentController = ng.controller('orderEquipmentController'
         Utils.safeApply($scope);
     };
 
-    $scope.calculateDelivreryDate = (date: Date) => {
-        return moment(date).add(60, 'days').calendar();
+
+    $scope.calculateDelivreryDate = () => {
+        return moment().add(60, 'days').calendar();
     };
 
     $scope.calculateTotal = (orderEquipment: OrderEquipment, roundNumber: number) => {

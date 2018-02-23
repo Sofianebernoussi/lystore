@@ -17,7 +17,9 @@ import {
     Baskets,
     Structures,
     Basket,
-    Notification
+    Notification,
+    OrdersEquipments,
+    OrderEquipment
 } from '../model';
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', '$rootScope',
@@ -44,6 +46,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.taxes = new Taxes();
         $scope.logs = new Logs();
         $scope.baskets = new Baskets();
+        $scope.ordersEquipments = new OrdersEquipments();
         route({
             main:  async() => {
                 if ($scope.isManager() || $scope.isAdministrator()) {
@@ -157,6 +160,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             campaignOrder : async (params) => {
+                let idCampaign = params.idCampaign;
+                $scope.idIsInteger(idCampaign);
+                $scope.current.structure
+                    ? await $scope.ordersEquipments.sync(idCampaign, $scope.current.structure.id )
+                    : null;
+                template.open('main-profile', 'customer/campaign/campaign-detail');
+                template.open('campaign-main', 'customer/campaign/order/manage-orderEquipment');
                 Utils.safeApply($scope);
             },
             campaignBasket : async (params) => {
@@ -229,7 +239,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
          * @param {number} roundNumber [number of digits after the decimal point]
          * @returns {string | number}
          */
-        $scope.calculatePriceOfEquipment = (equipment: Equipment, selectedOptions: boolean, roundNumber?: number) => {
+        $scope.calculatePriceOfEquipment = (equipment: any, selectedOptions: boolean, roundNumber?: number) => {
             let price = parseFloat( $scope.calculatePriceTTC(equipment.price , equipment.tax_amount) );
             equipment.options.map((option) => {
                 (option.required === true  || (selectedOptions ? option.selected === true : false) )

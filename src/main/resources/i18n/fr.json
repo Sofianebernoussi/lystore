@@ -125,6 +125,9 @@
   "lystore.confirm.order.message2":" est désormais en attente de traitement par votre Région. Consultez l'onglet '",
   "lystore.confirm.order.message3":"' pour connaître l'état d'avancement des traitements  de vos futurs équipements ",
   "lystore.confirm.order.title":"Commande effectuée avec succès",
+  "lystore.orderEquipment.manage.title": "Historique de vos commandes",
+  "lystore.orderEquipment.manage.order":"Commande du ",
+  "lystore.orderEquipment.manage.exportCSV":"Export CSV",
   "lystore.info.empty.basket":"Le panier est vide",
   "the.structure":"l'établissement",
   "lystore.slack.order.message1":" a passé une commande d'un montant de ",
@@ -226,5 +229,6 @@
   "lystore.basket.delete.err":"Erreur lors de la suppression des paniers",
   "lystore.basket.update.err":"Erreur lors de la mise à jour des paniers",
   "lystore.basket.create.err":"Erreur lors de la création des paniers",
-  "lystore.order.create.err":"Erreur lors de la création des commandes"
+  "lystore.order.create.err":"Erreur lors de la création des commandes",
+  "lystore.order.sync.err": "Erreur lors de la récupération des commandes"
 }

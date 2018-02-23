@@ -8,7 +8,7 @@ export const campaignMainController = ng.controller('campaignMainController',
         $scope.openBasket = () => {
             $scope.redirectTo(`/campaign/${$routeParams.idCampaign}/basket`);
         };
-        $scope.openOder = () => {
+        $scope.openOrder = () => {
             $scope.redirectTo(`/campaign/${$routeParams.idCampaign}/order`);
         };
         $scope.backHome = () => {

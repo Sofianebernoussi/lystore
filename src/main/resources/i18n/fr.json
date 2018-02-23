@@ -132,6 +132,7 @@
   "multi-combo.options": "Options",
   "multi-combo.searchPlaceholder": "Chercher",
   "multi-combo.selectAll": "Tout sélectionner",
+  "deselectAll": "Tout désélectionner",
   "SPECIFICATIONS":"Spécifications",
   "determiner.male":"le",
   "import": "Importer",

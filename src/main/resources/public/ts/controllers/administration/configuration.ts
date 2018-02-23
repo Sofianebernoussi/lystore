@@ -433,18 +433,33 @@ export const configurationController = ng.controller('configurationController',
           return _.without($scope.structures.all, ...$scope.structureGroup.structures).length;
         };
 
+        $scope.selectAllStructures = (structures: any) => {
+            structures.selectAll();
+            Utils.safeApply($scope);
+        };
+
+        $scope.deselectAllStructures = (structures: any) => {
+            structures.deselectAll();
+            Utils.safeApply($scope);
+        };
+
+        $scope.updateSelection = (structures: any, value: boolean) => {
+            structures.map((structure) => structure.selected = value);
+            Utils.safeApply($scope);
+        };
+
         $scope.addStructuresInGroup = () => {
-            $scope.structures.deselectAll($scope.structures.selected);
-            $scope.structureGroup.structures.push.apply($scope.structureGroup.structures, $scope.structures.selectedElements);
+            $scope.structureGroup.structures.push.apply($scope.structureGroup.structures, $scope.structures.selected);
             $scope.structureGroup.structures = _.uniq($scope.structureGroup.structures);
-            $scope.structures.selectedElements = [];
+            $scope.structures.deselectAll();
+            $scope.search.structure = '';
             Utils.safeApply($scope);
         };
 
         $scope.deleteStructuresofGroup = () => {
             $scope.structureGroup.structures = _.difference($scope.structureGroup.structures, $scope.structureGroup.structures.filter(structureRight => structureRight.selected));
-            $scope.structures.deselectAll($scope.structures.selectedElements);
-            $scope.structures.selectedElements = [];
+            $scope.structures.deselectAll();
+            $scope.search.structureRight = '';
             Utils.safeApply($scope);
         };
 

@@ -113,7 +113,7 @@
                                             ng-options="tax.id as tax.value + '%' for tax in taxes.all" required></select>
                                 </td>
                                 <td class="two aligne-text-center"><switch ng-model="option.required" ></switch></td>
-                                <td class="one aligne-text-center" ng-click="equipment.options.splice($index, 1);"><i  class="trash"></i></td>
+                                <td class="one aligne-text-center" ng-click="dropOption(equipment, $index)"><i  class="trash"></i></td>
                             </tr>
                         </tbody>
                     </table>

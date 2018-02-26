@@ -35,7 +35,17 @@
     },
     "technical_specs": {
       "type": "array"
+    },
+    "deletedOptions": {
+      "type": ["array", "null" ]
+    },
+    "optionsCreate": {
+      "type": ["array", "null" ]
+    },
+    "optionsUpdate": {
+      "type": ["array", "null" ]
     }
+
   },
   "required": [
     "name",

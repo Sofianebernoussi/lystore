@@ -15,6 +15,7 @@ import fr.wseduc.rs.Post;
 import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.request.RequestUtils;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
@@ -103,15 +104,37 @@ public class EquipmentController extends ControllerHelper {
     public void update(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "equipment", new Handler<JsonObject>() {
             @Override
-            public void handle(JsonObject equipment) {
+            public void handle(final JsonObject equipment) {
                 try {
-                    Integer id = Integer.parseInt(request.params().get("id"));
-                    equipmentService.update(id, equipment, Logging.defaultResponseHandler(eb,
-                            request,
-                            Contexts.EQUIPMENT.toString(),
-                            Actions.UPDATE.toString(),
-                            request.params().get("id"),
-                            equipment));
+                    final Integer id = Integer.parseInt(request.params().get("id"));
+                    equipmentService.updateEquipment(id, equipment,
+                            new Handler<Either<String, JsonObject>>() {
+                                @Override
+                                public void handle(Either<String, JsonObject> eventUpdateEquipment) {
+                                    if(eventUpdateEquipment.isRight()){
+                                        final Integer optionsCreate =  equipment
+                                                .getArray("optionsCreate").size();
+                                        equipmentService.prepareUpdateOptions( optionsCreate , id,
+                                                new Handler<Either<String, JsonObject>>() {
+                                                    @Override
+                                                    public void handle(Either<String, JsonObject> resultObject) {
+                                                        if(resultObject.isRight()) {
+                                                            equipmentService.updateOptions( id, equipment,
+                                                                    resultObject.right().getValue(),
+                                                                    Logging.defaultResponseHandler(eb,
+                                                                            request,
+                                                                            Contexts.EQUIPMENT.toString(),
+                                                                            Actions.UPDATE.toString(),
+                                                                            request.params().get("id"),
+                                                                            equipment) );
+                                                        }else {
+                                                          log.error("An error occurred when preparing options update");
+                                                        }
+                                                    }
+                                                });
+                                    }
+                                }
+                            });
                 } catch (ClassCastException e) {
                     log.error("An error occurred when casting equipment id", e);
                 }

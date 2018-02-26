@@ -1,5 +1,5 @@
 import { Tag, Utils } from './index';
-import { notify } from 'entcore';
+import { notify, _ } from 'entcore';
 import { Selectable, Selection, Mix } from 'entcore-toolkit';
 import http from 'axios';
 
@@ -18,6 +18,7 @@ export class Equipment implements Selectable {
     tax_amount: number;
     selected: boolean;
     options: EquipmentOption[];
+    deletedOptions?: EquipmentOption[];
 
     constructor (name?: string, price?: number) {
         if (name) this.name = name;
@@ -28,6 +29,7 @@ export class Equipment implements Selectable {
     }
 
     toJson () {
+        let optionList =  this.options.map((option: EquipmentOption) => option.toJson());
         return {
             name: this.name,
             summary: this.summary || null,
@@ -39,7 +41,9 @@ export class Equipment implements Selectable {
             id_contract: this.id_contract,
             technical_specs: this.technical_specs.map((spec: TechnicalSpec) => spec.toJson()),
             tags: this.tags.map((tag: Tag) => tag.id),
-            options : this.options.map((option: EquipmentOption) => option.toJson())
+            optionsCreate : _.filter(optionList, function(option) { return option.id === null ; }) ,
+            optionsUpdate : _.filter(optionList, function(option) { return option.id !== null ; }) ,
+            deletedOptions : this.deletedOptions || null,
         };
     }
 
@@ -175,6 +179,7 @@ export class EquipmentOption implements Selectable {
 
     toJson () {
         return {
+            id : this.id ? this.id : null ,
             name: this.name,
             price: parseFloat(this.price.toString()),
             amount: parseInt(this.amount.toString()),

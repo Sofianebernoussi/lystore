@@ -331,6 +331,12 @@ export const configurationController = ng.controller('configurationController',
             equipment.technical_specs = _.without(equipment.technical_specs, technicalSpec);
             Utils.safeApply($scope);
         };
+        $scope.dropOption = (equipment: Equipment, index) => {
+            equipment.deletedOptions === undefined ? equipment.deletedOptions = [] : null ;
+            equipment.options[index].id ? equipment.deletedOptions.push(equipment.options[index]) : null ;
+            equipment.options.splice(index, 1);
+            Utils.safeApply($scope);
+        };
 
         $scope.calculatePriceOption = (price , tax_id, amount) => {
             let tax_value = parseFloat(_.findWhere($scope.taxes.all, {id: tax_id}).value) ;

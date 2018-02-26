@@ -25,7 +25,7 @@ public interface EquipmentService {
                         Handler<Either<String, JsonArray>> handler);
 
     /**
-     * Get an Equipment informations
+     * Get an Equipment information's
      * @param idEquipment equipment identifier
      * @param handler function handler returning data
      */
@@ -44,8 +44,15 @@ public interface EquipmentService {
      * @param equipment equipment to update
      * @param handler function handler returning data
      */
-    void update(Integer id, JsonObject equipment, Handler<Either<String, JsonObject>> handler);
-
+    void updateEquipment(Integer id, JsonObject equipment, Handler<Either<String, JsonObject>> handler);
+    /**
+     * Update options of an equipment
+     * @param id equipment id to update
+     * @param equipment equipment to update
+     * @param handler function handler returning data
+     */
+    void updateOptions(Number id, JsonObject equipment,  JsonObject resultsObject,
+                       Handler<Either<String, JsonObject>> handler);
     /**
      * Delete an equipment
      * @param ids equipment ids to delete
@@ -60,4 +67,13 @@ public interface EquipmentService {
      * @param handler Function handler returning data
      */
     void setStatus(List<Integer> ids, String status, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Get Basket's ids for an equipment and alloc sequences for options to create
+     * @param numberOptionsCreate number of options to create
+     * @param idEquipment id of the equipment
+     * @param handler
+     */
+    void prepareUpdateOptions (Number numberOptionsCreate, Number idEquipment,
+                                Handler<Either<String, JsonObject>> handler);
 }

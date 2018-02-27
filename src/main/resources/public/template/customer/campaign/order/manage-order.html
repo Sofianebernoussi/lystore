@@ -1,61 +1,73 @@
 <div ng-controller="orderPersonnelController">
-    <h1>
-        <i18n>lystore.orderEquipment.manage.title</i18n>
-       <!-- <button class="right-magnet" ng-click="exportCSVorder()"><i18n>lystore.orderEquipment.manage.exportCSV</i18n></button>-->
-    </h1>
-    <article class="twelve cell order-equipment-manage" ng-repeat="orderClient in ordersClient.all track by $index">
-        <div class="four cell ">
-            <h3><em><i18n>lystore.orderEquipment.manage.order</i18n>[[formatDate(orderClient.creation_date,'dddd Do MMMM YYYY')]]</em></h3>
-            <div class="four cell">
-                <img ng-src="[[orderClient.image]]" ng-show="orderClient.image !== null && orderClient.image !== undefined"/>
-                <img skin-src="/img/illustrations/pages-default.png" ng-show="orderClient.image===null || orderClient.image===undifined"/>
-            </div>
-            <div class="seven cell horizontal-margin">
-                <h4>[[orderClient.name]]</h4>
-                <p>[[orderClient.summary]]</p>
-                <div>
-                    <a ng-init="display.orderClientOption[$index] = false" ng-click="displayEquipmentOption($index)" ng-show="orderClient.options.length > 0">
-                        [[lang.translate(display.orderClientOption[$index] ? 'lystore.options.hide' : 'lystore.options.show')]]
-                    </a>
+    <div ng-show="ordersEquipments.all.length > 0">
+        <h1>
+            <i18n>lystore.orderEquipment.manage.title</i18n>
+            <button class="right-magnet" ng-click="exportCSV()"><i18n>lystore.orderEquipment.manage.exportCSV</i18n></button>
+        </h1>
+        <article class="twelve cell order-equipment-manage" ng-repeat="orderClient in ordersClient.all track by $index">
+            <div class="four cell ">
+                <h3><em><i18n>lystore.orderEquipment.manage.order</i18n>[[formatDate(orderClient.creation_date,'dddd Do MMMM YYYY')]]</em></h3>
+                <div class="four cell">
+                    <img ng-src="[[orderClient.image]]" ng-show="orderClient.image !== null && orderClient.image !== undefined"/>
+                    <img skin-src="/img/illustrations/pages-default.png" ng-show="orderClient.image===null || orderClient.image===undifined"/>
+                </div>
+                <div class="seven cell horizontal-margin">
+                    <h4>[[orderClient.name]]</h4>
+                    <p>[[orderClient.summary]]</p>
+                    <div>
+                        <a ng-init="display.orderClientOption[$index] = false" ng-click="displayEquipmentOption($index)" ng-show="orderClient.options.length > 0">
+                            [[lang.translate(display.orderClientOption[$index] ? 'lystore.options.hide' : 'lystore.options.show')]]
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="four cell centered-text">
-            <h3 class="row">
-                <i18n>
-                    lystore.expected.delivery
-                </i18n>
-            </h3>
-            <p>[[calculateDelivreryDate()]]</p>
-        </div>
-        <div class="four cell">
-            <div class="row cell centered-text order-amount-price vertical-spacing-twice">
-                <h3 class="four"><i18n>lystore.quantity</i18n> : [[orderClient.amount]]</h3>
-                <p class="four" ng-bind="calculateTotal(orderClient,2) | currency"></p>
+            <div class="four cell centered-text">
+                <h3 class="row">
+                    <i18n>
+                        lystore.expected.delivery
+                    </i18n>
+                </h3>
+                <p>[[calculateDelivreryDate(orderEquipment.creation_date)]]</p>
             </div>
-            <ul class="[[orderClient.status]] status-bar cell row">
-                <li><i class="validated-status"></i></li>
-                <li><i class="validated-status"></i></li>
-                <li><i class="validated-status"></i></li>
-            </ul>
-        </div>
-        <div ng-show="orderClient.options.length > 0 && display.orderClientOption[$index]">
-            <table class="centered ten vertical-spacing option-table">
-                <thead>
-                <tr>
-                    <td>Nom</td>
-                    <td>Quantité</td>
-                    <td>Prix</td>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="option in orderClient.options">
-                    <td>[[option.name]]</td>
-                    <td>[[option.amount]]</td>
-                    <td>[[calculatePriceTTC(option.price, option.tax_amount, 2)]]</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
+            <div class="four cell">
+                <div class="row cell centered-text order-amount-price vertical-spacing-twice">
+                    <h3 class="four"><i18n>lystore.quantity</i18n> : [[orderClient.amount]]</h3>
+                    <p class="four" ng-bind="calculateTotal(orderClient,2) | currency"></p>
+                </div>
+                <ul class="[[orderClient.status]] status-bar cell row">
+                    <li><i class="validated-status"></i></li>
+                    <li><i class="validated-status"></i></li>
+                    <li><i class="validated-status"></i></li>
+                </ul>
+                <div class="row">
+                    <input ng-show = "orderClient.status === 'WAITING'" type="button" ng-click="displayLightboxDelete(orderEquipment)"
+                           class = "right-magnet cancel vertical-spacing" i18n-value="delete"/>
+                </div>
+            </div>
+            <div ng-show="orderClient.options.length > 0 && display.orderClientOption[$index]">
+                <table class="centered ten vertical-spacing option-table">
+                    <thead>
+                    <tr>
+                        <td>Nom</td>
+                        <td>Quantité</td>
+                        <td>Prix</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="option in orderClient.options">
+                        <td>[[option.name]]</td>
+                        <td>[[option.amount]]</td>
+                        <td><span ng-bind="calculatePriceTTC(option.price, option.tax_amount, 2) | currency"></span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </div>
+    <article ng-show = "ordersEquipments.all.length === 0 " class="centered-text row">
+        <p><i18n>lystore.orderEquipment.manage.empty.order</i18n></p>
     </article>
+    <lightbox show="display.lightbox.deleteOrderEquipement" on-close="cancelOrderEquipmentDelete()">
+        <container template="orderEquipment.delete"></container>
+    </lightbox>
 </div>

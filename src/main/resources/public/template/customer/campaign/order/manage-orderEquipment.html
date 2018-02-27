@@ -31,7 +31,7 @@
         <div class="four cell">
             <div class="row cell centered-text order-amount-price vertical-spacing-twice">
                 <h3 class="four"><i18n>lystore.quantity</i18n> : [[orderEquipment.amount]]</h3>
-                <p class="four">[[calculateTotal(orderEquipment,2)]] <i18n> money.symbol</i18n></p>
+                <p class="four" ng-bind="calculateTotal(orderEquipment,2) | currency"></p>
             </div>
             <ul class="[[orderEquipment.status]] status-bar cell row">
                 <li><i class="validated-status"></i></li>

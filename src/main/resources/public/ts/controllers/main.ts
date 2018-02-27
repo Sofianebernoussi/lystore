@@ -18,8 +18,8 @@ import {
     Structures,
     Basket,
     Notification,
-    OrdersEquipments,
-    OrderEquipment
+    OrdersClient,
+    OrderClient
 } from '../model';
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', '$rootScope',
@@ -46,7 +46,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.taxes = new Taxes();
         $scope.logs = new Logs();
         $scope.baskets = new Baskets();
-        $scope.ordersEquipments = new OrdersEquipments();
+        $scope.ordersClient = new OrdersClient();
         route({
             main:  async() => {
                 if ($scope.isManager() || $scope.isAdministrator()) {
@@ -163,10 +163,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 let idCampaign = params.idCampaign;
                 $scope.idIsInteger(idCampaign);
                 $scope.current.structure
-                    ? await $scope.ordersEquipments.sync(idCampaign, $scope.current.structure.id )
+                    ? await $scope.ordersClient.sync(idCampaign, $scope.current.structure.id )
                     : null;
                 template.open('main-profile', 'customer/campaign/campaign-detail');
-                template.open('campaign-main', 'customer/campaign/order/manage-orderEquipment');
+                template.open('campaign-main', 'customer/campaign/order/manage-order');
                 Utils.safeApply($scope);
             },
             campaignBasket : async (params) => {

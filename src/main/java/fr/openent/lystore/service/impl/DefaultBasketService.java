@@ -314,7 +314,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
         JsonArray options = new JsonArray(basket.getString("options"))  ;
         StringBuilder queryEOptionEquipmentOrder = new StringBuilder()
                 .append( " INSERT INTO " + Lystore.lystoreSchema + ".order_client_options " )
-                .append(" ( tax_amount, price, id_order_client_equipment, name_opt, amount_opt, required_opt) VALUES ");
+                .append(" ( tax_amount, price, id_order_client_equipment, name, amount, required) VALUES ");
         JsonArray params = new JsonArray();
         for (int i=0; i<options.size(); i++){
             queryEOptionEquipmentOrder.append("( ?, ?, ?, ?, ?, ?)");

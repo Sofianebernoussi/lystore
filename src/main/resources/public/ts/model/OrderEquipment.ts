@@ -51,9 +51,9 @@ export class OrderOptionEquipment implements Selectable {
     id?: number;
     tax_amount: number;
     price: number;
-    name_opt: string;
-    amount_opt: number;
-    required_opt: boolean;
+    name: string;
+    amount: number;
+    required: boolean;
     id_order_client_equipment: number;
     selected: boolean;
 

@@ -49,6 +49,7 @@ public interface EquipmentService {
      * Update options of an equipment
      * @param id equipment id to update
      * @param equipment equipment to update
+     * @param resultsObject the object returned by [prepareUpdateOptions()]
      * @param handler function handler returning data
      */
     void updateOptions(Number id, JsonObject equipment,  JsonObject resultsObject,
@@ -73,6 +74,8 @@ public interface EquipmentService {
      * @param numberOptionsCreate number of options to create
      * @param idEquipment id of the equipment
      * @param handler
+     * return : ids of baskets who contains the Equipment
+     *          ids allocated to create new options
      */
     void prepareUpdateOptions (Number numberOptionsCreate, Number idEquipment,
                                 Handler<Either<String, JsonObject>> handler);

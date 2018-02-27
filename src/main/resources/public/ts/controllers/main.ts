@@ -18,7 +18,8 @@ import {
     Structures,
     Basket,
     Notification,
-    OrdersClient
+    OrdersClient,
+    OrderClient
 } from '../model';
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', '$rootScope',

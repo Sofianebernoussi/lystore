@@ -49,7 +49,7 @@ ALTER TABLE lystore.order_client_options
     ADD COLUMN amount integer NOT NULL;
 
 ALTER TABLE lystore.order_client_equipment
-    ADD CONSTRAINT "status_values" CHECK (status IN ('WAITING', 'VALID', 'REJECTED', 'DONE') );
+    ADD CONSTRAINT "status_values" CHECK (status IN ('WAITING', 'VALID', 'REJECTED', 'SENT', 'DONE') );
 
 ALTER TABLE lystore.order_client_options
     ADD COLUMN required boolean NOT NULL;

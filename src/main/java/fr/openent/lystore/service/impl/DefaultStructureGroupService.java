@@ -123,11 +123,11 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
 
     /**
      * Returns  a structureGroup idStructure relationship transaction statement
-     * @param id_structure_group group id
+     * @param idStructureGroup group id
      * @param idsStructure structure ids
      * @return structureGroup idStructure relationship transaction statement
      */
-    private JsonObject getGroupStructureRelationshipStatement(Number id_structure_group, JsonArray idsStructure) {
+    private JsonObject getGroupStructureRelationshipStatement(Number idStructureGroup, JsonArray idsStructure) {
         StringBuilder insertGroupStructureRelationshipQuery = new StringBuilder();
         JsonArray params = new JsonArray();
         insertGroupStructureRelationshipQuery.append("INSERT INTO ").append(Lystore.lystoreSchema)
@@ -137,7 +137,7 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
             String idStructure = idsStructure.get(i);
             insertGroupStructureRelationshipQuery.append("(?,?)");
             params.addString(idStructure)
-                    .addNumber(id_structure_group);
+                    .addNumber(idStructureGroup);
             if(i != idsStructure.size()-1){
                 insertGroupStructureRelationshipQuery.append(",");
             }else{
@@ -171,15 +171,15 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
 
     /**
      * Delete in rel_group_structure
-     * @param id_structure_group of structureGroup
+     * @param idStructureGroup of structureGroup
      * @return Delete statement
      */
-    private JsonObject getStrctureGroupRelationshipDeletion(Number id_structure_group){
+    private JsonObject getStrctureGroupRelationshipDeletion(Number idStructureGroup){
         String query = "DELETE FROM " + Lystore.lystoreSchema + ".rel_group_structure WHERE id_structure_group = ?;";
 
         return new JsonObject()
                 .putString("statement", query)
-                .putArray("values", new JsonArray().addNumber(id_structure_group))
+                .putArray("values", new JsonArray().addNumber(idStructureGroup))
                 .putString("action", "prepared");
 
     }

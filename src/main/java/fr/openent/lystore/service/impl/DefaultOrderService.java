@@ -41,6 +41,24 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     }
 
     @Override
+    public void listExport(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler) {
+        JsonArray values = new JsonArray();
+        String query = "SELECT oe.name as equipment_name, oe.amount as equipment_quantity, " +
+                "oe.creation_date as equipment_creation_date, oe.summary as equipment_summary, " +
+                "oe.status as equipment_status,cause_status, price_all_options, CASE count(price_all_options) " +
+                "WHEN 0 THEN ROUND ((oe.price+( oe.tax_amount*oe.price)/100)*oe.amount,2) "+
+                "ELSE ROUND(price_all_options +(oe.price+(oe.tax_amount*oe.price)/100)*oe.amount,2) END as price_total_equipment "+
+                "FROM "+ Lystore.lystoreSchema + ".order_client_equipment  oe " +
+                "LEFT JOIN (SELECT SUM(( price +( tax_amount*price)/100)*amount) as price_all_options," +
+                " id_order_client_equipment FROM "+ Lystore.lystoreSchema + ".order_client_options GROUP BY id_order_client_equipment)" +
+                " opts ON oe.id = opts.id_order_client_equipment WHERE id_campaign = ? AND id_structure = ?" +
+                " GROUP BY oe.id, price_all_options ORDER BY creation_date";
+
+        values.addNumber(idCampaign).addString(idStructure);
+        sql.prepared(query, values, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public  void listOrder(Handler<Either<String, JsonArray>> handler){
         String query = "SELECT oce.* , to_json(contract.*) contract ,to_json(supplier.*) supplier, " +
                 "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options " +

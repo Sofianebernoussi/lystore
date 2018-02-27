@@ -1,6 +1,6 @@
 import {ng, moment, template} from 'entcore';
 import { OrdersEquipments, OrderEquipment, Utils } from '../../model';
-
+declare let window: any;
 export const orderEquipmentController = ng.controller('orderEquipmentController',
 ['$scope', '$routeParams',  ($scope, $routeParams) => {
 
@@ -10,6 +10,12 @@ export const orderEquipmentController = ng.controller('orderEquipmentController'
             deleteOrder : false,
         }
     };
+    $scope.exportCSV = () => {
+       let idCampaign = $scope.ordersEquipments.all[0].id_campaign;
+       let idStructure = $scope.ordersEquipments.all[0].id_structure;
+        window.location = `/lystore/orders/export/${idCampaign}/${idStructure}`;
+    };
+
     $scope.displayEquipmentOption = (index: number) => {
         $scope.display.orderEquipmentOption[index] = !$scope.display.orderEquipmentOption[index];
         Utils.safeApply($scope);

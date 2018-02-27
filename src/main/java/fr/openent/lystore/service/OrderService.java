@@ -22,4 +22,5 @@ public interface OrderService {
      */
     void listOrder(Handler<Either<String, JsonArray>> handler);
 
+    void listExport(Integer idCampaign, String idStructure,Handler<Either<String, JsonArray>> handler);
 }

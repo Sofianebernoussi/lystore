@@ -7,8 +7,8 @@
         <div class="four cell ">
             <h3><em><i18n>lystore.orderEquipment.manage.order</i18n>[[formatDate(orderEquipment.creation_date,'dddd Do MMMM YYYY')]]</em></h3>
             <div class="four cell">
-                <img ng-src="[[order.image]]" ng-show="order.image !== null || order.image !== undefined"/>
-                <img skin-src="/img/illustrations/pages-default.png" ng-show="order.image===null || order.image===undifined"/>
+                <img ng-src="[[orderEquipment.image]]" ng-show="orderEquipment.image !== null && orderEquipment.image !== undefined"/>
+                <img skin-src="/img/illustrations/pages-default.png" ng-show="orderEquipment.image===null || orderEquipment.image===undifined"/>
             </div>
             <div class="seven cell horizontal-margin">
                 <h4>[[orderEquipment.name]]</h4>
@@ -50,8 +50,8 @@
                 </thead>
                 <tbody>
                 <tr ng-repeat="option in orderEquipment.options">
-                    <td>[[option.name_opt]]</td>
-                    <td>[[option.amount_opt]]</td>
+                    <td>[[option.name]]</td>
+                    <td>[[option.amount]]</td>
                     <td>[[calculatePriceTTC(option.price, option.tax_amount, 2)]]</td>
                 </tr>
                 </tbody>

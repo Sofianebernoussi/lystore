@@ -62,6 +62,9 @@ routes.define(($routeProvider) => {
             })
             .when('/campaigns/:idCampaign/purse', {
                 action: 'managePurse'
+            })
+            .when('/order/client/waiting', {
+                action: 'orderClientWaiting'
             });
     } else {
         $routeProvider

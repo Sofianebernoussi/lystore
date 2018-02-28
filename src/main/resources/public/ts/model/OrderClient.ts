@@ -1,6 +1,6 @@
-import { notify } from 'entcore';
+import { notify, moment, _ } from 'entcore';
 import { Selectable, Selection, Mix } from 'entcore-toolkit';
-import { TechnicalSpec, Contract, Supplier, Campaign } from './index';
+import { TechnicalSpec, Contract, Supplier, Campaign, Structure, Utils } from './index';
 import http from 'axios';
 
 export class OrderClient implements Selectable {
@@ -42,7 +42,7 @@ constructor() {}
         super([]);
     }
 
-    async sync (idCampaign?: number, idStructure?: string) {
+    async sync (structures: Structure[] = [], idCampaign?: number, idStructure?: string, ) {
         try {
             if (idCampaign && idStructure ) {
                 let { data } = await http.get(  `/lystore/orders/${idCampaign}/${idStructure}` );

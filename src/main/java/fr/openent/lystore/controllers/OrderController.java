@@ -49,6 +49,14 @@ public class OrderController extends ControllerHelper {
             log.error("An error occured when casting campaign id ",e);
         }
     }
+
+    @Get("/orders")
+    @ApiDoc("Get the list of orders")
+    @ResourceFilter(ManagerRight.class)
+    public void listOrders (HttpServerRequest request){
+        orderService.listOrder(arrayResponseHandler(request));
+    }
+
     @Delete("/order/:idOrder/:idStructure")
     @ApiDoc("Delete a order item")
     @SecuredAction(value = "", type = ActionType.RESOURCE)

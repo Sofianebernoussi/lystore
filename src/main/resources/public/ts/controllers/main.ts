@@ -18,8 +18,7 @@ import {
     Structures,
     Basket,
     Notification,
-    OrdersClient,
-    OrderClient
+    OrdersClient
 } from '../model';
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', '$rootScope',
@@ -177,6 +176,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 : null;
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/basket/manage-basket');
+                Utils.safeApply($scope);
+            },
+            orderClientWaiting : async () => {
+                $scope.structures = new Structures();
+                await $scope.structures.sync();
+                await $scope.ordersClient.sync($scope.structures.all);
+                template.open('administrator-main', 'administrator/order/manage-order');
                 Utils.safeApply($scope);
             }
         });

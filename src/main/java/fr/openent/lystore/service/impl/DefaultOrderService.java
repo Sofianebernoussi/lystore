@@ -39,4 +39,17 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
 
     }
+
+    @Override
+    public  void listOrder(Handler<Either<String, JsonArray>> handler){
+        String query = "SELECT oce.* , to_json(contract.*) contract ,to_json(supplier.*) supplier, " +
+                "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options " +
+                "FROM lystore.order_client_equipment oce " +
+                "LEFT JOIN lystore.order_client_options oco ON oco.id_order_client_equipment = oce.id " +
+                "LEFT JOIN lystore.contract ON oce.id_contract = contract.id " +
+                "INNER JOIN lystore.supplier ON contract.id_supplier = supplier.id  " +
+                "INNER JOIN lystore.campaign ON oce.id_campaign = campaign.id " +
+                "GROUP BY (oce.id, contract.id, supplier.id, campaign.id); ";
+        sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
+    }
 }

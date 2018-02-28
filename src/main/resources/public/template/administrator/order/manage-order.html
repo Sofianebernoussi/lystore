@@ -1,0 +1,131 @@
+<div ng-controller="orderClientController" class="order-client-validation">
+    <h1><i18n>lystore.order.management</i18n></h1>
+    <div class="row">
+        <div class="cell flex-row horizontal-spacing search-pagination six">
+            <div class="row twelve vertical-spacing">
+                <input  class="row"
+                        type="text"
+                        ng-model="search.filterWord"
+                        ng-change="filterByTag(search.filterWord)"
+                        ng-keydown="addFilter(search.filterWord, $event)"
+                        i18n-placeholder="add.a.filter" />
+
+                <i class="search flex-row" ng-click="addFilter(search.filterWord)"></i>
+            </div>
+            <div class="row horizontal-spacing">
+                <div class="select-blocks">
+                    <div ng-repeat="filterWord in search.filterWords"
+                         ng-click="pullFilterWord(filterWord)"
+                         class="labels-in-ligne">
+                        <div > [[ filterWord ]] </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <article>
+        <table class="twelve">
+            <thead>
+            <tr>
+                <td workflow="lystore.administrator">
+                    <label class="checkbox">
+                        <input type="checkbox"
+                               ng-change="switchAll(allOrdersSelected, ordersClient)"
+                               ng-model="allOrdersSelected">
+                        <span></span>
+                    </label>
+                </td>
+                <td ng-click="sort.order.type = 'name_structure';
+                    sort.order.reverse = !sort.order.reverse">
+                    <i18n>Structure</i18n>
+                    <i class="up-open" ng-show="sort.order.type === 'name_structure' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'name_structure' && sort.order.reverse"></i>
+                </td>
+                <td ng-click="sort.order.type = 'contract.name';
+                    sort.order.reverse = !sort.order.reverse">
+                    <i18n>contract</i18n>
+                    <i class="up-open" ng-show="sort.order.type === 'contract.name' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'contract.name' && sort.order.reverse"></i>
+                </td>
+                <td ng-click="sort.order.type = 'supplier.name';
+                    sort.order.reverse = !sort.order.reverse">
+                    <i18n>supplier</i18n>
+                    <i class="up-open" ng-show="sort.order.type === 'supplier.name' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'supplier.name' && sort.order.reverse"></i>
+                </td>
+                <td ng-click="sort.order.type = 'amount';
+                    sort.order.reverse = !sort.order.reverse">
+                    <i18n>lystore.amount</i18n>
+                    <i class="up-open" ng-show="sort.order.type === 'amount' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'amount' && sort.order.reverse"></i>
+                </td>
+                <td ng-click="sort.order.type = 'creation_date';
+                    sort.order.reverse = !sort.order.reverse">
+                    <i18n>date</i18n>
+                    <i class="up-open" ng-show="sort.order.type === 'creation_date' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'creation_date' && sort.order.reverse"></i>
+                </td>
+                <td ng-click="sort.order.type = 'campaing.name';
+                    sort.order.reverse = !sort.order.reverse">
+                    <i18n>lystore.campaigns</i18n>
+                    <i class="up-open" ng-show="sort.order.type === 'campaing.name' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'campaing.name' && sort.order.reverse"></i>
+                </td>
+                <td ng-click="sort.order.type = 'price';
+                    sort.order.reverse = !sort.order.reverse">
+                    <i18n>lystore.price.TTC</i18n>
+                    <i class="up-open" ng-show="sort.order.type === 'price' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'price' && sort.order.reverse"></i>
+                </td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="order in ordersClient.all  |ordersClientFilter:search.filterWords
+             | orderBy:sort.order.type:sort.order.reverse">
+                <td workflow="lystore.administrator">
+                    <label class="checkbox">
+                        <input type="checkbox" ng-model="order.selected">
+                        <span></span>
+                    </label>
+                </td>
+                <td >[[order.name_structure]]</td>
+                <td >
+                    [[order.contract.name]]
+                </td>
+                <td> [[order.supplier.name]]</td>
+                <td>[[order.amount ]]</td>
+                <td>[[order.creation_date ]]</td>
+                <td>[[order.campaign.name ]]</td>
+                <td><span ng-bind="order.calculatePriceTTC(2) * order.amount | currency"></span></td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr >
+                <td >
+                    <i18n>totals</i18n>
+                </td>
+                <td ></td>
+                <td ></td>
+                <td ></td>
+                <td> [[ordersClient.calculTotalAmount() ]] </td>
+                <td></td>
+                <td> </td>
+                <td> [[ordersClient.calculTotalPriceTTC() | currency]]</td>
+            </tr>
+            </tfoot>
+        </table>
+    </article>
+
+    <section class="toggle-buttons" ng-class="{ hide: ordersClient.selected.length === 0 }">
+        <div class="toggle">
+            <div class="row">
+                <button ng-click="">
+                    <i18n>Validate</i18n>
+                </button>
+                <button ng-click="" >
+                    <i18n>lystore.logs.csv.export</i18n>
+                </button>
+            </div>
+        </div>
+    </section>
+</div>

@@ -80,7 +80,8 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     @Override
     public void orderForDelete(Integer idOrder, Handler<Either<String, JsonObject>> handler) {
 
-        String query = "SELECT id_campaign,  CASE count(opts) " +
+        String query = "SELECT  oe.id, oe.name,date_trunc('day',oe.creation_date)as creation_date, id_campaign, id_structure," +
+                " CASE count(opts) " +
                 "WHEN 0 THEN ROUND ((oe.price+( oe.tax_amount*oe.price)/100)*oe.amount,2) "+
                 "ELSE ROUND(price_all_options +(oe.price+(oe.tax_amount*oe.price)/100)*oe.amount,2) " +
                 "END as price_total_equipment "+

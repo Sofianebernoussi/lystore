@@ -3,6 +3,7 @@ package fr.openent.lystore.service.impl;
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.BasketService;
 import fr.openent.lystore.service.NotificationService;
+import fr.openent.lystore.service.PurseService;
 import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.I18n;
@@ -28,9 +29,11 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBasketService.class);
 
     private static NotificationService notificationService;
+    private PurseService purseService;
 
     public DefaultBasketService(String schema, String table, Vertx vertx, JsonObject slackConfiguration) {
         super(schema, table);
+        this.purseService = new DefaultPurseService();
         notificationService = new SlackService(
                 vertx,
                 slackConfiguration.getString("api-uri"),
@@ -162,8 +165,8 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             JsonObject basket;
             for (int i = 0; i < baskets.size(); i++) {
                 basket = baskets.get(i);
-                statements.add(getUpdatePurseStatment(Float.valueOf( basket.getString("total_price")),
-                        idCampaign , idStructure ));
+                statements.add(purseService.updatePurseAmountStatement(Float.valueOf( basket.getString("total_price")),
+                        idCampaign, idStructure,"-"));
                 statements.add(getInsertEquipmentOrderStatement( basket));
                 if(! "[null]".equals( basket.getString("options"))) {
                     statements.add(getInsertEquipmentOptionsStatement(basket));
@@ -186,23 +189,6 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             LOGGER.error("An error occurred when casting baskets elements", e);
             handler.handle(new Either.Left<String, JsonObject>(""));
         }
-    }
-    private static JsonObject getUpdatePurseStatment(Float price, Integer idCampaign , String idStructure) {
-        final double cons = 100.0;
-        String updateQuery = "UPDATE lystore.purse " +
-                        "SET amount = amount - ?  " +
-                        "WHERE id_campaign = ? " +
-                        "AND id_structure = ? ;";
-
-        JsonArray params = new JsonArray()
-                .addNumber(Math.round(price * cons)/cons)
-                .addNumber(idCampaign)
-                .addString(idStructure);
-
-        return new JsonObject()
-                .putString("statement", updateQuery)
-                .putArray("values", params)
-                .putString("action", "prepared");
     }
     private JsonObject getOptionsBasketDeletion(Integer idBasket) {
         String insertBasketEquipmentRelationshipQuery =

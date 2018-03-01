@@ -15,18 +15,26 @@
                 <img ng-src="[[campaign.image]]" ng-show="campaign.image!==null && campaign.image!==undefined " />
                 <img skin-src="/img/illustrations/pages-default.png" ng-show="campaign.image===null || campaign.image===undefined "/>
             </div>
-            <div class="ten cell">
+            <div class="three cell">
                 <h3>[[campaign.name]]</h3>
                 <p ng-bind-html="campaign.description"></p>
                 <p>
-                    <div class="small-text"><i18n>lystore.campaign.amount</i18n> : [[campaign.purse_amount || 0]] <i18n>money.symbol</i18n><div>
+                    <div class="small-text"><i18n>lystore.campaign.amount</i18n> : [[campaign.purse_amount || 0]] <i18n>money.symbol</i18n></div>
                     <div class="small-text">[[campaign.nb_structures]] <i18n>structures</i18n></div>
                     <div class="small-text">[[campaign.nb_equipments]] <i18n>lystore.equipments.available</i18n></div>
                 </p>
+                <button ng-click="redirectTo('/campaigns/' + campaign.id + '/purse')"><i18n>lystore.campaign.purse.manage</i18n></button>
             </div>
+            <div class=" cell ">
+                <ul class="order-info-campaign status-bar cell row">
+                    <li  tooltip="[[lang.translate('lystore.order.waiting')]]"><i class="validated-status"></i><span>[[campaign.nb_orders_sent]]</span></li>
+                    <li  tooltip="[[lang.translate('lystore.order.valid')]]"><i class="validated-status"></i><span>[[campaign.nb_orders_valid]]</span></li>
+                    <li  tooltip="[[lang.translate('lystore.order.sent')]]"><i class="validated-status"></i><span>[[campaign.nb_orders_waiting]]</span></li>
+                </ul>
+            </div>
+
         </div>
         <div class="row" workflow="lystore.administrator">
-            <button ng-click="redirectTo('/campaigns/' + campaign.id + '/purse')"><i18n>lystore.campaign.purse.manage</i18n></button>
             <div class="right-magnet">
                 <span class="horizontal-spacing cell"><i18n>lystore.campaign.accessibility</i18n></span>
                 <switch ng-model="campaign.accessible" ng-change="campaign.updateAccessibility()" class="cell"></switch>

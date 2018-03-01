@@ -271,6 +271,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 + basket.equipment.name  + '" ' + lang.translate('lystore.basket.'  + action + '.articles');
             $scope.notifications.push(new Notification(basket.amount === 1 ?  messageForOne : messageForMany , 'confirm'));
         };
+
         $scope. initCampaign = async (structure) => {
             if (structure) {
                 await $scope.campaigns.sync(structure.id);

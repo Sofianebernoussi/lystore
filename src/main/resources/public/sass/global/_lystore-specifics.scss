@@ -159,6 +159,7 @@ body.lystore {
     card{
       text-align:center;
     }
+    @import "fragments/statusBar";
   }
   .catalog{
     div.twelve{

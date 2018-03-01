@@ -28,7 +28,10 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 " FROM lystore.purse" +
                 " GROUP BY id_campaign )" +
                 " SELECT " +
-                " campaign.*, COUNT(distinct rel_group_structure.id_structure) as nb_structures," +
+                " campaign.*, COUNT(distinct rel_group_structure.id_structure) as nb_structures, " +
+                " COUNT(distinct oce_WAITING.id) as nb_orders_WAITING, " +
+                " COUNT(distinct oce_VALID.id) as nb_orders_VALID, " +
+                " COUNT(distinct oce_SENT.id) as nb_orders_SENT, " +
                 " campaign_amounts.sum as purse_amount," +
                 " COUNT(distinct rel_equipment_tag.id_equipment) as nb_equipments" +
                 " FROM " + Lystore.lystoreSchema + ".campaign" +
@@ -39,6 +42,12 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 " ON (rel_group_campaign.id_structure_group = rel_group_structure.id_structure_group)" +
                 " LEFT JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag" +
                 " ON (rel_equipment_tag.id_tag = rel_group_campaign.id_tag) " +
+                " LEFT JOIN Lystore.order_client_equipment oce_WAITING ON oce_WAITING.id_campaign = campaign.id " +
+                "AND oce_WAITING.status = 'WAITING' " +
+                " LEFT JOIN Lystore.order_client_equipment oce_VALID ON oce_VALID.id_campaign = campaign.id " +
+                "AND oce_VALID.status = 'VALID' " +
+                " LEFT JOIN Lystore.order_client_equipment oce_SENT ON oce_SENT.id_campaign = campaign.id " +
+                "AND oce_SENT.status = 'SENT' " +
                 " GROUP BY campaign.id, campaign_amounts.sum;";
         sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
     }

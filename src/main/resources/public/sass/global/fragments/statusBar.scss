@@ -115,4 +115,25 @@
       }
     }
   }
+  &.order-info-campaign {
+    > li {
+      background-color: $primary-dark;
+      width: 50px !important;
+      height: 50px !important;
+      border: 5px $solid-grey solid;
+      color: white;
+      > span {
+        position: relative;
+        text-align: center;
+        margin-left: auto;
+        top: 12px;
+        margin-right: auto;
+      }
+      &:first-child::after, &:nth-child(2)::after {
+        background-color: $light-grey;
+        right: -62px !important;
+        top: 20px !important;
+      }
+    }
+  }
 }

@@ -12,18 +12,24 @@ tax_amount: number;
 summary: string;
 description: string;
 image: string;
-technical_spec: string;
 id_campaign: number;
 id_structure: string;
 creation_date: Date;
 status: string;
 id_contract: number;
 options: OrderOptionEquipment[];
-technical_specs: TechnicalSpec[];
+technical_spec: TechnicalSpec[];
 name_supplier: string;
 selected: boolean;
 
-constructor() {}
+    constructor() {}
+    async delete (idStructure: number) {
+        try {
+          return await http.delete(`/lystore/order/${this.id}/${idStructure}`);
+        } catch (e) {
+            notify.error('lystore.order.delete.err');
+        }
+    }
 }
  export class OrdersEquipments extends Selection<OrderEquipment> {
     constructor() {
@@ -51,9 +57,9 @@ export class OrderOptionEquipment implements Selectable {
     id?: number;
     tax_amount: number;
     price: number;
-    name_opt: string;
-    amount_opt: number;
-    required_opt: boolean;
+    name: string;
+    amount: number;
+    required: boolean;
     id_order_client_equipment: number;
     selected: boolean;
 

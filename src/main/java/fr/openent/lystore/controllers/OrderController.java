@@ -6,6 +6,7 @@ import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.OrderService;
 import fr.openent.lystore.service.impl.DefaultOrderService;
 import fr.wseduc.rs.ApiDoc;
+import fr.wseduc.rs.Delete;
 import fr.wseduc.rs.Get;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -22,7 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
-
+import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
 
 public class OrderController extends ControllerHelper {
     private final OrderService orderService;
@@ -44,6 +45,29 @@ public class OrderController extends ControllerHelper {
             orderService.listOrder(idCampaign,idStructure, arrayResponseHandler(request));
         }catch (ClassCastException e ){
             log.error("An error occured when casting campaign id ",e);
+        }
+    }
+    @Delete("/order/:idOrder/:idStructure")
+    @ApiDoc("Delete a order item")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AccessOrderRight.class)
+    public void deleteOrder(final HttpServerRequest request){
+        try {
+            final Integer idOrder = Integer.parseInt(request.params().get("idOrder"));
+            final String idStructure = request.params().get("idStructure");
+            orderService.orderForDelete(idOrder, new Handler<Either<String, JsonObject>>() {
+                @Override
+                public void handle(Either<String, JsonObject> order) {
+                    if(order.isRight()){
+                        orderService.deleteOrder(idOrder,order.right().getValue(),idStructure,
+                                defaultResponseHandler (request));
+                    }
+                }
+            });
+
+        } catch (ClassCastException e){
+            log.error("An error occurred when casting order id", e);
+            badRequest(request);
         }
     }
 

@@ -133,6 +133,9 @@
   "lystore.orderEquipment.manage.order":"Commande du ",
   "lystore.orderEquipment.manage.exportCSV":"Export CSV",
   "lystore.orderEquipment.manage.empty.order":"Vous n'avez aucune commande en cours",
+  "lystore.orderEquipment.delete.title":"Suppression d'une commande",
+  "lystore.orderEquipment.delete.message":"Cette commande sera supprimée",
+  "lystore.orderEquipment.delete.confirm":"Votre commande a été supprimée",
   "lystore.info.empty.basket":"Le panier est vide",
   "the.structure":"l'établissement",
   "lystore.slack.order.message1":" a passé une commande d'un montant de ",
@@ -248,5 +251,6 @@
   "lystore.basket.update.err":"Erreur lors de la mise à jour des paniers",
   "lystore.basket.create.err":"Erreur lors de la création des paniers",
   "lystore.order.create.err":"Erreur lors de la création des commandes",
-  "lystore.order.sync.err": "Erreur lors de la récupération des commandes"
+  "lystore.order.sync.err": "Erreur lors de la récupération des commandes",
+  "lystore.order.delete.err":"Erreur lors de la suppression de la commande"
 }

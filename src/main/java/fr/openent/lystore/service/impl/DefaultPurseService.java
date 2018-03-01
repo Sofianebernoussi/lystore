@@ -84,4 +84,23 @@ public class DefaultPurseService implements PurseService {
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
+
+    @Override
+    public JsonObject updatePurseAmountStatement(Float price, Integer idCampaign, String idStructure,String operation) {
+        final double cons = 100.0;
+        String updateQuery = "UPDATE lystore.purse " +
+                "SET amount = amount " +  operation + " ?  " +
+                "WHERE id_campaign = ? " +
+                "AND id_structure = ? ;";
+
+        JsonArray params = new JsonArray()
+                .addNumber(Math.round(price * cons)/cons)
+                .addNumber(idCampaign)
+                .addString(idStructure);
+
+        return new JsonObject()
+                .putString("statement", updateQuery)
+                .putArray("values", params)
+                .putString("action", "prepared");
+    }
 }

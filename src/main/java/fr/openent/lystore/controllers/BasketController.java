@@ -70,10 +70,10 @@ public class BasketController extends ControllerHelper {
     @Override
     public void delete(HttpServerRequest request) {
         try {
-            Integer idCampaign = request.params().contains("idBasket")
+            Integer idBasket = request.params().contains("idBasket")
                     ? Integer.parseInt(request.params().get("idBasket"))
                     : null;
-            basketService.delete( idCampaign, defaultResponseHandler(request));
+            basketService.delete( idBasket, defaultResponseHandler(request));
 
         } catch (ClassCastException e) {
             log.error("An error occurred when casting basket id", e);

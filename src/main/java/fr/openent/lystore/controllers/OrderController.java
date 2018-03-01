@@ -1,6 +1,9 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.logging.Actions;
+import fr.openent.lystore.logging.Contexts;
+import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AccessOrderRight;
 import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.OrderService;
@@ -60,7 +63,8 @@ public class OrderController extends ControllerHelper {
                 public void handle(Either<String, JsonObject> order) {
                     if(order.isRight()){
                         orderService.deleteOrder(idOrder,order.right().getValue(),idStructure,
-                                defaultResponseHandler (request));
+                                Logging.defaultResponseHandler(eb,request, Contexts.ORDER.toString(),
+                                        Actions.DELETE.toString(),"idOrder",order.right().getValue()));
                     }
                 }
             });

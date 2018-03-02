@@ -4,40 +4,48 @@ import { TechnicalSpec, Contract, Supplier, Campaign, Structure, Utils } from '.
 import http from 'axios';
 
 export class OrderClient implements Selectable {
-id?: number;
-amount: number;
-name: string;
-price: number;
-tax_amount: number;
-summary: string;
-description: string;
-image: string;
-creation_date: Date;
-status: string;
+    id?: number;
+    amount: number;
+    name: string;
+    price: number;
+    tax_amount: number;
+    summary: string;
+    description: string;
+    image: string;
+    creation_date: Date;
+    status: string;
 
-options: OrderOptionClient[];
-technical_spec: TechnicalSpec[];
-contract: Contract;
-supplier: Supplier;
-campaign: Campaign;
+    options: OrderOptionClient[];
+    technical_spec: TechnicalSpec[];
+    contract: Contract;
+    supplier: Supplier;
+    campaign: Campaign;
 
-name_structure: string;
-id_contract: number;
-id_campaign: number;
-id_structure: string;
-selected: boolean;
+    name_structure: string;
+    id_contract: number;
+    id_campaign: number;
+    id_structure: string;
+    selected: boolean;
 
-constructor() {}
+    constructor() {}
 
     calculatePriceTTC = ( roundNumber?: number) => {
         let price = parseFloat(Utils.calculatePriceTTC(this.price , this.tax_amount).toString());
         this.options.map((option) => {
-                 price += parseFloat(Utils.calculatePriceTTC(option.price , option.tax_amount).toString() );
+            price += parseFloat(Utils.calculatePriceTTC(option.price , option.tax_amount).toString() );
         });
         return (!isNaN(price)) ? (roundNumber ? price.toFixed(roundNumber) : price ) : price ;
     }
+
+    async delete (idStructure: number) {
+        try {
+            return await http.delete(`/lystore/order/${this.id}/${idStructure}`);
+        } catch (e) {
+            notify.error('lystore.order.delete.err');
+        }
+    }
 }
- export class OrdersClient extends Selection<OrderClient> {
+export class OrdersClient extends Selection<OrderClient> {
     constructor() {
         super([]);
     }
@@ -74,33 +82,33 @@ constructor() {}
             notify.error('lystore.order.sync.err');
         }
     }
-     initNameStructure  (idStructure: string, structures: Structure[])  {
-         let structure = _.findWhere(structures, { id : idStructure});
-         return  structure ? structure.name : '' ;
-     }
-      calculTotalAmount () {
+    initNameStructure  (idStructure: string, structures: Structure[])  {
+        let structure = _.findWhere(structures, { id : idStructure});
+        return  structure ? structure.name : '' ;
+    }
+    calculTotalAmount () {
         let total = 0;
         this.all.map((order) => {
             total += order.amount;
         });
         return total;
-     }
-      calculTotalPriceTTC () {
-         let total = 0;
-         this.all.map((order) => {
-             total += parseFloat( order.calculatePriceTTC().toString()) * order.amount;
-         });
-         return total;
     }
- }
+    calculTotalPriceTTC () {
+        let total = 0;
+        this.all.map((order) => {
+            total += parseFloat( order.calculatePriceTTC().toString()) * order.amount;
+        });
+        return total;
+    }
+}
 
 export class OrderOptionClient implements Selectable {
     id?: number;
     tax_amount: number;
     price: number;
-    name_opt: string;
-    amount_opt: number;
-    required_opt: boolean;
+    name: string;
+    amount: number;
+    required: boolean;
     id_order_client_equipment: number;
     selected: boolean;
 }

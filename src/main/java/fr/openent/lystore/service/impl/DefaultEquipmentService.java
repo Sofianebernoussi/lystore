@@ -104,7 +104,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                         for (int i = 0; i < tags.size(); i++) {
                             statements.add(getEquipmentTagRelationshipStatement(id, (Number) tags.get(i)));
                         }
-                        JsonArray options = equipment.getArray("options");
+                        JsonArray options = equipment.getArray("optionsCreate");
                         for (int j = 0; j < options.size(); j++) {
                             statements.add(getEquipmentOptionRelationshipStatement(id, (JsonObject) options.get(j)));
                         }
@@ -179,12 +179,16 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                         ));
             }
         }
-        sql.transaction(statements, new Handler<Message<JsonObject>>() {
-            @Override
-            public void handle(Message<JsonObject> event) {
-                handler.handle(SqlQueryUtils.getTransactionHandler(event, id));
-            }
-        });
+        if (statements.size() > 0) {
+            sql.transaction(statements, new Handler<Message<JsonObject>>() {
+                @Override
+                public void handle(Message<JsonObject> event) {
+                    handler.handle(SqlQueryUtils.getTransactionHandler(event, id));
+                }
+            });
+        } else {
+            handler.handle(new Either.Right<String, JsonObject>(new JsonObject().putNumber("id", id)));
+        }
     }
     public void delete(final List<Integer> ids, final Handler<Either<String, JsonObject>> handler) {
         JsonArray statements = new JsonArray()

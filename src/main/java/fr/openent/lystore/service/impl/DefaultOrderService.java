@@ -77,20 +77,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     }
 
     @Override
-    public  void listOrder(Handler<Either<String, JsonArray>> handler){
-        String query = "SELECT oce.* , to_json(contract.*) contract ,to_json(supplier.*) supplier, " +
-                "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options " +
-                "FROM lystore.order_client_equipment oce " +
-                "LEFT JOIN lystore.order_client_options oco ON oco.id_order_client_equipment = oce.id " +
-                "LEFT JOIN lystore.contract ON oce.id_contract = contract.id " +
-                "INNER JOIN lystore.supplier ON contract.id_supplier = supplier.id  " +
-                "INNER JOIN lystore.campaign ON oce.id_campaign = campaign.id " +
-                "GROUP BY (oce.id, contract.id, supplier.id, campaign.id); ";
-        sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
-    }
-}
-
-    @Override
     public void orderForDelete(Integer idOrder, Handler<Either<String, JsonObject>> handler) {
 
         String query = "SELECT  oe.id, oe.name,date_trunc('day',oe.creation_date)as creation_date, id_campaign, id_structure," +
@@ -173,7 +159,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 " GROUP BY(p.amount) )";
     }
     private static void getTransactionHandler( Message<JsonObject> event, JsonObject amountPurseNbOrder,
-                                              Handler<Either<String, JsonObject>> handler){
+                                               Handler<Either<String, JsonObject>> handler){
         JsonObject result = event.body();
         if (result.containsField("status")&& "ok".equals(result.getString("status"))){
             JsonObject returns = new JsonObject();
@@ -181,11 +167,9 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
             returns.putNumber("nb_order",amountPurseNbOrder.getNumber("f2"));
             handler.handle(new Either.Right<String, JsonObject>(returns));
         }  else {
-        LOGGER.error("An error occurred when launching 'order' transaction");
-        handler.handle(new Either.Left<String, JsonObject>(""));
-    }
-
-
+            LOGGER.error("An error occurred when launching 'order' transaction");
+            handler.handle(new Either.Left<String, JsonObject>(""));
+        }
 
     }
 }

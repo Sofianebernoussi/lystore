@@ -17,6 +17,7 @@ import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.I18n;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
+import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
@@ -82,14 +83,6 @@ public class OrderController extends ControllerHelper {
         }
     }
 
-    @Get("/orders")
-    @ApiDoc("Get the list of orders")
-    @ResourceFilter(ManagerRight.class)
-    public void listOrders (HttpServerRequest request){
-        orderService.listOrder(arrayResponseHandler(request));
-    }
-
-
     @Get("/orders/export/:idCampaign/:idStructure")
     @ApiDoc("Export list of custumer's orders as CSV")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
@@ -101,10 +94,10 @@ public class OrderController extends ControllerHelper {
             @Override
             public void handle(Either<String, JsonArray> event) {
                 if(event.isRight()){
-                        request.response()
-                                .putHeader("Content-Type", "text/csv; charset=utf-8")
-                                .putHeader("Content-Disposition", "attachment; filename=orders.csv")
-                                .end(generateExport(request, event.right().getValue()));
+                    request.response()
+                            .putHeader("Content-Type", "text/csv; charset=utf-8")
+                            .putHeader("Content-Disposition", "attachment; filename=orders.csv")
+                            .end(generateExport(request, event.right().getValue()));
 
                 }else{
                     badRequest(request);
@@ -140,7 +133,7 @@ public class OrderController extends ControllerHelper {
             orderDate = formatterDate.parse( order.getString("equipment_creation_date"));
 
         } catch (ParseException e) {
-           log.error( "Error current format date" + e);
+            log.error( "Error current format date" + e);
         }
         return formatterDateCsv.format(orderDate) + ";" +
                 order.getString("equipment_name") + ";" +

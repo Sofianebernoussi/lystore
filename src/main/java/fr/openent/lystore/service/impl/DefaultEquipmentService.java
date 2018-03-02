@@ -294,7 +294,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         String insertEquipmentQuery =
                 "INSERT INTO " + Lystore.lystoreSchema + ".equipment(id, name, summary, description, price, id_tax," +
                         " image, id_contract, status, technical_specs) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, to_json(?)) RETURNING id;";
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, to_json(?::text)) RETURNING id;";
         JsonArray params = new JsonArray()
                 .addNumber(id)
                 .addString(equipment.getString("name"))

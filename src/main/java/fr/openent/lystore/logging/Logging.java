@@ -37,7 +37,7 @@ public final class Logging {
                 }
                 query.append(") VALUES (?, ?, ?, ?, ?");
                 if (object != null) {
-                    query.append(", to_json(?)");
+                    query.append(", to_json(?::text)");
                 }
                 query.append(");");
 
@@ -134,7 +134,7 @@ public final class Logging {
                         "VALUES (?, ?, ?, ?, ?, ";
 
                 if (object != null) {
-                    query += "to_json(?)";
+                    query += "to_json(?::text)";
                 } else {
                     query += "null";
                 }

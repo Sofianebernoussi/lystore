@@ -286,7 +286,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 .append(" (id, price, tax_amount, amount,  id_campaign, id_structure, name, summary," +
                         " description, image, technical_spec, status, " +
                         " id_contract, equipment_key ) VALUES ")
-                .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?), ?, ?, ?); ");
+                .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?); ");
         JsonArray params = new JsonArray();
         params.addNumber(basket.getNumber("id_order"))
                 .addNumber(Float.valueOf(basket.getString("price")))

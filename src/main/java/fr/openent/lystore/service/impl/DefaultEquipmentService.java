@@ -452,7 +452,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     private JsonObject getEquipmentUpdateStatement(Number id, JsonObject equipment) {
         String query = "UPDATE " + Lystore.lystoreSchema + ".equipment SET " +
                 "name = ?, summary = ?, description = ?, price = ?, id_tax = ?, image = ?, " +
-                "id_contract = ?, status = ?, technical_specs = to_json(?) " +
+                "id_contract = ?, status = ?, technical_specs = to_json(?::text) " +
                 "WHERE id = ?";
 
         JsonArray params = new JsonArray()

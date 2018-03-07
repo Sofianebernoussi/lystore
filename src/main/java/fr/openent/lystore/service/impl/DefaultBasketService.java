@@ -162,8 +162,8 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             JsonObject basket;
             for (int i = 0; i < baskets.size(); i++) {
                 basket = baskets.get(i);
-                statements.add(getUpdatePurseStatment(Float.valueOf( basket.getString("total_price")),
-                        idCampaign , idStructure ));
+                statements.add(getUpdatePurseStatment(Float.valueOf( basket.getString("total_price"))*Float.valueOf( basket.getNumber("amount").toString()),
+                        idCampaign, idStructure));
                 statements.add(getInsertEquipmentOrderStatement( basket));
                 if(! "[null]".equals( basket.getString("options"))) {
                     statements.add(getInsertEquipmentOptionsStatement(basket));

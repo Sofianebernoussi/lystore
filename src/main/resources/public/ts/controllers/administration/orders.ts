@@ -1,7 +1,8 @@
 import {ng, moment, template, _} from 'entcore';
-import {  OrderClient, Utils } from '../../model';
+import {  OrderClient, Utils, OrdersClient } from '../../model';
+import {Mix} from 'entcore-toolkit';
 
-export const orderClientController = ng.controller('orderClientController',
+export const orderController = ng.controller('orderController',
     ['$scope',  ($scope) => {
         $scope.allOrdersSelected = false;
         $scope.sort = {
@@ -18,6 +19,7 @@ export const orderClientController = ng.controller('orderClientController',
             ordersClientOptionOption : [],
             lightbox : {
                 deleteOrder : false,
+                validOrder : false
             }
         };
         $scope.switchAll = (model: boolean, collection) => {
@@ -45,5 +47,27 @@ export const orderClientController = ng.controller('orderClientController',
         };
         $scope.pullFilterWord = (filterWord) => {
             $scope.search.filterWords = _.without( $scope.search.filterWords , filterWord);
+        };
+        $scope.validateOrders = async (orders: OrderClient[]) => {
+           let ordersToValidat  = new OrdersClient();
+            ordersToValidat.all = Mix.castArrayAs(OrderClient, orders);
+           let { status, data } = await ordersToValidat.updateStatus('VALID');
+            if (status === 200) {
+                $scope.orderValidationData = {
+                    agents: _.uniq(data.agent),
+                    number: data.number,
+                    structures: _.uniq(_.pluck(ordersToValidat.all, 'name_structure'))
+                } ;
+                template.open('validOrder.lightbox', 'administrator/order/order-valid-confirmation');
+                $scope.display.lightbox.validOrder = true;
+            }
+            await $scope.ordersClient.sync($scope.structures.all);
+            $scope.ordersClient.all = _.where($scope.ordersClient.all, {status: 'WAITING'});
+            Utils.safeApply($scope);
+        };
+        $scope.cancelBasketDelete = () => {
+            $scope.display.lightbox.validOrder = false;
+            template.close('validOrder.lightbox');
+            Utils.safeApply($scope);
         };
     }]);

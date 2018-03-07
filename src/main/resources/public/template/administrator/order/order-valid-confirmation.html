@@ -1,0 +1,20 @@
+<h2><i18n>lystore.order.validated</i18n></h2>
+<div>
+ <p>
+     <i18n>lystore.order.validated.message1</i18n> <strong>[[orderValidationData.number]]</strong>
+    <br/>
+ </p>
+</div>
+<div>
+    <i18n>lystore.order.validated.message2</i18n>
+    <ul ng-repeat="structureName in orderValidationData.structures">
+        <li>[[structureName]]</li>
+    </ul>
+</div><div>
+    <i18n>lystore.order.validated.message3</i18n>
+    <ul ng-repeat="agentName in orderValidationData.agents">
+        <li>[[agentName]]</li>
+    </ul>
+</div>
+<input type="button" class="cancel right-magnet " ng-click="cancelBasketDelete()" i18n-value="ok"/>
+

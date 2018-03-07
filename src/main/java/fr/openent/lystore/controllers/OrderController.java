@@ -8,19 +8,33 @@ import fr.openent.lystore.security.AccessOrderRight;
 import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.OrderService;
 import fr.openent.lystore.service.impl.DefaultOrderService;
+import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Delete;
 import fr.wseduc.rs.Get;
+import fr.wseduc.rs.Put;
+import fr.wseduc.webutils.security.XssHttpServerRequest;
+import org.entcore.common.user.UserInfos;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.email.EmailSender;
+import org.entcore.common.email.EmailFactory;
+import fr.wseduc.webutils.request.RequestUtils;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.I18n;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.user.UserUtils;
 import org.vertx.java.core.Handler;
+import org.vertx.java.core.Vertx;
 import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonArray;
+import org.vertx.java.core.http.RouteMatcher;
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.platform.Container;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.vertx.java.core.json.JsonArray;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,13 +42,20 @@ import java.util.Date;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 
+
+import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
 public class OrderController extends ControllerHelper {
-    private final OrderService orderService;
+    private OrderService orderService;
     public static final String UTF8_BOM = "\uFEFF";
 
-    public OrderController (){
-        super();
-        this.orderService = new DefaultOrderService(Lystore.lystoreSchema, "order_client_equipment");
+
+    @Override
+    public void init(Vertx vertx, final Container container, RouteMatcher rm,
+                     Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
+        super.init(vertx, container, rm, securedActions);
+        EmailFactory emailFactory = new EmailFactory(vertx, container, container.config());
+        EmailSender emailSender = emailFactory.getSender();
+        this.orderService = new DefaultOrderService(Lystore.lystoreSchema, "order_client_equipment", emailSender);
     }
 
     @Get("/orders/:idCampaign/:idStructure")
@@ -143,5 +164,42 @@ public class OrderController extends ControllerHelper {
                 I18n.getInstance().translate(order.getString("equipment_status"),getHost(request),
                         I18n.acceptLanguage(request)) + ";" +
                 "\n";
+    }
+
+
+    @Put("/orders/valid")
+    @ApiDoc("validate orders ")
+    @ResourceFilter(ManagerRight.class)
+    public void validateOrders (final HttpServerRequest request){
+        RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {
+            @Override
+            public void handle(final JsonObject orders) {
+                UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+                    @Override
+                    public void handle(UserInfos userInfos) {
+                        try {
+                            List<String> params = new ArrayList<>();
+                            for (Object id: orders.getArray("ids") ) {
+                                params.add( id.toString());
+                            }
+                            final int urlNumber = 7;
+                            List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
+                            orderService.validateOrders(request, userInfos , ids,
+                                    (String)((XssHttpServerRequest) request)
+                                            .headers().entries().get(urlNumber).getValue(),
+                                    Logging.defaultResponsesHandler(eb,
+                                    request,
+                                    Contexts.ORDER.toString(),
+                                    Actions.UPDATE.toString(),
+                                    params,
+                                    null));
+                        } catch (ClassCastException e) {
+                            log.error("An error occurred when casting basket id", e);
+                        }
+                    }
+                });
+            }
+        });
+
     }
 }

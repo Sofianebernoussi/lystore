@@ -14,6 +14,7 @@ export class OrderClient implements Selectable {
     image: string;
     creation_date: Date;
     status: string;
+    number: string;
 
     options: OrderOptionClient[];
     technical_spec: TechnicalSpec[];
@@ -29,7 +30,7 @@ export class OrderClient implements Selectable {
 
     constructor() {}
 
-    calculatePriceTTC = ( roundNumber?: number) => {
+    calculatePriceTTC ( roundNumber?: number)  {
         let price = parseFloat(Utils.calculatePriceTTC(this.price , this.tax_amount).toString());
         this.options.map((option) => {
             price += parseFloat(Utils.calculatePriceTTC(option.price , option.tax_amount).toString() );
@@ -82,7 +83,16 @@ export class OrdersClient extends Selection<OrderClient> {
             notify.error('lystore.order.sync.err');
         }
     }
-    initNameStructure  (idStructure: string, structures: Structure[])  {
+    async updateStatus(status: string) {
+        try {
+            return await  http.put(`/lystore/orders/${status.toLowerCase()}`, { ids: _.pluck(this.all, 'id') , status : status } );
+        } catch (e) {
+            notify.error('lystore.basket.update.err');
+            throw e;
+        }
+    }
+
+    initNameStructure (idStructure: string, structures: Structure[]) {
         let structure = _.findWhere(structures, { id : idStructure});
         return  structure ? structure.name : '' ;
     }

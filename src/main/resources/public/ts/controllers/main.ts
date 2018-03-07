@@ -182,6 +182,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.structures = new Structures();
                 await $scope.structures.sync();
                 await $scope.ordersClient.sync($scope.structures.all);
+                $scope.ordersClient.all = _.where($scope.ordersClient.all, {status: 'WAITING'});
                 template.open('administrator-main', 'administrator/order/manage-order');
                 Utils.safeApply($scope);
             }

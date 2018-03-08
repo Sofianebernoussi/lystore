@@ -55,7 +55,7 @@ export const orderController = ng.controller('orderController',
             if (status === 200) {
                 $scope.orderValidationData = {
                     agents: _.uniq(data.agent),
-                    number: data.number,
+                    number_validation: data.number_validation,
                     structures: _.uniq(_.pluck(ordersToValidat.all, 'name_structure'))
                 } ;
                 template.open('validOrder.lightbox', 'administrator/order/order-valid-confirmation');

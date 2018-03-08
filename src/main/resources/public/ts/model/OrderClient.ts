@@ -14,7 +14,7 @@ export class OrderClient implements Selectable {
     image: string;
     creation_date: Date;
     status: string;
-    number: string;
+
 
     options: OrderOptionClient[];
     technical_spec: TechnicalSpec[];
@@ -26,6 +26,7 @@ export class OrderClient implements Selectable {
     id_contract: number;
     id_campaign: number;
     id_structure: string;
+    number_validation: string;
     selected: boolean;
 
     constructor() {}

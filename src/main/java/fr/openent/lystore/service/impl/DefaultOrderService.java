@@ -24,12 +24,12 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
     private static final Logger LOGGER = LoggerFactory.getLogger (DefaultOrderService.class);
     private PurseService purseService ;
-    private final EmailSender emailSender;
+    private EmailSendService emailSender ;
 
     public DefaultOrderService(String schema, String table, EmailSender emailSender){
         super(schema,table);
         this.purseService = new DefaultPurseService();
-        this.emailSender = emailSender;
+        this.emailSender = new EmailSendService(emailSender);
     }
 
     @Override
@@ -174,37 +174,34 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                         sql.transaction(statements, new Handler<Message<JsonObject>>() {
                             @Override
                             public void handle(Message<JsonObject> jsonObjectMessage) {
-                                JsonArray rows = ((JsonObject) ((JsonObjectMessage) jsonObjectMessage).body()
+                                try{
+                                final JsonArray rows = ((JsonObject) ((JsonObjectMessage) jsonObjectMessage).body()
                                         .getArray("results").get(1)).getArray("results");
                                 JsonArray names = new JsonArray();
-
-                                final int contractNameIndex = 1 ;
                                 final int agentNameIndex = 2;
-                                final int agentEmailIndex = 3 ;
-                                for(int j=0 ; j < rows.size(); j++) {
-                                    names.addString((String)((JsonArray)
+                                final int structureIdIndex = 4;
+                                JsonArray structureIds = new JsonArray();
+                                for (int j = 0; j < rows.size(); j++) {
+                                    names.addString((String) ((JsonArray)
                                             rows.get(j)).get(agentNameIndex));
+                                    structureIds.addString((String) ((JsonArray)
+                                            rows.get(j)).get(structureIdIndex));
                                 }
                                 final JsonArray agentNames = names;
-                                for(int i=0 ; i < rows.size(); i++){
-                                    JsonArray row = rows.get(i);
-                                    emailSender.sendEmail(request,
-                                            (String) row.get(agentEmailIndex),
-                                            null,
-                                            null,
-                                            "[LyStore] Commandes " + row.get(contractNameIndex),
-                                            getAgentBodyMail(row, user, numberOrder, url),
-                                            null,
-                                            true,
-                                            new Handler<Message<JsonObject>>() {
-                                                @Override
-                                                public void handle(Message<JsonObject> jsonObjectMessage) {
-                                                    handler.handle(new Either.Right<String, JsonObject>(
-                                                            new JsonObject()
-                                                                    .putString("number",numberOrder)
-                                                                    .putArray("agent", agentNames)));
-                                                }
-                                            });
+                                emailSender.getPersonnelMailStructure(structureIds,
+                                        new Handler<Either<String, JsonArray>>() {
+                                            @Override
+                                            public void handle(Either<String, JsonArray> stringJsonArrayEither) {
+                                                final JsonObject result = new JsonObject()
+                                                        .putString("number_validation", numberOrder)
+                                                        .putArray("agent", agentNames);
+                                                emailSender.sendMails( request, result,  rows,  user,  url,
+                                                        (JsonArray) stringJsonArrayEither.right().getValue(), handler);
+                                            }
+                                        });
+                            }catch(ClassCastException e) {
+                                    LOGGER.error("An error occurred when casting sql rows", e);
+                                    handler.handle(new Either.Left<String, JsonObject>(""));
                                 }
                             }
                         });
@@ -220,37 +217,11 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         }));
 
     }
-    private static String getAgentBodyMail(JsonArray row, UserInfos user, String numberOrder, String url){
-        final int contractName = 2 ;
-        String body = "Bonjour " + row.get(contractName) + ", <br/> <br/>"
-                + user.getFirstName() + " " + user.getLastName() + " vient de valider une commande sous le numéro \""
-                + numberOrder + "\"."
-                + " Une partie de la commande concerne le marche " + row.get(1) + ". "
-                + "<br /> Pour générer le bon de commande et les CSF associés, il suffit de se rendre ici : <br />"
-                + "<br />" + url + "#/order/client/waiting <br />"
-                + "<br /> Bien Cordialement, "
-                + "<br /> L'équipe LyStore. ";
 
-        return formatAccentedString(body);
 
-    }
-    private static String formatAccentedString (String body){
-        return  body.replace("&","&amp;").replace("€","&euro;")
-                .replace("à","&agrave;").replace("â","&acirc;")
-                .replace("é","&eacute;").replace("è","&egrave;")
-                .replace("ê","&ecirc;").replace("î","&icirc;")
-                .replace("ï","&iuml;") .replace("œ","&oelig;")
-                .replace("ù","&ugrave;").replace("û","&ucirc;")
-                .replace("ç","&ccedil;").replace("À","&Agrave;")
-                .replace("Â","&Acirc;").replace("É","&Eacute;")
-                .replace("È","&Egrave;").replace("Ê","&Ecirc;")
-                .replace("Î","&Icirc;").replace("Ï","&Iuml;")
-                .replace("Œ","&OElig;").replace("Ù","&Ugrave;")
-                .replace("Û","&Ucirc;").replace("Ç","&Ccedil;");
 
-    }
     private static JsonObject getAgentInformation(List<Integer> ids){
-        String query = "SELECT oce.id, contract.name,agent.name, agent.email " +
+        String query = "SELECT oce.id, contract.name, agent.name, agent.email, oce.id_structure " +
                 " FROM lystore.order_client_equipment oce " +
                 " INNER JOIN lystore.contract ON contract.id = oce.id_contract " +
                 " INNER JOIN lystore.agent ON contract.id_agent= agent.id " +
@@ -267,7 +238,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     private static JsonObject getUpdateStatusStatement(List<Integer>  ids, String numberOrder, String status){
 
         String query = "UPDATE lystore.order_client_equipment " +
-                " SET  status = ?, \"number\" = ?  " +
+                " SET  status = ?, number_validation = ?  " +
                 " WHERE id in "+ Sql.listPrepared(ids.toArray()) +" ;  ";
         JsonArray params = new JsonArray().addString(status).addString(numberOrder);
 

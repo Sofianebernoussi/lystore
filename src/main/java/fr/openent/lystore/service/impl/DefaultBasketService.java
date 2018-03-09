@@ -167,7 +167,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 basket = baskets.get(i);
                 statements.add(
                         purseService.updatePurseAmountStatement(
-                                Float.valueOf( basket.getString("total_price")) 
+                                Float.valueOf( basket.getString("total_price"))
                                         *Float.valueOf( basket.getNumber("amount").toString()),
                         idCampaign, idStructure,"-"));
                 statements.add(getInsertEquipmentOrderStatement( basket));

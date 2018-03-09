@@ -178,9 +178,15 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('campaign-main', 'customer/campaign/basket/manage-basket');
                 Utils.safeApply($scope);
             },
-            orderClientWaiting : async () => {
+            orderWaiting : async () => {
                $scope.initOrders('WAITING');
-                template.open('administrator-main', 'administrator/order/manage-order');
+                template.open('administrator-main', 'administrator/order/order-waiting');
+                Utils.safeApply($scope);
+            },
+            orderSent : async () => {
+                $scope.structures = new Structures();
+                $scope.initOrders('SENT');
+                template.open('administrator-main', 'administrator/order/order-sent');
                 Utils.safeApply($scope);
             },
             orderClientValided : async () => {
@@ -281,20 +287,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             }
         };
-        $scope.initOrders = async(status) => {
+        $scope.initOrders = async (status) => {
             $scope.structures = new Structures();
             await $scope.structures.sync();
             await $scope.ordersClient.sync($scope.structures.all);
-           switch (status) {
-               case 'WAITING':
-                $scope.ordersClient.all = _.where($scope.ordersClient.all, {status: 'WAITING'});
-                break;
-               case 'VALID':
-                $scope.ordersClient.all = _.where($scope.ordersClient.all, {status: 'VALID'});
-                break;
-               default:
-                   $scope.notifications.push(new Notification('lystore.order.sync.err', 'warning'));
-            }
+            $scope.ordersClient.all = _.where($scope.ordersClient.all, {status: status});
             Utils.safeApply($scope);
         };
         $rootScope.$on('$routeChangeSuccess', ( $currentRoute, $previousRoute, $location ) => {

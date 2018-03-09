@@ -64,8 +64,11 @@ routes.define(($routeProvider) => {
                 action: 'managePurse'
             })
             .when('/order/waiting', {
-                action: 'orderClientWaiting'
+                action: 'orderWaiting'
             })
+            .when('/order/sent', {
+            action: 'orderSent'
+        })
             .when('/order/valid', {
                 action: 'orderClientValided'
             });

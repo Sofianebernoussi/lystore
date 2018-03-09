@@ -6,26 +6,44 @@
 import { ng, _ } from 'entcore';
 export const ordersClientFilter = ng.filter('ordersClientFilter', () => {
 
-    return (inputs, table) => {
-        let conditionFilter = (order, table) => {
+    return (inputs, status, table) => {
+        let filter = (order, status, table) => {
             let result = [];
             let i = 0;
             do {
                 result[i] = (table[i] !== '') ?
-                    ((order.name_structure ? order.name_structure.toLowerCase().includes(table[i].toLowerCase()) : false )
-                        || ( order.contract ? order.contract.name.toLowerCase().includes(table[i].toLowerCase()) : false )
-                        || (order.supplier ? order.supplier.name.toString().includes(table[i].toLowerCase()) : false )
-                    || (order.campaign ? order.campaign.name.toString().includes(table[i].toLowerCase()) : false) )
+                    conditionFilter (order, status, table[i])
                     : true ;
                 i++;
             }while (i < table.length && result[i > 1 ? i - 1 : 0] === true);
 
             return _.reduce(result, (oldVal, newVal ) => {return oldVal && newVal; }, true);
         };
-
+        let conditionFilter = (order, status, table) => {
+            switch (status) {
+                case 'WAITING': {
+                    return   ((order.name_structure ? order.name_structure.toLowerCase().includes(table.toLowerCase()) : false )
+                        || ( order.contract ? order.contract.name.toLowerCase().includes(table.toLowerCase()) : false )
+                        || (order.supplier ? order.supplier.name.toString().includes(table.toLowerCase()) : false )
+                        || (order.campaign ? order.campaign.name.toString().includes(table.toLowerCase()) : false) );
+                }
+                case 'VALID': {
+                    return ((order.name_structure ? order.name_structure.toLowerCase().includes(table.toLowerCase()) : false )
+                        || ( order.contract ? order.contract.name.toLowerCase().includes(table.toLowerCase()) : false )
+                        || (order.supplier ? order.supplier.name.toString().includes(table.toLowerCase()) : false )
+                        || (order.number_validation ? order.number_validation.toLowerCase().includes(table.toLowerCase()) : false ));
+                }
+                case 'SENT': {
+                    return ((order.name_structure ? order.name_structure.toLowerCase().includes(table.toLowerCase()) : false )
+                        || ( order.contract ? order.contract.name.toLowerCase().includes(table.toLowerCase()) : false )
+                        || (order.supplier ? order.supplier.name.toString().includes(table.toLowerCase()) : false )
+                        || (order.number_validation ? order.number_validation.toLowerCase().includes(table.toLowerCase()) : false ));
+                }
+            }
+        };
         return table.length > 0
             ? _.without(inputs.map((input) => {
-                if (input === undefined || conditionFilter(input, table)) return input ;
+                if (input === undefined || filter(input, status, table)) return input ;
             }), undefined )
             :  inputs ;
 

@@ -1,5 +1,5 @@
 import {ng, moment, template, _} from 'entcore';
-import {  OrderClient, Utils, OrdersClient } from '../../model';
+import {OrderClient, Utils, OrdersClient, Notification} from '../../model';
 import {Mix} from 'entcore-toolkit';
 
 export const orderController = ng.controller('orderController',
@@ -19,7 +19,7 @@ export const orderController = ng.controller('orderController',
             ordersClientOptionOption : [],
             lightbox : {
                 deleteOrder : false,
-                validOrder : false
+                validOrder : false,
             }
         };
         $scope.switchAll = (model: boolean, collection) => {
@@ -70,4 +70,16 @@ export const orderController = ng.controller('orderController',
             template.close('validOrder.lightbox');
             Utils.safeApply($scope);
         };
+        $scope.windUpOrders = async (orders: OrderClient[]) => {
+            let ordersToWindUp  = new OrdersClient();
+            ordersToWindUp.all = Mix.castArrayAs(OrderClient, orders);
+            let { status } = await ordersToWindUp.updateStatus('DONE');
+            if (status === 200) {
+                $scope.notifications.push(new Notification( 'lystore.windUp.notif' , 'confirm'));
+            }
+            await $scope.ordersClient.sync($scope.structures.all);
+            $scope.ordersClient.all = _.where($scope.ordersClient.all, {status: 'SENT'});
+            Utils.safeApply($scope);
+        };
+
     }]);

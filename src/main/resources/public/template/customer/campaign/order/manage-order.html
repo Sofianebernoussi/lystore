@@ -27,7 +27,7 @@
                         lystore.expected.delivery
                     </i18n>
                 </h3>
-                <p>[[calculateDelivreryDate(orderEquipment.creation_date)]]</p>
+                <p>[[calculateDelivreryDate(orderClient.creation_date)]]</p>
             </div>
             <div class="four cell">
                 <div class="row cell centered-text order-amount-price vertical-spacing-twice">
@@ -64,10 +64,10 @@
             </div>
         </article>
     </div>
-    <article ng-show = "ordersEquipments.all.length === 0 " class="centered-text row">
+    <article ng-show = "ordersClient.all.length === 0 " class="centered-text row">
         <p><i18n>lystore.orderEquipment.manage.empty.order</i18n></p>
     </article>
     <lightbox show="display.lightbox.deleteOrder" on-close="cancelOrderEquipmentDelete()">
-        <container template="orderEquipment.delete"></container>
+        <container template="orderClient.delete"></container>
     </lightbox>
 </div>

@@ -188,16 +188,43 @@ public class OrderController extends ControllerHelper {
                                     (String)((XssHttpServerRequest) request)
                                             .headers().entries().get(urlNumber).getValue(),
                                     Logging.defaultResponsesHandler(eb,
+                                            request,
+                                            Contexts.ORDER.toString(),
+                                            Actions.UPDATE.toString(),
+                                            params,
+                                            null));
+                        } catch (ClassCastException e) {
+                            log.error("An error occurred when casting order id", e);
+                        }
+                    }
+                });
+            }
+        });
+
+    }
+    @Put("/orders/done")
+    @ApiDoc("Wind up orders ")
+    @ResourceFilter(ManagerRight.class)
+    public void windUpOrders (final HttpServerRequest request){
+        RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {
+            @Override
+            public void handle(final JsonObject orders) {
+                try {
+                    List<String> params = new ArrayList<>();
+                    for (Object id: orders.getArray("ids") ) {
+                        params.add( id.toString());
+                    }
+                    List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
+                    orderService.windUpOrders(ids,
+                            Logging.defaultResponsesHandler(eb,
                                     request,
                                     Contexts.ORDER.toString(),
                                     Actions.UPDATE.toString(),
                                     params,
                                     null));
-                        } catch (ClassCastException e) {
-                            log.error("An error occurred when casting basket id", e);
-                        }
-                    }
-                });
+                } catch (ClassCastException e) {
+                    log.error("An error occurred when casting order id", e);
+                }
             }
         });
 

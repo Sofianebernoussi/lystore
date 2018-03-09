@@ -132,7 +132,13 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
             handler.handle(new Either.Left<String, JsonObject>(""));
         }
     }
-
+    @Override
+    public  void windUpOrders(List<Integer> ids, Handler<Either<String, JsonObject>> handler){
+        JsonObject statement = getUpdateStatusStatement(ids, "DONE");
+        sql.prepared(statement.getString("statement"),
+                statement.getArray("values"),
+                SqlResult.validUniqueResultHandler(handler));
+    }
     private JsonObject getOptionsOrderDeletion (Integer idOrder){
         String queryDeleteOptionsOrder = "DELETE FROM " + Lystore.lystoreSchema + ".order_client_options"
                 + " WHERE id_order_client_equipment = ? ;";
@@ -169,12 +175,11 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                     try {
                         final String numberOrder = event.right().getValue().getString("numberorder");
                         JsonArray statements = new JsonArray()
-                                .add(getUpdateStatusStatement(ids, numberOrder, "VALID"))
+                                .add(getValidateStatusStatement(ids, numberOrder, "VALID"))
                                 .add(getAgentInformation( ids));
                         sql.transaction(statements, new Handler<Message<JsonObject>>() {
                             @Override
                             public void handle(Message<JsonObject> jsonObjectMessage) {
-                                try{
                                 final JsonArray rows = ((JsonObject) ((JsonObjectMessage) jsonObjectMessage).body()
                                         .getArray("results").get(1)).getArray("results");
                                 JsonArray names = new JsonArray();
@@ -199,10 +204,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                                                         (JsonArray) stringJsonArrayEither.right().getValue(), handler);
                                             }
                                         });
-                            }catch(ClassCastException e) {
-                                    LOGGER.error("An error occurred when casting sql rows", e);
-                                    handler.handle(new Either.Left<String, JsonObject>(""));
-                                }
                             }
                         });
                     } catch (ClassCastException e) {
@@ -235,7 +236,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 .putArray("values", params)
                 .putString("action", "prepared");
     }
-    private static JsonObject getUpdateStatusStatement(List<Integer>  ids, String numberOrder, String status){
+    private static JsonObject getValidateStatusStatement(List<Integer>  ids, String numberOrder, String status){
 
         String query = "UPDATE lystore.order_client_equipment " +
                 " SET  status = ?, number_validation = ?  " +
@@ -250,7 +251,21 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 .putArray("values", params)
                 .putString("action", "prepared");
     }
+    private static JsonObject getUpdateStatusStatement(List<Integer>  ids, String status){
 
+        String query = "UPDATE lystore.order_client_equipment " +
+                " SET  status = ? " +
+                " WHERE id in "+ Sql.listPrepared(ids.toArray()) +" ;  ";
+        JsonArray params = new JsonArray().addString(status);
+
+        for (Integer id : ids) {
+            params.addNumber( id);
+        }
+        return new JsonObject()
+                .putString("statement", query)
+                .putArray("values", params)
+                .putString("action", "prepared");
+    }
 
     private static String getReturningQueryOfDeleteOrder(){
         return  "( SELECT row_to_json(row(p.amount, count(o.id ) )) " +

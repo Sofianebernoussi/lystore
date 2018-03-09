@@ -33,7 +33,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
     };
 
     $scope.displayLightboxDelete = (orderEquipment: OrderClient) => {
-        template.open('orderEquipment.delete', 'customer/campaign/order/delete-confirmation');
+        template.open('orderClient.delete', 'customer/campaign/order/delete-confirmation');
         $scope.orderEquipmentToDelete = orderEquipment;
         $scope.display.lightbox.deleteOrderClient = true;
         Utils.safeApply($scope);
@@ -41,7 +41,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
     $scope.cancelOrderEquipmentDelete = () => {
         delete $scope.orderEquipmentToDelete;
         $scope.display.lightbox.deleteOrderEquipement = false;
-        template.close('orderEquipment.delete');
+        template.close('orderClient.delete');
         Utils.safeApply($scope);
     };
 
@@ -53,7 +53,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             $scope.notifications.push(new Notification('lystore.orderEquipment.delete.confirm', 'confirm'));
         }
         $scope.cancelOrderEquipmentDelete();
-        await $scope.ordersEquipments.sync($routeParams.idCampaign, $scope.current.structure.id );
+        await $scope.ordersClient.sync($routeParams.idCampaign, $scope.current.structure.id );
         Utils.safeApply($scope);
     };
 

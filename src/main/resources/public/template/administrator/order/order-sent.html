@@ -1,5 +1,5 @@
-<div ng-controller="orderController">
-    <h1><i18n>lystore.order.valided.title</i18n></h1>
+<div ng-controller="orderController" class="order-client-sent">
+    <h1><i18n>lystore.order.management</i18n></h1>
     <div class="row">
         <div class="cell flex-row horizontal-spacing search-pagination six">
             <div class="row twelve vertical-spacing">
@@ -35,15 +35,15 @@
                         <span></span>
                     </label>
                 </td>
-                <td ng-click="sort.order.type = 'name_structure'";
+                <td ng-click="sort.order.type = 'name_structure';
                     sort.order.reverse = !sort.order.reverse">
                     <i18n>Structure</i18n>
                     <i class="up-open" ng-show="sort.order.type === 'name_structure' && !sort.order.reverse"></i>
                     <i class="down-open" ng-show="sort.order.type === 'name_structure' && sort.order.reverse"></i>
                 </td>
-                <td ng-click="sort.order.type = 'number_validation'";
+                <td ng-click="sort.order.type = 'number_validation';
                     sort.order.reverse = !sort.order.reverse">
-                <i18n>number.validation</i18n>
+                    <i18n>number.validation</i18n>
                     <i class="up-open" ng-show="sort.order.type === 'number_validation' && !sort.order.reverse"></i>
                     <i class="down-open" ng-show="sort.order.type === 'number_validation' && sort.order.reverse"></i>
                 </td>
@@ -74,7 +74,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="order in ordersClient.all  |ordersClientFilter:'VALID':search.filterWords
+            <tr ng-repeat="order in ordersClient.all  |ordersClientFilter:'SENT':search.filterWords
              | orderBy:sort.order.type:sort.order.reverse">
                 <td workflow="lystore.administrator">
                     <label class="checkbox">
@@ -82,21 +82,23 @@
                         <span></span>
                     </label>
                 </td>
-                <td>[[order.name_structure]]</td>
-                <td>[[order.number_validation]]</td>
-                <td>[[order.contract.name]]</td>
-                <td>[[order.supplier.name]]</td>
+                <td >[[order.name_structure]]</td>
+                <td >[[order.number_validation]]</td>
+                <td >
+                    [[order.contract.name]]
+                </td>
+                <td> [[order.supplier.name]]</td>
                 <td>[[order.amount ]]</td>
                 <td><span ng-bind="order.calculatePriceTTC(2) * order.amount | currency"></span></td>
             </tr>
             </tbody>
         </table>
     </article>
-    <section class="toggle-buttons" ng-class="{ hide:ordersClient.selected.length === 0 }">
+    <section class="toggle-buttons" ng-class="{ hide: ordersClient.selected.length === 0 }">
         <div class="toggle">
             <div class="row">
-                <button ng-click="generateBC(ordersClient.selected)">
-                    <i18n>lystore.order.valided.generateBC</i18n>
+                <button ng-click="windUpOrders(ordersClient.selected)">
+                    <i18n>windUp</i18n>
                 </button>
             </div>
         </div>

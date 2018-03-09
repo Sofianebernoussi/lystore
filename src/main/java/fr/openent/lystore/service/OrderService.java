@@ -54,4 +54,11 @@ public interface OrderService {
      */
     void deleteOrder( Integer idOrder, JsonObject order, String idstructure,
                       Handler<Either<String,JsonObject>> handler);
+
+    /**
+     * Wind up orders
+     * @param ids
+     * @param handler
+     */
+    void windUpOrders(List<Integer> ids, Handler<Either<String, JsonObject>> handler);
 }

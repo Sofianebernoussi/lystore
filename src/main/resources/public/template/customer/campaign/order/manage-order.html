@@ -1,5 +1,5 @@
 <div ng-controller="orderPersonnelController">
-    <div ng-show="ordersEquipments.all.length > 0">
+    <div ng-show="ordersClient.all.length > 0">
         <h1>
             <i18n>lystore.orderEquipment.manage.title</i18n>
             <button class="right-magnet" ng-click="exportCSV()"><i18n>lystore.orderEquipment.manage.exportCSV</i18n></button>
@@ -40,11 +40,11 @@
                     <li><i class="validated-status"></i></li>
                 </ul>
                 <div class="row">
-                    <input ng-show = "orderClient.status === 'WAITING'" type="button" ng-click="displayLightboxDelete(orderEquipment)"
+                    <input ng-show = "orderClient.status === 'WAITING'" type="button" ng-click="displayLightboxDelete(orderClient)"
                            class = "right-magnet cancel vertical-spacing" i18n-value="delete"/>
                 </div>
             </div>
-            <div ng-show="orderClient.options.length > 0 && display.orderClientOption[$index]">
+            <div ng-show="orderClient.options.length > 0 && display.orderClientOptionOption[$index]">
                 <table class="centered ten vertical-spacing option-table">
                     <thead>
                     <tr>
@@ -67,7 +67,7 @@
     <article ng-show = "ordersEquipments.all.length === 0 " class="centered-text row">
         <p><i18n>lystore.orderEquipment.manage.empty.order</i18n></p>
     </article>
-    <lightbox show="display.lightbox.deleteOrderEquipement" on-close="cancelOrderEquipmentDelete()">
+    <lightbox show="display.lightbox.deleteOrder" on-close="cancelOrderEquipmentDelete()">
         <container template="orderEquipment.delete"></container>
     </lightbox>
 </div>

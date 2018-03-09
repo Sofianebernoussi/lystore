@@ -14,7 +14,7 @@ export class OrderClient implements Selectable {
     image: string;
     creation_date: Date;
     status: string;
-
+    number_validation: string;
 
     options: OrderOptionClient[];
     technical_spec: TechnicalSpec[];
@@ -26,7 +26,6 @@ export class OrderClient implements Selectable {
     id_contract: number;
     id_campaign: number;
     id_structure: string;
-    number_validation: string;
     selected: boolean;
 
     constructor() {}
@@ -95,7 +94,7 @@ export class OrdersClient extends Selection<OrderClient> {
 
     initNameStructure (idStructure: string, structures: Structure[]) {
         let structure = _.findWhere(structures, { id : idStructure});
-        return  structure ? structure.name : '' ;
+        return  structure ? structure.uai + '-' + structure.name : '' ;
     }
     calculTotalAmount () {
         let total = 0;

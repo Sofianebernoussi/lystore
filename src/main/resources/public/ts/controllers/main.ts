@@ -179,11 +179,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             orderClientWaiting : async () => {
-                $scope.structures = new Structures();
-                await $scope.structures.sync();
-                await $scope.ordersClient.sync($scope.structures.all);
-                $scope.ordersClient.all = _.where($scope.ordersClient.all, {status: 'WAITING'});
+               $scope.initOrders('WAITING');
                 template.open('administrator-main', 'administrator/order/manage-order');
+                Utils.safeApply($scope);
+            },
+            orderClientValided : async () => {
+                $scope.initOrders('VALID');
+                template.open('administrator-main', 'administrator/order/order-valided');
                 Utils.safeApply($scope);
             }
         });
@@ -278,6 +280,22 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 await $scope.campaigns.sync(structure.id);
                 Utils.safeApply($scope);
             }
+        };
+        $scope.initOrders = async(status) => {
+            $scope.structures = new Structures();
+            await $scope.structures.sync();
+            await $scope.ordersClient.sync($scope.structures.all);
+           switch (status) {
+               case 'WAITING':
+                $scope.ordersClient.all = _.where($scope.ordersClient.all, {status: 'WAITING'});
+                break;
+               case 'VALID':
+                $scope.ordersClient.all = _.where($scope.ordersClient.all, {status: 'VALID'});
+                break;
+               default:
+                   $scope.notifications.push(new Notification('lystore.order.sync.err', 'warning'));
+            }
+            Utils.safeApply($scope);
         };
         $rootScope.$on('$routeChangeSuccess', ( $currentRoute, $previousRoute, $location ) => {
             if ( $location === undefined) {

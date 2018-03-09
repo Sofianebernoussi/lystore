@@ -63,8 +63,11 @@ routes.define(($routeProvider) => {
             .when('/campaigns/:idCampaign/purse', {
                 action: 'managePurse'
             })
-            .when('/order/client/waiting', {
+            .when('/order/waiting', {
                 action: 'orderClientWaiting'
+            })
+            .when('/order/valid', {
+                action: 'orderClientValided'
             });
     } else {
         $routeProvider

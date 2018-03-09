@@ -14,8 +14,8 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
     };
 
     $scope.exportCSV = () => {
-        let idCampaign = $scope.ordersEquipments.all[0].id_campaign;
-        let idStructure = $scope.ordersEquipments.all[0].id_structure;
+        let idCampaign = $scope.ordersClient.all[0].id_campaign;
+        let idStructure = $scope.ordersClient.all[0].id_structure;
         window.location = `/lystore/orders/export/${idCampaign}/${idStructure}`;
     };
 
@@ -35,7 +35,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
     $scope.displayLightboxDelete = (orderEquipment: OrderClient) => {
         template.open('orderEquipment.delete', 'customer/campaign/order/delete-confirmation');
         $scope.orderEquipmentToDelete = orderEquipment;
-        $scope.display.lightbox.deleteOrderEquipement = true;
+        $scope.display.lightbox.deleteOrderClient = true;
         Utils.safeApply($scope);
     };
     $scope.cancelOrderEquipmentDelete = () => {

@@ -162,7 +162,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 let idCampaign = params.idCampaign;
                 $scope.idIsInteger(idCampaign);
                 $scope.current.structure
-                    ? await $scope.ordersClient.sync(idCampaign, $scope.current.structure.id )
+                    ? await $scope.ordersClient.sync([], idCampaign, $scope.current.structure.id )
                     : null;
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/order/manage-order');

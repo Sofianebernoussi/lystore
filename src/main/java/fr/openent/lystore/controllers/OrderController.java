@@ -74,6 +74,7 @@ public class OrderController extends ControllerHelper {
 
     @Get("/orders")
     @ApiDoc("Get the list of orders")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void listOrders (HttpServerRequest request){
         orderService.listOrder(arrayResponseHandler(request));

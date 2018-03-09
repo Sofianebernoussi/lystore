@@ -15,8 +15,8 @@
                     <h4>[[orderClient.name]]</h4>
                     <p>[[orderClient.summary]]</p>
                     <div>
-                        <a ng-init="display.orderClientOption[$index] = false" ng-click="displayEquipmentOption($index)" ng-show="orderClient.options.length > 0">
-                            [[lang.translate(display.orderClientOption[$index] ? 'lystore.options.hide' : 'lystore.options.show')]]
+                        <a ng-init="display.ordersClientOption[$index] = false" ng-click="displayEquipmentOption($index)" ng-show="orderClient.options.length > 0">
+                            [[lang.translate(display.ordersClientOption[$index] ? 'lystore.options.hide' : 'lystore.options.show')]]
                         </a>
                     </div>
                 </div>
@@ -44,7 +44,7 @@
                            class = "right-magnet cancel vertical-spacing" i18n-value="delete"/>
                 </div>
             </div>
-            <div ng-show="orderClient.options.length > 0 && display.orderClientOptionOption[$index]">
+            <div ng-show="orderClient.options.length > 0 && display.ordersClientOption[$index]">
                 <table class="centered ten vertical-spacing option-table">
                     <thead>
                     <tr>

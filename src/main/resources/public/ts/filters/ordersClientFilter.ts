@@ -41,7 +41,7 @@ export const ordersClientFilter = ng.filter('ordersClientFilter', () => {
                 }
             }
         };
-        return table.length > 0
+        return table && table.length > 0
             ? _.without(inputs.map((input) => {
                 if (input === undefined || filter(input, status, table)) return input ;
             }), undefined )

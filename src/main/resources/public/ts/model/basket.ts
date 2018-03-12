@@ -88,6 +88,7 @@ export class Baskets extends Selection<Basket> {
                     basket.options = Mix.castArrayAs(EquipmentOption, JSON.parse(basket.options.toString()))
                     : basket.options = [];
                 basket.equipment.options = basket.options;
+                basket.equipment.options.map((option) => option.selected = true);
             });
         } catch (e) {
             notify.error('lystore.basket.sync.err');

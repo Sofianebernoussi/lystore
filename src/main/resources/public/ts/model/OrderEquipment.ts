@@ -40,6 +40,7 @@ constructor() {}
                 order.options.toString() !== '[null]' && order.options !== null ?
                     order.options = Mix.castArrayAs( OrderOptionEquipment, JSON.parse(order.options.toString()))
                     : order.options = [];
+                order.options.map((option) => option.selected = true);
             });
         } catch (e) {
             notify.error('lystore.order.sync.err');

@@ -16,7 +16,13 @@
                 <div class="six cell">
                     <div class="centered-text quantity">
                         <h4 class="cell"><i18n>lystore.quantity</i18n></h4>
-                        <i class="moins" ng-click="amountDecrease()"></i> <input type="number" step="10" min="0" ng-model="basket.amount"  class="three "/> <i class="plus" ng-click="amountIncrease()"></i>
+                        <i class="moins" ng-click="amountDecrease()"></i>
+                        <input type="number"
+                               step="1"
+                               min="0"
+                               ng-keypress="avoidDecimals($event)"
+                               ng-model="basket.amount" class="three"/>
+                        <i class="plus" ng-click="amountIncrease()"></i>
                     </div>
                     <div class="centered-text row"><input type="button"  ng-click="addBasketItem(basket)" i18n-value="lystore.add.to.basket" ng-disabled="!validArticle(basket.equipment)" /> </div>
                 </div>

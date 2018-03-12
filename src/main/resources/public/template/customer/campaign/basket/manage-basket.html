@@ -39,6 +39,7 @@
                     <div class="four cell basket-amount">
                         <div class="right-magnet">
                             <input type="number" step="1" min="0" ng-model="basket.amount"
+                                   ng-keypress="avoidDecimals($event)"
                                    ng-blur="updateBasketAmount(basket)"/>
                             <p ng-bind="calculatePriceOfBasket(basket , 2, true) | currency"></p>
                         </div>

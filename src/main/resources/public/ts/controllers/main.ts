@@ -273,6 +273,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             }
             $scope.current.structure = $scope.structures[0];
         };
+
+        $scope.avoidDecimals = (event) => {
+            return event.charCode >= 48 && event.charCode <= 57;
+        };
+
         $scope.notifyBasket = (action: String, basket: Basket) => {
             let messageForOne =  basket.amount + ' ' + lang.translate('article') + ' "'
                 + basket.equipment.name  + '" ' + lang.translate('lystore.basket.' + action + '.article');

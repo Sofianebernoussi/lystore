@@ -24,7 +24,7 @@ export const basketController = ng.controller('basketController',
             return (!isNaN(totalPrice)) ? (roundNumber ? totalPrice.toFixed(roundNumber) : totalPrice ) : '';
         };
         $scope.calculatePriceOfBasket = (basket: Basket, roundNumber?: number,  toDisplay?: boolean ) => {
-            let equipmentPrice =  $scope.calculatePriceOfEquipment(basket.equipment, false, roundNumber);
+            let equipmentPrice =  $scope.calculatePriceOfEquipment(basket.equipment, true, roundNumber);
             equipmentPrice = basket.amount === 0 && toDisplay  ? equipmentPrice : equipmentPrice * basket.amount;
             return (!isNaN(equipmentPrice)) ? (roundNumber ? equipmentPrice.toFixed(roundNumber) : equipmentPrice ) : '';
         };

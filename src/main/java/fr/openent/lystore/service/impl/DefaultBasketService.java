@@ -135,8 +135,8 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 " nextval('lystore.order_client_equipment_id_seq' ) as id_order, " +
                 "Case Count(ep) " +
                 "when 0 " +
-                "then ROUND(e.price + ((e.price *  e.tax_amount) /100) , 3 )  " +
-                "else ROUND(e.price + ((e.price *  e.tax_amount) /100) + SUM(ep.total_option_price)  , 3 ) " +
+                "then ROUND((e.price + ((e.price *  e.tax_amount) /100)) * basket.amount , 3 )  " +
+                "else ROUND((e.price + ((e.price *  e.tax_amount) /100) + SUM(ep.total_option_price)) * basket.amount  , 3 ) " +
                 "END as total_price, array_to_json(array_agg(DISTINCT ep.*)) as options  " +
                 "FROM  lystore.basket_equipment basket  " +
                 "LEFT JOIN lystore.basket_option ON basket_option.id_basket_equipment = basket.id " +

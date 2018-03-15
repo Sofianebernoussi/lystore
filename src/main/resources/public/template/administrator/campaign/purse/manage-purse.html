@@ -1,13 +1,13 @@
 <div ng-controller="PurseController" class="purse-management">
 
-    <div class="tools right-magnet">
-        <button ng-click="openPurseImporter()"><i18n>lystore.campaign.purse.import</i18n></button>
-        <button ng-click="exportPurses(campaign.id)"><i18n>lystore.campaign.purse.export</i18n></button>
+    <div class="tools right-magnet eleven-mobile">
+        <button class="five-mobile" ng-click="openPurseImporter()"><i18n>lystore.campaign.purse.import</i18n></button>
+        <button class="five-mobile" ng-click="exportPurses(campaign.id)"><i18n>lystore.campaign.purse.export</i18n></button>
     </div>
 
     <div class="six centered twelve-mobile">
         <h1 class="centered-text">[[campaign.name]]</h1>
-        <article>
+        <article class="responsive-table">
             <table class="twelve">
                 <thead>
                     <td workflow="lystore.administrator">

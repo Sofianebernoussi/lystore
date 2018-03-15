@@ -1,5 +1,20 @@
+<nav class="vertical twelve-mobile mobile-navigation" side-nav>
+    <ul>
+        <li><a href="#/order/waiting"><i18n>lystore.orders.validations.waiting</i18n></a></li>
+        <li><a href="#/order/valid"><i18n>lystore.order.form.generate</i18n></a></li>
+        <li><a href="#/order/sent"><i18n>lystore.end.expedited.requests</i18n></a></li>
+        <li><a href="#/tags"><i18n>lystore.tag.management</i18n></a></li>
+        <li><a href="#/equipments"><i18n>lystore.catalog.management</i18n></a></li>
+        <li><a href="#/campaigns"><i18n>lystore.manage.campaigns</i18n></a></li>
+        <li><a href="#/structureGroups"><i18n>lystore.structureGroups.management</i18n></a></li>
+        <li><a href="#/suppliers"><i18n>lystore.suppliers.management</i18n></a></li>
+        <li><a href="#/contracts"><i18n>lystore.contracts.management</i18n></a></li>
+        <li><a href="#/agents"><i18n>lystore.agents.management</i18n></a></li>
+        <li workflow="lystore.administrator"><a href="#/logs"><i18n>lystore.logs</i18n></a></li>
+    </ul>
+</nav>
 
-<div class="twelve tabs vertical-spacing heading-tabs">
+<div class="twelve tabs vertical-spacing heading-tabs zero-mobile">
     <header class="horizontal-spacing">
         <drop-down-menu title="[[lang.translate('lystore.orders')]]">
             <opt ng-click="redirectTo('/order/waiting')"><i18n>lystore.orders.validations.waiting</i18n></opt>

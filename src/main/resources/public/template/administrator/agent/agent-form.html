@@ -1,29 +1,29 @@
 <h2><i18n ng-show="agent.id == undefined">lystore.agent.add</i18n><i18n ng-show="agent.id !== undefined">lystore.agent.modify</i18n></h2>
 <form ng-submit="validAgent(agent)">
     <div class="row">
-        <label class="cell twelve">
-                    <span class="four cell">
-                        <i18n>lystore.agent.name</i18n>
-                    </span>
-            <input class="cell eight" type="text" ng-model="agent.name" required />
+        <label class="cell twelve ">
+            <span class="four cell twelve-mobile">
+                <i18n>lystore.agent.name</i18n>
+            </span>
+            <input class="cell eight twelve-mobile" type="text" ng-model="agent.name" required />
         </label>
         <label class="cell twelve">
-                    <span class="four cell">
-                        <i18n>department</i18n>
-                    </span>
-            <input class="cell eight" type="text" ng-model="agent.department" required />
+            <span class="four cell twelve-mobile">
+                <i18n>department</i18n>
+            </span>
+            <input class="cell eight twelve-mobile" type="text" ng-model="agent.department" required />
         </label>
         <label class="cell twelve">
-                    <span class="four cell">
-                        <i18n>phone</i18n>
-                    </span>
-            <input class="cell eight" type="text" ng-model="agent.phone" required />
+            <span class="four cell twelve-mobile">
+                <i18n>phone</i18n>
+            </span>
+            <input class="cell eight twelve-mobile" type="text" ng-model="agent.phone" required />
         </label>
         <label class="cell twelve">
-                    <span class="four cell">
-                        <i18n>email</i18n>
-                    </span>
-            <input type="email" class="cell eight" ng-model="agent.email" required />
+            <span class="four cell twelve-mobile">
+                <i18n>email</i18n>
+            </span>
+            <input type="email" class="cell eight twelve-mobile" ng-model="agent.email" required />
         </label>
     </div>
     <div class="right-magnet">

@@ -1,0 +1,38 @@
+@media screen and (max-width: $tablette) {
+  .mobile-navigation {
+    display: block !important;
+  }
+
+  .responsive-table {
+    table {
+      td {
+        text-align: center !important;
+      }
+
+      tfoot {
+        display: block;
+      }
+    }
+  }
+
+  .agent-management,
+  .supplier-management,
+  .contract-management,
+  .tag-management,
+  .equipment-management,
+  .log-view,
+  .purse-management{
+
+    table {
+      thead td {
+        label.checkbox {
+          position: relative !important;
+        }
+      }
+    }
+
+    .color-tag {
+      margin: 0 auto;
+    }
+  }
+}

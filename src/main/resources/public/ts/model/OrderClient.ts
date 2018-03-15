@@ -85,7 +85,7 @@ export class OrdersClient extends Selection<OrderClient> {
                     order.options.toString() !== '[null]' && order.options !== null ?
                         order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
                         : order.options = [];
-                    order.creation_date = moment(order.creation_date, 'YYYY-MM-DD').format('l');
+                    order.creation_date = moment(order.creation_date, 'YYYY-MM-DD').format('YYY-MM-DD');
                     order.name_structure =  structures.length > 0 ? this.initNameStructure(order.id_structure, structures) : '';
                 });
             }

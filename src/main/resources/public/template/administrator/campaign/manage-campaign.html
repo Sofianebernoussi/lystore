@@ -1,6 +1,7 @@
 
 <div workflow="lystore.administrator">
-    <input type="button"  ng-click="openCampaignForm()" class="right-magnet" i18n-value="lystore.campaigns.add"/>
+    <input type="button" ng-click="openCampaignForm()" class="right-magnet twelve-mobile"
+           i18n-value="lystore.campaigns.add"/>
 </div>
 <div class="twelve cell manage-campaign campaign-list"  workflow="lystore.manager">
     <article class="twelve cell " ng-repeat="campaign in campaigns.all track by $index ">
@@ -11,25 +12,24 @@
                     <span></span>
                 </label>
             </div>
-            <div class="two cell campaign-image">
+            <div class="two cell campaign-image zero-mobile">
                 <img ng-src="[[campaign.image]]" ng-show="campaign.image!==null && campaign.image!==undefined " />
                 <img skin-src="/img/illustrations/pages-default.png" ng-show="campaign.image===null || campaign.image===undefined "/>
             </div>
-            <div class="three cell">
+            <div class="three cell twelve-mobile">
                 <h3>[[campaign.name]]</h3>
                 <p ng-bind-html="campaign.description"></p>
-                <p>
-                    <div class="small-text"><i18n>lystore.campaign.amount</i18n> : [[campaign.purse_amount || 0]] <i18n>money.symbol</i18n></div>
-                    <div class="small-text">[[campaign.nb_structures]] <i18n>structures</i18n></div>
-                    <div class="small-text">[[campaign.nb_equipments]] <i18n>lystore.equipments.available</i18n></div>
-                </p>
-                <button ng-click="redirectTo('/campaigns/' + campaign.id + '/purse')"><i18n>lystore.campaign.purse.manage</i18n></button>
+                <div class="small-text"><i18n>lystore.campaign.amount</i18n> : [[campaign.purse_amount || 0]] <i18n>money.symbol</i18n></div>
+                <div class="small-text">[[campaign.nb_structures]] <i18n>structures</i18n></div>
+                <div class="small-text">[[campaign.nb_equipments]] <i18n>lystore.equipments.available</i18n></div>
+                <button class="vertical-spacing twelve-mobile"
+                        ng-click="redirectTo('/campaigns/' + campaign.id + '/purse')"><i18n>lystore.campaign.purse.manage</i18n></button>
             </div>
-            <div class=" cell ">
-                <ul class="order-info-campaign status-bar cell row">
-                    <li  tooltip="[[lang.translate('lystore.order.waiting')]]"><i class="validated-status"></i><span>[[campaign.nb_orders_sent]]</span></li>
-                    <li  tooltip="[[lang.translate('lystore.order.valid')]]"><i class="validated-status"></i><span>[[campaign.nb_orders_valid]]</span></li>
-                    <li  tooltip="[[lang.translate('lystore.order.sent')]]"><i class="validated-status"></i><span>[[campaign.nb_orders_waiting]]</span></li>
+            <div class="twelve-mobile row-mobile cell">
+                <ul class="colored status-bar cell row">
+                    <li tooltip="[[lang.translate('lystore.order.waiting')]]"><i class="validated-status"></i><span>[[campaign.nb_orders_sent]]</span></li>
+                    <li tooltip="[[lang.translate('lystore.order.valid')]]"><i class="validated-status"></i><span>[[campaign.nb_orders_valid]]</span></li>
+                    <li tooltip="[[lang.translate('lystore.order.sent')]]"><i class="validated-status"></i><span>[[campaign.nb_orders_waiting]]</span></li>
                 </ul>
             </div>
 

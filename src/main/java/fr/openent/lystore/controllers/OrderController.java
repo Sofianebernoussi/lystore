@@ -180,6 +180,7 @@ public class OrderController extends ControllerHelper {
 
     @Put("/orders/valid")
     @ApiDoc("validate orders ")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void validateOrders (final HttpServerRequest request){
         RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {

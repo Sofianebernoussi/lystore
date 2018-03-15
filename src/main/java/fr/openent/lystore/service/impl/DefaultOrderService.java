@@ -112,10 +112,10 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "oe.creation_date as equipment_creation_date, oe.summary as equipment_summary, " +
                 "oe.status as equipment_status,cause_status, price_all_options, CASE count(price_all_options) " +
                 "WHEN 0 THEN ROUND ((oe.price+( oe.tax_amount*oe.price)/100)*oe.amount,2) "+
-                "ELSE ROUND(price_all_options +(oe.price+(oe.tax_amount*oe.price)/100)*oe.amount,2)" +
+                "ELSE ROUND((price_all_options +( oe.price + ROUND((oe.tax_amount*oe.price)/100,2)))*oe.amount,2)" +
                 " END as price_total_equipment "+
                 "FROM "+ Lystore.lystoreSchema + ".order_client_equipment  oe " +
-                "LEFT JOIN (SELECT SUM(( price +( tax_amount*price)/100)*amount) as price_all_options," +
+                "LEFT JOIN (SELECT ROUND (SUM(( price +( tax_amount*price)/100)*amount),2) as price_all_options," +
                 " id_order_client_equipment FROM "+ Lystore.lystoreSchema + ".order_client_options " +
                 "GROUP BY id_order_client_equipment)" +
                 " opts ON oe.id = opts.id_order_client_equipment WHERE id_campaign = ? AND id_structure = ?" +

@@ -132,7 +132,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 " id_campaign, id_structure," +
                 " CASE count(opts) " +
                 "WHEN 0 THEN ROUND ((oe.price+( oe.tax_amount*oe.price)/100)*oe.amount,2) "+
-                "ELSE ROUND(price_all_options +(oe.price+(oe.tax_amount*oe.price)/100)*oe.amount,2) " +
+                "ELSE ROUND((price_all_options +( oe.price + ROUND((oe.tax_amount*oe.price)/100,2)))*oe.amount,2) " +
                 "END as price_total_equipment "+
                 "FROM "+ Lystore.lystoreSchema + ".order_client_equipment  oe " +
                 "LEFT JOIN (SELECT SUM(( price +( tax_amount*price)/100)*amount) as price_all_options," +
@@ -154,8 +154,9 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
             JsonArray statements = new JsonArray();
             statements.add(purseService.updatePurseAmountStatement(price, idCampaign, idStructure,"+"));
             statements.addObject(getOptionsOrderDeletion(idOrder));
+            statements.addObject(getEquipmentOrderDeletion(idOrder));
+            statements.addObject(getNewPurseAndNbOrder(idCampaign,idStructure));
 
-            statements.addObject(getEquipmentOrderDeletion(idOrder, idCampaign, idStructure));
 
             sql.transaction(statements, new Handler<Message<JsonObject>>() {
                 @Override
@@ -370,20 +371,40 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         }
         return  new JsonObject().putArray("order",result).putArray ("id_structures",idStructures);
     }
-    private JsonObject getEquipmentOrderDeletion (Integer idOrder,Integer idCampaign, String idStructure){
+    private JsonObject getEquipmentOrderDeletion (Integer idOrder){
         String queryDeleteEquipmentOrder = "DELETE FROM " + Lystore.lystoreSchema + ".order_client_equipment"
-                + " WHERE id = ?  RETURNING " + getReturningQueryOfDeleteOrder();
+                + " WHERE id = ? ";
 
         JsonArray params = new JsonArray()
-                .addNumber(idOrder)
-                .addNumber(idCampaign).addString(idStructure)
-                .addNumber(idCampaign).addString(idStructure);
+                .addNumber(idOrder);
 
         return new JsonObject()
                 .putString("statement", queryDeleteEquipmentOrder)
                 .putArray("values", params)
                 .putString("action", "prepared");
     }
+    private  JsonObject getNewPurseAndNbOrder(Integer idCampaign, String idStructure){
+        String query = "( SELECT row_to_json(row(p.amount, count(o.id ) )) " +
+                " FROM " + Lystore.lystoreSchema + ".purse p, " + Lystore.lystoreSchema + ".order_client_equipment o " +
+                " where p.id_campaign = ? " +
+                " AND p.id_structure = ? " +
+                " AND  o.id_campaign = ? " +
+                " AND o.id_structure = ? " +
+                " GROUP BY(p.amount) )";
+
+        JsonArray params = new JsonArray()
+                .addNumber(idCampaign).addString(idStructure)
+                .addNumber(idCampaign).addString(idStructure);
+
+        return  new JsonObject()
+                .putString("statement",query)
+                .putArray("values",params)
+                .putString("action", "prepared");
+
+
+
+    }
+
     @Override
     public void validateOrders(final HttpServerRequest request,final UserInfos user, final List<Integer> ids,
                                final String url, final Handler<Either<String, JsonObject>> handler){
@@ -487,15 +508,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 .putString("action", "prepared");
     }
 
-    private static String getReturningQueryOfDeleteOrder(){
-        return  "( SELECT row_to_json(row(p.amount, count(o.id ) )) " +
-                " FROM " + Lystore.lystoreSchema + ".purse p, " + Lystore.lystoreSchema + ".order_client_equipment o " +
-                " where p.id_campaign = ? " +
-                " AND p.id_structure = ? " +
-                " AND  o.id_campaign = ? " +
-                " AND o.id_structure = ? " +
-                " GROUP BY(p.amount) )";
-    }
+
     private static void getTransactionHandler( Message<JsonObject> event, JsonObject amountPurseNbOrder,
                                                Handler<Either<String, JsonObject>> handler){
         JsonObject result = event.body();

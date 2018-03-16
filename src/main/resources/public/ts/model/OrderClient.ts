@@ -39,9 +39,9 @@ export class OrderClient implements Selectable {
         return (!isNaN(price)) ? (roundNumber ? price.toFixed(roundNumber) : price ) : price ;
     }
 
-    async delete (idStructure: number) {
+    async delete () {
         try {
-            return await http.delete(`/lystore/order/${this.id}/${idStructure}`);
+            return await http.delete(`/lystore/order/${this.id}/${this.id_structure}`);
         } catch (e) {
             notify.error('lystore.order.delete.err');
         }

@@ -46,7 +46,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
     };
 
     $scope.deleteOrderEquipment = async (orderEquipmentToDelete: OrderClient) => {
-        let { status, data } = await orderEquipmentToDelete.delete($scope.current.structure.id);
+        let { status, data } = await orderEquipmentToDelete.delete();
         if (status === 200) {
             $scope.campaign.nb_order = data.nb_order;
             $scope.campaign.purse_amount = data.amount;

@@ -1,7 +1,7 @@
 <div class="twelve-mobile ten centered row" ng-controller="campaignsListController">
     <div class="row" ng-if="structures.length > 1">
         <h4 class="right-magnet"><i18n>multi-structures.choice</i18n> :
-            <select ng-model="current.structure"
+            <select ng-model="current.structure" class="twelve-mobile"
                     ng-change="initCampaign(current.structure)"
                     ng-init="current.structure =
                 (current.structure === undefined
@@ -15,11 +15,11 @@
                  ng-class="{disabled : !campaign.accessible}"
                  ng-repeat="campaign in campaigns.all track by $index"
                  ng-click="openCampaign(campaign)" >
-            <div class="two cell campaign-image">
+            <div class="two cell campaign-image four-mobile">
                 <img ng-src="[[campaign.image]]" ng-show="campaign.image!==null && campaign.image!==undefined " />
                 <img skin-src="/img/illustrations/pages-default.png" ng-show="campaign.image===null || campaign.image===undefined "/>
             </div>
-            <div class="ten cell" >
+            <div class="ten cell eight-mobile" >
                 <h3>[[campaign.name]]</h3>
                 <div ng-if="campaign.accessible">
                     <p ng-bind-html="campaign.description" class="small-text"></p>

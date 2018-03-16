@@ -177,6 +177,8 @@
   "Validate":"Valider",
   "ORDER": "Commande",
   "STRUCTUREGROUP": "Regroupement d'établissements",
+  "home": "Accueil",
+  "back.to.catalog": "Retour au catalogue",
   "show.file": "Voir le fichier",
   "lystore.log.purse.import": "Import des cagnottes du",
   "lystore.log.purse.import.file": "Fichier importé",

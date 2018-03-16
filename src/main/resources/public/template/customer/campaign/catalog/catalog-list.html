@@ -1,9 +1,14 @@
 <div ng-controller="catalogController" class="catalog">
-    <div class="cell flex-row horizontal-spacing search-pagination three ">
-        <div class="row twelve vertical-spacing">
+    <div class="cell twelve-mobile horizontal-spacing search-pagination four vertical-spacing-twice">
+        <a ng-show="display.equipment" class="zero block-mobile"
+            href="#/campaign/[[campaign.id]]/catalog">
+            <i class="angle-double-left horizontal-spacing"></i>
+            <i18n>back.to.catalog</i18n>
+        </a>
+        <div class="row twelve vertical-spacing" ng-show="!display.equipment">
             <input  class="row"
                     type="text"
-                    ng-model="search.filterWrod "
+                    ng-model="search.filterWrod"
                     ng-change="filterByTag(search.filterWrod)"
                     ng-keydown="addFilter(search.filterWrod, $event)"
                     i18n-placeholder="add.a.filter" />
@@ -21,7 +26,7 @@
     </div>
     <div class="cell catalog-list" ng-class="{twelve: !display.equipment, 'border-list': display.equipment}">
         <div class="dominos item_hover_accent_list">
-            <div class="item" ng-class="{
+            <div class="item six-mobile" ng-class="{
                     disabled: equipment.status!== 'AVAILABLE',
                     'list-item': display.equipment
                  }"

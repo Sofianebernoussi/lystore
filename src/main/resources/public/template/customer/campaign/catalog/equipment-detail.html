@@ -1,15 +1,15 @@
 <div class="card cell left-detail-box" ng-show="display.equipment">
     <h1 class="row">[[basket.equipment.name]] </h1>
     <div class="twelve cell">
-        <div class="four cell">
+        <div class="four cell twelve-mobile">
             <img class="img-equipment" ng-src="[[basket.equipment.image]]" ng-show="basket.equipment.image!==null && basket.equipment.image!==undefined " />
             <img class="img-equipment" skin-src="/img/illustrations/pages-default.png" ng-show="basket.equipment.image===null || basket.equipment.image===undefined "/>
         </div>
-        <div class="eight cell" >
+        <div class="eight cell twelve-mobile" >
             <div class="summary" ng-show="basket.equipment.description !== null" >
                 <p ng-bind-html="[[basket.equipment.description]]"></p>
             </div>
-            <article class="add-basket centered row nine vertical-spacing">
+            <article class="add-basket centered row twelve vertical-spacing twelve-mobile">
                 <div class="six cell">
                     <h1 class="centered-text" ng-bind="calculatePriceOfEquipment(basket.equipment, true, 2) | currency"></h1>
                 </div>
@@ -50,7 +50,7 @@
         <h2><i18n>lystore.equipment.options</i18n></h2>
         <table class="twelve">
             <thead>
-            <td  class="one">
+            <td class="one">
                 <label class="checkbox" ng-show="thereAreOptionalOptions(basket.equipment)">
                     <input type="checkbox"
                            ng-change="switchAll(alloptionsSelected, basket.equipment.options)"

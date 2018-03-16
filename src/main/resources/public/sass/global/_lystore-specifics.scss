@@ -232,7 +232,7 @@ body.lystore {
       float: right;
       display: block;
       position: absolute;
-      width: calc(100% - 380px) !important;
+      width: calc(100% - 380px);
       .bold{
         font-weight: bold;
       }
@@ -323,8 +323,8 @@ body.lystore {
 
   .catalog-list {
     .dominos .item {
-      max-width: 300px !important;
-      width: 16% !important;
+      max-width: 300px;
+      width: 16%;
       margin: 7px 0;
 
       &.list-item {

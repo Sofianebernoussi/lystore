@@ -1,80 +1,99 @@
 <div  ng-controller="basketController">
-<div ng-show="baskets.all.length > 0">
-    <div class="vertical-spacing-twice right-magnet">
-        <h3 class="cell horizontal-margin horizontal-spacing ng-binding"><i18n>total</i18n> :
-            <span class="color-orange"ng-bind="calculatePriceOfEquipments(baskets, 2)| currency"></span>
-        </h3>
-        <input type="button"  ng-click="takeClientOrder(baskets)" i18n-value="lystore.take.order" ng-disabled="!validOrder(baskets)" />
-    </div>
-    <div class="basket-list">
-        <div ng-repeat="basket in baskets.all track by $index" class="row">
-            <h1 ng-class="{disabled: equipment.status !== 'AVAILABLE'} " ng-show="basket.equipment.status !== 'AVAILABLE'">
-                <i18n ng-show="basket.equipment.status === 'UNAVAILABLE'">lystore.UNAVAILABLE</i18n>
-                <i18n ng-show="basket.equipment.status === 'OUT_OF_STOCK'">lystore.OUT_OF_STOCK</i18n></h1>
-            <article class="basket-item twelve cell"
-                     ng-class="{ openedOptions: display.equipmentOption[$index], disabled: basket.equipment.status !== 'AVAILABLE' }">
-                <div class="row article-equipment">
-                    <div class="one cell basket-image">
-                        <img ng-src="[[basket.equipment.image]]" ng-show="basket.equipment.image!==null && basket.equipment.image!==undefined " />
-                        <img skin-src="/img/illustrations/pages-default.png" ng-show="basket.equipment.image===null || basket.equipment.image===undefined "/>
-                    </div>
-                    <div class="horizontal-spacing-twice three cell basket-equipment">
-                        <h3>[[basket.equipment.name]]</h3>
-                        <p ng-bind-html="basket.equipment.summary" ></p>
-                        <div>
-                            <a ng-init="display.equipmentOption[$index] = false" ng-click="displayOptions($index)" ng-show="basket.options.length > 0">
-                                [[lang.translate(display.equipmentOption[$index] ? 'lystore.options.hide' : 'lystore.options.show')]]
-                            </a>
+    <div ng-show="baskets.all.length > 0">
+        <div class="vertical-spacing-twice right-magnet twelve-mobile">
+            <h3 class="cell horizontal-margin horizontal-spacing ng-binding"><i18n>total</i18n> :
+                <span class="color-orange"ng-bind="calculatePriceOfEquipments(baskets, 2)| currency"></span>
+            </h3>
+            <input type="button"  ng-click="takeClientOrder(baskets)" i18n-value="lystore.take.order" ng-disabled="!validOrder(baskets)" />
+        </div>
+        <div class="basket-list">
+            <div ng-repeat="basket in baskets.all track by $index" class="row">
+                <h1 ng-class="{disabled: equipment.status !== 'AVAILABLE'} " ng-show="basket.equipment.status !== 'AVAILABLE'">
+                    <i18n ng-show="basket.equipment.status === 'UNAVAILABLE'">lystore.UNAVAILABLE</i18n>
+                    <i18n ng-show="basket.equipment.status === 'OUT_OF_STOCK'">lystore.OUT_OF_STOCK</i18n></h1>
+                <article class="basket-item twelve cell"
+                         ng-class="{ openedOptions: display.equipmentOption[$index], disabled: basket.equipment.status !== 'AVAILABLE' }">
+                    <div class="row article-equipment">
+                        <div class="one cell basket-image zero-mobile">
+                            <img ng-src="[[basket.equipment.image]]" ng-show="basket.equipment.image!==null && basket.equipment.image!==undefined " />
+                            <img skin-src="/img/illustrations/pages-default.png" ng-show="basket.equipment.image===null || basket.equipment.image===undefined "/>
                         </div>
-                    </div>
-                    <div class="four cell basket-delivery">
-                        &nbsp;
-                        <!--<h3>-->
+                        <div class="horizontal-spacing-twice three cell basket-equipment twelve-mobile">
+                            <h3>[[basket.equipment.name]]</h3>
+                            <p ng-bind-html="basket.equipment.summary" ></p>
+                            <div>
+                                <a ng-init="display.equipmentOption[$index] = false" ng-click="displayOptions($index)" ng-show="basket.options.length > 0">
+                                    [[lang.translate(display.equipmentOption[$index] ? 'lystore.options.hide' : 'lystore.options.show')]]
+                                </a>
+                            </div>
+                        </div>
+                        <div class="four cell basket-delivery twelve-mobile">
+                            &nbsp;
+                            <!--<h3>-->
                             <!--<i18n>-->
-                                <!--lystore.expected.delivery-->
+                            <!--lystore.expected.delivery-->
                             <!--</i18n>-->
-                        <!--</h3>-->
-                        <!--[[calculeDeliveryDate()]]-->
-                    </div>
-                    <div class="four cell basket-amount">
-                        <div class="right-magnet">
-                            <input type="number" step="1" min="0" ng-model="basket.amount"
-                                   ng-keypress="avoidDecimals($event)"
-                                   ng-blur="updateBasketAmount(basket)"/>
-                            <p ng-bind="calculatePriceOfBasket(basket , 2, true) | currency"></p>
+                            <!--</h3>-->
+                            <!--[[calculeDeliveryDate()]]-->
                         </div>
-                        <div class="row">
-                            <input type="button"  ng-click="displayLightboxDelete(basket)"
-                                   class="right-magnet cancel vertical-spacing" i18n-value="delete"/>
+                        <div class="four cell basket-amount zero-mobile">
+                            <div class="right-magnet">
+                                <input type="number" step="1" min="0" ng-model="basket.amount"
+                                       ng-keypress="avoidDecimals($event)"
+                                       ng-blur="updateBasketAmount(basket)"/>
+                                <p ng-bind="calculatePriceOfBasket(basket , 2, true) | currency"></p>
+                            </div>
+                            <div class="row">
+                                <input type="button"  ng-click="displayLightboxDelete(basket)"
+                                       class="right-magnet cancel vertical-spacing" i18n-value="delete"/>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div ng-show="basket.options.length > 0 && display.equipmentOption[$index]" >
-                    <table class="centered ten vertical-spacing option-table">
-                        <thead>
+                    <div ng-show="basket.options.length > 0 && display.equipmentOption[$index]" >
+                        <table class="centered ten vertical-spacing option-table">
+                            <thead>
                             <tr>
                                 <td><i18n>price</i18n></td>
                                 <td><i18n>lystore.quantity</i18n></td>
                                 <td><i18n>price</i18n></td>
                             </tr>
-                        </thead>
-                        <tbody>
-                        <tr ng-repeat="option in basket.options">
-                            <td>[[option.name]]</td>
-                            <td>[[option.amount]]</td>
-                            <td><span ng-bind="calculatePriceTTC(option.price, option.tax_amount, 2) | currency"></span></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </article></div>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="option in basket.options">
+                                <td>[[option.name]]</td>
+                                <td>[[option.amount]]</td>
+                                <td><span ng-bind="calculatePriceTTC(option.price, option.tax_amount, 2) | currency"></span></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="horizontal-spacing-twice zero block-mobile cell basket-amount twelve-mobile">
+                        <div class="twelve-mobile">
+                            <h5>
+                                <i18n>lystore.quantity</i18n> :
+                                <input type="number" step="1" min="0" ng-model="basket.amount"
+                                       ng-keypress="avoidDecimals($event)"
+                                       ng-blur="updateBasketAmount(basket)"/>
+                            </h5>
+                            <h5>
+                                <span>
+                                    <i18n>total</i18n> : <span ng-bind="calculatePriceOfBasket(basket , 2, true) | currency"></span>
+                                </span>
+                            </h5>
+                        </div>
+                        <div class="row">
+                            <input type="button"  ng-click="displayLightboxDelete(basket)"
+                                   class="right-magnet cancel vertical-spacing" i18n-value="delete"/>
+                        </div>
+                </article>
+            </div>
         </div>
     </div>
     <div ng-show="baskets.all.length === 0" class=" row cell centered empty-basket-message">
-        <div>
-            <img class="tree cell" src="/lystore/public/img/basket.png" />
+        <div class="cell twelve-mobile centered-text">
+            <img src="/lystore/public/img/basket.png" />
         </div>
-        <div class="cell four" >
+        <div class="cell centered-text four twelve-mobile" >
             <h4><i18n>lystore.info.empty.basket</i18n></h4>
         </div>
     </div>

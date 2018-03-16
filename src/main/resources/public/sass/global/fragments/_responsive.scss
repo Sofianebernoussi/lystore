@@ -1,6 +1,22 @@
 @media screen and (max-width: $tablette) {
+  .block-mobile {
+    display: block;
+  }
+
   .mobile-navigation {
     display: block !important;
+  }
+
+  nav.mobile-navigation {
+    .notification-bull {
+      top: 0;
+      height: 20px;
+      width: 20px;
+      line-height: 20px;
+      font-size: 14px;
+      border-radius: 10px;
+      padding: 2px;
+    }
   }
 
   .responsive-table {
@@ -33,6 +49,38 @@
 
     .color-tag {
       margin: 0 auto;
+    }
+  }
+
+  .catalog-list {
+    .dominos {
+      .item {
+        max-width: unset !important;
+        width: 50% !important;
+      }
+    }
+
+    &.border-list {
+      display: none;
+    }
+  }
+
+  .catalog {
+    .left-detail-box {
+      left: 0 !important;
+      float: none !important;
+      width: 100% !important;
+      position: relative !important;
+    }
+  }
+
+  .empty-basket-message {
+    .four {
+      height: auto !important;
+    }
+
+    h4 {
+      line-height: normal !important;
     }
   }
 }

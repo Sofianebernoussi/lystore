@@ -5,13 +5,13 @@
             <button class="right-magnet" ng-click="exportCSV()"><i18n>lystore.orderEquipment.manage.exportCSV</i18n></button>
         </h1>
         <article class="twelve cell order-equipment-manage" ng-repeat="orderClient in ordersClient.all track by $index">
-            <div class="four cell ">
+            <div class="four cell twelve-mobile">
                 <h3><em><i18n>lystore.orderEquipment.manage.order</i18n>[[formatDate(orderClient.creation_date,'dddd Do MMMM YYYY')]]</em></h3>
-                <div class="four cell">
+                <div class="four cell zero-mobile">
                     <img ng-src="[[orderClient.image]]" ng-show="orderClient.image !== null && orderClient.image !== undefined"/>
                     <img skin-src="/img/illustrations/pages-default.png" ng-show="orderClient.image===null || orderClient.image===undifined"/>
                 </div>
-                <div class="seven cell horizontal-margin">
+                <div class="seven cell horizontal-margin twelve-mobile">
                     <h4>[[orderClient.name]]</h4>
                     <p>[[orderClient.summary]]</p>
                     <div>
@@ -20,16 +20,35 @@
                         </a>
                     </div>
                 </div>
+                <div ng-show="orderClient.options.length > 0 && display.ordersClientOption[$index]" class="twelve-mobile">
+                    <table class="centered ten vertical-spacing option-table">
+                        <thead>
+                        <tr>
+                            <td><i18n>name</i18n></td>
+                            <td><i18n>lystore.quantity</i18n></td>
+                            <td><i18n>price</i18n></td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="option in orderClient.options">
+                            <td>[[option.name]]</td>
+                            <td>[[option.amount]]</td>
+                            <td><span ng-bind="calculatePriceTTC(option.price, option.tax_amount, 2) | currency"></span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="four cell centered-text">
-                <h3 class="row">
-                    <i18n>
-                        lystore.expected.delivery
-                    </i18n>
-                </h3>
-                <p>[[calculateDelivreryDate(orderClient.creation_date)]]</p>
+            <div class="four cell centered-text twelve-mobile">
+                &nbsp;
+                <!--<h3 class="row">-->
+                    <!--<i18n>-->
+                        <!--lystore.expected.delivery-->
+                    <!--</i18n>-->
+                <!--</h3>-->
+                <!--<p>[[calculateDelivreryDate(orderClient.creation_date)]]</p>-->
             </div>
-            <div class="four cell">
+            <div class="four cell twelve-mobile">
                 <div class="row cell centered-text order-amount-price vertical-spacing-twice">
                     <h3 class="four"><i18n>lystore.quantity</i18n> : [[orderClient.amount]]</h3>
                     <p class="four" ng-bind="calculateTotal(orderClient,2) | currency"></p>
@@ -44,13 +63,13 @@
                            class = "right-magnet cancel vertical-spacing" i18n-value="delete"/>
                 </div>
             </div>
-            <div ng-show="orderClient.options.length > 0 && display.ordersClientOption[$index]">
+            <div ng-show="orderClient.options.length > 0 && display.ordersClientOption[$index]" class="zero-mobile">
                 <table class="centered ten vertical-spacing option-table">
                     <thead>
                     <tr>
-                        <td>Nom</td>
-                        <td>Quantité</td>
-                        <td>Prix</td>
+                        <td><i18n>name</i18n></td>
+                        <td><i18n>lystore.quantity</i18n></td>
+                        <td><i18n>price</i18n></td>
                     </tr>
                     </thead>
                     <tbody>

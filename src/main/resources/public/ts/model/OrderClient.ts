@@ -85,7 +85,7 @@ export class OrdersClient extends Selection<OrderClient> {
                     order.options.toString() !== '[null]' && order.options !== null ?
                         order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
                         : order.options = [];
-                    order.creation_date = moment(order.creation_date, 'YYYY-MM-DD').format('YYY-MM-DD');
+                    order.creation_date = moment(order.creation_date).format('L');
                     order.name_structure =  structures.length > 0 ? this.initNameStructure(order.id_structure, structures) : '';
                     order.priceTTCtotal = parseFloat(order.calculatePriceTTC(2).toString()) * order.amount;
                 });

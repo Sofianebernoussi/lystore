@@ -80,7 +80,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="order in ordersClient.all  |ordersClientFilter:search.filterWords
+            <tr ng-repeat="order in ordersClient.all  |ordersClientFilter:'WAITING': search.filterWords
              | orderBy:sort.order.type:sort.order.reverse">
                 <td workflow="lystore.administrator" class="table-selector">
                     <label class="checkbox">

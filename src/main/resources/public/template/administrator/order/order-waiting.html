@@ -65,17 +65,17 @@
                     <i class="up-open" ng-show="sort.order.type === 'creation_date' && !sort.order.reverse"></i>
                     <i class="down-open" ng-show="sort.order.type === 'creation_date' && sort.order.reverse"></i>
                 </td>
-                <td ng-click="sort.order.type = 'campaing.name';
+                <td ng-click="sort.order.type = 'campaign.name';
                     sort.order.reverse = !sort.order.reverse">
                     <i18n>lystore.campaigns</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'campaing.name' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'campaing.name' && sort.order.reverse"></i>
+                    <i class="up-open" ng-show="sort.order.type === 'campaign.name' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'campaign.name' && sort.order.reverse"></i>
                 </td>
-                <td ng-click="sort.order.type = 'price';
+                <td ng-click="sort.order.type = 'priceTTCtotal';
                     sort.order.reverse = !sort.order.reverse">
                     <i18n>lystore.price.TTC</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'price' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'price' && sort.order.reverse"></i>
+                    <i class="up-open" ng-show="sort.order.type === 'priceTTCtotal' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'priceTTCtotal' && sort.order.reverse"></i>
                 </td>
             </tr>
             </thead>
@@ -96,7 +96,7 @@
                 <td>[[order.amount ]]</td>
                 <td>[[order.creation_date ]]</td>
                 <td>[[order.campaign.name ]]</td>
-                <td><span ng-bind="order.calculatePriceTTC(2) * order.amount | currency"></span></td>
+                <td><span ng-bind="order.priceTTCtotal| currency"></span></td>
             </tr>
             </tbody>
             <tfoot>

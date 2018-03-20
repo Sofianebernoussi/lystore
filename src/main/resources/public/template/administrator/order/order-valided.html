@@ -65,11 +65,11 @@
                     <i class="up-open" ng-show="sort.order.type === 'amount' && !sort.order.reverse"></i>
                     <i class="down-open" ng-show="sort.order.type === 'amount' && sort.order.reverse"></i>
                 </td>
-                <td ng-click="sort.order.type = 'price';
+                <td ng-click="sort.order.type = 'priceTTCtotal';
                     sort.order.reverse = !sort.order.reverse">
                     <i18n>lystore.price.TTC</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'price' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'price' && sort.order.reverse"></i>
+                    <i class="up-open" ng-show="sort.order.type === 'priceTTCtotal' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'priceTTCtotal' && sort.order.reverse"></i>
                 </td>
             </tr>
             </thead>
@@ -87,7 +87,7 @@
                 <td>[[order.contract.name]]</td>
                 <td>[[order.supplier.name]]</td>
                 <td>[[order.amount ]]</td>
-                <td><span ng-bind="order.calculatePriceTTC(2) * order.amount | currency"></span></td>
+                <td><span ng-bind="order.priceTTCtotal | currency"></span></td>
             </tr>
             </tbody>
         </table>

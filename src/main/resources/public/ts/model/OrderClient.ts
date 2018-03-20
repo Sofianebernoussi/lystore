@@ -15,7 +15,7 @@ export class OrderClient implements Selectable {
     creation_date: Date;
     status: string;
     number_validation: string;
-
+    priceTTCtotal: number ;
     options: OrderOptionClient[];
     technical_spec: TechnicalSpec[];
     contract: Contract;
@@ -87,6 +87,7 @@ export class OrdersClient extends Selection<OrderClient> {
                         : order.options = [];
                     order.creation_date = moment(order.creation_date, 'YYYY-MM-DD').format('YYY-MM-DD');
                     order.name_structure =  structures.length > 0 ? this.initNameStructure(order.id_structure, structures) : '';
+                    order.priceTTCtotal = parseFloat(order.calculatePriceTTC(2).toString()) * order.amount;
                 });
             }
         } catch (e) {

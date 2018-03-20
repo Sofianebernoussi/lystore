@@ -146,6 +146,7 @@
   "lystore.info.empty.basket":"Le panier est vide",
   "lystore.order.valided.generateBC":"GÉNÉRER BC & CSF",
   "lystore.order.valided.title":"Générer les bons de commande",
+  "lystore.order.sent.title":"Clôturer les demandes",
   "lystore.order.generate.bc.csf":"Génération du BC & CSF",
   "lystore.order.supplier.name":"Nom du titulaire",
   "lystore.order.agent.name":"Nom du Correspondant",

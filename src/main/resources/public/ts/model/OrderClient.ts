@@ -1,4 +1,4 @@
-import { notify, moment, _ } from 'entcore';
+import { notify, moment, _ , model} from 'entcore';
 import { Selectable, Selection, Mix } from 'entcore-toolkit';
 import { TechnicalSpec, Contract, Supplier, Campaign, Structure, Utils } from './index';
 import http from 'axios';
@@ -26,6 +26,7 @@ export class OrderClient implements Selectable {
     id_contract: number;
     id_campaign: number;
     id_structure: string;
+    id_supplier: string;
     selected: boolean;
 
     constructor() {}
@@ -47,8 +48,16 @@ export class OrderClient implements Selectable {
     }
 }
 export class OrdersClient extends Selection<OrderClient> {
-    constructor() {
+
+    supplier: Supplier;
+    bc_number?: string;
+    engagement_number?: string;
+    dateGeneration?: Date;
+
+    constructor(supplier?: Supplier) {
         super([]);
+        this.supplier = supplier ? supplier : new Supplier();
+        this.dateGeneration = new Date();
     }
 
     async sync (structures: Structure[] = [], idCampaign?: number, idStructure?: string, ) {
@@ -71,7 +80,8 @@ export class OrdersClient extends Selection<OrderClient> {
                     order.tax_amount = parseFloat(order.tax_amount.toString());
                     order.contract = Mix.castAs(Contract,  JSON.parse(order.contract.toString()));
                     order.supplier = Mix.castAs(Supplier,  JSON.parse(order.supplier.toString()));
-                    order.campaign = Mix.castAs(Campaign,  JSON.parse(order.campaign.toString()));
+                    order.id_supplier = order.supplier.id;
+                        order.campaign = Mix.castAs(Campaign,  JSON.parse(order.campaign.toString()));
                     order.options.toString() !== '[null]' && order.options !== null ?
                         order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
                         : order.options = [];
@@ -83,11 +93,24 @@ export class OrdersClient extends Selection<OrderClient> {
             notify.error('lystore.order.sync.err');
         }
     }
+
+    toJson (status) {
+        return {
+            ids: _.pluck(this.all, 'id') ,
+            status : status,
+            bc_number: this.bc_number || null,
+            engagement_number: this.engagement_number || null,
+            dateGeneration: moment(this.dateGeneration).format('DD/MM/YYYY') || null,
+            supplier : this.supplier,
+            userId : model.me.userId
+        };
+    }
     async updateStatus(status: string) {
         try {
-            return await  http.put(`/lystore/orders/${status.toLowerCase()}`, { ids: _.pluck(this.all, 'id') , status : status } );
+            return  await  http.put(`/lystore/orders/${status.toLowerCase()}`, this.toJson(status) , {responseType: 'arraybuffer'});
+
         } catch (e) {
-            notify.error('lystore.basket.update.err');
+            notify.error('lystore.order.update.err');
             throw e;
         }
     }

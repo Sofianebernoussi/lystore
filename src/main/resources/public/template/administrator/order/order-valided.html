@@ -92,10 +92,14 @@
             </tbody>
         </table>
     </article>
+    <lightbox on-close="display.lightbox.sendOrder = false;"
+              show="display.lightbox.sendOrder">
+        <container template="sendOrder.lightbox"></container>
+    </lightbox>
     <section class="toggle-buttons" ng-class="{ hide:ordersClient.selected.length === 0 }">
         <div class="toggle">
             <div class="row">
-                <button ng-click="generateBC(ordersClient.selected)">
+                <button ng-click="prepareSendOrder(ordersClient.selected)" ng-disabled="! validateSentOrders(ordersClient.selected)">
                     <i18n>lystore.order.valided.generateBC</i18n>
                 </button>
             </div>

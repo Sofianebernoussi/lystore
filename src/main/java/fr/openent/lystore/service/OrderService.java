@@ -26,7 +26,6 @@ public interface OrderService {
      * @param handler
      */
     void listOrder(Handler<Either<String, JsonArray>> handler);
-
     /**
      * Valid order ( change status to 'VALID', add validation number to the order,
      * then send mail to Agents )
@@ -61,4 +60,10 @@ public interface OrderService {
      * @param handler
      */
     void windUpOrders(List<Integer> ids, Handler<Either<String, JsonObject>> handler);
+    /**
+     * Send orders
+     * @param ids
+     * @param handler
+     */
+    void sendOrders(List<Integer> ids, Handler<Either<String, JsonObject>> handler);
 }

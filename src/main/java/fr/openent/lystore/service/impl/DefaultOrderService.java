@@ -1,23 +1,31 @@
 package fr.openent.lystore.service.impl;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.service.ExportPDFService;
 import fr.openent.lystore.service.OrderService;
 import fr.openent.lystore.service.PurseService;
+import fr.openent.lystore.service.StructureService;
+import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.webutils.Either;
 import org.entcore.common.service.impl.SqlCrudService;
 import fr.wseduc.webutils.email.EmailSender;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.vertx.java.core.Handler;
+import org.vertx.java.core.Vertx;
+import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.eventbus.impl.JsonObjectMessage;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.entcore.common.user.UserInfos;
+import org.vertx.java.core.json.impl.Json;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.core.logging.impl.LoggerFactory;
+import org.vertx.java.platform.Container;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DefaultOrderService extends SqlCrudService implements OrderService {
@@ -25,11 +33,16 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     private static final Logger LOGGER = LoggerFactory.getLogger (DefaultOrderService.class);
     private PurseService purseService ;
     private EmailSendService emailSender ;
+    private StructureService structureService;
+    // private ExportPDFService exportPDFService;
 
-    public DefaultOrderService(String schema, String table, EmailSender emailSender){
+    public DefaultOrderService(
+            String schema, String table, EmailSender emailSender){
         super(schema,table);
         this.purseService = new DefaultPurseService();
         this.emailSender = new EmailSendService(emailSender);
+        this.structureService = new DefaultStructureService();
+        // this.exportPDFService = new DefaultExportPDFService( eb,  vertx,  container );
     }
 
     @Override
@@ -65,6 +78,33 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
     }
 
+    /**
+     * Get information on orders
+     * @param ids list of orders
+     * @param handler
+     */
+    JsonObject listOrder(List<Integer> ids){
+        String query = "SELECT oce.* , oce.price * oce.amount as total_price , to_json(contract.*) contract ,to_json(supplier.*) supplier, " +
+                "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options " +
+                "FROM lystore.order_client_equipment oce " +
+                "LEFT JOIN "+ Lystore.lystoreSchema + ".order_client_options oco " +
+                "ON oco.id_order_client_equipment = oce.id " +
+                "LEFT JOIN "+ Lystore.lystoreSchema + ".contract ON oce.id_contract = contract.id " +
+                "INNER JOIN "+ Lystore.lystoreSchema + ".supplier ON contract.id_supplier = supplier.id  " +
+                "INNER JOIN "+ Lystore.lystoreSchema + ".campaign ON oce.id_campaign = campaign.id " +
+                "WHERE oce.id in "+ Sql.listPrepared(ids.toArray()) +
+                " GROUP BY (oce.id, contract.id, supplier.id, campaign.id); ";
+        JsonArray params = new JsonArray();
+
+        for (Integer id : ids) {
+            params.addNumber( id);
+        }
+
+        return new JsonObject()
+                .putString("statement", query)
+                .putArray("values", params)
+                .putString("action", "prepared");
+    }
     @Override
     public void listExport(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new JsonArray();
@@ -149,7 +189,134 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 .putArray("values", params)
                 .putString("action", "prepared");
     }
+    @Override
+    public void sendOrders(List<Integer> ids,final Handler<Either<String, JsonObject>> handler){
+        JsonArray statements = new JsonArray();
+        statements.add(getUpdateStatusStatement(ids, "SENT"))
+                .add(listOrder(ids));
+        sql.transaction(statements, new Handler<Message<JsonObject>>() {
+            @Override
+            public void handle(Message<JsonObject> jsonObjectMessage) {
+                final JsonObject ordersObject = formatSendOrdersResult( (JsonObject)
+                        ((JsonObjectMessage) jsonObjectMessage).body()
+                                .getArray("results").get(1) );
+                structureService.getStructureById(ordersObject.getArray("id_structures"),
+                        new Handler<Either<String, JsonArray>>() {
+                            @Override
+                            public void handle(Either<String, JsonArray> structureArray) {
+                                if(structureArray.isRight()){
+                                    Either<String, JsonObject> either;
+                                    JsonArray orders = getOrdersOrderedByEquipment(
+                                            ordersObject.getArray("order"),
+                                            (JsonArray) structureArray.right().getValue());
+                                    JsonObject returns = new JsonObject()
+                                            .putArray("ordersObject",ordersObject.getArray("order"))
+                                            .putObject("total",getTotalsOrdersPrices(ordersObject.getArray("order")))
+                                            .putArray("structureArray", (JsonArray) structureArray.right().getValue());
+                                    either = new Either.Right<>(returns);
+                                    handler.handle(either);
+                                }
+                            }
+                        });
+            }
+        });
+    }
+    private JsonArray getOrdersOrderedByEquipment (JsonArray ordersArray, JsonArray structures) {
+        JsonArray orders = new JsonArray();
+        boolean isIn;
+        JsonObject orderOld;
+        JsonObject orderNew;
+        for (int i = 0 ; i< ordersArray.size(); i++){
+             isIn = false;
+             orderOld = ordersArray.get(i);
+            for(int j = 0; j<orders.size(); j++){
+                orderNew = (JsonObject) orders.get(j);
+                if(orderOld.getString("equipment_key")
+                        .equals(orderNew.getString("equipment_key"))){
+                    isIn = true;
+                    //TODO add the structure to the structureList
+                }
+            }
+            if(! isIn) {
+                JsonObject order = new JsonObject()
+                        .putString("price", orderOld.getString("price"))
+                        .putString("tax_amount", orderOld.getString("tax_amount"))
+                        .putString("amount", orderOld.getString("amount"))
+                        .putString("id_campaign", orderOld.getString("id_campaign"))
+                        .putString("name", orderOld.getString("name"))
+                        .putString("summary", orderOld.getString("summary"))
+                        .putString("description", orderOld.getString("description"))
+                        .putString("image", orderOld.getString("image"))
+                        .putString("technical_spec", orderOld.getString("technical_spec"))
+                        .putString("id_contract", orderOld.getString("id_contract"))
+                        .putString("equipment_key", orderOld.getString("equipment_key"))
+                        .putObject("contract", orderOld.getObject("contract"))
+                        .putObject("supplier", orderOld.getObject("supplier"))
+                        .putObject("campaign", orderOld.getObject("campaign"))
+                        .putArray("options",orderOld.getArray("options"))
+                        .putArray("structures", new JsonArray()
+                                .add(getStructureObject( structures, orderOld.getString("id_structure") )) )
+                        ;
+                orders.add(order);
+            }
+        }
+        return orders;
+    }
+    private JsonObject getStructureObject(JsonArray structures, String structureId){
+        JsonObject structure = new JsonObject();
+        for (int i = 0; i < structures.size() ; i++) {
+            if(((JsonObject) structures.get(i)).getString("id").equals(structureId)){
+                structure =  structures.get(i);
+            }
+        }
+        return structure;
+    }
+    private JsonObject getTotalsOrdersPrices(JsonArray orders){
 
+        Float tva = new Float(0);
+        Float total = new Float(0);
+        final Integer Const = 100;
+        Float totalTTC ;
+        try {
+            tva = Float.parseFloat( ((JsonObject) orders.get(0)).getString("tax_amount"));
+        }catch (ClassCastException e) {
+            LOGGER.error("An error occurred when casting tax amount", e);
+        }
+        for(int i = 0 ; i < orders.size(); i++) {
+            try {
+                total += Float.parseFloat( ((JsonObject) orders.get(0)).getString("price")) *
+                        Float.parseFloat( ((JsonObject) orders.get(0)).getString("amount"));
+            }catch (ClassCastException e) {
+                LOGGER.error("An error occurred when casting order price", e);
+            }
+        }
+        totalTTC = (total * tva)/Const + total;
+        return new JsonObject()
+                .putNumber("totalPrice", total)
+                .putNumber("tva", tva)
+                .putNumber("totalTTC", totalTTC)
+                ;
+    }
+    private JsonObject formatSendOrdersResult(JsonObject object){
+        JsonArray fields = object.getArray("fields");
+        JsonArray results = object.getArray("results");
+        JsonArray result = new JsonArray();
+        JsonArray idStructures = new JsonArray();
+        JsonArray row ;
+        JsonObject newRow = new JsonObject();
+        for(int j = 0; j< results.size(); j++){
+            row = results.get(j);
+            for(int i = 0 ; i < fields.size() ; i++){
+                newRow.putString(fields.get(i).toString(),
+                        null != row.get(i) ? row.get(i).toString(): "null");
+                if("id_structure".equals(fields.get(i).toString())){
+                    idStructures.add(row.get(i).toString());
+                }
+            }
+            result.add( newRow);
+        }
+        return  new JsonObject().putArray("order",result).putArray ("id_structures",idStructures);
+    }
     private JsonObject getEquipmentOrderDeletion (Integer idOrder,Integer idCampaign, String idStructure){
         String queryDeleteEquipmentOrder = "DELETE FROM " + Lystore.lystoreSchema + ".order_client_equipment"
                 + " WHERE id = ?  RETURNING " + getReturningQueryOfDeleteOrder();

@@ -6,8 +6,12 @@ import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AccessOrderRight;
 import fr.openent.lystore.security.ManagerRight;
+import fr.openent.lystore.service.ExportPDFService;
 import fr.openent.lystore.service.OrderService;
+import fr.openent.lystore.service.UserInfoService;
+import fr.openent.lystore.service.impl.DefaultExportPDFService;
 import fr.openent.lystore.service.impl.DefaultOrderService;
+import fr.openent.lystore.service.impl.DefaultUserInfoService;
 import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Delete;
@@ -27,6 +31,9 @@ import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.Vertx;
+import org.vertx.java.core.buffer.Buffer;
+
+import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.http.RouteMatcher;
 import org.vertx.java.core.json.JsonObject;
@@ -47,7 +54,8 @@ import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultRes
 public class OrderController extends ControllerHelper {
     private OrderService orderService;
     public static final String UTF8_BOM = "\uFEFF";
-
+    private ExportPDFService exportPDFService;
+    private UserInfoService userInfoService;
 
     @Override
     public void init(Vertx vertx, final Container container, RouteMatcher rm,
@@ -56,6 +64,8 @@ public class OrderController extends ControllerHelper {
         EmailFactory emailFactory = new EmailFactory(vertx, container, container.config());
         EmailSender emailSender = emailFactory.getSender();
         this.orderService = new DefaultOrderService(Lystore.lystoreSchema, "order_client_equipment", emailSender);
+        this.exportPDFService = new DefaultExportPDFService( eb, vertx, container);
+        this.userInfoService = new DefaultUserInfoService();
     }
 
     @Get("/orders/:idCampaign/:idStructure")
@@ -203,6 +213,65 @@ public class OrderController extends ControllerHelper {
         });
 
     }
+
+    @Put("/orders/sent")
+    @ApiDoc("send orders ")
+    @ResourceFilter(ManagerRight.class)
+    public void sendOrders (final HttpServerRequest request){
+        RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {
+            @Override
+            public void handle(final JsonObject orders) {
+                userInfoService.getUserInfo(orders.getString("userId"), new Handler<Either<String, JsonArray>>() {
+                    @Override
+                    public void handle(final Either<String, JsonArray> user) {
+                try {
+                            final List<String> params = new ArrayList<>();
+                            for (Object id: orders.getArray("ids") ) {
+                                params.add( id.toString());
+                            }
+                            final String nbrBc = orders.getString("bc_number");
+                            final String nbrEngagement = orders.getString("engagement_number");
+                            final String dateGeneration = orders.getString("dateGeneration");
+                            final JsonObject supplier = orders.getObject("supplier");
+                            final List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
+                            orderService.sendOrders(ids,
+                                    new Handler<Either<String, JsonObject>>() {
+                                        @Override
+                                        public void handle(Either<String, JsonObject> stringJsonObjectEither) {
+                                            JsonObject object = stringJsonObjectEither.right().getValue()
+                                                    .putString("nbr_bc", nbrBc)
+                                                    .putString("nbr_engagement", nbrEngagement)
+                                                    .putString("date_generation", dateGeneration)
+                                                    .putObject("me",
+                                                            makeUserObject((JsonObject) user.right().getValue().get(0)))
+                                                    .putObject("supplier", supplier);
+                                            exportPDFService.generatePDF(request, object,
+                                                    "BC.xhtml", "Bon_Commande_",
+                                                    new Handler<Buffer>() {
+                                                        @Override
+                                                        public void handle(final Buffer pdf) {
+                                                            request.response().end(pdf);
+                                                        }
+                                                    }
+                                            );
+                                        }
+                                    });
+                        } catch (ClassCastException e) {
+                            log.error("An error occurred when casting order id", e);
+                        }
+                    }
+                });
+            }
+        });
+
+    }
+    private JsonObject makeUserObject(JsonObject user) {
+        JsonObject dataUser = user.getObject("u").getObject("data");
+     return   new JsonObject()
+                .putString("name", dataUser.getString("firstName")+" "+ dataUser.getString("lastName") )
+                .putString("email", dataUser.getString("emailAcademy"))
+             .putString("phone", dataUser.getString("mobile"));
+    }
     @Put("/orders/done")
     @ApiDoc("Wind up orders ")
     @ResourceFilter(ManagerRight.class)
@@ -216,13 +285,14 @@ public class OrderController extends ControllerHelper {
                         params.add( id.toString());
                     }
                     List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
-                    orderService.windUpOrders(ids,
-                            Logging.defaultResponsesHandler(eb,
-                                    request,
-                                    Contexts.ORDER.toString(),
-                                    Actions.UPDATE.toString(),
-                                    params,
-                                    null));
+                    orderService.windUpOrders(ids, Logging.defaultResponsesHandler(eb,
+                            request,
+                            Contexts.ORDER.toString(),
+                            Actions.UPDATE.toString(),
+                            params,
+                            null)
+
+                    );
                 } catch (ClassCastException e) {
                     log.error("An error occurred when casting order id", e);
                 }

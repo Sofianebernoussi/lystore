@@ -8,6 +8,21 @@
     },
     "status":{
       "type": "string"
+    },
+    "bc_number":{
+      "type": [ "string", "null" ]
+    },
+    "engagement_number":{
+      "type": [ "string", "null" ]
+    },
+    "dateGeneration":{
+      "type": [ "string", "null" ]
+    },
+    "supplier":{
+      "type": ["object", "null"]
+    },
+    "userId":{
+      "type": "string"
     }
   },
   "required": [ "ids" ]

@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+
+<head>
+    <title>Formulaire de saisie</title>
+    <style type="text/css">
+        body {
+            font-family: "Calibri", sans-serif;
+            font-size: 13px ;
+            align-content: center;
+        }
+        .page {
+            page-break-after: always;
+            display: block;
+        }
+        @page {
+            size:  A4 ;
+            margin-left: 5%;
+            margin-right: 5%;
+            margin-top: 3%;
+        }
+        .logo-region{
+            height: auto;
+            width: 300px;
+            border-bottom: 1px #f6f6f6 solid ;
+            margin-bottom: 5px;
+        }
+        .left {
+            position: relative;
+            width: 300px;
+        }
+        .right {
+            position: relative;
+            width: 50%;
+        }
+        .right > input {
+            width: 100%;
+        }
+        .right > h1{
+            font-size: 20px ;
+        }
+        .header {
+            width: 100%;
+        }
+        .foot {
+            width: 100%;
+            page-break-after: always;
+        }
+
+        .signature {
+            height: 60px;
+        }
+        .equipments-table  {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+        }
+        .equipments-table tfoot tr td:first-child  {
+            font-weight: bold;
+        }
+        .equipments-table tr  td {
+            width: auto;
+            padding-top:10px;
+            padding-left: 10px ;
+            padding-bottom:10px;
+            border: 1px solid #ddd;
+        }
+
+        table.equipments-table > tbody tr:nth-child(odd) td {
+            background-color: #efefef;
+        }
+        table.equipments-table > tbody tr:nth-child(even) td {
+            background-color: #f2f4f6;
+        }
+
+        table > thead {
+            font-size: 14px ;
+            font-weight: bold;
+            text-align: center;
+        }
+        input {
+            min-width: 150px ;
+            width: 200px;
+            max-width: 100%;
+            margin-left: 5px;
+            padding-left: 5px ;
+        }
+
+        table > tfoot > tr {
+            margin-top: 20px;
+        }
+        table tfoot {
+
+        }
+    </style>
+</head>
+
+<body class="page">
+
+<table class="header">
+    <tr>
+        <td class="left">
+            <img  class="logo-region" src="img/ile_de_france.png" alt="ile de france" />
+
+            <div class="agent-info">
+                {{#me}}
+                <strong>{{name}} <br/> </strong>
+                {{email}} <br/>
+                Tel : {{phone}}  <br/>
+                {{/me}}
+            </div>
+        </td>
+        <td class="right">
+            <h1>
+                BON DE COMMANDE
+            </h1>
+            <strong>
+                N°: <input type="text"  value = "{{nbr_bc}}" /> <br/>
+            </strong>
+            <p>
+                Du: <input type="text" value = "{{date_generation}}" /><br/>
+                <br/>
+                {{#supplier}}
+                {{name}} <br/>
+                {{address}} <br/>
+                Tel : {{phone}}  <br/>
+                {{/supplier}}
+
+                N° ENGAGEMENT:  <input type="text" value = "{{nbr_engagement}}" />
+            </p>
+
+        </td>
+    </tr>
+</table>
+
+<table class="equipments-table">
+    <thead>
+    <tr>
+        <td>
+           Description
+        </td>
+        <td>
+            Quantité
+        </td>
+        <td>
+            Prix U HT
+        </td>
+        <td>
+            Total HT
+        </td>
+    </tr>
+    </thead>
+    <tbody>
+    {{#ordersObject}}
+    <tr>
+        <td>
+            {{name}}
+        </td>
+        <td>
+            {{amount}}
+        </td>
+        <td>
+           {{ price}}
+        </td>
+        <td>
+            {{total_price}}
+        </td>
+    </tr>
+    {{/ordersObject }}
+    </tbody>
+    <tfoot>
+    {{#total}}
+    <tr>
+    <td colspan="2">Total HT</td>
+    <td colspan="2"> {{totalPrice}} </td>
+    </tr>
+    <tr>
+    <td colspan="2">TVA </td>
+
+    <td colspan="2"> {{tva}}</td>
+    </tr>
+    <tr>
+    <td colspan="2">TOTAL TTC </td>
+    <td colspan="2">{{totalTTC}}</td>
+    </tr>
+    {{/total}}
+    </tfoot>
+</table>
+
+
+<table class="foot">
+    <tr>
+        <td class="left">
+            <p>
+                Lieu de Livraison, personne à contacter  tel : voir liste des lycées ci-jointe
+                Date de  livraison: Délai contractuel - Article 3.1 du CCAP
+                Reçu par l'entreprise le :
+                (Date - Cachet - Signature)
+            </p>
+            <div class="signature">
+                &nbsp;
+            </div>
+        </td>
+        <td class="right">
+            <p >
+                <strong>
+                    <!--TODO patrick Tondat-->
+                </strong>
+            </p>
+        </td>
+    </tr>
+</table>
+
+{{#ordersObject}}
+<div class="orders">
+Marché numéro {{number_validation}} - {{name}} <br/>
+bon de commande N° {{nbr_bc}} - {{#supplier}} {{name}} {{/supplier}}
+
+</div>
+{{/ordersObject}}
+</body>
+</html>

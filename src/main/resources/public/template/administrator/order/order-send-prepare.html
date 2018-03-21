@@ -1,0 +1,12 @@
+<h2><i18n>lystore.order.generate.bc.csf</i18n></h2>
+<div>
+    <i18n>lystore.order.supplier.name</i18n> : [[orderToSend.supplier.name]] <br/>
+    <i18n>lystore.order.agent.name</i18n> :  [[model.me.username]] <br/>
+    <i18n>lystore.order.bc.number</i18n> :  <input type="text" ng-model="orderToSend.bc_number"> <br/>
+    <i18n>lystore.order.engagement.number</i18n> : <input type="text" ng-model="orderToSend.engagement_number"> <br/>
+    <i18n>lystore.order.generation.date</i18n> <date-picker ng-model="orderToSend.dateGeneration" ></date-picker> <br/>
+</div>
+<div >
+
+</div>
+<input type="button" class="submit right-magnet " ng-click="sendOrders(orderToSend)" ng-disabled="! validatePrepareSentOrders(orderToSend)" i18n-value="ok"/>

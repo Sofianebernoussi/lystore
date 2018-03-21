@@ -42,6 +42,7 @@ import java.util.*;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 
+
 public class OrderController extends ControllerHelper {
 
     private Storage storage;
@@ -54,10 +55,10 @@ public class OrderController extends ControllerHelper {
 
     public static final String UTF8_BOM = "\uFEFF";
 
+
     public OrderController (Storage storage) {
         this.storage = storage;
     }
-
     public void init(Vertx vertx, final Container container, RouteMatcher rm,
                      Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
         super.init(vertx, container, rm, securedActions);

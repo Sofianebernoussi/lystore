@@ -331,7 +331,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         }
         for(int i = 0 ; i < orders.size(); i++) {
             try {
-
                 total += Float.parseFloat( ((JsonObject) orders.get(0)).getString("price")) *
                         Float.parseFloat( ((JsonObject) orders.get(0)).getString("amount"));
             }catch (ClassCastException e) {
@@ -345,6 +344,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 .putNumber("totalTTC", totalTTC)
                 ;
     }
+
     private JsonObject formatSendOrdersResult(JsonObject object){
         JsonArray fields = object.getArray("fields");
         JsonArray results = object.getArray("results");

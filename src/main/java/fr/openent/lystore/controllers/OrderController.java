@@ -63,6 +63,8 @@ private ExportPDFService exportPDFService;
         this.exportPDFService = new DefaultExportPDFService( eb, vertx, container);
         this.userInfoService = new DefaultUserInfoService();
         this.structureService = new DefaultStructureService();
+        this.exportPDFService = new DefaultExportPDFService( eb, vertx, container);
+        this.userInfoService = new DefaultUserInfoService();
     }
 
     @Get("/orders/:idCampaign/:idStructure")

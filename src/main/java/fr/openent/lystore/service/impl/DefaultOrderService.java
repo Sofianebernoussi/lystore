@@ -445,6 +445,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                                                         (JsonArray) stringJsonArrayEither.right().getValue(), handler);
                                             }
                                         });
+                                LOGGER.info("FIN handler transaction");
                             }
                         });
                     } catch (ClassCastException e) {

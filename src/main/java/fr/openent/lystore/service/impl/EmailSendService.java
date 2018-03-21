@@ -10,11 +10,13 @@ import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.core.logging.impl.LoggerFactory;
 
 public class EmailSendService {
 
     private Neo4j neo4j;
 
+    private static final org.vertx.java.core.logging.Logger LOGGER = LoggerFactory.getLogger (EmailSendService.class);
     private final EmailSender emailSender;
     public EmailSendService(EmailSender emailSender){
         this.emailSender = emailSender;
@@ -34,17 +36,18 @@ public class EmailSendService {
                 new Handler<Message<JsonObject>>() {
                     @Override
                     public void handle(Message<JsonObject> jsonObjectMessage) {
+                        LOGGER.info(" emailSender.sendEmail : handle");
                         handler.handle(new Either.Right<String, JsonObject>(result));
                     }
                 });
-
+        LOGGER.info(" sendEmail classEmailSendService FIN");
     }
 
     public void sendMails(HttpServerRequest request, JsonObject result, JsonArray rows, UserInfos user, String url,
-                         JsonArray structureRows, Handler<Either<String, JsonObject>> handler ){
+                          JsonArray structureRows, Handler<Either<String, JsonObject>> handler ){
         final int contractNameIndex = 1;
         final int agentEmailIndex = 3;
-
+        LOGGER.info(" début sendMails");
         for (int i = 0; i < rows.size(); i++) {
             JsonArray row = rows.get(i);
             String mailObject="[LyStore] Commandes "+row.get(contractNameIndex);
@@ -54,12 +57,14 @@ public class EmailSendService {
                     mailBody,
                     result,
                     handler);
+            LOGGER.info(" sendEmails : bouclefor1");
         }
         for (int i = 0; i < structureRows.size(); i++) {
             String mailObject="[LyStore] Commandes ";
             JsonObject row = structureRows.get(i);
             String name = row.getString("name");
             JsonArray mailsRow = row.getArray("mails");
+            LOGGER.error(" sendEmails : bouclefor2");
             for(int j = 0 ; j < mailsRow.size() ; j++){
                 String mailBody = getStructureBodyMail( (JsonObject) mailsRow.get(j), user,
                         result.getString("number_validation"), url, name);
@@ -68,8 +73,10 @@ public class EmailSendService {
                         mailBody,
                         result,
                         handler);
+                LOGGER.info(" sendEmails : bouclefor3");
             }
         }
+        LOGGER.info(" sendEmails Fin");
     }
 
     public void getPersonnelMailStructure (JsonArray structureIds, Handler<Either<String, JsonArray>> handler){

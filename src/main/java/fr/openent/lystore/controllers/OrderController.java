@@ -38,25 +38,23 @@ import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.http.RouteMatcher;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Container;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
+
 import org.vertx.java.core.json.JsonArray;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
-
-
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
+
 public class OrderController extends ControllerHelper {
     private OrderService orderService;
     public static final String UTF8_BOM = "\uFEFF";
-    private ExportPDFService exportPDFService;
-    private UserInfoService userInfoService;
 
+private ExportPDFService exportPDFService;
+    private UserInfoService userInfoService;
     @Override
     public void init(Vertx vertx, final Container container, RouteMatcher rm,
                      Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
@@ -194,11 +192,10 @@ public class OrderController extends ControllerHelper {
                             for (Object id: orders.getArray("ids") ) {
                                 params.add( id.toString());
                             }
-                            final int urlNumber = 7;
+
                             List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
-                            orderService.validateOrders(request, userInfos , ids,
-                                    (String)((XssHttpServerRequest) request)
-                                            .headers().entries().get(urlNumber).getValue(),
+                            final String url = request.headers().get("Referer") ;
+                            orderService.validateOrders(request, userInfos , ids, url,
                                     Logging.defaultResponsesHandler(eb,
                                             request,
                                             Contexts.ORDER.toString(),
@@ -273,6 +270,7 @@ public class OrderController extends ControllerHelper {
                 .putString("email", dataUser.getString("emailAcademy"))
              .putString("phone", dataUser.getString("mobile"));
     }
+
     @Put("/orders/done")
     @ApiDoc("Wind up orders ")
     @ResourceFilter(ManagerRight.class)

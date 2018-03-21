@@ -1,32 +1,24 @@
 package fr.openent.lystore.service.impl;
 
 import fr.openent.lystore.Lystore;
-import fr.openent.lystore.service.ExportPDFService;
 import fr.openent.lystore.service.OrderService;
 import fr.openent.lystore.service.PurseService;
 import fr.openent.lystore.service.StructureService;
-import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.webutils.Either;
-import org.entcore.common.service.impl.SqlCrudService;
 import fr.wseduc.webutils.email.EmailSender;
+import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
+import org.entcore.common.user.UserInfos;
 import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.VoidHandler;
-import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.eventbus.impl.JsonObjectMessage;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
-import org.entcore.common.user.UserInfos;
-import org.vertx.java.core.json.impl.Json;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.core.logging.impl.LoggerFactory;
-import org.vertx.java.platform.Container;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class DefaultOrderService extends SqlCrudService implements OrderService {

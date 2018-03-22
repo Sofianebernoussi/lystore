@@ -7,7 +7,7 @@ declare let window: any;
 export const purseController = ng.controller('PurseController',
     ['$scope', '$routeParams', ($scope, $routeParams) => {
         $scope.campaign = $scope.campaigns.get(parseInt($routeParams.idCampaign));
-        $scope.campaign.purses = new Purses($routeParams.idCampaign);
+        $scope.campaign.purses = new Purses(parseInt($routeParams.idCampaign));
         $scope.campaign.purses.sync().then(() => Utils.safeApply($scope));
 
         $scope.lightbox = {

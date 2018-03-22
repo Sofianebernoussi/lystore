@@ -13,6 +13,12 @@
     position: relative;
     line-height: 35px;
 
+    &.large {
+      width: 40px !important;
+      height: 40px !important;
+      line-height: 40px !important;
+    }
+
     &:first-child, &:nth-child(2) {
       margin-right: 65px;
 

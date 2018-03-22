@@ -119,7 +119,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
             managePurse: async (params) => {
                 if (template.isEmpty('administrator-main')) { $scope.redirectTo('/campaigns'); }
-                $scope.campaign = $scope.campaigns.get(parseInt(params.idCampaign));
                 template.open('campaigns-main', 'administrator/campaign/purse/manage-purse');
                 Utils.safeApply($scope);
             },

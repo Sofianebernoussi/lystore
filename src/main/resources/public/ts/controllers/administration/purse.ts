@@ -5,8 +5,9 @@ import { Mix } from 'entcore-toolkit';
 declare let window: any;
 
 export const purseController = ng.controller('PurseController',
-    ['$scope', ($scope) => {
-        $scope.campaign.purses = new Purses($scope.campaign.id);
+    ['$scope', '$routeParams', ($scope, $routeParams) => {
+        $scope.campaign = $scope.campaigns.get(parseInt($routeParams.idCampaign));
+        $scope.campaign.purses = new Purses($routeParams.idCampaign);
         $scope.campaign.purses.sync().then(() => Utils.safeApply($scope));
 
         $scope.lightbox = {

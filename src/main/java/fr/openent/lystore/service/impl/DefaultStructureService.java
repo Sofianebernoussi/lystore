@@ -14,7 +14,6 @@ import org.vertx.java.core.json.JsonObject;
 public class DefaultStructureService implements StructureService {
 
     private Neo4j neo4j;
-
     public DefaultStructureService(){
         this.neo4j = Neo4j.getInstance();
     }

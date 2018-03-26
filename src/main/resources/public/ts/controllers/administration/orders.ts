@@ -1,9 +1,7 @@
 import {ng, moment, template, _} from 'entcore';
 import {OrderClient, Utils, OrdersClient, Notification, Supplier} from '../../model';
 import {Mix} from 'entcore-toolkit';
-
-
-
+declare let window: any;
 export const orderController = ng.controller('orderController',
     ['$scope',  ($scope) => {
 
@@ -126,4 +124,9 @@ export const orderController = ng.controller('orderController',
             link.download =  reportName + '.pdf';
             link.click();
         };
+        $scope.exportCSV = async() => {
+            let params = Utils.formatKeyToParameter($scope.ordersClient.selected, 'id');
+            window.location = `/lystore/orders/export?${params}`;
+        };
+
     }]);

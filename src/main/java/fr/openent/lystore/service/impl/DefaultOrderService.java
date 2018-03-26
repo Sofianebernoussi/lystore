@@ -180,6 +180,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 statement.getArray("values"),
                 SqlResult.validUniqueResultHandler(handler));
     }
+
     private JsonObject getOptionsOrderDeletion (Integer idOrder){
         String queryDeleteOptionsOrder = "DELETE FROM " + Lystore.lystoreSchema + ".order_client_options"
                 + " WHERE id_order_client_equipment = ? ;";
@@ -400,9 +401,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 .putString("statement",query)
                 .putArray("values",params)
                 .putString("action", "prepared");
-
-
-
     }
 
     @Override
@@ -458,9 +456,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 }
             }
         }));
-
     }
-
 
 
     private static JsonObject getAgentInformation(List<Integer> ids){
@@ -522,6 +518,35 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
             LOGGER.error("An error occurred when launching 'order' transaction");
             handler.handle(new Either.Left<String, JsonObject>(""));
         }
+
+    }
+    @Override
+    public void getExportCsvOrdersAdmin(List<Integer> idsOrders, Handler<Either<String, JsonArray>> handler) {
+
+    String query = "SELECT oce.id, oce.id_structure as idStructure, contract.name as namecontract," +
+            " supplier.name as namesupplier, campaign.name as namecampaign, oce.amount as qty," +
+            " oce.creation_date as date, CASE count(priceOptions)"+
+        "WHEN 0 THEN ROUND ((oce.price+( oce.tax_amount*oce.price)/100)*oce.amount,2)"+
+        "ELSE ROUND((priceOptions +( oce.price + ROUND((oce.tax_amount*oce.price)/100,2)))*oce.amount,2) "+
+        "END as priceTotal "+
+        "FROM "+ Lystore.lystoreSchema +".order_client_equipment  oce "+
+        "LEFT JOIN (SELECT ROUND (SUM(( price +( tax_amount*price)/100)*amount),2) as priceOptions, "+
+        "id_order_client_equipment FROM "+ Lystore.lystoreSchema +".order_client_options  GROUP BY id_order_client_equipment) opts "+
+        "ON oce.id = opts.id_order_client_equipment "+
+        "LEFT JOIN "+ Lystore.lystoreSchema +".contract ON contract.id=oce.id_contract "+
+        "INNER JOIN "+ Lystore.lystoreSchema +".campaign ON campaign.id = oce.id_campaign "+
+        "INNER JOIN "+ Lystore.lystoreSchema +".supplier ON contract.id_supplier = supplier.id "+
+        "WHERE oce.id in "+ Sql.listPrepared(idsOrders.toArray()) +
+        " GROUP BY oce.id, idStructure, qty,date,oce.price, oce.tax_amount, oce.id_campaign, priceOptions," +
+            " namecampaign, namecontract, namesupplier ;";
+
+            JsonArray params = new JsonArray();
+
+            for(Integer id : idsOrders){
+                params.addNumber(id);
+            }
+
+           sql.prepared(query, params, SqlResult.validResultHandler(handler));
 
     }
 }

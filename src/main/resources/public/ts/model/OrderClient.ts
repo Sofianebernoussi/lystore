@@ -134,6 +134,7 @@ export class OrdersClient extends Selection<OrderClient> {
         });
         return total;
     }
+
 }
 
 export class OrderOptionClient implements Selectable {

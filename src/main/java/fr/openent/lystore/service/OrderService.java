@@ -60,6 +60,13 @@ public interface OrderService {
      * @param handler Function handler returning data
      **/
     void windUpOrders(List<Integer> ids, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * get params for the exportCsvOrdersSelected
+     * @param idsOrders list of idsOrders selected
+     * @param handler function returning data
+     */
+    void getExportCsvOrdersAdmin(List<Integer> idsOrders, Handler<Either<String, JsonArray>> handler);
     /**
      * Send orders
      * @param ids

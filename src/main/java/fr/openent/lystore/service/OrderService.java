@@ -67,6 +67,7 @@ public interface OrderService {
      * @param handler function returning data
      */
     void getExportCsvOrdersAdmin(List<Integer> idsOrders, Handler<Either<String, JsonArray>> handler);
+
     /**
      * Send orders
      * @param ids List containing ids

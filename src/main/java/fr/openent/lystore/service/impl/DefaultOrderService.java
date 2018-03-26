@@ -484,9 +484,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 .putString("statement",query)
                 .putArray("values",params)
                 .putString("action", "prepared");
-
-
-
     }
 
     @Override

@@ -206,13 +206,16 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                             public void handle(Either<String, JsonArray> structureArray) {
                                 if(structureArray.isRight()){
                                     Either<String, JsonObject> either;
-                                    JsonArray orders = getOrdersOrderedByEquipment(
-                                            ordersObject.getArray("order"),
-                                            (JsonArray) structureArray.right().getValue());
                                     JsonObject returns = new JsonObject()
-                                            .putArray("ordersObject",ordersObject.getArray("order"))
-                                            .putObject("total",getTotalsOrdersPrices(ordersObject.getArray("order")))
-                                            .putArray("structureArray", (JsonArray) structureArray.right().getValue());
+                                            .putArray("ordersCSF",
+                                                    getOrdersFormatedCSF(ordersObject.getArray("order"),
+                                                            (JsonArray) structureArray.right().getValue()))
+                                            .putArray("ordersBC",
+                                                    getOrdersFormatedBC(ordersObject.getArray("order"),
+                                                            (JsonArray) structureArray.right().getValue()))
+                                            .putObject("total",
+                                                    getTotalsOrdersPrices(ordersObject.getArray("order")))
+                                            ;
                                     either = new Either.Right<>(returns);
                                     handler.handle(either);
                                 }
@@ -221,7 +224,26 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
             }
         });
     }
-    private JsonArray getOrdersOrderedByEquipment (JsonArray ordersArray, JsonArray structures) {
+    private JsonArray getOrdersFormatedCSF (JsonArray ordersArray, JsonArray structures) {
+        JsonArray orders = new JsonArray();
+        JsonObject orderOld;
+        for (int i = 0 ; i< ordersArray.size(); i++){
+            orderOld = ordersArray.get(i);
+            JsonObject order = orderOld
+                        .putObject("structure",
+                                (getStructureObject( structures, orderOld.getString("id_structure"))));
+            if (null ==  orderOld.getArray("options").get(0)) {
+                order.putBoolean("hasOptions", false);
+            } else {
+                order.putBoolean("hasOptions", true);
+            }
+            orders.add(order);
+            }
+
+        return orders;
+    }
+
+    private JsonArray getOrdersFormatedBC (JsonArray ordersArray, JsonArray structures) {
         JsonArray orders = new JsonArray();
         boolean isIn;
         JsonObject orderOld;
@@ -234,7 +256,16 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 if(orderOld.getString("equipment_key")
                         .equals(orderNew.getString("equipment_key"))){
                     isIn = true;
-                    //TODO add the structure to the structureList
+                    JsonArray structure = new JsonArray();
+                    structure = orderNew.getArray("structures");
+                    structure.add(getStructureObject( structures,
+                                    orderOld.getString("id_structure"),
+                                    orderOld.getString("amount"),
+                                    orderOld.getString("number_validation")));
+                    orderNew.putArray("structures", structure);
+                    Integer amount = (Integer.parseInt( orderOld.getString("amount")) +
+                            Integer.parseInt( orderNew.getString("amount"))) ;
+                    orderNew.putString("amount",amount.toString());
                 }
             }
             if(! isIn) {
@@ -250,23 +281,37 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                         .putString("technical_spec", orderOld.getString("technical_spec"))
                         .putString("id_contract", orderOld.getString("id_contract"))
                         .putString("equipment_key", orderOld.getString("equipment_key"))
-                        .putObject("contract", orderOld.getObject("contract"))
-                        .putObject("supplier", orderOld.getObject("supplier"))
-                        .putObject("campaign", orderOld.getObject("campaign"))
-                        .putArray("options",orderOld.getArray("options"))
+                        .putObject("contract", new JsonObject( orderOld.getString("contract")))
+                        .putObject("supplier",new JsonObject( orderOld.getString("supplier")) )
+                        .putObject("campaign", new JsonObject( orderOld.getString("campaign")))
+                        .putArray("options", orderOld.getArray("options"))
                         .putArray("structures", new JsonArray()
-                                .add(getStructureObject( structures, orderOld.getString("id_structure") )) )
-                        ;
+                                .addObject(getStructureObject( structures,
+                                        orderOld.getString("id_structure"),
+                                        orderOld.getString("amount"),
+                                        orderOld.getString("number_validation"))));
                 orders.add(order);
             }
         }
         return orders;
     }
-    private JsonObject getStructureObject(JsonArray structures, String structureId){
+    private JsonObject getStructureObject(JsonArray structures, String structureId ){
         JsonObject structure = new JsonObject();
         for (int i = 0; i < structures.size() ; i++) {
             if(((JsonObject) structures.get(i)).getString("id").equals(structureId)){
                 structure =  structures.get(i);
+            }
+        }
+        return structure;
+    }
+    private JsonObject getStructureObject(JsonArray structures, String structureId,
+                                          String amount, String numberValidation ){
+        JsonObject structure = new JsonObject();
+        for (int i = 0; i < structures.size() ; i++) {
+            if(((JsonObject) structures.get(i)).getString("id").equals(structureId)){
+                structure = ((JsonObject) structures.get(i)).copy();
+                structure.putString("amount", amount)
+                        .putString("number_validation", numberValidation);
             }
         }
         return structure;
@@ -284,6 +329,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         }
         for(int i = 0 ; i < orders.size(); i++) {
             try {
+
                 total += Float.parseFloat( ((JsonObject) orders.get(0)).getString("price")) *
                         Float.parseFloat( ((JsonObject) orders.get(0)).getString("amount"));
             }catch (ClassCastException e) {
@@ -303,17 +349,24 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         JsonArray result = new JsonArray();
         JsonArray idStructures = new JsonArray();
         JsonArray row ;
-        JsonObject newRow = new JsonObject();
+        JsonObject newRow;
         for(int j = 0; j< results.size(); j++){
             row = results.get(j);
+            newRow = new JsonObject();
             for(int i = 0 ; i < fields.size() ; i++){
-                newRow.putString(fields.get(i).toString(),
-                        null != row.get(i) ? row.get(i).toString(): "null");
+
                 if("id_structure".equals(fields.get(i).toString())){
                     idStructures.add(row.get(i).toString());
                 }
+                if ("options".equals(fields.get(i).toString())) {
+                    newRow.putArray(fields.get(i).toString(),
+                            null != row.get(i) ? new JsonArray(row.get(i).toString()) : new JsonArray());
+                }else {
+                    newRow.putString(fields.get(i).toString(),
+                            null != row.get(i) ? row.get(i).toString(): "null");
+                }
             }
-            result.add( newRow);
+            result.addObject(newRow) ;
         }
         return  new JsonObject().putArray("order",result).putArray ("id_structures",idStructures);
     }

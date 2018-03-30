@@ -36,7 +36,7 @@
             width: 50%;
         }
         .right > input {
-            width: 100%;
+            width: 90%;
         }
         .right > h1{
             font-size: 20px ;
@@ -46,9 +46,11 @@
         }
         .foot {
             width: 100%;
+
+        }
+        .break {
             page-break-after: always;
         }
-
         .signature {
             height: 60px;
         }
@@ -82,7 +84,7 @@
         }
         input {
             min-width: 150px ;
-            width: 200px;
+            width: 150px;
             max-width: 100%;
             margin-left: 5px;
             padding-left: 5px ;
@@ -91,13 +93,250 @@
         table > tfoot > tr {
             margin-top: 20px;
         }
-        table tfoot {
-
+        div.service-fait > table.header {
+            margin-bottom: 10px ;
         }
+        div.service-fait > table.equipments-table {
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+        div.service-fait > div.signature {
+            width: 100%;
+            height: 400px;
+        }
+        div.block {
+            border: 0.5px #aaaaaa solid;
+            margin-bottom: 5px ;
+            margin-top: 5px ;
+            padding: 5px;
+            page-break-after: avoid;
+        }
+        div.center-text {
+            text-align: center;
+        }
+        input.text-area {
+            width: 200px;
+            text-align: center;
+            align-content: center;
+            margin-top: 5px;
+        }
+        div.text-area {
+            padding-top: 30px;
+            margin-top: 200px;
+            width: 230px;
+            height: 100px;
+        }
+        td.bigger {
+            width: 70%;
+        }
+        td.smaller {
+            width: 25%;
+        }
+
     </style>
 </head>
 
 <body class="page">
+
+
+
+{{#ordersCSF}}
+<div class="service-fait" >
+    <table class="header">
+        <tr>
+            <td class="left">
+                <img  class="logo-region" src="img/ile_de_france.png" alt="ile de france" />
+
+                <div class="agent-info">
+                    {{#me}}
+                    <strong> Gestionnaire :{{name}}</strong><br/>
+                    {{email}} <br/>
+                    Tel : {{phone}}  <br/>
+                    {{/me}}
+                </div>
+            </td>
+
+            <td class="right">
+                <h1>
+                    CERTIFICAT DE SERVICE FAIT
+                </h1>
+                <strong>
+                    BON DE COMMANDE : <input type="text"  value = "{{nbr_bc}}" /> <br/>
+                </strong>
+                <p>
+                    <strong>
+                        Titulaire du marché :
+                    </strong>
+                    {{#supplier}}
+                    {{name}} <br/>
+                    Address: {{address}} <br/>
+                    Tel : {{phone}}  <br/>
+                    {{/supplier}}
+                </p>
+                <p>
+                    <strong>
+                        Etablissement :
+                    </strong>
+                    {{#structure}}
+                    {{name}} <br/>
+                    RNE: {{uai}} <br/>
+                    {{address}}. <br/>
+                    Tel : {{phone}}  <br/>
+                    {{/structure}}
+                </p>
+            </td>
+        </tr>
+    </table>
+
+    <br/>
+    <strong>Description des l'équipement livré et installé</strong>
+    <table class="equipments-table">
+        <thead>
+        <tr>
+            <td>
+                Nom
+            </td>
+            <td>
+                Quantité
+            </td>
+            <td>
+                Prix U HT
+            </td>
+            <td>
+                Total HT
+            </td>
+        </tr>
+        </thead>
+        <tbody>
+
+        <tr>
+            <td>
+                {{name}}
+            </td>
+            <td>
+                {{amount}}
+            </td>
+            <td>
+                {{ price}}
+            </td>
+            <td>
+                {{total_price}}
+            </td>
+        </tr>
+
+        </tbody>
+    </table>
+    {{#hasOptions}}
+    <br/>
+    <strong>Description des options pour chaque equipment</strong>
+    <table class="equipments-table">
+        <thead>
+        <tr>
+            <td>
+                Nom
+            </td>
+            <td>
+                Quantité
+            </td>
+            <td>
+                Prix U HT
+            </td>
+        </tr>
+        </thead>
+        <tbody>
+        {{#options}}
+        <tr>
+            <td>
+                {{name}}
+            </td>
+            <td>
+                {{amount}}
+            </td>
+            <td>
+                {{price}}
+            </td>
+        </tr>
+        {{/options}}
+        </tbody>
+    </table>
+    {{/hasOptions}}
+
+    <br/>
+    <div class="center-text"><strong>A remplir par le chef d’etablissement ou son représentant</strong></div>
+
+    <div class="block">
+        <strong>DATE DE LIVRASION DU MATERIEL / SERVICE FAIT : <input type="text"  value = "..../..../........" /> <br/> </strong>
+        <p>
+            La date de mise en service sera prise comme référence au calcul de pénalités en cas de non respect du
+            délai de livraison et de mise en service (voir CCAP).  Tout dépassement de délai non imputable au prestataire devra être dûment justifié par un écrit.
+        </p>
+    </div>
+
+    <div class="block">
+        Le chef d’etablissement certifie que les matériels ont été réceptionnés à la date indiquée ci-dessus en parfait état d'usage. <br/>
+
+        A RENVOYER UNE FOIS LES OBSERVATIONS LEVEES EN ORIGINAL  <br/>
+        <br/>
+        A  <input type="text"  value = "..............." />,  le  <input type="text"   />  <br/>
+        Nom:  <input type="text"  value = "..............." />  <br/>
+        Qualité  <input type="text"  value = "..............." /> <br/>
+        SIGNATURE ET CACHET DU PROVISEUR OU DU GESTIONNAIRE :   <br/>
+        <div class="signature" >
+            &nbsp;
+        </div>
+    </div>
+    <br/>
+    <div class="center-text"><strong>A remplir par les services de la Région  </strong> </div>
+    <div class="block">
+        <table>
+            <tr>
+                <td>
+                    Référence facture :
+                </td>
+                <td colspan="2">
+                    <input type="text"  value = "...................." />
+                </td>
+            </tr>
+            <tr>
+                <td>
+
+                </td>
+                <td >
+                    <div class="center-text"> Motifs </div>
+                </td>
+                <td >
+                    <div class="center-text"> Date </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Rejet facture
+                </td>
+                <td >
+                    <input type="text"  value = "...................." />
+                </td>
+                <td >
+                    <input type="text"  value = "....../....../........" />
+                </td>
+            </tr>
+        </table>
+        <br/>
+        Validation du service fait le <input type="text"  value = "....../....../........" /> ,  Par: <input type="text"  value = "..............." />   <br/>
+        A  <input type="text"  value = "..............." /> <br/>
+        SIGNATURE ET CACHET: <br/>
+        <div class="signature" >
+            &nbsp;
+        </div>
+    </div>
+
+</div>
+<div class="break" >
+    &nbsp;
+</div>
+{{/ordersCSF }}
+
+
+
 
 <table class="header">
     <tr>
@@ -134,12 +373,11 @@
         </td>
     </tr>
 </table>
-
 <table class="equipments-table">
     <thead>
     <tr>
         <td>
-           Description
+            Description
         </td>
         <td>
             Quantité
@@ -153,7 +391,7 @@
     </tr>
     </thead>
     <tbody>
-    {{#ordersObject}}
+    {{#ordersBC}}
     <tr>
         <td>
             {{name}}
@@ -162,28 +400,28 @@
             {{amount}}
         </td>
         <td>
-           {{ price}}
+            {{ price}}
         </td>
         <td>
             {{total_price}}
         </td>
     </tr>
-    {{/ordersObject }}
+    {{/ordersBC }}
     </tbody>
     <tfoot>
     {{#total}}
     <tr>
-    <td colspan="2">Total HT</td>
-    <td colspan="2"> {{totalPrice}} </td>
+        <td colspan="2">Total HT</td>
+        <td colspan="2"> {{totalPrice}} </td>
     </tr>
     <tr>
-    <td colspan="2">TVA </td>
+        <td colspan="2">TVA </td>
 
-    <td colspan="2"> {{tva}}</td>
+        <td colspan="2"> {{tva}}</td>
     </tr>
     <tr>
-    <td colspan="2">TOTAL TTC </td>
-    <td colspan="2">{{totalTTC}}</td>
+        <td colspan="2">TOTAL TTC </td>
+        <td colspan="2">{{totalTTC}}</td>
     </tr>
     {{/total}}
     </tfoot>
@@ -192,33 +430,81 @@
 
 <table class="foot">
     <tr>
-        <td class="left">
+        <td class="left bigger">
             <p>
-                Lieu de Livraison, personne à contacter  tel : voir liste des lycées ci-jointe
-                Date de  livraison: Délai contractuel - Article 3.1 du CCAP
-                Reçu par l'entreprise le :
-                (Date - Cachet - Signature)
+                Lieu de Livraison, personne à contacter  tel : voir liste des lycées ci-jointe <br/>
+                Date de  livraison: Délai contractuel - Article 3.1 du CCAP <br/> <br/>
+                Reçu par l'entreprise le :  <input type="text"  value = "....../....../........" /> <br/>
+                (Cachet - Signature)
             </p>
             <div class="signature">
                 &nbsp;
             </div>
         </td>
-        <td class="right">
-            <p >
+        <td class="right smaller ">
+          <div class="block text-area center-text">
                 <strong>
-                    <!--TODO patrick Tondat-->
+                    <input class="text-area center-text" type="text"  value = "...................." />
                 </strong>
-            </p>
+                    <input class="text-area center-text" type="text"  value = "...................." />
+                    <input class="text-area center-text" type="text"  value = "...................." />
+                    <input class="text-area center-text" type="text"  value = "...................." />
+                    <input class="text-area center-text" type="text"  value = "...................." />
+
+            </div>
+
         </td>
     </tr>
 </table>
-
-{{#ordersObject}}
-<div class="orders">
-Marché numéro {{number_validation}} - {{name}} <br/>
-bon de commande N° {{nbr_bc}} - {{#supplier}} {{name}} {{/supplier}}
-
+<div class="break" >
+    &nbsp;
 </div>
-{{/ordersObject}}
+{{#ordersBC}}
+<div class="orders center-text">
+    <h1>
+        Marché numéro {{number_validation}} - {{name}} <br/>
+        bon de commande N° {{nbr_bc}} - {{#supplier}} {{name}} {{/supplier}}
+    </h1>
+</div>
+<table class="equipments-table">
+    <thead>
+    <tr>
+        <td>
+            UAI
+        </td>
+        <td>
+            Nom
+        </td>
+        <td>
+            Commune postale
+        </td>
+        <td>
+            Quantité
+        </td>
+    </tr>
+    </thead>
+    <tbody>
+    {{#structures}}
+    <tr>
+        <td>
+            {{name}}
+        </td>
+        <td>
+            {{name}}
+        </td>
+        <td>
+            {{ zipCode}}
+        </td>
+        <td>
+            {{amount}}
+        </td>
+    </tr>
+    {{/structures }}
+    </tbody>
+</table>
+<div class="break" >
+    &nbsp;
+</div>
+{{/ordersBC}}
 </body>
 </html>

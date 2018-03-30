@@ -37,7 +37,9 @@ public class DefaultStructureService implements StructureService {
 
     @Override
     public void getStructureById(JsonArray ids, Handler<Either<String, JsonArray>> handler) {
-        String query = "MATCH (s:Structure) WHERE s.id IN {ids} return s.id as id, s.UAI as uai, s.name as name";
+        String query = "MATCH (s:Structure) WHERE s.id IN {ids} return s.id as id, s.UAI as uai," +
+                " s.name as name, s.phone as phone, s.address + ' ,' + s.zipCode +' ' + s.city as address,  " +
+                "s.zipCode  as zipCode, s.city as city ";
 
         Neo4j.getInstance().execute(query,
                 new JsonObject().putArray("ids", ids),

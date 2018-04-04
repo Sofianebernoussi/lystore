@@ -77,7 +77,7 @@ export const orderController = ng.controller('orderController',
             ordersToWindUp.all = Mix.castArrayAs(OrderClient, orders);
             let { status } = await ordersToWindUp.updateStatus('DONE');
             if (status === 200) {
-                $scope.notifications.push(new Notification( 'lystore.windUp.notif' , 'confirm'));
+                $scope.notifications.push(new Notification('lystore.windUp.notif', 'confirm'));
             }
             await $scope.ordersClient.sync($scope.structures.all);
             $scope.ordersClient.all = _.where($scope.ordersClient.all, {status: 'SENT'});

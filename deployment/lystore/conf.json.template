@@ -16,6 +16,9 @@
         "entcore.port" : 8009,
         "sql": true,
         "db-schema": "lystore",
+        "exports" : {
+            "template-path" : "./public/template/pdf/"
+        },
         "slack": {
             "token": "",
             "api-uri": "",

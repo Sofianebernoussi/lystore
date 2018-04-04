@@ -87,7 +87,7 @@ export class OrdersClient extends Selection<OrderClient> {
                         : order.options = [];
                     order.creation_date = moment(order.creation_date).format('L');
                     order.name_structure =  structures.length > 0 ? this.initNameStructure(order.id_structure, structures) : '';
-                    order.priceTTCtotal = parseFloat(order.calculatePriceTTC(2).toString()) * order.amount;
+                    order.priceTTCtotal = parseFloat((order.calculatePriceTTC(2) as number).toString()) * order.amount;
                 });
             }
         } catch (e) {
@@ -108,8 +108,8 @@ export class OrdersClient extends Selection<OrderClient> {
     }
     async updateStatus(status: string) {
         try {
-            return  await  http.put(`/lystore/orders/${status.toLowerCase()}`, this.toJson(status) , {responseType: 'arraybuffer'});
-
+            let config = status === 'SENT' ? {responseType: 'arraybuffer'} : {};
+            return  await  http.put(`/lystore/orders/${status.toLowerCase()}`, this.toJson(status), config);
         } catch (e) {
             notify.error('lystore.order.update.err');
             throw e;
@@ -130,7 +130,7 @@ export class OrdersClient extends Selection<OrderClient> {
     calculTotalPriceTTC () {
         let total = 0;
         this.all.map((order) => {
-            total += parseFloat( order.calculatePriceTTC().toString()) * order.amount;
+            total += parseFloat((order.calculatePriceTTC() as number).toString()) * order.amount;
         });
         return total;
     }

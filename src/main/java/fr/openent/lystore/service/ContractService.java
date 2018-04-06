@@ -37,4 +37,11 @@ public interface ContractService {
      */
     void deleteContract (List<Integer> ids, Handler<Either<String, JsonObject>> handler);
 
+    /**
+     * Return contract based on order ids
+     * @param ids order ids
+     * @param handler Function handler returning data
+     */
+    void getContract(JsonArray ids, Handler<Either<String, JsonArray>> handler);
+
 }

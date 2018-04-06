@@ -1,0 +1,480 @@
+<div class="order-preview">
+    <style type="text/css">
+
+        .pdf-generation-preview .prev-next {
+            margin-top: 50px;
+        }
+
+        .order-preview {
+            margin-top: 50px;
+            font-family: "Calibri", sans-serif !important;
+            align-content: center !important;
+            color: #000000 !important;
+        }
+
+        .order-preview h1,
+        .order-preview h2,
+        .order-preview h3,
+        .order-preview h4,
+        .order-preview h5 {
+            color: #000000 !important;
+        }
+
+        .order-preview .logo-region{
+            height: auto;
+            width: 300px;
+            border-bottom: 1px #f6f6f6 solid ;
+            margin-bottom: 5px;
+        }
+
+        .order-preview  .left {
+            position: relative;
+            width: 45%;
+            margin-right: 5%;
+            display: inline-block;
+        }
+
+        .order-preview  .left::before {
+            content: none !important;
+        }
+        .order-preview  .right {
+            position: relative;
+            margin-left: 5%;
+            width: 44%;
+            display: inline-block;
+        }
+
+        .order-preview  .order-info {
+            margin-top: 25px;
+            margin-bottom: 25px;
+        }
+
+        .order-preview  .right > input {
+            width: 90%;
+        }
+        .order-preview  .right > h1{
+            font-size: 20px ;
+        }
+        .order-preview  .header {
+            width: 100%;
+        }
+        .order-preview  .foot {
+            width: 100%;
+            margin-top: 35px;
+        }
+
+        .order-preview  .fright {
+            float: right;
+        }
+
+        .order-preview  .signature {
+            height: 60px;
+        }
+        .order-preview .equipments-table  {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+        }
+        .order-preview  .equipments-table tfoot tr td:first-child  {
+            font-weight: bold;
+        }
+        .order-preview  .equipments-table tr  td {
+            width: auto;
+            padding-top:10px;
+            padding-left: 10px ;
+            padding-bottom:10px;
+            border: 1px solid #ddd;
+        }
+
+        .order-preview  table.equipments-table > tbody tr:nth-child(odd) td {
+            background-color: #efefef;
+        }
+        .order-preview  table.equipments-table > tbody tr:nth-child(even) td {
+            background-color: #f2f4f6;
+        }
+
+        .order-preview  table > thead {
+            font-size: 14px ;
+            font-weight: bold;
+            text-align: center;
+        }
+        .order-preview  input {
+            min-width: 150px ;
+            width: 150px;
+            max-width: 100%;
+            margin-left: 5px;
+            padding-left: 5px ;
+        }
+
+        .order-preview  table > tfoot > tr {
+            margin-top: 20px;
+        }
+        .order-preview  div.service-fait > table.header {
+            margin-bottom: 10px ;
+        }
+        .order-preview  div.service-fait > table.equipments-table {
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+        .order-preview  div.service-fait > div.signature {
+            width: 100%;
+            height: 400px;
+        }
+        .order-preview  div.block {
+            border: 0.5px #aaaaaa solid;
+            margin-bottom: 5px ;
+            margin-top: 5px ;
+            padding: 5px;
+            page-break-after: avoid;
+        }
+        .order-preview  .center-text {
+            text-align: center;
+        }
+
+        .order-preview  .right-text {
+            text-align: right;
+            padding-right: 5px;
+        }
+
+        .order-preview .bigger {
+            width: 70%;
+        }
+
+        .order-preview  .smaller {
+            width: 25%;
+        }
+
+        .order-preview  .uppercase {
+            text-transform: uppercase;
+        }
+
+        .order-preview .orders {
+            margin-bottom: 50px;
+        }
+
+        .order-preview .header h4, .order-preview  .header h5 {
+            margin: 5px;
+        }
+
+        .order-preview .signature:not(:empty) {
+            border-top: 0 !important;
+        }
+
+        .order-preview table thead td {
+            background-color: #fff;
+            color: #000;
+        }
+
+    </style>
+    <div ng-if="display.generation.type === 'ORDER'">
+        <div class="header">
+            <div>
+                <div class="left center-text">
+                    <img  class="logo-region" src="/lystore/public/img/ile_de_france.png" alt="ile de france" />
+                    <h4>REGION ILE DE FRANCE</h4>
+                    <h5>PÔLE LYCÉES</h5>
+                    <p>
+                        <span class="uppercase">Mission administration, pilotage et projets transverses</span><br />
+                        Service administratif et juridique<br />
+                        2, rue Simone Veil, 93400 Saint-Ouen
+                    </p>
+                </div>
+                <div class="right">
+                    <h1>
+                        BON DE COMMANDE
+                    </h1>
+                    <strong>
+                        N°: <span ng-bind="orderToSend.bc_number"></span> <br/>
+                    </strong>
+                    <p>
+                        Du: <span ng-bind="formatDate(orderToSend.dateGeneration, 'DD/MM/YYYY')"></span><br/>
+                        <br/>
+                        [[ orderToSend.preview.supplier.name ]] <br/>
+                        [[ orderToSend.preview.supplier.address ]]  <br/>
+                        Tel : [[ orderToSend.preview.supplier.phone ]]  <br/>
+
+                        N° ENGAGEMENT:  <span ng-bind="orderToSend.engagement_number"></span>
+                    </p>
+                </div>
+            </div>
+            <div class="order-info">
+                <div class="contract-info">
+                    <h2>
+                        MARCHE N° : [[ orderToSend.preview.contract.reference ]]
+                    </h2>
+                </div>
+                <div class="agent-info">
+                    <strong>[[ orderToSend.preview.agent.name ]] <br/> </strong>
+                    [[ orderToSend.preview.agent.email ]] <br/>
+                    Tel : [[ orderToSend.preview.agent.phone ]] <br/>
+                </div>
+            </div>
+        </div>
+        <table class="equipments-table">
+            <thead>
+            <tr>
+                <td>
+                    Description
+                </td>
+                <td class="right-text">
+                    Quantité
+                </td>
+                <td class="right-text">
+                    PU HT (€)
+                </td>
+                <td class="right-text">
+                    Total HT (€)
+                </td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="order in orderToSend.preview.order.orders">
+                <td>
+                    [[ order.name ]]
+                </td>
+                <td class="right-text">
+                    [[ order.amount ]]
+                </td>
+                <td class="right-text">
+                    [[ order.priceLocale ]]
+                </td>
+                <td class="right-text">
+                    [[ order.totalPriceLocale ]]
+                </td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+                <td colspan="3">Total HT</td>
+                <td class="right-text"> [[ orderToSend.preview.order.sumLocale ]] </td>
+            </tr>
+            <tr>
+                <td colspan="3">TVA </td>
+                <td class="right-text"> [[ orderToSend.preview.order.totalTaxesLocale ]]</td>
+            </tr>
+            <tr>
+                <td colspan="3">TOTAL TTC </td>
+                <td class="right-text">[[ orderToSend.preview.order.totalPriceTaxeIncludedLocal ]]</td>
+            </tr>
+            </tfoot>
+        </table>
+
+        <div class="foot">
+            <div class="left">
+                <p class="bigger">
+                    Lieu de Livraison, personne à contacter  tel : voir liste des lycées ci-jointe <br/>
+                    Date de  livraison: Délai contractuel - Article 3.1 du CCAP <br/> <br/>
+                    Reçu par l'entreprise le :  <span>....../....../........</span> <br/>
+                    (Cachet - Signature)
+                </p>
+                <div class="signature">
+                    &nbsp;
+                </div>
+            </div>
+            <div class="right">
+                <div class="block text-area center-text bigger fright">
+                    <strong>
+                        Patrick TONDAT <br />
+                    </strong>
+                    Directeur Général Adjoint des Services de la Région Île-de-France et chargé du Pôle lycées
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="break"  ng-if="display.generation.type === 'CERTIFICATES'">
+        <div class="service-fait">
+            <div class="header">
+                <div>
+                    <div class="left center-text">
+                        <img  class="logo-region" src="/lystore/public/img/ile_de_france.png" alt="ile de france" />
+                        <h4>REGION ILE DE FRANCE</h4>
+                        <h5>PÔLE LYCÉES</h5>
+                        <p>
+                            <span class="uppercase">Mission administration, pilotage et projets transverses</span><br />
+                            Service administratif et juridique<br />
+                            2, rue Simone Veil, 93400 Saint-Ouen
+                        </p>
+                    </div>
+                    <div class="right">
+                        <h1>
+                            CERTIFICAT DE SERVICE FAIT
+                        </h1>
+                        <p>
+                        <h4>Titulaire du marché :</h4>
+                        [[ orderToSend.preview.certificates[orderToSend.preview.index].supplier.name ]] <br/>
+                        [[ orderToSend.preview.certificates[orderToSend.preview.index].supplier.address ]] <br/>
+                        Tel : [[ orderToSend.preview.certificates[orderToSend.preview.index].supplier.phone ]]  <br/>
+                        <h4>Etablissement :</h4>
+                        [[ orderToSend.preview.certificates[orderToSend.preview.index].structure.name ]] <br />
+                        [[ orderToSend.preview.certificates[orderToSend.preview.index].structure.address ]] <br />
+                        [[ orderToSend.preview.certificates[orderToSend.preview.index].structure.zipCode ]] - [[ orderToSend.preview.certificates[orderToSend.preview.index].structure.city ]] <br />
+                        Tel : [[ orderToSend.preview.certificates[orderToSend.preview.index].structure.phone ]]
+                        </p>
+                    </div>
+                </div>
+                <div class="order-info">
+                    <div class="agent-info">
+                        <strong>[[ orderToSend.preview.certificates[orderToSend.preview.index].agent.name ]]<br/></strong>
+                        [[ orderToSend.preview.certificates[orderToSend.preview.index].agent.email ]]<br/>
+                        Tel : [[ orderToSend.preview.certificates[orderToSend.preview.index].agent.phone ]]
+                    </div>
+                </div>
+            </div>
+
+            <br/>
+            <strong>Description de l'équipement livré et installé</strong>
+            <table class="equipments-table">
+                <thead>
+                <tr>
+                    <td>
+                        Nom
+                    </td>
+                    <td>
+                        Quantité
+                    </td>
+                    <td>
+                        Prix U HT
+                    </td>
+                    <td>
+                        Total HT
+                    </td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="order in orderToSend.preview.certificates[orderToSend.preview.index].orders">
+                    <td>
+                        [[ order.name ]]
+                    </td>
+                    <td class="right-text">
+                        [[ order.amount ]]
+                    </td>
+                    <td class="right-text">
+                        [[ order.priceLocale ]]
+                    </td>
+                    <td class="right-text">
+                        [[ order.totalPriceLocale ]]
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <br/>
+            <div class="center-text"><strong>A remplir par le chef d’établissement ou son représentant</strong></div>
+
+            <div class="block">
+                <strong>DATE DE LIVRAISON DU MATERIEL / SERVICE FAIT : <span>"..../..../........"</span><br/> </strong>
+                <p>
+                    La date de mise en service sera prise comme référence au calcul de pénalités en cas de non respect du
+                    délai de livraison et de mise en service (voir CCAP).  Tout dépassement de délai non imputable au prestataire devra être dûment justifié par un écrit.
+                </p>
+            </div>
+
+            <div class="block">
+                Le chef d’etablissement certifie que les matériels ont été réceptionnés à la date indiquée ci-dessus en parfait état d'usage. <br/>
+
+                A RENVOYER UNE FOIS LES OBSERVATIONS LEVEES EN ORIGINAL  <br/>
+                <br/>
+                A  <span>...............</span>,  le <br/>
+                Nom:  <span>...............</span><br/>
+                Qualité  <span>...............</span><br/>
+                SIGNATURE ET CACHET DU PROVISEUR OU DU GESTIONNAIRE :   <br/>
+                <div class="signature" >
+                    &nbsp;
+                </div>
+            </div>
+            <br/>
+            <div class="center-text"><strong>A remplir par les services de la Région  </strong> </div>
+            <div class="block">
+                <table>
+                    <tr>
+                        <td>
+                            Référence facture :
+                        </td>
+                        <td colspan="2">
+                            <span>...............</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+
+                        </td>
+                        <td >
+                            <div class="center-text"> Motifs </div>
+                        </td>
+                        <td >
+                            <div class="center-text"> Date </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Rejet facture
+                        </td>
+                        <td >
+                            <span>...............</span>
+                        </td>
+                        <td >
+                            <span>....../....../........</span>
+                        </td>
+                    </tr>
+                </table>
+                <br/>
+                Validation du service fait le <span>....../....../........</span>,  Par: <span>...............</span><br/>
+                A  <span>...............</span><br/>
+                SIGNATURE ET CACHET: <br/>
+                <div class="signature" >
+                    &nbsp;
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="break"  ng-if="display.generation.type === 'CONTRACT_VIEW'">
+        <div class="orders center-text">
+            <h1>
+                Marché numéro [[ orderToSend.preview.contract.reference ]] - [[ orderToSend.preview.contract.name ]]<br/>
+                bon de commande N° [[ orderToSend.bc_number ]] - [[ orderToSend.preview.supplier.name ]]
+            </h1>
+        </div>
+        <table class="equipments-table">
+            <thead>
+            <tr>
+                <td>
+                    UAI
+                </td>
+                <td>
+                    Nom
+                </td>
+                <td>
+                    Commune postale
+                </td>
+                <td>
+                    Equipement/Prestation
+                </td>
+                <td>
+                    Quantité
+                </td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="order in concatOrders()">
+                <td>
+                    [[ order.structure.uai ]]
+                </td>
+                <td>
+                    [[ order.structure.name ]]
+                </td>
+                <td>
+                    [[ order.structure.zipCode ]]
+                </td>
+                <td>
+                    [[ order.name ]]
+                </td>
+                <td>
+                    [[ order.amount ]]
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

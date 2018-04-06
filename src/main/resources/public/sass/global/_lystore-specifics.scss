@@ -632,4 +632,14 @@ body.lystore {
       font-weight: bold;
     }
   }
+
+  .pdf-generation-preview {
+    input[type="text"] {
+      margin-bottom: 0 !important;
+    }
+
+    nav.prev-next {
+      justify-content: center !important;
+    }
+  }
 }

@@ -23,7 +23,7 @@ public interface OrderService {
     void listExport(Integer idCampaign, String idStructure,Handler<Either<String, JsonArray>> handler);
     /**
      * Get the list of all orders
-     * @param handler
+     * @param handler Function handler returning data
      */
     void listOrder(Handler<Either<String, JsonArray>> handler);
     /**
@@ -56,9 +56,9 @@ public interface OrderService {
 
     /**
      * Wind up orders
-     * @param ids
-     * @param handler
-     */
+     * @param ids List containing ids
+     * @param handler Function handler returning data
+     **/
     void windUpOrders(List<Integer> ids, Handler<Either<String, JsonObject>> handler);
 
     /**
@@ -69,8 +69,47 @@ public interface OrderService {
     void getExportCsvOrdersAdmin(List<Integer> idsOrders, Handler<Either<String, JsonArray>> handler);
     /**
      * Send orders
-     * @param ids
-     * @param handler
+     * @param ids List containing ids
+     * @param handler Function handler returning data
      */
     void sendOrders(List<Integer> ids, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Update status order
+     * @param ids order id list
+     * @param status status to update
+     * @param handler Function handler returning data
+     */
+    void updateStatus(List<Integer> ids, String status, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * List orders based on ids
+     * @param ids order ids
+     * @param handler Function handler returning data
+     */
+    void listOrders(List<Integer> ids, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Get structure ids based on provided order ids
+     * @param ids order ids
+     * @param handler Function handler returning data
+     */
+    void getStructuresId(JsonArray ids, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * List an union of equipments and options based on order ids
+     * @param ids order ids
+     * @param structureId structure id
+     * @param handler function handler returning data
+     */
+    void getOrders(JsonArray ids, String structureId, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Add file id to order ids
+     * @param ids Order ids
+     * @param fileId File id
+     */
+    void addFileId(JsonArray ids, String fileId);
+
+    void getOrderByIds(JsonArray ids, Handler<Either<String, JsonArray>> handler);
 }

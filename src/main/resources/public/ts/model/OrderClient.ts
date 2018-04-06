@@ -1,4 +1,4 @@
-import { notify, moment, _ , model} from 'entcore';
+import { notify, moment, _ , model } from 'entcore';
 import { Selectable, Selection, Mix } from 'entcore-toolkit';
 import { TechnicalSpec, Contract, Supplier, Campaign, Structure, Utils } from './index';
 import http from 'axios';
@@ -95,17 +95,28 @@ export class OrdersClient extends Selection<OrderClient> {
         }
     }
 
-    toJson (status) {
+    toJson (status: string) {
         return {
             ids: _.pluck(this.all, 'id') ,
             status : status,
             bc_number: this.bc_number || null,
             engagement_number: this.engagement_number || null,
             dateGeneration: moment(this.dateGeneration).format('DD/MM/YYYY') || null,
-            supplier : this.supplier,
+            supplierId : this.supplier.id,
             userId : model.me.userId
         };
     }
+
+    async getPreviewData (): Promise<any> {
+        try {
+            const params = Utils.formatGetParameters(this.toJson('SENT'));
+            const { data } = await http.get(`lystore/orders/preview?${params}`);
+            return data;
+        } catch (e) {
+            throw e;
+        }
+    }
+
     async updateStatus(status: string) {
         try {
             let config = status === 'SENT' ? {responseType: 'arraybuffer'} : {};

@@ -12,7 +12,6 @@
             align-content: center;
         }
         .page {
-            page-break-after: always;
             display: block;
         }
         @page {
@@ -29,12 +28,22 @@
         }
         .left {
             position: relative;
-            width: 300px;
+            width: 45%;
+            margin-right: 5%;
+            display: inline-block;
         }
         .right {
             position: relative;
-            width: 50%;
+            margin-left: 5%;
+            width: 44%;
+            display: inline-block;
         }
+
+        .order-info {
+            margin-top: 25px;
+            margin-bottom: 25px;
+        }
+
         .right > input {
             width: 90%;
         }
@@ -46,10 +55,15 @@
         }
         .foot {
             width: 100%;
-
+            margin-top: 35px;
         }
+
+        .fright {
+            float: right;
+        }
+
         .break {
-            page-break-after: always;
+            page-break-before: always;
         }
         .signature {
             height: 60px;
@@ -111,247 +125,52 @@
             padding: 5px;
             page-break-after: avoid;
         }
-        div.center-text {
+        .center-text {
             text-align: center;
         }
-        input.text-area {
-            width: 200px;
-            text-align: center;
-            align-content: center;
-            margin-top: 5px;
+
+        .right-text {
+            text-align: right;
+            padding-right: 5px;
         }
-        div.text-area {
-            padding-top: 30px;
-            margin-top: 200px;
-            width: 230px;
-            height: 100px;
-        }
-        td.bigger {
+
+        .bigger {
             width: 70%;
         }
-        td.smaller {
+
+        .smaller {
             width: 25%;
+        }
+
+        .uppercase {
+            text-transform: uppercase;
+        }
+
+        .orders {
+            margin-bottom: 50px;
+        }
+
+        .header h4, .header h5 {
+            margin: 5px;
         }
 
     </style>
 </head>
 
 <body class="page">
-
-
-
-{{#ordersCSF}}
-<div class="service-fait" >
-    <table class="header">
-        <tr>
-            <td class="left">
-                <img  class="logo-region" src="img/ile_de_france.png" alt="ile de france" />
-
-                <div class="agent-info">
-                    {{#me}}
-                    <strong> Gestionnaire :{{name}}</strong><br/>
-                    {{email}} <br/>
-                    Tel : {{phone}}  <br/>
-                    {{/me}}
-                </div>
-            </td>
-
-            <td class="right">
-                <h1>
-                    CERTIFICAT DE SERVICE FAIT
-                </h1>
-                <strong>
-                    BON DE COMMANDE : <input type="text"  value = "{{nbr_bc}}" /> <br/>
-                </strong>
-                <p>
-                    <strong>
-                        Titulaire du marché :
-                    </strong>
-                    {{#supplier}}
-                    {{name}} <br/>
-                    Address: {{address}} <br/>
-                    Tel : {{phone}}  <br/>
-                    {{/supplier}}
-                </p>
-                <p>
-                    <strong>
-                        Etablissement :
-                    </strong>
-                    {{#structure}}
-                    {{name}} <br/>
-                    RNE: {{uai}} <br/>
-                    {{address}}. <br/>
-                    Tel : {{phone}}  <br/>
-                    {{/structure}}
-                </p>
-            </td>
-        </tr>
-    </table>
-
-    <br/>
-    <strong>Description des l'équipement livré et installé</strong>
-    <table class="equipments-table">
-        <thead>
-        <tr>
-            <td>
-                Nom
-            </td>
-            <td>
-                Quantité
-            </td>
-            <td>
-                Prix U HT
-            </td>
-            <td>
-                Total HT
-            </td>
-        </tr>
-        </thead>
-        <tbody>
-
-        <tr>
-            <td>
-                {{name}}
-            </td>
-            <td>
-                {{amount}}
-            </td>
-            <td>
-                {{ price}}
-            </td>
-            <td>
-                {{total_price}}
-            </td>
-        </tr>
-
-        </tbody>
-    </table>
-    {{#hasOptions}}
-    <br/>
-    <strong>Description des options pour chaque equipment</strong>
-    <table class="equipments-table">
-        <thead>
-        <tr>
-            <td>
-                Nom
-            </td>
-            <td>
-                Quantité
-            </td>
-            <td>
-                Prix U HT
-            </td>
-        </tr>
-        </thead>
-        <tbody>
-        {{#options}}
-        <tr>
-            <td>
-                {{name}}
-            </td>
-            <td>
-                {{amount}}
-            </td>
-            <td>
-                {{price}}
-            </td>
-        </tr>
-        {{/options}}
-        </tbody>
-    </table>
-    {{/hasOptions}}
-
-    <br/>
-    <div class="center-text"><strong>A remplir par le chef d’etablissement ou son représentant</strong></div>
-
-    <div class="block">
-        <strong>DATE DE LIVRASION DU MATERIEL / SERVICE FAIT : <input type="text"  value = "..../..../........" /> <br/> </strong>
-        <p>
-            La date de mise en service sera prise comme référence au calcul de pénalités en cas de non respect du
-            délai de livraison et de mise en service (voir CCAP).  Tout dépassement de délai non imputable au prestataire devra être dûment justifié par un écrit.
-        </p>
-    </div>
-
-    <div class="block">
-        Le chef d’etablissement certifie que les matériels ont été réceptionnés à la date indiquée ci-dessus en parfait état d'usage. <br/>
-
-        A RENVOYER UNE FOIS LES OBSERVATIONS LEVEES EN ORIGINAL  <br/>
-        <br/>
-        A  <input type="text"  value = "..............." />,  le  <input type="text"   />  <br/>
-        Nom:  <input type="text"  value = "..............." />  <br/>
-        Qualité  <input type="text"  value = "..............." /> <br/>
-        SIGNATURE ET CACHET DU PROVISEUR OU DU GESTIONNAIRE :   <br/>
-        <div class="signature" >
-            &nbsp;
-        </div>
-    </div>
-    <br/>
-    <div class="center-text"><strong>A remplir par les services de la Région  </strong> </div>
-    <div class="block">
-        <table>
-            <tr>
-                <td>
-                    Référence facture :
-                </td>
-                <td colspan="2">
-                    <input type="text"  value = "...................." />
-                </td>
-            </tr>
-            <tr>
-                <td>
-
-                </td>
-                <td >
-                    <div class="center-text"> Motifs </div>
-                </td>
-                <td >
-                    <div class="center-text"> Date </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Rejet facture
-                </td>
-                <td >
-                    <input type="text"  value = "...................." />
-                </td>
-                <td >
-                    <input type="text"  value = "....../....../........" />
-                </td>
-            </tr>
-        </table>
-        <br/>
-        Validation du service fait le <input type="text"  value = "....../....../........" /> ,  Par: <input type="text"  value = "..............." />   <br/>
-        A  <input type="text"  value = "..............." /> <br/>
-        SIGNATURE ET CACHET: <br/>
-        <div class="signature" >
-            &nbsp;
-        </div>
-    </div>
-
-</div>
-<div class="break" >
-    &nbsp;
-</div>
-{{/ordersCSF }}
-
-
-
-
-<table class="header">
-    <tr>
-        <td class="left">
+<div class="header">
+    <div>
+        <div class="left center-text">
             <img  class="logo-region" src="img/ile_de_france.png" alt="ile de france" />
-
-            <div class="agent-info">
-                {{#me}}
-                <strong>{{name}} <br/> </strong>
-                {{email}} <br/>
-                Tel : {{phone}}  <br/>
-                {{/me}}
-            </div>
-        </td>
-        <td class="right">
+            <h4>REGION ILE DE FRANCE</h4>
+            <h5>PÔLE LYCÉES</h5>
+            <p>
+                <span class="uppercase">Mission administration, pilotage et projets transverses</span><br />
+                Service administratif et juridique<br />
+                2, rue Simone Veil, 93400 Saint-Ouen
+            </p>
+        </div>
+        <div class="right">
             <h1>
                 BON DE COMMANDE
             </h1>
@@ -369,10 +188,27 @@
 
                 N° ENGAGEMENT:  <input type="text" value = "{{nbr_engagement}}" />
             </p>
-
-        </td>
-    </tr>
-</table>
+        </div>
+    </div>
+    <div class="order-info">
+        <div class="contract-info">
+            <input type="text" style="width: 300px;"/>
+            {{#contract}}
+            <h2>
+                MARCHE N° : {{reference}}
+            </h2>
+            {{/contract}}
+        </div>
+        <div class="agent-info">
+            {{#agent}}
+            <strong>{{name}} <br/> </strong>
+            {{email}} <br/>
+            Tel : {{phone}}  <br/>
+            {{/agent}}
+        </div>
+    </div>
+</div>
+{{#order}}
 <table class="equipments-table">
     <thead>
     <tr>
@@ -380,133 +216,284 @@
 
             Description
         </td>
-        <td>
+        <td class="right-text">
             Quantité
         </td>
-        <td>
-            Prix U HT
+        <td class="right-text">
+            PU HT (€)
         </td>
-        <td>
-            Total HT
+        <td class="right-text">
+            Total HT (€)
         </td>
     </tr>
     </thead>
     <tbody>
-    {{#ordersBC}}
+    {{#orders}}
     <tr>
         <td>
             {{name}}
         </td>
-        <td>
+        <td class="right-text">
             {{amount}}
         </td>
-        <td>
-
-            {{ price}}
+        <td class="right-text">
+            {{priceLocale}}
         </td>
-        <td>
-            {{total_price}}
+        <td class="right-text">
+            {{totalPriceLocale}}
         </td>
     </tr>
-    {{/ordersBC }}
+    {{/orders}}
     </tbody>
     <tfoot>
-    {{#total}}
     <tr>
-<td colspan="2">Total HT</td>
-    <td colspan="2"> {{totalPrice}} </td>
+        <td colspan="3">Total HT</td>
+        <td class="right-text"> {{sumLocale}} </td>
     </tr>
     <tr>
-    <td colspan="2">TVA </td>
-
-    <td colspan="2"> {{tva}}</td>
+        <td colspan="3">TVA </td>
+        <td class="right-text"> {{totalTaxesLocale}}</td>
     </tr>
     <tr>
-    <td colspan="2">TOTAL TTC </td>
-    <td colspan="2">{{totalTTC}}</td>
+        <td colspan="3">TOTAL TTC </td>
+        <td class="right-text">{{totalPriceTaxeIncludedLocal}}</td>
     </tr>
-    {{/total}}
     </tfoot>
 </table>
+{{/order}}
 
+<div class="foot">
+    <div class="left">
+        <p class="bigger">
+            Lieu de Livraison, personne à contacter  tel : voir liste des lycées ci-jointe <br/>
+            Date de  livraison: Délai contractuel - Article 3.1 du CCAP <br/> <br/>
+            Reçu par l'entreprise le :  <input type="text"  value = "....../....../........" /> <br/>
+            (Cachet - Signature)
+        </p>
+        <div class="signature">
+            &nbsp;
+        </div>
+    </div>
+    <div class="right">
+        <div class="block text-area center-text bigger fright">
+            <strong>
+                Patrick TONDAT <br />
+            </strong>
+            Directeur Général Adjoint des Services de la Région Île-de-France et chargé du Pôle lycées
+        </div>
 
-<table class="foot">
-    <tr>
-        <td class="left bigger">
+    </div>
+</div>
+{{#certificates}}
+<div class="break">
+    <div class="service-fait" >
+        <div class="header">
+            <div>
+                <div class="left center-text">
+                    <img  class="logo-region" src="img/ile_de_france.png" alt="ile de france" />
+                    <h4>REGION ILE DE FRANCE</h4>
+                    <h5>PÔLE LYCÉES</h5>
+                    <p>
+                        <span class="uppercase">Mission administration, pilotage et projets transverses</span><br />
+                        Service administratif et juridique<br />
+                        2, rue Simone Veil, 93400 Saint-Ouen
+                    </p>
+                </div>
+                <div class="right">
+                    <h1>
+                        CERTIFICAT DE SERVICE FAIT
+                    </h1>
+                    <p>
+                        {{#supplier}}
+                        <h4>Titulaire du marché :</h4>
+                        {{name}} <br/>
+                        {{address}} <br/>
+                        Tel : {{phone}}  <br/>
+                        {{/supplier}}
+                        <h4>Etablissement :</h4>
+                        {{#structure}}
+                        {{name}} <br />
+                        {{address}} <br />
+                        {{zipCode}} - {{city}} <br />
+                        Tel : {{phone}}
+                        {{/structure}}
+                    </p>
+                </div>
+            </div>
+            <div class="order-info">
+                <div class="agent-info">
+                    {{#agent}}
+                    <strong>{{name}} <br/> </strong>
+                    {{email}} <br/>
+                    Tel : {{phone}}  <br/>
+                    {{/agent}}
+                </div>
+            </div>
+        </div>
+
+        <br/>
+        <strong>Description de l'équipement livré et installé</strong>
+        <table class="equipments-table">
+            <thead>
+            <tr>
+                <td>
+                    Nom
+                </td>
+                <td>
+                    Quantité
+                </td>
+                <td>
+                    Prix U HT
+                </td>
+                <td>
+                    Total HT
+                </td>
+            </tr>
+            </thead>
+            <tbody>
+            {{#orders}}
+            <tr>
+                <td>
+                    {{name}}
+                </td>
+                <td class="right-text">
+                    {{amount}}
+                </td>
+                <td class="right-text">
+                    {{priceLocale}}
+                </td>
+                <td class="right-text">
+                    {{totalPriceLocale}}
+                </td>
+            </tr>
+            {{/orders}}
+            </tbody>
+        </table>
+
+        <br/>
+        <div class="center-text"><strong>A remplir par le chef d’établissement ou son représentant</strong></div>
+
+        <div class="block">
+            <strong>DATE DE LIVRAISON DU MATERIEL / SERVICE FAIT : <input type="text"  value = "..../..../........" /> <br/> </strong>
             <p>
-                Lieu de Livraison, personne à contacter  tel : voir liste des lycées ci-jointe <br/>
-                Date de  livraison: Délai contractuel - Article 3.1 du CCAP <br/> <br/>
-                Reçu par l'entreprise le :  <input type="text"  value = "....../....../........" /> <br/>
-                (Cachet - Signature)
+                La date de mise en service sera prise comme référence au calcul de pénalités en cas de non respect du
+                délai de livraison et de mise en service (voir CCAP).  Tout dépassement de délai non imputable au prestataire devra être dûment justifié par un écrit.
             </p>
-            <div class="signature">
+        </div>
+
+        <div class="block">
+            Le chef d’etablissement certifie que les matériels ont été réceptionnés à la date indiquée ci-dessus en parfait état d'usage. <br/>
+
+            A RENVOYER UNE FOIS LES OBSERVATIONS LEVEES EN ORIGINAL  <br/>
+            <br/>
+            A  <input type="text"  value = "..............." />,  le  <input type="text"   />  <br/>
+            Nom:  <input type="text"  value = "..............." />  <br/>
+            Qualité  <input type="text"  value = "..............." /> <br/>
+            SIGNATURE ET CACHET DU PROVISEUR OU DU GESTIONNAIRE :   <br/>
+            <div class="signature" >
                 &nbsp;
             </div>
-        </td>
-        <td class="right smaller ">
-          <div class="block text-area center-text">
-                <strong>
-                    <input class="text-area center-text" type="text"  value = "...................." />
-                </strong>
-                    <input class="text-area center-text" type="text"  value = "...................." />
-                    <input class="text-area center-text" type="text"  value = "...................." />
-                    <input class="text-area center-text" type="text"  value = "...................." />
-                    <input class="text-area center-text" type="text"  value = "...................." />
+        </div>
+        <br/>
+        <div class="center-text"><strong>A remplir par les services de la Région  </strong> </div>
+        <div class="block">
+            <table>
+                <tr>
+                    <td>
+                        Référence facture :
+                    </td>
+                    <td colspan="2">
+                        <input type="text"  value = "...................." />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
 
+                    </td>
+                    <td >
+                        <div class="center-text"> Motifs </div>
+                    </td>
+                    <td >
+                        <div class="center-text"> Date </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Rejet facture
+                    </td>
+                    <td >
+                        <input type="text"  value = "...................." />
+                    </td>
+                    <td >
+                        <input type="text"  value = "....../....../........" />
+                    </td>
+                </tr>
+            </table>
+            <br/>
+            Validation du service fait le <input type="text"  value = "....../....../........" /> ,  Par: <input type="text"  value = "..............." />   <br/>
+            A  <input type="text"  value = "..............." /> <br/>
+            SIGNATURE ET CACHET: <br/>
+            <div class="signature" >
+                &nbsp;
             </div>
+        </div>
 
-        </td>
-    </tr>
-</table>
-<div class="break" >
-    &nbsp;
+    </div>
 </div>
-{{#ordersBC}}
-<div class="orders center-text">
-    <h1>
-        Marché numéro {{number_validation}} - {{name}} <br/>
-        bon de commande N° {{nbr_bc}} - {{#supplier}} {{name}} {{/supplier}}
-    </h1>
+{{/certificates }}
+<div class="break">
+    <div class="orders center-text">
+        <h1>
+            Marché numéro {{#contract}}{{reference}} - {{name}}{{/contract}}<br/>
+            bon de commande N° {{nbr_bc}} - {{#supplier}} {{name}} {{/supplier}}
+        </h1>
+    </div>
+    <table class="equipments-table">
+        <thead>
+        <tr>
+            <td>
+                UAI
+            </td>
+            <td>
+                Nom
+            </td>
+            <td>
+                Commune postale
+            </td>
+            <td>
+                Equipement/Prestation
+            </td>
+            <td>
+                Quantité
+            </td>
+        </tr>
+        </thead>
+        <tbody>
+        {{#certificates}}
+        {{#orders}}
+        <tr>
+            {{#structure}}
+            <td>
+                {{uai}}
+            </td>
+            <td>
+                {{name}}
+            </td>
+            <td>
+                {{zipCode}}
+            </td>
+            {{/structure}}
+            <td>
+                {{name}}
+            </td>
+            <td>
+                {{amount}}
+            </td>
+        </tr>
+        {{/orders}}
+        {{/certificates}}
+        </tbody>
+    </table>
 </div>
-<table class="equipments-table">
-    <thead>
-    <tr>
-        <td>
-            UAI
-        </td>
-        <td>
-            Nom
-        </td>
-        <td>
-            Commune postale
-        </td>
-        <td>
-            Quantité
-        </td>
-    </tr>
-    </thead>
-    <tbody>
-    {{#structures}}
-    <tr>
-        <td>
-            {{name}}
-        </td>
-        <td>
-            {{name}}
-        </td>
-        <td>
-            {{ zipCode}}
-        </td>
-        <td>
-            {{amount}}
-        </td>
-    </tr>
-    {{/structures }}
-    </tbody>
-</table>
-<div class="break" >
-    &nbsp;
-</div>
-{{/ordersBC}}
 </body>
 </html>

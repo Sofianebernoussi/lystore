@@ -80,3 +80,6 @@ BEGIN
 	return nextSeqVal;
  END;
  $$ LANGUAGE plpgsql VOLATILE
+
+ALTER TABLE lystore.order_client_equipment
+	ADD COLUMN file character varying (250);

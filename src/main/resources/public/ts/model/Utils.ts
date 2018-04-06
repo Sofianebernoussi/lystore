@@ -24,11 +24,38 @@ export class Utils {
         values.map((value) => params += value.hasOwnProperty(key) ? `${key}=${value[key]}&` : '');
         return params.slice(0, -1);
     }
-    static calculatePriceTTC = (price, tax_value, roundNumber?: number) => {
+
+    static calculatePriceTTC (price, tax_value, roundNumber?: number) {
         let priceFloat = parseFloat(price);
         let taxFloat = parseFloat(tax_value);
         let price_TTC = (( priceFloat + ((priceFloat *  taxFloat) / 100)));
         return (!isNaN(price_TTC)) ? (roundNumber ? price_TTC.toFixed(roundNumber) : price_TTC ) : '';
+    }
+
+    static formatGetParameters (obj: any): string {
+        let parameters = '';
+        Object.keys(obj).map((key) => {
+            if (obj[key] == null || obj[key] === undefined) return;
+            let type = obj[key].constructor.name;
+            switch (type) {
+                case 'Array' : {
+                    obj[key].map((value) => parameters += `${key}=${value.toString()}&`);
+                    break;
+                }
+                case 'Object': {
+                    for (let innerKey in obj[key]) {
+                        parameters += `${innerKey}=${obj[key][innerKey].toString()}&`;
+                    }
+                    break;
+                }
+                default: {
+                    parameters += `${key}=${obj[key].toString()}&`;
+                    break;
+                }
+            }
+        });
+
+        return parameters.slice(0, -1);
     }
 
 }

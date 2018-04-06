@@ -2,6 +2,9 @@ package fr.openent.lystore;
 
 import fr.openent.lystore.controllers.*;
 import org.entcore.common.http.BaseServer;
+import org.entcore.common.storage.Storage;
+import org.entcore.common.storage.StorageFactory;
+import org.entcore.common.storage.impl.MongoDBApplicationStorage;
 import org.vertx.java.core.json.JsonObject;
 
 public class Lystore extends BaseServer {
@@ -15,6 +18,9 @@ public class Lystore extends BaseServer {
     public void start() {
         lystoreSchema = container.config().getString("db-schema");
         super.start();
+
+        Storage storage = new StorageFactory(vertx, config).getStorage();
+
         addController(new LystoreController());
         addController(new AgentController());
         addController(new SupplierController());
@@ -30,6 +36,6 @@ public class Lystore extends BaseServer {
         addController(new StructureGroupController());
         addController(new StructureController());
         addController(new BasketController(vertx, container.config().getObject("slack", new JsonObject()) ));
-        addController(new OrderController());
+        addController(new OrderController(storage));
     }
 }

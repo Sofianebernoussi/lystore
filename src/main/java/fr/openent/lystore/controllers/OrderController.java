@@ -6,14 +6,8 @@ import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AccessOrderRight;
 import fr.openent.lystore.security.ManagerRight;
-import fr.openent.lystore.service.ExportPDFService;
-import fr.openent.lystore.service.OrderService;
-import fr.openent.lystore.service.StructureService;
-import fr.openent.lystore.service.UserInfoService;
-import fr.openent.lystore.service.impl.DefaultExportPDFService;
-import fr.openent.lystore.service.impl.DefaultOrderService;
-import fr.openent.lystore.service.impl.DefaultStructureService;
-import fr.openent.lystore.service.impl.DefaultUserInfoService;
+import fr.openent.lystore.service.*;
+import fr.openent.lystore.service.impl.*;
 import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Delete;
@@ -28,9 +22,11 @@ import fr.wseduc.webutils.request.RequestUtils;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.email.EmailFactory;
 import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 import org.vertx.java.core.Handler;
+import org.vertx.java.core.MultiMap;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpServerRequest;
@@ -39,6 +35,7 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Container;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -47,13 +44,20 @@ import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayRespo
 
 public class OrderController extends ControllerHelper {
 
+    private Storage storage;
     private OrderService orderService;
     private StructureService structureService;
+    private SupplierService supplierService;
+    private ExportPDFService exportPDFService;
+    private UserInfoService userInfoService;
+    private ContractService contractService;
+
     public static final String UTF8_BOM = "\uFEFF";
 
-private ExportPDFService exportPDFService;
-    private UserInfoService userInfoService;
-    @Override
+    public OrderController (Storage storage) {
+        this.storage = storage;
+    }
+
     public void init(Vertx vertx, final Container container, RouteMatcher rm,
                      Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
         super.init(vertx, container, rm, securedActions);
@@ -65,6 +69,8 @@ private ExportPDFService exportPDFService;
         this.structureService = new DefaultStructureService();
         this.exportPDFService = new DefaultExportPDFService( eb, vertx, container);
         this.userInfoService = new DefaultUserInfoService();
+        this.supplierService = new DefaultSupplierService(Lystore.lystoreSchema, "supplier");
+        this.contractService = new DefaultContractService(Lystore.lystoreSchema, "contract");
     }
 
     @Get("/orders/:idCampaign/:idStructure")
@@ -246,62 +252,418 @@ private ExportPDFService exportPDFService;
     }
 
     @Put("/orders/sent")
-    @ApiDoc("send orders ")
+    @ApiDoc("send orders")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void sendOrders (final HttpServerRequest request){
         RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {
             @Override
             public void handle(final JsonObject orders) {
-                userInfoService.getUserInfo(orders.getString("userId"), new Handler<Either<String, JsonArray>>() {
-                    @Override
-                    public void handle(final Either<String, JsonArray> user) {
-                try {
-                            final List<String> params = new ArrayList<>();
-                            for (Object id: orders.getArray("ids") ) {
-                                params.add( id.toString());
+                final JsonArray ids = orders.getArray("ids");
+                final String userId = orders.getString("userId");
+                final String nbrBc = orders.getString("bc_number");
+                final String nbrEngagement = orders.getString("engagement_number");
+                final String dateGeneration = orders.getString("dateGeneration");
+                Number supplierId = orders.getNumber("supplierId");
+
+                getOrdersData(request, userId, nbrBc, nbrEngagement, dateGeneration, supplierId, ids,
+                        new Handler<JsonObject>() {
+                            @Override
+                            public void handle(JsonObject data) {
+                                exportPDFService.generatePDF(request, data,
+                                        "BC.xhtml", "Bon_Commande_",
+                                        new Handler<Buffer>() {
+                                            @Override
+                                            public void handle(final Buffer pdf) {
+                                                manageFileAndUpdateStatus(request, pdf, ids, nbrBc);
+                                            }
+                                        }
+                                );
                             }
-                            final String nbrBc = orders.getString("bc_number");
-                            final String nbrEngagement = orders.getString("engagement_number");
-                            final String dateGeneration = orders.getString("dateGeneration");
-                            final JsonObject supplier = orders.getObject("supplier");
-                            final List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
-                            orderService.sendOrders(ids,
+                        });
+            }
+        });
+    }
+
+    private void manageFileAndUpdateStatus(final HttpServerRequest request, final Buffer pdf,
+                                           final JsonArray ids, final String nbrBc) {
+        final String id = UUID.randomUUID().toString();
+        storage.writeBuffer(id, pdf, "application/pdf",
+                "BC_" + nbrBc, new Handler<JsonObject>() {
+                    @Override
+                    public void handle(JsonObject file) {
+                        if ("ok".equals(file.getString("status"))) {
+                            orderService.addFileId(ids, id);
+                            orderService.updateStatus(ids.toList(), "SENT",
                                     new Handler<Either<String, JsonObject>>() {
                                         @Override
-                                        public void handle(Either<String, JsonObject> stringJsonObjectEither) {
-                                            JsonObject object = stringJsonObjectEither.right().getValue()
-                                                    .putString("nbr_bc", nbrBc)
-                                                    .putString("nbr_engagement", nbrEngagement)
-                                                    .putString("date_generation", dateGeneration)
-                                                    .putObject("me",
-                                                            makeUserObject((JsonObject) user.right().getValue().get(0)))
-                                                    .putObject("supplier", supplier);
-                                            exportPDFService.generatePDF(request, object,
-                                                    "BC.xhtml", "Bon_Commande_",
-                                                    new Handler<Buffer>() {
-                                                        @Override
-                                                        public void handle(final Buffer pdf) {
-                                                            request.response().end(pdf);
-                                                        }
-                                                    }
-                                            );
+                                        public void handle(Either<String, JsonObject> event) {
+                                            if (event.isRight()) {
+                                                request.response().end(pdf);
+                                                logSendingOrder(ids, request);
+                                            } else {
+                                                badRequest(request);
+                                            }
                                         }
                                     });
-                        } catch (ClassCastException e) {
-                            log.error("An error occurred when casting order id", e);
+                        } else {
+                            log.error("An error occurred when inserting pdf in mongo");
+                            badRequest(request);
                         }
+                    }
+                });
+    }
+
+    private void logSendingOrder (JsonArray ids, final HttpServerRequest request) {
+        orderService.getOrderByIds(ids, new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(Either<String, JsonArray> event) {
+                if (event.isRight()) {
+                    JsonArray orders = event.right().getValue();
+                    JsonObject order;
+                    for (int i = 0; i < orders.size(); i++) {
+                        order = orders.get(i);
+                        Logging.insert(eb, request, Contexts.ORDER.toString(), Actions.UPDATE.toString(),
+                               order.getNumber("id").toString(), order);
+                    }
+                }
+            }
+        });
+    }
+
+    private void retrieveContract(final HttpServerRequest request, JsonArray ids,
+                                  final Handler<JsonObject> handler) {
+        contractService.getContract(ids, new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(Either<String, JsonArray> event) {
+                if (event.isRight() && event.right().getValue().size() == 1) {
+                    handler.handle((JsonObject) event.right().getValue().get(0));
+                } else {
+                    log.error("An error occured when collecting contract data");
+                    badRequest(request);
+                }
+            }
+        });
+    }
+
+    private void retrieveStructures (final HttpServerRequest request, JsonArray ids,
+                                     final Handler<JsonObject> handler) {
+        orderService.getStructuresId(ids, new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(Either<String, JsonArray> event) {
+                if (event.isRight()) {
+                    JsonArray structures = event.right().getValue();
+                    JsonArray structuresList = new JsonArray();
+                    final JsonObject structureMapping = new JsonObject();
+                    JsonObject structure;
+                    JsonObject structureInfo;
+                    JsonArray orderIds;
+                    for (int i = 0; i < structures.size(); i++) {
+                        structure = structures.get(i);
+                        if (!structuresList.contains(structure.getString("id_structure"))) {
+                            structuresList.addString(structure.getString("id_structure"));
+                            structureInfo = new JsonObject();
+                            structureInfo.putArray("orderIds", new JsonArray());
+                        } else {
+                            structureInfo = structureMapping.getObject(structure.getString("id_structure"));
+                        }
+                        orderIds = structureInfo.getArray("orderIds");
+                        orderIds.addNumber(structure.getNumber("id"));
+                        structureMapping.putObject(structure.getString("id_structure"), structureInfo);
+                    }
+                    structureService.getStructureById(structuresList, new Handler<Either<String, JsonArray>>() {
+                        @Override
+                        public void handle(Either<String, JsonArray> event) {
+                            if (event.isRight()) {
+                                JsonArray structures = event.right().getValue();
+                                JsonObject structure;
+                                for (int i = 0; i < structures.size(); i++) {
+                                    structure = structures.get(i);
+                                    JsonObject structureObject = structureMapping.getObject(structure.getString("id"));
+                                    structureObject.putObject(  "structureInfo", structure);
+                                }
+                                handler.handle(structureMapping);
+                            } else {
+                                log.error("An error occurred when collecting structures based on ids");
+                                badRequest(request);
+                            }
+                        }
+                    });
+                } else {
+                    log.error("An error occurred when getting structures id based on order ids.");
+                    renderError(request);
+                }
+            }
+        });
+    }
+
+    private void retrieveOrderData (final HttpServerRequest request, JsonArray ids, final Handler<JsonObject> handler) {
+        orderService.getOrders(ids, null, new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(Either<String, JsonArray> event) {
+                if (event.isRight()) {
+                    JsonObject order = new JsonObject();
+                    JsonArray orders = formatOrders(event.right().getValue());
+                    order.putArray("orders", orders);
+                    order.putString("sumLocale",
+                            String.valueOf(roundWith2Decimals(getSumWithoutTaxes(orders))).replace(".", ","));
+                    order.putString("totalTaxesLocale",
+                            String.valueOf(roundWith2Decimals(getTaxesTotal(orders))).replace(".", ","));
+                    order.putString("totalPriceTaxeIncludedLocal",
+                            String.valueOf(roundWith2Decimals(getTotalOrder(orders))).replace(".", ","));
+                    handler.handle(order);
+                } else {
+                    log.error("An error occurred when retrieving order data");
+                    badRequest(request);
+                }
+            }
+        });
+    }
+
+    private Float getTotalOrder(JsonArray orders) {
+        Float sum = 0F;
+        JsonObject order;
+        for (int i = 0; i < orders.size(); i++) {
+            order = orders.get(i);
+            sum += (Float.parseFloat(order.getString("price")) * Integer.parseInt(order.getString("amount"))
+                    * (Float.parseFloat(order.getString("tax_amount")) / 100 + 1));
+        }
+
+        return sum;
+    }
+
+    private Float getTaxesTotal(JsonArray orders) {
+        Float sum = 0F;
+        JsonObject order;
+        for (int i = 0; i < orders.size(); i++) {
+            order = orders.get(i);
+            sum += Float.parseFloat(order.getString("price")) * Integer.parseInt(order.getString("amount"))
+                    * (Float.parseFloat(order.getString("tax_amount")) / 100);
+        }
+
+        return sum;
+    }
+
+    private Float getSumWithoutTaxes(JsonArray orders) {
+        JsonObject order;
+        Float sum = 0F;
+        for (int i = 0; i < orders.size(); i++) {
+            order = orders.get(i);
+            sum += Float.parseFloat(order.getString("price")) * Integer.parseInt(order.getString("amount"));
+        }
+
+        return sum;
+    }
+
+    private static JsonArray formatOrders (JsonArray orders) {
+        JsonObject order;
+        for (int i = 0; i < orders.size(); i++) {
+            order = orders.get(i);
+            order.putString("priceLocale",
+                    String.valueOf(roundWith2Decimals(Float.parseFloat(order.getString("price")))).replace(".", ","));
+            order.putString("unitPriceTaxIncluded",
+                    String.valueOf(getTaxIncludedPrice(Float.parseFloat(order.getString("price")),
+                            Float.parseFloat(order.getString("tax_amount")))).replace(".", ","));
+            order.putString("unitPriceTaxIncludedLocale",
+                    String.valueOf(getTaxIncludedPrice(Float.parseFloat(order.getString("price")),
+                            Float.parseFloat(order.getString("tax_amount")))).replace(".", ","));
+            order.putNumber("totalPrice",
+                    getTotalPrice(Float.parseFloat(order.getString("price")),
+                            Long.parseLong(order.getString("amount"))));
+            order.putString("totalPriceLocale",
+                    String.valueOf(order.getNumber("totalPrice")).replace(".", ","));
+            order.putString("totalPriceTaxIncluded",
+                    String.valueOf(getTaxIncludedPrice((Float) order.getNumber("totalPrice"),
+                            Float.parseFloat(order.getString("tax_amount")))).replace(".", ","));
+        }
+        return orders;
+    }
+
+    private static Float getTotalPrice (Float price, Long amount) {
+        return price * amount;
+    }
+    private static Float getTaxIncludedPrice(Float price, Float taxAmount) {
+        Float multiplier = taxAmount / 100 + 1;
+        return roundWith2Decimals(price * multiplier);
+    }
+
+    private static Float roundWith2Decimals(Float numberToRound) {
+        BigDecimal bd = new BigDecimal(numberToRound);
+        return bd.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
+    }
+
+
+    @Get("/orders/preview")
+    @ApiDoc("Get orders preview data")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void getOrdersPreviewData (final HttpServerRequest request) {
+        MultiMap params = request.params();
+        if (!params.contains("userId") && !params.contains("ids") && !params.contains("bc_number")
+                && !params.contains("engagement_number") && !params.contains("dateGeneration")
+                && !params.contains("supplierId")) {
+            badRequest(request);
+        } else {
+            final String userId = params.get("userId");
+            final List<String> ids = params.getAll("ids");
+            final List<Integer> integerIds = new ArrayList<>();
+            final String nbrBc = params.get("bc_number");
+            final String nbrEngagement = params.get("engagement_number");
+            final String dateGeneration = params.get("dateGeneration");
+            Number supplierId = Integer.parseInt(params.get("supplierId"));
+
+            try {
+                for (String id : ids) {
+                    integerIds.add(Integer.parseInt(id));
+                }
+            } catch (NumberFormatException e) {
+                log.error("An error occured when casting order id to Integer", e);
+                badRequest(request);
+                return;
+            }
+
+            getOrdersData(request, userId, nbrBc, nbrEngagement, dateGeneration, supplierId,
+                    new JsonArray(integerIds.toArray()), new Handler<JsonObject>() {
+                        @Override
+                        public void handle(JsonObject data) {
+                            renderJson(request, data);
+                        }
+                    });
+        }
+    }
+
+    private void getOrdersData (final HttpServerRequest request, String userId, final String nbrBc,
+                                final String nbrEngagement, final String dateGeneration,
+                                final Number supplierId, final JsonArray ids,
+                                final Handler<JsonObject> handler) {
+        final JsonObject data = new JsonObject();
+        retrieveManagementInfo(request, userId, supplierId, new Handler<JsonObject>() {
+            @Override
+            public void handle(final JsonObject managmentInfo) {
+                retrieveStructures(request, ids, new Handler<JsonObject>() {
+                    @Override
+                    public void handle(final JsonObject structures) {
+                        retrieveOrderData(request, ids, new Handler<JsonObject>() {
+                            @Override
+                            public void handle(final JsonObject order) {
+                                retrieveOrderDataForCertificate(request, structures, new Handler<JsonArray>() {
+                                    @Override
+                                    public void handle(final JsonArray certificates) {
+                                        retrieveContract(request, ids, new Handler<JsonObject>() {
+                                            @Override
+                                            public void handle(JsonObject contract) {
+                                                JsonObject certificate;
+                                                for (int i = 0; i < certificates.size(); i++) {
+                                                    certificate = certificates.get(i);
+                                                    certificate.putObject("agent", managmentInfo.getObject("userInfo"));
+                                                    certificate.putObject("supplier",
+                                                            managmentInfo.getObject("supplierInfo"));
+                                                    addStructureToOrders(certificate.getArray("orders"),
+                                                            certificate.getObject("structure"));
+                                                }
+                                                data.putObject("supplier", managmentInfo.getObject("supplierInfo"))
+                                                        .putObject("agent", managmentInfo.getObject("userInfo"))
+                                                        .putObject("order", order)
+                                                        .putArray("certificates", certificates)
+                                                        .putObject("contract", contract)
+                                                        .putString("nbr_bc", nbrBc)
+                                                        .putString("nbr_engagement", nbrEngagement)
+                                                        .putString("date_generation", dateGeneration);
+
+                                                handler.handle(data);
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
                     }
                 });
             }
         });
-
     }
+
+    private void addStructureToOrders(JsonArray orders, JsonObject structure) {
+        JsonObject order;
+        for (int i = 0; i < orders.size(); i++) {
+            order = orders.get(i);
+            order.putObject("structure", structure);
+        }
+    }
+
+    private void retrieveOrderDataForCertificate(final HttpServerRequest request, final JsonObject structures,
+                                                 final Handler<JsonArray> handler) {
+        JsonObject structure;
+        String structureId;
+        Iterator<String> structureIds = structures.getFieldNames().iterator();
+        final JsonArray result = new JsonArray();
+        while (structureIds.hasNext()) {
+            structureId = structureIds.next();
+            structure = structures.getObject(structureId);
+            orderService.getOrders(structure.getArray("orderIds"), structureId,
+                    new Handler<Either<String, JsonArray>>() {
+                        @Override
+                        public void handle(Either<String, JsonArray> event) {
+                            if (event.isRight() && event.right().getValue().size() > 0) {
+                                JsonObject order = event.right().getValue().get(0);
+                                result.addObject(new JsonObject()
+                                        .putString("id_structure", order.getString("id_structure"))
+                                        .putObject("structure", structures.getObject(order.getString("id_structure"))
+                                                .getObject("structureInfo"))
+                                        .putArray("orders", formatOrders(event.right().getValue()))
+                                );
+                                if (result.size() == structures.size()) {
+                                    handler.handle(result);
+                                }
+                            } else {
+                                log.error("An error occurred when collecting orders for certificates");
+                                badRequest(request);
+                                return;
+                            }
+                        }
+                    });
+        }
+    }
+
+    private void retrieveManagementInfo(final HttpServerRequest request, String userId,
+                                        final Number supplierId, final Handler<JsonObject> handler) {
+        userInfoService.getUserInfo(userId, new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(final Either<String, JsonArray> user) {
+                if (user.isRight()) {
+                    final JsonObject userObject = makeUserObject((JsonObject) user.right().getValue().get(0));
+                    supplierService.getSupplier(supplierId.toString(), new Handler<Either<String, JsonObject>>() {
+                        @Override
+                        public void handle(Either<String, JsonObject> supplier) {
+                            if (supplier.isRight()) {
+                                JsonObject supplierObject = supplier.right().getValue();
+                                handler.handle(
+                                        new JsonObject()
+                                                .putObject("userInfo", userObject)
+                                                .putObject("supplierInfo", supplierObject)
+                                );
+                            } else {
+                                log.error("An error occurred when collecting supplier data");
+                                badRequest(request);
+                                return;
+                            }
+                        }
+                    });
+                } else {
+                    log.error("An error occured when collecting user information");
+                    badRequest(request);
+                    return;
+                }
+            }
+        });
+    }
+
     private JsonObject makeUserObject(JsonObject user) {
         JsonObject dataUser = user.getObject("u").getObject("data");
-     return   new JsonObject()
+        return   new JsonObject()
                 .putString("name", dataUser.getString("firstName")+" "+ dataUser.getString("lastName") )
-                .putString("email", dataUser.getString("emailAcademy"))
-             .putString("phone", dataUser.getString("mobile"));
+                .putString("email", dataUser.getString("email"))
+                .putString("phone", dataUser.getString("homePhone"));
     }
 
     @Put("/orders/done")

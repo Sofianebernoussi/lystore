@@ -1,13 +1,9 @@
 package fr.openent.lystore.service.impl;
 
 import fr.openent.lystore.service.ExportPDFService;
-
-
-import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
-
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.eventbus.EventBus;
@@ -18,7 +14,6 @@ import org.vertx.java.core.logging.Logger;
 import org.vertx.java.core.logging.impl.LoggerFactory;
 import org.vertx.java.platform.Container;
 
-
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -26,7 +21,8 @@ import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static fr.wseduc.webutils.http.Renders.*;
+import static fr.wseduc.webutils.http.Renders.badRequest;
+import static fr.wseduc.webutils.http.Renders.getScheme;
 
 
 
@@ -50,8 +46,6 @@ public class DefaultExportPDFService  implements ExportPDFService {
                             final String prefixPdfName,  final Handler<Buffer> handler) {
 
         final String dateDebut = new SimpleDateFormat("dd.MM.yyyy").format(new Date().getTime());
-        LOGGER.info(new SimpleDateFormat("HH:mm:ss:S").format(new Date().getTime()) +
-                " -> Debut Generation PDF du template " + templateName);
         final String templatePath = container.config().getObject("exports").getString("template-path");
         final String baseUrl = getScheme(request) + "://" + Renders.getHost(request) +
                 container.config().getString("app-address") + "/public/";
@@ -99,14 +93,8 @@ public class DefaultExportPDFService  implements ExportPDFService {
                                     return;
                                 }
                                 byte[] pdf = pdfResponse.getBinary("content");
-                            /*    request.response().putHeader("Content-Type", "application/pdf");
-                                request.response().putHeader("Content-Disposition",
-                                        "attachment; filename="+prefixPdfName+"_"+dateDebut+".pdf");
-                                request.response().end(new Buffer(pdf));*/
                                 Buffer either = new Buffer(pdf);
-                              handler.handle(either);
-                                LOGGER.info(new SimpleDateFormat("HH:mm:ss:S").format(new Date().getTime()) +
-                                        " -> Fin Generation PDF du template " + templateName);
+                                handler.handle(either);
                             }
                         });
                     }

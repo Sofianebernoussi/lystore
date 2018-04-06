@@ -4,6 +4,7 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.ContractService;
 import fr.wseduc.webutils.Either;
 import org.entcore.common.service.impl.SqlCrudService;
+import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
@@ -81,5 +82,22 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
 
     public void deleteContract(List<Integer> ids, Handler<Either<String, JsonObject>> handler) {
         SqlUtils.deleteIds(this.table, ids, handler);
+    }
+
+    @Override
+    public void getContract(JsonArray ids, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT contract.* " +
+                "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract " +
+                "ON (order_client_equipment.id_contract = contract.id) " +
+                "WHERE order_client_equipment.id IN " + Sql.listPrepared(ids.toArray()) +
+                " GROUP BY contract.id";
+        JsonArray params = new JsonArray();
+
+        for (int i = 0; i < ids.size(); i++) {
+            params.addNumber((Number) ids.get(i));
+        }
+
+        this.sql.prepared(query, params, SqlResult.validResultHandler(handler));
     }
 }

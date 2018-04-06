@@ -1,7 +1,9 @@
-import {ng, moment, template, _} from 'entcore';
-import {OrderClient, Utils, OrdersClient, Notification, Supplier} from '../../model';
-import {Mix} from 'entcore-toolkit';
+import { ng, moment, template, _, model } from 'entcore';
+import { OrderClient, Utils, OrdersClient, Notification, Supplier } from '../../model';
+import { Mix } from 'entcore-toolkit';
+
 declare let window: any;
+
 export const orderController = ng.controller('orderController',
     ['$scope',  ($scope) => {
 
@@ -22,6 +24,9 @@ export const orderController = ng.controller('orderController',
                 deleteOrder : false,
                 sendOrder : false,
                 validOrder : false,
+            },
+            generation: {
+                type: 'ORDER'
             }
         };
         $scope.switchAll = (model: boolean, collection) => {
@@ -84,32 +89,39 @@ export const orderController = ng.controller('orderController',
             Utils.safeApply($scope);
         };
         $scope.validateSentOrders = (orders: OrderClient[]) => {
-            let id_suppliers = (_.uniq(_.pluck(orders, 'id_supplier')));
+            let id_suppliers = (_.uniq(_.pluck(orders, 'id_contract')));
             return id_suppliers.length === 1 ;
         };
+
         $scope.prepareSendOrder = async (orders: OrderClient[]) => {
             if ($scope.validateSentOrders(orders)) {
-                $scope.orderToSend = new OrdersClient( Mix.castAs( Supplier, orders[0].supplier ));
-                $scope.orderToSend.all = Mix.castArrayAs(OrderClient, orders);
-                $scope.display.lightbox.sendOrder = true;
-                template.open('sendOrder.lightbox', 'administrator/order/order-send-prepare');
-                Utils.safeApply($scope);
+                try {
+                    await $scope.initOrdersForPreview(orders);
+                } catch (e) {
+                    console.error(e);
+                    $scope.notifications.push(new Notification('lystore.order.pdf.preview.error', 'warning'));
+                } finally {
+                    if ($scope.orderToSend.hasOwnProperty('preview')) {
+                        $scope.redirectTo('/order/preview');
+                    }
+                    Utils.safeApply($scope);
+                }
             }
         };
         $scope.validatePrepareSentOrders = (orderToSend: OrdersClient) => {
-            return orderToSend.supplier && orderToSend.bc_number && orderToSend.engagement_number
+            return orderToSend && orderToSend.supplier && orderToSend.bc_number && orderToSend.engagement_number
                 && orderToSend.bc_number !== undefined && orderToSend.engagement_number !== undefined
                 && orderToSend.bc_number.trim() !== '' && orderToSend.engagement_number.trim() !== '';
         };
         $scope.sendOrders = async (orders: OrdersClient) => {
             let { status, data } = await orders.updateStatus('SENT');
-            $scope.saveByteArray('Sample Report', data);
+            $scope.saveByteArray(`BC_${orders.bc_number}`, data);
             if (status === 200) {
                 $scope.notifications.push(new Notification( 'lystore.sent.notif' , 'confirm'));
             }
             await $scope.ordersClient.sync($scope.structures.all);
             $scope.cancelPrepareSentOrders();
-            $scope.ordersClient.all = _.where($scope.ordersClient.all, {status: 'SENT'});
+            $scope.redirectTo('/order/valid');
             Utils.safeApply($scope);
         };
         $scope.cancelPrepareSentOrders = () => {
@@ -127,6 +139,16 @@ export const orderController = ng.controller('orderController',
         $scope.exportCSV = async() => {
             let params = Utils.formatKeyToParameter($scope.ordersClient.selected, 'id');
             window.location = `/lystore/orders/export?${params}`;
+        };
+
+        $scope.getUsername = () => model.me.username;
+
+        $scope.concatOrders = () => {
+            let arr = [];
+            $scope.orderToSend.preview.certificates.map((certificate) => {
+               arr = [...arr, ...certificate.orders];
+            });
+            return arr;
         };
 
     }]);

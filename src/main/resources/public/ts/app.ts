@@ -67,10 +67,13 @@ routes.define(($routeProvider) => {
                 action: 'orderWaiting'
             })
             .when('/order/sent', {
-            action: 'orderSent'
-        })
+                action: 'orderSent'
+            })
             .when('/order/valid', {
                 action: 'orderClientValided'
+            })
+            .when('/order/preview', {
+                action: 'previewOrder'
             });
     } else {
         $routeProvider

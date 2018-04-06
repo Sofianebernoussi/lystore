@@ -52,4 +52,9 @@ public class DefaultSupplierService extends SqlCrudService implements SupplierSe
     public void deleteSupplier(List<Integer> ids, Handler<Either<String, JsonObject>> handler) {
         SqlUtils.deleteIds("supplier", ids, handler);
     }
+
+    @Override
+    public void getSupplier(String id, Handler<Either<String, JsonObject>> handler) {
+        super.retrieve(id, handler);
+    }
 }

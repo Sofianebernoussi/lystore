@@ -18,8 +18,8 @@
     "dateGeneration":{
       "type": [ "string", "null" ]
     },
-    "supplier":{
-      "type": ["object", "null"]
+    "supplierId":{
+      "type": ["number", "null"]
     },
     "userId":{
       "type": "string"

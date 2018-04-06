@@ -18,8 +18,9 @@ import {
     Structures,
     Basket,
     Notification,
-    OrdersClient
+    OrdersClient, Supplier, OrderClient
 } from '../model';
+import {Mix} from "entcore-toolkit";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', '$rootScope',
     ($scope, route, $location, $rootScope) => {
@@ -186,12 +187,17 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.structures = new Structures();
                 $scope.initOrders('SENT');
                 template.open('administrator-main', 'administrator/order/order-sent');
+                $scope.orderToSend = null;
                 Utils.safeApply($scope);
             },
             orderClientValided : async () => {
                 $scope.initOrders('VALID');
                 template.open('administrator-main', 'administrator/order/order-valided');
                 Utils.safeApply($scope);
+            },
+            previewOrder: async () => {
+                template.open('administrator-main', 'administrator/order/order-send-prepare');
+                template.open('sendOrder.preview', 'pdf/preview');
             }
         });
         $scope.initBasketItem = async (idEquipment: number, idCampaign: number, structure) => {
@@ -298,6 +304,14 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             $scope.ordersClient.all = _.where($scope.ordersClient.all, {status: status});
             Utils.safeApply($scope);
         };
+
+        $scope.initOrdersForPreview = async (orders: OrderClient[]) => {
+            $scope.orderToSend = new OrdersClient( Mix.castAs( Supplier, orders[0].supplier ));
+            $scope.orderToSend.all = Mix.castArrayAs(OrderClient, orders);
+            $scope.orderToSend.preview = await $scope.orderToSend.getPreviewData();
+            $scope.orderToSend.preview.index = 0;
+        };
+
         $rootScope.$on('$routeChangeSuccess', ( $currentRoute, $previousRoute, $location ) => {
             if ( $location === undefined) {
                 $scope.redirectTo('/');

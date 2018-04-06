@@ -36,4 +36,11 @@ public interface SupplierService {
      * @param handler Function handler returning data
      */
     void deleteSupplier(List<Integer> ids, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Get supplier by Id
+     * @param id supplier id
+     * @param handler Function handler returning data
+     */
+    void getSupplier(String id, Handler<Either<String, JsonObject>> handler);
 }

@@ -1,6 +1,6 @@
 @media screen and (max-width: $tablette) {
   .block-mobile {
-    display: block;
+    display: block !important;
   }
 
   .mobile-navigation {
@@ -16,6 +16,7 @@
       font-size: 14px;
       border-radius: 10px;
       padding: 2px;
+      margin-left: 10px;
     }
   }
 

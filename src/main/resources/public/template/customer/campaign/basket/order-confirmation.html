@@ -1,12 +1,14 @@
 <div class="confirm-order" >
     <h1><i18n>lystore.confirm.order.title</i18n></h1>
-    <div class="three cell "><img class=" centered " src="/lystore/public/img/thumb_up.png" /></div>
-    <p class="nine cell">
+    <div class="three cell twelve-mobile"><img class=" centered " src="/lystore/public/img/thumb_up.png" /></div>
+    <p class="nine cell twelve-mobile">
         <i18n>lystore.confirm.order.message1</i18n>
         <strong ng-bind="totalPrice | currency"></strong>
         <i18n>lystore.confirm.order.message2</i18n>
         <i18n>lystore.order.tracking</i18n>
         <i18n>lystore.confirm.order.message3</i18n>
     </p>
-    <input type="button" class="cancel right-magnet " ng-click="cancelConfirmOrder()" i18n-value="ok"/>
+    <div class="row">
+        <input type="button" class="cancel right-magnet " ng-click="cancelConfirmOrder()" i18n-value="ok"/>
+    </div>
 </div>

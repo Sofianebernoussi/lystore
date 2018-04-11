@@ -61,9 +61,6 @@ CREATE  SEQUENCE lystore.seq_validation_number
   MAXVALUE 99999999999999
   START 19700101001
   CACHE 1;
-ALTER TABLE lystore.seq_validation_number
-  OWNER TO postgres;
-
 
 CREATE OR REPLACE FUNCTION lystore.get_validation_number()
   RETURNS VARCHAR AS $$
@@ -79,7 +76,7 @@ BEGIN
 	end if;
 	return nextSeqVal;
  END;
- $$ LANGUAGE plpgsql VOLATILE
+ $$ LANGUAGE plpgsql VOLATILE;
 
 ALTER TABLE lystore.order_client_equipment
 	ADD COLUMN file character varying (250);

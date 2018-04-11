@@ -27,7 +27,7 @@
         <table class="twelve">
             <thead>
             <tr>
-                <td workflow="lystore.administrator" class="table-selector">
+                <td workflow="lystore.manager" class="table-selector">
                     <label class="checkbox">
                         <input type="checkbox"
                                ng-change="switchAll(allOrdersSelected, ordersClient)"
@@ -82,7 +82,7 @@
             <tbody>
             <tr ng-repeat="order in ordersClient.all  |ordersClientFilter:'WAITING': search.filterWords
              | orderBy:sort.order.type:sort.order.reverse">
-                <td workflow="lystore.administrator" class="table-selector">
+                <td workflow="lystore.manager" class="table-selector">
                     <label class="checkbox">
                         <input type="checkbox" ng-model="order.selected">
                         <span></span>

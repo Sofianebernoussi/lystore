@@ -23,32 +23,25 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
     }
 
     public void listCampaigns( Handler<Either<String, JsonArray>> handler) {
-        String query = "WITH campaign_amounts AS (" +
-                " SELECT SUM(amount) as sum, purse.id_campaign" +
-                " FROM lystore.purse" +
-                " GROUP BY id_campaign )" +
-                " SELECT " +
-                " campaign.*, COUNT(distinct rel_group_structure.id_structure) as nb_structures, " +
-                " COUNT(distinct oce_WAITING.id) as nb_orders_WAITING, " +
-                " COUNT(distinct oce_VALID.id) as nb_orders_VALID, " +
-                " COUNT(distinct oce_SENT.id) as nb_orders_SENT, " +
-                " campaign_amounts.sum as purse_amount," +
-                " COUNT(distinct rel_equipment_tag.id_equipment) as nb_equipments" +
-                " FROM " + Lystore.lystoreSchema + ".campaign" +
-                " LEFT JOIN campaign_amounts ON (campaign.id = campaign_amounts.id_campaign)" +
-                " LEFT JOIN " + Lystore.lystoreSchema + ".rel_group_campaign" +
-                " ON (campaign.id = rel_group_campaign.id_campaign)" +
-                " LEFT JOIN " + Lystore.lystoreSchema + ".rel_group_structure" +
-                " ON (rel_group_campaign.id_structure_group = rel_group_structure.id_structure_group)" +
-                " LEFT JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag" +
-                " ON (rel_equipment_tag.id_tag = rel_group_campaign.id_tag) " +
-                " LEFT JOIN Lystore.order_client_equipment oce_WAITING ON oce_WAITING.id_campaign = campaign.id " +
-                "AND oce_WAITING.status = 'WAITING' " +
-                " LEFT JOIN Lystore.order_client_equipment oce_VALID ON oce_VALID.id_campaign = campaign.id " +
-                "AND oce_VALID.status = 'VALID' " +
-                " LEFT JOIN Lystore.order_client_equipment oce_SENT ON oce_SENT.id_campaign = campaign.id " +
-                "AND oce_SENT.status = 'SENT' " +
-                " GROUP BY campaign.id, campaign_amounts.sum;";
+        String query = "select c.* , " +
+                "SUM (CASE WHEN oce.status = 'WAITING' THEN 1 ELSE 0 END ) as nb_orders_WAITING, " +
+                "SUM (CASE WHEN oce.status = 'VALID' THEN 1 ELSE 0 END ) as nb_orders_VALID, " +
+                "SUM (CASE WHEN oce.status = 'SENT' THEN 1 ELSE 0 END ) as nb_orders_SENT " +
+                "FROM (" +
+                "WITH campaign_amounts AS (" +
+                "SELECT SUM(amount) as sum, purse.id_campaign " +
+                "FROM " + Lystore.lystoreSchema + ".purse GROUP BY id_campaign " +
+                ") " +
+                "SELECT  campaign.*, COUNT(distinct rel_group_structure.id_structure) as nb_structures, " +
+                "campaign_amounts.sum as purse_amount, COUNT(distinct rel_equipment_tag.id_equipment) as nb_equipments " +
+                "FROM " + Lystore.lystoreSchema + ".campaign " +
+                "LEFT JOIN campaign_amounts ON (campaign.id = campaign_amounts.id_campaign) " +
+                "LEFT JOIN " + Lystore.lystoreSchema + ".rel_group_campaign ON (campaign.id = rel_group_campaign.id_campaign) " +
+                "LEFT JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON (rel_group_campaign.id_structure_group = rel_group_structure.id_structure_group) " +
+                "LEFT JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (rel_equipment_tag.id_tag = rel_group_campaign.id_tag)" +
+                "GROUP BY campaign.id, campaign_amounts.sum) as C " +
+                "LEFT JOIN " + Lystore.lystoreSchema + ".order_client_equipment oce ON oce.id_campaign = C.id and  oce.status in ( 'WAITING', 'VALID', 'SENT') " +
+                "group by c.id, c.name, c.description, c.image, c.accessible, c.nb_structures, c.purse_amount, c.nb_equipments";
         sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
     }
 

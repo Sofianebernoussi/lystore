@@ -463,19 +463,19 @@ public class OrderController extends ControllerHelper {
             order.putString("priceLocale",
                     String.valueOf(roundWith2Decimals(Float.parseFloat(order.getString("price")))).replace(".", ","));
             order.putString("unitPriceTaxIncluded",
-                    String.valueOf(getTaxIncludedPrice(Float.parseFloat(order.getString("price")),
-                            Float.parseFloat(order.getString("tax_amount")))).replace(".", ","));
+                    String.valueOf(roundWith2Decimals(getTaxIncludedPrice(Float.parseFloat(order.getString("price")),
+                            Float.parseFloat(order.getString("tax_amount"))))).replace(".", ","));
             order.putString("unitPriceTaxIncludedLocale",
-                    String.valueOf(getTaxIncludedPrice(Float.parseFloat(order.getString("price")),
-                            Float.parseFloat(order.getString("tax_amount")))).replace(".", ","));
+                    String.valueOf(roundWith2Decimals(getTaxIncludedPrice(Float.parseFloat (order.getString("price")),
+                            Float.parseFloat(order.getString("tax_amount"))))).replace(".", ","));
             order.putNumber("totalPrice",
-                    getTotalPrice(Float.parseFloat(order.getString("price")),
-                            Long.parseLong(order.getString("amount"))));
+                    roundWith2Decimals(getTotalPrice(Float.parseFloat(order.getString("price")),
+                            Long.parseLong(order.getString("amount")))));
             order.putString("totalPriceLocale",
-                    String.valueOf(order.getNumber("totalPrice")).replace(".", ","));
+                    String.valueOf(roundWith2Decimals(Float.parseFloat(order.getNumber("totalPrice").toString()))).replace(".", ","));
             order.putString("totalPriceTaxIncluded",
-                    String.valueOf(getTaxIncludedPrice((Float) order.getNumber("totalPrice"),
-                            Float.parseFloat(order.getString("tax_amount")))).replace(".", ","));
+                    String.valueOf(roundWith2Decimals(getTaxIncludedPrice((Float) order.getNumber("totalPrice"),
+                            Float.parseFloat(order.getString("tax_amount"))))).replace(".", ","));
         }
         return orders;
     }
@@ -483,9 +483,10 @@ public class OrderController extends ControllerHelper {
     private static Float getTotalPrice (Float price, Long amount) {
         return price * amount;
     }
+
     private static Float getTaxIncludedPrice(Float price, Float taxAmount) {
         Float multiplier = taxAmount / 100 + 1;
-        return roundWith2Decimals(price * multiplier);
+        return roundWith2Decimals(price) * multiplier;
     }
 
     private static Float roundWith2Decimals(Float numberToRound) {

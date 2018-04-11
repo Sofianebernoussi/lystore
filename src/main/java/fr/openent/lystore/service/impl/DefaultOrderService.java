@@ -224,16 +224,26 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
             statements.add(purseService.updatePurseAmountStatement(price, idCampaign, idStructure,"+"));
             statements.addObject(getOptionsOrderDeletion(idOrder));
             statements.addObject(getEquipmentOrderDeletion(idOrder));
-            statements.addObject(getNewPurseAndNbOrder(idCampaign,idStructure));
+            statements.addObject(getNewPurse(idCampaign,idStructure));
+            statements.addObject(getNewNbOrder(idCampaign, idStructure));
 
 
             sql.transaction(statements, new Handler<Message<JsonObject>>() {
                 @Override
                 public void handle(Message<JsonObject> event) {
-                    JsonObject results = event.body().getArray("results")
-                            .get(event.body().getArray("results").size()-1);
-                    JsonArray objectResult = results.getArray("results").get(0);
-                    getTransactionHandler(event, new JsonObject((String) objectResult.get(0) ),handler);
+                    JsonArray results = event.body().getArray("results");
+                    JsonObject res = new JsonObject();
+                    JsonObject newPurse = results.get(3);
+                    JsonObject newOrderNumber = results.get(4);
+                    JsonArray newPurseArray = newPurse.getArray("results").get(0);
+                    JsonArray newOrderNumberArray = newOrderNumber.getArray("results").get(0);
+                    res.putNumber("f1", newPurseArray.size() > 0
+                        ? Float.parseFloat(newPurseArray.get(0).toString())
+                        : 0);
+                    res.putNumber("f2", newOrderNumberArray.size() > 0
+                            ? Float.parseFloat(newOrderNumberArray.get(0).toString())
+                            : 0);
+                    getTransactionHandler(event, res, handler);
 
                 }
             });
@@ -459,17 +469,34 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 .putArray("values", params)
                 .putString("action", "prepared");
     }
-    private  JsonObject getNewPurseAndNbOrder(Integer idCampaign, String idStructure){
-        String query = "( SELECT row_to_json(row(p.amount, count(o.id ) )) " +
-                " FROM " + Lystore.lystoreSchema + ".purse p, " + Lystore.lystoreSchema + ".order_client_equipment o " +
-                " where p.id_campaign = ? " +
-                " AND p.id_structure = ? " +
-                " AND  o.id_campaign = ? " +
-                " AND o.id_structure = ? " +
-                " GROUP BY(p.amount) )";
+    private  JsonObject getNewPurse(Integer idCampaign, String idStructure){
+//        String query = "( SELECT row_to_json(row(p.amount, count(o.id ) )) " +
+//                " FROM " + Lystore.lystoreSchema + ".purse p, " + Lystore.lystoreSchema + ".order_client_equipment o " +
+//                " where p.id_campaign = ? " +
+//                " AND p.id_structure = ? " +
+//                " AND  o.id_campaign = ? " +
+//                " AND o.id_structure = ? " +
+//                " GROUP BY(p.amount) )";
+
+        String query = "SELECT amount FROM " + Lystore.lystoreSchema + ".purse " +
+                "WHERE id_campaign = ? " +
+                "AND id_structure = ?;";
 
         JsonArray params = new JsonArray()
-                .addNumber(idCampaign).addString(idStructure)
+                .addNumber(idCampaign).addString(idStructure);
+
+        return  new JsonObject()
+                .putString("statement",query)
+                .putArray("values",params)
+                .putString("action", "prepared");
+    }
+
+    private JsonObject getNewNbOrder(Integer idCampaign, String idStructure) {
+        String query = "SELECT count(id) FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
+                "WHERE id_campaign = ? " +
+                "AND id_structure = ?;";
+
+        JsonArray params = new JsonArray()
                 .addNumber(idCampaign).addString(idStructure);
 
         return  new JsonObject()
@@ -588,7 +615,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         JsonObject result = event.body();
         if (result.containsField("status")&& "ok".equals(result.getString("status"))){
             JsonObject returns = new JsonObject();
-            returns.putNumber("amount",amountPurseNbOrder.getNumber("f1"));
+            returns.putNumber("amount", amountPurseNbOrder.getNumber("f1"));
             returns.putNumber("nb_order",amountPurseNbOrder.getNumber("f2"));
             handler.handle(new Either.Right<String, JsonObject>(returns));
         }  else {

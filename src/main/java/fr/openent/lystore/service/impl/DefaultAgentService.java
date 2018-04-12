@@ -4,6 +4,7 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.AgentService;
 import fr.wseduc.webutils.Either;
 import org.entcore.common.service.impl.SqlCrudService;
+import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
@@ -51,5 +52,17 @@ public class DefaultAgentService extends SqlCrudService implements AgentService 
 
     public void deleteAgent(List<Integer> ids, Handler<Either<String, JsonObject>> handler) {
         SqlUtils.deleteIds("agent", ids, handler);
+    }
+
+    @Override
+    public void getAgentByOrderIds(JsonArray ids, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT distinct agent.id, agent.email, agent.name, agent.phone " +
+                "FROM lystore.agent " +
+                "INNER JOIN lystore.contract ON (contract.id_agent = agent.id) " +
+                "INNER JOIN lystore.equipment ON (equipment.id_contract = contract.id) " +
+                "INNER JOIN lystore.order_client_equipment ON (equipment.id = order_client_equipment.equipment_key) " +
+                "WHERE order_client_equipment.id IN " + Sql.listPrepared(ids.toArray());
+
+        sql.prepared(query, ids, SqlResult.validUniqueResultHandler(handler, new String[0]));
     }
 }

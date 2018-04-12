@@ -50,8 +50,8 @@ public class OrderController extends ControllerHelper {
     private StructureService structureService;
     private SupplierService supplierService;
     private ExportPDFService exportPDFService;
-    private UserInfoService userInfoService;
     private ContractService contractService;
+    private AgentService agentService;
 
     public static final String UTF8_BOM = "\uFEFF";
 
@@ -66,12 +66,11 @@ public class OrderController extends ControllerHelper {
         EmailSender emailSender = emailFactory.getSender();
         this.orderService = new DefaultOrderService(Lystore.lystoreSchema, "order_client_equipment", emailSender);
         this.exportPDFService = new DefaultExportPDFService( eb, vertx, container);
-        this.userInfoService = new DefaultUserInfoService();
         this.structureService = new DefaultStructureService();
         this.exportPDFService = new DefaultExportPDFService( eb, vertx, container);
-        this.userInfoService = new DefaultUserInfoService();
         this.supplierService = new DefaultSupplierService(Lystore.lystoreSchema, "supplier");
         this.contractService = new DefaultContractService(Lystore.lystoreSchema, "contract");
+        this.agentService = new DefaultAgentService(Lystore.lystoreSchema, "agent");
     }
 
     @Get("/orders/:idCampaign/:idStructure")
@@ -261,13 +260,12 @@ public class OrderController extends ControllerHelper {
             @Override
             public void handle(final JsonObject orders) {
                 final JsonArray ids = orders.getArray("ids");
-                final String userId = orders.getString("userId");
                 final String nbrBc = orders.getString("bc_number");
                 final String nbrEngagement = orders.getString("engagement_number");
                 final String dateGeneration = orders.getString("dateGeneration");
                 Number supplierId = orders.getNumber("supplierId");
 
-                getOrdersData(request, userId, nbrBc, nbrEngagement, dateGeneration, supplierId, ids,
+                getOrdersData(request, nbrBc, nbrEngagement, dateGeneration, supplierId, ids,
                         new Handler<JsonObject>() {
                             @Override
                             public void handle(JsonObject data) {
@@ -501,12 +499,11 @@ public class OrderController extends ControllerHelper {
     @ResourceFilter(ManagerRight.class)
     public void getOrdersPreviewData (final HttpServerRequest request) {
         MultiMap params = request.params();
-        if (!params.contains("userId") && !params.contains("ids") && !params.contains("bc_number")
+        if (!params.contains("ids") && !params.contains("bc_number")
                 && !params.contains("engagement_number") && !params.contains("dateGeneration")
                 && !params.contains("supplierId")) {
             badRequest(request);
         } else {
-            final String userId = params.get("userId");
             final List<String> ids = params.getAll("ids");
             final List<Integer> integerIds = new ArrayList<>();
             final String nbrBc = params.get("bc_number");
@@ -524,7 +521,7 @@ public class OrderController extends ControllerHelper {
                 return;
             }
 
-            getOrdersData(request, userId, nbrBc, nbrEngagement, dateGeneration, supplierId,
+            getOrdersData(request, nbrBc, nbrEngagement, dateGeneration, supplierId,
                     new JsonArray(integerIds.toArray()), new Handler<JsonObject>() {
                         @Override
                         public void handle(JsonObject data) {
@@ -534,12 +531,12 @@ public class OrderController extends ControllerHelper {
         }
     }
 
-    private void getOrdersData (final HttpServerRequest request, String userId, final String nbrBc,
+    private void getOrdersData (final HttpServerRequest request, final String nbrBc,
                                 final String nbrEngagement, final String dateGeneration,
                                 final Number supplierId, final JsonArray ids,
                                 final Handler<JsonObject> handler) {
         final JsonObject data = new JsonObject();
-        retrieveManagementInfo(request, userId, supplierId, new Handler<JsonObject>() {
+        retrieveManagementInfo(request, ids, supplierId, new Handler<JsonObject>() {
             @Override
             public void handle(final JsonObject managmentInfo) {
                 retrieveStructures(request, ids, new Handler<JsonObject>() {
@@ -627,13 +624,13 @@ public class OrderController extends ControllerHelper {
         }
     }
 
-    private void retrieveManagementInfo(final HttpServerRequest request, String userId,
+    private void retrieveManagementInfo(final HttpServerRequest request, JsonArray ids,
                                         final Number supplierId, final Handler<JsonObject> handler) {
-        userInfoService.getUserInfo(userId, new Handler<Either<String, JsonArray>>() {
+        agentService.getAgentByOrderIds(ids, new Handler<Either<String, JsonObject>>() {
             @Override
-            public void handle(final Either<String, JsonArray> user) {
+            public void handle(Either<String, JsonObject> user) {
                 if (user.isRight()) {
-                    final JsonObject userObject = makeUserObject((JsonObject) user.right().getValue().get(0));
+                    final JsonObject userObject = user.right().getValue();
                     supplierService.getSupplier(supplierId.toString(), new Handler<Either<String, JsonObject>>() {
                         @Override
                         public void handle(Either<String, JsonObject> supplier) {
@@ -658,14 +655,6 @@ public class OrderController extends ControllerHelper {
                 }
             }
         });
-    }
-
-    private JsonObject makeUserObject(JsonObject user) {
-        JsonObject dataUser = user.getObject("u").getObject("data");
-        return   new JsonObject()
-                .putString("name", dataUser.getString("firstName")+" "+ dataUser.getString("lastName") )
-                .putString("email", dataUser.getString("email"))
-                .putString("phone", dataUser.getString("homePhone"));
     }
 
     @Put("/orders/done")

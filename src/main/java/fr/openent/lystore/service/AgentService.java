@@ -36,4 +36,11 @@ public interface AgentService {
      * @param handler Function handler returning data
      */
     void deleteAgent (List<Integer> ids, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Return agent based on order ids
+     * @param ids order ids
+     * @param handler Function handler returning data
+     */
+    void getAgentByOrderIds (JsonArray ids, Handler<Either<String, JsonObject>> handler);
 }

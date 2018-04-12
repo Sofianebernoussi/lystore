@@ -48,14 +48,12 @@ public class EmailSendService {
             sendMail(request, (String) row.get(agentEmailIndex),
                     mailObject,
                     mailBody);
-            LOGGER.info(" sendEmails : bouclefor1");
         }
         for (int i = 0; i < structureRows.size(); i++) {
             String mailObject="[LyStore] Commandes ";
             JsonObject row = structureRows.get(i);
             String name = row.getString("name");
             JsonArray mailsRow = row.getArray("mails");
-            LOGGER.error(" sendEmails : bouclefor2");
             for(int j = 0 ; j < mailsRow.size() ; j++){
                 JsonObject userMail = (JsonObject) mailsRow.get(j);
                 if (userMail.getString("mail") != null) {
@@ -67,7 +65,6 @@ public class EmailSendService {
                 }
             }
         }
-        LOGGER.info(" sendEmails Fin");
     }
 
     public void getPersonnelMailStructure (JsonArray structureIds, Handler<Either<String, JsonArray>> handler){

@@ -132,7 +132,12 @@ export const orderController = ng.controller('orderController',
             let link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
             link.download =  reportName + '.pdf';
+            document.body.appendChild(link);
             link.click();
+            setTimeout(function(){
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(link.href);
+            }, 100);
         };
         $scope.exportCSV = async() => {
             let params = Utils.formatKeyToParameter($scope.ordersClient.selected, 'id');

@@ -135,13 +135,13 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 " nextval('lystore.order_client_equipment_id_seq' ) as id_order, " +
                 "Case Count(ep) " +
                 "when 0 " +
-                "then ROUND((e.price + ((e.price *  e.tax_amount) /100)) * basket.amount , 2)  " +
-                "else ROUND((e.price + ((e.price *  e.tax_amount) /100) + SUM(ep.total_option_price)) * basket.amount  , 2) " +
+                "then ROUND((e.price + ((e.price *  e.tax_amount) /100)), 2) * basket.amount " +
+                "else (ROUND(e.price + ((e.price *  e.tax_amount) /100), 2) + SUM(ep.total_option_price)) * basket.amount " +
                 "END as total_price, array_to_json(array_agg(DISTINCT ep.*)) as options  " +
                 "FROM  lystore.basket_equipment basket  " +
                 "LEFT JOIN lystore.basket_option ON basket_option.id_basket_equipment = basket.id " +
-                "LEFT JOIN (Select equipment_option.*, tax.value tax_amount, equipment_option.price + " +
-                "((equipment_option.price * tax.value )/100) as total_option_price " +
+                "LEFT JOIN (Select equipment_option.*, tax.value tax_amount, " +
+                "ROUND(equipment_option.price + ((equipment_option.price * tax.value )/100), 2) as total_option_price " +
                 "FROM lystore.equipment_option  " +
                 "INNER JOIN  lystore.tax ON tax.id = equipment_option.id_tax ) " +
                 "ep ON basket_option.id_option = ep.id " +
@@ -151,7 +151,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 "WHERE basket.id_campaign = ?   AND basket.id_structure = ? " +
                 "GROUP BY (basket.id, basket.amount, basket.processing_date,basket.id_campaign, basket.id_structure, " +
                 "e.id, e.price, e.name, e.summary, e.description, e.price, e.image, e.id_contract, e.status," +
-                " jsonb(e.technical_specs),  e.tax_amount );   ";
+                " jsonb(e.technical_specs),  e.tax_amount );";
         values.addNumber(idCampaign).addString(idStructure);
 
         sql.prepared(query, values, SqlResult.validResultHandler(handler));

@@ -71,6 +71,7 @@ export class OrdersClient extends Selection<OrderClient> {
                     order.options.toString() !== '[null]' && order.options !== null ?
                         order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
                         : order.options = [];
+                    order.options.map((order) => order.selected = true);
                 });
             } else {
                 let { data } = await http.get(  `/lystore/orders` );

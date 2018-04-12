@@ -28,7 +28,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
         return moment(date).add(60, 'days').calendar();
     };
     $scope.calculateTotal = (orderClient: OrderClient, roundNumber: number) => {
-        let totalPrice = $scope.calculatePriceOfEquipment(orderClient, false, roundNumber) * orderClient.amount;
+        let totalPrice = $scope.calculatePriceOfEquipment(orderClient, true, roundNumber) * orderClient.amount;
         return totalPrice.toFixed(roundNumber);
     };
 

@@ -212,11 +212,11 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         String query = "SELECT  oe.id, oe.name,date_trunc('day',oe.creation_date)as creation_date, " +
                 " id_campaign, id_structure," +
                 " CASE count(opts) " +
-                "WHEN 0 THEN ROUND ((oe.price+( oe.tax_amount*oe.price)/100)*oe.amount,2) "+
-                "ELSE ROUND((price_all_options +( oe.price + ROUND((oe.tax_amount*oe.price)/100,2)))*oe.amount,2) " +
+                "WHEN 0 THEN ROUND((oe.price + (oe.tax_amount * oe.price)/100), 2) * oe.amount "+
+                "ELSE (price_all_options +(ROUND(oe.price + (oe.tax_amount * oe.price)/100, 2))) * oe.amount " +
                 "END as price_total_equipment "+
                 "FROM "+ Lystore.lystoreSchema + ".order_client_equipment  oe " +
-                "LEFT JOIN (SELECT SUM(( price +( tax_amount*price)/100)*amount) as price_all_options," +
+                "LEFT JOIN (SELECT SUM((ROUND(price +(tax_amount * price)/100,2))) as price_all_options," +
                 " id_order_client_equipment FROM "+ Lystore.lystoreSchema + ".order_client_options " +
                 "GROUP BY id_order_client_equipment)" +
                 " opts ON oe.id = opts.id_order_client_equipment WHERE id= ? " +
@@ -482,14 +482,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 .putString("action", "prepared");
     }
     private  JsonObject getNewPurse(Integer idCampaign, String idStructure){
-//        String query = "( SELECT row_to_json(row(p.amount, count(o.id ) )) " +
-//                " FROM " + Lystore.lystoreSchema + ".purse p, " + Lystore.lystoreSchema + ".order_client_equipment o " +
-//                " where p.id_campaign = ? " +
-//                " AND p.id_structure = ? " +
-//                " AND  o.id_campaign = ? " +
-//                " AND o.id_structure = ? " +
-//                " GROUP BY(p.amount) )";
-
         String query = "SELECT amount FROM " + Lystore.lystoreSchema + ".purse " +
                 "WHERE id_campaign = ? " +
                 "AND id_structure = ?;";

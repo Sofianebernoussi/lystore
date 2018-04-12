@@ -259,7 +259,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
          * @param {number} roundNumber [number of digits after the decimal point]
          * @returns {string | number}
          */
-        $scope.calculatePriceOfEquipment = (equipment: any, selectedOptions: boolean, roundNumber?: number) => {
+        $scope.calculatePriceOfEquipment = (equipment: any, selectedOptions: boolean, roundNumber: number = 2) => {
             let price = parseFloat( $scope.calculatePriceTTC(equipment.price , equipment.tax_amount) );
             equipment.options.map((option) => {
                 (option.required === true  || (selectedOptions ? option.selected === true : false) )

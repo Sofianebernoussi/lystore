@@ -23,3 +23,5 @@ BEGIN
 
 ALTER TABLE lystore.order_client_equipment
 	ADD COLUMN file character varying (250);
+
+ALTER TABLE lystore.order_client_equipment RENAME COLUMN "number" TO "number_validation";

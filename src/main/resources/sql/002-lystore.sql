@@ -29,7 +29,7 @@ ALTER TABLE lystore.order_client_equipment
     ADD COLUMN cause_status character varying(300);
 
 ALTER TABLE lystore.order_client_equipment
-    ADD COLUMN "number_validation" character varying(50);
+    ADD COLUMN "number" character varying(50);
 
 ALTER TABLE lystore.order_client_equipment
     ADD CONSTRAINT fk_contract_id FOREIGN KEY (id_contract)

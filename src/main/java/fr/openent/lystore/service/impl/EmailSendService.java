@@ -71,7 +71,7 @@ public class EmailSendService {
         String query = "MATCH (w:WorkflowAction {displayName: 'lystore.access'})--(r:Role) with r , count((r)-->(w)) as NbrRows " +
                 " Match p = ((r)<--(mg:ManualGroup)-->(s:Structure)), (mg)<-[IN]-(u:User)  " +
                 "where NbrRows=1 AND s.id IN {ids} return s.id as id, s.name as name, " +
-                "collect(DISTINCT {mail : u.emailAcademy, name: u.displayName} ) as mails ";
+                "collect(DISTINCT {mail : u.email, name: u.displayName} ) as mails ";
         neo4j.execute(query, new JsonObject().putArray("ids", structureIds),
                 Neo4jResult.validResultHandler(handler));
 

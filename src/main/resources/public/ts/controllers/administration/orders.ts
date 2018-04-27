@@ -39,10 +39,16 @@ export const orderController = ng.controller('orderController',
         $scope.addFilter = (filterWord: string, event?) => {
             if (event && (event.which === 13 || event.keyCode === 13 )) {
                 $scope.addFilterWords(filterWord);
-            } else if (!event) {
-                $scope.addFilterWords(filterWord);
+                $scope.filterDisplayedOrders();
             }
         };
+
+        $scope.switchAllOrders = () => {
+            $scope.displayedOrders.map((order) => order.selected = $scope.allOrdersSelected);
+        };
+
+        $scope.getSelectedOrders = () => _.where($scope.displayedOrders, { selected: true });
+
         $scope.addFilterWords = (filterWord) => {
             if (filterWord !== '') {
                 $scope.search.filterWords = _.union($scope.search.filterWords, [filterWord]);
@@ -50,8 +56,36 @@ export const orderController = ng.controller('orderController',
                 Utils.safeApply($scope);
             }
         };
+
+        function generateRegexp (words: string[]): RegExp {
+            let reg;
+            if (words.length > 0) {
+                reg = '.*(';
+                words.map((word: string) => reg += `${word.toLowerCase()}|`);
+                reg = reg.slice(0, -1);
+                reg += ').*';
+            } else {
+                reg = '.*';
+            }
+            return new RegExp(reg);
+        };
+
+        $scope.filterDisplayedOrders = () => {
+            const regex = generateRegexp($scope.search.filterWords);
+            $scope.displayedOrders = _.filter($scope.ordersClient.all, (order: OrderClient) => {
+                return regex.test(order.name_structure.toLowerCase())
+                    || regex.test(order.contract.name.toLowerCase())
+                    || regex.test(order.supplier.name.toLowerCase())
+                    || regex.test(order.campaign.name.toLowerCase())
+                    || (order.number_validation !== null
+                        ? regex.test(order.number_validation.toLowerCase())
+                        : false);
+            });
+        };
+
         $scope.pullFilterWord = (filterWord) => {
             $scope.search.filterWords = _.without( $scope.search.filterWords , filterWord);
+            $scope.filterDisplayedOrders();
         };
         $scope.validateOrders = async (orders: OrderClient[]) => {
             let ordersToValidat  = new OrdersClient();
@@ -66,8 +100,7 @@ export const orderController = ng.controller('orderController',
                 template.open('validOrder.lightbox', 'administrator/order/order-valid-confirmation');
                 $scope.display.lightbox.validOrder = true;
             }
-            await $scope.ordersClient.sync($scope.structures.all);
-            $scope.ordersClient.all = _.where($scope.ordersClient.all, {status: 'WAITING'});
+            await $scope.syncOrders('WAITING');
             Utils.safeApply($scope);
         };
         $scope.cancelBasketDelete = () => {
@@ -82,8 +115,7 @@ export const orderController = ng.controller('orderController',
             if (status === 200) {
                 $scope.notifications.push(new Notification('lystore.windUp.notif', 'confirm'));
             }
-            await $scope.ordersClient.sync($scope.structures.all);
-            $scope.ordersClient.all = _.where($scope.ordersClient.all, {status: 'SENT'});
+            await $scope.syncOrders('DONE');
             Utils.safeApply($scope);
         };
         $scope.validateSentOrders = (orders: OrderClient[]) => {
@@ -117,16 +149,10 @@ export const orderController = ng.controller('orderController',
             if (status === 200) {
                 $scope.notifications.push(new Notification( 'lystore.sent.notif' , 'confirm'));
             }
-            await $scope.ordersClient.sync($scope.structures.all);
-            $scope.cancelPrepareSentOrders();
             $scope.redirectTo('/order/valid');
             Utils.safeApply($scope);
         };
-        $scope.cancelPrepareSentOrders = () => {
-            $scope.display.lightbox.sendOrder = false;
-            template.close('sendOrder.lightbox');
-            Utils.safeApply($scope);
-        };
+
         $scope.saveByteArray = (reportName, data) => {
             let blob = new Blob([data]);
             let link = document.createElement('a');

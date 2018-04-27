@@ -30,7 +30,7 @@
                 <td workflow="lystore.manager">
                     <label class="checkbox">
                         <input type="checkbox"
-                               ng-change="switchAll(allOrdersSelected, ordersClient)"
+                               ng-change="switchAllOrders()"
                                ng-model="allOrdersSelected">
                         <span></span>
                     </label>
@@ -74,8 +74,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="order in ordersClient.all  |ordersClientFilter:'SENT':search.filterWords
-             | orderBy:sort.order.type:sort.order.reverse">
+            <tr ng-repeat="order in displayedOrders | orderBy:sort.order.type:sort.order.reverse">
                 <td workflow="lystore.manager">
                     <label class="checkbox">
                         <input type="checkbox" ng-model="order.selected">
@@ -97,7 +96,7 @@
     <section class="toggle-buttons" ng-class="{ hide: ordersClient.selected.length === 0 }">
         <div class="toggle">
             <div class="row">
-                <button ng-click="windUpOrders(ordersClient.selected)">
+                <button ng-click="windUpOrders(getSelectedOrders())">
                     <i18n>windUp</i18n>
                 </button>
             </div>

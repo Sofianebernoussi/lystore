@@ -60,7 +60,7 @@ export class OrdersClient extends Selection<OrderClient> {
         this.dateGeneration = new Date();
     }
 
-    async sync (structures: Structure[] = [], idCampaign?: number, idStructure?: string, ) {
+    async sync (status: string, structures: Structure[] = [], idCampaign?: number, idStructure?: string) {
         try {
             if (idCampaign && idStructure ) {
                 let { data } = await http.get(  `/lystore/orders/${idCampaign}/${idStructure}` );
@@ -74,7 +74,7 @@ export class OrdersClient extends Selection<OrderClient> {
                     order.options.map((order) => order.selected = true);
                 });
             } else {
-                let { data } = await http.get(  `/lystore/orders` );
+                let { data } = await http.get(  `/lystore/orders?status=${status}` );
                 this.all = Mix.castArrayAs(OrderClient, data);
                 this.all.map((order) => {
                     order.price = parseFloat(order.price.toString());

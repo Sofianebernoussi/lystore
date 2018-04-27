@@ -5,7 +5,6 @@
  */
 import { ng, _ } from 'entcore';
 export const ordersClientFilter = ng.filter('ordersClientFilter', () => {
-
     return (inputs, status, table) => {
         let filter = (order, status, table) => {
             let result = [];

@@ -6,7 +6,6 @@
                 <input  class="row"
                         type="text"
                         ng-model="search.filterWord"
-                        ng-change="filterByTag(search.filterWord)"
                         ng-keydown="addFilter(search.filterWord, $event)"
                         i18n-placeholder="add.a.filter" />
 
@@ -30,7 +29,7 @@
                 <td workflow="lystore.manager" class="table-selector">
                     <label class="checkbox">
                         <input type="checkbox"
-                               ng-change="switchAll(allOrdersSelected, ordersClient)"
+                               ng-change="switchAllOrders()"
                                ng-model="allOrdersSelected">
                         <span></span>
                     </label>
@@ -80,8 +79,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="order in ordersClient.all  |ordersClientFilter:'WAITING': search.filterWords
-             | orderBy:sort.order.type:sort.order.reverse">
+            <tr ng-repeat="order in displayedOrders | orderBy:sort.order.type:sort.order.reverse">
                 <td workflow="lystore.manager" class="table-selector">
                     <label class="checkbox">
                         <input type="checkbox" ng-model="order.selected">
@@ -117,7 +115,7 @@
     <section class="toggle-buttons" ng-class="{ hide: ordersClient.selected.length === 0 }">
         <div class="toggle">
             <div class="row">
-                <button ng-click="validateOrders(ordersClient.selected)">
+                <button ng-click="validateOrders(getSelectedOrders())">
                     <i18n>Validate</i18n>
                 </button>
                 <button ng-click="exportCSV()" >

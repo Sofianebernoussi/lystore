@@ -92,7 +92,12 @@ public class OrderController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void listOrders (HttpServerRequest request){
-        orderService.listOrder(arrayResponseHandler(request));
+        if (request.params().contains("status")) {
+            String status = request.params().get("status");
+            orderService.listOrder(status, arrayResponseHandler(request));
+        } else {
+            badRequest(request);
+        }
     }
 
     @Delete("/order/:idOrder/:idStructure")

@@ -23,9 +23,10 @@ public interface OrderService {
     void listExport(Integer idCampaign, String idStructure,Handler<Either<String, JsonArray>> handler);
     /**
      * Get the list of all orders
+     * @param status order status to retrieve
      * @param handler Function handler returning data
      */
-    void listOrder(Handler<Either<String, JsonArray>> handler);
+    void listOrder(String status, Handler<Either<String, JsonArray>> handler);
     /**
      * Valid order ( change status to 'VALID', add validation number to the order,
      * then send mail to Agents )

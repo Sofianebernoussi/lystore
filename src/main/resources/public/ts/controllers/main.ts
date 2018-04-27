@@ -297,11 +297,16 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             }
         };
+
+        $scope.syncOrders = async (status: string) => {
+            await $scope.ordersClient.sync(status, $scope.structures.all);
+            $scope.displayedOrders = $scope.ordersClient.all;
+        };
+
         $scope.initOrders = async (status) => {
             $scope.structures = new Structures();
             await $scope.structures.sync();
-            await $scope.ordersClient.sync($scope.structures.all);
-            $scope.ordersClient.all = _.where($scope.ordersClient.all, {status: status});
+            await $scope.syncOrders(status);
             Utils.safeApply($scope);
         };
 

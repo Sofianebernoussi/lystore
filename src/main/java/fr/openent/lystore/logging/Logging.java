@@ -24,37 +24,33 @@ public final class Logging {
     }
 
     public static JsonObject add(EventBus eb, HttpServerRequest request, final String context,
-                                 final String action, final String item, final JsonObject object) {
-       final JsonObject statement = new JsonObject();
-        UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-            @Override
-            public void handle(UserInfos user) {
-                StringBuilder query = new StringBuilder("INSERT INTO ")
-                        .append(Lystore.lystoreSchema)
+                                 final String action, final String item, final JsonObject object, UserInfos user) {
+        final JsonObject statement = new JsonObject();
+        StringBuilder query = new StringBuilder("INSERT INTO ")
+                .append(Lystore.lystoreSchema)
                 .append(".logs(id_user, username, action, context, item" );
-                if (object != null) {
-                    query.append(", value");
-                }
-                query.append(") VALUES (?, ?, ?, ?, ?");
-                if (object != null) {
-                    query.append(", to_json(?::text)");
-                }
-                query.append(");");
+        if (object != null) {
+            query.append(", value");
+        }
+        query.append(") VALUES (?, ?, ?, ?, ?");
+        if (object != null) {
+            query.append(", to_json(?::text)");
+        }
+        query.append(");");
 
-                JsonArray params = new JsonArray()
-                        .addString(user.getUserId())
-                        .add(user.getUsername())
-                        .addString(action)
-                        .addString(context)
-                        .addString(item.contains("id = ") ? item : ("id = " + item));
-                        if (object != null) {
-                            params.addObject(object);
-                        }
-                statement.putString("statement", query.toString())
-                        .putArray("values",params)
-                        .putString("action", "prepared");
-            }
-        });
+        JsonArray params = new JsonArray()
+                .addString(user.getUserId())
+                .add(user.getUsername())
+                .addString(action)
+                .addString(context)
+                .addString(item.contains("id = ") ? item : ("id = " + item));
+        if (object != null) {
+            params.addObject(object);
+        }
+        statement.putString("statement", query.toString())
+                .putArray("values",params)
+                .putString("action", "prepared");
+
         return statement;
     }
 
@@ -63,13 +59,17 @@ public final class Logging {
                       final String item, final JsonObject object) {
         return new Handler<Either<String, JsonObject>>() {
             @Override
-            public void handle(Either<String, JsonObject> event) {
+            public void handle(final Either<String, JsonObject> event) {
                 if (event.isRight()) {
-                    Renders.renderJson(request, event.right().getValue(), OK_STATUS);
-                    JsonObject statement = add(eb, request, context, action,
-                            item == null ? event.right().getValue().getNumber("id").toString() : item, object);
-                    Sql.getInstance().prepared(statement.getString("statement"),statement.getArray("values"),null);
-
+                    UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+                        @Override
+                        public void handle(UserInfos user) {
+                            Renders.renderJson(request, event.right().getValue(), OK_STATUS);
+                            JsonObject statement = add(eb, request, context, action,
+                                    item == null ? event.right().getValue().getNumber("id").toString() : item, object, user);
+                            Sql.getInstance().prepared(statement.getString("statement"),statement.getArray("values"),null);
+                        }
+                    });
                 } else {
                     JsonObject error = new JsonObject()
                             .putString("error", event.left().getValue());
@@ -83,14 +83,19 @@ public final class Logging {
              final  List<String> items, final JsonObject object) {
         return new Handler<Either<String, JsonObject>>() {
             @Override
-            public void handle(Either<String, JsonObject> event) {
+            public void handle(final Either<String, JsonObject> event) {
                 if (event.isRight()) {
-                    Renders.renderJson(request, event.right().getValue(), OK_STATUS);
-                    JsonArray statements = new JsonArray();
-                    for(int i=0; i<items.size(); i++){
-                        statements.add( add(eb, request, context, action,items.get(i), object ));
-                    }
-                    Sql.getInstance().transaction(statements, null);
+                    UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+                        @Override
+                        public void handle(UserInfos user) {
+                            Renders.renderJson(request, event.right().getValue(), OK_STATUS);
+                            JsonArray statements = new JsonArray();
+                            for(int i=0; i<items.size(); i++){
+                                statements.add( add(eb, request, context, action,items.get(i), object, user));
+                            }
+                            Sql.getInstance().transaction(statements, null);
+                        }
+                    });
                 } else {
                     JsonObject error = new JsonObject()
                             .putString("error", event.left().getValue());
@@ -105,17 +110,22 @@ public final class Logging {
              final String context, final String action,final String item, final JsonArray objects) {
         return new Handler<Either<String, JsonObject>>() {
             @Override
-            public void handle(Either<String, JsonObject> event) {
+            public void handle(final Either<String, JsonObject> event) {
                 if (event.isRight()) {
-                    JsonObject object;
-                    Renders.renderJson(request, event.right().getValue(), OK_STATUS);
-                    JsonArray statements = new JsonArray();
-                    for(int i=0; i<objects.size(); i++){
-                        object = objects.get(i);
-                        statements.add( add(eb, request, context, action,
-                                object.getNumber(item).toString(), (JsonObject) object));
-                    }
-                    Sql.getInstance().transaction(statements, null);
+                    UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+                        @Override
+                        public void handle(UserInfos user) {
+                            JsonObject object;
+                            Renders.renderJson(request, event.right().getValue(), OK_STATUS);
+                            JsonArray statements = new JsonArray();
+                            for(int i=0; i<objects.size(); i++){
+                                object = objects.get(i);
+                                statements.add( add(eb, request, context, action,
+                                        object.getNumber(item).toString(), (JsonObject) object, user));
+                            }
+                            Sql.getInstance().transaction(statements, null);
+                        }
+                    });
                 } else {
                     JsonObject error = new JsonObject()
                             .putString("error", event.left().getValue());

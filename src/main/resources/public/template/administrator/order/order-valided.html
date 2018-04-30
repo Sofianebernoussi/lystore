@@ -74,7 +74,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="order in displayedOrders | orderBy:sort.order.type:sort.order.reverse">
+            <tr ng-repeat="order in displayedOrders.all | orderBy:sort.order.type:sort.order.reverse">
                 <td workflow="lystore.manager">
                     <label class="checkbox">
                         <input type="checkbox" ng-model="order.selected">

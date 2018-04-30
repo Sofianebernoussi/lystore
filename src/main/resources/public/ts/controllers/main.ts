@@ -47,6 +47,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.logs = new Logs();
         $scope.baskets = new Baskets();
         $scope.ordersClient = new OrdersClient();
+        $scope.displayedOrders = new OrdersClient();
         route({
             main:  async() => {
                 if ($scope.isManager() || $scope.isAdministrator()) {
@@ -300,7 +301,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
         $scope.syncOrders = async (status: string) => {
             await $scope.ordersClient.sync(status, $scope.structures.all);
-            $scope.displayedOrders = $scope.ordersClient.all;
+            $scope.displayedOrders.all = $scope.ordersClient.all;
         };
 
         $scope.initOrders = async (status) => {

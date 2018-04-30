@@ -44,10 +44,10 @@ export const orderController = ng.controller('orderController',
         };
 
         $scope.switchAllOrders = () => {
-            $scope.displayedOrders.map((order) => order.selected = $scope.allOrdersSelected);
+            $scope.displayedOrders.all.map((order) => order.selected = $scope.allOrdersSelected);
         };
 
-        $scope.getSelectedOrders = () => _.where($scope.displayedOrders, { selected: true });
+        $scope.getSelectedOrders = () => $scope.displayedOrders.selected;
 
         $scope.addFilterWords = (filterWord) => {
             if (filterWord !== '') {
@@ -72,7 +72,7 @@ export const orderController = ng.controller('orderController',
 
         $scope.filterDisplayedOrders = () => {
             const regex = generateRegexp($scope.search.filterWords);
-            $scope.displayedOrders = _.filter($scope.ordersClient.all, (order: OrderClient) => {
+            $scope.displayedOrders.all = _.filter($scope.ordersClient.all, (order: OrderClient) => {
                 return regex.test(order.name_structure.toLowerCase())
                     || regex.test(order.contract.name.toLowerCase())
                     || regex.test(order.supplier.name.toLowerCase())

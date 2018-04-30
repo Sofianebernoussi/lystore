@@ -79,7 +79,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="order in displayedOrders | orderBy:sort.order.type:sort.order.reverse">
+            <tr ng-repeat="order in displayedOrders.all | orderBy:sort.order.type:sort.order.reverse">
                 <td workflow="lystore.manager" class="table-selector">
                     <label class="checkbox">
                         <input type="checkbox" ng-model="order.selected">
@@ -103,7 +103,7 @@
                     <i18n>totals</i18n>
                 </td>
                 <td>[[ordersClient.calculTotalAmount() ]]</td>
-                <td colspan="3" class="text-right"> [[ordersClient.calculTotalPriceTTC() | currency]]</td>
+                <td colspan="3" class="text-right"> [[displayedOrders.calculTotalPriceTTC() | currency]]</td>
             </tr>
             </tfoot>
         </table>

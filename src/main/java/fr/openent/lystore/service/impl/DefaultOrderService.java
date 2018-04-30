@@ -60,13 +60,16 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     @Override
     public  void listOrder(String status, Handler<Either<String, JsonArray>> handler){
         String query = "SELECT oce.* , to_json(contract.*) contract ,to_json(supplier.*) supplier, " +
-                "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options " +
-                "FROM lystore.order_client_equipment oce " +
+                "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options," +
+                "array_to_json(array_agg(structure_group.name)) as structure_groups " +
+                "FROM " + Lystore.lystoreSchema + ".order_client_equipment oce " +
                 "LEFT JOIN "+ Lystore.lystoreSchema + ".order_client_options oco " +
                 "ON oco.id_order_client_equipment = oce.id " +
                 "LEFT JOIN "+ Lystore.lystoreSchema + ".contract ON oce.id_contract = contract.id " +
                 "INNER JOIN "+ Lystore.lystoreSchema + ".supplier ON contract.id_supplier = supplier.id  " +
                 "INNER JOIN "+ Lystore.lystoreSchema + ".campaign ON oce.id_campaign = campaign.id " +
+                "INNER JOIN "+ Lystore.lystoreSchema + ".rel_group_structure ON (oce.id_structure = rel_group_structure.id_structure) " +
+                "INNER JOIN "+ Lystore.lystoreSchema + ".structure_group ON (rel_group_structure.id_structure_group = structure_group.id) " +
                 "WHERE oce.status = ? " +
                 "GROUP BY (oce.id, contract.id, supplier.id, campaign.id); ";
         sql.prepared(query, new JsonArray().addString(status), SqlResult.validResultHandler(handler));

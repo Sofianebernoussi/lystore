@@ -48,7 +48,7 @@
                 </td>
                 <td ng-click="sort.order.type = 'supplier.name';
                     sort.order.reverse = !sort.order.reverse">
-                    <i18n>supplier</i18n>
+                    <i18n>EQUIPMENT</i18n>
                     <i class="up-open" ng-show="sort.order.type === 'supplier.name' && !sort.order.reverse"></i>
                     <i class="down-open" ng-show="sort.order.type === 'supplier.name' && sort.order.reverse"></i>
                 </td>
@@ -63,6 +63,12 @@
                     <i18n>date</i18n>
                     <i class="up-open" ng-show="sort.order.type === 'creation_date' && !sort.order.reverse"></i>
                     <i class="down-open" ng-show="sort.order.type === 'creation_date' && sort.order.reverse"></i>
+                </td>
+                <td ng-click="sort.order.type = 'structure_groups';
+                    sort.order.reverse = !sort.order.reverse">
+                    <i18n>STRUCTUREGROUP</i18n>
+                    <i class="up-open" ng-show="sort.order.type === 'structure_groups' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'structure_groups' && sort.order.reverse"></i>
                 </td>
                 <td ng-click="sort.order.type = 'campaign.name';
                     sort.order.reverse = !sort.order.reverse">
@@ -90,11 +96,12 @@
                 <td >
                     [[order.contract.name]]
                 </td>
-                <td> [[order.supplier.name]]</td>
+                <td> [[order.name]]</td>
                 <td>[[order.amount ]]</td>
                 <td>[[order.creation_date ]]</td>
+                <td>[[getStructureGroupsList(order.structure_groups)]]</td>
                 <td>[[order.campaign.name ]]</td>
-                <td><span ng-bind="order.priceTTCtotal| currency"></span></td>
+                <td><span ng-bind="order.priceTTCtotal | currency"></span></td>
             </tr>
             </tbody>
             <tfoot>
@@ -102,7 +109,7 @@
                 <td colspan="4">
                     <i18n>totals</i18n>
                 </td>
-                <td>[[ordersClient.calculTotalAmount() ]]</td>
+                <td>[[displayedOrders.calculTotalAmount() ]]</td>
                 <td colspan="3" class="text-right"> [[displayedOrders.calculTotalPriceTTC() | currency]]</td>
             </tr>
             </tfoot>

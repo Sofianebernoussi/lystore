@@ -49,6 +49,12 @@ export const orderController = ng.controller('orderController',
 
         $scope.getSelectedOrders = () => $scope.displayedOrders.selected;
 
+        $scope.getStructureGroupsList = (structureGroups: string[]): string => {
+            let list = '';
+            structureGroups.map((groupName) => list += `${groupName}, `);
+            return list.trim().slice(0, -1);
+        };
+
         $scope.addFilterWords = (filterWord) => {
             if (filterWord !== '') {
                 $scope.search.filterWords = _.union($scope.search.filterWords, [filterWord]);
@@ -72,11 +78,20 @@ export const orderController = ng.controller('orderController',
 
         $scope.filterDisplayedOrders = () => {
             const regex = generateRegexp($scope.search.filterWords);
+
+            const matchStructureGroups = (structureGroups: string[]): boolean => {
+                let bool: boolean = false;
+                structureGroups.map((groupName) => bool = bool || regex.test(groupName));
+                return bool;
+            };
+
             $scope.displayedOrders.all = _.filter($scope.ordersClient.all, (order: OrderClient) => {
                 return regex.test(order.name_structure.toLowerCase())
                     || regex.test(order.contract.name.toLowerCase())
                     || regex.test(order.supplier.name.toLowerCase())
                     || regex.test(order.campaign.name.toLowerCase())
+                    || regex.test(order.name.toLowerCase())
+                    || matchStructureGroups(order.structure_groups)
                     || (order.number_validation !== null
                         ? regex.test(order.number_validation.toLowerCase())
                         : false);

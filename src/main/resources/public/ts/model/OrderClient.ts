@@ -21,6 +21,7 @@ export class OrderClient implements Selectable {
     contract: Contract;
     supplier: Supplier;
     campaign: Campaign;
+    structure_groups: string[];
 
     name_structure: string;
     id_contract: number;
@@ -76,7 +77,7 @@ export class OrdersClient extends Selection<OrderClient> {
             } else {
                 let { data } = await http.get(  `/lystore/orders?status=${status}` );
                 this.all = Mix.castArrayAs(OrderClient, data);
-                this.all.map((order) => {
+                this.all.map((order: OrderClient) => {
                     order.price = parseFloat(order.price.toString());
                     order.tax_amount = parseFloat(order.tax_amount.toString());
                     order.contract = Mix.castAs(Contract,  JSON.parse(order.contract.toString()));
@@ -89,6 +90,7 @@ export class OrdersClient extends Selection<OrderClient> {
                     order.creation_date = moment(order.creation_date).format('L');
                     order.name_structure =  structures.length > 0 ? this.initNameStructure(order.id_structure, structures) : '';
                     order.priceTTCtotal = parseFloat((order.calculatePriceTTC(2) as number).toString()) * order.amount;
+                    order.structure_groups = Utils.parsePostgreSQLJson(order.structure_groups);
                 });
             }
         } catch (e) {

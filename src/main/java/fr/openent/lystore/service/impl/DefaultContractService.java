@@ -21,7 +21,7 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
     public void getContracts(Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT contract.id as id, contract.name as name, annual_min, annual_max, " +
                 "start_date, nb_renewal, " +
-                "id_contract_type, max_brink, id_supplier, id_agent, id_program, reference, renewal_end, end_date, " +
+                "id_contract_type, max_brink, id_supplier, id_agent, reference, renewal_end, end_date, " +
                 "supplier.name as supplier_display_name " +
                 "FROM " + Lystore.lystoreSchema + ".contract INNER JOIN " + Lystore.lystoreSchema +
                 ".supplier on (contract.id_supplier = supplier.id)";
@@ -32,8 +32,8 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
     public void createContract(JsonObject contract, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + Lystore.lystoreSchema + ".contract(name, annual_min, " +
                 "annual_max, start_date, nb_renewal, id_contract_type, max_brink, id_supplier, id_agent, " +
-                "id_program, reference, end_date, renewal_end) " +
-                "VALUES (?, ?, ?, to_date(?, 'YYYY-MM-DD'), ?, ?, ?, ?, ?, ?, ?, to_date(?, 'YYYY-MM-DD')," +
+                "reference, end_date, renewal_end) " +
+                "VALUES (?, ?, ?, to_date(?, 'YYYY-MM-DD'), ?, ?, ?, ?, ?, ?, to_date(?, 'YYYY-MM-DD')," +
                 " to_date(?, 'YYYY-MM-DD')) " +
                 "RETURNING id;";
         JsonArray params = new JsonArray()
@@ -46,7 +46,6 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
                 .addNumber(contract.getNumber("max_brink"))
                 .addNumber(contract.getNumber("id_supplier"))
                 .addNumber(contract.getNumber("id_agent"))
-                .addNumber(contract.getNumber("id_program"))
                 .addString(contract.getString("reference"))
                 .addString(contract.getString("end_date"))
                 .addString(contract.getString("renewal_end"));
@@ -57,7 +56,7 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
     public void updateContract(JsonObject contract, Integer id, Handler<Either<String, JsonObject>> handler) {
         String query = "UPDATE " + Lystore.lystoreSchema + ".contract " +
                 "SET name = ?, annual_min = ?, annual_max = ?, start_date = to_date(?, 'YYYY-MM-DD'), nb_renewal = ?," +
-                "id_contract_type = ?, max_brink = ?, id_supplier = ?, id_agent = ?, id_program = ?," +
+                "id_contract_type = ?, max_brink = ?, id_supplier = ?, id_agent = ?, " +
                 "reference = ?, end_date = to_date(?, 'YYYY-MM-DD'), renewal_end = to_date(?, 'YYYY-MM-DD') " +
                 "WHERE id = ?;";
 
@@ -71,7 +70,6 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
                 .addNumber(contract.getNumber("max_brink"))
                 .addNumber(contract.getNumber("id_supplier"))
                 .addNumber(contract.getNumber("id_agent"))
-                .addNumber(contract.getNumber("id_program"))
                 .addString(contract.getString("reference"))
                 .addString(contract.getString("end_date"))
                 .addString(contract.getString("renewal_end"))

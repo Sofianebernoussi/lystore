@@ -14,7 +14,6 @@ export class Contract implements Selectable {
     max_brink: number | string;
     id_supplier: number;
     id_agent: number;
-    id_program: number;
     end_date: string;
     renewal_end: string;
     supplier_display_name: string;
@@ -54,10 +53,9 @@ export class Contract implements Selectable {
             id_agent: this.id_agent,
             end_date: moment(this.end_date).format('YYYY-MM-DD'),
             renewal_end: moment(this.end_date).add(this.nb_renewal, 'y').format('YYYY-MM-DD'),
-            annual_min: this.annual_min_enabled && this.annual_min !== null ? parseFloat(this.annual_min.toString()) : null,
-            annual_max: this.annual_max_enabled && this.annual_max !== null ? parseFloat(this.annual_max.toString()) : null,
-            max_brink: this.max_brink_enabled && this.max_brink !== null ? parseFloat(this.max_brink.toString()) : null,
-            id_program: this.id_program || null
+            annual_min: this.annual_min_enabled && this.annual_min !== null ? parseFloat((this.annual_min as number).toString()) : null,
+            annual_max: this.annual_max_enabled && this.annual_max !== null ? parseFloat((this.annual_max as number).toString()) : null,
+            max_brink: this.max_brink_enabled && this.max_brink !== null ? parseFloat((this.max_brink as number).toString()) : null,
         };
     }
 

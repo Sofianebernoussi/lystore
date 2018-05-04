@@ -30,9 +30,6 @@
     "id_agent": {
       "type": "number"
     },
-    "id_program": {
-      "type": "number"
-    },
     "reference": {
       "type": "string"
     },

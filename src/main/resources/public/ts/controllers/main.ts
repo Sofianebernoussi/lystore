@@ -75,7 +75,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.agents.sync();
                 $scope.suppliers.sync();
                 $scope.contractTypes.sync();
-                $scope.programs.sync();
                 Utils.safeApply($scope);
             },
             manageEquipmentTags: async () => {

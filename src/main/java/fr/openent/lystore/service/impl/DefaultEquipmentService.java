@@ -236,7 +236,6 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
      * Returns transaction handler. Manage response based on PostgreSQL event
      *
      * @param event PostgreSQL event
-     * @param id    resource Id
      * @return id_basket_equipment : ids of baskets who contains the equipment
      *         a sequence allocation for each option to create
      */
@@ -416,7 +415,6 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
 
     /**
      * add a required option for all equipments in a basket
-     * @param option the option
      * @return Insert statement
      */
     private static JsonObject addRequiredOptionToBasketStatement(JsonArray idsBasket, Number optionId) {
@@ -473,7 +471,6 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
 
     /**
      * Delete options of an equipment
-     * @param id : ids of Options to delete
      * @return Delete statement
      */
     private JsonObject getEquipmentOptionsRelationshipDeletion(JsonArray deletedOptions) {
@@ -490,7 +487,6 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     }
     /**
      * Delete options of an equipment from baskets
-     * @param id :  ids of Options to delete
      * @return Delete statement
      */
     private JsonObject getEquipmentOptionsBasketRelationshipDeletion(JsonArray deletedOptions) {

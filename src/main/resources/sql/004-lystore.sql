@@ -1,0 +1,1 @@
+ALTER TABLE lystore.contract DROP COLUMN id_program;

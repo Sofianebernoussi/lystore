@@ -79,7 +79,6 @@
             font-weight: bold;
         }
         .order-preview  .equipments-table tr  td {
-            width: auto;
             padding-top:10px;
             padding-left: 10px ;
             padding-bottom:10px;
@@ -334,11 +333,8 @@
                     <td>
                         Quantité
                     </td>
-                    <td>
-                        Prix U HT
-                    </td>
-                    <td>
-                        Total HT
+                    <td class="six">
+                        Observations
                     </td>
                 </tr>
                 </thead>
@@ -350,11 +346,8 @@
                     <td class="right-text">
                         [[ order.amount ]]
                     </td>
-                    <td class="right-text">
-                        [[ order.priceLocale ]]
-                    </td>
-                    <td class="right-text">
-                        [[ order.totalPriceLocale ]]
+                    <td class="six">
+                        &nbsp;
                     </td>
                 </tr>
                 </tbody>

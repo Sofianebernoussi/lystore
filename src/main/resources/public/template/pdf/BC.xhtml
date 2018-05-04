@@ -77,7 +77,6 @@
             font-weight: bold;
         }
         .equipments-table tr  td {
-            width: auto;
             padding-top:10px;
             padding-left: 10px ;
             padding-bottom:10px;
@@ -343,11 +342,8 @@
                 <td>
                     Quantité
                 </td>
-                <td>
-                    Prix U HT
-                </td>
-                <td>
-                    Total HT
+                <td style="width: 50%;">
+                    Observations
                 </td>
             </tr>
             </thead>
@@ -360,11 +356,8 @@
                 <td class="right-text">
                     {{amount}}
                 </td>
-                <td class="right-text">
-                    {{priceLocale}}
-                </td>
-                <td class="right-text">
-                    {{totalPriceLocale}}
+                <td style="width: 50%;">
+                    &nbsp;
                 </td>
             </tr>
             {{/orders}}

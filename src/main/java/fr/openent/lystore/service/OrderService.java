@@ -128,4 +128,6 @@ public interface OrderService {
      * @param handler Function handler returning data
      */
     void getOrdersDetailsIndexedByValidationNumber(String status, Handler<Either<String, JsonArray>> handler);
+
+    void getOrdersForCSVExportByValidationNumbers(JsonArray validationNumbers, Handler<Either<String, JsonArray>> handler);
 }

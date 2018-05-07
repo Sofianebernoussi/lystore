@@ -35,7 +35,7 @@
                         <span></span>
                     </label>
                 </td>
-                <td ng-click="sort.order.type = 'number_validation'";
+                <td ng-click="sort.order.type = 'number_validation';
                     sort.order.reverse = !sort.order.reverse">
                 <i18n>number.validation</i18n>
                     <i class="up-open" ng-show="sort.order.type === 'number_validation' && !sort.order.reverse"></i>
@@ -52,6 +52,12 @@
                     <i18n>supplier</i18n>
                     <i class="up-open" ng-show="sort.order.type === 'supplier.name' && !sort.order.reverse"></i>
                     <i class="down-open" ng-show="sort.order.type === 'supplier.name' && sort.order.reverse"></i>
+                </td>
+                <td ng-click="sort.order.type = 'structure_count';
+                    sort.order.reverse = !sort.order.reverse">
+                    <i18n>lystore.structures.number</i18n>
+                    <i class="up-open" ng-show="sort.order.type === 'structure_count' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'structure_count' && sort.order.reverse"></i>
                 </td>
                 <td ng-click="sort.order.type = 'price';
                     sort.order.reverse = !sort.order.reverse">
@@ -72,6 +78,7 @@
                 <td>[[order.number_validation]]</td>
                 <td>[[order.contract_name]]</td>
                 <td>[[order.supplier_name]]</td>
+                <td>[[order.structure_count]]</td>
                 <td><span ng-bind="order.price | currency"></span></td>
             </tr>
             </tbody>
@@ -86,6 +93,10 @@
             <div class="row">
                 <button ng-click="prepareSendOrder(getSelectedOrders())" ng-disabled="!validateSentOrders(getSelectedOrders())">
                     <i18n>lystore.order.valided.generateBC</i18n>
+                </button>
+                <button ng-click="exportValidOrders(getSelectedOrders())"
+                        ng-disabled="!validateSentOrders(getSelectedOrders())">
+                    <i18n>lystore.orders.valid.structure.list.export</i18n>
                 </button>
             </div>
         </div>

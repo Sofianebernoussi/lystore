@@ -357,6 +357,94 @@ public class OrderController extends ControllerHelper {
         });
     }
 
+    @Get("/orders/valid/export/csv")
+    @ApiDoc("Export valid orders as CSV based on validation number")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void csvExport (final HttpServerRequest request) {
+        if (request.params().contains("number_validation")) {
+            List<String> validationNumbers = request.params().getAll("number_validation");
+            orderService.getOrdersForCSVExportByValidationNumbers(new JsonArray(validationNumbers.toArray()), new Handler<Either<String, JsonArray>>() {
+                @Override
+                public void handle(Either<String, JsonArray> event) {
+                    if (event.isRight()) {
+                        final JsonArray equipments = event.right().getValue();
+                        JsonArray structures = new JsonArray();
+                        final JsonObject[] equipment = new JsonObject[1];
+                        for (int i = 0; i < equipments.size(); i++) {
+                            equipment[0] = equipments.get(i);
+                            if (!structures.contains(equipment[0].getString("id_structure"))) {
+                                structures.addString(equipment[0].getString("id_structure"));
+                            }
+
+                        }
+
+                        structureService.getStructureById(structures, new Handler<Either<String, JsonArray>>() {
+                            @Override
+                            public void handle(Either<String, JsonArray> event) {
+                                if (event.isRight()) {
+                                    JsonObject structureMap = new JsonObject(), structure;
+                                    JsonArray structures = event.right().getValue();
+                                    for (int i = 0; i < structures.size(); i++) {
+                                        structure = structures.get(i);
+                                        structureMap.putString(structure.getString("id"),
+                                                structure.getString("uai"));
+                                    }
+
+                                    for (int e = 0; e < equipments.size(); e++) {
+                                        equipment[0] = equipments.get(e);
+                                        equipment[0].putString("uai", structureMap.getString(equipment[0].getString("id_structure")));
+                                    }
+
+                                    renderValidOrdersCSVExport(request, equipments);
+                                } else {
+                                    renderError(request);
+                                }
+                            }
+                        });
+                    } else {
+                        renderError(request);
+                    }
+                }
+            });
+        } else {
+            badRequest(request);
+        }
+    }
+
+    private void renderValidOrdersCSVExport(HttpServerRequest request, JsonArray equipments) {
+        StringBuilder export = new StringBuilder(UTF8_BOM).append(getValidOrdersCSVExportHeader(request));
+        for (int i = 0; i < equipments.size(); i++) {
+            export.append(getValidOrdersCSVExportline((JsonObject) equipments.get(i)));
+        }
+
+        request.response()
+                .putHeader("Content-Type", "text/csv; charset=utf-8")
+                .putHeader("Content-Disposition", "attachment; filename=orders.csv")
+                .end(export.toString());
+    }
+
+    private String getValidOrdersCSVExportline (JsonObject equipment) {
+        return equipment.getString("uai")
+                + ";"
+                + equipment.getString("name")
+                + ";"
+                + equipment.getNumber("amount")
+                + "\n";
+    }
+
+    private String getValidOrdersCSVExportHeader(HttpServerRequest request) {
+        return I18n.getInstance().
+                translate("UAI", getHost(request), I18n.acceptLanguage(request)) +
+                ";" +
+                I18n.getInstance().
+                        translate("EQUIPMENT", getHost(request), I18n.acceptLanguage(request)) +
+                ";" +
+                I18n.getInstance().
+                        translate("lystore.amount", getHost(request), I18n.acceptLanguage(request)) +
+                "\n";
+    }
+
     private void manageFileAndUpdateStatus(final HttpServerRequest request, final Buffer pdf,
                                            final JsonArray ids, final String nbrBc) {
         final String id = UUID.randomUUID().toString();

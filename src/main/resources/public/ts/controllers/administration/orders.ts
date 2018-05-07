@@ -213,4 +213,13 @@ export const orderController = ng.controller('orderController',
             }
         };
 
+        $scope.exportValidOrders = (orders: OrderClient[]) => {
+            let params = '';
+            orders.map((order: OrderClient) => {
+                params += `number_validation=${order.number_validation}&`;
+            });
+            params = params.slice(0, -1);
+            window.location = `/lystore/orders/valid/export/csv?${params}`;
+        };
+
     }]);

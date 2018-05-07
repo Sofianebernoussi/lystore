@@ -60,18 +60,20 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     @Override
     public  void listOrder(String status, Handler<Either<String, JsonArray>> handler){
         String query = "SELECT oce.* , to_json(contract.*) contract ,to_json(supplier.*) supplier, " +
-                "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options," +
+                "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options, " +
                 "array_to_json(array_agg(distinct structure_group.name)) as structure_groups " +
-                "FROM " + Lystore.lystoreSchema + ".order_client_equipment oce " +
-                "LEFT JOIN "+ Lystore.lystoreSchema + ".order_client_options oco " +
+                "FROM lystore.order_client_equipment oce " +
+                "LEFT JOIN lystore.order_client_options oco " +
                 "ON oco.id_order_client_equipment = oce.id " +
-                "LEFT JOIN "+ Lystore.lystoreSchema + ".contract ON oce.id_contract = contract.id " +
-                "INNER JOIN "+ Lystore.lystoreSchema + ".supplier ON contract.id_supplier = supplier.id  " +
-                "INNER JOIN "+ Lystore.lystoreSchema + ".campaign ON oce.id_campaign = campaign.id " +
-                "INNER JOIN "+ Lystore.lystoreSchema + ".rel_group_structure ON (oce.id_structure = rel_group_structure.id_structure) " +
-                "INNER JOIN "+ Lystore.lystoreSchema + ".structure_group ON (rel_group_structure.id_structure_group = structure_group.id) " +
+                "LEFT JOIN lystore.contract ON oce.id_contract = contract.id " +
+                "INNER JOIN lystore.supplier ON contract.id_supplier = supplier.id " +
+                "INNER JOIN lystore.campaign ON oce.id_campaign = campaign.id " +
+                "INNER JOIN lystore.rel_group_campaign ON (oce.id_campaign = rel_group_campaign.id_campaign) " +
+                "INNER JOIN lystore.rel_group_structure ON (oce.id_structure = rel_group_structure.id_structure) " +
+                "INNER JOIN lystore.structure_group ON (rel_group_structure.id_structure_group = structure_group.id " +
+                "AND rel_group_campaign.id_structure_group = structure_group.id) " +
                 "WHERE oce.status = ? " +
-                "GROUP BY (oce.id, contract.id, supplier.id, campaign.id); ";
+                "GROUP BY (oce.id, contract.id, supplier.id, campaign.id);";
         sql.prepared(query, new JsonArray().addString(status), SqlResult.validResultHandler(handler));
     }
 
@@ -193,7 +195,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     @Override
     public void getOrdersGroupByValidationNumber(String status, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT row.number_validation, contract.name as contract_name, supplier.name as supplier_name, " +
-                "array_to_json(array_agg(structure_group.name)) as structure_groups, count(rel_group_structure) as structure_count " +
+                "array_to_json(array_agg(structure_group.name)) as structure_groups, count(distinct row.id_structure) as structure_count " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment row " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".equipment ON (row.equipment_key = equipment.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (equipment.id_contract = contract.id) " +

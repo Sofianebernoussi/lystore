@@ -98,6 +98,9 @@
                         ng-disabled="!validateSentOrders(getSelectedOrders())">
                     <i18n>lystore.orders.valid.structure.list.export</i18n>
                 </button>
+                <button ng-click="cancelValidation(getSelectedOrders())">
+                    <i18n>cancel</i18n>
+                </button>
             </div>
         </div>
     </section>

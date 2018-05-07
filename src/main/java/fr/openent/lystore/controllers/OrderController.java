@@ -42,6 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
+import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
 
 
 public class OrderController extends ControllerHelper {
@@ -407,6 +408,19 @@ public class OrderController extends ControllerHelper {
                     }
                 }
             });
+        } else {
+            badRequest(request);
+        }
+    }
+
+    @Delete("/orders/valid")
+    @ApiDoc("Delete valid orders. Cancel validation. All orders are back to validation state")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void cancelValidOrder (HttpServerRequest request) {
+        if (request.params().contains("number_validation")) {
+            List<String> numbers = request.params().getAll("number_validation");
+            orderService.cancelValidation(new JsonArray(numbers.toArray()), defaultResponseHandler(request));
         } else {
             badRequest(request);
         }

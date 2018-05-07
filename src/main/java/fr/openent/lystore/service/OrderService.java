@@ -7,6 +7,8 @@ import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonArray;
 
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.core.json.impl.Json;
+
 import java.util.List;
 /**
  * Created by agnes.lapeyronnie on 20/02/2018.
@@ -130,4 +132,11 @@ public interface OrderService {
     void getOrdersDetailsIndexedByValidationNumber(String status, Handler<Either<String, JsonArray>> handler);
 
     void getOrdersForCSVExportByValidationNumbers(JsonArray validationNumbers, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Cancel validation order. Set all orders to waiting status. All orders update are based on validation numbers;
+     * @param validationNumbers validatio numbers list
+     * @param handler Function handler returning data
+     */
+    void cancelValidation(JsonArray validationNumbers, Handler<Either<String, JsonObject>> handler);
 }

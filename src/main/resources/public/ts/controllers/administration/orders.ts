@@ -175,7 +175,7 @@ export const orderController = ng.controller('orderController',
             link.download =  reportName + '.pdf';
             document.body.appendChild(link);
             link.click();
-            setTimeout(function(){
+            setTimeout(function() {
                 document.body.removeChild(link);
                 window.URL.revokeObjectURL(link.href);
             }, 100);
@@ -222,4 +222,15 @@ export const orderController = ng.controller('orderController',
             window.location = `/lystore/orders/valid/export/csv?${params}`;
         };
 
+        $scope.cancelValidation = async (orders: OrderClient[]) => {
+            try {
+                await $scope.displayedOrders.cancel(orders);
+                await $scope.syncOrders('VALID');
+                $scope.notifications.push(new Notification('lystore.orders.valid.cancel.confirmation', 'confirm'));
+            } catch (e) {
+                $scope.notifications.push(new Notification('lystore.orders.valid.cancel.error', 'warning'));
+            } finally {
+                Utils.safeApply($scope);
+            }
+        };
     }]);

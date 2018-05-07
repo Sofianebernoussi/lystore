@@ -172,6 +172,8 @@
   "the.structure":"l'établissement",
   "lystore.structures.number": "Nb d'établissements",
   "lystore.slack.order.message1":" a passé une commande d'un montant de ",
+  "lystore.orders.valid.cancel.confirmation": "Annulation des commandes effecutée",
+  "lystore.orders.valid.cancel.error": "Une erreur est survenue lors de l'annulation des commandes. Merci de réessayer plus tard",
   "multi-combo.deselectAll": "Tout déselectionner",
   "multi-combo.options": "Options",
   "multi-combo.searchPlaceholder": "Chercher",

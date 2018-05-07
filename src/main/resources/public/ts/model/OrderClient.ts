@@ -151,6 +151,19 @@ export class OrdersClient extends Selection<OrderClient> {
         return total;
     }
 
+    async cancel (orders: OrderClient[]) {
+        try {
+            let params = '';
+            orders.map((order) => {
+                params += `number_validation=${order.number_validation}&`;
+            });
+            params = params.slice(0, -1);
+            await http.delete(`/lystore/orders/valid?${params}`);
+        } catch (e) {
+            throw e;
+        }
+    }
+
 }
 
 export class OrderOptionClient implements Selectable {

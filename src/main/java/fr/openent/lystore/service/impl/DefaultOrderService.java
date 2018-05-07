@@ -224,14 +224,16 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
     @Override
     public void getOrdersForCSVExportByValidationNumbers(JsonArray validationNumbers, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT name, amount, id_structure " +
-                "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
+        String query = "SELECT name, SUM(amount) as amount, id_structure, equipment_key " +
+                "FROM lystore.order_client_equipment " +
                 "WHERE number_validation IN " + Sql.listPrepared(validationNumbers.toArray()) +
+                "GROUP BY equipment_key, id_structure, name, id_structure " +
                 "UNION ALL " +
-                "SELECT order_client_options.name, order_client_options.amount, order_client_equipment.id_structure " +
-                "FROM " + Lystore.lystoreSchema + ".order_client_options " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".order_client_equipment ON (order_client_options.id_order_client_equipment = order_client_equipment.id) " +
+                "SELECT order_client_options.name, SUM(order_client_options.amount) as amount, order_client_equipment.id_structure, order_client_equipment.equipment_key " +
+                "FROM lystore.order_client_options " +
+                "INNER JOIN lystore.order_client_equipment ON (order_client_options.id_order_client_equipment = order_client_equipment.id) " +
                 "WHERE number_validation IN " + Sql.listPrepared(validationNumbers.toArray()) +
+                "GROUP BY equipment_key, id_structure, order_client_options.name, id_structure " +
                 "ORDER BY id_structure";
         JsonArray params = new JsonArray();
 

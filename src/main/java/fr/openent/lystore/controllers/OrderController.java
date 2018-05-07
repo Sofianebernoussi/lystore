@@ -443,7 +443,7 @@ public class OrderController extends ControllerHelper {
                 + ";"
                 + equipment.getString("name")
                 + ";"
-                + equipment.getNumber("amount")
+                + equipment.getString("amount")
                 + "\n";
     }
 

@@ -199,4 +199,18 @@ export const orderController = ng.controller('orderController',
             window.location = `/lystore/orders/export?${params}`;
         };
 
+        $scope.isValidOrdersWaitingSelection = () => {
+            const orders: OrderClient[] = $scope.getSelectedOrders();
+            if (orders.length > 1) {
+                let isValid: boolean = true;
+                let contractId = orders[0].id_contract;
+                for (let i = 1; i < orders.length; i++) {
+                    isValid = isValid && (contractId === orders[i].id_contract);
+                }
+                return isValid;
+            } else {
+                return true;
+            }
+        };
+
     }]);

@@ -61,7 +61,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     public  void listOrder(String status, Handler<Either<String, JsonArray>> handler){
         String query = "SELECT oce.* , to_json(contract.*) contract ,to_json(supplier.*) supplier, " +
                 "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options," +
-                "array_to_json(array_agg(structure_group.name)) as structure_groups " +
+                "array_to_json(array_agg(distinct structure_group.name)) as structure_groups " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment oce " +
                 "LEFT JOIN "+ Lystore.lystoreSchema + ".order_client_options oco " +
                 "ON oco.id_order_client_equipment = oce.id " +

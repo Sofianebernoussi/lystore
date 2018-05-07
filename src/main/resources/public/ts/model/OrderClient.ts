@@ -79,22 +79,20 @@ export class OrdersClient extends Selection<OrderClient> {
                 this.all = Mix.castArrayAs(OrderClient, data);
                 this.all.map((order: OrderClient) => {
                     order.price = parseFloat(order.price.toString());
-                    if ('tax_amount' in order) order.tax_amount = parseFloat(order.tax_amount.toString());
-                    if ('contract' in order) order.contract = Mix.castAs(Contract,  JSON.parse(order.contract.toString()));
-                    if ('supplier' in order) {
+                    order.name_structure =  structures.length > 0 ? this.initNameStructure(order.id_structure, structures) : '';
+                    if (status !== 'VALID') {
+                        order.tax_amount = parseFloat(order.tax_amount.toString());
+                        order.contract = Mix.castAs(Contract,  JSON.parse(order.contract.toString()));
                         order.supplier = Mix.castAs(Supplier,  JSON.parse(order.supplier.toString()));
                         order.id_supplier = order.supplier.id;
-                    }
-                    if ('campaign' in order) order.campaign = Mix.castAs(Campaign,  JSON.parse(order.campaign.toString()));
-                    if ('options' in order) {
+                        order.campaign = Mix.castAs(Campaign,  JSON.parse(order.campaign.toString()));
+                        order.creation_date = moment(order.creation_date).format('L');
                         order.options.toString() !== '[null]' && order.options !== null ?
                             order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
                             : order.options = [];
+                        order.priceTTCtotal = parseFloat((order.calculatePriceTTC(2) as number).toString()) * order.amount;
+                        order.structure_groups = Utils.parsePostgreSQLJson(order.structure_groups);
                     }
-                    if ('creation_date' in order) order.creation_date = moment(order.creation_date).format('L');
-                    if ('name_structure' in order) order.name_structure =  structures.length > 0 ? this.initNameStructure(order.id_structure, structures) : '';
-                    if ('priceTTCtotal' in order) order.priceTTCtotal = parseFloat((order.calculatePriceTTC(2) as number).toString()) * order.amount;
-                    if ('structure_groups' in order) order.structure_groups = Utils.parsePostgreSQLJson(order.structure_groups);
                 });
             }
         } catch (e) {

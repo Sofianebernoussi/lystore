@@ -18,6 +18,7 @@ import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.email.EmailSender;
+import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.email.EmailFactory;
@@ -91,13 +92,80 @@ public class OrderController extends ControllerHelper {
     @ApiDoc("Get the list of orders")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
-    public void listOrders (HttpServerRequest request){
+    public void listOrders (final HttpServerRequest request){
         if (request.params().contains("status")) {
-            String status = request.params().get("status");
-            orderService.listOrder(status, arrayResponseHandler(request));
+            final String status = request.params().get("status");
+            if ("valid".equals(status.toLowerCase())) {
+                orderService.getOrdersGroupByValidationNumber("VALID", new Handler<Either<String, JsonArray>>() {
+                    @Override
+                    public void handle(Either<String, JsonArray> event) {
+                        if (event.isRight()) {
+                            final JsonArray orders = event.right().getValue();
+                            orderService.getOrdersDetailsIndexedByValidationNumber(status, new Handler<Either<String, JsonArray>>() {
+                                @Override
+                                public void handle(Either<String, JsonArray> event) {
+                                    if (event.isRight()) {
+                                        JsonArray equipments = event.right().getValue();
+                                        JsonObject mapNumberEquipments = initNumbersMap(orders);
+                                        mapNumberEquipments = mapNumbersEquipments(equipments, mapNumberEquipments);
+                                        JsonObject order;
+                                        for (int i = 0; i < orders.size(); i++) {
+                                            order = orders.get(i);
+                                            order.putString("price",
+                                                    String.valueOf(
+                                                            roundWith2Decimals(getTotalOrder(mapNumberEquipments.getArray(order.getString("number_validation")))))
+                                                            .replace(".", ","));
+                                        }
+                                        renderJson(request, orders);
+                                    } else {
+                                        badRequest(request);
+                                    }
+                                }
+                            });
+                        } else {
+                            badRequest(request);
+                        }
+                    }
+                });
+            } else {
+                orderService.listOrder(status, arrayResponseHandler(request));
+            }
         } else {
             badRequest(request);
         }
+    }
+
+    /**
+     * Init map with numbers validation
+     * @param orders order list containing numbers
+     * @return Map containing numbers validation as key and an empty array as value
+     */
+    private JsonObject initNumbersMap (JsonArray orders) {
+        JsonObject map = new JsonObject();
+        JsonObject item;
+        for (int i = 0; i < orders.size(); i++) {
+            item = orders.get(i);
+            map.putArray(item.getString("number_validation"), new JsonArray());
+        }
+        return map;
+    }
+
+    /**
+     * Map equipments with numbers validation
+     * @param equipments Equipments list
+     * @param numbers Numbers maps
+     * @return Map containing number validations as key and an array containing equipments as value
+     */
+    private JsonObject mapNumbersEquipments (JsonArray equipments, JsonObject numbers) {
+        JsonObject equipment;
+        JsonArray equipmentList;
+        for (int i = 0; i < equipments.size(); i++) {
+            equipment = equipments.get(i);
+            equipmentList = numbers.getArray(equipment.getString("number_validation"));
+            numbers.putArray(equipment.getString("number_validation"), equipmentList.addObject(equipment));
+        }
+
+        return numbers;
     }
 
     @Delete("/order/:idOrder/:idStructure")

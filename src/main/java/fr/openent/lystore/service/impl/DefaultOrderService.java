@@ -191,6 +191,36 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     }
 
     @Override
+    public void getOrdersGroupByValidationNumber(String status, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT row.number_validation, contract.name as contract_name, supplier.name as supplier_name, " +
+                "array_to_json(array_agg(structure_group.name)) as structure_groups, count(rel_group_structure) as structure_count " +
+                "FROM " + Lystore.lystoreSchema + ".order_client_equipment row " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".equipment ON (row.equipment_key = equipment.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (equipment.id_contract = contract.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".supplier ON (contract.id_supplier = supplier.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON (row.id_structure = rel_group_structure.id_structure) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".structure_group ON (rel_group_structure.id_structure_group = structure_group.id) " +
+                "WHERE row.status = ? " +
+                "GROUP BY row.number_validation, contract.name, supplier.name";
+
+        this.sql.prepared(query, new JsonArray().addString(status), SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void getOrdersDetailsIndexedByValidationNumber(String status, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT price, tax_amount, amount::text, number_validation " +
+                "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
+                "WHERE status = ? " +
+                "UNION ALL " +
+                "SELECT order_client_options.price, order_client_options.tax_amount, order_client_options.amount::text, order_client_equipment.number_validation " +
+                "FROM " + Lystore.lystoreSchema + ".order_client_options " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".order_client_equipment ON (order_client_equipment.id = order_client_options.id_order_client_equipment) " +
+                "WHERE order_client_equipment.status = ? ";
+
+        this.sql.prepared(query, new JsonArray().addString(status).addString(status), SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void listExport(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new JsonArray();
         String query = "SELECT oe.name as equipment_name, oe.amount as equipment_quantity, " +

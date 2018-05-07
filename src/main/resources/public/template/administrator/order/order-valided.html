@@ -35,12 +35,6 @@
                         <span></span>
                     </label>
                 </td>
-                <td ng-click="sort.order.type = 'name_structure'";
-                    sort.order.reverse = !sort.order.reverse">
-                    <i18n>Structure</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'name_structure' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'name_structure' && sort.order.reverse"></i>
-                </td>
                 <td ng-click="sort.order.type = 'number_validation'";
                     sort.order.reverse = !sort.order.reverse">
                 <i18n>number.validation</i18n>
@@ -59,17 +53,11 @@
                     <i class="up-open" ng-show="sort.order.type === 'supplier.name' && !sort.order.reverse"></i>
                     <i class="down-open" ng-show="sort.order.type === 'supplier.name' && sort.order.reverse"></i>
                 </td>
-                <td ng-click="sort.order.type = 'amount';
-                    sort.order.reverse = !sort.order.reverse">
-                    <i18n>lystore.amount</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'amount' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'amount' && sort.order.reverse"></i>
-                </td>
-                <td ng-click="sort.order.type = 'priceTTCtotal';
+                <td ng-click="sort.order.type = 'price';
                     sort.order.reverse = !sort.order.reverse">
                     <i18n>lystore.price.TTC</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'priceTTCtotal' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'priceTTCtotal' && sort.order.reverse"></i>
+                    <i class="up-open" ng-show="sort.order.type === 'price' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'price' && sort.order.reverse"></i>
                 </td>
             </tr>
             </thead>
@@ -81,12 +69,10 @@
                         <span></span>
                     </label>
                 </td>
-                <td>[[order.name_structure]]</td>
                 <td>[[order.number_validation]]</td>
-                <td>[[order.contract.name]]</td>
-                <td>[[order.supplier.name]]</td>
-                <td>[[order.amount ]]</td>
-                <td><span ng-bind="order.priceTTCtotal | currency"></span></td>
+                <td>[[order.contract_name]]</td>
+                <td>[[order.supplier_name]]</td>
+                <td><span ng-bind="order.price | currency"></span></td>
             </tr>
             </tbody>
         </table>

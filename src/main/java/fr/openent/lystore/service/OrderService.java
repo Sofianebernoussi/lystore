@@ -114,4 +114,18 @@ public interface OrderService {
     void addFileId(JsonArray ids, String fileId);
 
     void getOrderByIds(JsonArray ids, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * List all orders group by number validation and fitlered by status
+     * @param status Status
+     * @param handler Function handler returning data
+     */
+    void getOrdersGroupByValidationNumber(String status, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Returns all orders indexed by validation number and filtered by status
+     * @param status Status
+     * @param handler Function handler returning data
+     */
+    void getOrdersDetailsIndexedByValidationNumber(String status, Handler<Either<String, JsonArray>> handler);
 }

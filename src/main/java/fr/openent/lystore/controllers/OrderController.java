@@ -54,6 +54,7 @@ public class OrderController extends ControllerHelper {
     private ExportPDFService exportPDFService;
     private ContractService contractService;
     private AgentService agentService;
+    private ProgramService programService;
 
     public static final String UTF8_BOM = "\uFEFF";
 
@@ -73,6 +74,7 @@ public class OrderController extends ControllerHelper {
         this.supplierService = new DefaultSupplierService(Lystore.lystoreSchema, "supplier");
         this.contractService = new DefaultContractService(Lystore.lystoreSchema, "contract");
         this.agentService = new DefaultAgentService(Lystore.lystoreSchema, "agent");
+        this.programService = new DefaultProgramService(Lystore.lystoreSchema, "program");
     }
 
     @Get("/orders/:idCampaign/:idStructure")
@@ -97,12 +99,13 @@ public class OrderController extends ControllerHelper {
         if (request.params().contains("status")) {
             final String status = request.params().get("status");
             if ("valid".equals(status.toLowerCase())) {
-                orderService.getOrdersGroupByValidationNumber("VALID", new Handler<Either<String, JsonArray>>() {
+                final JsonArray statusList = new JsonArray().addString(status).addString("SENT");
+                orderService.getOrdersGroupByValidationNumber(statusList, new Handler<Either<String, JsonArray>>() {
                     @Override
                     public void handle(Either<String, JsonArray> event) {
                         if (event.isRight()) {
                             final JsonArray orders = event.right().getValue();
-                            orderService.getOrdersDetailsIndexedByValidationNumber(status, new Handler<Either<String, JsonArray>>() {
+                            orderService.getOrdersDetailsIndexedByValidationNumber(statusList, new Handler<Either<String, JsonArray>>() {
                                 @Override
                                 public void handle(Either<String, JsonArray> event) {
                                     if (event.isRight()) {
@@ -134,6 +137,34 @@ public class OrderController extends ControllerHelper {
         } else {
             badRequest(request);
         }
+    }
+
+    @Get("/order/:orderNumber")
+    @ApiDoc("Get the list of orders")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void getOrderPDF (final HttpServerRequest request) {
+        final String orderNumber = request.params().get("orderNumber");
+        orderService.getOrderFileId(orderNumber, new Handler<Either<String, JsonObject>>() {
+            @Override
+            public void handle(Either<String, JsonObject> event) {
+                if (event.isRight()) {
+                    JsonObject objRes = event.right().getValue();
+                    String fileId = objRes.getString("id_mongo");
+                    storage.readFile(fileId, new Handler<Buffer>() {
+                        @Override
+                        public void handle(Buffer buffer) {
+                            request.response()
+                                    .putHeader("Content-Type", "application/pdf; charset=utf-8")
+                                    .putHeader("Content-Disposition", "attachment; filename=BC_" + orderNumber + ".pdf")
+                                    .end(buffer);
+                        }
+                    });
+                } else {
+                    badRequest(request);
+                }
+            }
+        });
     }
 
     /**
@@ -338,17 +369,19 @@ public class OrderController extends ControllerHelper {
                 final String nbrEngagement = orders.getString("engagement_number");
                 final String dateGeneration = orders.getString("dateGeneration");
                 Number supplierId = orders.getNumber("supplierId");
+                final Number programId = orders.getNumber("id_program");
 
                 getOrdersData(request, nbrBc, nbrEngagement, dateGeneration, supplierId, ids,
                         new Handler<JsonObject>() {
                             @Override
                             public void handle(JsonObject data) {
+                                data.putBoolean("print_order", true);
                                 exportPDFService.generatePDF(request, data,
                                         "BC.xhtml", "Bon_Commande_",
                                         new Handler<Buffer>() {
                                             @Override
                                             public void handle(final Buffer pdf) {
-                                                manageFileAndUpdateStatus(request, pdf, ids, nbrBc);
+                                                manageFileAndUpdateStatus(request, pdf, ids, nbrEngagement, programId, dateGeneration, nbrBc);
                                             }
                                         }
                                 );
@@ -358,59 +391,124 @@ public class OrderController extends ControllerHelper {
         });
     }
 
-    @Get("/orders/valid/export/csv")
-    @ApiDoc("Export valid orders as CSV based on validation number")
+    @Get("/orders/valid/export/:file")
+    @ApiDoc("Export valid orders based on validation number and type file")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void csvExport (final HttpServerRequest request) {
         if (request.params().contains("number_validation")) {
             List<String> validationNumbers = request.params().getAll("number_validation");
-            orderService.getOrdersForCSVExportByValidationNumbers(new JsonArray(validationNumbers.toArray()), new Handler<Either<String, JsonArray>>() {
-                @Override
-                public void handle(Either<String, JsonArray> event) {
-                    if (event.isRight()) {
-                        final JsonArray equipments = event.right().getValue();
-                        JsonArray structures = new JsonArray();
-                        final JsonObject[] equipment = new JsonObject[1];
-                        for (int i = 0; i < equipments.size(); i++) {
-                            equipment[0] = equipments.get(i);
-                            if (!structures.contains(equipment[0].getString("id_structure"))) {
-                                structures.addString(equipment[0].getString("id_structure"));
-                            }
-
-                        }
-
-                        structureService.getStructureById(structures, new Handler<Either<String, JsonArray>>() {
-                            @Override
-                            public void handle(Either<String, JsonArray> event) {
-                                if (event.isRight()) {
-                                    JsonObject structureMap = new JsonObject(), structure;
-                                    JsonArray structures = event.right().getValue();
-                                    for (int i = 0; i < structures.size(); i++) {
-                                        structure = structures.get(i);
-                                        structureMap.putString(structure.getString("id"),
-                                                structure.getString("uai"));
-                                    }
-
-                                    for (int e = 0; e < equipments.size(); e++) {
-                                        equipment[0] = equipments.get(e);
-                                        equipment[0].putString("uai", structureMap.getString(equipment[0].getString("id_structure")));
-                                    }
-
-                                    renderValidOrdersCSVExport(request, equipments);
-                                } else {
-                                    renderError(request);
-                                }
-                            }
-                        });
-                    } else {
-                        renderError(request);
-                    }
+            switch (request.params().get("file")) {
+                case "structure_list" : {
+                    exportStructuresList(request, validationNumbers);
+                    break;
                 }
-            });
+                case "certificates" : {
+                    exportDocuments(request, false, true, validationNumbers);
+                    break;
+                }
+                case "order" : {
+                    exportDocuments(request, true, false, validationNumbers);
+                    break;
+                }
+                default : {
+                    badRequest(request);
+                }
+            }
         } else {
             badRequest(request);
         }
+    }
+
+    private void exportDocuments(final HttpServerRequest request, final Boolean printOrder, final Boolean printCertificates, final List<String> validationNumbers) {
+        supplierService.getSupplierByValidationNumbers(new JsonArray(validationNumbers.toArray()), new Handler<Either<String, JsonObject>>() {
+            @Override
+            public void handle(Either<String, JsonObject> event) {
+                if (event.isRight()) {
+                    JsonObject supplier = event.right().getValue();
+                    getOrdersData(request, "", "", "", supplier.getNumber("id"), new JsonArray(validationNumbers.toArray()),
+                            new Handler<JsonObject>() {
+                                @Override
+                                public void handle(JsonObject data) {
+                                    data.putBoolean("print_order", printOrder);
+                                    data.putBoolean("print_certificates", printCertificates);
+                                    exportPDFService.generatePDF(request, data,
+                                            "BC.xhtml", "CSF_",
+                                            new Handler<Buffer>() {
+                                                @Override
+                                                public void handle(final Buffer pdf) {
+                                                    request.response()
+                                                            .putHeader("Content-Type", "application/pdf; charset=utf-8")
+                                                            .putHeader("Content-Disposition", "attachment; filename="
+                                                                    + generateExportName(validationNumbers, "" +
+                                                                    (printOrder ? "BC": "") + (printCertificates ? "CSF" : "")) + ".pdf")
+                                                            .end(pdf);
+                                                }
+                                            }
+                                    );
+                                }
+                            });
+                } else {
+                    log.error("An error occurred when collecting supplier Id", new Throwable(event.left().getValue()));
+                    badRequest(request);
+                }
+            }
+        });
+    }
+
+    private String generateExportName(List<String> validationNumbers, String prefix) {
+        String exportName = prefix;
+        for (int i = 0; i < validationNumbers.size(); i++) {
+            exportName = exportName + "_" + validationNumbers.get(i);
+        }
+
+        return exportName;
+    }
+
+    private void exportStructuresList(final HttpServerRequest request, List<String> validationNumbers) {
+        orderService.getOrdersForCSVExportByValidationNumbers(new JsonArray(validationNumbers.toArray()), new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(Either<String, JsonArray> event) {
+                if (event.isRight()) {
+                    final JsonArray equipments = event.right().getValue();
+                    JsonArray structures = new JsonArray();
+                    final JsonObject[] equipment = new JsonObject[1];
+                    for (int i = 0; i < equipments.size(); i++) {
+                        equipment[0] = equipments.get(i);
+                        if (!structures.contains(equipment[0].getString("id_structure"))) {
+                            structures.addString(equipment[0].getString("id_structure"));
+                        }
+
+                    }
+
+                    structureService.getStructureById(structures, new Handler<Either<String, JsonArray>>() {
+                        @Override
+                        public void handle(Either<String, JsonArray> event) {
+                            if (event.isRight()) {
+                                JsonObject structureMap = new JsonObject(), structure;
+                                JsonArray structures = event.right().getValue();
+                                for (int i = 0; i < structures.size(); i++) {
+                                    structure = structures.get(i);
+                                    structureMap.putString(structure.getString("id"),
+                                            structure.getString("uai"));
+                                }
+
+                                for (int e = 0; e < equipments.size(); e++) {
+                                    equipment[0] = equipments.get(e);
+                                    equipment[0].putString("uai", structureMap.getString(equipment[0].getString("id_structure")));
+                                }
+
+                                renderValidOrdersCSVExport(request, equipments);
+                            } else {
+                                renderError(request);
+                            }
+                        }
+                    });
+                } else {
+                    renderError(request);
+                }
+            }
+        });
     }
 
     @Delete("/orders/valid")
@@ -460,26 +558,41 @@ public class OrderController extends ControllerHelper {
     }
 
     private void manageFileAndUpdateStatus(final HttpServerRequest request, final Buffer pdf,
-                                           final JsonArray ids, final String nbrBc) {
+                                           final JsonArray ids, final String engagementNumber, final Number programId, final String dateCreation,
+                                           final String orderNumber) {
         final String id = UUID.randomUUID().toString();
         storage.writeBuffer(id, pdf, "application/pdf",
-                "BC_" + nbrBc, new Handler<JsonObject>() {
+                "BC_" + orderNumber, new Handler<JsonObject>() {
                     @Override
-                    public void handle(JsonObject file) {
+                    public void handle(final JsonObject file) {
                         if ("ok".equals(file.getString("status"))) {
-                            orderService.addFileId(ids, id);
-                            orderService.updateStatus(ids.toList(), "SENT",
-                                    new Handler<Either<String, JsonObject>>() {
+                            UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+                                @Override
+                                public void handle(final UserInfos user) {
+                                    programService.getProgramById(programId, new Handler<Either<String, JsonObject>>() {
                                         @Override
-                                        public void handle(Either<String, JsonObject> event) {
-                                            if (event.isRight()) {
-                                                request.response().end(pdf);
-                                                logSendingOrder(ids, request);
+                                        public void handle(Either<String, JsonObject> programEvent) {
+                                            if (programEvent.isRight()) {
+                                                JsonObject program = programEvent.right().getValue();
+                                                orderService.updateStatusToSent(ids.toList(), "SENT", engagementNumber, program.getString("name"),
+                                                        dateCreation, orderNumber, id, user.getUsername(), new Handler<Either<String, JsonObject>>() {
+                                                            @Override
+                                                            public void handle(Either<String, JsonObject> event) {
+                                                                if (event.isRight()) {
+                                                                    request.response().end(pdf);
+                                                                    logSendingOrder(ids, request);
+                                                                } else {
+                                                                    badRequest(request);
+                                                                }
+                                                            }
+                                                        });
                                             } else {
-                                                badRequest(request);
+                                                renderError(request);
                                             }
                                         }
                                     });
+                                }
+                            });
                         } else {
                             log.error("An error occurred when inserting pdf in mongo");
                             badRequest(request);
@@ -489,7 +602,7 @@ public class OrderController extends ControllerHelper {
     }
 
     private void logSendingOrder (JsonArray ids, final HttpServerRequest request) {
-        orderService.getOrderByIds(ids, new Handler<Either<String, JsonArray>>() {
+        orderService.getOrderByValidatioNumber(ids, new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> event) {
                 if (event.isRight()) {
@@ -572,7 +685,7 @@ public class OrderController extends ControllerHelper {
     }
 
     private void retrieveOrderData (final HttpServerRequest request, JsonArray ids, final Handler<JsonObject> handler) {
-        orderService.getOrders(ids, null, new Handler<Either<String, JsonArray>>() {
+        orderService.getOrders(ids, null, true, new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> event) {
                 if (event.isRight()) {
@@ -686,18 +799,18 @@ public class OrderController extends ControllerHelper {
             final String dateGeneration = params.get("dateGeneration");
             Number supplierId = Integer.parseInt(params.get("supplierId"));
 
-            try {
-                for (String id : ids) {
-                    integerIds.add(Integer.parseInt(id));
-                }
-            } catch (NumberFormatException e) {
-                log.error("An error occured when casting order id to Integer", e);
-                badRequest(request);
-                return;
-            }
+//            try {
+//                for (String id : ids) {
+//                    integerIds.add(Integer.parseInt(id));
+//                }
+//            } catch (NumberFormatException e) {
+//                log.error("An error occured when casting order id to Integer", e);
+//                badRequest(request);
+//                return;
+//            }
 
             getOrdersData(request, nbrBc, nbrEngagement, dateGeneration, supplierId,
-                    new JsonArray(integerIds.toArray()), new Handler<JsonObject>() {
+                    new JsonArray(ids.toArray()), new Handler<JsonObject>() {
                         @Override
                         public void handle(JsonObject data) {
                             renderJson(request, data);
@@ -774,7 +887,7 @@ public class OrderController extends ControllerHelper {
         while (structureIds.hasNext()) {
             structureId = structureIds.next();
             structure = structures.getObject(structureId);
-            orderService.getOrders(structure.getArray("orderIds"), structureId,
+            orderService.getOrders(structure.getArray("orderIds"), structureId, false,
                     new Handler<Either<String, JsonArray>>() {
                         @Override
                         public void handle(Either<String, JsonArray> event) {

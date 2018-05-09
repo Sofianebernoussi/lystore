@@ -82,9 +82,16 @@ public interface OrderService {
      * Update status order
      * @param ids order id list
      * @param status status to update
+     * @param engagementNumber engagement number
+     * @param labelProgram Program label
+     * @param fileId Mongo file id
+     * @param owner Owner username
+     * @param dateCreation Creation date
+     * @param orderNumber Order number
      * @param handler Function handler returning data
      */
-    void updateStatus(List<Integer> ids, String status, Handler<Either<String, JsonObject>> handler);
+    void updateStatusToSent(List<String> ids, String status, String engagementNumber, String labelProgram, String dateCreation,
+                      String orderNumber, String fileId, String owner, Handler<Either<String, JsonObject>> handler);
 
     /**
      * List orders based on ids
@@ -105,31 +112,25 @@ public interface OrderService {
      * @param ids order ids
      * @param structureId structure id
      * @param handler function handler returning data
+     * @param isNumberValidation Set true if it based on number validation
      */
-    void getOrders(JsonArray ids, String structureId, Handler<Either<String, JsonArray>> handler);
+    void getOrders(JsonArray ids, String structureId, Boolean isNumberValidation, Handler<Either<String, JsonArray>> handler);
 
-    /**
-     * Add file id to order ids
-     * @param ids Order ids
-     * @param fileId File id
-     */
-    void addFileId(JsonArray ids, String fileId);
-
-    void getOrderByIds(JsonArray ids, Handler<Either<String, JsonArray>> handler);
+    void getOrderByValidatioNumber(JsonArray ids, Handler<Either<String, JsonArray>> handler);
 
     /**
      * List all orders group by number validation and fitlered by status
      * @param status Status
      * @param handler Function handler returning data
      */
-    void getOrdersGroupByValidationNumber(String status, Handler<Either<String, JsonArray>> handler);
+    void getOrdersGroupByValidationNumber(JsonArray status, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Returns all orders indexed by validation number and filtered by status
      * @param status Status
      * @param handler Function handler returning data
      */
-    void getOrdersDetailsIndexedByValidationNumber(String status, Handler<Either<String, JsonArray>> handler);
+    void getOrdersDetailsIndexedByValidationNumber(JsonArray status, Handler<Either<String, JsonArray>> handler);
 
     void getOrdersForCSVExportByValidationNumbers(JsonArray validationNumbers, Handler<Either<String, JsonArray>> handler);
 
@@ -139,4 +140,6 @@ public interface OrderService {
      * @param handler Function handler returning data
      */
     void cancelValidation(JsonArray validationNumbers, Handler<Either<String, JsonObject>> handler);
+
+    void getOrderFileId(String orderNumber, Handler<Either<String, JsonObject>> handler);
 }

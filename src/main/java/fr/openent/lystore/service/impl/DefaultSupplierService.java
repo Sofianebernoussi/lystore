@@ -4,6 +4,7 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.SupplierService;
 import fr.wseduc.webutils.Either;
 import org.entcore.common.service.impl.SqlCrudService;
+import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonArray;
@@ -56,5 +57,16 @@ public class DefaultSupplierService extends SqlCrudService implements SupplierSe
     @Override
     public void getSupplier(String id, Handler<Either<String, JsonObject>> handler) {
         super.retrieve(id, handler);
+    }
+
+    @Override
+    public void getSupplierByValidationNumbers(JsonArray validationNumbers, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT distinct supplier.id " +
+                "FROM lystore.order_client_equipment " +
+                "INNER JOIN lystore.contract ON (order_client_equipment.id_contract = contract.id) " +
+                "INNER JOIN lystore.supplier ON (contract.id_supplier = supplier.id) " +
+                "WHERE order_client_equipment.number_validation IN " + Sql.listPrepared(validationNumbers.toArray());
+
+        this.sql.prepared(query, validationNumbers, SqlResult.validUniqueResultHandler(handler, new String[0]));
     }
 }

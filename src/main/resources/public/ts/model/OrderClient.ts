@@ -22,6 +22,7 @@ export class OrderClient implements Selectable {
     supplier: Supplier;
     campaign: Campaign;
     structure_groups: string[];
+    order_number?: string;
 
     name_structure: string;
     id_contract: number;
@@ -52,6 +53,7 @@ export class OrdersClient extends Selection<OrderClient> {
 
     supplier: Supplier;
     bc_number?: string;
+    id_program?: number;
     engagement_number?: string;
     dateGeneration?: Date;
 
@@ -101,14 +103,22 @@ export class OrdersClient extends Selection<OrderClient> {
     }
 
     toJson (status: string) {
+        const ids = status === 'SENT'
+            ? _.pluck(this.all, 'number_validation')
+            : _.pluck(this.all, 'id');
+
+        const supplierId = status === 'SENT'
+            ? _.pluck(this.all, 'supplierid')[0]
+            : this.supplier.id;
         return {
-            ids: _.pluck(this.all, 'id') ,
+            ids,
             status : status,
             bc_number: this.bc_number || null,
             engagement_number: this.engagement_number || null,
             dateGeneration: moment(this.dateGeneration).format('DD/MM/YYYY') || null,
-            supplierId : this.supplier.id,
-            userId : model.me.userId
+            supplierId,
+            userId : model.me.userId,
+            id_program: this.id_program || null
         };
     }
 

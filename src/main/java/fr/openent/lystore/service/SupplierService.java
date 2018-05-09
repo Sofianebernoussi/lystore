@@ -43,4 +43,6 @@ public interface SupplierService {
      * @param handler Function handler returning data
      */
     void getSupplier(String id, Handler<Either<String, JsonObject>> handler);
+
+    void getSupplierByValidationNumbers(JsonArray validationNumbers, Handler<Either<String, JsonObject>> handler);
 }

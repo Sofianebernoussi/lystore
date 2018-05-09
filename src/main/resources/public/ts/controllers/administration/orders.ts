@@ -130,17 +130,27 @@ export const orderController = ng.controller('orderController',
             if (status === 200) {
                 $scope.notifications.push(new Notification('lystore.windUp.notif', 'confirm'));
             }
-            await $scope.syncOrders('DONE');
+            await $scope.syncOrders('SENT');
             Utils.safeApply($scope);
         };
         $scope.validateSentOrders = (orders: OrderClient[]) => {
-            let id_suppliers = (_.uniq(_.pluck(orders, 'id_contract')));
-            return id_suppliers.length === 1 ;
+            if (_.where(orders, { status : 'SENT' }).length > 0) {
+                let orderNumber = orders[0].order_number;
+                return _.every(orders, (order) => order.order_number === orderNumber);
+            } else {
+                let id_suppliers = (_.uniq(_.pluck(orders, 'id_contract')));
+                return (id_suppliers.length === 1);
+            }
+        };
+
+        $scope.disableCancelValidation = (orders: OrderClient[]) => {
+            return _.where(orders, { status : 'SENT' }).length > 0;
         };
 
         $scope.prepareSendOrder = async (orders: OrderClient[]) => {
             if ($scope.validateSentOrders(orders)) {
                 try {
+                    await $scope.programs.sync();
                     await $scope.initOrdersForPreview(orders);
                 } catch (e) {
                     console.error(e);
@@ -156,7 +166,8 @@ export const orderController = ng.controller('orderController',
         $scope.validatePrepareSentOrders = (orderToSend: OrdersClient) => {
             return orderToSend && orderToSend.supplier && orderToSend.bc_number && orderToSend.engagement_number
                 && orderToSend.bc_number !== undefined && orderToSend.engagement_number !== undefined
-                && orderToSend.bc_number.trim() !== '' && orderToSend.engagement_number.trim() !== '';
+                && orderToSend.bc_number.trim() !== '' && orderToSend.engagement_number.trim() !== ''
+                && orderToSend.id_program !== undefined;
         };
         $scope.sendOrders = async (orders: OrdersClient) => {
             let { status, data } = await orders.updateStatus('SENT');
@@ -213,13 +224,22 @@ export const orderController = ng.controller('orderController',
             }
         };
 
-        $scope.exportValidOrders = (orders: OrderClient[]) => {
+        $scope.exportOrder = (orders: OrderClient[]) => {
+            if (_.where(orders, { status : 'SENT' }).length === orders.length && $scope.validateSentOrders(orders)) {
+                let orderNumber = _.uniq(_.pluck(orders, 'order_number'));
+                window.location = `/lystore/order/${orderNumber}`;
+            } else {
+                $scope.exportValidOrders(orders, 'order');
+            }
+        };
+
+        $scope.exportValidOrders = (orders: OrderClient[], fileType: string) => {
             let params = '';
             orders.map((order: OrderClient) => {
                 params += `number_validation=${order.number_validation}&`;
             });
             params = params.slice(0, -1);
-            window.location = `/lystore/orders/valid/export/csv?${params}`;
+            window.location = `/lystore/orders/valid/export/${fileType}?${params}`;
         };
 
         $scope.cancelValidation = async (orders: OrderClient[]) => {

@@ -7,13 +7,14 @@ CREATE TABLE lystore.order (
   id bigserial NOT NULL,
   engagement_number character varying(255),
   label_program character varying(255),
+  date_creation timestamp without time zone NOT NULL DEFAULT now(),
+  order_number character varying (255),
   CONSTRAINT order_pkey PRIMARY KEY (id)
 );
 
 CREATE TABLE lystore.file (
   id bigserial NOT NULL,
   id_mongo character varying(255),
-  type character varying(255),
   owner character varying(255),
   date timestamp without time zone NOT NULL DEFAULT now(),
   id_order bigint,

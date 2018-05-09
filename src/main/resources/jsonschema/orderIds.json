@@ -23,6 +23,9 @@
     },
     "userId":{
       "type": "string"
+    },
+    "id_program": {
+      "type": ["number", "null"]
     }
   },
   "required": [ "ids" ]

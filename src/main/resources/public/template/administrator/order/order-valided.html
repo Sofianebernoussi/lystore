@@ -41,6 +41,12 @@
                     <i class="up-open" ng-show="sort.order.type === 'number_validation' && !sort.order.reverse"></i>
                     <i class="down-open" ng-show="sort.order.type === 'number_validation' && sort.order.reverse"></i>
                 </td>
+                <td ng-click="sort.order.type = 'order_number';
+                    sort.order.reverse = !sort.order.reverse">
+                    <i18n>lystore.orders.order.number</i18n>
+                    <i class="up-open" ng-show="sort.order.type === 'order_number' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'order_number' && sort.order.reverse"></i>
+                </td>
                 <td ng-click="sort.order.type = 'contract.name';
                     sort.order.reverse = !sort.order.reverse">
                     <i18n>contract</i18n>
@@ -59,6 +65,12 @@
                     <i class="up-open" ng-show="sort.order.type === 'structure_count' && !sort.order.reverse"></i>
                     <i class="down-open" ng-show="sort.order.type === 'structure_count' && sort.order.reverse"></i>
                 </td>
+                <td ng-click="sort.order.type = 'label_program';
+                    sort.order.reverse = !sort.order.reverse">
+                    <i18n>lystore.program</i18n>
+                    <i class="up-open" ng-show="sort.order.type === 'label_program' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'label_program' && sort.order.reverse"></i>
+                </td>
                 <td ng-click="sort.order.type = 'price';
                     sort.order.reverse = !sort.order.reverse">
                     <i18n>lystore.price.TTC</i18n>
@@ -68,7 +80,8 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="order in displayedOrders.all | orderBy:sort.order.type:sort.order.reverse">
+            <tr ng-repeat="order in displayedOrders.all | orderBy:sort.order.type:sort.order.reverse"
+                class="[[order.status]]">
                 <td workflow="lystore.manager">
                     <label class="checkbox">
                         <input type="checkbox" ng-model="order.selected">
@@ -76,9 +89,11 @@
                     </label>
                 </td>
                 <td>[[order.number_validation]]</td>
+                <td>[[order.order_number]]</td>
                 <td>[[order.contract_name]]</td>
                 <td>[[order.supplier_name]]</td>
                 <td>[[order.structure_count]]</td>
+                <td>[[order.label_program]]</td>
                 <td><span ng-bind="order.price | currency"></span></td>
             </tr>
             </tbody>
@@ -91,14 +106,25 @@
     <section class="toggle-buttons" ng-class="{ hide:ordersClient.selected.length === 0 }">
         <div class="toggle">
             <div class="row">
-                <button ng-click="prepareSendOrder(getSelectedOrders())" ng-disabled="!validateSentOrders(getSelectedOrders())">
+                <button class="right-magnet"
+                        ng-click="prepareSendOrder(getSelectedOrders())"
+                        ng-disabled="!validateSentOrders(getSelectedOrders())">
                     <i18n>lystore.order.valided.generateBC</i18n>
                 </button>
-                <button ng-click="exportValidOrders(getSelectedOrders())"
+                <button ng-click="exportValidOrders(getSelectedOrders(), 'structure_list')"
                         ng-disabled="!validateSentOrders(getSelectedOrders())">
                     <i18n>lystore.orders.valid.structure.list.export</i18n>
                 </button>
-                <button ng-click="cancelValidation(getSelectedOrders())">
+                <button ng-click="exportOrder(getSelectedOrders())"
+                        ng-disabled="!validateSentOrders(getSelectedOrders())">
+                    <i18n>lystore.orders.valid.order.export</i18n>
+                </button>
+                <button ng-click="exportValidOrders(getSelectedOrders(), 'certificates')"
+                        ng-disabled="!validateSentOrders(getSelectedOrders())">
+                    <i18n>lystore.orders.valid.certificates.export</i18n>
+                </button>
+                <button ng-click="cancelValidation(getSelectedOrders())"
+                        ng-disabled="disableCancelValidation(getSelectedOrders())">
                     <i18n>cancel</i18n>
                 </button>
             </div>

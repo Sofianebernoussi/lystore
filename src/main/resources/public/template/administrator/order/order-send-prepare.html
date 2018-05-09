@@ -4,7 +4,7 @@
         <div class="row">
             <div class="row vertical-spacing">
                 <div class="cell four"><i18n>lystore.order.supplier.name</i18n> :</div>
-                <div class="cell eight"><strong>[[orderToSend.supplier.name]]</strong></div>
+                <div class="cell eight"><strong>[[orderToSend.preview.supplier.name]]</strong></div>
             </div>
             <div class="row vertical-spacing">
                 <div class="cell four"><i18n>lystore.order.agent.name</i18n> :</div>
@@ -17,6 +17,16 @@
             <div class="row vertical-spacing">
                 <div class="cell four"><i18n>lystore.order.engagement.number</i18n> :</div>
                 <div class="cell eight"><input type="text" ng-model="orderToSend.engagement_number"></div>
+            </div>
+            <div class="row verical-spacing">
+                <div class="four cell">
+                    <i18n>lystore.contract.program</i18n>
+                </div>
+                <div class="cell eight">
+                    <select ng-model="orderToSend.id_program"
+                            ng-options="program.id as program.name for program in programs.all">
+                    </select>
+                </div>
             </div>
             <div class="row vertical-spacing">
                 <div class="cell four"><i18n>lystore.order.generation.date</i18n> :</div>
@@ -33,20 +43,6 @@
 
     <article class="eight twelve-mobile centered">
         <div class="row">
-            <div class="twelve tabs vertical-spacing">
-                <header ng-click="display.generation.type = 'ORDER'"><i18n>lystore.order</i18n></header>
-                <header ng-click="display.generation.type = 'CERTIFICATES'"><i18n>lystore.certificates</i18n></header>
-                <header ng-click="display.generation.type = 'CONTRACT_VIEW'"><i18n>lystore.certificates.contract</i18n></header>
-            </div>
-            <div class="row vertical-spacing-twice" ng-if="display.generation.type === 'CERTIFICATES' && orderToSend.preview.certificates.length > 1">
-                <nav class="prev-next">
-                    <button ng-click="orderToSend.preview.index = orderToSend.preview.index - 1"
-                            ng-disabled="orderToSend.preview.index === 0"><i class="left-open"></i></button>
-                    <span class="pagination">[[ orderToSend.preview.certificates[orderToSend.preview.index].structure.name ]]</span>
-                    <button ng-click="orderToSend.preview.index = orderToSend.preview.index + 1"
-                            ng-disabled="orderToSend.preview.index === orderToSend.preview.certificates.length - 1"><i class="open-right"></i></button>
-                </nav>
-            </div>
             <container template="sendOrder.preview"></container>
         </div>
     </article>

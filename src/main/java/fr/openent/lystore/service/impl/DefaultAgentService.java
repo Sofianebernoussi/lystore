@@ -61,7 +61,7 @@ public class DefaultAgentService extends SqlCrudService implements AgentService 
                 "INNER JOIN lystore.contract ON (contract.id_agent = agent.id) " +
                 "INNER JOIN lystore.equipment ON (equipment.id_contract = contract.id) " +
                 "INNER JOIN lystore.order_client_equipment ON (equipment.id = order_client_equipment.equipment_key) " +
-                "WHERE order_client_equipment.id IN " + Sql.listPrepared(ids.toArray());
+                "WHERE order_client_equipment.number_validation IN " + Sql.listPrepared(ids.toArray());
 
         sql.prepared(query, ids, SqlResult.validUniqueResultHandler(handler, new String[0]));
     }

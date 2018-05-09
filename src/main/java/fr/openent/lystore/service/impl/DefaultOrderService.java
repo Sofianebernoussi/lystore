@@ -16,6 +16,7 @@ import org.vertx.java.core.eventbus.impl.JsonObjectMessage;
 import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.core.json.impl.Json;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.core.logging.impl.LoggerFactory;
 
@@ -103,25 +104,20 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     public void getStructuresId(JsonArray ids, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT id, id_structure " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
-                "WHERE id IN " + Sql.listPrepared(ids.toArray()) + ";";
-        JsonArray params = new JsonArray();
+                "WHERE number_validation IN " + Sql.listPrepared(ids.toArray()) + ";";
 
-        for (int i = 0; i < ids.size(); i++) {
-            params.addNumber((Integer) ids.get(i));
-        }
-
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+        Sql.getInstance().prepared(query, ids, SqlResult.validResultHandler(handler));
     }
 
     @Override
-    public void getOrders(JsonArray ids, String structureId, Handler<Either<String, JsonArray>> handler) {
+    public void getOrders(JsonArray ids, String structureId, Boolean isNumberValidation, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT price, tax_amount, name, id_contract, " +
                 "SUM(amount) as amount ";
         if (structureId != null) {
             query += ", id_structure ";
         }
         query += "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
-                "WHERE id IN " + Sql.listPrepared(ids.toArray());
+                "WHERE " + (isNumberValidation ? "number_validation" : "id") + " IN " + Sql.listPrepared(ids.toArray());
         if (structureId != null) {
             query += "AND id_structure = ?";
         }
@@ -139,7 +135,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         query += "FROM " + Lystore.lystoreSchema + ".order_client_options options " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".order_client_equipment equipment " +
                 "ON (options.id_order_client_equipment = equipment.id) " +
-                "WHERE id_order_client_equipment IN " + Sql.listPrepared(ids.toArray());
+                "WHERE " + (isNumberValidation ? "number_validation" : "id_order_client_equipment") + " IN " + Sql.listPrepared(ids.toArray());
         if (structureId != null) {
             query += " AND equipment.id_structure = ?";
         }
@@ -153,7 +149,11 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < ids.size(); j++) {
-                params.addNumber((Number) ids.get(j));
+                if (isNumberValidation) {
+                    params.addString((String) ids.get(j));
+                } else {
+                    params.addNumber((Number) ids.get(j));
+                }
             }
             if (structureId != null) {
                 params.addString(structureId);
@@ -163,63 +163,59 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
-    @Override
-    public void addFileId(JsonArray ids, String fileId) {
-        String query = "UPDATE " + Lystore.lystoreSchema + ".order_client_equipment " +
-                "SET file = ? WHERE id IN " + Sql.listPrepared(ids.toArray());
-
-        JsonArray params = new JsonArray()
-                .addString(fileId);
-
-        for (int i = 0; i < ids.size(); i++) {
-            params.addNumber((Number) ids.get(i));
-        }
-
-        Sql.getInstance().prepared(query, params, null);
-    }
 
     @Override
-    public void getOrderByIds(JsonArray ids, Handler<Either<String, JsonArray>> handler) {
+    public void getOrderByValidatioNumber(JsonArray ids, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
-                "WHERE id IN " + Sql.listPrepared(ids.toArray());
+                "WHERE number_validation IN " + Sql.listPrepared(ids.toArray());
 
         JsonArray params = new JsonArray();
 
         for (int i = 0; i < ids.size(); i++) {
-            params.addNumber((Number) ids.get(i));
+            params.addString((String) ids.get(i));
         }
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
     @Override
-    public void getOrdersGroupByValidationNumber(String status, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT row.number_validation, contract.name as contract_name, contract.id as id_contract, supplier.name as supplier_name, " +
-                "array_to_json(array_agg(structure_group.name)) as structure_groups, count(distinct row.id_structure) as structure_count " +
+    public void getOrdersGroupByValidationNumber(JsonArray status, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT row.number_validation, row.status, contract.name as contract_name, contract.id as id_contract, supplier.name as supplier_name, " +
+                "array_to_json(array_agg(structure_group.name)) as structure_groups, count(distinct row.id_structure) as structure_count, supplier.id as supplierId, " +
+                Lystore.lystoreSchema + ".order.label_program, " + Lystore.lystoreSchema + ".order.order_number " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment row " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".equipment ON (row.equipment_key = equipment.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (equipment.id_contract = contract.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".supplier ON (contract.id_supplier = supplier.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON (row.id_structure = rel_group_structure.id_structure) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".structure_group ON (rel_group_structure.id_structure_group = structure_group.id) " +
-                "WHERE row.status = ? " +
-                "GROUP BY row.number_validation, contract.name, supplier.name, contract.id;";
+                "LEFT OUTER JOIN " + Lystore.lystoreSchema + ".order ON (row.id_order = lystore.order.id)  " +
+                "WHERE row.status IN " + Sql.listPrepared(status.toArray()) +
+                " GROUP BY row.number_validation, contract.name, supplier.name, contract.id, supplierId, row.status, " + Lystore.lystoreSchema +
+                ".order.label_program, " + Lystore.lystoreSchema + ".order.order_number;";
 
-        this.sql.prepared(query, new JsonArray().addString(status), SqlResult.validResultHandler(handler));
+        this.sql.prepared(query, status, SqlResult.validResultHandler(handler));
     }
 
     @Override
-    public void getOrdersDetailsIndexedByValidationNumber(String status, Handler<Either<String, JsonArray>> handler) {
+    public void getOrdersDetailsIndexedByValidationNumber(JsonArray status, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT price, tax_amount, amount::text, number_validation " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
-                "WHERE status = ? " +
-                "UNION ALL " +
+                "WHERE status IN " + Sql.listPrepared(status.toArray()) +
+                " UNION ALL " +
                 "SELECT order_client_options.price, order_client_options.tax_amount, order_client_options.amount::text, order_client_equipment.number_validation " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_options " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".order_client_equipment ON (order_client_equipment.id = order_client_options.id_order_client_equipment) " +
-                "WHERE order_client_equipment.status = ? ";
+                "WHERE order_client_equipment.status IN " + Sql.listPrepared(status.toArray());
 
-        this.sql.prepared(query, new JsonArray().addString(status).addString(status), SqlResult.validResultHandler(handler));
+        JsonArray statusList = new JsonArray();
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < status.size(); j++) {
+                statusList.addString((String) status.get(j));
+            }
+        }
+
+        this.sql.prepared(query, statusList, SqlResult.validResultHandler(handler));
     }
 
     @Override
@@ -252,6 +248,17 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "WHERE number_validation IN " + Sql.listPrepared(validationNumbers.toArray());
 
         this.sql.prepared(query, validationNumbers, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
+    public void getOrderFileId(String orderNumber, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT id_mongo FROM " + Lystore.lystoreSchema + ".file " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".order ON (" + Lystore.lystoreSchema + ".order.id = file.id_order) " +
+                "WHERE order_number = ?;";
+
+        JsonArray params = new JsonArray().addString(orderNumber);
+
+        this.sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
@@ -318,8 +325,8 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                     JsonArray newPurseArray = newPurse.getArray("results").get(0);
                     JsonArray newOrderNumberArray = newOrderNumber.getArray("results").get(0);
                     res.putNumber("f1", newPurseArray.size() > 0
-                        ? Float.parseFloat(newPurseArray.get(0).toString())
-                        : 0);
+                            ? Float.parseFloat(newPurseArray.get(0).toString())
+                            : 0);
                     res.putNumber("f2", newOrderNumberArray.size() > 0
                             ? Float.parseFloat(newOrderNumberArray.get(0).toString())
                             : 0);
@@ -360,26 +367,26 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                     JsonArray res = event.right().getValue();
                     final JsonObject ordersObject = formatSendOrdersResult(res);
                     structureService.getStructureById(ordersObject.getArray("id_structures"),
-                        new Handler<Either<String, JsonArray>>() {
-                            @Override
-                            public void handle(Either<String, JsonArray> structureArray) {
-                                if(structureArray.isRight()){
-                                    Either<String, JsonObject> either;
-                                    JsonObject returns = new JsonObject()
-                                            .putArray("ordersCSF",
-                                                    getOrdersFormatedCSF(ordersObject.getArray("order"),
-                                                            (JsonArray) structureArray.right().getValue()))
-                                            .putArray("ordersBC",
-                                                    getOrdersFormatedBC(ordersObject.getArray("order"),
-                                                            (JsonArray) structureArray.right().getValue()))
-                                            .putObject("total",
-                                                    getTotalsOrdersPrices(ordersObject.getArray("order")))
-                                            ;
-                                    either = new Either.Right<>(returns);
-                                    handler.handle(either);
+                            new Handler<Either<String, JsonArray>>() {
+                                @Override
+                                public void handle(Either<String, JsonArray> structureArray) {
+                                    if(structureArray.isRight()){
+                                        Either<String, JsonObject> either;
+                                        JsonObject returns = new JsonObject()
+                                                .putArray("ordersCSF",
+                                                        getOrdersFormatedCSF(ordersObject.getArray("order"),
+                                                                (JsonArray) structureArray.right().getValue()))
+                                                .putArray("ordersBC",
+                                                        getOrdersFormatedBC(ordersObject.getArray("order"),
+                                                                (JsonArray) structureArray.right().getValue()))
+                                                .putObject("total",
+                                                        getTotalsOrdersPrices(ordersObject.getArray("order")))
+                                                ;
+                                        either = new Either.Right<>(returns);
+                                        handler.handle(either);
+                                    }
                                 }
-                            }
-                        });
+                            });
                 } else {
                     handler.handle(new Either.Left<String, JsonObject>("An error occurred when collecting orders"));
                 }
@@ -388,17 +395,130 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     }
 
     @Override
-    public void updateStatus(List<Integer> ids, String status, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE lystore.order_client_equipment " +
-                " SET  status = ? " +
-                " WHERE id in "+ Sql.listPrepared(ids.toArray()) +";";
-        JsonArray params = new JsonArray().addString(status);
+    public void updateStatusToSent(final List<String> ids, String status, final String engagementNumber, final String labelProgram, final String dateCreation,
+                                   final String orderNumber, final String fileId, final String owner, final Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT distinct id_order " +
+                "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
+                "WHERE order_client_equipment.number_validation IN " + Sql.listPrepared(ids.toArray());
+        Sql.getInstance().prepared(query, new JsonArray(ids.toArray()), SqlResult.validResultHandler(new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(Either<String, JsonArray> updateOrCreateEvent) {
+                if (updateOrCreateEvent.isRight()) {
+                    JsonArray orderIds =  updateOrCreateEvent.right().getValue();
+                    JsonObject orderObject = orderIds.get(0);
+                    if (null == orderObject.getNumber("id_order")) {
+                        String nextValQuery = "SELECT nextval('" + Lystore.lystoreSchema + ".order_id_seq') as id";
+                        Sql.getInstance().raw(nextValQuery, SqlResult.validUniqueResultHandler(new Handler<Either<String, JsonObject>>() {
+                            @Override
+                            public void handle(Either<String, JsonObject> eventId) {
+                                if (eventId.isRight()) {
+                                    Number orderId = eventId.right().getValue().getNumber("id");
+                                    JsonArray statements = new JsonArray()
+                                            .add(getOrderCreateStatement(orderId, engagementNumber, labelProgram, dateCreation, orderNumber))
+                                            .add(getAddOrderClientRef(orderId, ids))
+                                            .add(getAddFileStatement(fileId, owner, orderId))
+                                            .add(getUpdateClientOrderStatement(new JsonArray(ids.toArray()), "SENT"));
 
-        for (Integer id : ids) {
-            params.addNumber( id);
+                                    Sql.getInstance().transaction(statements, SqlResult.validRowsResultHandler(handler));
+                                } else {
+                                    handler.handle(new Either.Left<String, JsonObject>(eventId.left().getValue()));
+                                }
+                            }
+                        }));
+                    } else {
+                        Number orderId = ((JsonObject)orderIds.get(0)).getNumber("id_order");
+                        JsonArray statements = new JsonArray()
+                                .addObject(getUpdateOrderStatement(engagementNumber, labelProgram, dateCreation, orderNumber, orderId))
+                                .addObject(getAddFileStatement(fileId, owner, orderId))
+                                .addObject(getUpdateClientOrderStatement(new JsonArray(ids.toArray()), "SENT"));
+
+                        Sql.getInstance().transaction(statements, SqlResult.validRowsResultHandler(handler));
+                    }
+                } else {
+                    handler.handle(new Either.Left<String, JsonObject>(updateOrCreateEvent.left().getValue()));
+                }
+            }
+        }));
+    }
+
+    private JsonObject getAddOrderClientRef(Number orderId, List<String> validationNumbers) {
+        String query = "UPDATE " + Lystore.lystoreSchema + ".order_client_equipment " +
+                "SET id_order = ? " +
+                "WHERE number_validation IN " + Sql.listPrepared(validationNumbers.toArray());
+
+        JsonArray params = new JsonArray().addNumber(orderId);
+        for (String number : validationNumbers)  {
+            params.addString(number);
         }
 
-        Sql.getInstance().prepared(query, params, SqlResult.validRowsResultHandler(handler));
+        return new JsonObject()
+                .putString("statement", query)
+                .putArray("values", params)
+                .putString("action", "prepared");
+    }
+
+    private JsonObject getUpdateOrderStatement (String engagementNumber, String labelProgram, String dateCreation, String orderNumber, Number orderId) {
+        String query = "UPDATE " + Lystore.lystoreSchema + ".order " +
+                "SET engagement_number = ?, label_program = ?, date_creation = to_date(?, 'DD/MM/YYYY'), order_number = ? " +
+                "WHERE id = ?;";
+        JsonArray params = new JsonArray()
+                .addString(engagementNumber).addString(labelProgram).addString(dateCreation)
+                .addString(orderNumber).addNumber(orderId);
+
+        return new JsonObject()
+                .putString("statement", query)
+                .putArray("values", params)
+                .putString("action", "prepared");
+    }
+
+    private JsonObject getOrderCreateStatement(Number id, String engagementNumber, String labelProgram, String dateCreation,
+                                                       String orderNumber) {
+
+        String query = "INSERT INTO " + Lystore.lystoreSchema + ".order(id, engagement_number, label_program, date_creation, order_number) " +
+                "VALUES (?, ?, ?, to_date(?, 'DD/MM/YYYY'), ?);";
+
+        JsonArray params = new JsonArray()
+                .addNumber(id)
+                .addString(engagementNumber)
+                .addString(labelProgram)
+                .addString(dateCreation)
+                .addString(orderNumber);
+
+        return new JsonObject()
+                .putString("statement", query)
+                .putArray("values", params)
+                .putString("action", "prepared");
+    }
+
+    private JsonObject getUpdateClientOrderStatement (JsonArray validationNumbers, String status) {
+        String query = "UPDATE " + Lystore.lystoreSchema + ".order_client_equipment " +
+                " SET  status = ? " +
+                " WHERE number_validation in " + Sql.listPrepared(validationNumbers.toArray()) +";";
+        JsonArray params = new JsonArray().addString(status);
+
+        for (int i = 0; i < validationNumbers.size(); i++) {
+            params.addString(validationNumbers.get(i).toString());
+        }
+
+        return new JsonObject()
+                .putString("statement", query)
+                .putArray("values", params)
+                .putString("action", "prepared");
+    }
+
+    private JsonObject getAddFileStatement(String mongoId, String owner, Number orderId) {
+        String query = "INSERT INTO " + Lystore.lystoreSchema + ".file(id_mongo, owner, id_order) " +
+                "VALUES (?, ?, ?);";
+
+        JsonArray params = new JsonArray()
+                .addString(mongoId)
+                .addString(owner)
+                .addNumber(orderId);
+
+        return new JsonObject()
+                .putString("statement", query)
+                .putArray("values", params)
+                .putString("action", "prepared");
     }
 
     private JsonArray getOrdersFormatedCSF (JsonArray ordersArray, JsonArray structures) {
@@ -407,15 +527,15 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         for (int i = 0 ; i< ordersArray.size(); i++){
             orderOld = ordersArray.get(i);
             JsonObject order = orderOld
-                        .putObject("structure",
-                                (getStructureObject( structures, orderOld.getString("id_structure"))));
+                    .putObject("structure",
+                            (getStructureObject( structures, orderOld.getString("id_structure"))));
             if (orderOld.getArray("options").size() == 0) {
                 order.putBoolean("hasOptions", false);
             } else {
                 order.putBoolean("hasOptions", true);
             }
             orders.add(order);
-            }
+        }
 
         return orders;
     }
@@ -426,8 +546,8 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         JsonObject orderOld;
         JsonObject orderNew;
         for (int i = 0 ; i< ordersArray.size(); i++){
-             isIn = false;
-             orderOld = ordersArray.get(i);
+            isIn = false;
+            orderOld = ordersArray.get(i);
             for(int j = 0; j<orders.size(); j++){
                 orderNew = orders.get(j);
                 if(orderOld.getNumber("equipment_key").equals(orderNew.getNumber("equipment_key"))){
@@ -435,9 +555,9 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                     JsonArray structure;
                     structure = orderNew.getArray("structures");
                     structure.add(getStructureObject( structures,
-                                    orderOld.getString("id_structure"),
-                                    orderOld.getNumber("amount").toString(),
-                                    orderOld.getString("number_validation")));
+                            orderOld.getString("id_structure"),
+                            orderOld.getNumber("amount").toString(),
+                            orderOld.getString("number_validation")));
                     orderNew.putArray("structures", structure);
                     Integer amount = (Integer.parseInt(orderOld.getNumber("amount").toString()) +
                             Integer.parseInt( orderNew.getNumber("amount").toString())) ;
@@ -698,30 +818,30 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     @Override
     public void getExportCsvOrdersAdmin(List<Integer> idsOrders, Handler<Either<String, JsonArray>> handler) {
 
-    String query = "SELECT oce.id, oce.id_structure as idStructure, contract.name as namecontract," +
-            " supplier.name as namesupplier, campaign.name as namecampaign, oce.amount as qty," +
-            " oce.creation_date as date, CASE count(priceOptions)"+
-        "WHEN 0 THEN ROUND ((oce.price+( oce.tax_amount*oce.price)/100)*oce.amount,2)"+
-        "ELSE ROUND((priceOptions +( oce.price + ROUND((oce.tax_amount*oce.price)/100,2)))*oce.amount,2) "+
-        "END as priceTotal "+
-        "FROM "+ Lystore.lystoreSchema +".order_client_equipment  oce "+
-        "LEFT JOIN (SELECT ROUND (SUM(( price +( tax_amount*price)/100)*amount),2) as priceOptions, "+
-        "id_order_client_equipment FROM "+ Lystore.lystoreSchema +".order_client_options  GROUP BY id_order_client_equipment) opts "+
-        "ON oce.id = opts.id_order_client_equipment "+
-        "LEFT JOIN "+ Lystore.lystoreSchema +".contract ON contract.id=oce.id_contract "+
-        "INNER JOIN "+ Lystore.lystoreSchema +".campaign ON campaign.id = oce.id_campaign "+
-        "INNER JOIN "+ Lystore.lystoreSchema +".supplier ON contract.id_supplier = supplier.id "+
-        "WHERE oce.id in "+ Sql.listPrepared(idsOrders.toArray()) +
-        " GROUP BY oce.id, idStructure, qty,date,oce.price, oce.tax_amount, oce.id_campaign, priceOptions," +
-            " namecampaign, namecontract, namesupplier ;";
+        String query = "SELECT oce.id, oce.id_structure as idStructure, contract.name as namecontract," +
+                " supplier.name as namesupplier, campaign.name as namecampaign, oce.amount as qty," +
+                " oce.creation_date as date, CASE count(priceOptions)"+
+                "WHEN 0 THEN ROUND ((oce.price+( oce.tax_amount*oce.price)/100)*oce.amount,2)"+
+                "ELSE ROUND((priceOptions +( oce.price + ROUND((oce.tax_amount*oce.price)/100,2)))*oce.amount,2) "+
+                "END as priceTotal "+
+                "FROM "+ Lystore.lystoreSchema +".order_client_equipment  oce "+
+                "LEFT JOIN (SELECT ROUND (SUM(( price +( tax_amount*price)/100)*amount),2) as priceOptions, "+
+                "id_order_client_equipment FROM "+ Lystore.lystoreSchema +".order_client_options  GROUP BY id_order_client_equipment) opts "+
+                "ON oce.id = opts.id_order_client_equipment "+
+                "LEFT JOIN "+ Lystore.lystoreSchema +".contract ON contract.id=oce.id_contract "+
+                "INNER JOIN "+ Lystore.lystoreSchema +".campaign ON campaign.id = oce.id_campaign "+
+                "INNER JOIN "+ Lystore.lystoreSchema +".supplier ON contract.id_supplier = supplier.id "+
+                "WHERE oce.id in "+ Sql.listPrepared(idsOrders.toArray()) +
+                " GROUP BY oce.id, idStructure, qty,date,oce.price, oce.tax_amount, oce.id_campaign, priceOptions," +
+                " namecampaign, namecontract, namesupplier ;";
 
-            JsonArray params = new JsonArray();
+        JsonArray params = new JsonArray();
 
-            for(Integer id : idsOrders){
-                params.addNumber(id);
-            }
+        for(Integer id : idsOrders){
+            params.addNumber(id);
+        }
 
-           sql.prepared(query, params, SqlResult.validResultHandler(handler));
+        sql.prepared(query, params, SqlResult.validResultHandler(handler));
 
     }
 }

@@ -88,12 +88,12 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract " +
                 "ON (order_client_equipment.id_contract = contract.id) " +
-                "WHERE order_client_equipment.id IN " + Sql.listPrepared(ids.toArray()) +
+                "WHERE order_client_equipment.number_validation IN " + Sql.listPrepared(ids.toArray()) +
                 " GROUP BY contract.id";
         JsonArray params = new JsonArray();
 
         for (int i = 0; i < ids.size(); i++) {
-            params.addNumber((Number) ids.get(i));
+            params.addString((String) ids.get(i));
         }
 
         this.sql.prepared(query, params, SqlResult.validResultHandler(handler));

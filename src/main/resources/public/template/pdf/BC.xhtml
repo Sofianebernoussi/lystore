@@ -63,8 +63,13 @@
         }
 
         .break {
-            page-break-before: always;
+            page-break-after: always;
         }
+
+        .break:first-child {
+            page-break-after: auto;
+        }
+
         .signature {
             height: 60px;
         }
@@ -157,6 +162,7 @@
 </head>
 
 <body class="page">
+{{#print_order}}
 <div class="header">
     <div>
         <div class="left center-text">
@@ -284,6 +290,8 @@
 
     </div>
 </div>
+{{/print_order}}
+{{#print_certificates}}
 {{#certificates}}
 <div class="break">
     <div class="service-fait" >
@@ -435,59 +443,6 @@
     </div>
 </div>
 {{/certificates }}
-<div class="break">
-    <div class="orders center-text">
-        <h1>
-            Marché numéro {{#contract}}{{reference}} - {{name}}{{/contract}}<br/>
-            bon de commande N° {{nbr_bc}} - {{#supplier}} {{name}} {{/supplier}}
-        </h1>
-    </div>
-    <table class="equipments-table">
-        <thead>
-        <tr>
-            <td>
-                UAI
-            </td>
-            <td>
-                Nom
-            </td>
-            <td>
-                Commune postale
-            </td>
-            <td>
-                Equipement/Prestation
-            </td>
-            <td>
-                Quantité
-            </td>
-        </tr>
-        </thead>
-        <tbody>
-        {{#certificates}}
-        {{#orders}}
-        <tr>
-            {{#structure}}
-            <td>
-                {{uai}}
-            </td>
-            <td>
-                {{name}}
-            </td>
-            <td>
-                {{zipCode}}
-            </td>
-            {{/structure}}
-            <td>
-                {{name}}
-            </td>
-            <td>
-                {{amount}}
-            </td>
-        </tr>
-        {{/orders}}
-        {{/certificates}}
-        </tbody>
-    </table>
-</div>
+{{/print_certificates}}
 </body>
 </html>

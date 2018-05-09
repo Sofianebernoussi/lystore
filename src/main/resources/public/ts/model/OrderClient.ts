@@ -23,6 +23,9 @@ export class OrderClient implements Selectable {
     campaign: Campaign;
     structure_groups: string[];
     order_number?: string;
+    label_program?: string;
+    contract_name?: string;
+    supplier_name?: string;
 
     name_structure: string;
     id_contract: number;

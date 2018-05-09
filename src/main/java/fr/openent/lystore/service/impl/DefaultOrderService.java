@@ -62,7 +62,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     public  void listOrder(String status, Handler<Either<String, JsonArray>> handler){
         String query = "SELECT oce.* , to_json(contract.*) contract ,to_json(supplier.*) supplier, " +
                 "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options, " +
-                "array_to_json(array_agg(distinct structure_group.name)) as structure_groups " +
+                "array_to_json(array_agg(distinct structure_group.name)) as structure_groups, lystore.order.order_number " +
                 "FROM lystore.order_client_equipment oce " +
                 "LEFT JOIN lystore.order_client_options oco " +
                 "ON oco.id_order_client_equipment = oce.id " +
@@ -71,10 +71,11 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "INNER JOIN lystore.campaign ON oce.id_campaign = campaign.id " +
                 "INNER JOIN lystore.rel_group_campaign ON (oce.id_campaign = rel_group_campaign.id_campaign) " +
                 "INNER JOIN lystore.rel_group_structure ON (oce.id_structure = rel_group_structure.id_structure) " +
+                "LEFT OUTER JOIN lystore.order ON (oce.id_order = lystore.order.id) " +
                 "INNER JOIN lystore.structure_group ON (rel_group_structure.id_structure_group = structure_group.id " +
                 "AND rel_group_campaign.id_structure_group = structure_group.id) " +
                 "WHERE oce.status = ? " +
-                "GROUP BY (oce.id, contract.id, supplier.id, campaign.id);";
+                "GROUP BY (oce.id, contract.id, supplier.id, campaign.id, lystore.order.order_number);";
         sql.prepared(query, new JsonArray().addString(status), SqlResult.validResultHandler(handler));
     }
 

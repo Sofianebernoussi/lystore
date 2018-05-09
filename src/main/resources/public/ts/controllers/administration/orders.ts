@@ -81,19 +81,30 @@ export const orderController = ng.controller('orderController',
 
             const matchStructureGroups = (structureGroups: string[]): boolean => {
                 let bool: boolean = false;
+                if (typeof structureGroups === 'string') structureGroups = Utils.parsePostgreSQLJson(structureGroups);
                 structureGroups.map((groupName) => bool = bool || regex.test(groupName));
                 return bool;
             };
 
             $scope.displayedOrders.all = _.filter($scope.ordersClient.all, (order: OrderClient) => {
-                return regex.test(order.name_structure.toLowerCase())
-                    || regex.test(order.contract.name.toLowerCase())
-                    || regex.test(order.supplier.name.toLowerCase())
-                    || regex.test(order.campaign.name.toLowerCase())
-                    || regex.test(order.name.toLowerCase())
+                return ('name_structure' in order ? regex.test(order.name_structure.toLowerCase()) : false)
+                    || regex.test('contract' in order
+                        ? order.contract.name.toLowerCase()
+                        : order.contract_name)
+                    || regex.test('supplier' in order
+                        ? order.supplier.name.toLowerCase()
+                        : order.supplier_name)
+                    || ('campaign' in order ? regex.test(order.campaign.name.toLowerCase()) : false)
+                    || ('name' in order ? regex.test(order.name.toLowerCase()) : false)
                     || matchStructureGroups(order.structure_groups)
                     || (order.number_validation !== null
                         ? regex.test(order.number_validation.toLowerCase())
+                        : false)
+                    || (order.order_number !== null && 'order_number' in order
+                        ? regex.test(order.order_number.toLowerCase())
+                        : false)
+                    || (order.label_program !== null && 'label_program' in order
+                        ? regex.test(order.label_program.toLowerCase())
                         : false);
             });
         };

@@ -41,11 +41,11 @@
                     <i class="up-open" ng-show="sort.order.type === 'name_structure' && !sort.order.reverse"></i>
                     <i class="down-open" ng-show="sort.order.type === 'name_structure' && sort.order.reverse"></i>
                 </td>
-                <td ng-click="sort.order.type = 'number_validation';
+                <td ng-click="sort.order.type = 'order_number';
                     sort.order.reverse = !sort.order.reverse">
-                    <i18n>number.validation</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'number_validation' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'number_validation' && sort.order.reverse"></i>
+                    <i18n>lystore.orders.order.number</i18n>
+                    <i class="up-open" ng-show="sort.order.type === 'order_number' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'order_number' && sort.order.reverse"></i>
                 </td>
                 <td ng-click="sort.order.type = 'contract.name';
                     sort.order.reverse = !sort.order.reverse">
@@ -82,10 +82,8 @@
                     </label>
                 </td>
                 <td >[[order.name_structure]]</td>
-                <td >[[order.number_validation]]</td>
-                <td >
-                    [[order.contract.name]]
-                </td>
+                <td >[[order.order_number]]</td>
+                <td >[[order.contract.name]]</td>
                 <td> [[order.supplier.name]]</td>
                 <td>[[order.amount ]]</td>
                 <td><span ng-bind="order.priceTTCtotal | currency"></span></td>

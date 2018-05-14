@@ -35,9 +35,9 @@
         </div>
         <div class="row">
             <input type="button" class="submit right-magnet"
-                   ng-click="sendOrders(orderToSend)"
+                   ng-click="display.lightbox.sendOrder = true"
                    ng-disabled="!validatePrepareSentOrders(orderToSend)"
-                   i18n-value="lystore.order.pdf.generate"/>
+                   i18n-value="Validate"/>
         </div>
     </article>
 
@@ -46,4 +46,25 @@
             <container template="sendOrder.preview"></container>
         </div>
     </article>
+
+    <lightbox show="display.lightbox.sendOrder" on-close="display.lightbox.sendOrder = false">
+        <h1>
+            <i18n>lystore.order.valided.generateBC</i18n>
+        </h1>
+        <h4><i18n>lystore.order.validated.message</i18n></h4>
+        <div class="row vertical-spacing">
+            <p>
+                <i18n>lystore.order.number</i18n> : <strong>[[orderToSend.bc_number]]</strong>
+            </p>
+            <p>
+                <i18n>lystore.order.engagement.number</i18n> : <strong>[[orderToSend.engagement_number]]</strong>
+            </p>
+            <p>
+                <i18n>lystore.contract.program</i18n> : <strong>[[getProgramName(orderToSend.id_program)]]</strong>
+            </p>
+        </div>
+        <input type="button" class="submit right-magnet"
+               ng-click="sendOrders(orderToSend)"
+               i18n-value="Validate"/>
+    </lightbox>
 </div>

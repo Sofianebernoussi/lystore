@@ -264,4 +264,8 @@ export const orderController = ng.controller('orderController',
                 Utils.safeApply($scope);
             }
         };
+
+        $scope.getProgramName = (idProgram: number) => idProgram !== undefined
+            ? _.findWhere($scope.programs.all, { id: idProgram }).name
+            : '';
     }]);

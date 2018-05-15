@@ -41,14 +41,13 @@ public class EmailSendService {
                           JsonArray structureRows){
         final int contractNameIndex = 1;
         final int agentEmailIndex = 3;
-        for (int i = 0; i < rows.size(); i++) {
-            JsonArray row = rows.get(i);
-            String mailObject="[LyStore] Commandes " + row.get(contractNameIndex);
-            String mailBody = getAgentBodyMail(row, user, result.getString("number_validation"), url);
-            sendMail(request, (String) row.get(agentEmailIndex),
-                    mailObject,
-                    mailBody);
-        }
+        //TODO FIXER CETTE PARTIE. REFAIRE COMPLETEMENT LA SEQUENCE DE GESTION DES MAILS
+        JsonArray line = rows.get(0);
+        String agentMailObject = "[LyStore] Commandes " + line.get(contractNameIndex);
+        String agentMailBody = getAgentBodyMail(line, user, result.getString("number_validation"), url);
+        sendMail(request, (String) line.get(agentEmailIndex),
+                agentMailObject,
+                agentMailBody);
         for (int i = 0; i < structureRows.size(); i++) {
             String mailObject="[LyStore] Commandes ";
             JsonObject row = structureRows.get(i);

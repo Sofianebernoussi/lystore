@@ -723,7 +723,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                                                         .putString("number_validation", numberOrder)
                                                         .putArray("agent", agentNames);
                                                 handler.handle(new Either.Right<String, JsonObject>(result));
-                                                emailSender.sendMails( request, result,  rows,  user,  url,
+                                                emailSender.sendMails(request, result,  rows,  user,  url,
                                                         (JsonArray) stringJsonArrayEither.right().getValue());
                                             }
                                         });

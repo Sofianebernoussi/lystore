@@ -489,13 +489,17 @@ public class OrderController extends ControllerHelper {
                                 JsonArray structures = event.right().getValue();
                                 for (int i = 0; i < structures.size(); i++) {
                                     structure = structures.get(i);
-                                    structureMap.putString(structure.getString("id"),
-                                            structure.getString("uai"));
+                                    structureMap.putObject(structure.getString("id"),
+                                            structure);
                                 }
 
                                 for (int e = 0; e < equipments.size(); e++) {
                                     equipment[0] = equipments.get(e);
-                                    equipment[0].putString("uai", structureMap.getString(equipment[0].getString("id_structure")));
+                                    structure = structureMap.getObject(equipment[0].getString("id_structure"));
+                                    equipment[0].putString("uai", structure.getString("uai"));
+                                    equipment[0].putString("structure_name", structure.getString("name"));
+                                    equipment[0].putString("city", structure.getString("city"));
+                                    equipment[0].putString("phone", structure.getString("phone"));
                                 }
 
                                 renderValidOrdersCSVExport(request, equipments);
@@ -539,6 +543,12 @@ public class OrderController extends ControllerHelper {
     private String getValidOrdersCSVExportline (JsonObject equipment) {
         return equipment.getString("uai")
                 + ";"
+                + equipment.getString("structure_name")
+                + ";"
+                + equipment.getString("city")
+                + ";"
+                + equipment.getString("phone")
+                + ";"
                 + equipment.getString("name")
                 + ";"
                 + equipment.getString("amount")
@@ -549,6 +559,15 @@ public class OrderController extends ControllerHelper {
         return I18n.getInstance().
                 translate("UAI", getHost(request), I18n.acceptLanguage(request)) +
                 ";" +
+                I18n.getInstance().
+                        translate("lystore.structure.name", getHost(request), I18n.acceptLanguage(request)) +
+                ";" +
+                I18n.getInstance().
+                        translate("city", getHost(request), I18n.acceptLanguage(request)) +
+                ";"  +
+                I18n.getInstance().
+                        translate("phone", getHost(request), I18n.acceptLanguage(request)) +
+                ";"+
                 I18n.getInstance().
                         translate("EQUIPMENT", getHost(request), I18n.acceptLanguage(request)) +
                 ";" +

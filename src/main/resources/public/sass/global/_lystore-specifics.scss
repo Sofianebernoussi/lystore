@@ -42,7 +42,7 @@ body.lystore {
         width: auto;
       }
 
-      tr.SENT {
+      tr.SENT, tr.DONE {
         color: #999 !important;
       }
     }

@@ -99,7 +99,7 @@ public class OrderController extends ControllerHelper {
         if (request.params().contains("status")) {
             final String status = request.params().get("status");
             if ("valid".equals(status.toLowerCase())) {
-                final JsonArray statusList = new JsonArray().addString(status).addString("SENT");
+                final JsonArray statusList = new JsonArray().addString(status).addString("SENT").addString("DONE");
                 orderService.getOrdersGroupByValidationNumber(statusList, new Handler<Either<String, JsonArray>>() {
                     @Override
                     public void handle(Either<String, JsonArray> event) {

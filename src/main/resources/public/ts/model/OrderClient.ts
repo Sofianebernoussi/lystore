@@ -83,8 +83,8 @@ export class OrdersClient extends Selection<OrderClient> {
                 let { data } = await http.get(  `/lystore/orders?status=${status}` );
                 this.all = Mix.castArrayAs(OrderClient, data);
                 this.all.map((order: OrderClient) => {
-                    order.price = parseFloat(order.price.toString());
                     order.name_structure =  structures.length > 0 ? this.initNameStructure(order.id_structure, structures) : '';
+                    order.price = parseFloat(status === 'VALID' ? order.price.toString().replace(',', '.') : order.price.toString());
                     if (status !== 'VALID') {
                         order.tax_amount = parseFloat(order.tax_amount.toString());
                         order.contract = Mix.castAs(Contract,  JSON.parse(order.contract.toString()));

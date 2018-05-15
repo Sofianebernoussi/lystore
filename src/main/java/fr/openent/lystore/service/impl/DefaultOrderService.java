@@ -192,7 +192,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
                 "WHERE status IN " + Sql.listPrepared(status.toArray()) +
                 " UNION ALL " +
-                "SELECT order_client_options.price, order_client_options.tax_amount, order_client_options.amount::text, order_client_equipment.number_validation " +
+                "SELECT order_client_options.price, order_client_options.tax_amount, order_client_equipment.amount::text, order_client_equipment.number_validation " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_options " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".order_client_equipment ON (order_client_equipment.id = order_client_options.id_order_client_equipment) " +
                 "WHERE order_client_equipment.status IN " + Sql.listPrepared(status.toArray());

@@ -466,7 +466,7 @@ public class OrderController extends ControllerHelper {
     }
 
     private void exportStructuresList(final HttpServerRequest request, List<String> validationNumbers) {
-        orderService.getOrdersForCSVExportByValidationNumbers(new JsonArray(validationNumbers.toArray()), new Handler<Either<String, JsonArray>>() {
+        orderService.getOrders(new JsonArray(validationNumbers.toArray()), null, true, new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> event) {
                 if (event.isRight()) {

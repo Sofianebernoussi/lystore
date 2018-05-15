@@ -113,27 +113,18 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     @Override
     public void getOrders(JsonArray ids, String structureId, Boolean isNumberValidation, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT price, tax_amount, name, id_contract, " +
-                "SUM(amount) as amount ";
-        if (structureId != null) {
-            query += ", id_structure ";
-        }
-        query += "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
+                "SUM(amount) as amount, id_structure " +
+                "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
                 "WHERE " + (isNumberValidation ? "number_validation" : "id") + " IN " + Sql.listPrepared(ids.toArray());
         if (structureId != null) {
             query += "AND id_structure = ?";
         }
-        query += " GROUP BY equipment_key, price, tax_amount, name, id_contract ";
-        if (structureId != null) {
-            query += ", id_structure ";
-        }
-        query += "UNION " +
+        query += " GROUP BY equipment_key, price, tax_amount, name, id_contract, id_structure " +
+                "UNION " +
                 "SELECT options.price, options.tax_amount," +
                 "options.name, equipment.id_contract," +
-                "SUM(equipment.amount) as amount ";
-        if (structureId != null) {
-            query += ", equipment.id_structure ";
-        }
-        query += "FROM " + Lystore.lystoreSchema + ".order_client_options options " +
+                "SUM(equipment.amount) as amount, equipment.id_structure " +
+                "FROM " + Lystore.lystoreSchema + ".order_client_options options " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".order_client_equipment equipment " +
                 "ON (options.id_order_client_equipment = equipment.id) " +
                 "WHERE " + (isNumberValidation ? "number_validation" : "id_order_client_equipment") + " IN " + Sql.listPrepared(ids.toArray());
@@ -141,10 +132,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
             query += " AND equipment.id_structure = ?";
         }
         query += " GROUP BY options.name, equipment_key, options.price, options.tax_amount," +
-                "equipment.id_contract";
-        if (structureId != null) {
-            query += ", equipment.id_structure";
-        }
+                "equipment.id_contract, equipment.id_structure";
 
         JsonArray params = new JsonArray();
 

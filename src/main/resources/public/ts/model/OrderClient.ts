@@ -38,9 +38,11 @@ export class OrderClient implements Selectable {
 
     calculatePriceTTC ( roundNumber?: number)  {
         let price = parseFloat(Utils.calculatePriceTTC(this.price , this.tax_amount).toString());
-        this.options.map((option) => {
-            price += parseFloat(Utils.calculatePriceTTC(option.price , option.tax_amount).toString() );
-        });
+        if (this.options !== undefined) {
+            this.options.map((option) => {
+                price += parseFloat(Utils.calculatePriceTTC(option.price , option.tax_amount).toString() );
+            });
+        }
         return (!isNaN(price)) ? (roundNumber ? price.toFixed(roundNumber) : price ) : price ;
     }
 
@@ -85,6 +87,7 @@ export class OrdersClient extends Selection<OrderClient> {
                 this.all.map((order: OrderClient) => {
                     order.name_structure =  structures.length > 0 ? this.initNameStructure(order.id_structure, structures) : '';
                     order.price = parseFloat(status === 'VALID' ? order.price.toString().replace(',', '.') : order.price.toString());
+                    order.structure_groups = Utils.parsePostgreSQLJson(order.structure_groups);
                     if (status !== 'VALID') {
                         order.tax_amount = parseFloat(order.tax_amount.toString());
                         order.contract = Mix.castAs(Contract,  JSON.parse(order.contract.toString()));
@@ -96,7 +99,6 @@ export class OrdersClient extends Selection<OrderClient> {
                             order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
                             : order.options = [];
                         order.priceTTCtotal = parseFloat((order.calculatePriceTTC(2) as number).toString()) * order.amount;
-                        order.structure_groups = Utils.parsePostgreSQLJson(order.structure_groups);
                     }
                 });
             }

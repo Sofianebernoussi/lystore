@@ -243,7 +243,9 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     public void getOrderFileId(String orderNumber, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT id_mongo FROM " + Lystore.lystoreSchema + ".file " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".order ON (" + Lystore.lystoreSchema + ".order.id = file.id_order) " +
-                "WHERE order_number = ?;";
+                "WHERE order_number = ? " +
+                "ORDER BY date DESC " +
+                "LIMIT 1;";
 
         JsonArray params = new JsonArray().addString(orderNumber);
 

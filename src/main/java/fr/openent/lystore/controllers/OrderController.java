@@ -37,6 +37,7 @@ import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Container;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -57,6 +58,8 @@ public class OrderController extends ControllerHelper {
     private ProgramService programService;
 
     public static final String UTF8_BOM = "\uFEFF";
+
+    private static DecimalFormat decimals = new DecimalFormat("0.00");
 
 
     public OrderController (Storage storage) {
@@ -116,7 +119,7 @@ public class OrderController extends ControllerHelper {
                                         for (int i = 0; i < orders.size(); i++) {
                                             order = orders.get(i);
                                             order.putString("price",
-                                                    String.valueOf(
+                                                    decimals.format(
                                                             roundWith2Decimals(getTotalOrder(mapNumberEquipments.getArray(order.getString("number_validation")))))
                                                             .replace(".", ","));
                                         }
@@ -712,11 +715,11 @@ public class OrderController extends ControllerHelper {
                     JsonArray orders = formatOrders(event.right().getValue());
                     order.putArray("orders", orders);
                     order.putString("sumLocale",
-                            String.valueOf(roundWith2Decimals(getSumWithoutTaxes(orders))).replace(".", ","));
+                            decimals.format(roundWith2Decimals(getSumWithoutTaxes(orders))).replace(".", ","));
                     order.putString("totalTaxesLocale",
-                            String.valueOf(roundWith2Decimals(getTaxesTotal(orders))).replace(".", ","));
+                            decimals.format(roundWith2Decimals(getTaxesTotal(orders))).replace(".", ","));
                     order.putString("totalPriceTaxeIncludedLocal",
-                            String.valueOf(roundWith2Decimals(getTotalOrder(orders))).replace(".", ","));
+                            decimals.format(roundWith2Decimals(getTotalOrder(orders))).replace(".", ","));
                     handler.handle(order);
                 } else {
                     log.error("An error occurred when retrieving order data");
@@ -766,20 +769,20 @@ public class OrderController extends ControllerHelper {
         for (int i = 0; i < orders.size(); i++) {
             order = orders.get(i);
             order.putString("priceLocale",
-                    String.valueOf(roundWith2Decimals(Float.parseFloat(order.getString("price")))).replace(".", ","));
+                    decimals.format(roundWith2Decimals(Float.parseFloat(order.getString("price")))).replace(".", ","));
             order.putString("unitPriceTaxIncluded",
-                    String.valueOf(roundWith2Decimals(getTaxIncludedPrice(Float.parseFloat(order.getString("price")),
+                    decimals.format(roundWith2Decimals(getTaxIncludedPrice(Float.parseFloat(order.getString("price")),
                             Float.parseFloat(order.getString("tax_amount"))))).replace(".", ","));
             order.putString("unitPriceTaxIncludedLocale",
-                    String.valueOf(roundWith2Decimals(getTaxIncludedPrice(Float.parseFloat (order.getString("price")),
+                    decimals.format(roundWith2Decimals(getTaxIncludedPrice(Float.parseFloat (order.getString("price")),
                             Float.parseFloat(order.getString("tax_amount"))))).replace(".", ","));
             order.putNumber("totalPrice",
                     roundWith2Decimals(getTotalPrice(Float.parseFloat(order.getString("price")),
                             Long.parseLong(order.getString("amount")))));
             order.putString("totalPriceLocale",
-                    String.valueOf(roundWith2Decimals(Float.parseFloat(order.getNumber("totalPrice").toString()))).replace(".", ","));
+                    decimals.format(roundWith2Decimals(Float.parseFloat(order.getNumber("totalPrice").toString()))).replace(".", ","));
             order.putString("totalPriceTaxIncluded",
-                    String.valueOf(roundWith2Decimals(getTaxIncludedPrice((Float) order.getNumber("totalPrice"),
+                    decimals.format(roundWith2Decimals(getTaxIncludedPrice((Float) order.getNumber("totalPrice"),
                             Float.parseFloat(order.getString("tax_amount"))))).replace(".", ","));
         }
         return orders;

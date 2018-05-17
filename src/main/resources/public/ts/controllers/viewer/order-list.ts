@@ -53,7 +53,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             $scope.notifications.push(new Notification('lystore.orderEquipment.delete.confirm', 'confirm'));
         }
         $scope.cancelOrderEquipmentDelete();
-        await $scope.ordersClient.sync([], $routeParams.idCampaign, $scope.current.structure.id );
+        await $scope.ordersClient.sync(null, [], $routeParams.idCampaign, $scope.current.structure.id );
         Utils.safeApply($scope);
     };
 

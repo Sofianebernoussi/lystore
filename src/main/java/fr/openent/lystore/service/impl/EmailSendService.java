@@ -79,7 +79,7 @@ public class EmailSendService {
     private static String getStructureBodyMail(JsonObject row, UserInfos user, String numberOrder, String url,
                                                String name){
         String body = "Bonjour " + row.getString("name") + ", <br/> <br/>"
-                + "Une commande sous le numéro \"" + numberOrder + "\"."
+                + "Une commande sous le numéro \"" + numberOrder + "\" vient d'être validée."
                 + " Une partie de la commande concerne l'établissement " + name + ". "
                 + "Cette confirmation est visible sur l'interface de LyStore en vous rendant ici :  <br />"
                 + "<br />" + url + "#/ <br />"

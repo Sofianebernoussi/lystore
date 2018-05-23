@@ -111,10 +111,11 @@ public interface OrderService {
      * List an union of equipments and options based on order ids
      * @param ids order ids
      * @param structureId structure id
+     * @param groupByStructure Group result by structure
      * @param handler function handler returning data
      * @param isNumberValidation Set true if it based on number validation
      */
-    void getOrders(JsonArray ids, String structureId, Boolean isNumberValidation, Handler<Either<String, JsonArray>> handler);
+    void getOrders(JsonArray ids, String structureId, Boolean isNumberValidation, Boolean groupByStructure, Handler<Either<String, JsonArray>> handler);
 
     void getOrderByValidatioNumber(JsonArray ids, Handler<Either<String, JsonArray>> handler);
 

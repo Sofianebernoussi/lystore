@@ -469,7 +469,7 @@ public class OrderController extends ControllerHelper {
     }
 
     private void exportStructuresList(final HttpServerRequest request, List<String> validationNumbers) {
-        orderService.getOrders(new JsonArray(validationNumbers.toArray()), null, true, new Handler<Either<String, JsonArray>>() {
+        orderService.getOrders(new JsonArray(validationNumbers.toArray()), null, true, true, new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> event) {
                 if (event.isRight()) {
@@ -707,7 +707,7 @@ public class OrderController extends ControllerHelper {
     }
 
     private void retrieveOrderData (final HttpServerRequest request, JsonArray ids, final Handler<JsonObject> handler) {
-        orderService.getOrders(ids, null, true, new Handler<Either<String, JsonArray>>() {
+        orderService.getOrders(ids, null, true, false, new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> event) {
                 if (event.isRight()) {
@@ -909,7 +909,7 @@ public class OrderController extends ControllerHelper {
         while (structureIds.hasNext()) {
             structureId = structureIds.next();
             structure = structures.getObject(structureId);
-            orderService.getOrders(structure.getArray("orderIds"), structureId, false,
+            orderService.getOrders(structure.getArray("orderIds"), structureId, false, true,
                     new Handler<Either<String, JsonArray>>() {
                         @Override
                         public void handle(Either<String, JsonArray> event) {

@@ -29,7 +29,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.display = {
             equipment: false
         };
-        $scope.structures = [];
+        $scope.structures = new Structures();
         $scope.current = {};
         $scope.notifications = [];
         $scope.lang = lang;
@@ -269,14 +269,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             return (!isNaN(price)) ? (roundNumber ? price.toFixed(roundNumber) : price ) : price ;
         };
         $scope.initStructures = async () => {
-            for ( let i = 0 ; i < model.me.structures.length ; i++) {
-                $scope.structures[i] = {
-                    id: model.me.structures[i],
-                    name : model.me.structureNames[i],
-                    i : i
-                };
-            }
-            $scope.current.structure = $scope.structures[0];
+            await $scope.structures.syncUserStructures();
+            $scope.current.structure = $scope.structures.all[0];
         };
 
         $scope.avoidDecimals = (event) => {

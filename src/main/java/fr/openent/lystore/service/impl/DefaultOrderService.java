@@ -315,7 +315,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                             ? Float.parseFloat(newPurseArray.getString(0))
                             : 0);
                     res.put("f2", newOrderNumberArray.size() > 0
-                            ? Float.parseFloat(newOrderNumberArray.getString(0))
+                            ? Float.parseFloat(newOrderNumberArray.getLong(0).toString())
                             : 0);
                     getTransactionHandler(event, res, handler);
 

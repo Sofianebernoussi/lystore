@@ -39,4 +39,9 @@ export class Structures  extends Selection<Structure> {
         this.all = Mix.castArrayAs(Structure, data);
     }
 
+    async syncUserStructures (): Promise<void> {
+        let { data } = await http.get('/lystore/user/structures');
+        this.all = Mix.castArrayAs(Structure, data);
+    }
+
 }

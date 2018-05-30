@@ -427,6 +427,7 @@ public class OrderController extends ControllerHelper {
                                 public void handle(JsonObject data) {
                                     data.put("print_order", printOrder);
                                     data.put("print_certificates", printCertificates);
+                                    data.put("public_host", request.scheme() + "://" + request.host() + "/lystore/public");
                                     exportPDFService.generatePDF(request, data,
                                             "BC.xhtml", "CSF_",
                                             new Handler<Buffer>() {

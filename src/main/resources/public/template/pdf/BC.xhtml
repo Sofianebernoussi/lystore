@@ -166,7 +166,9 @@
 <div class="header">
     <div>
         <div class="left center-text">
-            <img  class="logo-region" src="img/ile_de_france.png" alt="ile de france" />
+            {{#public_host}}
+                <img  class="logo-region" src="{{public_host}}/img/ile_de_france.png" alt="ile de france" />
+            {{/public_host}}
             <h4>REGION ILE DE FRANCE</h4>
             <h5>PÔLE LYCÉES</h5>
             <p>
@@ -298,7 +300,9 @@
         <div class="header">
             <div>
                 <div class="left center-text">
-                    <img  class="logo-region" src="img/ile_de_france.png" alt="ile de france" />
+                    {{#public_host}}
+                    <img  class="logo-region" src="{{public_host}}/img/ile_de_france.png" alt="ile de france" />
+                    {{/public_host}}
                     <h4>REGION ILE DE FRANCE</h4>
                     <h5>PÔLE LYCÉES</h5>
                     <p>

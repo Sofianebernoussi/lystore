@@ -6,19 +6,17 @@ import fr.openent.lystore.service.PurseService;
 import fr.openent.lystore.service.StructureService;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.email.EmailSender;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.eventbus.impl.JsonObjectMessage;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.json.impl.Json;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.core.logging.impl.LoggerFactory;
 
 import java.util.List;
 
@@ -28,7 +26,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     private PurseService purseService ;
     private EmailSendService emailSender ;
     private StructureService structureService;
-    // private ExportPDFService exportPDFService;
 
     public DefaultOrderService(
             String schema, String table, EmailSender emailSender){
@@ -36,12 +33,11 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         this.purseService = new DefaultPurseService();
         this.emailSender = new EmailSendService(emailSender);
         this.structureService = new DefaultStructureService();
-        // this.exportPDFService = new DefaultExportPDFService( eb,  vertx,  container );
     }
 
     @Override
     public void listOrder(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler) {
-        JsonArray values = new JsonArray();
+        JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
         String query = "SELECT oe.id, oe.price, oe.tax_amount, oe.amount,oe.creation_date, oe.id_campaign," +
                 " oe.id_structure, oe.name, oe.summary, oe.image, oe.status, oe.id_contract," +
                 " array_to_json(array_agg(order_opts)) as options, c.name as name_supplier  " +
@@ -53,7 +49,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "ON oe.id_contract = c.id WHERE id_campaign = ? AND id_structure = ? " +
                 "GROUP BY (oe.id, c.name) ORDER BY creation_date";
 
-        values.addNumber(idCampaign).addString(idStructure);
+        values.add(idCampaign).add(idStructure);
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
 
     }
@@ -76,7 +72,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "AND rel_group_campaign.id_structure_group = structure_group.id) " +
                 "WHERE oce.status = ? " +
                 "GROUP BY (oce.id, contract.id, supplier.id, campaign.id, lystore.order.order_number);";
-        sql.prepared(query, new JsonArray().addString(status), SqlResult.validResultHandler(handler));
+        sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray().add(status), SqlResult.validResultHandler(handler));
     }
 
     @Override
@@ -92,10 +88,10 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "INNER JOIN "+ Lystore.lystoreSchema + ".campaign ON oce.id_campaign = campaign.id " +
                 "WHERE oce.id in "+ Sql.listPrepared(ids.toArray()) +
                 " GROUP BY (oce.id, contract.id, supplier.id, campaign.id); ";
-        JsonArray params = new JsonArray();
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
 
         for (Integer id : ids) {
-            params.addNumber( id);
+            params.add( id);
         }
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
@@ -105,7 +101,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     public void getStructuresId(JsonArray ids, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT id, id_structure " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
-                "WHERE number_validation IN " + Sql.listPrepared(ids.toArray()) + ";";
+                "WHERE number_validation IN " + Sql.listPrepared(ids.getList()) + ";";
 
         Sql.getInstance().prepared(query, ids, SqlResult.validResultHandler(handler));
     }
@@ -115,7 +111,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         String query = "SELECT price, tax_amount, name, id_contract, " +
                 "SUM(amount) as amount " + (groupByStructure ? ", id_structure " : "") +
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
-                "WHERE " + (isNumberValidation ? "number_validation" : "id") + " IN " + Sql.listPrepared(ids.toArray());
+                "WHERE " + (isNumberValidation ? "number_validation" : "id") + " IN " + Sql.listPrepared(ids.getList());
         if (structureId != null) {
             query += "AND id_structure = ?";
         }
@@ -127,25 +123,25 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "FROM " + Lystore.lystoreSchema + ".order_client_options options " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".order_client_equipment equipment " +
                 "ON (options.id_order_client_equipment = equipment.id) " +
-                "WHERE " + (isNumberValidation ? "number_validation" : "id_order_client_equipment") + " IN " + Sql.listPrepared(ids.toArray());
+                "WHERE " + (isNumberValidation ? "number_validation" : "id_order_client_equipment") + " IN " + Sql.listPrepared(ids.getList());
         if (structureId != null) {
             query += " AND equipment.id_structure = ?";
         }
         query += " GROUP BY options.name, equipment_key, options.price, options.tax_amount," +
                 "equipment.id_contract" + (groupByStructure ? ", equipment.id_structure" : "");
 
-        JsonArray params = new JsonArray();
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
 
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < ids.size(); j++) {
                 if (isNumberValidation) {
-                    params.addString((String) ids.get(j));
+                    params.add(ids.getString(j));
                 } else {
-                    params.addNumber((Number) ids.get(j));
+                    params.add(ids.getInteger(j));
                 }
             }
             if (structureId != null) {
-                params.addString(structureId);
+                params.add(structureId);
             }
         }
 
@@ -156,12 +152,12 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     @Override
     public void getOrderByValidatioNumber(JsonArray ids, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
-                "WHERE number_validation IN " + Sql.listPrepared(ids.toArray());
+                "WHERE number_validation IN " + Sql.listPrepared(ids.getList());
 
-        JsonArray params = new JsonArray();
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
 
         for (int i = 0; i < ids.size(); i++) {
-            params.addString((String) ids.get(i));
+            params.add(ids.getString(i));
         }
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
@@ -179,7 +175,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON (row.id_structure = rel_group_structure.id_structure) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".structure_group ON (rel_group_structure.id_structure_group = structure_group.id) " +
                 "LEFT OUTER JOIN " + Lystore.lystoreSchema + ".order ON (row.id_order = lystore.order.id)  " +
-                "WHERE row.status IN " + Sql.listPrepared(status.toArray()) +
+                "WHERE row.status IN " + Sql.listPrepared(status.getList()) +
                 " GROUP BY row.number_validation, contract.name, supplier.name, contract.id, supplierId, row.status, " + Lystore.lystoreSchema +
                 ".order.label_program, " + Lystore.lystoreSchema + ".order.order_number;";
 
@@ -190,17 +186,17 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     public void getOrdersDetailsIndexedByValidationNumber(JsonArray status, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT price, tax_amount, amount::text, number_validation " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
-                "WHERE status IN " + Sql.listPrepared(status.toArray()) +
+                "WHERE status IN " + Sql.listPrepared(status.getList()) +
                 " UNION ALL " +
                 "SELECT order_client_options.price, order_client_options.tax_amount, order_client_equipment.amount::text, order_client_equipment.number_validation " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_options " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".order_client_equipment ON (order_client_equipment.id = order_client_options.id_order_client_equipment) " +
-                "WHERE order_client_equipment.status IN " + Sql.listPrepared(status.toArray());
+                "WHERE order_client_equipment.status IN " + Sql.listPrepared(status.getList());
 
-        JsonArray statusList = new JsonArray();
+        JsonArray statusList = new fr.wseduc.webutils.collections.JsonArray();
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < status.size(); j++) {
-                statusList.addString((String) status.get(j));
+                statusList.add(status.getString(j));
             }
         }
 
@@ -211,20 +207,20 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     public void getOrdersForCSVExportByValidationNumbers(JsonArray validationNumbers, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT name, SUM(amount) as amount, id_structure, equipment_key " +
                 "FROM lystore.order_client_equipment " +
-                "WHERE number_validation IN " + Sql.listPrepared(validationNumbers.toArray()) +
+                "WHERE number_validation IN " + Sql.listPrepared(validationNumbers.getList()) +
                 "GROUP BY equipment_key, id_structure, name, id_structure " +
                 "UNION ALL " +
                 "SELECT order_client_options.name, SUM(order_client_options.amount) as amount, order_client_equipment.id_structure, order_client_equipment.equipment_key " +
                 "FROM lystore.order_client_options " +
                 "INNER JOIN lystore.order_client_equipment ON (order_client_options.id_order_client_equipment = order_client_equipment.id) " +
-                "WHERE number_validation IN " + Sql.listPrepared(validationNumbers.toArray()) +
+                "WHERE number_validation IN " + Sql.listPrepared(validationNumbers.getList()) +
                 "GROUP BY equipment_key, id_structure, order_client_options.name, id_structure " +
                 "ORDER BY id_structure";
-        JsonArray params = new JsonArray();
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
 
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < validationNumbers.size(); j++) {
-                params.addString((String) validationNumbers.get(j));
+                params.add(validationNumbers.getString(j));
             }
         }
 
@@ -234,7 +230,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     @Override
     public void cancelValidation(JsonArray validationNumbers, Handler<Either<String, JsonObject>> handler) {
         String query = "UPDATE lystore.order_client_equipment SET number_validation = '', status = 'WAITING' " +
-                "WHERE number_validation IN " + Sql.listPrepared(validationNumbers.toArray());
+                "WHERE number_validation IN " + Sql.listPrepared(validationNumbers.getList());
 
         this.sql.prepared(query, validationNumbers, SqlResult.validUniqueResultHandler(handler));
     }
@@ -247,14 +243,14 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "ORDER BY date DESC " +
                 "LIMIT 1;";
 
-        JsonArray params = new JsonArray().addString(orderNumber);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray().add(orderNumber);
 
         this.sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
     public void listExport(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler) {
-        JsonArray values = new JsonArray();
+        JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
         String query = "SELECT oe.name as equipment_name, oe.amount as equipment_quantity, " +
                 "oe.creation_date as equipment_creation_date, oe.summary as equipment_summary, " +
                 "oe.status as equipment_status,cause_status, price_all_options, CASE count(price_all_options) " +
@@ -268,7 +264,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 " opts ON oe.id = opts.id_order_client_equipment WHERE id_campaign = ? AND id_structure = ?" +
                 " GROUP BY oe.id, price_all_options ORDER BY creation_date";
 
-        values.addNumber(idCampaign).addString(idStructure);
+        values.add(idCampaign).add(idStructure);
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
     }
 
@@ -288,7 +284,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 " opts ON oe.id = opts.id_order_client_equipment WHERE id= ? " +
                 " GROUP BY oe.id, price_all_options";
 
-        sql.prepared(query,new JsonArray().addNumber(idOrder),SqlResult.validUniqueResultHandler(handler));
+        sql.prepared(query,new fr.wseduc.webutils.collections.JsonArray().add(idOrder),SqlResult.validUniqueResultHandler(handler));
     }
 
 
@@ -298,28 +294,28 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         Integer idCampaign = order.getInteger("id_campaign");
         Float price = Float.valueOf(order.getString("price_total_equipment"));
         try{
-            JsonArray statements = new JsonArray();
+            JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
             statements.add(purseService.updatePurseAmountStatement(price, idCampaign, idStructure,"+"));
-            statements.addObject(getOptionsOrderDeletion(idOrder));
-            statements.addObject(getEquipmentOrderDeletion(idOrder));
-            statements.addObject(getNewPurse(idCampaign,idStructure));
-            statements.addObject(getNewNbOrder(idCampaign, idStructure));
+            statements.add(getOptionsOrderDeletion(idOrder));
+            statements.add(getEquipmentOrderDeletion(idOrder));
+            statements.add(getNewPurse(idCampaign,idStructure));
+            statements.add(getNewNbOrder(idCampaign, idStructure));
 
 
             sql.transaction(statements, new Handler<Message<JsonObject>>() {
                 @Override
                 public void handle(Message<JsonObject> event) {
-                    JsonArray results = event.body().getArray("results");
+                    JsonArray results = event.body().getJsonArray("results");
                     JsonObject res = new JsonObject();
-                    JsonObject newPurse = results.get(3);
-                    JsonObject newOrderNumber = results.get(4);
-                    JsonArray newPurseArray = newPurse.getArray("results").get(0);
-                    JsonArray newOrderNumberArray = newOrderNumber.getArray("results").get(0);
-                    res.putNumber("f1", newPurseArray.size() > 0
-                            ? Float.parseFloat(newPurseArray.get(0).toString())
+                    JsonObject newPurse = results.getJsonObject(3);
+                    JsonObject newOrderNumber = results.getJsonObject(4);
+                    JsonArray newPurseArray = newPurse.getJsonArray("results").getJsonArray(0);
+                    JsonArray newOrderNumberArray = newOrderNumber.getJsonArray("results").getJsonArray(0);
+                    res.put("f1", newPurseArray.size() > 0
+                            ? Float.parseFloat(newPurseArray.getString(0))
                             : 0);
-                    res.putNumber("f2", newOrderNumberArray.size() > 0
-                            ? Float.parseFloat(newOrderNumberArray.get(0).toString())
+                    res.put("f2", newOrderNumberArray.size() > 0
+                            ? Float.parseFloat(newOrderNumberArray.getString(0))
                             : 0);
                     getTransactionHandler(event, res, handler);
 
@@ -327,26 +323,26 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
             });
         }catch(ClassCastException e){
             LOGGER.error("An error occurred when casting order elements", e);
-            handler.handle(new Either.Left<String, JsonObject>(""));
+            handler.handle(new Either.Left<>(""));
         }
     }
     @Override
     public  void windUpOrders(List<Integer> ids, Handler<Either<String, JsonObject>> handler){
         JsonObject statement = getUpdateStatusStatement(ids, "DONE");
         sql.prepared(statement.getString("statement"),
-                statement.getArray("values"),
+                statement.getJsonArray("values"),
                 SqlResult.validUniqueResultHandler(handler));
     }
 
     private JsonObject getOptionsOrderDeletion (Integer idOrder){
         String queryDeleteOptionsOrder = "DELETE FROM " + Lystore.lystoreSchema + ".order_client_options"
                 + " WHERE id_order_client_equipment = ? ;";
-        JsonArray params = new JsonArray()
-                .addNumber(idOrder);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(idOrder);
         return new JsonObject()
-                .putString("statement", queryDeleteOptionsOrder)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", queryDeleteOptionsOrder)
+                .put("values", params)
+                .put("action", "prepared");
     }
     @Override
     public void sendOrders(List<Integer> ids,final Handler<Either<String, JsonObject>> handler){
@@ -357,21 +353,21 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 if (event.isRight()) {
                     JsonArray res = event.right().getValue();
                     final JsonObject ordersObject = formatSendOrdersResult(res);
-                    structureService.getStructureById(ordersObject.getArray("id_structures"),
+                    structureService.getStructureById(ordersObject.getJsonArray("id_structures"),
                             new Handler<Either<String, JsonArray>>() {
                                 @Override
                                 public void handle(Either<String, JsonArray> structureArray) {
                                     if(structureArray.isRight()){
                                         Either<String, JsonObject> either;
                                         JsonObject returns = new JsonObject()
-                                                .putArray("ordersCSF",
-                                                        getOrdersFormatedCSF(ordersObject.getArray("order"),
+                                                .put("ordersCSF",
+                                                        getOrdersFormatedCSF(ordersObject.getJsonArray("order"),
                                                                 (JsonArray) structureArray.right().getValue()))
-                                                .putArray("ordersBC",
-                                                        getOrdersFormatedBC(ordersObject.getArray("order"),
+                                                .put("ordersBC",
+                                                        getOrdersFormatedBC(ordersObject.getJsonArray("order"),
                                                                 (JsonArray) structureArray.right().getValue()))
-                                                .putObject("total",
-                                                        getTotalsOrdersPrices(ordersObject.getArray("order")))
+                                                .put("total",
+                                                        getTotalsOrdersPrices(ordersObject.getJsonArray("order")))
                                                 ;
                                         either = new Either.Right<>(returns);
                                         handler.handle(either);
@@ -391,24 +387,24 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         String query = "SELECT distinct id_order " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
                 "WHERE order_client_equipment.number_validation IN " + Sql.listPrepared(ids.toArray());
-        Sql.getInstance().prepared(query, new JsonArray(ids.toArray()), SqlResult.validResultHandler(new Handler<Either<String, JsonArray>>() {
+        Sql.getInstance().prepared(query, new fr.wseduc.webutils.collections.JsonArray(ids), SqlResult.validResultHandler(new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> updateOrCreateEvent) {
                 if (updateOrCreateEvent.isRight()) {
                     JsonArray orderIds =  updateOrCreateEvent.right().getValue();
-                    JsonObject orderObject = orderIds.get(0);
-                    if (null == orderObject.getNumber("id_order")) {
+                    JsonObject orderObject = orderIds.getJsonObject(0);
+                    if (null == orderObject.getInteger("id_order")) {
                         String nextValQuery = "SELECT nextval('" + Lystore.lystoreSchema + ".order_id_seq') as id";
                         Sql.getInstance().raw(nextValQuery, SqlResult.validUniqueResultHandler(new Handler<Either<String, JsonObject>>() {
                             @Override
                             public void handle(Either<String, JsonObject> eventId) {
                                 if (eventId.isRight()) {
-                                    Number orderId = eventId.right().getValue().getNumber("id");
-                                    JsonArray statements = new JsonArray()
+                                    Number orderId = eventId.right().getValue().getInteger("id");
+                                    JsonArray statements = new fr.wseduc.webutils.collections.JsonArray()
                                             .add(getOrderCreateStatement(orderId, engagementNumber, labelProgram, dateCreation, orderNumber))
                                             .add(getAddOrderClientRef(orderId, ids))
                                             .add(getAddFileStatement(fileId, owner, orderId))
-                                            .add(getUpdateClientOrderStatement(new JsonArray(ids.toArray()), "SENT"));
+                                            .add(getUpdateClientOrderStatement(new fr.wseduc.webutils.collections.JsonArray(ids), "SENT"));
 
                                     Sql.getInstance().transaction(statements, SqlResult.validRowsResultHandler(handler));
                                 } else {
@@ -417,11 +413,11 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                             }
                         }));
                     } else {
-                        Number orderId = ((JsonObject)orderIds.get(0)).getNumber("id_order");
-                        JsonArray statements = new JsonArray()
-                                .addObject(getUpdateOrderStatement(engagementNumber, labelProgram, dateCreation, orderNumber, orderId))
-                                .addObject(getAddFileStatement(fileId, owner, orderId))
-                                .addObject(getUpdateClientOrderStatement(new JsonArray(ids.toArray()), "SENT"));
+                        Number orderId = (orderIds.getJsonObject(0)).getInteger("id_order");
+                        JsonArray statements = new fr.wseduc.webutils.collections.JsonArray()
+                                .add(getUpdateOrderStatement(engagementNumber, labelProgram, dateCreation, orderNumber, orderId))
+                                .add(getAddFileStatement(fileId, owner, orderId))
+                                .add(getUpdateClientOrderStatement(new fr.wseduc.webutils.collections.JsonArray(ids), "SENT"));
 
                         Sql.getInstance().transaction(statements, SqlResult.validRowsResultHandler(handler));
                     }
@@ -437,29 +433,29 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "SET id_order = ? " +
                 "WHERE number_validation IN " + Sql.listPrepared(validationNumbers.toArray());
 
-        JsonArray params = new JsonArray().addNumber(orderId);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray().add(orderId);
         for (String number : validationNumbers)  {
-            params.addString(number);
+            params.add(number);
         }
 
         return new JsonObject()
-                .putString("statement", query)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", query)
+                .put("values", params)
+                .put("action", "prepared");
     }
 
     private JsonObject getUpdateOrderStatement (String engagementNumber, String labelProgram, String dateCreation, String orderNumber, Number orderId) {
         String query = "UPDATE " + Lystore.lystoreSchema + ".order " +
                 "SET engagement_number = ?, label_program = ?, date_creation = to_date(?, 'DD/MM/YYYY'), order_number = ? " +
                 "WHERE id = ?;";
-        JsonArray params = new JsonArray()
-                .addString(engagementNumber).addString(labelProgram).addString(dateCreation)
-                .addString(orderNumber).addNumber(orderId);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(engagementNumber).add(labelProgram).add(dateCreation)
+                .add(orderNumber).add(orderId);
 
         return new JsonObject()
-                .putString("statement", query)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", query)
+                .put("values", params)
+                .put("action", "prepared");
     }
 
     private JsonObject getOrderCreateStatement(Number id, String engagementNumber, String labelProgram, String dateCreation,
@@ -468,62 +464,62 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         String query = "INSERT INTO " + Lystore.lystoreSchema + ".order(id, engagement_number, label_program, date_creation, order_number) " +
                 "VALUES (?, ?, ?, to_date(?, 'DD/MM/YYYY'), ?);";
 
-        JsonArray params = new JsonArray()
-                .addNumber(id)
-                .addString(engagementNumber)
-                .addString(labelProgram)
-                .addString(dateCreation)
-                .addString(orderNumber);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(id)
+                .add(engagementNumber)
+                .add(labelProgram)
+                .add(dateCreation)
+                .add(orderNumber);
 
         return new JsonObject()
-                .putString("statement", query)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", query)
+                .put("values", params)
+                .put("action", "prepared");
     }
 
     private JsonObject getUpdateClientOrderStatement (JsonArray validationNumbers, String status) {
         String query = "UPDATE " + Lystore.lystoreSchema + ".order_client_equipment " +
                 " SET  status = ? " +
-                " WHERE number_validation in " + Sql.listPrepared(validationNumbers.toArray()) +";";
-        JsonArray params = new JsonArray().addString(status);
+                " WHERE number_validation in " + Sql.listPrepared(validationNumbers.getList()) +";";
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray().add(status);
 
         for (int i = 0; i < validationNumbers.size(); i++) {
-            params.addString(validationNumbers.get(i).toString());
+            params.add(validationNumbers.getString(i));
         }
 
         return new JsonObject()
-                .putString("statement", query)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", query)
+                .put("values", params)
+                .put("action", "prepared");
     }
 
     private JsonObject getAddFileStatement(String mongoId, String owner, Number orderId) {
         String query = "INSERT INTO " + Lystore.lystoreSchema + ".file(id_mongo, owner, id_order) " +
                 "VALUES (?, ?, ?);";
 
-        JsonArray params = new JsonArray()
-                .addString(mongoId)
-                .addString(owner)
-                .addNumber(orderId);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(mongoId)
+                .add(owner)
+                .add(orderId);
 
         return new JsonObject()
-                .putString("statement", query)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", query)
+                .put("values", params)
+                .put("action", "prepared");
     }
 
     private JsonArray getOrdersFormatedCSF (JsonArray ordersArray, JsonArray structures) {
-        JsonArray orders = new JsonArray();
+        JsonArray orders = new fr.wseduc.webutils.collections.JsonArray();
         JsonObject orderOld;
         for (int i = 0 ; i< ordersArray.size(); i++){
-            orderOld = ordersArray.get(i);
+            orderOld = ordersArray.getJsonObject(i);
             JsonObject order = orderOld
-                    .putObject("structure",
+                    .put("structure",
                             (getStructureObject( structures, orderOld.getString("id_structure"))));
-            if (orderOld.getArray("options").size() == 0) {
-                order.putBoolean("hasOptions", false);
+            if (orderOld.getJsonArray("options").size() == 0) {
+                order.put("hasOptions", false);
             } else {
-                order.putBoolean("hasOptions", true);
+                order.put("hasOptions", true);
             }
             orders.add(order);
         }
@@ -532,50 +528,50 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     }
 
     private JsonArray getOrdersFormatedBC (JsonArray ordersArray, JsonArray structures) {
-        JsonArray orders = new JsonArray();
+        JsonArray orders = new fr.wseduc.webutils.collections.JsonArray();
         boolean isIn;
         JsonObject orderOld;
         JsonObject orderNew;
         for (int i = 0 ; i< ordersArray.size(); i++){
             isIn = false;
-            orderOld = ordersArray.get(i);
+            orderOld = ordersArray.getJsonObject(i);
             for(int j = 0; j<orders.size(); j++){
-                orderNew = orders.get(j);
-                if(orderOld.getNumber("equipment_key").equals(orderNew.getNumber("equipment_key"))){
+                orderNew = orders.getJsonObject(j);
+                if(orderOld.getInteger("equipment_key").equals(orderNew.getInteger("equipment_key"))){
                     isIn = true;
                     JsonArray structure;
-                    structure = orderNew.getArray("structures");
+                    structure = orderNew.getJsonArray("structures");
                     structure.add(getStructureObject( structures,
                             orderOld.getString("id_structure"),
-                            orderOld.getNumber("amount").toString(),
+                            orderOld.getInteger("amount").toString(),
                             orderOld.getString("number_validation")));
-                    orderNew.putArray("structures", structure);
-                    Integer amount = (Integer.parseInt(orderOld.getNumber("amount").toString()) +
-                            Integer.parseInt( orderNew.getNumber("amount").toString())) ;
-                    orderNew.putString("amount",amount.toString());
+                    orderNew.put("structures", structure);
+                    Integer amount = (Integer.parseInt(orderOld.getInteger("amount").toString()) +
+                            Integer.parseInt( orderNew.getInteger("amount").toString())) ;
+                    orderNew.put("amount",amount.toString());
                 }
             }
             if(! isIn) {
                 JsonObject order = new JsonObject()
-                        .putString("price", orderOld.getString("price"))
-                        .putString("tax_amount", orderOld.getString("tax_amount"))
-                        .putNumber("amount", orderOld.getNumber("amount"))
-                        .putString("id_campaign", orderOld.getNumber("id_campaign").toString())
-                        .putString("name", orderOld.getString("name"))
-                        .putString("summary", orderOld.getString("summary"))
-                        .putString("description", orderOld.getString("description"))
-                        .putString("image", orderOld.getString("image"))
-                        .putString("technical_spec", orderOld.getString("technical_spec"))
-                        .putString("id_contract", orderOld.getNumber("id_contract").toString())
-                        .putNumber("equipment_key", orderOld.getNumber("equipment_key"))
-                        .putObject("contract", new JsonObject( orderOld.getString("contract")))
-                        .putObject("supplier",new JsonObject( orderOld.getString("supplier")) )
-                        .putObject("campaign", new JsonObject( orderOld.getString("campaign")))
-                        .putArray("options", orderOld.getArray("options"))
-                        .putArray("structures", new JsonArray()
-                                .addObject(getStructureObject( structures,
+                        .put("price", orderOld.getString("price"))
+                        .put("tax_amount", orderOld.getString("tax_amount"))
+                        .put("amount", orderOld.getInteger("amount"))
+                        .put("id_campaign", orderOld.getInteger("id_campaign").toString())
+                        .put("name", orderOld.getString("name"))
+                        .put("summary", orderOld.getString("summary"))
+                        .put("description", orderOld.getString("description"))
+                        .put("image", orderOld.getString("image"))
+                        .put("technical_spec", orderOld.getString("technical_spec"))
+                        .put("id_contract", orderOld.getInteger("id_contract").toString())
+                        .put("equipment_key", orderOld.getInteger("equipment_key"))
+                        .put("contract", new JsonObject( orderOld.getString("contract")))
+                        .put("supplier",new JsonObject( orderOld.getString("supplier")) )
+                        .put("campaign", new JsonObject( orderOld.getString("campaign")))
+                        .put("options", orderOld.getJsonArray("options"))
+                        .put("structures", new fr.wseduc.webutils.collections.JsonArray()
+                                .add(getStructureObject( structures,
                                         orderOld.getString("id_structure"),
-                                        orderOld.getNumber("amount").toString(),
+                                        orderOld.getInteger("amount").toString(),
                                         orderOld.getString("number_validation"))));
                 orders.add(order);
             }
@@ -585,8 +581,8 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     private JsonObject getStructureObject(JsonArray structures, String structureId ){
         JsonObject structure = new JsonObject();
         for (int i = 0; i < structures.size() ; i++) {
-            if(((JsonObject) structures.get(i)).getString("id").equals(structureId)){
-                structure =  structures.get(i);
+            if((structures.getJsonObject(i)).getString("id").equals(structureId)){
+                structure =  structures.getJsonObject(i);
             }
         }
         return structure;
@@ -595,10 +591,10 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                                           String amount, String numberValidation ){
         JsonObject structure = new JsonObject();
         for (int i = 0; i < structures.size() ; i++) {
-            if(((JsonObject) structures.get(i)).getString("id").equals(structureId)){
-                structure = ((JsonObject) structures.get(i)).copy();
-                structure.putString("amount", amount)
-                        .putString("number_validation", numberValidation);
+            if((structures.getJsonObject(i)).getString("id").equals(structureId)){
+                structure = (structures.getJsonObject(i)).copy();
+                structure.put("amount", amount)
+                        .put("number_validation", numberValidation);
             }
         }
         return structure;
@@ -610,68 +606,68 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         final Integer Const = 100;
         Float totalTTC ;
         try {
-            tva = Float.parseFloat( ((JsonObject) orders.get(0)).getString("tax_amount"));
+            tva = Float.parseFloat((orders.getJsonObject(0)).getString("tax_amount"));
         }catch (ClassCastException e) {
             LOGGER.error("An error occurred when casting tax amount", e);
         }
         for(int i = 0 ; i < orders.size(); i++) {
             try {
-                total += Float.parseFloat( ((JsonObject) orders.get(0)).getString("price")) *
-                        Float.parseFloat( ((JsonObject) orders.get(0)).getNumber("amount").toString());
+                total += Float.parseFloat((orders.getJsonObject(0)).getString("price")) *
+                        Float.parseFloat((orders.getJsonObject(0)).getInstant("amount").toString());
             }catch (ClassCastException e) {
                 LOGGER.error("An error occurred when casting order price", e);
             }
         }
         totalTTC = (total * tva)/Const + total;
         return new JsonObject()
-                .putNumber("totalPrice", total)
-                .putNumber("tva", tva)
-                .putNumber("totalTTC", totalTTC)
+                .put("totalPrice", total)
+                .put("tva", tva)
+                .put("totalTTC", totalTTC)
                 ;
     }
 
     private JsonObject formatSendOrdersResult(JsonArray orders){
         JsonObject orderObject = new JsonObject();
-        JsonArray structures = new JsonArray();
-        JsonArray ordersList = new JsonArray();
+        JsonArray structures = new fr.wseduc.webutils.collections.JsonArray();
+        JsonArray ordersList = new fr.wseduc.webutils.collections.JsonArray();
         JsonObject order;
         for (int i = 0; i < orders.size(); i++) {
-            order = orders.get(i);
-            structures.addString(order.getString("id_structure"));
-            order.putArray("options",
+            order = orders.getJsonObject(i);
+            structures.add(order.getString("id_structure"));
+            order.put("options",
                     !order.getString("options").contains("null")
-                            ? new JsonArray(order.getString("options"))
-                            : new JsonArray());
-            ordersList.addObject(order);
+                            ? new fr.wseduc.webutils.collections.JsonArray(order.getString("options"))
+                            : new fr.wseduc.webutils.collections.JsonArray());
+            ordersList.add(order);
         }
-        orderObject.putArray("order", ordersList)
-                .putArray ("id_structures", structures);
+        orderObject.put("order", ordersList)
+                .put ("id_structures", structures);
         return orderObject;
     }
     private JsonObject getEquipmentOrderDeletion (Integer idOrder){
         String queryDeleteEquipmentOrder = "DELETE FROM " + Lystore.lystoreSchema + ".order_client_equipment"
                 + " WHERE id = ? ";
 
-        JsonArray params = new JsonArray()
-                .addNumber(idOrder);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(idOrder);
 
         return new JsonObject()
-                .putString("statement", queryDeleteEquipmentOrder)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", queryDeleteEquipmentOrder)
+                .put("values", params)
+                .put("action", "prepared");
     }
     private  JsonObject getNewPurse(Integer idCampaign, String idStructure){
         String query = "SELECT amount FROM " + Lystore.lystoreSchema + ".purse " +
                 "WHERE id_campaign = ? " +
                 "AND id_structure = ?;";
 
-        JsonArray params = new JsonArray()
-                .addNumber(idCampaign).addString(idStructure);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(idCampaign).add(idStructure);
 
         return  new JsonObject()
-                .putString("statement",query)
-                .putArray("values",params)
-                .putString("action", "prepared");
+                .put("statement",query)
+                .put("values",params)
+                .put("action", "prepared");
     }
 
     private JsonObject getNewNbOrder(Integer idCampaign, String idStructure) {
@@ -679,13 +675,13 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "WHERE id_campaign = ? " +
                 "AND id_structure = ?;";
 
-        JsonArray params = new JsonArray()
-                .addNumber(idCampaign).addString(idStructure);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(idCampaign).add(idStructure);
 
         return  new JsonObject()
-                .putString("statement",query)
-                .putArray("values",params)
-                .putString("action", "prepared");
+                .put("statement",query)
+                .put("values",params)
+                .put("action", "prepared");
     }
 
     @Override
@@ -698,23 +694,21 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 if (event.isRight()) {
                     try {
                         final String numberOrder = event.right().getValue().getString("numberorder");
-                        JsonArray statements = new JsonArray()
+                        JsonArray statements = new fr.wseduc.webutils.collections.JsonArray()
                                 .add(getValidateStatusStatement(ids, numberOrder, "VALID"))
                                 .add(getAgentInformation( ids));
                         sql.transaction(statements, new Handler<Message<JsonObject>>() {
                             @Override
                             public void handle(Message<JsonObject> jsonObjectMessage) {
-                                final JsonArray rows = ((JsonObject) ((JsonObjectMessage) jsonObjectMessage).body()
-                                        .getArray("results").get(1)).getArray("results");
-                                JsonArray names = new JsonArray();
+                                final JsonArray rows = ((jsonObjectMessage).body()
+                                        .getJsonArray("results").getJsonObject(1)).getJsonArray("results");
+                                JsonArray names = new fr.wseduc.webutils.collections.JsonArray();
                                 final int agentNameIndex = 2;
                                 final int structureIdIndex = 4;
-                                JsonArray structureIds = new JsonArray();
+                                JsonArray structureIds = new fr.wseduc.webutils.collections.JsonArray();
                                 for (int j = 0; j < rows.size(); j++) {
-                                    names.addString((String) ((JsonArray)
-                                            rows.get(j)).get(agentNameIndex));
-                                    structureIds.addString((String) ((JsonArray)
-                                            rows.get(j)).get(structureIdIndex));
+                                    names.add((rows.getJsonArray(j)).getString(agentNameIndex));
+                                    structureIds.add((rows.getJsonArray(j)).getString(structureIdIndex));
                                 }
                                 final JsonArray agentNames = names;
                                 emailSender.getPersonnelMailStructure(structureIds,
@@ -722,8 +716,8 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                                             @Override
                                             public void handle(Either<String, JsonArray> stringJsonArrayEither) {
                                                 final JsonObject result = new JsonObject()
-                                                        .putString("number_validation", numberOrder)
-                                                        .putArray("agent", agentNames);
+                                                        .put("number_validation", numberOrder)
+                                                        .put("agent", agentNames);
                                                 handler.handle(new Either.Right<String, JsonObject>(result));
                                                 emailSender.sendMails(request, result,  rows,  user,  url,
                                                         (JsonArray) stringJsonArrayEither.right().getValue());
@@ -750,29 +744,29 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 " INNER JOIN lystore.contract ON contract.id = oce.id_contract " +
                 " INNER JOIN lystore.agent ON contract.id_agent= agent.id " +
                 " WHERE oce.id in "+ Sql.listPrepared(ids.toArray()) +" ;  ";
-        JsonArray params = new JsonArray();
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
 
         for (Integer id : ids) {
-            params.addNumber( id);
+            params.add( id);
         }
-        return new JsonObject().putString("statement", query)
-                .putArray("values", params)
-                .putString("action", "prepared");
+        return new JsonObject().put("statement", query)
+                .put("values", params)
+                .put("action", "prepared");
     }
     private static JsonObject getValidateStatusStatement(List<Integer>  ids, String numberOrder, String status){
 
         String query = "UPDATE lystore.order_client_equipment " +
                 " SET  status = ?, number_validation = ?  " +
                 " WHERE id in "+ Sql.listPrepared(ids.toArray()) +" ;  ";
-        JsonArray params = new JsonArray().addString(status).addString(numberOrder);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray().add(status).add(numberOrder);
 
         for (Integer id : ids) {
-            params.addNumber( id);
+            params.add( id);
         }
         return new JsonObject()
-                .putString("statement", query)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", query)
+                .put("values", params)
+                .put("action", "prepared");
     }
 
     private static JsonObject getUpdateStatusStatement(List<Integer>  ids, String status){
@@ -780,25 +774,25 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         String query = "UPDATE lystore.order_client_equipment " +
                 " SET  status = ? " +
                 " WHERE id in "+ Sql.listPrepared(ids.toArray()) +";";
-        JsonArray params = new JsonArray().addString(status);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray().add(status);
 
         for (Integer id : ids) {
-            params.addNumber( id);
+            params.add( id);
         }
         return new JsonObject()
-                .putString("statement", query)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", query)
+                .put("values", params)
+                .put("action", "prepared");
     }
 
 
     private static void getTransactionHandler( Message<JsonObject> event, JsonObject amountPurseNbOrder,
                                                Handler<Either<String, JsonObject>> handler){
         JsonObject result = event.body();
-        if (result.containsField("status")&& "ok".equals(result.getString("status"))){
+        if (result.containsKey("status")&& "ok".equals(result.getString("status"))){
             JsonObject returns = new JsonObject();
-            returns.putNumber("amount", amountPurseNbOrder.getNumber("f1"));
-            returns.putNumber("nb_order",amountPurseNbOrder.getNumber("f2"));
+            returns.put("amount", amountPurseNbOrder.getInteger("f1"));
+            returns.put("nb_order",amountPurseNbOrder.getInteger("f2"));
             handler.handle(new Either.Right<String, JsonObject>(returns));
         }  else {
             LOGGER.error("An error occurred when launching 'order' transaction");
@@ -826,10 +820,10 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 " GROUP BY oce.id, idStructure, qty,date,oce.price, oce.tax_amount, oce.id_campaign, priceOptions," +
                 " namecampaign, namecontract, namesupplier ;";
 
-        JsonArray params = new JsonArray();
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
 
         for(Integer id : idsOrders){
-            params.addNumber(id);
+            params.add(id);
         }
 
         sql.prepared(query, params, SqlResult.validResultHandler(handler));

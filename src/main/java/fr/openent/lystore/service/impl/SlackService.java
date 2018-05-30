@@ -1,13 +1,14 @@
 package fr.openent.lystore.service.impl;
 
 import fr.openent.lystore.service.NotificationService;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.http.HttpClient;
-import org.vertx.java.core.http.HttpClientRequest;
-import org.vertx.java.core.http.HttpClientResponse;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.core.logging.impl.LoggerFactory;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -71,12 +72,13 @@ public class SlackService implements NotificationService {
     }
 
     private HttpClient generateHttpClient(URI uri) {
-        return vertx.createHttpClient()
-                .setHost(uri.getHost())
-                .setPort("https".equals(uri.getScheme()) ? httpsPort : httpPort)
+        HttpClientOptions options = new HttpClientOptions()
+                .setDefaultHost(uri.getHost())
+                .setDefaultPort("https".equals(uri.getScheme()) ? httpsPort : httpPort)
                 .setVerifyHost(false)
                 .setTrustAll(true)
-                .setSSL("https".equals(uri.getScheme()))
+                .setSsl("https".equals(uri.getScheme()))
                 .setKeepAlive(true);
+        return vertx.createHttpClient(options);
     }
 }

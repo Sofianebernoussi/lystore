@@ -25,23 +25,23 @@ import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServerFileUpload;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
-import org.entcore.directory.exceptions.ImportException;
-import org.vertx.java.core.AsyncResult;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.VoidHandler;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.http.HttpServerFileUpload;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.UUID;
 
 import static org.entcore.common.utils.FileUtils.deleteImportPath;
@@ -65,7 +65,7 @@ public class PurseController extends ControllerHelper {
     @ResourceFilter(AdministratorRight.class)
     public void purse(final HttpServerRequest request) {
         final String importId = UUID.randomUUID().toString();
-        final String path = container.config().getString("import-folder", "/tmp") + File.separator + importId;
+        final String path = config.getString("import-folder", "/tmp") + File.separator + importId;
         uploadImport(request, path, new Handler<AsyncResult>() {
             @Override
             public void handle(AsyncResult event) {
@@ -85,7 +85,7 @@ public class PurseController extends ControllerHelper {
      */
     private void uploadImport(final HttpServerRequest request, final String path, final Handler<AsyncResult> handler) {
         request.pause();
-        request.expectMultiPart(true);
+        request.setExpectMultipart(true);
         request.endHandler(getEndHandler(request, path, handler));
         request.exceptionHandler(getExceptionHandler(path, handler));
         request.uploadHandler(getUploadHandler(path, handler));
@@ -96,7 +96,7 @@ public class PurseController extends ControllerHelper {
                     request.resume();
                 } else {
                     handler.handle(new DefaultAsyncResult(
-                            new ImportException("mkdir.error", event.cause())));
+                            new RuntimeException("mkdir.error", event.cause())));
                 }
             }
         });
@@ -107,20 +107,20 @@ public class PurseController extends ControllerHelper {
      * @param request Http Server Request
      * @param path Upload directory path
      * @param handler Function handler
-     * @return VoidHandler
+     * @return Handler<Void>
      */
-    private VoidHandler getEndHandler(final HttpServerRequest request, final String path,
+    private Handler<Void> getEndHandler(final HttpServerRequest request, final String path,
                                       final Handler<AsyncResult> handler) {
-        return new VoidHandler() {
+        return new Handler<Void>() {
             @Override
-            protected void handle() {
+            public void handle(Void v) {
                 UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
                     @Override
                     public void handle(UserInfos user) {
                         if (WorkflowActionUtils.hasRight(user, WorkflowActions.ADMINISTRATOR_RIGHT.toString())) {
                             handler.handle(new DefaultAsyncResult(null));
                         } else {
-                            handler.handle(new DefaultAsyncResult(new ImportException("invalid.admin")));
+                            handler.handle(new DefaultAsyncResult(new RuntimeException("invalid.admin")));
                             deleteImportPath(vertx, path);
                         }
                     }
@@ -159,7 +159,7 @@ public class PurseController extends ControllerHelper {
             public void handle(final HttpServerFileUpload upload) {
                 if (!upload.filename().toLowerCase().endsWith(".csv")) {
                     handler.handle(new DefaultAsyncResult(
-                            new ImportException("invalid.file.extension")
+                            new RuntimeException("invalid.file.extension")
                     ));
                     return;
                 }
@@ -182,11 +182,11 @@ public class PurseController extends ControllerHelper {
      * @param path Temp directory path
      */
     private void readCsv(final HttpServerRequest request, final String path) {
-        vertx.fileSystem().readDir(path, new Handler<AsyncResult<String[]>>() {
+        vertx.fileSystem().readDir(path, new Handler<AsyncResult<List<String>>>() {
             @Override
-            public void handle(final AsyncResult<String[]> event) {
+            public void handle(final AsyncResult<List<String>> event) {
                 if (event.succeeded()) {
-                    String file = event.result()[0];
+                    String file = event.result().get(0);
                     vertx.fileSystem().readFile(file, new Handler<AsyncResult<Buffer>>() {
                         @Override
                         public void handle(AsyncResult<Buffer> eventBuffer) {
@@ -215,11 +215,11 @@ public class PurseController extends ControllerHelper {
                     new ByteArrayInputStream(content.getBytes())),
                     ';', '"', 1);
             String[] values;
-            JsonArray uais = new JsonArray();
+            JsonArray uais = new fr.wseduc.webutils.collections.JsonArray();
             JsonObject amounts = new JsonObject();
             while ((values = csv.readNext()) != null) {
-                amounts.putString(values[0], values[1]);
-                uais.addString(values[0]);
+                amounts.put(values[0], values[1]);
+                uais.add(values[0]);
             }
             if (uais.size() > 0) {
                 matchUAIID(request, path, uais, amounts, content.toString());
@@ -239,17 +239,17 @@ public class PurseController extends ControllerHelper {
      * @return JsonArray containing structure campaign ids specified in CSV file.
      */
     private static JsonArray deleteWrongIds(JsonArray realIds, JsonArray expectedIds) {
-        JsonArray ids = new JsonArray();
-        JsonArray correctIds = new JsonArray();
+        JsonArray ids = new fr.wseduc.webutils.collections.JsonArray();
+        JsonArray correctIds = new fr.wseduc.webutils.collections.JsonArray();
         JsonObject structure;
         for (int i = 0; i < expectedIds.size(); i++) {
-            structure = expectedIds.get(i);
-            ids.addString(structure.getString("id_structure"));
+            structure = expectedIds.getJsonObject(i);
+            ids.add(structure.getString("id_structure"));
         }
         for (int j = 0; j < realIds.size(); j++) {
-            structure = realIds.get(j);
+            structure = realIds.getJsonObject(j);
             if (ids.contains(structure.getString("id"))) {
-                correctIds.addObject(structure);
+                correctIds.add(structure);
             }
         }
 
@@ -284,8 +284,8 @@ public class PurseController extends ControllerHelper {
                                 JsonObject statementsValues = new JsonObject();
                                 JsonObject id;
                                 for (int i = 0; i < correctIds.size(); i++) {
-                                    id = correctIds.get(i);
-                                    statementsValues.putString(id.getString("id"),
+                                    id = correctIds.getJsonObject(i);
+                                    statementsValues.put(id.getString("id"),
                                             amount.getString(id.getString("uai")));
                                 }
                                 launchImport(request, path, statementsValues, contentFile);
@@ -317,7 +317,7 @@ public class PurseController extends ControllerHelper {
                 public void handle(Either<String, JsonObject> event) {
                     if (event.isRight()) {
                         Renders.renderJson(request, event.right().getValue());
-                        JsonObject contentObject = new JsonObject().putString("content", contentFile);
+                        JsonObject contentObject = new JsonObject().put("content", contentFile);
                         Logging.insert(eb, request, Contexts.PURSE.toString(),
                                 Actions.IMPORT.toString(), campaignId.toString(), contentObject);
                         deleteImportPath(vertx, path);
@@ -349,7 +349,7 @@ public class PurseController extends ControllerHelper {
      * @param cause Cause error
      */
     private static void renderErrorMessage(HttpServerRequest request, Throwable cause) {
-        renderError(request, new JsonObject().putString("message", cause.getMessage()));
+        renderError(request, new JsonObject().put("message", cause.getMessage()));
     }
 
     @Get("/campaign/:id/purses/export")
@@ -363,15 +363,15 @@ public class PurseController extends ControllerHelper {
                 @Override
                 public void handle(Either<String, JsonArray> event) {
                     if (event.isRight()) {
-                        JsonArray ids = new JsonArray();
+                        JsonArray ids = new fr.wseduc.webutils.collections.JsonArray();
                         JsonObject exportValues = new JsonObject();
                         JsonArray purses = event.right().getValue();
                         JsonObject purse;
                         for (int i = 0; i < purses.size(); i++) {
-                            purse = purses.get(i);
-                            exportValues.putNumber(purse.getString("id_structure"),
+                            purse = purses.getJsonObject(i);
+                            exportValues.put(purse.getString("id_structure"),
                                     Float.parseFloat(purse.getString("amount")));
-                            ids.addString(purse.getString("id_structure"));
+                            ids.add(purse.getString("id_structure"));
                         }
                         retrieveUAIs(ids, exportValues, request);
                     } else {
@@ -421,12 +421,12 @@ public class PurseController extends ControllerHelper {
                 @Override
                 public void handle(Either<String, JsonArray> event) {
                     if (event.isRight()) {
-                        JsonArray ids = new JsonArray();
+                        JsonArray ids = new fr.wseduc.webutils.collections.JsonArray();
                         JsonArray purses = event.right().getValue();
                         JsonObject purse;
                         for (int i = 0; i < purses.size(); i++) {
-                            purse = purses.get(i);
-                            ids.addString(purse.getString("id_structure"));
+                            purse = purses.getJsonObject(i);
+                            ids.add(purse.getString("id_structure"));
                         }
                         retrieveStructuresData(ids, purses, request);
                     } else {
@@ -457,18 +457,18 @@ public class PurseController extends ControllerHelper {
 
                     // put structure name / uai on the purse according to structure id
                     for (int i = 0; i < structures.size(); i++) {
-                        structure = structures.get(i);
+                        structure = structures.getJsonObject(i);
                         for (int j = 0; j < purses.size(); j++) {
-                            purse = purses.get(j);
+                            purse = purses.getJsonObject(j);
 
-                            if(purse.getField("id_structure").equals(structure.getField("id"))) {
-                                purse.putString("name", structure.getField("name").toString());
-                                purse.putString("uai", structure.getField("uai").toString());
+                            if(purse.getString("id_structure").equals(structure.getString("id"))) {
+                                purse.put("name", structure.getString("name"));
+                                purse.put("uai", structure.getString("uai"));
 
                                 // we also convert amount to get a number instead of a string
                                 String amount = purse.getString("amount");
-                                purse.removeField("amount");
-                                purse.putNumber("amount",Double.parseDouble(amount));
+                                purse.remove("amount");
+                                purse.put("amount",Double.parseDouble(amount));
                             }
                         }
                     }
@@ -476,7 +476,7 @@ public class PurseController extends ControllerHelper {
                     Renders.renderJson(request, purses);
 
                 } else {
-                    renderError(request, new JsonObject().putString("message",
+                    renderError(request, new JsonObject().put("message",
                             event.left().getValue()));
                 }
             }
@@ -499,13 +499,13 @@ public class PurseController extends ControllerHelper {
                     JsonArray uais = event.right().getValue();
                     JsonObject uai;
                     for (int i = 0; i < uais.size(); i++) {
-                        uai = uais.get(i);
-                        values.putNumber(uai.getString("uai"),
-                                exportValues.getNumber(uai.getString("id")));
+                        uai = uais.getJsonObject(i);
+                        values.put(uai.getString("uai"),
+                                exportValues.getInteger(uai.getString("id")));
                     }
                     launchExport(values, request);
                 } else {
-                    renderError(request, new JsonObject().putString("message",
+                    renderError(request, new JsonObject().put("message",
                             event.left().getValue()));
                 }
             }
@@ -518,10 +518,10 @@ public class PurseController extends ControllerHelper {
      * @param request Http request
      */
     private static void launchExport(JsonObject values, HttpServerRequest request) {
-        String[] uais = values.getFieldNames().toArray(new String[0]);
+        String[] uais = values.fieldNames().toArray(new String[0]);
         StringBuilder exportString = new StringBuilder(getCSVHeader(request));
         for (String uai : uais) {
-            exportString.append(getCSVLine(uai, values.getNumber(uai)));
+            exportString.append(getCSVLine(uai, values.getFloat(uai)));
         }
         request.response()
                 .putHeader("Content-Type", "text/csv; charset=utf-8")

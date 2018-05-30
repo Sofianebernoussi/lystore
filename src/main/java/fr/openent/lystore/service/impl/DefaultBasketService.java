@@ -9,14 +9,14 @@ import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.I18n;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.SqlResult;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.core.logging.impl.LoggerFactory;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -44,7 +44,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
     }
 
     public void listBasket(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler){
-        JsonArray values = new JsonArray();
+        JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
         String query = "SELECT basket.id, basket.amount, basket.processing_date," +
                 "     basket.id_campaign, basket.id_structure " +
                 "    , array_to_json(array_agg( e.* )) as equipment " +
@@ -66,7 +66,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 "    AND basket.id_structure = ? " +
                 "    GROUP BY " +
                 "    (basket.id, basket.amount, basket.processing_date, basket.id_campaign, basket.id_structure ); ";
-        values.addNumber(idCampaign).addString(idStructure);
+        values.add(idCampaign).add(idStructure);
 
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
     }
@@ -77,14 +77,14 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             public void handle(Either<String, JsonObject> event) {
                 if (event.isRight()) {
                     try {
-                        final Number id = event.right().getValue().getNumber("id");
-                        JsonArray statements = new JsonArray()
+                        final Number id = event.right().getValue().getInteger("id");
+                        JsonArray statements = new fr.wseduc.webutils.collections.JsonArray()
                                 .add(getBasketEquipmentCreationStatement(id, basket));
 
-                        JsonArray options = basket.getArray("options");
+                        JsonArray options = basket.getJsonArray("options");
                         int i = 0;
                         while (null != options && i < options.size() ) {
-                            statements.add(getBasketEquipmentOptionCreationStatement(id, (Number) options.get(i)));
+                            statements.add(getBasketEquipmentOptionCreationStatement(id, options.getInteger(i)));
                             i++;
                         }
 
@@ -106,9 +106,9 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
         }));
     }
     public void delete(final Integer idBasket,final Handler<Either<String, JsonObject>> handler){
-        JsonArray statements = new JsonArray()
-                .addObject(getOptionsBasketDeletion(idBasket))
-                .addObject(getEquipmentBasketDeletion(idBasket));
+        JsonArray statements = new fr.wseduc.webutils.collections.JsonArray()
+                .add(getOptionsBasketDeletion(idBasket))
+                .add(getEquipmentBasketDeletion(idBasket));
 
         sql.transaction(statements, new Handler<Message<JsonObject>>() {
             @Override
@@ -118,17 +118,17 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
         });
     }
     public void updateAmount(Integer idBasket, Integer amount, Handler<Either<String, JsonObject>> handler ) {
-        JsonArray values = new JsonArray();
+        JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
         String query = " UPDATE " + Lystore.lystoreSchema + ".basket_equipment " +
                 " SET  amount = ? " +
                 " WHERE id = ?; ";
-        values.addNumber(amount).addNumber(idBasket);
+        values.add(amount).add(idBasket);
 
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler) );
     }
     public void listebasketItemForOrder( Integer idCampaign, String idStructure,
                                          Handler<Either<String, JsonArray>> handler ){
-        JsonArray values = new JsonArray();
+        JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
         String query = "SELECT  basket.id id_basket, basket.amount, basket.processing_date,  basket.id_campaign, " +
                 "basket.id_structure, e.id id_equipment, e.name,e.summary, e.description, e.price, e.image, " +
                 "e.id_contract, e.status, jsonb(e.technical_specs) technical_specs, e.tax_amount, " +
@@ -152,7 +152,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 "GROUP BY (basket.id, basket.amount, basket.processing_date,basket.id_campaign, basket.id_structure, " +
                 "e.id, e.price, e.name, e.summary, e.description, e.price, e.image, e.id_contract, e.status," +
                 " jsonb(e.technical_specs),  e.tax_amount );";
-        values.addNumber(idCampaign).addString(idStructure);
+        values.add(idCampaign).add(idStructure);
 
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
     }
@@ -161,16 +161,16 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                           String idStructure, final String nameStructure ,
                           final Handler<Either<String, JsonObject>> handler ){
         try {
-            JsonArray statements = new JsonArray();
+            JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
             JsonObject basket;
             for (int i = 0; i < baskets.size(); i++) {
-                basket = baskets.get(i);
+                basket = baskets.getJsonObject(i);
                 statements.add(purseService.updatePurseAmountStatement(Float.valueOf(basket.getString("total_price")),
                         idCampaign , idStructure ,"-"));
                 statements.add(getInsertEquipmentOrderStatement( basket));
                 if(! "[null]".equals( basket.getString("options"))) {
                     statements.add(getInsertEquipmentOptionsStatement(basket));
-                    statements.add(getDeletionBasketsOptionsStatments((Number) basket.getInteger("id_basket")));
+                    statements.add(getDeletionBasketsOptionsStatments(basket.getInteger("id_basket")));
                 }
             }
             statements.add(getDeletionBasketsEquipmentStatments(idCampaign, idStructure));
@@ -178,11 +178,11 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             sql.transaction(statements, new Handler<Message<JsonObject>>() {
                 @Override
                 public void handle(Message<JsonObject> event) {
-                    JsonObject results = event.body().getArray("results")
-                            .get(event.body().getArray("results").size()-1);
-                    JsonArray objectResult = results.getArray("results").get(0);
+                    JsonObject results = event.body().getJsonArray("results")
+                            .getJsonObject(event.body().getJsonArray("results").size()-1);
+                    JsonArray objectResult = results.getJsonArray("results").getJsonArray(0);
                     getTransactionHandler(request, nameStructure, getTotalPriceOfBasketList(baskets),
-                            event, new JsonObject((String) objectResult.get(0) ), handler);
+                            event, new JsonObject(objectResult.getString(0) ), handler);
                 }
             });
         }catch (ClassCastException e) {
@@ -195,26 +195,26 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 "DELETE FROM " + Lystore.lystoreSchema + ".basket_option " +
                         " WHERE id_basket_equipment = ? ;";
 
-        JsonArray params = new JsonArray()
-                .addNumber(idBasket);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(idBasket);
 
         return new JsonObject()
-                .putString("statement", insertBasketEquipmentRelationshipQuery)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", insertBasketEquipmentRelationshipQuery)
+                .put("values", params)
+                .put("action", "prepared");
     }
     private JsonObject getEquipmentBasketDeletion(Integer idBasket) {
         String insertBasketEquipmentRelationshipQuery =
                 "DELETE FROM " + Lystore.lystoreSchema + ".basket_equipment " +
                         "WHERE id= ? ;";
 
-        JsonArray params = new JsonArray()
-                .addNumber(idBasket);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(idBasket);
 
         return new JsonObject()
-                .putString("statement", insertBasketEquipmentRelationshipQuery)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", insertBasketEquipmentRelationshipQuery)
+                .put("values", params)
+                .put("action", "prepared");
     }
 
     /**
@@ -230,18 +230,18 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                         "id, amount, processing_date, id_equipment, id_campaign, id_structure)" +
                         "VALUES (?, ?, ?, ?, ?, ?);";
 
-        JsonArray params = new JsonArray()
-                .addNumber(id)
-                .addNumber(basket.getInteger("amount"))
-                .addString(basket.getString("processing_date"))
-                .addNumber(basket.getInteger("equipment"))
-                .addNumber(basket.getInteger("id_campaign"))
-                .addString(basket.getString("id_structure"));
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(id)
+                .add(basket.getInteger("amount"))
+                .add(basket.getString("processing_date"))
+                .add(basket.getInteger("equipment"))
+                .add(basket.getInteger("id_campaign"))
+                .add(basket.getString("id_structure"));
 
         return new JsonObject()
-                .putString("statement", insertBasketEquipmentRelationshipQuery)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", insertBasketEquipmentRelationshipQuery)
+                .put("values", params)
+                .put("action", "prepared");
     }
 
     /**
@@ -255,13 +255,13 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 "INSERT INTO " + Lystore.lystoreSchema + ".basket_option " +
                         "(id_basket_equipment, id_option) " +
                         " VALUES (?, ?);";
-        JsonArray params = new JsonArray()
-                .addNumber(id)
-                .addNumber(option);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(id)
+                .add(option);
         return new JsonObject()
-                .putString("statement", insertBasketEquipmentOptionRelationshipQuery)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", insertBasketEquipmentOptionRelationshipQuery)
+                .put("values", params)
+                .put("action", "prepared");
     }
 
 
@@ -273,50 +273,50 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                         " description, image, technical_spec, status, " +
                         " id_contract, equipment_key ) VALUES ")
                 .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?); ");
-        JsonArray params = new JsonArray();
-        params.addNumber(basket.getNumber("id_order"))
-                .addNumber(Float.valueOf(basket.getString("price")))
-                .addNumber(Float.valueOf(basket.getString("tax_amount")))
-                .addNumber(basket.getInteger("amount"))
-                .addNumber(basket.getNumber("id_campaign"))
-                .addString(basket.getString("id_structure"))
-                .addString(basket.getString("name"))
-                .addString(basket.getString("summary"))
-                .addString(basket.getString("description"))
-                .addString(basket.getString("image"))
-                .addString(basket.getString("technical_specs"))
-                .addString("WAITING")
-                .addNumber(basket.getNumber("id_contract"))
-                .addNumber(basket.getNumber("id_equipment")) ;
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
+        params.add(basket.getInteger("id_order"))
+                .add(Float.valueOf(basket.getString("price")))
+                .add(Float.valueOf(basket.getString("tax_amount")))
+                .add(basket.getInteger("amount"))
+                .add(basket.getInteger("id_campaign"))
+                .add(basket.getString("id_structure"))
+                .add(basket.getString("name"))
+                .add(basket.getString("summary"))
+                .add(basket.getString("description"))
+                .add(basket.getString("image"))
+                .add(basket.getString("technical_specs"))
+                .add("WAITING")
+                .add(basket.getInteger("id_contract"))
+                .add(basket.getInteger("id_equipment")) ;
 
         return new JsonObject()
-                .putString("statement", queryEquipmentOrder.toString())
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", queryEquipmentOrder.toString())
+                .put("values", params)
+                .put("action", "prepared");
 
     }
 
     private static JsonObject getInsertEquipmentOptionsStatement (JsonObject basket){
-        JsonArray options = new JsonArray(basket.getString("options"))  ;
+        JsonArray options = new fr.wseduc.webutils.collections.JsonArray(basket.getString("options"))  ;
         StringBuilder queryEOptionEquipmentOrder = new StringBuilder()
                 .append( " INSERT INTO " + Lystore.lystoreSchema + ".order_client_options " )
                 .append(" ( tax_amount, price, id_order_client_equipment, name, amount, required) VALUES ");
-        JsonArray params = new JsonArray();
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
         for (int i=0; i<options.size(); i++){
             queryEOptionEquipmentOrder.append("( ?, ?, ?, ?, ?, ?)");
             queryEOptionEquipmentOrder.append( i == options.size()-1 ? "; " : ", ");
-            JsonObject option = options.get(i);
-            params.addNumber( option.getNumber("tax_amount"))
-                    .addNumber(option.getNumber("price"))
-                    .addNumber( basket.getNumber("id_order"))
-                    .addString(option.getString("name"))
-                    .addNumber(option.getNumber("amount"))
-                    .addBoolean(option.getBoolean("required"));
+            JsonObject option = options.getJsonObject(i);
+            params.add( option.getFloat("tax_amount"))
+                    .add(option.getFloat("price"))
+                    .add( basket.getInteger("id_order"))
+                    .add(option.getString("name"))
+                    .add(option.getInteger("amount"))
+                    .add(option.getBoolean("required"));
         }
         return new JsonObject()
-                .putString("statement", queryEOptionEquipmentOrder.toString())
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", queryEOptionEquipmentOrder.toString())
+                .put("values", params)
+                .put("action", "prepared");
     }
 
     private static JsonObject getDeletionBasketsOptionsStatments (Number idBasketEquipment){
@@ -325,23 +325,23 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 .append( "WHERE id_basket_equipment = ? ;");
 
         return new JsonObject()
-                .putString("statement", queryEquipmentOrder.toString())
-                .putArray("values",  new JsonArray().addNumber(idBasketEquipment))
-                .putString("action", "prepared");
+                .put("statement", queryEquipmentOrder.toString())
+                .put("values",  new fr.wseduc.webutils.collections.JsonArray().add(idBasketEquipment))
+                .put("action", "prepared");
     }
     private static JsonObject getDeletionBasketsEquipmentStatments(Integer idCampaign, String idStructure){
         StringBuilder queryEquipmentOrder = new StringBuilder()
                 .append( " DELETE FROM " + Lystore.lystoreSchema + ".basket_equipment " )
                 .append( " WHERE id_campaign = ? AND id_structure = ? RETURNING ")
                 .append(getReturningQueryOfTakeOrder()) ;
-        JsonArray params = new JsonArray()
-                .addNumber(idCampaign).addString(idStructure)
-                .addNumber(idCampaign).addString(idStructure)
-                .addNumber(idCampaign).addString(idStructure);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(idCampaign).add(idStructure)
+                .add(idCampaign).add(idStructure)
+                .add(idCampaign).add(idStructure);
         return new JsonObject()
-                .putString("statement", queryEquipmentOrder.toString())
-                .putArray("values", params )
-                .putString("action", "prepared");
+                .put("statement", queryEquipmentOrder.toString())
+                .put("values", params )
+                .put("action", "prepared");
     }
     private static String getReturningQueryOfTakeOrder() {
         return "( SELECT row_to_json(row(p.amount, count(o.id ) )) " +
@@ -363,10 +363,10 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                           Message<JsonObject> event, JsonObject basicBDObject,
                                               Handler<Either<String, JsonObject>> handler) {
         JsonObject result = event.body();
-        if (result.containsField("status") && "ok".equals(result.getString("status"))) {
+        if (result.containsKey("status") && "ok".equals(result.getString("status"))) {
                 JsonObject returns = new JsonObject()
-                        .putNumber("amount", basicBDObject.getNumber("f1"))
-                        .putNumber("nb_order", basicBDObject.getNumber("f2"));
+                        .put("amount", basicBDObject.getInteger("f1"))
+                        .put("nb_order", basicBDObject.getInteger("f2"));
                 DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                 final double cons = 100.0;
                 Number total =  Math.round(totalPrice * cons)/cons;
@@ -393,7 +393,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
     private static Float getTotalPriceOfBasketList(JsonArray baskets) {
         Float total = Float.valueOf(0);
         for(int i = 0; i < baskets.size(); i++) {
-            total += Float.valueOf(( (JsonObject) baskets.get(i)).getString("total_price"));
+            total += Float.valueOf((baskets.getJsonObject(i)).getString("total_price"));
         }
         return total;
     }

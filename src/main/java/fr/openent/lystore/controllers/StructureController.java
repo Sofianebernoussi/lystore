@@ -6,7 +6,7 @@ import fr.wseduc.rs.Get;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import org.entcore.common.controller.ControllerHelper;
-import org.vertx.java.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerRequest;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 

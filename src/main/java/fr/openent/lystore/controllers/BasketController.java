@@ -13,12 +13,12 @@ import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.request.RequestUtils;
 import org.entcore.common.http.filter.ResourceFilter;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.http.HttpServerRequest;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerRequest;
 import org.entcore.common.controller.ControllerHelper;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
@@ -34,7 +34,6 @@ public class BasketController extends ControllerHelper {
     @Get("/basket/:idCampaign/:idStructure")
     @ApiDoc("List  basket liste of a campaigne and a structure")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
-    @Override
     public void list(HttpServerRequest request) {
         try {
             Integer idCampaign = request.params().contains("idCampaign")
@@ -53,7 +52,6 @@ public class BasketController extends ControllerHelper {
     @ApiDoc("Create a basket item")
     @SecuredAction(value =  "", type = ActionType.RESOURCE)
     @ResourceFilter(PersonnelRight.class)
-    @Override
     public void create(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "basket", new Handler<JsonObject>() {
             @Override
@@ -67,7 +65,6 @@ public class BasketController extends ControllerHelper {
     @ApiDoc("Delete a basket item")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(PersonnelRight.class)
-    @Override
     public void delete(HttpServerRequest request) {
         try {
             Integer idBasket = request.params().contains("idBasket")

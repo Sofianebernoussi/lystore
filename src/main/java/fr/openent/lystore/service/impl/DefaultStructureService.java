@@ -4,9 +4,9 @@ import fr.openent.lystore.service.StructureService;
 import fr.wseduc.webutils.Either;
 import org.entcore.common.neo4j.Neo4j;
 import org.entcore.common.neo4j.Neo4jResult;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.Handler;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 /**
  * Created by agnes.lapeyronnie on 09/01/2018.
@@ -30,7 +30,7 @@ public class DefaultStructureService implements StructureService {
         String query = "MATCH (s:Structure) WHERE s.UAI IN {uais} return s.id as id, s.UAI as uai";
 
         Neo4j.getInstance().execute(query,
-                new JsonObject().putArray("uais", uais),
+                new JsonObject().put("uais", uais),
                 Neo4jResult.validResultHandler(handler));
     }
 
@@ -41,7 +41,7 @@ public class DefaultStructureService implements StructureService {
                 "s.zipCode  as zipCode, s.city as city ";
 
         Neo4j.getInstance().execute(query,
-                new JsonObject().putArray("ids", ids),
+                new JsonObject().put("ids", ids),
                 Neo4jResult.validResultHandler(handler));
     }
 

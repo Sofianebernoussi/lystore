@@ -18,23 +18,21 @@ import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.email.EmailSender;
-import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.email.EmailFactory;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.MultiMap;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.http.RouteMatcher;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.platform.Container;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -61,19 +59,13 @@ public class OrderController extends ControllerHelper {
 
     private static DecimalFormat decimals = new DecimalFormat("0.00");
 
-
-    public OrderController (Storage storage) {
+    public OrderController (Storage storage, Vertx vertx, JsonObject config, EventBus eb) {
         this.storage = storage;
-    }
-    public void init(Vertx vertx, final Container container, RouteMatcher rm,
-                     Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
-        super.init(vertx, container, rm, securedActions);
-        EmailFactory emailFactory = new EmailFactory(vertx, container, container.config());
+        EmailFactory emailFactory = new EmailFactory(vertx, config);
         EmailSender emailSender = emailFactory.getSender();
         this.orderService = new DefaultOrderService(Lystore.lystoreSchema, "order_client_equipment", emailSender);
-        this.exportPDFService = new DefaultExportPDFService( eb, vertx, container);
+        this.exportPDFService = new DefaultExportPDFService(eb, vertx, config);
         this.structureService = new DefaultStructureService();
-        this.exportPDFService = new DefaultExportPDFService( eb, vertx, container);
         this.supplierService = new DefaultSupplierService(Lystore.lystoreSchema, "supplier");
         this.contractService = new DefaultContractService(Lystore.lystoreSchema, "contract");
         this.agentService = new DefaultAgentService(Lystore.lystoreSchema, "agent");
@@ -102,7 +94,7 @@ public class OrderController extends ControllerHelper {
         if (request.params().contains("status")) {
             final String status = request.params().get("status");
             if ("valid".equals(status.toLowerCase())) {
-                final JsonArray statusList = new JsonArray().addString(status).addString("SENT").addString("DONE");
+                final JsonArray statusList = new fr.wseduc.webutils.collections.JsonArray().add(status).add("SENT").add("DONE");
                 orderService.getOrdersGroupByValidationNumber(statusList, new Handler<Either<String, JsonArray>>() {
                     @Override
                     public void handle(Either<String, JsonArray> event) {
@@ -117,10 +109,10 @@ public class OrderController extends ControllerHelper {
                                         mapNumberEquipments = mapNumbersEquipments(equipments, mapNumberEquipments);
                                         JsonObject order;
                                         for (int i = 0; i < orders.size(); i++) {
-                                            order = orders.get(i);
-                                            order.putString("price",
+                                            order = orders.getJsonObject(i);
+                                            order.put("price",
                                                     decimals.format(
-                                                            roundWith2Decimals(getTotalOrder(mapNumberEquipments.getArray(order.getString("number_validation")))))
+                                                            roundWith2Decimals(getTotalOrder(mapNumberEquipments.getJsonArray(order.getString("number_validation")))))
                                                             .replace(".", ","));
                                         }
                                         renderJson(request, orders);
@@ -179,8 +171,8 @@ public class OrderController extends ControllerHelper {
         JsonObject map = new JsonObject();
         JsonObject item;
         for (int i = 0; i < orders.size(); i++) {
-            item = orders.get(i);
-            map.putArray(item.getString("number_validation"), new JsonArray());
+            item = orders.getJsonObject(i);
+            map.put(item.getString("number_validation"), new fr.wseduc.webutils.collections.JsonArray());
         }
         return map;
     }
@@ -195,9 +187,9 @@ public class OrderController extends ControllerHelper {
         JsonObject equipment;
         JsonArray equipmentList;
         for (int i = 0; i < equipments.size(); i++) {
-            equipment = equipments.get(i);
-            equipmentList = numbers.getArray(equipment.getString("number_validation"));
-            numbers.putArray(equipment.getString("number_validation"), equipmentList.addObject(equipment));
+            equipment = equipments.getJsonObject(i);
+            equipmentList = numbers.getJsonArray(equipment.getString("number_validation"));
+            numbers.put(equipment.getString("number_validation"), equipmentList.add(equipment));
         }
 
         return numbers;
@@ -256,7 +248,7 @@ public class OrderController extends ControllerHelper {
     private static String generateExport (HttpServerRequest request, JsonArray orders)  {
         StringBuilder report = new StringBuilder(UTF8_BOM).append(getExportHeader(request));
         for (int i = 0; i < orders.size(); i++) {
-            report.append(generateExportLine(request, (JsonObject) orders.get(i)));
+            report.append(generateExportLine(request, orders.getJsonObject(i)));
         }
         return report.toString();
     }
@@ -297,7 +289,7 @@ public class OrderController extends ControllerHelper {
             }
             return formatterDateCsv.format(orderDate) + ";" +
                     order.getString("equipment_name") + ";" +
-                    order.getNumber("equipment_quantity") + ";" +
+                    order.getInteger("equipment_quantity") + ";" +
                     order.getString("price_total_equipment") + " " + I18n.getInstance().
                     translate("money.symbol", getHost(request), I18n.acceptLanguage(request)) + ";" +
                     I18n.getInstance().translate(order.getString("equipment_status"), getHost(request),
@@ -313,7 +305,7 @@ public class OrderController extends ControllerHelper {
             return order.getString("uaiNameStructure") + ";" +
                     order.getString("namecontract") + ";" +
                     order.getString("namesupplier") + ";" +
-                    order.getNumber("qty") + ";" +
+                    order.getInteger("qty") + ";" +
                     formatterDateCsv.format(orderDate) + ";" +
                     order.getString("namecampaign") + ";" +
                     order.getString("pricetotal") + " " + I18n.getInstance().
@@ -336,7 +328,7 @@ public class OrderController extends ControllerHelper {
                     public void handle(UserInfos userInfos) {
                         try {
                             List<String> params = new ArrayList<>();
-                            for (Object id: orders.getArray("ids") ) {
+                            for (Object id: orders.getJsonArray("ids") ) {
                                 params.add( id.toString());
                             }
 
@@ -367,18 +359,18 @@ public class OrderController extends ControllerHelper {
         RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {
             @Override
             public void handle(final JsonObject orders) {
-                final JsonArray ids = orders.getArray("ids");
+                final JsonArray ids = orders.getJsonArray("ids");
                 final String nbrBc = orders.getString("bc_number");
                 final String nbrEngagement = orders.getString("engagement_number");
                 final String dateGeneration = orders.getString("dateGeneration");
-                Number supplierId = orders.getNumber("supplierId");
-                final Number programId = orders.getNumber("id_program");
+                Number supplierId = orders.getInteger("supplierId");
+                final Number programId = orders.getInteger("id_program");
 
                 getOrdersData(request, nbrBc, nbrEngagement, dateGeneration, supplierId, ids,
                         new Handler<JsonObject>() {
                             @Override
                             public void handle(JsonObject data) {
-                                data.putBoolean("print_order", true);
+                                data.put("print_order", true);
                                 exportPDFService.generatePDF(request, data,
                                         "BC.xhtml", "Bon_Commande_",
                                         new Handler<Buffer>() {
@@ -424,17 +416,17 @@ public class OrderController extends ControllerHelper {
     }
 
     private void exportDocuments(final HttpServerRequest request, final Boolean printOrder, final Boolean printCertificates, final List<String> validationNumbers) {
-        supplierService.getSupplierByValidationNumbers(new JsonArray(validationNumbers.toArray()), new Handler<Either<String, JsonObject>>() {
+        supplierService.getSupplierByValidationNumbers(new fr.wseduc.webutils.collections.JsonArray(validationNumbers), new Handler<Either<String, JsonObject>>() {
             @Override
             public void handle(Either<String, JsonObject> event) {
                 if (event.isRight()) {
                     JsonObject supplier = event.right().getValue();
-                    getOrdersData(request, "", "", "", supplier.getNumber("id"), new JsonArray(validationNumbers.toArray()),
+                    getOrdersData(request, "", "", "", supplier.getInteger("id"), new fr.wseduc.webutils.collections.JsonArray(validationNumbers),
                             new Handler<JsonObject>() {
                                 @Override
                                 public void handle(JsonObject data) {
-                                    data.putBoolean("print_order", printOrder);
-                                    data.putBoolean("print_certificates", printCertificates);
+                                    data.put("print_order", printOrder);
+                                    data.put("print_certificates", printCertificates);
                                     exportPDFService.generatePDF(request, data,
                                             "BC.xhtml", "CSF_",
                                             new Handler<Buffer>() {
@@ -469,17 +461,17 @@ public class OrderController extends ControllerHelper {
     }
 
     private void exportStructuresList(final HttpServerRequest request, List<String> validationNumbers) {
-        orderService.getOrders(new JsonArray(validationNumbers.toArray()), null, true, true, new Handler<Either<String, JsonArray>>() {
+        orderService.getOrders(new fr.wseduc.webutils.collections.JsonArray(validationNumbers), null, true, true, new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> event) {
                 if (event.isRight()) {
                     final JsonArray equipments = event.right().getValue();
-                    JsonArray structures = new JsonArray();
+                    JsonArray structures = new fr.wseduc.webutils.collections.JsonArray();
                     final JsonObject[] equipment = new JsonObject[1];
                     for (int i = 0; i < equipments.size(); i++) {
-                        equipment[0] = equipments.get(i);
+                        equipment[0] = equipments.getJsonObject(i);
                         if (!structures.contains(equipment[0].getString("id_structure"))) {
-                            structures.addString(equipment[0].getString("id_structure"));
+                            structures.add(equipment[0].getString("id_structure"));
                         }
 
                     }
@@ -491,18 +483,18 @@ public class OrderController extends ControllerHelper {
                                 JsonObject structureMap = new JsonObject(), structure;
                                 JsonArray structures = event.right().getValue();
                                 for (int i = 0; i < structures.size(); i++) {
-                                    structure = structures.get(i);
-                                    structureMap.putObject(structure.getString("id"),
+                                    structure = structures.getJsonObject(i);
+                                    structureMap.put(structure.getString("id"),
                                             structure);
                                 }
 
                                 for (int e = 0; e < equipments.size(); e++) {
-                                    equipment[0] = equipments.get(e);
-                                    structure = structureMap.getObject(equipment[0].getString("id_structure"));
-                                    equipment[0].putString("uai", structure.getString("uai"));
-                                    equipment[0].putString("structure_name", structure.getString("name"));
-                                    equipment[0].putString("city", structure.getString("city"));
-                                    equipment[0].putString("phone", structure.getString("phone"));
+                                    equipment[0] = equipments.getJsonObject(e);
+                                    structure = structureMap.getJsonObject(equipment[0].getString("id_structure"));
+                                    equipment[0].put("uai", structure.getString("uai"));
+                                    equipment[0].put("structure_name", structure.getString("name"));
+                                    equipment[0].put("city", structure.getString("city"));
+                                    equipment[0].put("phone", structure.getString("phone"));
                                 }
 
                                 renderValidOrdersCSVExport(request, equipments);
@@ -525,7 +517,7 @@ public class OrderController extends ControllerHelper {
     public void cancelValidOrder (HttpServerRequest request) {
         if (request.params().contains("number_validation")) {
             List<String> numbers = request.params().getAll("number_validation");
-            orderService.cancelValidation(new JsonArray(numbers.toArray()), defaultResponseHandler(request));
+            orderService.cancelValidation(new fr.wseduc.webutils.collections.JsonArray(numbers), defaultResponseHandler(request));
         } else {
             badRequest(request);
         }
@@ -534,7 +526,7 @@ public class OrderController extends ControllerHelper {
     private void renderValidOrdersCSVExport(HttpServerRequest request, JsonArray equipments) {
         StringBuilder export = new StringBuilder(UTF8_BOM).append(getValidOrdersCSVExportHeader(request));
         for (int i = 0; i < equipments.size(); i++) {
-            export.append(getValidOrdersCSVExportline((JsonObject) equipments.get(i)));
+            export.append(getValidOrdersCSVExportline(equipments.getJsonObject(i)));
         }
 
         request.response()
@@ -596,7 +588,7 @@ public class OrderController extends ControllerHelper {
                                         public void handle(Either<String, JsonObject> programEvent) {
                                             if (programEvent.isRight()) {
                                                 JsonObject program = programEvent.right().getValue();
-                                                orderService.updateStatusToSent(ids.toList(), "SENT", engagementNumber, program.getString("name"),
+                                                orderService.updateStatusToSent(ids.getList(), "SENT", engagementNumber, program.getString("name"),
                                                         dateCreation, orderNumber, id, user.getUsername(), new Handler<Either<String, JsonObject>>() {
                                                             @Override
                                                             public void handle(Either<String, JsonObject> event) {
@@ -631,9 +623,9 @@ public class OrderController extends ControllerHelper {
                     JsonArray orders = event.right().getValue();
                     JsonObject order;
                     for (int i = 0; i < orders.size(); i++) {
-                        order = orders.get(i);
+                        order = orders.getJsonObject(i);
                         Logging.insert(eb, request, Contexts.ORDER.toString(), Actions.UPDATE.toString(),
-                               order.getNumber("id").toString(), order);
+                               order.getInteger("id").toString(), order);
                     }
                 }
             }
@@ -646,7 +638,7 @@ public class OrderController extends ControllerHelper {
             @Override
             public void handle(Either<String, JsonArray> event) {
                 if (event.isRight() && event.right().getValue().size() == 1) {
-                    handler.handle((JsonObject) event.right().getValue().get(0));
+                    handler.handle(event.right().getValue().getJsonObject(0));
                 } else {
                     log.error("An error occured when collecting contract data");
                     badRequest(request);
@@ -662,23 +654,23 @@ public class OrderController extends ControllerHelper {
             public void handle(Either<String, JsonArray> event) {
                 if (event.isRight()) {
                     JsonArray structures = event.right().getValue();
-                    JsonArray structuresList = new JsonArray();
+                    JsonArray structuresList = new fr.wseduc.webutils.collections.JsonArray();
                     final JsonObject structureMapping = new JsonObject();
                     JsonObject structure;
                     JsonObject structureInfo;
                     JsonArray orderIds;
                     for (int i = 0; i < structures.size(); i++) {
-                        structure = structures.get(i);
+                        structure = structures.getJsonObject(i);
                         if (!structuresList.contains(structure.getString("id_structure"))) {
-                            structuresList.addString(structure.getString("id_structure"));
+                            structuresList.add(structure.getString("id_structure"));
                             structureInfo = new JsonObject();
-                            structureInfo.putArray("orderIds", new JsonArray());
+                            structureInfo.put("orderIds", new fr.wseduc.webutils.collections.JsonArray());
                         } else {
-                            structureInfo = structureMapping.getObject(structure.getString("id_structure"));
+                            structureInfo = structureMapping.getJsonObject(structure.getString("id_structure"));
                         }
-                        orderIds = structureInfo.getArray("orderIds");
-                        orderIds.addNumber(structure.getNumber("id"));
-                        structureMapping.putObject(structure.getString("id_structure"), structureInfo);
+                        orderIds = structureInfo.getJsonArray("orderIds");
+                        orderIds.add(structure.getInteger("id"));
+                        structureMapping.put(structure.getString("id_structure"), structureInfo);
                     }
                     structureService.getStructureById(structuresList, new Handler<Either<String, JsonArray>>() {
                         @Override
@@ -687,9 +679,9 @@ public class OrderController extends ControllerHelper {
                                 JsonArray structures = event.right().getValue();
                                 JsonObject structure;
                                 for (int i = 0; i < structures.size(); i++) {
-                                    structure = structures.get(i);
-                                    JsonObject structureObject = structureMapping.getObject(structure.getString("id"));
-                                    structureObject.putObject(  "structureInfo", structure);
+                                    structure = structures.getJsonObject(i);
+                                    JsonObject structureObject = structureMapping.getJsonObject(structure.getString("id"));
+                                    structureObject.put(  "structureInfo", structure);
                                 }
                                 handler.handle(structureMapping);
                             } else {
@@ -713,12 +705,12 @@ public class OrderController extends ControllerHelper {
                 if (event.isRight()) {
                     JsonObject order = new JsonObject();
                     JsonArray orders = formatOrders(event.right().getValue());
-                    order.putArray("orders", orders);
-                    order.putString("sumLocale",
+                    order.put("orders", orders);
+                    order.put("sumLocale",
                             decimals.format(roundWith2Decimals(getSumWithoutTaxes(orders))).replace(".", ","));
-                    order.putString("totalTaxesLocale",
+                    order.put("totalTaxesLocale",
                             decimals.format(roundWith2Decimals(getTaxesTotal(orders))).replace(".", ","));
-                    order.putString("totalPriceTaxeIncludedLocal",
+                    order.put("totalPriceTaxeIncludedLocal",
                             decimals.format(roundWith2Decimals(getTotalOrder(orders))).replace(".", ","));
                     handler.handle(order);
                 } else {
@@ -733,7 +725,7 @@ public class OrderController extends ControllerHelper {
         Float sum = 0F;
         JsonObject order;
         for (int i = 0; i < orders.size(); i++) {
-            order = orders.get(i);
+            order = orders.getJsonObject(i);
             sum += (Float.parseFloat(order.getString("price")) * Integer.parseInt(order.getString("amount"))
                     * (Float.parseFloat(order.getString("tax_amount")) / 100 + 1));
         }
@@ -745,7 +737,7 @@ public class OrderController extends ControllerHelper {
         Float sum = 0F;
         JsonObject order;
         for (int i = 0; i < orders.size(); i++) {
-            order = orders.get(i);
+            order = orders.getJsonObject(i);
             sum += Float.parseFloat(order.getString("price")) * Integer.parseInt(order.getString("amount"))
                     * (Float.parseFloat(order.getString("tax_amount")) / 100);
         }
@@ -757,7 +749,7 @@ public class OrderController extends ControllerHelper {
         JsonObject order;
         Float sum = 0F;
         for (int i = 0; i < orders.size(); i++) {
-            order = orders.get(i);
+            order = orders.getJsonObject(i);
             sum += Float.parseFloat(order.getString("price")) * Integer.parseInt(order.getString("amount"));
         }
 
@@ -767,22 +759,22 @@ public class OrderController extends ControllerHelper {
     private static JsonArray formatOrders (JsonArray orders) {
         JsonObject order;
         for (int i = 0; i < orders.size(); i++) {
-            order = orders.get(i);
-            order.putString("priceLocale",
+            order = orders.getJsonObject(i);
+            order.put("priceLocale",
                     decimals.format(roundWith2Decimals(Float.parseFloat(order.getString("price")))).replace(".", ","));
-            order.putString("unitPriceTaxIncluded",
+            order.put("unitPriceTaxIncluded",
                     decimals.format(roundWith2Decimals(getTaxIncludedPrice(Float.parseFloat(order.getString("price")),
                             Float.parseFloat(order.getString("tax_amount"))))).replace(".", ","));
-            order.putString("unitPriceTaxIncludedLocale",
+            order.put("unitPriceTaxIncludedLocale",
                     decimals.format(roundWith2Decimals(getTaxIncludedPrice(Float.parseFloat (order.getString("price")),
                             Float.parseFloat(order.getString("tax_amount"))))).replace(".", ","));
-            order.putNumber("totalPrice",
+            order.put("totalPrice",
                     roundWith2Decimals(getTotalPrice(Float.parseFloat(order.getString("price")),
                             Long.parseLong(order.getString("amount")))));
-            order.putString("totalPriceLocale",
-                    decimals.format(roundWith2Decimals(Float.parseFloat(order.getNumber("totalPrice").toString()))).replace(".", ","));
-            order.putString("totalPriceTaxIncluded",
-                    decimals.format(roundWith2Decimals(getTaxIncludedPrice((Float) order.getNumber("totalPrice"),
+            order.put("totalPriceLocale",
+                    decimals.format(roundWith2Decimals(Float.parseFloat(order.getFloat("totalPrice").toString()))).replace(".", ","));
+            order.put("totalPriceTaxIncluded",
+                    decimals.format(roundWith2Decimals(getTaxIncludedPrice((Float) order.getFloat("totalPrice"),
                             Float.parseFloat(order.getString("tax_amount"))))).replace(".", ","));
         }
         return orders;
@@ -821,18 +813,8 @@ public class OrderController extends ControllerHelper {
             final String dateGeneration = params.get("dateGeneration");
             Number supplierId = Integer.parseInt(params.get("supplierId"));
 
-//            try {
-//                for (String id : ids) {
-//                    integerIds.add(Integer.parseInt(id));
-//                }
-//            } catch (NumberFormatException e) {
-//                log.error("An error occured when casting order id to Integer", e);
-//                badRequest(request);
-//                return;
-//            }
-
             getOrdersData(request, nbrBc, nbrEngagement, dateGeneration, supplierId,
-                    new JsonArray(ids.toArray()), new Handler<JsonObject>() {
+                    new fr.wseduc.webutils.collections.JsonArray(ids), new Handler<JsonObject>() {
                         @Override
                         public void handle(JsonObject data) {
                             renderJson(request, data);
@@ -863,21 +845,21 @@ public class OrderController extends ControllerHelper {
                                             public void handle(JsonObject contract) {
                                                 JsonObject certificate;
                                                 for (int i = 0; i < certificates.size(); i++) {
-                                                    certificate = certificates.get(i);
-                                                    certificate.putObject("agent", managmentInfo.getObject("userInfo"));
-                                                    certificate.putObject("supplier",
-                                                            managmentInfo.getObject("supplierInfo"));
-                                                    addStructureToOrders(certificate.getArray("orders"),
-                                                            certificate.getObject("structure"));
+                                                    certificate = certificates.getJsonObject(i);
+                                                    certificate.put("agent", managmentInfo.getJsonObject("userInfo"));
+                                                    certificate.put("supplier",
+                                                            managmentInfo.getJsonObject("supplierInfo"));
+                                                    addStructureToOrders(certificate.getJsonArray("orders"),
+                                                            certificate.getJsonObject("structure"));
                                                 }
-                                                data.putObject("supplier", managmentInfo.getObject("supplierInfo"))
-                                                        .putObject("agent", managmentInfo.getObject("userInfo"))
-                                                        .putObject("order", order)
-                                                        .putArray("certificates", certificates)
-                                                        .putObject("contract", contract)
-                                                        .putString("nbr_bc", nbrBc)
-                                                        .putString("nbr_engagement", nbrEngagement)
-                                                        .putString("date_generation", dateGeneration);
+                                                data.put("supplier", managmentInfo.getJsonObject("supplierInfo"))
+                                                        .put("agent", managmentInfo.getJsonObject("userInfo"))
+                                                        .put("order", order)
+                                                        .put("certificates", certificates)
+                                                        .put("contract", contract)
+                                                        .put("nbr_bc", nbrBc)
+                                                        .put("nbr_engagement", nbrEngagement)
+                                                        .put("date_generation", dateGeneration);
 
                                                 handler.handle(data);
                                             }
@@ -895,8 +877,8 @@ public class OrderController extends ControllerHelper {
     private void addStructureToOrders(JsonArray orders, JsonObject structure) {
         JsonObject order;
         for (int i = 0; i < orders.size(); i++) {
-            order = orders.get(i);
-            order.putObject("structure", structure);
+            order = orders.getJsonObject(i);
+            order.put("structure", structure);
         }
     }
 
@@ -904,22 +886,22 @@ public class OrderController extends ControllerHelper {
                                                  final Handler<JsonArray> handler) {
         JsonObject structure;
         String structureId;
-        Iterator<String> structureIds = structures.getFieldNames().iterator();
-        final JsonArray result = new JsonArray();
+        Iterator<String> structureIds = structures.fieldNames().iterator();
+        final JsonArray result = new fr.wseduc.webutils.collections.JsonArray();
         while (structureIds.hasNext()) {
             structureId = structureIds.next();
-            structure = structures.getObject(structureId);
-            orderService.getOrders(structure.getArray("orderIds"), structureId, false, true,
+            structure = structures.getJsonObject(structureId);
+            orderService.getOrders(structure.getJsonArray("orderIds"), structureId, false, true,
                     new Handler<Either<String, JsonArray>>() {
                         @Override
                         public void handle(Either<String, JsonArray> event) {
                             if (event.isRight() && event.right().getValue().size() > 0) {
-                                JsonObject order = event.right().getValue().get(0);
-                                result.addObject(new JsonObject()
-                                        .putString("id_structure", order.getString("id_structure"))
-                                        .putObject("structure", structures.getObject(order.getString("id_structure"))
-                                                .getObject("structureInfo"))
-                                        .putArray("orders", formatOrders(event.right().getValue()))
+                                JsonObject order = event.right().getValue().getJsonObject(0);
+                                result.add(new JsonObject()
+                                        .put("id_structure", order.getString("id_structure"))
+                                        .put("structure", structures.getJsonObject(order.getString("id_structure"))
+                                                .getJsonObject("structureInfo"))
+                                        .put("orders", formatOrders(event.right().getValue()))
                                 );
                                 if (result.size() == structures.size()) {
                                     handler.handle(result);
@@ -948,8 +930,8 @@ public class OrderController extends ControllerHelper {
                                 JsonObject supplierObject = supplier.right().getValue();
                                 handler.handle(
                                         new JsonObject()
-                                                .putObject("userInfo", userObject)
-                                                .putObject("supplierInfo", supplierObject)
+                                                .put("userInfo", userObject)
+                                                .put("supplierInfo", supplierObject)
                                 );
                             } else {
                                 log.error("An error occurred when collecting supplier data");
@@ -976,7 +958,7 @@ public class OrderController extends ControllerHelper {
             public void handle(final JsonObject orders) {
                 try {
                     List<String> params = new ArrayList<>();
-                    for (Object id: orders.getArray("ids") ) {
+                    for (Object id: orders.getJsonArray("ids") ) {
                         params.add( id.toString());
                     }
                     List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
@@ -1009,10 +991,10 @@ public class OrderController extends ControllerHelper {
                 public void handle(Either<String, JsonArray> ordersWithIdStructure) {
                     if(ordersWithIdStructure.isRight()) {
                         final JsonArray orders = ordersWithIdStructure.right().getValue();
-                        JsonArray idsStructures = new JsonArray();
+                        JsonArray idsStructures = new fr.wseduc.webutils.collections.JsonArray();
                         for(int i = 0; i <orders.size();i++){
-                            JsonObject order = orders.get(i);
-                            idsStructures.addString(order.getString("idstructure"));
+                            JsonObject order = orders.getJsonObject(i);
+                            idsStructures.add(order.getString("idstructure"));
                         }
                         structureService.getStructureById(idsStructures, new Handler<Either<String, JsonArray>>() {
                             @Override
@@ -1022,8 +1004,8 @@ public class OrderController extends ControllerHelper {
 
                                     Map<String, String> structuresMap = retrieveUaiNameStructure(structures);
                                     for (int i = 0; i < orders.size(); i++) {
-                                        JsonObject order = orders.get(i);
-                                        order.putString("uaiNameStructure", structuresMap.get(order.getString("idstructure")));
+                                        JsonObject order = orders.getJsonObject(i);
+                                        order.put("uaiNameStructure", structuresMap.get(order.getString("idstructure")));
                                     }
 
                                     request.response()
@@ -1053,7 +1035,7 @@ public class OrderController extends ControllerHelper {
         final Map<String, String> structureMap = new HashMap<String, String>();
 
         for (int i = 0; i < structures.size(); i++) {
-            JsonObject structure = structures.get(i);
+            JsonObject structure = structures.getJsonObject(i);
             String uaiNameStructure = structure.getString("uai") + " - " + structure.getString("name");
             structureMap.put(structure.getString("id"), uaiNameStructure);
         }

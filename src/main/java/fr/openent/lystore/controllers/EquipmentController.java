@@ -19,9 +19,9 @@ import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.request.RequestUtils;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.Handler;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,7 +113,7 @@ public class EquipmentController extends ControllerHelper {
                                 public void handle(Either<String, JsonObject> eventUpdateEquipment) {
                                     if(eventUpdateEquipment.isRight()){
                                         final Integer optionsCreate =  equipment
-                                                .getArray("optionsCreate").size();
+                                                .getJsonArray("optionsCreate").size();
                                         equipmentService.prepareUpdateOptions( optionsCreate , id,
                                                 new Handler<Either<String, JsonObject>>() {
                                                     @Override

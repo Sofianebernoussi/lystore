@@ -5,9 +5,9 @@ import fr.openent.lystore.service.TagService;
 import fr.wseduc.webutils.Either;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.SqlResult;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.Handler;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 import java.util.List;
 
@@ -28,15 +28,15 @@ public class DefaultTagService extends SqlCrudService implements TagService {
                 "LEFT JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag on (tag.id = rel_equipment_tag.id_tag) " +
                 "GROUP BY id;";
 
-        this.sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
+        this.sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray(), SqlResult.validResultHandler(handler));
     }
 
     public void create(JsonObject tag, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + Lystore.lystoreSchema + ".tag(name, color) " +
                 "VALUES (?, ?) RETURNING id;";
 
-        JsonArray params = new JsonArray()
-                .addString(tag.getString("name"))
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(tag.getString("name"))
                 .add(tag.getString("color"));
 
         this.sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
@@ -47,10 +47,10 @@ public class DefaultTagService extends SqlCrudService implements TagService {
                 "SET name = ?, color = ? " +
                 "WHERE id = ?;";
 
-        JsonArray params = new JsonArray()
-                .addString(tag.getString("name"))
-                .addString(tag.getString("color"))
-                .addNumber(id);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(tag.getString("name"))
+                .add(tag.getString("color"))
+                .add(id);
 
         this.sql.prepared(query, params, SqlResult.validRowsResultHandler(handler));
     }

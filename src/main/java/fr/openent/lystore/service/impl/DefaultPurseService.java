@@ -5,29 +5,29 @@ import fr.openent.lystore.service.PurseService;
 import fr.wseduc.webutils.Either;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 public class DefaultPurseService implements PurseService {
     @Override
     public void launchImport(Integer campaignId, JsonObject statementsValues,
                              final Handler<Either<String, JsonObject>> handler) {
-        JsonArray statements = new JsonArray();
-        String[] fields = statementsValues.getFieldNames().toArray(new String[0]);
+        JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
+        String[] fields = statementsValues.fieldNames().toArray(new String[0]);
         for (String field : fields) {
-            statements.addObject(getImportStatement(campaignId, field,
+            statements.add(getImportStatement(campaignId, field,
                     statementsValues.getString(field)));
         }
         if (statements.size() > 0) {
             Sql.getInstance().transaction(statements, new Handler<Message<JsonObject>>() {
                 @Override
                 public void handle(Message<JsonObject> message) {
-                    if (message.body().containsField("status") &&
+                    if (message.body().containsKey("status") &&
                             "ok".equals(message.body().getString("status"))) {
                         handler.handle(new Either.Right<String, JsonObject>(
-                                new JsonObject().putString("status", "ok")));
+                                new JsonObject().put("status", "ok")));
                     } else {
                         handler.handle(new Either.Left<String, JsonObject>
                                 ("lystore.statements.error"));
@@ -45,8 +45,8 @@ public class DefaultPurseService implements PurseService {
         String query = "SELECT * FROM " + Lystore.lystoreSchema + ".purse" +
                 " WHERE id_campaign = ?;";
 
-        JsonArray params = new JsonArray()
-                .addNumber(campaignId);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(campaignId);
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
@@ -59,28 +59,28 @@ public class DefaultPurseService implements PurseService {
                 "WHERE purse.id_structure = ? " +
                 "AND purse.id_campaign = ?;";
 
-        JsonArray params = new JsonArray()
-                .addString(structureId)
-                .addNumber(Float.parseFloat(amount))
-                .addNumber(campaignId)
-                .addNumber(Float.parseFloat(amount))
-                .addString(structureId)
-                .addNumber(campaignId);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(structureId)
+                .add(Float.parseFloat(amount))
+                .add(campaignId)
+                .add(Float.parseFloat(amount))
+                .add(structureId)
+                .add(campaignId);
 
 
         return new JsonObject()
-                .putString("statement", statement)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", statement)
+                .put("values", params)
+                .put("action", "prepared");
     }
 
     public void update(Integer id, JsonObject purse, Handler<Either<String, JsonObject>> handler) {
         String query = "UPDATE " + Lystore.lystoreSchema + ".purse " +
                 "SET amount = ? WHERE id = ? RETURNING *;";
 
-        JsonArray params = new JsonArray()
-                .addNumber(purse.getNumber("amount"))
-                .addNumber(id);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(purse.getInteger("amount"))
+                .add(id);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
@@ -93,14 +93,14 @@ public class DefaultPurseService implements PurseService {
                 "WHERE id_campaign = ? " +
                 "AND id_structure = ? ;";
 
-        JsonArray params = new JsonArray()
-                .addNumber(Math.round(price * cons)/cons)
-                .addNumber(idCampaign)
-                .addString(idStructure);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(Math.round(price * cons)/cons)
+                .add(idCampaign)
+                .add(idStructure);
 
         return new JsonObject()
-                .putString("statement", updateQuery)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", updateQuery)
+                .put("values", params)
+                .put("action", "prepared");
     }
 }

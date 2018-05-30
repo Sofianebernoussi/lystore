@@ -6,12 +6,12 @@ import fr.wseduc.webutils.Either;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.core.logging.impl.LoggerFactory;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 import java.util.List;
 public class DefaultCampaignService extends SqlCrudService implements CampaignService {
@@ -42,7 +42,7 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 "GROUP BY campaign.id, campaign_amounts.sum) as C " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".order_client_equipment oce ON oce.id_campaign = C.id and  oce.status in ( 'WAITING', 'VALID', 'SENT') " +
                 "group by c.id, c.name, c.description, c.image, c.accessible, c.nb_structures, c.purse_amount, c.nb_equipments";
-        sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
+        sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray(), SqlResult.validResultHandler(handler));
     }
 
     public void listCampaigns(String idStructure,  Handler<Either<String, JsonArray>> handler) {
@@ -67,8 +67,8 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 .append(" ON (rel_equipment_tag.id_tag = rel_group_campaign.id_tag)")
                 .append(" GROUP BY campaign.id, purse.amount ;" );
         sql.prepared(query.toString(),
-                new JsonArray().addString(idStructure).addString(idStructure)
-                        .addString(idStructure).addString(idStructure),
+                new fr.wseduc.webutils.collections.JsonArray().add(idStructure).add(idStructure)
+                        .add(idStructure).add(idStructure),
                 SqlResult.validResultHandler(handler));
     }
 
@@ -86,7 +86,7 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 "where campaign.id = ?  "+
                 "group By (campaign.id);  " ;
 
-        sql.prepared(query, new JsonArray().addNumber(id).addNumber(id), SqlResult.validUniqueResultHandler(handler));
+        sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray().add(id).add(id), SqlResult.validUniqueResultHandler(handler));
     }
     public void create(final JsonObject campaign, final Handler<Either<String, JsonObject>> handler) {
         String getIdQuery = "SELECT nextval('" + Lystore.lystoreSchema + ".campaign_id_seq') as id";
@@ -95,12 +95,12 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
             public void handle(Either<String, JsonObject> event) {
                 if (event.isRight()) {
                     try {
-                        final Number id = event.right().getValue().getNumber("id");
-                        JsonArray statements = new JsonArray()
+                        final Number id = event.right().getValue().getInteger("id");
+                        JsonArray statements = new fr.wseduc.webutils.collections.JsonArray()
                                 .add(getCampaignCreationStatement(id, campaign));
 
 
-                        JsonArray groups = campaign.getArray("groups");
+                        JsonArray groups = campaign.getJsonArray("groups");
                         statements.add(getCampaignTagsGroupsRelationshipStatement(id, (JsonArray) groups));
                         sql.transaction(statements, new Handler<Message<JsonObject>>() {
                             @Override
@@ -121,10 +121,10 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
     }
 
     public void update(final Integer id, JsonObject campaign,final Handler<Either<String, JsonObject>> handler){
-        JsonArray statements = new JsonArray()
-                .addObject(getCampaignUpdateStatement(id, campaign))
-                .addObject(getCampaignTagGroupRelationshipDeletion(id));
-        JsonArray groups = campaign.getArray("groups");
+        JsonArray statements = new fr.wseduc.webutils.collections.JsonArray()
+                .add(getCampaignUpdateStatement(id, campaign))
+                .add(getCampaignTagGroupRelationshipDeletion(id));
+        JsonArray groups = campaign.getJsonArray("groups");
         statements.add(getCampaignTagsGroupsRelationshipStatement(id, (JsonArray) groups));
 
         sql.transaction(statements, new Handler<Message<JsonObject>>() {
@@ -136,9 +136,9 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
     }
 
     public void delete(final List<Integer> ids, final Handler<Either<String, JsonObject>> handler) {
-        JsonArray statements = new JsonArray()
-                .addObject(getCampaignsGroupRelationshipDeletion(ids))
-                .addObject(getCampaignsDeletion(ids));
+        JsonArray statements = new fr.wseduc.webutils.collections.JsonArray()
+                .add(getCampaignsGroupRelationshipDeletion(ids))
+                .add(getCampaignsDeletion(ids));
 
         sql.transaction(statements, new Handler<Message<JsonObject>>() {
             @Override
@@ -156,23 +156,23 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 "ON (rel_group_structure.id_structure_group = rel_group_campaign.id_structure_group) " +
                 "WHERE campaign.id = ?;";
 
-        sql.prepared(query, new JsonArray().addNumber(campaignId), SqlResult.validResultHandler(handler));
+        sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray().add(campaignId), SqlResult.validResultHandler(handler));
     }
 
 
     public void updateAccessibility(final Integer id,final JsonObject campaign,
                                     final Handler<Either<String, JsonObject>> handler){
-        JsonArray statements = new JsonArray();
+        JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
         String query = "UPDATE " + Lystore.lystoreSchema + ".campaign SET " +
                 "accessible= ? " +
                 "WHERE id = ?";
-        JsonArray params = new JsonArray()
-                .addBoolean(campaign.getBoolean("accessible"))
-                .addNumber(id);
-        statements.addObject(new JsonObject()
-                .putString("statement", query)
-                .putArray("values",params)
-                .putString("action", "prepared"));
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(campaign.getBoolean("accessible"))
+                .add(id);
+        statements.add(new JsonObject()
+                .put("statement", query)
+                .put("values",params)
+                .put("action", "prepared"));
         sql.transaction(statements, new Handler<Message<JsonObject>>() {
             @Override
             public void handle(Message<JsonObject> event) {
@@ -185,24 +185,24 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
         StringBuilder insertTagCampaignRelationshipQuery = new StringBuilder("INSERT INTO " +
                 Lystore.lystoreSchema + ".rel_group_campaign" +
                         "(id_campaign, id_structure_group, id_tag) VALUES ");
-        JsonArray params = new JsonArray();
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
         for(int j = 0; j < groups.size(); j++ ){
-            JsonObject group =  groups.get(j);
-            JsonArray tags = group.getArray("tags");
+            JsonObject group =  groups.getJsonObject(j);
+            JsonArray tags = group.getJsonArray("tags");
             for (int i = 0; i < tags.size(); i++) {
                 insertTagCampaignRelationshipQuery.append(" (?, ?, ?)");
                 if(i!=tags.size()-1 || j!= groups.size()-1){
                     insertTagCampaignRelationshipQuery.append(",");
                 }
-                params.addNumber(id)
-                        .addNumber(group.getNumber("id"))
-                        .addNumber((Number) tags.get(i));
+                params.add(id)
+                        .add(group.getInteger("id"))
+                        .add(tags.getInteger(i));
             }
         }
         return new JsonObject()
-                .putString("statement", insertTagCampaignRelationshipQuery.toString())
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", insertTagCampaignRelationshipQuery.toString())
+                .put("values", params)
+                .put("action", "prepared");
     }
 
     private JsonObject getCampaignTagGroupRelationshipDeletion(Number id) {
@@ -210,9 +210,9 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 " WHERE id_campaign = ?;";
 
         return new JsonObject()
-                .putString("statement", query)
-                .putArray("values", new JsonArray().addNumber(id))
-                .putString("action", "prepared");
+                .put("statement", query)
+                .put("values", new fr.wseduc.webutils.collections.JsonArray().add(id))
+                .put("action", "prepared");
     }
 
     /**
@@ -227,66 +227,65 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 "SET  name=?, description=?, image=? " +
                 "WHERE id = ?";
 
-        JsonArray params = new JsonArray()
-                .addString(campaign.getString("name"))
-                .addString(campaign.getString("description"))
-                .addString(campaign.getString("image"))
-                .addNumber(id);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(campaign.getString("name"))
+                .add(campaign.getString("description"))
+                .add(campaign.getString("image"))
+                .add(id);
 
         return new JsonObject()
-                .putString("statement", query)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", query)
+                .put("values", params)
+                .put("action", "prepared");
     }
     private JsonObject getCampaignCreationStatement(Number id, JsonObject campaign) {
         String insertCampaignQuery =
                 "INSERT INTO " + Lystore.lystoreSchema + ".campaign(id, name, description, image, accessible )"+
                         "VALUES (?, ?, ?, ?, ?) RETURNING id; ";
-        JsonArray params = new JsonArray()
-                .addNumber(id)
-                .addString(campaign.getString("name"))
-                .addString(campaign.getString("description"))
-                .addString(campaign.getString("image"))
-                .addBoolean(campaign.getBoolean("accessible"))
-                ;
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(id)
+                .add(campaign.getString("name"))
+                .add(campaign.getString("description"))
+                .add(campaign.getString("image"))
+                .add(campaign.getBoolean("accessible"));
 
         return new JsonObject()
-                .putString("statement", insertCampaignQuery)
-                .putArray("values", params)
-                .putString("action", "prepared");
+                .put("statement", insertCampaignQuery)
+                .put("values", params)
+                .put("action", "prepared");
     }
     private JsonObject getCampaignsGroupRelationshipDeletion(List<Integer> ids) {
         StringBuilder query = new StringBuilder();
-        JsonArray value = new JsonArray();
+        JsonArray value = new fr.wseduc.webutils.collections.JsonArray();
         query.append("DELETE FROM " + Lystore.lystoreSchema + ".rel_group_campaign ")
                 .append(" WHERE id_campaign in  ")
                 .append(Sql.listPrepared(ids.toArray()));
 
         for (Integer id : ids) {
-            value.addNumber(id);
+            value.add(id);
         }
 
         return new JsonObject()
-                .putString("statement", query.toString())
-                .putArray("values", value)
-                .putString("action", "prepared");
+                .put("statement", query.toString())
+                .put("values", value)
+                .put("action", "prepared");
     }
 
     private JsonObject getCampaignsDeletion(List<Integer> ids) {
         StringBuilder query = new StringBuilder();
-        JsonArray value = new JsonArray();
+        JsonArray value = new fr.wseduc.webutils.collections.JsonArray();
         query.append("DELETE FROM " + Lystore.lystoreSchema + ".campaign ")
                 .append(" WHERE id in  ")
                 .append(Sql.listPrepared(ids.toArray()));
 
         for (Integer id : ids) {
-            value.addNumber(id);
+            value.add(id);
         }
 
         return new JsonObject()
-                .putString("statement", query.toString())
-                .putArray("values", value)
-                .putString("action", "prepared");
+                .put("statement", query.toString())
+                .put("values", value)
+                .put("action", "prepared");
     }
     /**
      * Returns transaction handler. Manage response based on PostgreSQL event
@@ -298,9 +297,9 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
     private static Either<String, JsonObject> getTransactionHandler(Message<JsonObject> event, Number id) {
         Either<String, JsonObject> either;
         JsonObject result = event.body();
-        if (result.containsField("status") && "ok".equals(result.getString("status"))) {
+        if (result.containsKey("status") && "ok".equals(result.getString("status"))) {
             JsonObject returns = new JsonObject()
-                    .putNumber("id", id);
+                    .put("id", id);
             either = new Either.Right<>(returns);
         } else {
             LOGGER.error("An error occurred when launching campaign transaction");

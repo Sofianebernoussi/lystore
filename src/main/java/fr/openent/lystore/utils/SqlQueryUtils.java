@@ -1,10 +1,10 @@
 package fr.openent.lystore.utils;
 
 import fr.wseduc.webutils.Either;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.core.logging.impl.LoggerFactory;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,9 +48,9 @@ public final class SqlQueryUtils {
     public static Either<String, JsonObject> getTransactionHandler(Message<JsonObject> event, Number id) {
         Either<String, JsonObject> either;
         JsonObject result = event.body();
-        if (result.containsField("status") && "ok".equals(result.getString("status"))) {
+        if (result.containsKey("status") && "ok".equals(result.getString("status"))) {
             JsonObject returns = new JsonObject()
-                    .putNumber("id", id);
+                    .put("id", id);
             either = new Either.Right<>(returns);
         } else {
             LOGGER.error("An error occurred when launching transaction");

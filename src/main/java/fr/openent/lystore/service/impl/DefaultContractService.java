@@ -6,9 +6,9 @@ import fr.wseduc.webutils.Either;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.Handler;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
                 "FROM " + Lystore.lystoreSchema + ".contract INNER JOIN " + Lystore.lystoreSchema +
                 ".supplier on (contract.id_supplier = supplier.id)";
 
-        this.sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
+        this.sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray(), SqlResult.validResultHandler(handler));
     }
 
     public void createContract(JsonObject contract, Handler<Either<String, JsonObject>> handler) {
@@ -36,19 +36,19 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
                 "VALUES (?, ?, ?, to_date(?, 'YYYY-MM-DD'), ?, ?, ?, ?, ?, ?, to_date(?, 'YYYY-MM-DD')," +
                 " to_date(?, 'YYYY-MM-DD')) " +
                 "RETURNING id;";
-        JsonArray params = new JsonArray()
-                .addString(contract.getString("name"))
-                .addNumber(contract.getNumber("annual_min"))
-                .addNumber(contract.getNumber("annual_max"))
-                .addString(contract.getString("start_date"))
-                .addNumber(contract.getNumber("nb_renewal"))
-                .addNumber(contract.getNumber("id_contract_type"))
-                .addNumber(contract.getNumber("max_brink"))
-                .addNumber(contract.getNumber("id_supplier"))
-                .addNumber(contract.getNumber("id_agent"))
-                .addString(contract.getString("reference"))
-                .addString(contract.getString("end_date"))
-                .addString(contract.getString("renewal_end"));
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(contract.getString("name"))
+                .add(contract.getFloat("annual_min"))
+                .add(contract.getFloat("annual_max"))
+                .add(contract.getString("start_date"))
+                .add(contract.getInteger("nb_renewal"))
+                .add(contract.getInteger("id_contract_type"))
+                .add(contract.getFloat("max_brink"))
+                .add(contract.getInteger("id_supplier"))
+                .add(contract.getInteger("id_agent"))
+                .add(contract.getString("reference"))
+                .add(contract.getString("end_date"))
+                .add(contract.getString("renewal_end"));
 
         this.sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
@@ -60,20 +60,20 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
                 "reference = ?, end_date = to_date(?, 'YYYY-MM-DD'), renewal_end = to_date(?, 'YYYY-MM-DD') " +
                 "WHERE id = ?;";
 
-        JsonArray params = new JsonArray()
-                .addString(contract.getString("name"))
-                .addNumber(contract.getNumber("annual_min"))
-                .addNumber(contract.getNumber("annual_max"))
-                .addString(contract.getString("start_date"))
-                .addNumber(contract.getNumber("nb_renewal"))
-                .addNumber(contract.getNumber("id_contract_type"))
-                .addNumber(contract.getNumber("max_brink"))
-                .addNumber(contract.getNumber("id_supplier"))
-                .addNumber(contract.getNumber("id_agent"))
-                .addString(contract.getString("reference"))
-                .addString(contract.getString("end_date"))
-                .addString(contract.getString("renewal_end"))
-                .addNumber(id);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(contract.getString("name"))
+                .add(contract.getFloat("annual_min"))
+                .add(contract.getFloat("annual_max"))
+                .add(contract.getString("start_date"))
+                .add(contract.getInteger("nb_renewal"))
+                .add(contract.getInteger("id_contract_type"))
+                .add(contract.getFloat("max_brink"))
+                .add(contract.getInteger("id_supplier"))
+                .add(contract.getInteger("id_agent"))
+                .add(contract.getString("reference"))
+                .add(contract.getString("end_date"))
+                .add(contract.getString("renewal_end"))
+                .add(id);
 
         this.sql.prepared(query, params, SqlResult.validRowsResultHandler(handler));
     }
@@ -88,12 +88,12 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract " +
                 "ON (order_client_equipment.id_contract = contract.id) " +
-                "WHERE order_client_equipment.number_validation IN " + Sql.listPrepared(ids.toArray()) +
+                "WHERE order_client_equipment.number_validation IN " + Sql.listPrepared(ids.getList()) +
                 " GROUP BY contract.id";
-        JsonArray params = new JsonArray();
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
 
         for (int i = 0; i < ids.size(); i++) {
-            params.addString((String) ids.get(i));
+            params.add(ids.getString(i));
         }
 
         this.sql.prepared(query, params, SqlResult.validResultHandler(handler));

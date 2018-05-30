@@ -6,9 +6,9 @@ import fr.wseduc.webutils.Either;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.Handler;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 import java.util.List;
 
@@ -26,11 +26,11 @@ public class DefaultSupplierService extends SqlCrudService implements SupplierSe
         String query = "INSERT INTO " + Lystore.lystoreSchema + ".supplier (email, address, name, phone) " +
                 "VALUES (?, ?, ?, ?) RETURNING id;";
 
-        JsonArray params = new JsonArray()
-                .addString(agent.getString("email"))
-                .addString(agent.getString("address"))
-                .addString(agent.getString("name"))
-                .addString(agent.getString("phone"));
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(agent.getString("email"))
+                .add(agent.getString("address"))
+                .add(agent.getString("name"))
+                .add(agent.getString("phone"));
 
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
@@ -40,12 +40,12 @@ public class DefaultSupplierService extends SqlCrudService implements SupplierSe
                 "SET email = ?, address = ?, name = ?, phone = ? " +
                 "WHERE id = ? RETURNING *;";
 
-        JsonArray params = new JsonArray()
-                .addString(supplier.getString("email"))
-                .addString(supplier.getString("address"))
-                .addString(supplier.getString("name"))
-                .addString(supplier.getString("phone"))
-                .addNumber(id);
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(supplier.getString("email"))
+                .add(supplier.getString("address"))
+                .add(supplier.getString("name"))
+                .add(supplier.getString("phone"))
+                .add(id);
 
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
@@ -65,7 +65,7 @@ public class DefaultSupplierService extends SqlCrudService implements SupplierSe
                 "FROM lystore.order_client_equipment " +
                 "INNER JOIN lystore.contract ON (order_client_equipment.id_contract = contract.id) " +
                 "INNER JOIN lystore.supplier ON (contract.id_supplier = supplier.id) " +
-                "WHERE order_client_equipment.number_validation IN " + Sql.listPrepared(validationNumbers.toArray());
+                "WHERE order_client_equipment.number_validation IN " + Sql.listPrepared(validationNumbers.getList());
 
         this.sql.prepared(query, validationNumbers, SqlResult.validUniqueResultHandler(handler, new String[0]));
     }

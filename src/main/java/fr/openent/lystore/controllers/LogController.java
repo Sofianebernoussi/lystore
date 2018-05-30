@@ -11,10 +11,10 @@ import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.I18n;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.Handler;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 
@@ -49,8 +49,8 @@ public class LogController extends ControllerHelper {
                                 if (event.isRight()) {
                                     Integer numberLogs = event.right().getValue().getInteger("number_logs");
                                     JsonObject response = new JsonObject();
-                                    response.putNumber("number_logs", numberLogs)
-                                            .putArray("logs", logs);
+                                    response.put("number_logs", numberLogs)
+                                            .put("logs", logs);
                                     renderJson(request, response, 200);
                                 } else {
                                     log.error("An error occurred when collecting numbers of log");
@@ -92,7 +92,7 @@ public class LogController extends ControllerHelper {
     private static String generateExport (HttpServerRequest request, JsonArray logs) {
         StringBuilder report = new StringBuilder(UTF8_BOM).append(getExportHeader(request));
         for (int i = 0; i < logs.size(); i++) {
-          report.append(generateExportLine(request, (JsonObject) logs.get(i)));
+          report.append(generateExportLine(request, logs.getJsonObject(i)));
         }
         return report.toString();
     }

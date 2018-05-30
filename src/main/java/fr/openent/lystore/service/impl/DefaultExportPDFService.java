@@ -2,17 +2,18 @@ package fr.openent.lystore.service.impl;
 
 import fr.openent.lystore.service.ExportPDFService;
 import fr.wseduc.webutils.http.Renders;
-import org.vertx.java.core.AsyncResult;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.eventbus.EventBus;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.core.logging.impl.LoggerFactory;
-import org.vertx.java.platform.Container;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpServerRequest;
+import fr.wseduc.webutils.data.FileResolver;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -29,32 +30,35 @@ import static fr.wseduc.webutils.http.Renders.getScheme;
 public class DefaultExportPDFService  implements ExportPDFService {
     private static final Logger LOGGER = LoggerFactory.getLogger (DefaultOrderService.class);
     private String node;
-    private Container container;
+    private JsonObject config;
     private Vertx vertx;
     private EventBus eb;
     private Renders renders ;
 
-    public DefaultExportPDFService(EventBus eb, Vertx vertx, Container container ) {
+    public DefaultExportPDFService(EventBus eb, Vertx vertx, JsonObject config) {
         super();
         this.eb = eb;
-        this.container = container;
+        this.config = config;
         this.vertx = vertx;
-        this.renders = new Renders(this.vertx, this.container);
+        this.renders = new Renders(this.vertx, config);
     }
 
     public void generatePDF(final HttpServerRequest request, final JsonObject templateProps, final String templateName,
                             final String prefixPdfName,  final Handler<Buffer> handler) {
 
         final String dateDebut = new SimpleDateFormat("dd.MM.yyyy").format(new Date().getTime());
-        final String templatePath = container.config().getObject("exports").getString("template-path");
+        final String templatePath = config.getJsonObject("exports").getString("template-path");
         final String baseUrl = getScheme(request) + "://" + Renders.getHost(request) +
-                container.config().getString("app-address") + "/public/";
+                config.getString("app-address") + "/public/";
 
-        node = (String) vertx.sharedData().getMap("server").get("node");
+        node = (String) vertx.sharedData().getLocalMap("server").get("node");
         if (node == null) {
             node = "";
         }
-        vertx.fileSystem().readFile(templatePath + templateName, new Handler<AsyncResult<Buffer>>() {
+
+        final String path =  FileResolver.absolutePath(templatePath + templateName).toString();
+
+        vertx.fileSystem().readFile(path, new Handler<AsyncResult<Buffer>>() {
 
             @Override
             public void handle(AsyncResult<Buffer> result) {
@@ -82,18 +86,18 @@ public class DefaultExportPDFService  implements ExportPDFService {
                         }
 
                         actionObject
-                                .putBinary("content", bytes)
-                                .putString("baseUrl", baseUrl);
-                        eb.send(node + "entcore.pdf.generator", actionObject, new Handler<Message<JsonObject>>() {
+                                .put("content", bytes)
+                                .put("baseUrl", baseUrl);
+                        eb.send(node + "entcore.pdf.generator", actionObject, new Handler<AsyncResult<Message<JsonObject>>>() {
                             @Override
-                            public void handle(Message<JsonObject> reply) {
-                                JsonObject pdfResponse = reply.body();
+                            public void handle(AsyncResult<Message<JsonObject>> reply) {
+                                JsonObject pdfResponse = reply.result().body();
                                 if (!"ok".equals(pdfResponse.getString("status"))) {
                                     badRequest(request, pdfResponse.getString("message"));
                                     return;
                                 }
                                 byte[] pdf = pdfResponse.getBinary("content");
-                                Buffer either = new Buffer(pdf);
+                                Buffer either = Buffer.buffer(pdf);
                                 handler.handle(either);
                             }
                         });

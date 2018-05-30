@@ -5,9 +5,9 @@ import fr.openent.lystore.service.LogService;
 import fr.wseduc.webutils.Either;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.Handler;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 public class DefaultLogService implements LogService {
 
@@ -22,11 +22,11 @@ public class DefaultLogService implements LogService {
                 " ELSE value END, " +
                 " id_user, username, item "+
                 "FROM " + Lystore.lystoreSchema + ".logs LOGGER ";
-        JsonArray params = new JsonArray();
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
 
         if (page != null) {
             query += " ORDER BY date DESC LIMIT 100 OFFSET ?";
-            params.addNumber(NB_OCCURRENCES_PAGE * page);
+            params.add(NB_OCCURRENCES_PAGE * page);
         }
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
@@ -36,6 +36,6 @@ public class DefaultLogService implements LogService {
     public void getLogsNumber(Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT count(id) as number_logs FROM " + Lystore.lystoreSchema + ".logs";
 
-        Sql.getInstance().prepared(query, new JsonArray(), SqlResult.validUniqueResultHandler(handler));
+        Sql.getInstance().prepared(query, new fr.wseduc.webutils.collections.JsonArray(), SqlResult.validUniqueResultHandler(handler));
     }
 }

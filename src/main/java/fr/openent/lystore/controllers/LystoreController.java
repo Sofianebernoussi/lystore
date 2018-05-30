@@ -4,7 +4,7 @@ import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
 import fr.wseduc.security.SecuredAction;
 import org.entcore.common.controller.ControllerHelper;
-import org.vertx.java.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerRequest;
 
 
 public class LystoreController extends ControllerHelper {

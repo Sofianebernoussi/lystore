@@ -2,21 +2,22 @@ package fr.openent.lystore.service.impl;
 
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.email.EmailSender;
+import io.vertx.core.AsyncResult;
 import org.entcore.common.neo4j.Neo4j;
 import org.entcore.common.neo4j.Neo4jResult;
 import org.entcore.common.user.UserInfos;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.logging.impl.LoggerFactory;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.LoggerFactory;
 
 public class EmailSendService {
 
     private Neo4j neo4j;
 
-    private static final org.vertx.java.core.logging.Logger LOGGER = LoggerFactory.getLogger (EmailSendService.class);
+    private static final io.vertx.core.logging.Logger LOGGER = LoggerFactory.getLogger (EmailSendService.class);
     private final EmailSender emailSender;
     public EmailSendService(EmailSender emailSender){
         this.emailSender = emailSender;
@@ -31,10 +32,7 @@ public class EmailSendService {
                 body,
                 null,
                 true,
-                new Handler<Message<JsonObject>>() {
-                    @Override
-                    public void handle(Message<JsonObject> jsonObjectMessage) {}
-                });
+                null);
     }
 
     public void sendMails(HttpServerRequest request, JsonObject result, JsonArray rows, UserInfos user, String url,
@@ -42,21 +40,21 @@ public class EmailSendService {
         final int contractNameIndex = 1;
         final int agentEmailIndex = 3;
         //TODO FIXER CETTE PARTIE. REFAIRE COMPLETEMENT LA SEQUENCE DE GESTION DES MAILS
-        JsonArray line = rows.get(0);
-        String agentMailObject = "[LyStore] Commandes " + line.get(contractNameIndex);
+        JsonArray line = rows.getJsonArray(0);
+        String agentMailObject = "[LyStore] Commandes " + line.getString(contractNameIndex);
         String agentMailBody = getAgentBodyMail(line, user, result.getString("number_validation"), url);
-        sendMail(request, (String) line.get(agentEmailIndex),
+        sendMail(request, line.getString(agentEmailIndex),
                 agentMailObject,
                 agentMailBody);
         for (int i = 0; i < structureRows.size(); i++) {
             String mailObject="[LyStore] Commandes ";
-            JsonObject row = structureRows.get(i);
+            JsonObject row = structureRows.getJsonObject(i);
             String name = row.getString("name");
-            JsonArray mailsRow = row.getArray("mails");
+            JsonArray mailsRow = row.getJsonArray("mails");
             for(int j = 0 ; j < mailsRow.size() ; j++){
-                JsonObject userMail = (JsonObject) mailsRow.get(j);
+                JsonObject userMail = mailsRow.getJsonObject(j);
                 if (userMail.getString("mail") != null) {
-                    String mailBody = getStructureBodyMail((JsonObject) mailsRow.get(j), user,
+                    String mailBody = getStructureBodyMail(mailsRow.getJsonObject(j), user,
                             result.getString("number_validation"), url, name);
                     sendMail(request, userMail.getString("mail"),
                             mailObject,
@@ -71,7 +69,7 @@ public class EmailSendService {
                 " Match p = ((r)<--(mg:ManualGroup)-->(s:Structure)), (mg)<-[IN]-(u:User)  " +
                 "where NbrRows=1 AND s.id IN {ids} return s.id as id, s.name as name, " +
                 "collect(DISTINCT {mail : u.email, name: u.displayName} ) as mails ";
-        neo4j.execute(query, new JsonObject().putArray("ids", structureIds),
+        neo4j.execute(query, new JsonObject().put("ids", structureIds),
                 Neo4jResult.validResultHandler(handler));
 
     }
@@ -91,10 +89,10 @@ public class EmailSendService {
     }
     private static String getAgentBodyMail(JsonArray row, UserInfos user, String numberOrder, String url){
         final int contractName = 2 ;
-        String body = "Bonjour " + row.get(contractName) + ", <br/> <br/>"
+        String body = "Bonjour " + row.getString(contractName) + ", <br/> <br/>"
                 + user.getFirstName() + " " + user.getLastName() + " vient de valider une commande sous le numéro \""
                 + numberOrder + "\"."
-                + " Une partie de la commande concerne le marche " + row.get(1) + ". "
+                + " Une partie de la commande concerne le marche " + row.getString(1) + ". "
                 + "<br /> Pour générer le bon de commande et les CSF associés, il suffit de se rendre ici : <br />"
                 + "<br />" + url + "#/order/client/waiting <br />"
                 + "<br /> Bien Cordialement, "

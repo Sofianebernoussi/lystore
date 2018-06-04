@@ -64,10 +64,13 @@ export const orderController = ng.controller('orderController',
         };
 
         function generateRegexp (words: string[]): RegExp {
+            function escapeRegExp(str: string) {
+                return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+            }
             let reg;
             if (words.length > 0) {
                 reg = '.*(';
-                words.map((word: string) => reg += `${word.toLowerCase()}|`);
+                words.map((word: string) => reg += `${escapeRegExp(word.toLowerCase())}|`);
                 reg = reg.slice(0, -1);
                 reg += ').*';
             } else {
@@ -82,7 +85,7 @@ export const orderController = ng.controller('orderController',
             const matchStructureGroups = (structureGroups: string[]): boolean => {
                 let bool: boolean = false;
                 if (typeof structureGroups === 'string') structureGroups = Utils.parsePostgreSQLJson(structureGroups);
-                structureGroups.map((groupName) => bool = bool || regex.test(groupName));
+                structureGroups.map((groupName) => bool = bool || regex.test(groupName.toLowerCase()));
                 return bool;
             };
 

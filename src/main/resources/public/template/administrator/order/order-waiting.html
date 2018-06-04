@@ -58,11 +58,11 @@
                     <i class="up-open" ng-show="sort.order.type === 'amount' && !sort.order.reverse"></i>
                     <i class="down-open" ng-show="sort.order.type === 'amount' && sort.order.reverse"></i>
                 </td>
-                <td ng-click="sort.order.type = 'creation_date';
+                <td ng-click="sort.order.type = 'id';
                     sort.order.reverse = !sort.order.reverse">
                     <i18n>date</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'creation_date' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'creation_date' && sort.order.reverse"></i>
+                    <i class="up-open" ng-show="sort.order.type === 'id' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'id' && sort.order.reverse"></i>
                 </td>
                 <td ng-click="sort.order.type = 'structure_groups';
                     sort.order.reverse = !sort.order.reverse">

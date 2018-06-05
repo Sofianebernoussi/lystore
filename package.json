@@ -1,6 +1,6 @@
 {
   "name": "Lystore",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ENT Core application to create Lystore",
   "main": "gulpfile.js",
   "scripts": {

@@ -117,18 +117,20 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         }
         query += " GROUP BY equipment_key, price, tax_amount, name, id_contract " + (groupByStructure ? ", id_structure " : "") +
                 "UNION " +
+                "SELECT opt.price, opt.tax_amount, opt.name, opt.id_contract, SUM(opt.amount) as amount " +
+                (structureId != null || groupByStructure ? ", equipment.id_structure " : "") +
+                "FROM (" +
                 "SELECT options.price, options.tax_amount," +
                 "options.name, equipment.id_contract," +
-                "SUM(equipment.amount) as amount " + (groupByStructure ? ", equipment.id_structure " : "") +
+                "equipment.amount, options.id_order_client_equipment " + (groupByStructure ? ", equipment.id_structure " : "") +
                 "FROM " + Lystore.lystoreSchema + ".order_client_options options " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".order_client_equipment equipment " +
                 "ON (options.id_order_client_equipment = equipment.id) " +
-                "WHERE " + (isNumberValidation ? "number_validation" : "id_order_client_equipment") + " IN " + Sql.listPrepared(ids.getList());
-        if (structureId != null) {
-            query += " AND equipment.id_structure = ?";
-        }
-        query += " GROUP BY options.name, equipment_key, options.price, options.tax_amount," +
-                "equipment.id_contract" + (groupByStructure ? ", equipment.id_structure" : "");
+                "WHERE " + (isNumberValidation ? "number_validation" : "id_order_client_equipment") + " IN " + Sql.listPrepared(ids.getList()) +
+                (structureId != null ? " AND equipment.id_structure = ?" : "") +
+                ") as opt";
+        query += (groupByStructure || structureId != null ? " INNER JOIN lystore.order_client_equipment equipment ON (opt.id_order_client_equipment = equipment.id)" : "");
+        query += " GROUP BY opt.name, opt.price, opt.tax_amount, opt.id_contract" + (groupByStructure ? ", equipment.id_structure" : "");
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
 

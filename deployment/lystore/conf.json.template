@@ -17,7 +17,8 @@
         "sql": true,
         "db-schema": "lystore",
         "exports" : {
-            "template-path" : "./public/template/pdf/"
+            "template-path" : "./public/template/pdf/",
+            "logo-path": "./public/img/ile_de_france.png"
         },
         "slack": {
             "token": "",

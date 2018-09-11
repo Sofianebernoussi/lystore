@@ -20,6 +20,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Date;
 
 import static fr.wseduc.webutils.http.Renders.badRequest;
@@ -47,16 +48,19 @@ public class DefaultExportPDFService  implements ExportPDFService {
                             final String prefixPdfName,  final Handler<Buffer> handler) {
 
         final String dateDebut = new SimpleDateFormat("dd.MM.yyyy").format(new Date().getTime());
-        final String templatePath = config.getJsonObject("exports").getString("template-path");
+        final JsonObject exportConfig = config.getJsonObject("exports");
+        final String templatePath = exportConfig.getString("template-path");
         final String baseUrl = getScheme(request) + "://" + Renders.getHost(request) +
                 config.getString("app-address") + "/public/";
+        final String logo = exportConfig.getString("logo-path");
 
         node = (String) vertx.sharedData().getLocalMap("server").get("node");
         if (node == null) {
             node = "";
         }
 
-        final String path =  FileResolver.absolutePath(templatePath + templateName).toString();
+        final String path = FileResolver.absolutePath(templatePath + templateName);
+        final String logoPath = FileResolver.absolutePath(logo);
 
         vertx.fileSystem().readFile(path, new Handler<AsyncResult<Buffer>>() {
 
@@ -66,6 +70,17 @@ public class DefaultExportPDFService  implements ExportPDFService {
                     badRequest(request);
                     return;
                 }
+
+                Buffer logoBuffer = vertx.fileSystem().readFileBlocking(logoPath);
+                String encodedLogo = "";
+                try {
+                    encodedLogo = new String(Base64.getMimeEncoder().encode(logoBuffer.getBytes()), "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    LOGGER.error("[DefaultExportPDFService@generatePDF] An error occurred while encoding logo to base 64");
+                }
+                templateProps.put("logo-data", encodedLogo);
+
                 StringReader reader = new StringReader(result.result().toString("UTF-8"));
                 renders.processTemplate(request, templateProps, templateName, reader, new Handler<Writer>() {
 

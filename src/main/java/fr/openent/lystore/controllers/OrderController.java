@@ -35,9 +35,7 @@ import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.*;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
@@ -706,12 +704,14 @@ public class OrderController extends ControllerHelper {
                     JsonObject order = new JsonObject();
                     JsonArray orders = formatOrders(event.right().getValue());
                     order.put("orders", orders);
+                    Double sumWithoutTaxes = getSumWithoutTaxes(orders);
+                    Double taxTotal = getTaxesTotal(orders);
                     order.put("sumLocale",
-                            decimals.format(roundWith2Decimals(getSumWithoutTaxes(orders))).replace(".", ","));
+                            getReadableNumber(roundWith2Decimals(sumWithoutTaxes)));
                     order.put("totalTaxesLocale",
-                            decimals.format(roundWith2Decimals(getTaxesTotal(orders))).replace(".", ","));
+                            getReadableNumber(roundWith2Decimals(taxTotal)));
                     order.put("totalPriceTaxeIncludedLocal",
-                            decimals.format(roundWith2Decimals(getTotalOrder(orders))).replace(".", ","));
+                            getReadableNumber(roundWith2Decimals(taxTotal + sumWithoutTaxes)));
                     handler.handle(order);
                 } else {
                     log.error("An error occurred when retrieving order data");
@@ -721,36 +721,44 @@ public class OrderController extends ControllerHelper {
         });
     }
 
-    private Float getTotalOrder(JsonArray orders) {
-        Float sum = 0F;
+    private static String getReadableNumber(Double number) {
+        DecimalFormat instance = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.FRENCH);
+        DecimalFormatSymbols symbols = instance .getDecimalFormatSymbols();
+        symbols.setCurrencySymbol("");
+        instance.setDecimalFormatSymbols(symbols);
+        return instance.format(number);
+    }
+
+    private Double getTotalOrder(JsonArray orders) {
+        Double sum = 0D;
         JsonObject order;
         for (int i = 0; i < orders.size(); i++) {
             order = orders.getJsonObject(i);
-            sum += (Float.parseFloat(order.getString("price")) * Integer.parseInt(order.getString("amount"))
-                    * (Float.parseFloat(order.getString("tax_amount")) / 100 + 1));
+            sum += (Double.parseDouble(order.getString("price")) * Integer.parseInt(order.getString("amount"))
+                    * (Double.parseDouble(order.getString("tax_amount")) / 100 + 1));
         }
 
         return sum;
     }
 
-    private Float getTaxesTotal(JsonArray orders) {
-        Float sum = 0F;
+    private Double getTaxesTotal(JsonArray orders) {
+        Double sum = 0D;
         JsonObject order;
         for (int i = 0; i < orders.size(); i++) {
             order = orders.getJsonObject(i);
-            sum += Float.parseFloat(order.getString("price")) * Integer.parseInt(order.getString("amount"))
-                    * (Float.parseFloat(order.getString("tax_amount")) / 100);
+            sum += Double.parseDouble(order.getString("price")) * Integer.parseInt(order.getString("amount"))
+                    * (Double.parseDouble(order.getString("tax_amount")) / 100);
         }
 
         return sum;
     }
 
-    private Float getSumWithoutTaxes(JsonArray orders) {
+    private Double getSumWithoutTaxes(JsonArray orders) {
         JsonObject order;
-        Float sum = 0F;
+        Double sum = 0D;
         for (int i = 0; i < orders.size(); i++) {
             order = orders.getJsonObject(i);
-            sum += Float.parseFloat(order.getString("price")) * Integer.parseInt(order.getString("amount"));
+            sum += Double.parseDouble(order.getString("price")) * Integer.parseInt(order.getString("amount"));
         }
 
         return sum;
@@ -761,37 +769,37 @@ public class OrderController extends ControllerHelper {
         for (int i = 0; i < orders.size(); i++) {
             order = orders.getJsonObject(i);
             order.put("priceLocale",
-                    decimals.format(roundWith2Decimals(Float.parseFloat(order.getString("price")))).replace(".", ","));
+                    getReadableNumber(roundWith2Decimals(Double.parseDouble(order.getString("price")))));
             order.put("unitPriceTaxIncluded",
-                    decimals.format(roundWith2Decimals(getTaxIncludedPrice(Float.parseFloat(order.getString("price")),
-                            Float.parseFloat(order.getString("tax_amount"))))).replace(".", ","));
+                    getReadableNumber(roundWith2Decimals(getTaxIncludedPrice(Double.parseDouble(order.getString("price")),
+                            Double.parseDouble(order.getString("tax_amount"))))));
             order.put("unitPriceTaxIncludedLocale",
-                    decimals.format(roundWith2Decimals(getTaxIncludedPrice(Float.parseFloat (order.getString("price")),
-                            Float.parseFloat(order.getString("tax_amount"))))).replace(".", ","));
+                    getReadableNumber(roundWith2Decimals(getTaxIncludedPrice(Double.parseDouble(order.getString("price")),
+                            Double.parseDouble(order.getString("tax_amount"))))));
             order.put("totalPrice",
-                    roundWith2Decimals(getTotalPrice(Float.parseFloat(order.getString("price")),
-                            Long.parseLong(order.getString("amount")))));
+                    roundWith2Decimals(getTotalPrice(Double.parseDouble(order.getString("price")),
+                            Double.parseDouble(order.getString("amount")))));
             order.put("totalPriceLocale",
-                    decimals.format(roundWith2Decimals(Float.parseFloat(order.getFloat("totalPrice").toString()))).replace(".", ","));
+                    getReadableNumber(roundWith2Decimals(Double.parseDouble(order.getDouble("totalPrice").toString()))));
             order.put("totalPriceTaxIncluded",
-                    decimals.format(roundWith2Decimals(getTaxIncludedPrice((Float) order.getFloat("totalPrice"),
-                            Float.parseFloat(order.getString("tax_amount"))))).replace(".", ","));
+                    getReadableNumber(roundWith2Decimals(getTaxIncludedPrice(order.getDouble("totalPrice"),
+                            Double.parseDouble(order.getString("tax_amount"))))));
         }
         return orders;
     }
 
-    private static Float getTotalPrice (Float price, Long amount) {
+    private static Double getTotalPrice (Double price, Double amount) {
         return price * amount;
     }
 
-    private static Float getTaxIncludedPrice(Float price, Float taxAmount) {
-        Float multiplier = taxAmount / 100 + 1;
+    private static Double getTaxIncludedPrice(Double price, Double taxAmount) {
+        Double multiplier = taxAmount / 100 + 1;
         return roundWith2Decimals(price) * multiplier;
     }
 
-    private static Float roundWith2Decimals(Float numberToRound) {
+    private static Double roundWith2Decimals(Double numberToRound) {
         BigDecimal bd = new BigDecimal(numberToRound);
-        return bd.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
+        return bd.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
 

@@ -3,24 +3,31 @@
         <i18n>lystore.basket.delete.title</i18n>
     </h2>
     <p>
-        <i18n>lystore.basket.delete.message</i18n> :
+        <i18n>lystore.basket.delete.message</i18n>
+        :
     </p>
 
     <div class="cell twelve">
         <div class="row article-equipment">
-            <h4 class="highlighted"><i18n>description</i18n></h4>
+            <h4 class="highlighted">
+                <i18n>description</i18n>
+            </h4>
             <div class="two cell basket-image">
-                <img ng-src="[[basketToDelete.equipment.image]]" ng-show="basketToDelete.equipment.image!==null && basketToDelete.equipment.image!==undefined " />
-                <img skin-src="/img/illustrations/pages-default.png" ng-show="basketToDelete.equipment.image===null || basketToDelete.equipment.image===undefined "/>
+                <img ng-src="[[basketToDelete.equipment.image]]"
+                     ng-show="basketToDelete.equipment.image!==null && basketToDelete.equipment.image!==undefined "/>
+                <img skin-src="/img/illustrations/pages-default.png"
+                     ng-show="basketToDelete.equipment.image===null || basketToDelete.equipment.image===undefined "/>
             </div>
             <div class="nine cell basket-equipment">
                 <h3>[[basketToDelete.equipment.name]]</h3>
-                <p ng-bind-html="basketToDelete.equipment.summary" ></p>
+                <p ng-bind-html="basketToDelete.equipment.summary"></p>
                 <p>
             </div>
         </div>
         <div class="row options-head" ng-show="basketToDelete.options.length > 0">
-            <h4 class="highlighted"><i18n>multi-combo.options</i18n></h4>
+            <h4 class="highlighted">
+                <i18n>multi-combo.options</i18n>
+            </h4>
             <table class="twelve option-table">
                 <thead>
                 <tr>
@@ -45,16 +52,11 @@
                 <i18n>lystore.order</i18n>
             </h4>
             <p>
-                <i18n>
-                    lystore.expected.delivery
-                </i18n>
-                <strong>[[calculeDeliveryDate()]]</strong>
-            </p>
-            <p>
                 <span> <i18n>lystore.quantity</i18n> :</span><strong>[[basketToDelete.amount]]</strong>
             </p>
             <p>
-                <span><i18n>price</i18n> :</span><strong ng-bind="calculatePriceOfBasket(basketToDelete , 2, true) | currency"></strong>
+                <span><i18n>price</i18n> :</span><strong
+                    ng-bind="calculatePriceOfBasket(basketToDelete , 2, true) | currency"></strong>
             </p>
         </div>
 

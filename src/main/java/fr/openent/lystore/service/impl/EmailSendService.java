@@ -13,6 +13,9 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 public class EmailSendService {
 
     private Neo4j neo4j;
@@ -80,7 +83,7 @@ public class EmailSendService {
                 + "Une commande sous le numéro \"" + numberOrder + "\" vient d'être validée."
                 + " Une partie de la commande concerne l'établissement " + name + ". "
                 + "Cette confirmation est visible sur l'interface de LyStore en vous rendant ici :  <br />"
-                + "<br />" + url + "#/ <br />"
+                + "<br />" + url + "/lystore#/ <br />"
                 + "<br /> Bien Cordialement, "
                 + "<br /> L'équipe LyStore. ";
 
@@ -89,16 +92,24 @@ public class EmailSendService {
     }
     private static String getAgentBodyMail(JsonArray row, UserInfos user, String numberOrder, String url){
         final int contractName = 2 ;
-        String body = "Bonjour " + row.getString(contractName) + ", <br/> <br/>"
+        String body = null;
+        body = "Bonjour " + row.getString(contractName) + ", <br/> <br/>"
                 + user.getFirstName() + " " + user.getLastName() + " vient de valider une commande sous le numéro \""
                 + numberOrder + "\"."
-                + " Une partie de la commande concerne le marche " + row.getString(1) + ". "
+                + " Une partie de la commande concerne le marché " + row.getString(1) + ". "
                 + "<br /> Pour générer le bon de commande et les CSF associés, il suffit de se rendre ici : <br />"
-                + "<br />" + url + "#/order/client/waiting <br />"
+                + "<br />" + url + getEncodedRedirectUri(url + "/lystore#/order/valid") + "<br />"
                 + "<br /> Bien Cordialement, "
                 + "<br /> L'équipe LyStore. ";
-
         return formatAccentedString(body);
+    }
+
+    private static String getEncodedRedirectUri(String callback) {
+        try {
+            return "/auth/login?callback=" + URLEncoder.encode(callback, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return "";
+        }
     }
 
     private static String formatAccentedString (String body){

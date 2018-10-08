@@ -1,4 +1,4 @@
-import { ng, template, notify, idiom as lang, moment, model, Behaviours, _} from 'entcore';
+import {ng, template, notify, idiom as lang, moment, model, Behaviours, _} from 'entcore';
 import {
     Agents,
     Suppliers,
@@ -49,7 +49,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.ordersClient = new OrdersClient();
         $scope.displayedOrders = new OrdersClient();
         route({
-            main:  async() => {
+            main: async () => {
                 if ($scope.isManager() || $scope.isAdministrator()) {
                     template.open('main-profile', 'administrator/management-main');
                 } else {
@@ -92,7 +92,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             createEquipment: async () => {
-                if (template.isEmpty('administrator-main')) { $scope.redirectTo('/equipments'); }
+                if (template.isEmpty('administrator-main')) {
+                    $scope.redirectTo('/equipments');
+                }
                 template.open('equipments-main', 'administrator/equipment/equipment-form');
             },
             viewLogs: async () => {
@@ -107,19 +109,25 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             createCampaigns: async () => {
-                if (template.isEmpty('administrator-main')) { $scope.redirectTo('/campaigns'); }
+                if (template.isEmpty('administrator-main')) {
+                    $scope.redirectTo('/campaigns');
+                }
                 template.open('campaigns-main', 'administrator/campaign/campaign_form');
                 await $scope.tags.sync();
                 await $scope.structureGroups.sync();
                 Utils.safeApply($scope);
             },
             updateCampaigns: async () => {
-                if (template.isEmpty('administrator-main')) { $scope.redirectTo('/campaigns'); }
+                if (template.isEmpty('administrator-main')) {
+                    $scope.redirectTo('/campaigns');
+                }
                 template.open('campaigns-main', 'administrator/campaign/campaign_form');
                 Utils.safeApply($scope);
             },
             managePurse: async (params) => {
-                if (template.isEmpty('administrator-main')) { $scope.redirectTo('/campaigns'); }
+                if (template.isEmpty('administrator-main')) {
+                    $scope.redirectTo('/campaigns');
+                }
                 template.open('campaigns-main', 'administrator/campaign/purse/manage-purse');
                 Utils.safeApply($scope);
             },
@@ -132,65 +140,67 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             createStructureGroup: async () => {
-                if (template.isEmpty('administrator-main')) { $scope.redirectTo('/structureGroups'); }
+                if (template.isEmpty('administrator-main')) {
+                    $scope.redirectTo('/structureGroups');
+                }
                 template.open('structureGroups-main', 'administrator/structureGroup/structureGroup-form');
                 Utils.safeApply($scope);
             },
-            campaignCatalog : async (params) => {
+            campaignCatalog: async (params) => {
                 let id = params.idCampaign;
                 $scope.idIsInteger(id);
-                $scope.current.structure ? await $scope.equipments.sync(id, $scope.current.structure.id) : null ;
+                $scope.current.structure ? await $scope.equipments.sync(id, $scope.current.structure.id) : null;
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/catalog/catalog-list');
                 template.close('right-side');
                 $scope.display.equipment = false;
                 Utils.safeApply($scope);
             },
-            equipmentDetail : async (params) => {
+            equipmentDetail: async (params) => {
                 let idCampaign = params.idCampaign;
                 let idEquipment = params.idEquipment;
                 $scope.idIsInteger(idCampaign);
                 $scope.idIsInteger(idEquipment);
                 $scope.current.structure
-                    ? await $scope.initBasketItem( parseInt(idEquipment), parseInt(idCampaign), $scope.current.structure.id )
+                    ? await $scope.initBasketItem(parseInt(idEquipment), parseInt(idCampaign), $scope.current.structure.id)
                     : null;
                 template.open('right-side', 'customer/campaign/catalog/equipment-detail');
                 window.scrollTo(0, 0);
                 Utils.safeApply($scope);
             },
-            campaignOrder : async (params) => {
+            campaignOrder: async (params) => {
                 let idCampaign = params.idCampaign;
                 $scope.idIsInteger(idCampaign);
                 $scope.current.structure
-                    ? await $scope.ordersClient.sync(null, [], idCampaign, $scope.current.structure.id )
+                    ? await $scope.ordersClient.sync(null, [], idCampaign, $scope.current.structure.id)
                     : null;
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/order/manage-order');
                 Utils.safeApply($scope);
             },
-            campaignBasket : async (params) => {
+            campaignBasket: async (params) => {
                 let idCampaign = params.idCampaign;
                 $scope.idIsInteger(idCampaign);
                 $scope.current.structure
-                ? await $scope.baskets.sync(idCampaign, $scope.current.structure.id )
-                : null;
+                    ? await $scope.baskets.sync(idCampaign, $scope.current.structure.id)
+                    : null;
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/basket/manage-basket');
                 Utils.safeApply($scope);
             },
-            orderWaiting : async () => {
-               $scope.initOrders('WAITING');
+            orderWaiting: async () => {
+                $scope.initOrders('WAITING');
                 template.open('administrator-main', 'administrator/order/order-waiting');
                 Utils.safeApply($scope);
             },
-            orderSent : async () => {
+            orderSent: async () => {
                 $scope.structures = new Structures();
                 $scope.initOrders('SENT');
                 template.open('administrator-main', 'administrator/order/order-sent');
                 $scope.orderToSend = null;
                 Utils.safeApply($scope);
             },
-            orderClientValided : async () => {
+            orderClientValided: async () => {
                 $scope.initOrders('VALID');
                 template.open('administrator-main', 'administrator/order/order-valided');
                 Utils.safeApply($scope);
@@ -201,17 +211,17 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             }
         });
         $scope.initBasketItem = async (idEquipment: number, idCampaign: number, structure) => {
-            $scope.equipment = _.findWhere( $scope.equipments.all, {id: idEquipment});
+            $scope.equipment = _.findWhere($scope.equipments.all, {id: idEquipment});
             if ($scope.equipment === undefined && !isNaN(idEquipment)) {
                 $scope.equipment = new Equipment();
                 await $scope.equipment.sync(idEquipment);
             }
-            $scope.basket = new Basket($scope.equipment , idCampaign, structure);
+            $scope.basket = new Basket($scope.equipment, idCampaign, structure);
         };
         $scope.idIsInteger = (id) => {
             try {
-                id = parseInt(id) ;
-                if (isNaN(id) ) {
+                id = parseInt(id);
+                if (isNaN(id)) {
                     $scope.redirectTo(`/`);
                     Utils.safeApply($scope);
                 }
@@ -230,14 +240,14 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         };
 
         $scope.isAdministrator = () => {
-            return model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.administrator) ;
+            return model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.administrator);
         };
 
         $scope.redirectTo = (path: string) => {
             $location.path(path);
         };
 
-        $rootScope.$on('eventEmitedCampaign', function(event, data) {
+        $rootScope.$on('eventEmitedCampaign', function (event, data) {
             $scope.campaign = data;
         });
 
@@ -248,8 +258,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.calculatePriceTTC = (price, tax_value, roundNumber?: number) => {
             let priceFloat = parseFloat(price);
             let taxFloat = parseFloat(tax_value);
-            let price_TTC = (( priceFloat + ((priceFloat *  taxFloat) / 100)));
-            return (!isNaN(price_TTC)) ? (roundNumber ? price_TTC.toFixed(roundNumber) : price_TTC ) : '';
+            let price_TTC = ((priceFloat + ((priceFloat * taxFloat) / 100)));
+            return (!isNaN(price_TTC)) ? (roundNumber ? price_TTC.toFixed(roundNumber) : price_TTC) : '';
         };
 
         /**
@@ -260,13 +270,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
          * @returns {string | number}
          */
         $scope.calculatePriceOfEquipment = (equipment: any, selectedOptions: boolean, roundNumber: number = 2) => {
-            let price = parseFloat( $scope.calculatePriceTTC(equipment.price , equipment.tax_amount) );
+            let price = parseFloat($scope.calculatePriceTTC(equipment.price, equipment.tax_amount));
             equipment.options.map((option) => {
-                (option.required === true  || (selectedOptions ? option.selected === true : false) )
-                    ? price += parseFloat($scope.calculatePriceTTC(option.price , option.tax_amount) )
-                    : null ;
+                (option.required === true || (selectedOptions ? option.selected === true : false))
+                    ? price += parseFloat($scope.calculatePriceTTC(option.price, option.tax_amount))
+                    : null;
             });
-            return (!isNaN(price)) ? (roundNumber ? price.toFixed(roundNumber) : price ) : price ;
+            return (!isNaN(price)) ? (roundNumber ? price.toFixed(roundNumber) : price) : price;
         };
         $scope.initStructures = async () => {
             await $scope.structures.syncUserStructures();
@@ -278,14 +288,14 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         };
 
         $scope.notifyBasket = (action: String, basket: Basket) => {
-            let messageForOne =  basket.amount + ' ' + lang.translate('article') + ' "'
-                + basket.equipment.name  + '" ' + lang.translate('lystore.basket.' + action + '.article');
+            let messageForOne = basket.amount + ' ' + lang.translate('article') + ' "'
+                + basket.equipment.name + '" ' + lang.translate('lystore.basket.' + action + '.article');
             let messageForMany = basket.amount + ' ' + lang.translate('articles') + ' "'
-                + basket.equipment.name  + '" ' + lang.translate('lystore.basket.'  + action + '.articles');
-            $scope.notifications.push(new Notification(basket.amount === 1 ?  messageForOne : messageForMany , 'confirm'));
+                + basket.equipment.name + '" ' + lang.translate('lystore.basket.' + action + '.articles');
+            $scope.notifications.push(new Notification(basket.amount === 1 ? messageForOne : messageForMany, 'confirm'));
         };
 
-        $scope. initCampaign = async (structure) => {
+        $scope.initCampaign = async (structure) => {
             if (structure) {
                 await $scope.campaigns.sync(structure.id);
                 Utils.safeApply($scope);
@@ -305,17 +315,12 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         };
 
         $scope.initOrdersForPreview = async (orders: OrderClient[]) => {
-            $scope.orderToSend = new OrdersClient( Mix.castAs( Supplier, orders[0].supplier ));
+            $scope.orderToSend = new OrdersClient(Mix.castAs(Supplier, orders[0].supplier));
             $scope.orderToSend.all = Mix.castArrayAs(OrderClient, orders);
             $scope.orderToSend.preview = await $scope.orderToSend.getPreviewData();
             $scope.orderToSend.preview.index = 0;
         };
 
-        $rootScope.$on('$routeChangeSuccess', ( $currentRoute, $previousRoute, $location ) => {
-            if ( $location === undefined) {
-                $scope.redirectTo('/');
-            }
-        });
         if ($scope.isManager() || $scope.isAdministrator()) {
             template.open('main-profile', 'administrator/management-main');
         }

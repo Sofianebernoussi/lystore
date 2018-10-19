@@ -188,4 +188,16 @@ public class EquipmentController extends ControllerHelper {
             badRequest(request);
         }
     }
+
+    @Get("/equipments/search")
+    @ApiDoc("Search equipment through reference and name")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void search(HttpServerRequest request) {
+        if (request.params().contains("q") && request.params().get("q").trim() != "") {
+            String query = request.getParam("q");
+            equipmentService.search(query, arrayResponseHandler(request));
+        } else {
+            badRequest(request);
+        }
+    }
 }

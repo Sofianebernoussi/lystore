@@ -44,8 +44,10 @@
     },
     "optionsUpdate": {
       "type": ["array", "null" ]
+    },
+    "warranty": {
+      "type": "integer"
     }
-
   },
   "required": [
     "name",

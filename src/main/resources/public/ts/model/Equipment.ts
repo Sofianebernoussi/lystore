@@ -13,6 +13,9 @@ export class Equipment implements Selectable {
     id_contract: number;
     status: string;
     image: string;
+    reference: string;
+    search?: Equipment[];
+    id_option?: number;
     technical_specs: TechnicalSpec[];
     tags: Tag[];
     tax_amount: number;
@@ -28,6 +31,10 @@ export class Equipment implements Selectable {
         this.options = [];
     }
 
+    toString(): string {
+        return `${this.reference} - ${this.name}`;
+    }
+
     toJson () {
         let optionList =  this.options.map((option: EquipmentOption) => option.toJson());
         return {
@@ -37,6 +44,7 @@ export class Equipment implements Selectable {
             price: parseFloat(this.price.toString()),
             id_tax: this.id_tax,
             status: this.status,
+            warranty: 1,
             image: this.image || null,
             id_contract: this.id_contract,
             technical_specs: this.technical_specs.map((spec: TechnicalSpec) => spec.toJson()),
@@ -157,34 +165,38 @@ export class Equipments extends Selection<Equipment> {
             throw e;
         }
     }
+
+    async search(text: String) {
+        try {
+            if (text.trim() === '' || !text) return;
+            const {data} = await http.get(`/lystore/equipments/search?q=${text}`);
+            return Mix.castArrayAs(Equipment, data);
+        } catch (err) {
+            notify.error('lystore.option.search.err');
+            throw err;
+        }
+    }
 }
 
 export class EquipmentOption implements Selectable {
 
     id?: number;
-    name: string;
-    price: number;
     amount: number;
     required: boolean;
-    id_tax: number;
-    tax_amount: number;
     selected: boolean;
+    id_option: number;
 
     constructor () {
-        this.name = '';
         this.amount = 1;
         this.required = true;
-
     }
 
     toJson () {
         return {
-            id : this.id ? this.id : null ,
-            name: this.name,
-            price: parseFloat(this.price.toString()),
+            id: this.id ? this.id : null,
             amount: parseInt(this.amount.toString()),
             required : this.required,
-            id_tax: this.id_tax
+            id_option: this.id_option
         };
     }
 

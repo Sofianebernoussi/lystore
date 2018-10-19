@@ -255,16 +255,10 @@ export const configurationController = ng.controller('configurationController',
             if ( options.length > 0 ) {
                 let valid = true;
                 for (let i = 0; i < options.length; i++) {
-                    if ( options[i].name === undefined
-                        || options[i].name.trim() === ''
-                        || options[i].name === null
-                        || options[i].price === (undefined || null)
-                        || isNaN(options[i].price)
-                        || options[i].amount === undefined
+                    if (options[i].amount === undefined
                         || options[i].amount.toString().trim() === ''
                         || isNaN(parseInt(options[i].amount.toString()))
-                        || typeof(options[i].required ) !== 'boolean'
-                        || options[i].id_tax === undefined ) {
+                        || typeof(options[i].required) !== 'boolean') {
                         valid = false;
                         break;
                     }
@@ -339,6 +333,7 @@ export const configurationController = ng.controller('configurationController',
         };
 
         $scope.calculatePriceOption = (price , tax_id, amount) => {
+            if (!price || !tax_id || !amount) return '';
             let tax_value = parseFloat(_.findWhere($scope.taxes.all, {id: tax_id}).value) ;
             if (tax_value !== undefined ) {
                 let priceFloat = parseFloat(price);
@@ -499,6 +494,32 @@ export const configurationController = ng.controller('configurationController',
             await $scope.equipments.sync();
             $scope.allEquipmentSelected = false;
             $scope.notifications.push(new Notification('lystore.status.update.ok', 'confirm'));
+            Utils.safeApply($scope);
+        };
+
+        $scope.searchOption = async (searchText: string, model: Equipment) => {
+            try {
+                const options: Equipment[] = await $scope.equipments.search(searchText);
+                options.map((equipment: Equipment) => {
+                    equipment.id_option = equipment.id;
+                    delete equipment.id;
+                });
+                model.search = options;
+                $scope.$apply();
+            } catch (err) {
+                console.error(err);
+                model.search = [];
+                return;
+            }
+        };
+
+        $scope.selectOption = function (model: EquipmentOption, option: Equipment) {
+            const alreadyAdded = _.findWhere($scope.equipment.options, {id: option.id});
+            if (!alreadyAdded) {
+                let index = _.indexOf($scope.equipment.options, model);
+                $scope.equipment.options[index] = Mix.castAs(EquipmentOption, {...model, ...option});
+                $scope.equipment.options[index].search = undefined;
+            }
             Utils.safeApply($scope);
         };
     }]);

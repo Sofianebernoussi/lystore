@@ -79,4 +79,12 @@ public interface EquipmentService {
      */
     void prepareUpdateOptions (Number numberOptionsCreate, Number idEquipment,
                                 Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Search equipment based on query. Search field are name and reference
+     *
+     * @param query   queyr searching
+     * @param handler Function handler returning data
+     */
+    void search(String query, Handler<Either<String, JsonArray>> handler);
 }

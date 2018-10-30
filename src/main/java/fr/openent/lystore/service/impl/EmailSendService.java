@@ -2,16 +2,14 @@ package fr.openent.lystore.service.impl;
 
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.email.EmailSender;
-import io.vertx.core.AsyncResult;
-import org.entcore.common.neo4j.Neo4j;
-import org.entcore.common.neo4j.Neo4jResult;
-import org.entcore.common.user.UserInfos;
 import io.vertx.core.Handler;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
+import org.entcore.common.neo4j.Neo4j;
+import org.entcore.common.neo4j.Neo4jResult;
+import org.entcore.common.user.UserInfos;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -42,7 +40,7 @@ public class EmailSendService {
                           JsonArray structureRows){
         final int contractNameIndex = 1;
         final int agentEmailIndex = 3;
-        //TODO FIXER CETTE PARTIE. REFAIRE COMPLETEMENT LA SEQUENCE DE GESTION DES MAILS
+        //FIXME FIXER CETTE PARTIE. REFAIRE COMPLETEMENT LA SEQUENCE DE GESTION DES MAILS
         JsonArray line = rows.getJsonArray(0);
         String agentMailObject = "[LyStore] Commandes " + line.getString(contractNameIndex);
         String agentMailBody = getAgentBodyMail(line, user, result.getString("number_validation"), url);

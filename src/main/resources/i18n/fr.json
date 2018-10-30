@@ -121,6 +121,7 @@
   "lystore.campaign.purse.import.definition": "L'import des cagnottes s'effectue grâce à un fichier csv.",
   "lystore.campaign.purse.import.skeleton": "Squelette d'import :",
   "lystore.structureGroups.management": "Regroupements",
+  "lystore.structureGroups.import.definition": "L'import des regroupements d'établissement s'effectue grâce à un fichier csv.",
   "lystore.manage.structureGroups": "Gestion des regroupements d'établissements",
   "lystore.form.structureGroups.add": "Ajouter un regroupement d'établissements",
   "lystore.form.structureGroups.modify": "Modifier un regroupement d'établissement",

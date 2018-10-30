@@ -2,12 +2,11 @@ package fr.openent.lystore.controllers;
 
 import com.opencsv.CSVReader;
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.helpers.ImportCSVHelper;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AdministratorRight;
-import fr.openent.lystore.security.WorkflowActionUtils;
-import fr.openent.lystore.security.WorkflowActions;
 import fr.openent.lystore.service.CampaignService;
 import fr.openent.lystore.service.PurseService;
 import fr.openent.lystore.service.StructureService;
@@ -20,40 +19,38 @@ import fr.wseduc.rs.Post;
 import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.DefaultAsyncResult;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpServerFileUpload;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
-import org.entcore.common.user.UserInfos;
-import org.entcore.common.user.UserUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.List;
 import java.util.UUID;
 
 import static org.entcore.common.utils.FileUtils.deleteImportPath;
 
 public class PurseController extends ControllerHelper {
 
+
+    private ImportCSVHelper importCSVHelper;
     private StructureService structureService;
     private PurseService purseService;
     private CampaignService campaignService;
 
-    public PurseController () {
+    public PurseController(Vertx vertx) {
         super();
+        this.importCSVHelper = new ImportCSVHelper(vertx, this.eb);
         this.structureService = new DefaultStructureService();
         this.purseService = new DefaultPurseService();
         this.campaignService = new DefaultCampaignService(Lystore.lystoreSchema, "campaign");
@@ -66,139 +63,15 @@ public class PurseController extends ControllerHelper {
     public void purse(final HttpServerRequest request) {
         final String importId = UUID.randomUUID().toString();
         final String path = config.getString("import-folder", "/tmp") + File.separator + importId;
-        uploadImport(request, path, new Handler<AsyncResult>() {
+        importCSVHelper.getParsedCSV(request, path, new Handler<Either<String, Buffer>>() {
             @Override
-            public void handle(AsyncResult event) {
-                if (event.succeeded()) {
-                    readCsv(request, path);
+            public void handle(Either<String, Buffer> event) {
+                if (event.isRight()) {
+
+                    Buffer content = event.right().getValue();
+                    parseCsv(request, path, content);
                 } else {
-                    badRequest(request, event.cause().getMessage());
-                }
-            }
-        });
-    }
-
-    /**
-     * Upload import with multipart
-     * @param request Http request containing files
-     * @param handler Function handler returning data
-     */
-    private void uploadImport(final HttpServerRequest request, final String path, final Handler<AsyncResult> handler) {
-        request.pause();
-        request.setExpectMultipart(true);
-        request.endHandler(getEndHandler(request, path, handler));
-        request.exceptionHandler(getExceptionHandler(path, handler));
-        request.uploadHandler(getUploadHandler(path, handler));
-        vertx.fileSystem().mkdir(path, new Handler<AsyncResult<Void>>() {
-            @Override
-            public void handle(AsyncResult<Void> event) {
-                if (event.succeeded()) {
-                    request.resume();
-                } else {
-                    handler.handle(new DefaultAsyncResult(
-                            new RuntimeException("mkdir.error", event.cause())));
-                }
-            }
-        });
-    }
-
-    /**
-     * Get end upload handler
-     * @param request Http Server Request
-     * @param path Upload directory path
-     * @param handler Function handler
-     * @return Handler<Void>
-     */
-    private Handler<Void> getEndHandler(final HttpServerRequest request, final String path,
-                                      final Handler<AsyncResult> handler) {
-        return new Handler<Void>() {
-            @Override
-            public void handle(Void v) {
-                UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-                    @Override
-                    public void handle(UserInfos user) {
-                        if (WorkflowActionUtils.hasRight(user, WorkflowActions.ADMINISTRATOR_RIGHT.toString())) {
-                            handler.handle(new DefaultAsyncResult(null));
-                        } else {
-                            handler.handle(new DefaultAsyncResult(new RuntimeException("invalid.admin")));
-                            deleteImportPath(vertx, path);
-                        }
-                    }
-                });
-            }
-        };
-    }
-
-    /**
-     * Get exception handler. It return a handler that catch error while the request upload the file.
-     * In case of exception, the handler delete the directory.
-     * @param path Temp directory path
-     * @param handler Function handler
-     * @return Handler<Throwable>
-     */
-    private Handler<Throwable> getExceptionHandler(final String path, final Handler<AsyncResult> handler) {
-        return new Handler<Throwable>() {
-            @Override
-            public void handle(Throwable event) {
-                handler.handle(new DefaultAsyncResult(event));
-                deleteImportPath(vertx, path);
-            }
-        };
-    }
-
-    /**
-     * Get chunk upload handler
-     * @param path Upload directory path
-     * @param handler Function handler
-     * @return Upload handler
-     */
-    private static Handler<HttpServerFileUpload> getUploadHandler(final String path,
-                                                                  final Handler<AsyncResult> handler) {
-        return new Handler<HttpServerFileUpload>() {
-            @Override
-            public void handle(final HttpServerFileUpload upload) {
-                if (!upload.filename().toLowerCase().endsWith(".csv")) {
-                    handler.handle(new DefaultAsyncResult(
-                            new RuntimeException("invalid.file.extension")
-                    ));
-                    return;
-                }
-
-                final String filename = path + File.separator + upload.filename();
-                upload.endHandler(new Handler<Void>() {
-                    @Override
-                    public void handle(Void event) {
-                        log.info("File " + upload.filename() + " uploaded as " + upload.filename());
-                    }
-                });
-                upload.streamToFileSystem(filename);
-            }
-        };
-    }
-
-    /**
-     * Read CSV file
-     * @param request Http request
-     * @param path Temp directory path
-     */
-    private void readCsv(final HttpServerRequest request, final String path) {
-        vertx.fileSystem().readDir(path, new Handler<AsyncResult<List<String>>>() {
-            @Override
-            public void handle(final AsyncResult<List<String>> event) {
-                if (event.succeeded()) {
-                    String file = event.result().get(0);
-                    vertx.fileSystem().readFile(file, new Handler<AsyncResult<Buffer>>() {
-                        @Override
-                        public void handle(AsyncResult<Buffer> eventBuffer) {
-                            if (eventBuffer.succeeded()) {
-                                parseCsv(request, path, eventBuffer.result());
-                            } else {
-                                returnErrorMessage(request, event.cause(), path);
-                            }
-                        }
-                    });
-                } else {
-                    returnErrorMessage(request, event.cause(), path);
+                    renderError(request);
                 }
             }
         });
@@ -206,8 +79,9 @@ public class PurseController extends ControllerHelper {
 
     /**
      * Parse CSV file
+     *
      * @param request Http request
-     * @param path Directory path
+     * @param path    Directory path
      */
     private void parseCsv(final HttpServerRequest request, final String path, Buffer content) {
         try {

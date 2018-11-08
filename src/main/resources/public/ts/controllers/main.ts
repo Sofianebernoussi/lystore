@@ -1,24 +1,26 @@
-import {ng, template, notify, idiom as lang, moment, model, Behaviours, _} from 'entcore';
+import {_, Behaviours, idiom as lang, model, moment, ng, notify, template} from 'entcore';
 import {
     Agents,
-    Suppliers,
-    Programs,
-    ContractTypes,
-    Contracts,
-    Tags,
-    Equipments,
-    Taxes,
-    Logs,
-    StructureGroups,
-    Campaigns,
-    Campaign,
-    Utils,
-    Equipment,
-    Baskets,
-    Structures,
     Basket,
+    Baskets,
+    Campaign,
+    Campaigns,
+    Contracts,
+    ContractTypes,
+    Equipment,
+    Equipments,
+    Logs,
     Notification,
-    OrdersClient, Supplier, OrderClient
+    OrderClient,
+    OrdersClient,
+    Programs,
+    StructureGroups,
+    Structures,
+    Supplier,
+    Suppliers,
+    Tags,
+    Taxes,
+    Utils
 } from '../model';
 import {Mix} from "entcore-toolkit";
 
@@ -51,7 +53,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         route({
             main: async () => {
                 if ($scope.isManager() || $scope.isAdministrator()) {
-                    template.open('main-profile', 'administrator/management-main');
+                    $scope.redirectTo('/campaigns');
                 } else {
                     await $scope.initStructures();
                     await $scope.initCampaign($scope.current.structure);

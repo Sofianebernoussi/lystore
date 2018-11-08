@@ -2,10 +2,10 @@ package fr.openent.lystore;
 
 import fr.openent.lystore.controllers.*;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.json.JsonObject;
 import org.entcore.common.http.BaseServer;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.storage.StorageFactory;
-import io.vertx.core.json.JsonObject;
 
 public class Lystore extends BaseServer {
 
@@ -38,5 +38,7 @@ public class Lystore extends BaseServer {
         addController(new BasketController(vertx, config.getJsonObject("slack", new JsonObject()) ));
         addController(new OrderController(storage, vertx, config, eb));
         addController(new UserController());
+        addController(new TitleController());
+        addController(new GradeController());
     }
 }

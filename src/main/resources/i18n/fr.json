@@ -304,6 +304,8 @@
   "lystore.order.sync.err": "Erreur lors de la récupération des commandes",
   "lystore.order.delete.err": "Erreur lors de la suppression de la commande",
   "lystore.option.search.err": "Erreur lors de la recherche d'une option",
+  "lystore.grades.sync.err": "Une erreur est survenue lors de la récupération des diplômes",
+  "lystore.titles.sync.err": "Une erreur est survenue lors de la récupération des intitulés",
   "seemore": "Voir la suite",
   "noresult": "La recherche n'a retournée aucun résultat"
 }

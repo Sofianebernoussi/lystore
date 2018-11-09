@@ -18,6 +18,7 @@ export class Contract implements Selectable {
     renewal_end: string;
     supplier_display_name: string;
     file: boolean;
+    price_editable: boolean;
 
     selected: false;
     annual_min_enabled: boolean;
@@ -42,6 +43,7 @@ export class Contract implements Selectable {
         }
         if ( start_date ) this.start_date = start_date;
         this.file = false;
+        this.price_editable = false;
     }
 
     toJson() {
@@ -58,7 +60,8 @@ export class Contract implements Selectable {
             annual_min: this.annual_min_enabled && this.annual_min !== null ? parseFloat((this.annual_min as number).toString()) : null,
             annual_max: this.annual_max_enabled && this.annual_max !== null ? parseFloat((this.annual_max as number).toString()) : null,
             max_brink: this.max_brink_enabled && this.max_brink !== null ? parseFloat((this.max_brink as number).toString()) : null,
-            file: this.file
+            file: this.file,
+            price_editable: this.price_editable
         };
     }
 

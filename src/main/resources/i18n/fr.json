@@ -263,6 +263,8 @@
   "windUp": "Clôturer",
   "lystore.options": "Options",
   "lystore.contract.file": "Pièces jointes autorisées",
+  "lystore.contract.price_editable": "Prix des demandes éditables par le lycée",
+  "lystore.contract.price_editable.label": "Prix éditable",
   "lystore.windUp.notif": "Commande(s) clôturée(s)",
   "lystore.sent.notif": "Commande(s) envoyée(s)",
   "multi-structures.choice": "Choix de la structure",

@@ -38,6 +38,9 @@
     },
     "renewal_end": {
       "type": "string"
+    },
+    "file": {
+      "type": "boolean"
     }
   },
   "required": [

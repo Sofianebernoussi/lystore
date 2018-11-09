@@ -261,6 +261,8 @@
   "number.validation": "Numéro de validation",
   "totals": "Totaux",
   "windUp": "Clôturer",
+  "lystore.options": "Options",
+  "lystore.contract.file": "Pièces jointes autorisées",
   "lystore.windUp.notif": "Commande(s) clôturée(s)",
   "lystore.sent.notif": "Commande(s) envoyée(s)",
   "multi-structures.choice": "Choix de la structure",

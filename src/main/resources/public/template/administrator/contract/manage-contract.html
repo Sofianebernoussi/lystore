@@ -46,6 +46,12 @@
                         <i class="up-open" ng-show="sort.contract.type === 'start_date' && !sort.contract.reverse"></i>
                         <i class="down-open" ng-show="sort.contract.type === 'start_date' && sort.contract.reverse"></i>
                     </td>
+                    <td ng-click="sort.contract.type = 'file';
+                    sort.contract.reverse = !sort.contract.reverse">
+                        <i18n>lystore.contract.file</i18n>
+                        <i class="up-open" ng-show="sort.contract.type === 'start_date' && !sort.contract.reverse"></i>
+                        <i class="down-open" ng-show="sort.contract.type === 'start_date' && sort.contract.reverse"></i>
+                    </td>
                 </tr>
                 </thead>
                 <tbody>
@@ -70,6 +76,9 @@
                             + " - " +
                             formatDate(contract.renewal_end, 'MMMM YYYY')
                         ]]
+                    </td>
+                    <td>
+                        <i ng-if="contract.file" class="checked-value">&nbsp;</i>
                     </td>
                 </tr>
                 </tbody>

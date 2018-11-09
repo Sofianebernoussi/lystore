@@ -1,5 +1,5 @@
-import { moment, notify } from 'entcore';
-import { Selection, Selectable, Mix, Provider } from 'entcore-toolkit';
+import {moment, notify} from 'entcore';
+import {Mix, Provider, Selectable, Selection} from 'entcore-toolkit';
 import http from 'axios';
 
 export class Contract implements Selectable {
@@ -17,6 +17,7 @@ export class Contract implements Selectable {
     end_date: string;
     renewal_end: string;
     supplier_display_name: string;
+    file: boolean;
 
     selected: false;
     annual_min_enabled: boolean;
@@ -40,6 +41,7 @@ export class Contract implements Selectable {
             this.max_brink_enabled = true;
         }
         if ( start_date ) this.start_date = start_date;
+        this.file = false;
     }
 
     toJson() {
@@ -56,6 +58,7 @@ export class Contract implements Selectable {
             annual_min: this.annual_min_enabled && this.annual_min !== null ? parseFloat((this.annual_min as number).toString()) : null,
             annual_max: this.annual_max_enabled && this.annual_max !== null ? parseFloat((this.annual_max as number).toString()) : null,
             max_brink: this.max_brink_enabled && this.max_brink !== null ? parseFloat((this.max_brink as number).toString()) : null,
+            file: this.file
         };
     }
 

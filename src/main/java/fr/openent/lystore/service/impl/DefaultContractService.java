@@ -3,12 +3,12 @@ package fr.openent.lystore.service.impl;
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.ContractService;
 import fr.wseduc.webutils.Either;
-import org.entcore.common.service.impl.SqlCrudService;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.entcore.common.service.impl.SqlCrudService;
+import org.entcore.common.sql.Sql;
+import org.entcore.common.sql.SqlResult;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
         String query = "SELECT contract.id as id, contract.name as name, annual_min, annual_max, " +
                 "start_date, nb_renewal, " +
                 "id_contract_type, max_brink, id_supplier, id_agent, reference, renewal_end, end_date, " +
-                "supplier.name as supplier_display_name " +
+                "supplier.name as supplier_display_name, contract.file as file " +
                 "FROM " + Lystore.lystoreSchema + ".contract INNER JOIN " + Lystore.lystoreSchema +
                 ".supplier on (contract.id_supplier = supplier.id)";
 
@@ -32,9 +32,9 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
     public void createContract(JsonObject contract, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + Lystore.lystoreSchema + ".contract(name, annual_min, " +
                 "annual_max, start_date, nb_renewal, id_contract_type, max_brink, id_supplier, id_agent, " +
-                "reference, end_date, renewal_end) " +
+                "reference, end_date, renewal_end, file) " +
                 "VALUES (?, ?, ?, to_date(?, 'YYYY-MM-DD'), ?, ?, ?, ?, ?, ?, to_date(?, 'YYYY-MM-DD')," +
-                " to_date(?, 'YYYY-MM-DD')) " +
+                " to_date(?, 'YYYY-MM-DD'), ?) " +
                 "RETURNING id;";
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(contract.getString("name"))
@@ -48,7 +48,8 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
                 .add(contract.getInteger("id_agent"))
                 .add(contract.getString("reference"))
                 .add(contract.getString("end_date"))
-                .add(contract.getString("renewal_end"));
+                .add(contract.getString("renewal_end"))
+                .add(contract.getBoolean("file"));
 
         this.sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }

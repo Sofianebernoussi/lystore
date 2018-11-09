@@ -646,4 +646,14 @@ body.lystore {
       justify-content: center !important;
     }
   }
+
+  .checked-value {
+    @include fonticon();
+
+    &:before {
+      content: "\e916";
+      color: $green;
+      font-size: 20px;
+    }
+  }
 }

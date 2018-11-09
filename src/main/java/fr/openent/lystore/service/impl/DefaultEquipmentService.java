@@ -4,15 +4,15 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.EquipmentService;
 import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.webutils.Either;
-import org.entcore.common.service.impl.SqlCrudService;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.entcore.common.service.impl.SqlCrudService;
+import org.entcore.common.sql.Sql;
+import org.entcore.common.sql.SqlResult;
 
 import java.util.List;
 
@@ -122,6 +122,58 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 }
             }
         }));
+    }
+
+    public void importEquipments(final JsonArray equipments, Handler<Either<String, JsonObject>> handler) {
+        JsonArray statements = new JsonArray();
+        JsonArray params;
+        JsonObject statement;
+
+        for (int i = 0; i < equipments.size(); i++) {
+            statement = new JsonObject();
+            params = new JsonArray();
+
+            JsonObject equipment = equipments.getJsonObject(i);
+
+            Boolean referenceValue = !"".equals(equipment.getString("reference").trim());
+            String insertImportEquipmentQuery = "INSERT INTO " + Lystore.lystoreSchema + ".equipment(" + (referenceValue ? "reference, " : "") + "name, " +
+                    "price, id_tax, warranty, catalog_enabled, id_contract, status) VALUES (" + (referenceValue ? "?," : "") + "?, ?, ?, ?, ?, ?, ?)";
+
+            if (referenceValue) {
+                params.add(equipment.getString("reference"));
+            }
+            params.add(equipment.getString("name"));
+            params.add(equipment.getFloat("price"));
+            params.add(equipment.getInteger("id_tax"));
+            params.add(equipment.getInteger("warranty"));
+            params.add(equipment.getBoolean("catalog_enabled"));
+            params.add(equipment.getInteger("id_contract"));
+            params.add(equipment.getString("status"));
+
+            statement.put(STATEMENT, insertImportEquipmentQuery);
+            statement.put(VALUES, params);
+            statement.put(ACTION, PREPARED);
+
+            statements.add(statement);
+        }
+        if (statements.size() > 0) {
+            sql.transaction(statements, new Handler<Message<JsonObject>>() {
+                @Override
+                public void handle(Message<JsonObject> event) {
+                    if (event.body().containsKey("status") && "ok".equals(event.body().getString("status"))) {
+                        handler.handle(new Either.Right<>(new JsonObject().put("message", "Imported")));
+                    } else {
+                        String message = "An error occurred when handling equipment transaction";
+                        LOGGER.error(message);
+                        handler.handle(new Either.Left<>(message));
+                    }
+                }
+            });
+        } else {
+            String message = "An error occurred when creating the statement";
+            LOGGER.error(message);
+            handler.handle(new Either.Left<String, JsonObject>(message));
+        }
     }
 
     @Override

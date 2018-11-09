@@ -7,9 +7,10 @@
         </div>
     </div>
     <div class="right-magnet twelve-mobile">
-        <button workflow="lystore.administrator"
-                class="twelve-mobile"
-                ng-click="openEquipmentForm()">
+        <button workflow="lystore.administrator" class="twelve-mobile" ng-click="openEquipmentImporter()">
+            <i18n>lystore.equipment.add.list</i18n>
+        </button>
+        <button workflow="lystore.administrator" class="twelve-mobile" ng-click="openEquipmentForm()">
             <i18n>lystore.equipment.add</i18n>
         </button>
     </div>
@@ -28,6 +29,12 @@
                            ng-model="allEquipmentSelected">
                     <span></span>
                 </label>
+            </td>
+            <td ng-click="sort.equipment.type = 'reference';
+                    sort.equipment.reverse = !sort.equipment.reverse">
+                <i18n>reference</i18n>
+                <i class="up-open" ng-show="sort.equipment.type === 'reference' && !sort.equipment.reverse"></i>
+                <i class="down-open" ng-show="sort.equipment.type === 'reference' && sort.equipment.reverse"></i>
             </td>
             <td ng-click="sort.equipment.type = 'name';
                     sort.equipment.reverse = !sort.equipment.reverse">
@@ -63,19 +70,23 @@
         </thead>
         <tbody>
             <tr ng-repeat="equipment in equipments.all | filter:equipmentSearchFilter | orderBy:sort.equipment.type:sort.equipment.reverse">
-            <td workflow="lystore.administrator">
-                <label class="checkbox">
-                    <input type="checkbox" ng-model="equipment.selected">
-                    <span></span>
-                </label>
-            </td>
-            <td ng-class="{'color-grey': equipment.status === 'UNAVAILABLE'}">[[ equipment.name ]]</td>
-            <td class="color-orange" ng-class="{'color-grey': equipment.status === 'UNAVAILABLE'||equipment.status === 'OUT_OF_STOCK'}">
-                <span ng-bind="calculatePriceOfEquipment(equipment, false , 2) | currency"></span>
-            </td>
-            <td>[[ contracts.get(equipment.id_contract).supplier_display_name ]]</td>
-            <td>[[ contracts.get(equipment.id_contract).name ]]</td>
-            <td ng-class="{'color-green': equipment.status === 'AVAILABLE','color-red': equipment.status === 'OUT_OF_STOCK', 'color-orange': equipment.status === 'UNAVAILABLE'}">[[ lang.translate('lystore.' + equipment.status) ]]</td>
+                <td workflow="lystore.administrator">
+                    <label class="checkbox">
+                        <input type="checkbox" ng-model="equipment.selected">
+                        <span></span>
+                    </label>
+                </td>
+                <td ng-class="{'color-grey': equipment.status === 'UNAVAILABLE'}">[[ equipment.reference ]]</td>
+                <td ng-class="{'color-grey': equipment.status === 'UNAVAILABLE'}">[[ equipment.name ]]</td>
+                <td class="color-orange"
+                    ng-class="{'color-grey': equipment.status === 'UNAVAILABLE'||equipment.status === 'OUT_OF_STOCK'}">
+                    <span ng-bind="calculatePriceOfEquipment(equipment, false , 2) | currency"></span>
+                </td>
+                <td>[[ contracts.get(equipment.id_contract).supplier_display_name ]]</td>
+                <td>[[ contracts.get(equipment.id_contract).name ]]</td>
+                <td ng-class="{'color-green': equipment.status === 'AVAILABLE','color-red': equipment.status === 'OUT_OF_STOCK', 'color-orange': equipment.status === 'UNAVAILABLE'}">
+                    [[ lang.translate('lystore.' + equipment.status) ]]
+                </td>
         </tr>
         </tbody>
     </table>

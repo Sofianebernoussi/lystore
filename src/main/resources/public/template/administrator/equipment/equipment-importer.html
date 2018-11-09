@@ -1,0 +1,28 @@
+<form ng-submit="importEquipment(importer)">
+    <div>
+        <h1>
+            <i18n>lystore.equipment.add.list</i18n>
+        </h1>
+        <i18n>lystore.equipment.import.text</i18n>
+    </div>
+    <br/>
+    <div>
+        <i18n class="three cell twelve-mobile">target.market</i18n>
+        <select class="nine cell twelve-mobile" ng-model="importer.id_contract" required=""
+                ng-options="contract.id as (contract.name + ' - Ref ' + contract.reference) for contract in contracts.all">
+        </select>
+    </div>
+    <br/>
+    <br/>
+    <div class="vertical-spacing">
+        <p class="six centered">
+            <i18n>csv.file</i18n>
+            <input type="file" files-input-change ng-model="importer.files">
+        </p>
+        <div class="row">
+            <button class="right-magnet" ng-disabled="!importer.isValid()">
+                <i18n>add</i18n>
+            </button>
+        </div>
+    </div>
+</form>

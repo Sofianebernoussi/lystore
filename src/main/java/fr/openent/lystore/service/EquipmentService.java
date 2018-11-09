@@ -87,4 +87,12 @@ public interface EquipmentService {
      * @param handler Function handler returning data
      */
     void search(String query, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Create equipments due to an import
+     *
+     * @param equipments Array of equipments
+     * @param handler    Function handler returning data
+     */
+    void importEquipments(JsonArray equipments, Handler<Either<String, JsonObject>> handler);
 }

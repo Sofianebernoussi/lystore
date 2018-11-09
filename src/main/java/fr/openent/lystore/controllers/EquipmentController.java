@@ -1,6 +1,8 @@
 package fr.openent.lystore.controllers;
 
+import com.opencsv.CSVReader;
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.helpers.ImportCSVHelper;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
@@ -8,34 +10,41 @@ import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.service.EquipmentService;
 import fr.openent.lystore.service.impl.DefaultEquipmentService;
 import fr.openent.lystore.utils.SqlQueryUtils;
-import fr.wseduc.rs.ApiDoc;
-import fr.wseduc.rs.Delete;
-import fr.wseduc.rs.Get;
-import fr.wseduc.rs.Post;
-import fr.wseduc.rs.Put;
+import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
-import io.vertx.core.Handler;
-import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonObject;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
+import static org.entcore.common.utils.FileUtils.deleteImportPath;
 
 public class EquipmentController extends ControllerHelper {
 
     private final EquipmentService equipmentService;
+    private ImportCSVHelper importCSVHelper;
 
-    public EquipmentController () {
+    public EquipmentController(Vertx vertx) {
         super();
         this.equipmentService = new DefaultEquipmentService(Lystore.lystoreSchema, "equipment");
+        this.importCSVHelper = new ImportCSVHelper(vertx, this.eb);
     }
 
     @Get("/equipments")
@@ -162,6 +171,95 @@ public class EquipmentController extends ControllerHelper {
         } catch (NumberFormatException e) {
             log.error("An error occurred when parsing equipments ids", e);
         }
+    }
+
+    @Post("/equipments/contract/:id/import")
+    @ApiDoc("Import equipments")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
+    public void importEquipment(final HttpServerRequest request) {
+        final String importId = UUID.randomUUID().toString();
+        final String path = config.getString("import-folder", "/tmp") + File.separator + importId;
+        importCSVHelper.getParsedCSV(request, path, new Handler<Either<String, Buffer>>() {
+            @Override
+            public void handle(Either<String, Buffer> event) {
+                if (event.isRight()) {
+                    Buffer content = event.right().getValue();
+                    parseEquipmentCsv(request, path, content);
+                } else {
+                    renderError(request);
+                }
+            }
+        });
+    }
+
+    /**
+     * Parse CSV file
+     *
+     * @param request Http request
+     * @param path    Directory path
+     */
+    private void parseEquipmentCsv(final HttpServerRequest request, final String path, Buffer content) {
+        try {
+            CSVReader csv = new CSVReader(new InputStreamReader(
+                    new ByteArrayInputStream(content.getBytes())),
+                    ';', '"', 1);
+            String[] values;
+            JsonArray equipments = new JsonArray();
+            while ((values = csv.readNext()) != null) {
+                JsonObject object = new JsonObject();
+                object.put("reference", values[0]);
+                object.put("name", values[1]);
+                object.put("price", Float.parseFloat(values[2]));
+                object.put("id_tax", 1);
+                object.put("warranty", 1);
+                object.put("catalog_enabled", true);
+                object.put("id_contract", Integer.parseInt(request.getParam("id")));
+                object.put("status", "AVAILABLE");
+
+                equipments.add(object);
+            }
+            if (equipments.size() > 0) {
+                equipmentService.importEquipments(equipments, new Handler<Either<String, JsonObject>>() {
+                    @Override
+                    public void handle(Either<String, JsonObject> event) {
+                        if (event.isRight()) {
+                            request.response().setStatusCode(201).end();
+                        } else {
+                            returnErrorMessage(request, new Throwable(event.left().getValue()), path);
+                        }
+                    }
+                });
+            } else {
+                returnErrorMessage(request, new Throwable("missing.equipment"), path);
+            }
+        } catch (IOException e) {
+            log.error("[Lystore@CSVImport]: csv exception", e);
+            returnErrorMessage(request, e.getCause(), path);
+            deleteImportPath(vertx, path);
+        }
+    }
+
+    /**
+     * End http request and returns message error. It delete the directory.
+     *
+     * @param request Http request
+     * @param cause   Throwable message
+     * @param path    Directory path to delete
+     */
+    private void returnErrorMessage(HttpServerRequest request, Throwable cause, String path) {
+        renderErrorMessage(request, cause);
+        deleteImportPath(vertx, path);
+    }
+
+    /**
+     * Render a message error based on cause message
+     *
+     * @param request Http request
+     * @param cause   Cause error
+     */
+    private static void renderErrorMessage(HttpServerRequest request, Throwable cause) {
+        renderError(request, new JsonObject().put("message", cause.getMessage()));
     }
 
     @Delete("/equipment")

@@ -1,6 +1,6 @@
-import { Tag, Utils } from './index';
-import { notify, _ } from 'entcore';
-import { Selectable, Selection, Mix } from 'entcore-toolkit';
+import {Tag, Utils} from './index';
+import {_, notify} from 'entcore';
+import {Mix, Selectable, Selection} from 'entcore-toolkit';
 import http from 'axios';
 
 export class Equipment implements Selectable {
@@ -87,6 +87,7 @@ export class Equipment implements Selectable {
             notify.error('lystore.equipment.delete.err');
         }
     }
+
     async sync (id) {
         try {
             let { data } =  await http.get(`/lystore/equipment/${id}`);
@@ -200,4 +201,45 @@ export class EquipmentOption implements Selectable {
         };
     }
 
+}
+
+export class EquipmentImporter {
+    files: File[];
+    message: string;
+    id_contract?: number;
+
+    constructor() {
+        this.files = [];
+    }
+
+    isValid(): boolean {
+        if (this.id_contract && this.id_contract >= 0) {
+            return this.files.length > 0
+                ? this.files[0].name.endsWith('.csv') && this.files[0].name.trim() !== ''
+                : false;
+        }
+    }
+
+    async validate(): Promise<any> {
+        try {
+            await this.postFile();
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    private async postFile(): Promise<any> {
+        if (this.id_contract) {
+            let formData = new FormData();
+            formData.append('file', this.files[0], this.files[0].name);
+            let response;
+            try {
+                response = await http.post(`/lystore/equipments/contract/${this.id_contract}/import`,
+                    formData, {'headers': {'Content-Type': 'multipart/form-data'}});
+                return response;
+            } catch (err) {
+                throw err.response.data;
+            }
+        } else throw new Error("lystore.equipment.import.contract");
+    }
 }

@@ -1,8 +1,8 @@
 import {_, idiom as lang, moment, ng, template} from 'entcore';
 import {Mix} from 'entcore-toolkit';
 import {
-    Agent, Campaign, COMBO_LABELS, Contract, Equipment, EquipmentOption, Notification, StructureGroup,
-    StructureGroupImporter, Supplier, Tag, TechnicalSpec, Utils
+    Agent, Campaign, COMBO_LABELS, Contract, Equipment, EquipmentImporter, EquipmentOption, Notification,
+    StructureGroup, StructureGroupImporter, Supplier, Tag, TechnicalSpec, Utils
 } from '../../model';
 
 export const configurationController = ng.controller('configurationController',
@@ -228,6 +228,29 @@ export const configurationController = ng.controller('configurationController',
                 (tagId) => _.findWhere($scope.tags.all, {id: tagId})
             );
             Utils.safeApply($scope);
+        };
+
+        $scope.openEquipmentImporter = (): void => {
+            $scope.importer = new EquipmentImporter();
+            template.open('equipment.lightbox', 'administrator/equipment/equipment-importer');
+            $scope.display.lightbox.equipment = true;
+        };
+
+        $scope.importEquipment = async (importer: EquipmentImporter): Promise<void> => {
+            try {
+                await importer.validate();
+            } catch (err) {
+                importer.message = err.message;
+            } finally {
+                if (!importer.message) {
+                    $scope.display.lightbox.equipment = false;
+                    delete $scope.importer;
+                } else {
+                    importer.files = [];
+                }
+                await $scope.equipments.sync();
+                Utils.safeApply($scope);
+            }
         };
 
         $scope.addTagToEquipment = (tag: Tag) => {

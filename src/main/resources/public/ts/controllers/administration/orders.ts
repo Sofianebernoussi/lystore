@@ -36,6 +36,7 @@ export const orderController = ng.controller('orderController',
             return totalPrice.toFixed(roundNumber);
         };
 
+
         $scope.addFilter = (filterWord: string, event?) => {
             if (event && (event.which === 13 || event.keyCode === 13 )) {
                 $scope.addFilterWords(filterWord);

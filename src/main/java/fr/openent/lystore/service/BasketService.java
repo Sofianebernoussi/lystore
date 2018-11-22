@@ -38,6 +38,15 @@ public interface BasketService {
      void updateAmount(Integer idBasket, Integer amount, Handler<Either<String, JsonObject>> handler );
 
     /**
+     * Update a basket's comment
+     *
+     * @param idBasket
+     * @param comment
+     * @param handler
+     */
+    void updateComment(Integer idBasket, String comment, Handler<Either<String, JsonObject>> handler );
+
+    /**
      * transform basket to an order
      * @param request the request
      * @param baskets list of basket's items to transform

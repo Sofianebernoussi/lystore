@@ -13,3 +13,9 @@ CREATE TRIGGER on_equipment_insert
 AFTER INSERT ON lystore.equipment
 FOR EACH ROW
 EXECUTE PROCEDURE lystore.create_equipment_reference();
+
+ALTER TABLE ORDER_CLIENT_EQUIPEMENT
+  ADD COLUMN "comment" type TEXT ;
+
+ALTER TABLE BASKET_EQUIPEMENT
+  ADD COLUMN "comment" type TEXT ;

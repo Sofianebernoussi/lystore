@@ -4,6 +4,7 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
+import fr.openent.lystore.security.AccessOrderCommentRight;
 import fr.openent.lystore.security.PersonnelRight;
 import fr.openent.lystore.service.BasketService;
 import fr.openent.lystore.service.impl.DefaultBasketService;
@@ -95,6 +96,30 @@ public class BasketController extends ControllerHelper {
             }
         });
     }
+
+    @Put("/basket/:idBasket/comment")
+    @ApiDoc("Update a basket's comment")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AccessOrderCommentRight.class)
+    public void updateComment(final HttpServerRequest request){
+        RequestUtils.bodyToJson(request,  new Handler<JsonObject>(){
+            @Override
+            public void handle(JsonObject basket){
+                if (!basket.containsKey("comment")) {
+                    badRequest(request);
+                    return;
+                }
+                try {
+                    Integer id = Integer.parseInt(request.params().get("idBasket"));
+                    String comment = basket.getString("comment");
+                    basketService.updateComment(id, comment, defaultResponseHandler(request));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     @Post("/baskets/to/orders")
     @ApiDoc("crearte an order liste from basket")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
@@ -109,24 +134,24 @@ public class BasketController extends ControllerHelper {
                     final String nameStructure = object.getString("structure_name");
                     basketService.listebasketItemForOrder(idCampaign, idStructure,
                             new Handler<Either<String, JsonArray>>() {
-                        @Override
-                        public void handle(Either<String, JsonArray> listBasket) {
-                            if(listBasket.isRight() && listBasket.right().getValue().size() > 0){
-                                basketService.takeOrder(request , listBasket.right().getValue(),
-                                        idCampaign , idStructure, nameStructure,
-                                        Logging.defaultCreateResponsesHandler(eb,
-                                        request,
-                                        Contexts.ORDER.toString(),
-                                        Actions.CREATE.toString(),
-                                        "id_order",
-                                        listBasket.right().getValue()));
+                                @Override
+                                public void handle(Either<String, JsonArray> listBasket) {
+                                    if(listBasket.isRight() && listBasket.right().getValue().size() > 0){
+                                        basketService.takeOrder(request , listBasket.right().getValue(),
+                                                idCampaign , idStructure, nameStructure,
+                                                Logging.defaultCreateResponsesHandler(eb,
+                                                        request,
+                                                        Contexts.ORDER.toString(),
+                                                        Actions.CREATE.toString(),
+                                                        "id_order",
+                                                        listBasket.right().getValue()));
 
-                            }else{
-                                log.error("An error occurred when listing Baskets");
-                                badRequest(request);
-                            }
-                        }
-                    });
+                                    }else{
+                                        log.error("An error occurred when listing Baskets");
+                                        badRequest(request);
+                                    }
+                                }
+                            });
 
                 } catch (ClassCastException e) {
                     log.error("An error occurred when casting Basket information", e);

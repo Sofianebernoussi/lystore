@@ -12,6 +12,7 @@ export class Basket implements Selectable {
     id_campaign: number;
     id_structure: string;
     selected: boolean;
+    comment?: string;
 
     constructor (equipment: Equipment , id_campaign: number, id_structure: string ) {
         this.equipment = Mix.castAs(Equipment, equipment) ;
@@ -64,6 +65,15 @@ export class Basket implements Selectable {
             throw e;
         }
     }
+    async updateComment(){
+        try{
+            http.put(`/lystore/basket/${this.id}/comment`, { comment: this.comment });
+        }catch (e){
+            notify.error('lystore.basket.update.err');
+            throw e;
+        }
+    }
+
     async delete () {
         try {
             return await  http.delete(`/lystore/basket/${this.id}`);

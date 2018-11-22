@@ -45,7 +45,7 @@ export const basketController = ng.controller('basketController',
             let { status } = await basket.delete();
             if (status === 200) {
                 $scope.campaign.nb_panier -= 1;
-              await $scope.notifyBasket('deleted', basket);
+                await $scope.notifyBasket('deleted', basket);
             }
             $scope.cancelBasketDelete();
             await $scope.baskets.sync($routeParams.idCampaign, $scope.current.structure.id);
@@ -65,6 +65,12 @@ export const basketController = ng.controller('basketController',
                 basket.updateAmount();
             }
         };
+        $scope.updateBasketComment= (basket: Basket) =>{
+            if (!basket.comment || basket.comment.trim() == " ") {
+                basket.comment="";
+            }
+            basket.updateComment();
+        }
         $scope.takeClientOrder = async (baskets: Baskets) => {
             let { status, data } = await baskets.takeOrder(parseInt($routeParams.idCampaign), $scope.current.structure);
             $scope.totalPrice = $scope.calculatePriceOfEquipments(baskets, 2);
@@ -87,8 +93,8 @@ export const basketController = ng.controller('basketController',
         };
         $scope.validOrder = (baskets: Baskets) => {
             let equipmentsBasket = _.pluck(baskets.all, 'equipment' );
-          return $scope.calculatePriceOfEquipments(baskets) <= $scope.campaign.purse_amount
-              && _.findWhere( equipmentsBasket, {status : 'OUT_OF_STOCK'}) === undefined
-              &&  _.findWhere( equipmentsBasket, {status : 'UNAVAILABLE'}) === undefined;
+            return $scope.calculatePriceOfEquipments(baskets) <= $scope.campaign.purse_amount
+                && _.findWhere( equipmentsBasket, {status : 'OUT_OF_STOCK'}) === undefined
+                &&  _.findWhere( equipmentsBasket, {status : 'UNAVAILABLE'}) === undefined;
         };
     }]);

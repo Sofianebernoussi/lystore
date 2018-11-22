@@ -81,6 +81,10 @@
                     </tbody>
                 </table>
             </div>
+            <div class="twelve cell">
+                <h2><i18n>comment</i18n></h2>
+                <textarea style="resize: none;" ng-blur="updateComment(orderClient)" ng-model="orderClient.comment"></textarea>
+            </div>
         </article>
     </div>
     <article ng-show = "ordersClient.all.length === 0 " class="centered-text row">

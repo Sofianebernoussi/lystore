@@ -4,8 +4,10 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
+import fr.openent.lystore.security.AccessOrderCommentRight;
 import fr.openent.lystore.security.AccessOrderRight;
 import fr.openent.lystore.security.ManagerRight;
+import fr.openent.lystore.security.PersonnelRight;
 import fr.openent.lystore.service.*;
 import fr.openent.lystore.service.impl.*;
 import fr.openent.lystore.utils.SqlQueryUtils;
@@ -131,6 +133,9 @@ public class OrderController extends ControllerHelper {
             badRequest(request);
         }
     }
+
+
+
 
     @Get("/order/:orderNumber")
     @ApiDoc("Get the list of orders")
@@ -521,6 +526,29 @@ public class OrderController extends ControllerHelper {
         }
     }
 
+    @Put("/order/:idOrder/comment")
+    @ApiDoc("Update an order's comment")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AccessOrderCommentRight.class)
+    public void updateComment(final HttpServerRequest request){
+        RequestUtils.bodyToJson(request,  new Handler<JsonObject>(){
+            @Override
+            public void handle(JsonObject order){
+                if (!order.containsKey("comment")) {
+                    badRequest(request);
+                    return;
+                }
+                try {
+                    Integer id = Integer.parseInt(request.params().get("idOrder"));
+                    String comment = order.getString("comment");
+                    orderService.updateComment(id, comment, defaultResponseHandler(request));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     private void renderValidOrdersCSVExport(HttpServerRequest request, JsonArray equipments) {
         StringBuilder export = new StringBuilder(UTF8_BOM).append(getValidOrdersCSVExportHeader(request));
         for (int i = 0; i < equipments.size(); i++) {
@@ -568,6 +596,8 @@ public class OrderController extends ControllerHelper {
                         translate("lystore.amount", getHost(request), I18n.acceptLanguage(request)) +
                 "\n";
     }
+
+
 
     private void manageFileAndUpdateStatus(final HttpServerRequest request, final Buffer pdf,
                                            final JsonArray ids, final String engagementNumber, final Number programId, final String dateCreation,

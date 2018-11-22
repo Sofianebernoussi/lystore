@@ -45,7 +45,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
 
     public void listBasket(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler){
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
-        String query = "SELECT basket.id, basket.amount, basket.processing_date, basket.id_campaign, basket.id_structure, array_to_json(array_agg( e.* )) as equipment, array_to_json(array_agg(DISTINCT ep.*)) as options " +
+        String query = "SELECT basket.id, basket.amount, basket.comment, basket.processing_date, basket.id_campaign, basket.id_structure, array_to_json(array_agg( e.* )) as equipment, array_to_json(array_agg(DISTINCT ep.*)) as options " +
                 "FROM " + Lystore.lystoreSchema + ".basket_equipment basket " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".basket_option ON basket_option.id_basket_equipment = basket.id " +
                 "LEFT JOIN (" +
@@ -122,10 +122,22 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
 
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler) );
     }
+
+    @Override
+    public void updateComment(Integer idBasket, String comment, Handler<Either<String, JsonObject>> handler) {
+        JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
+        String query = " UPDATE " + Lystore.lystoreSchema + ".basket_equipment " +
+                " SET comment = ? " +
+                " WHERE id = ?; ";
+        values.add(comment).add(idBasket);
+
+        sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
+    }
+
     public void listebasketItemForOrder( Integer idCampaign, String idStructure,
                                          Handler<Either<String, JsonArray>> handler ){
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
-        String query = "SELECT  basket.id id_basket, basket.amount, basket.processing_date,  basket.id_campaign, " +
+        String query = "SELECT  basket.id id_basket, basket.amount, basket.comment, basket.processing_date,  basket.id_campaign, " +
                 "basket.id_structure, e.id id_equipment, e.name,e.summary, e.description, e.price, e.image, e.id_contract, e.status, jsonb(e.technical_specs) technical_specs, e.tax_amount, nextval('" + Lystore.lystoreSchema + ".order_client_equipment_id_seq' ) as id_order, Case Count(ep) " +
                 "when 0 " +
                 "then ROUND((e.price + ((e.price *  e.tax_amount) /100)), 2) * basket.amount " +
@@ -260,15 +272,19 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 .put("action", "prepared");
     }
 
-
+    /**
+     * Basket to order
+     * @param basket
+     * @return
+     */
     private static JsonObject getInsertEquipmentOrderStatement (JsonObject basket){
 
         StringBuilder queryEquipmentOrder = new StringBuilder()
                 .append(" INSERT INTO lystore.order_client_equipment ")
                 .append(" (id, price, tax_amount, amount,  id_campaign, id_structure, name, summary," +
                         " description, image, technical_spec, status, " +
-                        " id_contract, equipment_key ) VALUES ")
-                .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?); ");
+                        " id_contract, equipment_key, comment ) VALUES ")
+                .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?, ?); ");
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
         params.add(basket.getInteger("id_order"))
                 .add(Float.valueOf(basket.getString("price")))
@@ -283,7 +299,8 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 .add(basket.getString("technical_specs"))
                 .add("WAITING")
                 .add(basket.getInteger("id_contract"))
-                .add(basket.getInteger("id_equipment")) ;
+                .add(basket.getInteger("id_equipment"))
+                .add(basket.getString("comment"));
 
         return new JsonObject()
                 .put("statement", queryEquipmentOrder.toString())

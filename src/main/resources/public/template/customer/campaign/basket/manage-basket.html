@@ -64,9 +64,15 @@
                                 <td>[[option.amount]]</td>
                                 <td><span ng-bind="calculatePriceTTC(option.price, option.tax_amount, 2) | currency"></span></td>
                             </tr>
+
                             </tbody>
                         </table>
                     </div>
+                    <div class="twelve cell ">
+                        <h2><i18n>comment</i18n></h2>
+                     <textarea  style="resize: none;" ng-model="basket.comment" ng-blur="updateBasketComment(basket)"></textarea>
+                    </div>
+
                     <div class="horizontal-spacing-twice zero block-mobile basket-amount twelve-mobile">
                         <div class="twelve-mobile">
                             <h5>
@@ -75,6 +81,7 @@
                                        ng-keypress="avoidDecimals($event)"
                                        ng-blur="updateBasketAmount(basket)"/>
                             </h5>
+
                             <h5>
                                 <span>
                                     <i18n>total</i18n> : <span ng-bind="calculatePriceOfBasket(basket , 2, true) | currency"></span>
@@ -85,6 +92,7 @@
                             <input type="button"  ng-click="displayLightboxDelete(basket)"
                                    class="right-magnet cancel vertical-spacing" i18n-value="delete"/>
                         </div>
+                    </div>
                 </article>
             </div>
         </div>

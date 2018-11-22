@@ -33,6 +33,7 @@ export class OrderClient implements Selectable {
     id_structure: string;
     id_supplier: string;
     selected: boolean;
+    comment?: string;
 
     constructor() {}
 
@@ -44,6 +45,15 @@ export class OrderClient implements Selectable {
             });
         }
         return (!isNaN(price)) ? (roundNumber ? price.toFixed(roundNumber) : price ) : price ;
+    }
+
+    async updateComment(){
+        try{
+            http.put(`/lystore/order/${this.id}/comment`, { comment: this.comment });
+        }catch (e){
+            notify.error('lystore.basket.update.err');
+            throw e;
+        }
     }
 
     async delete () {
@@ -146,6 +156,7 @@ export class OrdersClient extends Selection<OrderClient> {
             throw e;
         }
     }
+
 
     initNameStructure (idStructure: string, structures: Structure[]) {
         let structure = _.findWhere(structures, { id : idStructure});

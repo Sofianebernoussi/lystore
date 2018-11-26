@@ -37,7 +37,8 @@
         <div class="row" workflow="lystore.administrator">
             <div class="right-magnet">
                 <span class="horizontal-spacing cell"><i18n>lystore.campaign.accessibility</i18n></span>
-                <switch ng-model="campaign.accessible" ng-change="campaign.updateAccessibility()" class="cell"></switch>
+                <switch-toggle ng-model="campaign.accessible" ng-change="campaign.updateAccessibility()"
+                               class="cell"></switch-toggle>
             </div>
         </div>
     </article>

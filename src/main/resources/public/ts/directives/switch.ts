@@ -1,6 +1,6 @@
-import { ng } from 'entcore';
+import {ng} from 'entcore';
 
-export const Switch = ng.directive('switch', () => {
+export const Switch = ng.directive('switchToggle', () => {
     return {
         restrict: 'E',
         scope: {
@@ -8,10 +8,14 @@ export const Switch = ng.directive('switch', () => {
             ngChange: '&',
             ngDisabled: '@'
         },
-        template: '<label class="switch">' +
-        '<input type="checkbox" ng-model="ngModel" ng-change="valueChange()" ng-disabled="ngDisabled"/>' +
-        '<span class="tick cell"></span>' +
-        '</label>',
+        template: `
+        <div>
+            <label class="switch">
+                <input type="checkbox" ng-model="ngModel" ng-change="valueChange()" ng-disabled="ngDisabled"/>
+                <span class="tick cell"></span>
+            </label>
+        </div>
+        `,
         link: function ($scope, $element, $attrs, ngModel) {
             $scope.valueChange = function() {
                 setTimeout(function() {

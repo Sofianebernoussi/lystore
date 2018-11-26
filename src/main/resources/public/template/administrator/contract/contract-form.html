@@ -61,7 +61,7 @@
         <div class="cell four vertical-spacing horizontal-spacing twelve-mobile">
             <span class="cell eight"><i18n>lystore.contract.annual_min</i18n></span>
             <span class="horizontal-spacing cell four">
-                <switch ng-model="contract.annual_min_enabled" ></switch>
+                <switch-toggle ng-model="contract.annual_min_enabled"></switch-toggle>
             </span>
         </div>
         <label class="cell eight vertical-spacing horizontal-spacing twelve-mobile">
@@ -76,7 +76,7 @@
         <div class="cell four vertical-spacing horizontal-spacing twelve-mobile">
             <span class="cell eight"><i18n>lystore.contract.max_brink</i18n></span>
             <span class="horizontal-spacing cell four">
-                <switch ng-model="contract.max_brink_enabled" ></switch>
+                <switch-toggle ng-model="contract.max_brink_enabled"></switch-toggle>
             </span>
         </div>
         <label class="cell eight vertical-spacing horizontal-spacing twelve-mobile">
@@ -91,7 +91,7 @@
         <div class="cell four vertical-spacing horizontal-spacing twelve-mobile">
             <span class="cell eight"><i18n>lystore.contract.annual_max</i18n></span>
             <span class="horizontal-spacing cell four">
-                <switch ng-model="contract.annual_max_enabled" ></switch>
+                <switch-toggle ng-model="contract.annual_max_enabled"></switch-toggle>
             </span>
         </div>
         <label class="cell eight vertical-spacing horizontal-spacing twelve-mobile">
@@ -112,7 +112,7 @@
                 :
             </div>
             <label class="cell eight vertical-spacing horizontal-spacing twelve-mobile">
-                <switch ng-model="contract.file"></switch>
+                <switch-toggle ng-model="contract.file"></switch-toggle>
             </label>
         </div>
         <div class="row">
@@ -121,7 +121,7 @@
                 :
             </div>
             <label class="cell eight vertical-spacing horizontal-spacing twelve-mobile">
-                <switch ng-model="contract.price_editable"></switch>
+                <switch-toggle ng-model="contract.price_editable"></switch-toggle>
             </label>
         </div>
     </div>

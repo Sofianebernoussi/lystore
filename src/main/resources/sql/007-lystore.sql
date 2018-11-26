@@ -14,8 +14,8 @@ AFTER INSERT ON lystore.equipment
 FOR EACH ROW
 EXECUTE PROCEDURE lystore.create_equipment_reference();
 
-ALTER TABLE ORDER_CLIENT_EQUIPEMENT
-  ADD COLUMN "comment" type TEXT ;
+ALTER TABLE lystore.order_client_equipment
+  ADD COLUMN "comment" TEXT ;
 
-ALTER TABLE BASKET_EQUIPEMENT
-  ADD COLUMN "comment" type TEXT ;
+ALTER TABLE lystore.basket_equipment
+  ADD COLUMN "comment" TEXT ;

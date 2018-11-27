@@ -64,4 +64,12 @@ public interface BasketService {
      * @param handler function handler returning data
      */
     void listebasketItemForOrder( Integer idCampaign, String idStructure,  Handler<Either<String, JsonArray>> handler );
+
+    /**
+     * Update a price proposaf from a basket
+     * @param id
+     * @param price_proposal
+     * @param eitherHandler
+     */
+    void updatePriceProposal(Integer id, Float price_proposal, Handler<Either<String, JsonObject>> eitherHandler);
 }

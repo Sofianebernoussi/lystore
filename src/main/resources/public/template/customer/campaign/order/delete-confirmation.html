@@ -55,7 +55,12 @@
                 <span> <i18n>lystore.quantity</i18n> : </span><strong>[[orderEquipmentToDelete.amount]]</strong>
             </p>
             <p>
-                <span><i18n>price</i18n> : </span><strong ng-bind="calculateTotal(orderEquipmentToDelete,2) | currency"></strong>
+                <span><i18n>price</i18n> : </span>
+                <strong ng-bind="calculateTotal(orderEquipmentToDelete,2) | currency"></strong>
+            </p>
+            <p ng-if="hasAProposalPrice(orderEquipmentToDelete)">
+                <span><i18n>lystore.priceProposal</i18n></span>
+                <strong ng-bind="orderEquipmentToDelete.price_proposal | currency"></strong>
             </p>
         </div>
 

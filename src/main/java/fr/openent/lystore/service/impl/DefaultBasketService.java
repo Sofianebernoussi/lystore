@@ -7,8 +7,6 @@ import fr.openent.lystore.service.PurseService;
 import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.I18n;
-import org.entcore.common.service.impl.SqlCrudService;
-import org.entcore.common.sql.SqlResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
@@ -17,6 +15,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.entcore.common.service.impl.SqlCrudService;
+import org.entcore.common.sql.SqlResult;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -45,7 +45,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
 
     public void listBasket(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler){
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
-        String query = "SELECT basket.id, basket.amount, basket.comment, basket.processing_date, basket.id_campaign, basket.id_structure, array_to_json(array_agg( e.* )) as equipment, array_to_json(array_agg(DISTINCT ep.*)) as options " +
+        String query = "SELECT basket.id, basket.amount, basket.comment, basket.price_proposal::float, contract.price_editable , basket.processing_date, basket.id_campaign, basket.id_structure, array_to_json(array_agg( e.* )) as equipment, array_to_json(array_agg(DISTINCT ep.*)) as options " +
                 "FROM " + Lystore.lystoreSchema + ".basket_equipment basket " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".basket_option ON basket_option.id_basket_equipment = basket.id " +
                 "LEFT JOIN (" +
@@ -59,9 +59,10 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 "FROM " + Lystore.lystoreSchema + ".equipment " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax ON tax.id = equipment.id_tax " +
                 ") as e ON e.id = basket.id_equipment " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON contract.id = e.id_contract " +
                 "WHERE basket.id_campaign = ? " +
                 "AND basket.id_structure = ? " +
-                "GROUP BY (basket.id, basket.amount, basket.processing_date, basket.id_campaign, basket.id_structure);";
+                "GROUP BY (basket.id, basket.amount, basket.processing_date, basket.id_campaign, basket.id_structure, contract.price_editable);";
         values.add(idCampaign).add(idStructure);
 
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
@@ -123,7 +124,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler) );
     }
 
-    @Override
+
     public void updateComment(Integer idBasket, String comment, Handler<Either<String, JsonObject>> handler) {
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
         String query = " UPDATE " + Lystore.lystoreSchema + ".basket_equipment " +
@@ -134,10 +135,23 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
     }
 
+
+    public void updatePriceProposal(Integer id, Float price_proposal, Handler<Either<String, JsonObject>> eitherHandler) {
+        JsonArray values;
+        String query = "UPDATE " + Lystore.lystoreSchema + ".basket_equipment " +
+                "Set price_proposal = " + (price_proposal == null ? " null " : " ? ") +
+                "Where id = ?;";
+        values = price_proposal == null ? new JsonArray().add(id) : new JsonArray().add(price_proposal).add(id);
+
+
+        sql.prepared(query, values, SqlResult.validRowsResultHandler(eitherHandler));
+    }
+
+
     public void listebasketItemForOrder( Integer idCampaign, String idStructure,
                                          Handler<Either<String, JsonArray>> handler ){
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
-        String query = "SELECT  basket.id id_basket, basket.amount, basket.comment, basket.processing_date,  basket.id_campaign, " +
+        String query = "SELECT  basket.id id_basket, (basket.price_proposal * basket.amount) as price_proposal ,basket.amount, basket.comment, basket.processing_date,  basket.id_campaign, " +
                 "basket.id_structure, e.id id_equipment, e.name,e.summary, e.description, e.price, e.image, e.id_contract, e.status, jsonb(e.technical_specs) technical_specs, e.tax_amount, nextval('" + Lystore.lystoreSchema + ".order_client_equipment_id_seq' ) as id_order, Case Count(ep) " +
                 "when 0 " +
                 "then ROUND((e.price + ((e.price *  e.tax_amount) /100)), 2) * basket.amount " +
@@ -164,6 +178,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
 
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
     }
+
 
     public void takeOrder(final HttpServerRequest request, final JsonArray baskets, Integer idCampaign,
                           String idStructure, final String nameStructure ,
@@ -278,29 +293,61 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
      * @return
      */
     private static JsonObject getInsertEquipmentOrderStatement (JsonObject basket){
+        StringBuilder queryEquipmentOrder;
+        JsonArray params;
+        try {
+            queryEquipmentOrder = new StringBuilder()
+                    .append(" INSERT INTO lystore.order_client_equipment ")
+                    .append(" (id, price, tax_amount, amount,  id_campaign, id_structure, name, summary," +
+                            " description, image, technical_spec, status, " +
+                            " id_contract, equipment_key, comment, price_proposal ) VALUES ")
+                    .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?, ?, ?); ");
+            params = new fr.wseduc.webutils.collections.JsonArray();
 
-        StringBuilder queryEquipmentOrder = new StringBuilder()
-                .append(" INSERT INTO lystore.order_client_equipment ")
-                .append(" (id, price, tax_amount, amount,  id_campaign, id_structure, name, summary," +
-                        " description, image, technical_spec, status, " +
-                        " id_contract, equipment_key, comment ) VALUES ")
-                .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?, ?); ");
-        JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
-        params.add(basket.getInteger("id_order"))
-                .add(Float.valueOf(basket.getString("price")))
-                .add(Float.valueOf(basket.getString("tax_amount")))
-                .add(basket.getInteger("amount"))
-                .add(basket.getInteger("id_campaign"))
-                .add(basket.getString("id_structure"))
-                .add(basket.getString("name"))
-                .add(basket.getString("summary"))
-                .add(basket.getString("description"))
-                .add(basket.getString("image"))
-                .add(basket.getString("technical_specs"))
-                .add("WAITING")
-                .add(basket.getInteger("id_contract"))
-                .add(basket.getInteger("id_equipment"))
-                .add(basket.getString("comment"));
+            params.add(basket.getInteger("id_order"))
+                    .add(Float.valueOf(basket.getString("price")))
+                    .add(Float.valueOf(basket.getString("tax_amount")))
+                    .add(basket.getInteger("amount"))
+                    .add(basket.getInteger("id_campaign"))
+                    .add(basket.getString("id_structure"))
+                    .add(basket.getString("name"))
+                    .add(basket.getString("summary"))
+                    .add(basket.getString("description"))
+                    .add(basket.getString("image"))
+                    .add(basket.getString("technical_specs"))
+                    .add("WAITING")
+                    .add(basket.getInteger("id_contract"))
+                    .add(basket.getInteger("id_equipment"))
+                    .add(basket.getString("comment"))
+                    .add(Float.valueOf(basket.getString("price_proposal")));
+
+        } catch (java.lang.NullPointerException e) {
+            queryEquipmentOrder = new StringBuilder()
+                    .append(" INSERT INTO lystore.order_client_equipment ")
+                    .append(" (id, price, tax_amount, amount,  id_campaign, id_structure, name, summary," +
+                            " description, image, technical_spec, status, " +
+                            " id_contract, equipment_key, comment, price_proposal ) VALUES ")
+                    .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?, ?, null); ");
+            params = new fr.wseduc.webutils.collections.JsonArray();
+
+            params.add(basket.getInteger("id_order"))
+                    .add(Float.valueOf(basket.getString("price")))
+                    .add(Float.valueOf(basket.getString("tax_amount")))
+                    .add(basket.getInteger("amount"))
+                    .add(basket.getInteger("id_campaign"))
+                    .add(basket.getString("id_structure"))
+                    .add(basket.getString("name"))
+                    .add(basket.getString("summary"))
+                    .add(basket.getString("description"))
+                    .add(basket.getString("image"))
+                    .add(basket.getString("technical_specs"))
+                    .add("WAITING")
+                    .add(basket.getInteger("id_contract"))
+                    .add(basket.getInteger("id_equipment"))
+                    .add(basket.getString("comment"));
+
+        }
+
 
         return new JsonObject()
                 .put("statement", queryEquipmentOrder.toString())
@@ -373,30 +420,30 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
      * @return Transaction handler
      */
     private static void getTransactionHandler(HttpServerRequest request, String nameStructure, Float totalPrice,
-                          Message<JsonObject> event, JsonObject basicBDObject,
+                                              Message<JsonObject> event, JsonObject basicBDObject,
                                               Handler<Either<String, JsonObject>> handler) {
         JsonObject result = event.body();
         if (result.containsKey("status") && "ok".equals(result.getString("status"))) {
-                JsonObject returns = new JsonObject()
-                        .put("amount", basicBDObject.getInteger("f1"))
-                        .put("nb_order", basicBDObject.getInteger("f2"));
-                DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                final double cons = 100.0;
-                Number total =  Math.round(totalPrice * cons)/cons;
-                handler.handle( new Either.Right<String, JsonObject>(returns));
-                notificationService.sendMessage(
-                        I18n.getInstance().translate( "the.structure" ,
-                                getHost(request) , I18n.acceptLanguage(request) )
-                                +" "+ nameStructure +" "+
-                                I18n.getInstance().translate( "lystore.slack.order.message1" ,
-                                        getHost(request) , I18n.acceptLanguage(request) )
-                                +" "+ total.toString()  +" "+
-                                I18n.getInstance().translate( "money.symbol" ,
-                                        getHost(request) , I18n.acceptLanguage(request) )
-                                + " " +
-                                I18n.getInstance().translate( "determiner.male" ,
-                                        getHost(request) , I18n.acceptLanguage(request) )
-                                +" "+ format.format(new Date())+" ");
+            JsonObject returns = new JsonObject()
+                    .put("amount", basicBDObject.getInteger("f1"))
+                    .put("nb_order", basicBDObject.getInteger("f2"));
+            DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+            final double cons = 100.0;
+            Number total = Math.round(totalPrice * cons) / cons;
+            handler.handle(new Either.Right<String, JsonObject>(returns));
+            notificationService.sendMessage(
+                    I18n.getInstance().translate("the.structure",
+                            getHost(request), I18n.acceptLanguage(request))
+                            + " " + nameStructure + " " +
+                            I18n.getInstance().translate("lystore.slack.order.message1",
+                                    getHost(request), I18n.acceptLanguage(request))
+                            + " " + total.toString() + " " +
+                            I18n.getInstance().translate("money.symbol",
+                                    getHost(request), I18n.acceptLanguage(request))
+                            + " " +
+                            I18n.getInstance().translate("determiner.male",
+                                    getHost(request), I18n.acceptLanguage(request))
+                            + " " + format.format(new Date()) + " ");
         } else {
             LOGGER.error("An error occurred when launching 'order' transaction");
             handler.handle(new Either.Left<String, JsonObject>(""));

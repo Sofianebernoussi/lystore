@@ -1,5 +1,5 @@
-import { Selectable, Selection, Mix } from 'entcore-toolkit';
-import { notify, _ } from 'entcore';
+import {Mix, Selectable, Selection} from 'entcore-toolkit';
+import {_, notify} from 'entcore';
 import http from 'axios';
 import {Equipment, EquipmentOption, Structure} from './index';
 
@@ -13,12 +13,17 @@ export class Basket implements Selectable {
     id_structure: string;
     selected: boolean;
     comment?: string;
+    price_proposal?: number;
+    price_editable: boolean;
+    display_price_editable: boolean;
+
 
     constructor (equipment: Equipment , id_campaign: number, id_structure: string ) {
         this.equipment = Mix.castAs(Equipment, equipment) ;
         this.id_campaign = id_campaign;
         this.id_structure = id_structure;
         this.amount = 1;
+        this.display_price_editable = false;
     }
 
     toJson () {
@@ -35,15 +40,15 @@ export class Basket implements Selectable {
 
     async save () {
         if (this.id) {
-             this.update();
+            this.update();
         } else {
-             this.create();
+            this.create();
         }
     }
 
     async create () {
         try {
-          return await  http.post(`/lystore/basket`, this.toJson());
+            return await  http.post(`/lystore/basket`, this.toJson());
         } catch (e) {
             notify.error('lystore.basket.create.err');
         }
@@ -74,6 +79,15 @@ export class Basket implements Selectable {
         }
     }
 
+    async updatePriceProposal() {
+        try {
+            http.put(`/lystore/basket/${this.id}/priceProposal`, {price_proposal: this.price_proposal});
+        } catch (e) {
+            notify.error('lystore.basket.update.err');
+            throw e;
+        }
+    }
+
     async delete () {
         try {
             return await  http.delete(`/lystore/basket/${this.id}`);
@@ -81,6 +95,8 @@ export class Basket implements Selectable {
             notify.error('lystore.basket.delete.err');
         }
     }
+
+
 }
 
 export class Baskets extends Selection<Basket> {
@@ -106,7 +122,11 @@ export class Baskets extends Selection<Basket> {
     }
     async takeOrder (idCampaign: number , Structure: Structure ) {
         try {
-           return await http.post(`/lystore/baskets/to/orders`, {id_campaign : idCampaign, id_structure: Structure.id, structure_name: Structure.name  });
+            return await http.post(`/lystore/baskets/to/orders`, {
+                id_campaign: idCampaign,
+                id_structure: Structure.id,
+                structure_name: Structure.name
+            });
         } catch (e) {
             notify.error('lystore.order.create.err');
         }

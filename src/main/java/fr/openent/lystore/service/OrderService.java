@@ -1,12 +1,11 @@
 package fr.openent.lystore.service;
 
 import fr.wseduc.webutils.Either;
-import org.entcore.common.user.UserInfos;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
-
 import io.vertx.core.json.JsonObject;
+import org.entcore.common.user.UserInfos;
 
 import java.util.List;
 /**
@@ -144,4 +143,6 @@ public interface OrderService {
     void getOrderFileId(String orderNumber, Handler<Either<String, JsonObject>> handler);
 
     void updateComment(Integer id, String comment, Handler<Either<String, JsonObject>> eitherHandler);
+
+ void updatePriceProposal(Integer id, Float price_proposal, Handler<Either<String, JsonObject>> eitherHandler);
 }

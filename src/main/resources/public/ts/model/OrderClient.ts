@@ -1,6 +1,6 @@
-import { notify, moment, _ , model } from 'entcore';
-import { Selectable, Selection, Mix } from 'entcore-toolkit';
-import { TechnicalSpec, Contract, Supplier, Campaign, Structure, Utils } from './index';
+import {_, model, moment, notify} from 'entcore';
+import {Mix, Selectable, Selection} from 'entcore-toolkit';
+import {Campaign, Contract, Structure, Supplier, TechnicalSpec, Utils} from './index';
 import http from 'axios';
 
 export class OrderClient implements Selectable {
@@ -34,7 +34,7 @@ export class OrderClient implements Selectable {
     id_supplier: string;
     selected: boolean;
     comment?: string;
-
+    price_proposal?: number;
     constructor() {}
 
     calculatePriceTTC ( roundNumber?: number)  {
@@ -55,6 +55,7 @@ export class OrderClient implements Selectable {
             throw e;
         }
     }
+
 
     async delete () {
         try {

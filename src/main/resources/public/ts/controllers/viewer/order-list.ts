@@ -1,6 +1,5 @@
-import {ng, moment, template} from 'entcore';
-import {OrderClient, Utils, Notification, Basket} from '../../model';
-import {orderController} from "../administration";
+import {moment, ng, template} from 'entcore';
+import {Notification, OrderClient, Utils} from '../../model';
 
 declare let window: any;
 
@@ -19,6 +18,11 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             let idStructure = $scope.ordersClient.all[0].id_structure;
             window.location = `/lystore/orders/export/${idCampaign}/${idStructure}`;
         };
+
+        $scope.hasAProposalPrice = (orderClient: OrderClient) => {
+            
+            return (orderClient.price_proposal);
+        }
 
         $scope.displayEquipmentOption = (index: number) => {
             $scope.display.ordersClientOption[index] = !$scope.display.ordersClientOption[index];
@@ -42,7 +46,9 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             orderClient.updateComment();
         }
 
+        $scope.priceProposal = (orderClient: OrderClient) => {
 
+        }
         $scope.displayLightboxDelete = (orderEquipment: OrderClient) => {
             template.open('orderClient.delete', 'customer/campaign/order/delete-confirmation');
             $scope.orderEquipmentToDelete = orderEquipment;

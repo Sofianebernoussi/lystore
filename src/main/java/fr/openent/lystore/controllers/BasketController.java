@@ -5,6 +5,7 @@ import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AccessOrderCommentRight;
+import fr.openent.lystore.security.AccessPriceProposalRight;
 import fr.openent.lystore.security.PersonnelRight;
 import fr.openent.lystore.service.BasketService;
 import fr.openent.lystore.service.impl.DefaultBasketService;
@@ -13,14 +14,13 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.request.RequestUtils;
-import org.entcore.common.http.filter.ResourceFilter;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
-import org.entcore.common.controller.ControllerHelper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-
+import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.http.filter.ResourceFilter;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
@@ -78,6 +78,8 @@ public class BasketController extends ControllerHelper {
             badRequest(request);
         }
     }
+
+
     @Put("/basket/:idBasket/amount")
     @ApiDoc("Update a basket's amount")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
@@ -115,6 +117,33 @@ public class BasketController extends ControllerHelper {
                     basketService.updateComment(id, comment, defaultResponseHandler(request));
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    @Put("/basket/:idBasket/priceProposal")
+    @ApiDoc("Update the price proposal of a basket")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AccessPriceProposalRight.class)
+    public void updatePriceProposal(final HttpServerRequest request) {
+
+        RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+            @Override
+            public void handle(JsonObject basket) {
+                if (!basket.containsKey("price_proposal")) {
+                    badRequest(request);
+                    return;
+                }
+                try {
+                    Integer id = Integer.parseInt(request.params().get("idBasket"));
+                    Float price_proposal = basket.getFloat("price_proposal");
+                    basketService.updatePriceProposal(id, price_proposal, defaultResponseHandler(request));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                } catch (java.lang.NullPointerException e) {
+                    Integer id = Integer.parseInt(request.params().get("idBasket"));
+                    basketService.updatePriceProposal(id, null, defaultResponseHandler(request));
                 }
             }
         });

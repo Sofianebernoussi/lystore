@@ -38,7 +38,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     @Override
     public void listOrder(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
-        String query = "SELECT oe.id, oe.comment, oe.price, oe.tax_amount, oe.amount,oe.creation_date, oe.id_campaign," +
+        String query = "SELECT oe.id, oe.comment, oe.price_proposal, oe.price, oe.tax_amount, oe.amount,oe.creation_date, oe.id_campaign," +
                 " oe.id_structure, oe.name, oe.summary, oe.image, oe.status, oe.id_contract," +
                 " array_to_json(array_agg(order_opts)) as options, c.name as name_supplier  " +
                 "FROM "+ Lystore.lystoreSchema + ".order_client_equipment  oe " +
@@ -56,7 +56,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
     @Override
     public  void listOrder(String status, Handler<Either<String, JsonArray>> handler){
-        String query = "SELECT oce.* , oce.comment, to_json(contract.*) contract ,to_json(supplier.*) supplier, " +
+        String query = "SELECT oce.* , to_json(contract.*) contract ,to_json(supplier.*) supplier, " +
                 "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options, " +
                 "array_to_json(array_agg(distinct structure_group.name)) as structure_groups, lystore.order.order_number " +
                 "FROM lystore.order_client_equipment oce " +
@@ -77,7 +77,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
     @Override
     public void listOrders(List<Integer> ids, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT oce.* ,oce.comment, oce.price * oce.amount as total_price , " +
+        String query = "SELECT oce.* , oce.price * oce.amount as total_price , " +
                 "to_json(contract.*) contract ,to_json(supplier.*) supplier, " +
                 "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options " +
                 "FROM lystore.order_client_equipment oce " +
@@ -261,6 +261,17 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
 
+    }
+
+    @Override
+    public void updatePriceProposal(Integer id, Float price_proposal, Handler<Either<String, JsonObject>> handler) {
+        JsonArray values;
+        String query = "UPDATE " + Lystore.lystoreSchema + ".order_client_equipment" +
+                "SET price_proposal = " + (price_proposal == null ? " null " : " ? ") +
+                "WHERE id = ?;";
+        values = price_proposal == null ? new JsonArray().add(id) : new JsonArray().add(price_proposal).add(id);
+
+        sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
     }
 
 

@@ -7,7 +7,6 @@ import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AccessOrderCommentRight;
 import fr.openent.lystore.security.AccessOrderRight;
 import fr.openent.lystore.security.ManagerRight;
-import fr.openent.lystore.security.PersonnelRight;
 import fr.openent.lystore.service.*;
 import fr.openent.lystore.service.impl.*;
 import fr.openent.lystore.utils.SqlQueryUtils;
@@ -548,6 +547,8 @@ public class OrderController extends ControllerHelper {
             }
         });
     }
+
+
 
     private void renderValidOrdersCSVExport(HttpServerRequest request, JsonArray equipments) {
         StringBuilder export = new StringBuilder(UTF8_BOM).append(getValidOrdersCSVExportHeader(request));

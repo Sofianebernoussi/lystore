@@ -316,5 +316,6 @@
   "lystore.option.search.err": "Erreur lors de la recherche d'une option",
   "comment":"Commentaire",
   "seemore": "Voir la suite",
-  "noresult": "La recherche n'a retournée aucun résultat"
+  "noresult": "La recherche n'a retournée aucun résultat",
+  "lystore.priceProposal": "Prix souhaité"
 }

@@ -1,9 +1,6 @@
-import {moment, ng, template, _} from 'entcore';
-import {
-    Basket,
-    Baskets,
-    Utils
-} from '../../model';
+import {_, moment, ng, template} from 'entcore';
+import {Basket, Baskets, Utils} from '../../model';
+
 export const basketController = ng.controller('basketController',
     ['$scope', '$routeParams', ($scope, $routeParams) => {
         $scope.display = {
@@ -14,6 +11,11 @@ export const basketController = ng.controller('basketController',
                 confirmOrder : false
             }
         };
+
+        $scope.isProposed = (basket: Basket) => {
+            return (basket.price_proposal);
+        }
+
         $scope.calculatePriceOfEquipments = (baskets: Baskets, roundNumber?: number) => {
             let totalPrice = 0;
             baskets.all.map((basket) => {
@@ -23,18 +25,74 @@ export const basketController = ng.controller('basketController',
             });
             return (!isNaN(totalPrice)) ? (roundNumber ? totalPrice.toFixed(roundNumber) : totalPrice ) : '';
         };
-        $scope.calculatePriceOfBasket = (basket: Basket, roundNumber?: number,  toDisplay?: boolean ) => {
+        $scope.calculatePriceOfEquipmentsProposal = (baskets: Baskets, roundNumber?: number) => {
+            let totalPrice = 0;
+            baskets.all.map((basket) => {
+                if (basket.equipment.status !== 'AVAILABLE') return false;
+                let basketItemPrice = $scope.calculatePriceOfBasketProposal(basket, 2, false);
+                totalPrice += !isNaN(basketItemPrice) ? parseFloat(basketItemPrice) : 0;
+            });
+            return (!isNaN(totalPrice)) ? (roundNumber ? totalPrice.toFixed(roundNumber) : totalPrice) : '';
+        };
+
+        $scope.calculatePriceOfBasket = (basket: Basket, roundNumber?: number, toDisplay?: boolean) => {
+            let equipmentPrice = $scope.calculatePriceOfEquipment(basket.equipment, true, roundNumber);
+            equipmentPrice = basket.amount === 0 && toDisplay ? equipmentPrice : equipmentPrice * basket.amount;
+            return (!isNaN(equipmentPrice)) ? (roundNumber ? equipmentPrice.toFixed(roundNumber) : equipmentPrice) : '';
+        };
+
+
+        $scope.calculatePriceOfBasketProposal = (basket: Basket, roundNumber?: number, toDisplay?: boolean) => {
             let equipmentPrice =  $scope.calculatePriceOfEquipment(basket.equipment, true, roundNumber);
-            equipmentPrice = basket.amount === 0 && toDisplay  ? equipmentPrice : equipmentPrice * basket.amount;
+            if (!basket.price_proposal) {
+                equipmentPrice = basket.amount === 0 && toDisplay ? equipmentPrice : equipmentPrice * basket.amount;
+            } else {
+                equipmentPrice = basket.amount === 0 && toDisplay ? equipmentPrice : basket.price_proposal * basket.amount;
+            }
+            return (!isNaN(equipmentPrice)) ? (roundNumber ? equipmentPrice.toFixed(roundNumber) : equipmentPrice) : '';
+        };
+
+        $scope.resetPriceProposal = (basket: Basket) => {
+            //    basket.price_proposal = $scope.calculatePriceOfBasketUnity(basket,2);
+            basket.price_proposal = null;
+            basket.display_price_editable = false;
+            Utils.safeApply($scope);
+            basket.updatePriceProposal();
+
+        }
+
+
+        $scope.calculatePriceOfBasketUnity = (basket: Basket, roundNumber?: number, toDisplay?: boolean) => {
+            let equipmentPrice = $scope.calculatePriceOfEquipment(basket.equipment, true, roundNumber);
+            equipmentPrice = basket.amount === 0 && toDisplay ? equipmentPrice : equipmentPrice * 1;
             return (!isNaN(equipmentPrice)) ? (roundNumber ? equipmentPrice.toFixed(roundNumber) : equipmentPrice ) : '';
         };
+
+        $scope.priceDisplay = (basket: Basket) => {
+            if (!basket.price_proposal) {
+                return $scope.calculatePriceOfBasketUnity(basket, 2, true);
+            } else {
+                return basket.price_proposal;
+            }
+        }
+
+        $scope.displayPriceEdition = (basket: Basket) => {
+
+            basket.display_price_editable = true;
+            Utils.safeApply($scope);
+        }
+
+
         $scope.calculeDeliveryDate = () => {
             return moment().add(60, 'days').calendar();
         };
+
+
         $scope.displayOptions = (index: number) => {
             $scope.display.equipmentOption[index] = !$scope.display.equipmentOption[index] ;
             Utils.safeApply($scope);
         };
+
         $scope.displayLightboxDelete = (basket: Basket) => {
             template.open('basket.delete', 'customer/campaign/basket/delete-confirmation');
             $scope.basketToDelete = basket;
@@ -67,13 +125,24 @@ export const basketController = ng.controller('basketController',
         };
         $scope.updateBasketComment= (basket: Basket) =>{
             if (!basket.comment || basket.comment.trim() == " ") {
-                basket.comment="";
+                basket.comment = "";
             }
             basket.updateComment();
         }
+
+        $scope.updateBasketPriceProposal = (basket: Basket) => {
+            if (!basket.price_proposal) {
+                basket.price_proposal = Math.round($scope.calculatePriceOfBasket(basket, basket.amount, true));
+            }
+            basket.updatePriceProposal();
+            basket.display_price_editable = false;
+            Utils.safeApply($scope);
+        }
+
         $scope.takeClientOrder = async (baskets: Baskets) => {
             let { status, data } = await baskets.takeOrder(parseInt($routeParams.idCampaign), $scope.current.structure);
             $scope.totalPrice = $scope.calculatePriceOfEquipments(baskets, 2);
+            //   $scope.totalPriceProposal = $scope.calculatePriceOfEquipmentsProposal(baskets, 2)
             await baskets.sync(parseInt($routeParams.idCampaign), $scope.current.structure.id);
             status === 200 ?  $scope.confirmOrder(data) :  null ;
             Utils.safeApply($scope);

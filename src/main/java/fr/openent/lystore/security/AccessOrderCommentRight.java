@@ -44,6 +44,8 @@ public class AccessOrderCommentRight implements ResourcesProvider {
                     }
                 }
             }));
+        }else{
+            request.response().setStatusCode(400).end();
         }
     }
 }

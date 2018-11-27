@@ -51,8 +51,15 @@
             <div class="four cell twelve-mobile">
                 <div class="row cell centered-text order-amount-price vertical-spacing-twice">
                     <h3 class="four"><i18n>lystore.quantity</i18n> : [[orderClient.amount]]</h3>
-                    <p class="four" ng-bind="calculateTotal(orderClient,2) | currency"></p>
+                    <p class="four" ng-if="!hasAProposalPrice(orderClient)"
+                       ng-bind="calculateTotal(orderClient,2) | currency">
+                        <div class="right-magnet four cell">
+
+                    <p ng-bind="orderClient.price_proposal | currency" ng-if="hasAProposalPrice(orderClient)"></p>
+
                 </div>
+
+            </div>
                 <ul class="[[orderClient.status]] status-bar cell row">
                     <li><i class="validated-status"></i></li>
                     <li><i class="validated-status"></i></li>

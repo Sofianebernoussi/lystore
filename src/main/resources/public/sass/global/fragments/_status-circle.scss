@@ -1,0 +1,46 @@
+.status-cirle {
+  width:80px;
+  height:80px;
+  border-radius:50%;
+
+  > i {
+    margin-top: 30px;
+    margin-bottom: 20px;
+    color: $white;
+    font-size:30px;
+    display: block;
+    font-weight:bold;
+    text-align: center;
+
+    &:after {
+      color: $white;
+    }
+  }
+
+  &.WAITING{
+    background: $grey;
+  }
+
+  &.REJECTED{
+    background: $red;
+    >i:after{
+      content: '\e866';
+    }
+  }
+
+  &.WAITING_FOR_ACCEPTANCE{
+    background: $orange;
+    >i:after{
+      content: "?";
+    }
+  }
+
+  &.VALID{
+    background: $green;
+    >i:after{
+      content: '\e871';
+    }
+  }
+}
+
+

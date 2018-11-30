@@ -60,11 +60,11 @@
                 </div>
 
             </div>
-                <ul class="[[orderClient.status]] status-bar cell row">
-                    <li><i class="validated-status"></i></li>
-                    <li><i class="validated-status"></i></li>
-                    <li><i class="validated-status"></i></li>
-                </ul>
+            <div clas="twelve cell">
+                <div class="[[orderClient.status]] status-cirle cell row">
+                    <i></i>
+                </div>
+
                 <div class="row">
                     <input ng-show = "orderClient.status === 'WAITING'" type="button" ng-click="displayLightboxDelete(orderClient)"
                            class = "right-magnet cancel vertical-spacing" i18n-value="delete"/>

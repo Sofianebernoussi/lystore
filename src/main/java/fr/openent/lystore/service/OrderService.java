@@ -144,5 +144,14 @@ public interface OrderService {
 
     void updateComment(Integer id, String comment, Handler<Either<String, JsonObject>> eitherHandler);
 
- void updatePriceProposal(Integer id, Float price_proposal, Handler<Either<String, JsonObject>> eitherHandler);
+    /**
+     * Get file from a specific order id
+     *
+     * @param orderId order identifier
+     * @param fileId  file identifier
+     * @param handler Function handler returning data
+     */
+    void getFile(Integer orderId, String fileId, Handler<Either<String, JsonObject>> handler);
+
+    void updatePriceProposal(Integer id, Float price_proposal, Handler<Either<String, JsonObject>> eitherHandler);
 }

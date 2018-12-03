@@ -40,10 +40,11 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
         String query = "SELECT oe.id, oe.comment, oe.price_proposal, oe.price, oe.tax_amount, oe.amount,oe.creation_date, oe.id_campaign," +
                 " oe.id_structure, oe.name, oe.summary, oe.image, oe.status, oe.id_contract," +
-                " array_to_json(array_agg(order_opts)) as options, c.name as name_supplier  " +
+                " array_to_json(array_agg(order_opts)) as options, c.name as name_supplier, array_to_json(array_agg(DISTINCT order_file.*)) as files  " +
                 "FROM "+ Lystore.lystoreSchema + ".order_client_equipment  oe " +
                 "LEFT JOIN "+ Lystore.lystoreSchema + ".order_client_options order_opts ON " +
                 "oe.id = order_opts.id_order_client_equipment " +
+                "LEFT JOIN " + Lystore.lystoreSchema + ".order_file ON oe.id = order_file.id_order_client_equipment " +
                 "INNER JOIN (SELECT supplier.name, contract.id FROM " + Lystore.lystoreSchema + ".supplier INNER JOIN "
                 + Lystore.lystoreSchema + ".contract ON contract.id_supplier = supplier.id) c " +
                 "ON oe.id_contract = c.id WHERE id_campaign = ? AND id_structure = ? " +
@@ -272,6 +273,22 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         values = price_proposal == null ? new JsonArray().add(id) : new JsonArray().add(price_proposal).add(id);
 
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
+    }
+
+    @Override
+    public void getFile(Integer orderId, String fileId, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT * FROM " + Lystore.lystoreSchema + ".order_file WHERE id = ? AND id_order_client_equipment = ?";
+        JsonArray params = new JsonArray()
+                .add(fileId)
+                .add(orderId);
+
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(event -> {
+            if (event.isRight() && event.right().getValue().size() > 0) {
+                handler.handle(new Either.Right<>(event.right().getValue().getJsonObject(0)));
+            } else {
+                handler.handle(new Either.Left<>("Not found"));
+            }
+        }));
     }
 
 

@@ -26,6 +26,7 @@ export class OrderClient implements Selectable {
     label_program?: string;
     contract_name?: string;
     supplier_name?: string;
+    files: any;
 
     name_structure: string;
     id_contract: number;
@@ -64,6 +65,11 @@ export class OrderClient implements Selectable {
             notify.error('lystore.order.delete.err');
         }
     }
+
+
+    downloadFile(file) {
+        window.open(`/lystore/order/${this.id}/file/${file.id}`);
+    }
 }
 export class OrdersClient extends Selection<OrderClient> {
 
@@ -87,10 +93,11 @@ export class OrdersClient extends Selection<OrderClient> {
                 this.all.map((order) => {
                     order.price = parseFloat(order.price.toString());
                     order.tax_amount = parseFloat(order.tax_amount.toString());
-                    order.options.toString() !== '[null]' && order.options !== null ?
-                        order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
+                    order.options = order.options.toString() !== '[null]' && order.options !== null ?
+                        Mix.castArrayAs(OrderOptionClient, JSON.parse(order.options.toString()))
                         : order.options = [];
                     order.options.map((order) => order.selected = true);
+                    order.files = order.files !== '[null]' ? Utils.parsePostgreSQLJson(order.files) : [];
                 });
             } else {
                 let { data } = await http.get(  `/lystore/orders?status=${status}` );

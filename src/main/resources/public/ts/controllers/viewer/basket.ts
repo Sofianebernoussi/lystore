@@ -1,14 +1,13 @@
 import {_, moment, ng, template} from 'entcore';
-import {Basket, Baskets, Utils} from '../../model';
-
+import {Basket, Baskets, Notification, Utils} from '../../model';
 export const basketController = ng.controller('basketController',
     ['$scope', '$routeParams', ($scope, $routeParams) => {
         $scope.display = {
             equipmentOption : [],
-
             lightbox : {
                 deleteBasket : false,
-                confirmOrder : false
+                confirmOrder: false,
+                addDocuments: false
             }
         };
 
@@ -165,5 +164,36 @@ export const basketController = ng.controller('basketController',
             return $scope.calculatePriceOfEquipments(baskets) <= $scope.campaign.purse_amount
                 && _.findWhere( equipmentsBasket, {status : 'OUT_OF_STOCK'}) === undefined
                 &&  _.findWhere( equipmentsBasket, {status : 'UNAVAILABLE'}) === undefined;
+        };
+
+        $scope.openAddDocumentsLightbox = (basket: Basket) => {
+            $scope.basket = basket;
+            $scope.files = [];
+            $scope.display.lightbox.addDocuments = true;
+            Utils.safeApply($scope);
+        };
+
+        $scope.endUpload = (files) => {
+            $scope.basket.files = $scope.basket.files || [];
+            for (let i = 0; i < files.length; i++) {
+                $scope.basket.files.push(files[i]);
+            }
+            $scope.display.lightbox.addDocuments = false;
+            Utils.safeApply($scope);
+        };
+
+        $scope.deleteBasketDocument = async (basket: Basket, file) => {
+            try {
+                file.status = 'loading';
+                Utils.safeApply($scope);
+                await basket.deleteDocument(file);
+                basket.files = _.reject(basket.files, (doc) => doc.id === file.id);
+                $scope.notifications.push(new Notification('lystore.basket.file.delete.success', 'confirm'));
+            } catch (err) {
+                $scope.notifications.push(new Notification('lystore.basket.file.delete.error', 'warning'));
+                delete file.status;
+            } finally {
+                Utils.safeApply($scope);
+            }
         };
     }]);

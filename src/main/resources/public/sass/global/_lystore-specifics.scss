@@ -656,4 +656,40 @@ body.lystore {
       font-size: 20px;
     }
   }
+
+  .basket-file-list {
+    > h3 {
+      background-color: $primary;
+      color: $white;
+      margin: 0;
+      padding: 2px 5px;
+      font-size: 14px;
+    }
+
+    > ul {
+      margin: 0;
+      list-style-type: none;
+      padding: 0;
+
+      > li {
+        padding: 10px 5px;
+        border-bottom: solid 1px $solid-grey;
+        box-sizing: border-box;
+
+        &.basket-file {
+          .loading {
+            color: $primary;
+          }
+        }
+
+        > i::after {
+          color: $solid-grey;
+        }
+
+        &:last-child {
+          border-bottom: none;
+        }
+      }
+    }
+  }
 }

@@ -92,6 +92,20 @@
                 <h2><i18n>comment</i18n></h2>
                 <textarea style="resize: none;" ng-blur="updateComment(orderClient)" ng-model="orderClient.comment"></textarea>
             </div>
+            <div class="row twelve">
+                <div class="row basket-file-list"
+                     ng-if="orderClient.files.length > 0">
+                    <h3>
+                        <i18n>lystore.basket.file.name</i18n>
+                    </h3>
+                    <ul class="twelve">
+                        <li ng-repeat="file in orderClient.files" class="twelve basket-file"
+                            ng-click="orderClient.downloadFile(file)">
+                            <a>[[ file.filename ]]</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </article>
     </div>
     <article ng-show = "ordersClient.all.length === 0 " class="centered-text row">

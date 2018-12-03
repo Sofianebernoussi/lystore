@@ -116,6 +116,23 @@
                         <p class="right-magnet cancel vertical-spacing"
                            ng-bind="calculatePriceOfBasketProposal(basket , 2, true) | currency"></p>
                     </div>
+                    <div class="row twelve">
+                        <div class="row basket-file-list"
+                             ng-if="basket.equipment.file === true && basket.files.length > 0">
+                            <h3>
+                                <i18n>lystore.basket.file.name</i18n>
+                            </h3>
+                            <ul class="twelve">
+                                <li ng-repeat="file in basket.files" class="twelve basket-file"
+                                    ng-click="basket.downloadFile(file)">
+                                    <a>[[ file.name || file.filename ]]</a>
+                                    <i class="right-magnet"
+                                       ng-class="{ close: file.status !== 'loading', loading: file.status === 'loading'}"
+                                       ng-click="deleteBasketDocument(basket, file)"></i>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
 
 
                     <div class="horizontal-spacing-twice zero block-mobile basket-amount twelve-mobile">
@@ -140,6 +157,9 @@
                                    class="right-magnet cancel vertical-spacing" i18n-value="delete"/>
                         </div>
                     </div>
+                    <div ng-if="basket.equipment.file === true">
+                        <input type="button" value="Déposer des documents" ng-click="openAddDocumentsLightbox(basket)"/>
+                    </div>
                 </article>
             </div>
         </div>
@@ -158,5 +178,10 @@
 
     <lightbox show="display.lightbox.confirmOrder" on-close="cancelConfirmOrder()">
         <container template="basket.order"></container>
+    </lightbox>
+
+    <lightbox show="display.lightbox.addDocuments" on-close="display.lightbox.addDocuments = false">
+        <upload-files end="endUpload"
+                      upload-uri="'/lystore/basket/' + basket.id + '/file'"></upload-files>
     </lightbox>
 </div>

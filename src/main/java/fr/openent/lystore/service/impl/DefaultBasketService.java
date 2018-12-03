@@ -16,6 +16,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.service.impl.SqlCrudService;
+import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
 import java.text.DateFormat;
@@ -45,9 +46,11 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
 
     public void listBasket(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler){
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
-        String query = "SELECT basket.id, basket.amount, basket.comment, basket.price_proposal::float, contract.price_editable , basket.processing_date, basket.id_campaign, basket.id_structure, array_to_json(array_agg( e.* )) as equipment, array_to_json(array_agg(DISTINCT ep.*)) as options " +
+        String query = "SELECT basket.id, basket.amount, basket.comment, basket.price_proposal::float, contract.price_editable , basket.processing_date, basket.id_campaign, basket.id_structure, array_to_json(array_agg( e.* )) as equipment," +
+                "array_to_json(array_agg(DISTINCT ep.*)) as options, array_to_json(array_agg(DISTINCT basket_file.*)) as files " +
                 "FROM " + Lystore.lystoreSchema + ".basket_equipment basket " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".basket_option ON basket_option.id_basket_equipment = basket.id " +
+                "LEFT JOIN " + Lystore.lystoreSchema + ".basket_file ON basket.id = basket_file.id_basket_equipment " +
                 "LEFT JOIN (" +
                 "SELECT equipment_option.amount, equipment_option.required, equipment_option.id, tax.value as tax_amount, equipment_option.id_equipment, equipment.name, equipment.price " +
                 "FROM " + Lystore.lystoreSchema + ".equipment_option " +
@@ -55,9 +58,10 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax on tax.id = equipment.id_tax " +
                 ") ep ON basket_option.id_option = ep.id " +
                 "INNER JOIN (" +
-                "SELECT equipment.*, tax.value tax_amount " +
+                "SELECT equipment.*, tax.value tax_amount, contract.file " +
                 "FROM " + Lystore.lystoreSchema + ".equipment " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax ON tax.id = equipment.id_tax " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON equipment.id_contract = contract.id " +
                 ") as e ON e.id = basket.id_equipment " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract ON contract.id = e.id_contract " +
                 "WHERE basket.id_campaign = ? " +
@@ -156,9 +160,10 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 "when 0 " +
                 "then ROUND((e.price + ((e.price *  e.tax_amount) /100)), 2) * basket.amount " +
                 "else (ROUND(e.price + ((e.price *  e.tax_amount) /100), 2) + SUM(ep.total_option_price)) * basket.amount " +
-                "END as total_price, array_to_json(array_agg(DISTINCT ep.*)) as options " +
+                "END as total_price, array_to_json(array_agg(DISTINCT ep.*)) as options, array_to_json(array_agg(DISTINCT basket_file.*)) as files " +
                 "FROM  " + Lystore.lystoreSchema + ".basket_equipment basket " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".basket_option ON basket_option.id_basket_equipment = basket.id " +
+                "LEFT JOIN " + Lystore.lystoreSchema + ".basket_file ON basket.id = basket_file.id_basket_equipment " +
                 "LEFT JOIN (" +
                 "SELECT equipment_option.*, equipment.name, equipment.price, tax.value tax_amount, ROUND(equipment.price + ((equipment.price * tax.value)/100), 2) as total_option_price " +
                 "FROM " + Lystore.lystoreSchema + ".equipment_option " +
@@ -179,6 +184,44 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
     }
 
+    @Override
+    public void addFileToBasket(Integer basketId, String fileId, String fileName, Handler<Either<String, JsonObject>> handler) {
+        String query = "INSERT INTO " + Lystore.lystoreSchema + ".basket_file (id, id_basket_equipment, filename) " +
+                "VALUES (?, ?, ?)";
+        JsonArray params = new JsonArray()
+                .add(fileId)
+                .add(basketId)
+                .add(fileName);
+
+        Sql.getInstance().prepared(query, params, SqlResult.validRowsResultHandler(handler));
+    }
+
+    @Override
+    public void deleteFileFromBasket(Integer basketId, String fileId, Handler<Either<String, JsonObject>> handler) {
+        String query = "DELETE FROM " + Lystore.lystoreSchema + ".basket_file WHERE id = ? AND id_basket_equipment = ?";
+
+        JsonArray params = new JsonArray()
+                .add(fileId)
+                .add(basketId);
+
+        Sql.getInstance().prepared(query, params, SqlResult.validRowsResultHandler(handler));
+    }
+
+    @Override
+    public void getFile(Integer basketId, String fileId, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT * FROM " + Lystore.lystoreSchema + ".basket_file WHERE id = ? AND id_basket_equipment = ?";
+        JsonArray params = new JsonArray()
+                .add(fileId)
+                .add(basketId);
+
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(event -> {
+            if (event.isRight() && event.right().getValue().size() > 0) {
+                handler.handle(new Either.Right<>(event.right().getValue().getJsonObject(0)));
+            } else {
+                handler.handle(new Either.Left<>("Not found"));
+            }
+        }));
+    }
 
     public void takeOrder(final HttpServerRequest request, final JsonArray baskets, Integer idCampaign,
                           String idStructure, final String nameStructure ,
@@ -194,6 +237,10 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 if(! "[null]".equals( basket.getString("options"))) {
                     statements.add(getInsertEquipmentOptionsStatement(basket));
                     statements.add(getDeletionBasketsOptionsStatments(basket.getInteger("id_basket")));
+                }
+                if (!"[null]".equals(basket.getString("files"))) {
+                    statements.add(getInsertFilesStatement(basket));
+                    statements.add(deleteFilesFromBasket(basket.getInteger("id_basket")));
                 }
             }
             statements.add(getDeletionBasketsEquipmentStatments(idCampaign, idStructure));
@@ -213,6 +260,38 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             handler.handle(new Either.Left<String, JsonObject>(""));
         }
     }
+
+    private JsonObject getInsertFilesStatement(JsonObject basket) {
+        JsonArray files = new JsonArray(basket.getString("files"));
+        StringBuilder filesBuilder = new StringBuilder("INSERT INTO " + Lystore.lystoreSchema + ".order_file(id, id_order_client_equipment, filename) VALUES");
+        JsonArray params = new JsonArray();
+        JsonObject file;
+        for (int i = 0; i < files.size(); i++) {
+            file = files.getJsonObject(i);
+            filesBuilder.append("(?, ?, ?)");
+            params.add(file.getString("id"))
+                    .add(basket.getInteger("id_order"))
+                    .add(file.getString("filename"));
+            filesBuilder.append(i == files.size() - 1 ? "; " : ", ");
+        }
+
+        return new JsonObject()
+                .put("statement", filesBuilder.toString())
+                .put("values", params)
+                .put("action", "prepared");
+    }
+
+    private JsonObject deleteFilesFromBasket(Integer basketId) {
+        StringBuilder queryEquipmentOrder = new StringBuilder()
+                .append(" DELETE FROM " + Lystore.lystoreSchema + ".basket_file ")
+                .append("WHERE id_basket_equipment = ? ;");
+
+        return new JsonObject()
+                .put("statement", queryEquipmentOrder.toString())
+                .put("values", new JsonArray().add(basketId))
+                .put("action", "prepared");
+    }
+
     private JsonObject getOptionsBasketDeletion(Integer idBasket) {
         String insertBasketEquipmentRelationshipQuery =
                 "DELETE FROM " + Lystore.lystoreSchema + ".basket_option " +

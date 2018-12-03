@@ -1082,4 +1082,19 @@ public class OrderController extends ControllerHelper {
         return structureMap;
     }
 
+    @Get("/order/:id/file/:fileId")
+    @ApiDoc("Download specific file")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void getFile(HttpServerRequest request) {
+        Integer orderId = Integer.parseInt(request.getParam("id"));
+        String fileId = request.getParam("fileId");
+        orderService.getFile(orderId, fileId, event -> {
+            if (event.isRight()) {
+                storage.sendFile(fileId, event.right().getValue().getString("filename"), request, false, new JsonObject());
+            } else {
+                notFound(request);
+            }
+        });
+    }
+
 }

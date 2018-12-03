@@ -72,4 +72,32 @@ public interface BasketService {
      * @param eitherHandler
      */
     void updatePriceProposal(Integer id, Float price_proposal, Handler<Either<String, JsonObject>> eitherHandler);
+
+    /**
+     * Add file to a specific basket
+     *
+     * @param basketId basket identifier
+     * @param fileId   file identifier
+     * @param fileName file name
+     * @param handler  Function handler returning data
+     */
+    void addFileToBasket(Integer basketId, String fileId, String fileName, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Delete file from basket
+     *
+     * @param basketId basket identifier
+     * @param fileId   file identifier
+     * @param handler  Function handler returning data
+     */
+    void deleteFileFromBasket(Integer basketId, String fileId, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Get file from a specific basket id
+     *
+     * @param basketId basket identifier
+     * @param fileId   file identifier
+     * @param handler  Function handler returning data
+     */
+    void getFile(Integer basketId, String fileId, Handler<Either<String, JsonObject>> handler);
 }

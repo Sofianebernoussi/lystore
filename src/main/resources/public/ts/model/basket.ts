@@ -1,7 +1,7 @@
 import {Mix, Selectable, Selection} from 'entcore-toolkit';
 import {_, notify} from 'entcore';
 import http from 'axios';
-import {Equipment, EquipmentOption, Structure} from './index';
+import {Equipment, EquipmentOption, Structure, Utils} from './index';
 
 export class Basket implements Selectable {
     id?: number;
@@ -17,6 +17,8 @@ export class Basket implements Selectable {
     price_editable: boolean;
     display_price_editable: boolean;
 
+
+    files?: any;
 
     constructor (equipment: Equipment , id_campaign: number, id_structure: string ) {
         this.equipment = Mix.castAs(Equipment, equipment) ;
@@ -96,7 +98,17 @@ export class Basket implements Selectable {
         }
     }
 
+    async deleteDocument(file) {
+        try {
+            await http.delete(`/lystore/basket/${this.id}/file/${file.id}`);
+        } catch (err) {
+            throw err;
+        }
+    }
 
+    downloadFile(file) {
+        window.open(`/lystore/basket/${this.id}/file/${file.id}`);
+    }
 }
 
 export class Baskets extends Selection<Basket> {
@@ -110,10 +122,11 @@ export class Baskets extends Selection<Basket> {
             this.all = Mix.castArrayAs(Basket, data);
             this.all.map((basket) => {
                 basket.equipment = Mix.castAs(Equipment, JSON.parse(basket.equipment.toString())[0]);
-                basket.options.toString() !== '[null]' && basket.options !== null ?
-                    basket.options = Mix.castArrayAs(EquipmentOption, JSON.parse(basket.options.toString()))
-                    : basket.options = [];
+                basket.options = basket.options.toString() !== '[null]' && basket.options !== null
+                    ? Mix.castArrayAs(EquipmentOption, JSON.parse(basket.options.toString()))
+                    : [];
                 basket.equipment.options = basket.options;
+                basket.files = (basket.files.toString !== '[null]' && basket.files !== null) ? Utils.parsePostgreSQLJson(basket.files) : [];
                 basket.equipment.options.map((option) => option.selected = true);
             });
         } catch (e) {

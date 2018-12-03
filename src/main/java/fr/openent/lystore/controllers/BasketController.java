@@ -21,15 +21,18 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.storage.Storage;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
 
 public class BasketController extends ControllerHelper {
     private final BasketService basketService;
+    private final Storage storage;
 
-    public BasketController (Vertx vertx, JsonObject slackConfiguration) {
+    public BasketController(Vertx vertx, Storage storage, JsonObject slackConfiguration) {
         super();
+        this.storage = storage;
         this.basketService = new DefaultBasketService(Lystore.lystoreSchema, "basket", vertx, slackConfiguration);
     }
     @Get("/basket/:idCampaign/:idStructure")
@@ -186,6 +189,82 @@ public class BasketController extends ControllerHelper {
                     log.error("An error occurred when casting Basket information", e);
                     renderError(request);
                 }
+            }
+        });
+    }
+
+    @Post("/basket/:id/file")
+    @ApiDoc("Upload a file for a specific cart")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void uploadFile(HttpServerRequest request) {
+        storage.writeUploadFile(request, entries -> {
+            if (!"ok".equals(entries.getString("status"))) {
+                renderError(request);
+                return;
+            }
+            try {
+                Integer basketId = Integer.parseInt(request.getParam("id"));
+                String fileId = entries.getString("_id");
+                String filename = entries.getJsonObject("metadata").getString("filename");
+                basketService.addFileToBasket(basketId, fileId, filename, event -> {
+                    if (event.isRight()) {
+                        JsonObject response = new JsonObject()
+                                .put("id", fileId)
+                                .put("filname", filename);
+                        request.response().setStatusCode(201).putHeader("Content-Type", "application/json").end(response.toString());
+                    } else {
+                        deleteFile(fileId);
+                        renderError(request);
+                    }
+                });
+            } catch (NumberFormatException e) {
+                renderError(request);
+            }
+        });
+    }
+
+    @Delete("/basket/:id/file/:fileId")
+    @ApiDoc("Delete file from basket")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void deleteFileFromBasket(HttpServerRequest request) {
+        Integer basketId = Integer.parseInt(request.getParam("id"));
+        String fileId = request.getParam("fileId");
+
+        basketService.deleteFileFromBasket(basketId, fileId, event -> {
+            if (event.isRight()) {
+                request.response().setStatusCode(204).end();
+                deleteFile(fileId);
+            } else {
+                renderError(request);
+            }
+        });
+    }
+
+    /**
+     * Delete file from storage based on identifier
+     *
+     * @param fileId File identifier to delete
+     */
+    private void deleteFile(String fileId) {
+        storage.removeFile(fileId, e -> {
+            if (!"ok".equals(e.getString("status"))) {
+                log.error("[Lystore@uploadFile] An error occurred while removing " + fileId + " file.");
+            }
+        });
+    }
+
+    @Get("/basket/:id/file/:fileId")
+    @ApiDoc("Download specific file")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void getFile(HttpServerRequest request) {
+        Integer basketId = Integer.parseInt(request.getParam("id"));
+        String fileId = request.getParam("fileId");
+        basketService.getFile(basketId, fileId, event -> {
+            if (event.isRight()) {
+                JsonObject file = event.right().getValue();
+                storage.sendFile(fileId, file.getString("filename"), request, false, new JsonObject());
+            } else {
+                notFound(request);
             }
         });
     }

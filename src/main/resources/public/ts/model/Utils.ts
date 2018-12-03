@@ -2,6 +2,7 @@ export class Utils {
 
     static parsePostgreSQLJson (json: any): any {
         try {
+            if (json === '[null]') return [];
             let res = JSON.parse(json);
             if (typeof res !== 'string') {
                 return res;

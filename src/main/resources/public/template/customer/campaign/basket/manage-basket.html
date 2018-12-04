@@ -4,7 +4,8 @@
             <h3 class="cell horizontal-margin horizontal-spacing ng-binding"><i18n>total</i18n> :
                 <span class="color-orange" ng-bind="calculatePriceOfEquipmentsProposal(baskets, 2)| currency"></span>
             </h3>
-            <input type="button"  ng-click="takeClientOrder(baskets)" i18n-value="lystore.take.order" ng-disabled="!validOrder(baskets)" />
+            <input type="button" ng-click="takeClientOrder(baskets)" i18n-value="lystore.take.order"
+                   ng-disabled="campaign.purse_enabled && !validOrder(baskets)"/>
         </div>
         <div class="basket-list">
             <div ng-repeat="basket in baskets.all track by $index" class="row">

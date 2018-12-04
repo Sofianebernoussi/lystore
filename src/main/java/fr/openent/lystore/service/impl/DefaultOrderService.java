@@ -336,39 +336,52 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     public void deleteOrder(final Integer idOrder, JsonObject order,
                             final String idStructure, final Handler<Either<String, JsonObject>> handler) {
         Integer idCampaign = order.getInteger("id_campaign");
-        Float price = Float.valueOf(order.getString("price_total_equipment"));
-        try{
-            JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
-            statements.add(purseService.updatePurseAmountStatement(price, idCampaign, idStructure,"+"));
-            statements.add(getOptionsOrderDeletion(idOrder));
-            statements.add(getEquipmentOrderDeletion(idOrder));
-            statements.add(getNewPurse(idCampaign,idStructure));
-            statements.add(getNewNbOrder(idCampaign, idStructure));
+        String getCampaignPurseEnabledQuery = "SELECT purse_enabled FROM " + Lystore.lystoreSchema + ".campaign WHERE id = ?";
+        JsonArray params = new JsonArray().add(idCampaign);
+        Sql.getInstance().prepared(getCampaignPurseEnabledQuery, params, SqlResult.validResultHandler(event -> {
+            if (event.isRight()) {
+                JsonArray results = event.right().getValue();
+                Boolean purseEnabled = (results.size() > 0 && results.getJsonObject(0).getBoolean("purse_enabled"));
+                Float price = Float.valueOf(order.getString("price_total_equipment"));
+                try {
+                    JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
+                    if (purseEnabled) {
+                        statements.add(purseService.updatePurseAmountStatement(price, idCampaign, idStructure, "+"));
+                    }
+                    statements.add(getOptionsOrderDeletion(idOrder));
+                    statements.add(getEquipmentOrderDeletion(idOrder));
+                    if (purseEnabled) {
+                        statements.add(getNewPurse(idCampaign, idStructure));
+                    }
+                    statements.add(getNewNbOrder(idCampaign, idStructure));
 
+                    sql.transaction(statements, new Handler<Message<JsonObject>>() {
+                        @Override
+                        public void handle(Message<JsonObject> event) {
+                            JsonArray results = event.body().getJsonArray("results");
+                            JsonObject res = new JsonObject();
+                            JsonObject newPurse = purseEnabled ? results.getJsonObject(3) : new JsonObject();
+                            JsonObject newOrderNumber = results.getJsonObject(purseEnabled ? 4 : 2);
+                            JsonArray newPurseArray = purseEnabled ? newPurse.getJsonArray("results").getJsonArray(0) : new JsonArray();
+                            JsonArray newOrderNumberArray = newOrderNumber.getJsonArray("results").getJsonArray(0);
+                            res.put("f1", newPurseArray.size() > 0
+                                    ? Float.parseFloat(newPurseArray.getString(0))
+                                    : 0);
+                            res.put("f2", newOrderNumberArray.size() > 0
+                                    ? Float.parseFloat(newOrderNumberArray.getLong(0).toString())
+                                    : 0);
+                            getTransactionHandler(event, res, handler);
 
-            sql.transaction(statements, new Handler<Message<JsonObject>>() {
-                @Override
-                public void handle(Message<JsonObject> event) {
-                    JsonArray results = event.body().getJsonArray("results");
-                    JsonObject res = new JsonObject();
-                    JsonObject newPurse = results.getJsonObject(3);
-                    JsonObject newOrderNumber = results.getJsonObject(4);
-                    JsonArray newPurseArray = newPurse.getJsonArray("results").getJsonArray(0);
-                    JsonArray newOrderNumberArray = newOrderNumber.getJsonArray("results").getJsonArray(0);
-                    res.put("f1", newPurseArray.size() > 0
-                            ? Float.parseFloat(newPurseArray.getString(0))
-                            : 0);
-                    res.put("f2", newOrderNumberArray.size() > 0
-                            ? Float.parseFloat(newOrderNumberArray.getLong(0).toString())
-                            : 0);
-                    getTransactionHandler(event, res, handler);
-
+                        }
+                    });
+                } catch (ClassCastException e) {
+                    LOGGER.error("An error occurred when casting order elements", e);
+                    handler.handle(new Either.Left<>(""));
                 }
-            });
-        }catch(ClassCastException e){
-            LOGGER.error("An error occurred when casting order elements", e);
-            handler.handle(new Either.Left<>(""));
-        }
+            } else {
+                handler.handle(new Either.Left<>("An error occurred when getting campaign"));
+            }
+        }));
     }
     @Override
     public  void windUpOrders(List<Integer> ids, Handler<Either<String, JsonObject>> handler){

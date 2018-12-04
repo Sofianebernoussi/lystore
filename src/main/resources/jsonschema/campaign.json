@@ -17,12 +17,16 @@
     },
     "image":{
       "type": [ "string", "null" ]
+    },
+    "purse_enabled": {
+      "type": "boolean"
     }
   },
   "required": [
     "name",
     "description",
     "groups",
-    "accessible"
+    "accessible",
+    "purse_enabled"
   ]
 }

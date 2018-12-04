@@ -1,5 +1,6 @@
 import {_, moment, ng, template} from 'entcore';
 import {Basket, Baskets, Notification, Utils} from '../../model';
+
 export const basketController = ng.controller('basketController',
     ['$scope', '$routeParams', ($scope, $routeParams) => {
         $scope.display = {

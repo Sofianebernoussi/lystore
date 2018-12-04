@@ -1,8 +1,20 @@
 import {_, idiom as lang, moment, ng, template} from 'entcore';
 import {Mix} from 'entcore-toolkit';
 import {
-    Agent, Campaign, COMBO_LABELS, Contract, Equipment, EquipmentImporter, EquipmentOption, Notification,
-    StructureGroup, StructureGroupImporter, Supplier, Tag, TechnicalSpec, Utils
+    Agent,
+    Campaign,
+    COMBO_LABELS,
+    Contract,
+    Equipment,
+    EquipmentImporter,
+    EquipmentOption,
+    Notification,
+    StructureGroup,
+    StructureGroupImporter,
+    Supplier,
+    Tag,
+    TechnicalSpec,
+    Utils
 } from '../../model';
 
 export const configurationController = ng.controller('configurationController',
@@ -365,19 +377,19 @@ export const configurationController = ng.controller('configurationController',
             Utils.safeApply($scope);
         };
 
-        $scope.openCampaignForm = (campaign: Campaign = new Campaign()) => {
+        $scope.openCampaignForm = async (campaign: Campaign = new Campaign()) => {
             let id = campaign.id;
             id ? $scope.redirectTo('/campaigns/update') : $scope.redirectTo('/campaigns/create');
             $scope.campaign = new Campaign();
             Mix.extend($scope.campaign, campaign);
+            await $scope.tags.sync();
+            await $scope.structureGroups.sync();
             id ? $scope.updateSelectedCampaign(id) : null;
             Utils.safeApply($scope);
         };
 
         $scope.updateSelectedCampaign = async (id) => {
-            await $scope.tags.sync();
             await $scope.campaign.sync(id, $scope.tags.all);
-            await $scope.structureGroups.sync();
             $scope.structureGroups.all = $scope.structureGroups.all.map((group) => {
                 let Cgroup = _.findWhere($scope.campaign.groups, {id: group.id});
                 if (Cgroup !== undefined) {
@@ -387,6 +399,7 @@ export const configurationController = ng.controller('configurationController',
                 return group;
             });
             $scope.structureGroups.updateSelected();
+            Utils.safeApply($scope);
         };
 
         $scope.openCampaignsDeletion = () => {

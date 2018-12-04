@@ -160,8 +160,9 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 "when 0 " +
                 "then ROUND((e.price + ((e.price *  e.tax_amount) /100)), 2) * basket.amount " +
                 "else (ROUND(e.price + ((e.price *  e.tax_amount) /100), 2) + SUM(ep.total_option_price)) * basket.amount " +
-                "END as total_price, array_to_json(array_agg(DISTINCT ep.*)) as options, array_to_json(array_agg(DISTINCT basket_file.*)) as files " +
+                "END as total_price, array_to_json(array_agg(DISTINCT ep.*)) as options, array_to_json(array_agg(DISTINCT basket_file.*)) as files, campaign.purse_enabled " +
                 "FROM  " + Lystore.lystoreSchema + ".basket_equipment basket " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".campaign ON (basket.id_campaign = campaign.id) " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".basket_option ON basket_option.id_basket_equipment = basket.id " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".basket_file ON basket.id = basket_file.id_basket_equipment " +
                 "LEFT JOIN (" +
@@ -178,7 +179,8 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 ") as e ON e.id = basket.id_equipment " +
                 "WHERE basket.id_campaign = ? " +
                 "AND basket.id_structure = ? " +
-                "GROUP BY (basket.id, basket.amount, basket.processing_date,basket.id_campaign, basket.id_structure, e.id, e.price, e.name, e.summary, e.description, e.price, e.image, e.id_contract, e.status, jsonb(e.technical_specs),  e.tax_amount );";
+                "GROUP BY (basket.id, basket.amount, basket.processing_date,basket.id_campaign, basket.id_structure, e.id, e.price, e.name, e.summary, e.description, " +
+                "e.price, e.image, e.id_contract, e.status, jsonb(e.technical_specs),  e.tax_amount, campaign.purse_enabled);";
         values.add(idCampaign).add(idStructure);
 
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
@@ -231,8 +233,10 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             JsonObject basket;
             for (int i = 0; i < baskets.size(); i++) {
                 basket = baskets.getJsonObject(i);
-                statements.add(purseService.updatePurseAmountStatement(Float.valueOf(basket.getString("total_price")),
-                        idCampaign , idStructure ,"-"));
+                if (basket.getBoolean("purse_enabled")) {
+                    statements.add(purseService.updatePurseAmountStatement(Float.valueOf(basket.getString("total_price")),
+                            idCampaign, idStructure, "-"));
+                }
                 statements.add(getInsertEquipmentOrderStatement( basket));
                 if(! "[null]".equals( basket.getString("options"))) {
                     statements.add(getInsertEquipmentOptionsStatement(basket));
@@ -251,8 +255,9 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                     JsonObject results = event.body().getJsonArray("results")
                             .getJsonObject(event.body().getJsonArray("results").size()-1);
                     JsonArray objectResult = results.getJsonArray("results").getJsonArray(0);
+                    String jsonValue = objectResult.getString(0) == null ? "{}" : objectResult.getString(0);
                     getTransactionHandler(request, nameStructure, getTotalPriceOfBasketList(baskets),
-                            event, new JsonObject(objectResult.getString(0) ), handler);
+                            event, new JsonObject(jsonValue), handler);
                 }
             });
         }catch (ClassCastException e) {

@@ -3,8 +3,9 @@
         <i18n ng-show="campaign.id == undefined">lystore.campaigns.add</i18n>
         <i18n ng-show="campaign.id !== undefined">lystore.campaigns.modify</i18n>
     </h1>
-    <article>
-        <form >
+
+    <form>
+        <article>
             <div class="row horizontal-spacing vertical-spacing">
                 <div class="cell four horizontal-spacing twelve-mobile">
                     <div class="eight row centered">
@@ -31,63 +32,83 @@
                     </div>
                 </div>
             </div>
-            <div class="row twelve">
-                <h2>
-                    <i18n>lystore.campaign.groups</i18n>
-                </h2>
-                <article class="responsive-table">
-                    <table class="twelve">
-                        <thead>
-                        <td class="one checkbox ">
-                            <label class="checkbox">
-                                <input type="checkbox"
-                                       ng-change="switchAll(allGroupSelected, structureGroups)"
-                                       ng-model="allGroupSelected">
-                                <span></span>
-                            </label></td>
-                        <td class="tree "><i18n>lystore.name.of.group</i18n></td>
-                        <td class="eight "><i18n>lystore.equipements.visibles</i18n></td>
-                        </thead>
-                        <tbody>
-                        <tr ng-repeat="group in structureGroups.all track by $index ">
-                            <td class="one">
-                                <label class="checkbox">
-                                    <input type="checkbox" ng-model="group.selected"  >
-                                    <span></span>
-                                </label></td>
-                            <td class="tree">[[group.name]]</td>
-                            <td class="label-row">
-                                    <div class="select-blocks"  ng-show="group.selected" >
-                                        <div ng-repeat="tag in group.tags track by tag.id"
-                                             ng-click="deleteTagFromCampaign($parent.$index, tag)"
-                                             class="labels-in-ligne">
-                                              <div><span class="color-tag" ng-style="{ 'background-color': tag.color }">
+        </article>
+        <h4 style="margin: 50px 0 10px 0">
+            <i18n>lystore.campaign.groups</i18n>
+            :
+        </h4>
+        <article class="responsive-table" style="margin: 0;">
+            <table class="twelve">
+                <thead>
+                <td class="one checkbox ">
+                    <label class="checkbox">
+                        <input type="checkbox"
+                               ng-change="switchAll(allGroupSelected, structureGroups)"
+                               ng-model="allGroupSelected">
+                        <span></span>
+                    </label></td>
+                <td class="tree ">
+                    <i18n>lystore.name.of.group</i18n>
+                </td>
+                <td class="eight ">
+                    <i18n>lystore.equipements.visibles</i18n>
+                </td>
+                </thead>
+                <tbody>
+                <tr ng-repeat="group in structureGroups.all track by $index ">
+                    <td class="one">
+                        <label class="checkbox">
+                            <input type="checkbox" ng-model="group.selected">
+                            <span></span>
+                        </label></td>
+                    <td class="tree">[[group.name]]</td>
+                    <td class="label-row">
+                        <div class="select-blocks" ng-show="group.selected">
+                            <div ng-repeat="tag in group.tags track by tag.id"
+                                 ng-click="deleteTagFromCampaign($parent.$index, tag)"
+                                 class="labels-in-ligne">
+                                <div><span class="color-tag" ng-style="{ 'background-color': tag.color }">
                                                 &nbsp;
                                               </span></div>
-                                            <div>[[ tag.name ]]</div></div>
-                                    </div>
-                                    <autocomplete
-                                                  options="tags.all|tagFilter:group.tags"
-                                                  ng-model="search.tag[$index]"
-                                                  ng-change="addTagToCampaign($index)"
-                                                  ng-show="display.input.group[$index] && group.selected" >
+                                <div>[[ tag.name ]]</div>
+                            </div>
+                        </div>
+                        <autocomplete
+                                options="tags.all|tagFilter:group.tags"
+                                ng-model="search.tag[$index]"
+                                ng-change="addTagToCampaign($index)"
+                                ng-show="display.input.group[$index] && group.selected">
 
-                                    </autocomplete>
-                                <div ><input type="button" ng-click="display.input.group[$index]=true" value="+" ng-disabled="!group.selected"  /></div>
+                        </autocomplete>
+                        <div><input type="button" ng-click="display.input.group[$index]=true" value="+"
+                                    ng-disabled="!group.selected"/></div>
 
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </article>
-            </div>
-
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </article>
+        <h4 style="margin: 50px 0 10px 0">
+            <i18n>lystore.campaign.options</i18n>
+            :
+        </h4>
+        <article>
             <div class="row">
-                <div class="right-magnet">
-                    <input type="button" class="cancel" ng-click="redirectTo('/campaigns')" i18n-value="cancel"/>
-                    <input type="submit" class="button" ng-click="validCampaign(campaign)" ng-disabled="!validCampaignForm(campaign)" />
-                </div>
+                <span class="cell">
+                    <i18n>lystore.campaign.type.choose</i18n>
+                    :
+                </span>
+                <switch-toggle ng-model="campaign.purse_enabled" class="cell horizontal-margin-four"></switch-toggle>
             </div>
-        </form>
-    </article>
+        </article>
+
+        <div class="row">
+            <div class="right-magnet">
+                <input type="button" class="cancel" ng-click="redirectTo('/campaigns')" i18n-value="cancel"/>
+                <input type="submit" class="button" ng-click="validCampaign(campaign)"
+                       ng-disabled="!validCampaignForm(campaign)"/>
+            </div>
+        </div>
+
+    </form>
 </div>

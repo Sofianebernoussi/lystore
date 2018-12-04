@@ -1,7 +1,7 @@
 import http from 'axios';
-import { notify, _ } from 'entcore';
-import { Selectable, Selection, Mix } from 'entcore-toolkit';
-import {StructureGroup,  Tags, Purses} from './index';
+import {_, notify} from 'entcore';
+import {Mix, Selectable, Selection} from 'entcore-toolkit';
+import {Purses, StructureGroup, Tags} from './index';
 
 
 export class Campaign implements Selectable  {
@@ -12,17 +12,19 @@ export class Campaign implements Selectable  {
     accessible: boolean;
     groups: StructureGroup[];
     selected: boolean;
-    purse_amount: number;
+    purse_amount?: number;
     nb_structures: number;
     nb_equipments: number;
     purses?: Purses;
     nb_panier?: number;
+    purse_enabled: boolean;
 
     constructor (name?: string, description?: string) {
         if (name) this.name = name;
         if (description) this.description = description;
         this.groups = [];
         this.image = '';
+        this.purse_enabled = false;
     }
 
     toJson () {
@@ -31,7 +33,10 @@ export class Campaign implements Selectable  {
             description: this.description || null,
             image: this.image || null,
             accessible: this.accessible || false,
-            groups: this.groups.map((group) => {return group.toJson(); })
+            groups: this.groups.map((group) => {
+                return group.toJson();
+            }),
+            purse_enabled: this.purse_enabled
         };
     }
 

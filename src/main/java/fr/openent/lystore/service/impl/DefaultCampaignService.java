@@ -3,15 +3,15 @@ package fr.openent.lystore.service.impl;
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.CampaignService;
 import fr.wseduc.webutils.Either;
-import org.entcore.common.service.impl.SqlCrudService;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.entcore.common.service.impl.SqlCrudService;
+import org.entcore.common.sql.Sql;
+import org.entcore.common.sql.SqlResult;
 
 import java.util.List;
 public class DefaultCampaignService extends SqlCrudService implements CampaignService {
@@ -41,7 +41,7 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 "LEFT JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (rel_equipment_tag.id_tag = rel_group_campaign.id_tag)" +
                 "GROUP BY campaign.id, campaign_amounts.sum) as C " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".order_client_equipment oce ON oce.id_campaign = C.id and  oce.status in ( 'WAITING', 'VALID', 'SENT') " +
-                "group by c.id, c.name, c.description, c.image, c.accessible, c.nb_structures, c.purse_amount, c.nb_equipments";
+                "group by c.id, c.name, c.description, c.image, c.accessible, c.nb_structures, c.purse_amount, c.nb_equipments, c.purse_enabled";
         sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray(), SqlResult.validResultHandler(handler));
     }
 
@@ -224,13 +224,14 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
      */
     private JsonObject getCampaignUpdateStatement(Number id, JsonObject campaign) {
         String query = "UPDATE " + Lystore.lystoreSchema + ".campaign " +
-                "SET  name=?, description=?, image=? " +
+                "SET  name=?, description=?, image=?, purse_enabled=? " +
                 "WHERE id = ?";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(campaign.getString("name"))
                 .add(campaign.getString("description"))
                 .add(campaign.getString("image"))
+                .add(campaign.getBoolean("purse_enabled"))
                 .add(id);
 
         return new JsonObject()
@@ -240,14 +241,15 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
     }
     private JsonObject getCampaignCreationStatement(Number id, JsonObject campaign) {
         String insertCampaignQuery =
-                "INSERT INTO " + Lystore.lystoreSchema + ".campaign(id, name, description, image, accessible )"+
-                        "VALUES (?, ?, ?, ?, ?) RETURNING id; ";
+                "INSERT INTO " + Lystore.lystoreSchema + ".campaign(id, name, description, image, accessible, purse_enabled )" +
+                        "VALUES (?, ?, ?, ?, ?, ?) RETURNING id; ";
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(id)
                 .add(campaign.getString("name"))
                 .add(campaign.getString("description"))
                 .add(campaign.getString("image"))
-                .add(campaign.getBoolean("accessible"));
+                .add(campaign.getBoolean("accessible"))
+                .add(campaign.getBoolean("purse_enabled"));
 
         return new JsonObject()
                 .put("statement", insertCampaignQuery)

@@ -1,4 +1,4 @@
-import {_, Behaviours, idiom as lang, model, moment, ng, notify, template} from 'entcore';
+import {_, Behaviours, idiom as lang, model, moment, ng, template} from 'entcore';
 import {
     Agents,
     Basket,
@@ -115,8 +115,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                     $scope.redirectTo('/campaigns');
                 }
                 template.open('campaigns-main', 'administrator/campaign/campaign_form');
-                await $scope.tags.sync();
-                await $scope.structureGroups.sync();
                 Utils.safeApply($scope);
             },
             updateCampaigns: async () => {
@@ -127,7 +125,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             managePurse: async (params) => {
-                if (template.isEmpty('administrator-main')) {
+                const campaign = $scope.campaigns.get(parseInt(params.idCampaign));
+                if (template.isEmpty('administrator-main') || campaign === undefined || !campaign.purse_enabled) {
                     $scope.redirectTo('/campaigns');
                 }
                 template.open('campaigns-main', 'administrator/campaign/purse/manage-purse');

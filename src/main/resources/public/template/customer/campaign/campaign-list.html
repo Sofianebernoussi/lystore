@@ -19,7 +19,7 @@
                 <h3>[[campaign.name]]</h3>
                 <div ng-if="campaign.accessible">
                     <p ng-bind-html="campaign.description" class="small-text"></p>
-                    <p>
+                    <p ng-if="campaign.purse_enabled">
                         <em class="small-text"><i18n>lystore.campaign.amount</i18n> : <span ng-bind="campaign.purse_amount || 0 | currency"></span></em>
                     </p>
                 </div>

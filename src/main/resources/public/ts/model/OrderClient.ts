@@ -121,8 +121,6 @@ export class OrdersClient extends Selection<OrderClient> {
                     }
 
 
-                    order.options.toString() !== '[null]' && order.options !== null ?
-                        order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
                     order.options = order.options.toString() !== '[null]' && order.options !== null ?
                         Mix.castArrayAs(OrderOptionClient, JSON.parse(order.options.toString()))
                         : order.options = [];

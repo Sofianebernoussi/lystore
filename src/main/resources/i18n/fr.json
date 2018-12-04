@@ -338,6 +338,7 @@
   "lystore.project.stage": "Étage",
   "room.number": "N°salle(s)",
   "sites": "Site(s)",
+  "room.site": "Site",
   "lystore.grade": "Diplôme",
   "lystore.project.create.err": "Erreur lors de la création du projet"
 }

@@ -1,5 +1,5 @@
 import {moment, ng, template} from 'entcore';
-import {Notification, OrderClient, Utils} from '../../model';
+import {Notification, OrderClient, Project, Utils} from '../../model';
 
 declare let window: any;
 
@@ -32,6 +32,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
         $scope.calculateDelivreryDate = (date: Date) => {
             return moment(date).add(60, 'days').calendar();
         };
+
         $scope.calculateTotal = (orderClient: OrderClient, roundNumber: number) => {
             let totalPrice = $scope.calculatePriceOfEquipment(orderClient, true, roundNumber) * orderClient.amount;
             return totalPrice.toFixed(roundNumber);
@@ -73,5 +74,25 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             await $scope.ordersClient.sync(null, [], $routeParams.idCampaign, $scope.current.structure.id );
             Utils.safeApply($scope);
         };
+
+        $scope.projectHasBuilding = (project: Project) => {
+            return (project.building);
+        }
+
+        $scope.projectHasRoom = (project: Project) => {
+            return (project.room);
+        }
+
+        $scope.projectHasStair = (project: Project) => {
+            return (project.stair);
+        }
+
+        $scope.projectHasDescription = (project: Project) => {
+            return (project.description);
+        }
+
+        $scope.projectHasSite = (project: Project) => {
+            return (project.site);
+        }
 
     }]);

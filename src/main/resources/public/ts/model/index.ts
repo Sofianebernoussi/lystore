@@ -18,3 +18,6 @@ export * from './basket';
 export * from './Purse';
 export * from './Notification';
 export * from './OrderClient';
+export * from './project';
+export * from './title';
+export * from './grade';

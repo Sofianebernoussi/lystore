@@ -10,6 +10,9 @@ public enum Contexts {
     STRUCTUREGROUP("STRUCTUREGROUP"),
     PURSE ("PURSE"),
     BASKET("BASKET"),
+    TITLE("TITLE"),
+    GRADE("GRADE"),
+    PROJECT("PROJECT"),
     ORDER ("ORDER");
 
     private final String contextName;

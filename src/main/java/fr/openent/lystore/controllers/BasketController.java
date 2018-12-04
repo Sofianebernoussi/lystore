@@ -153,7 +153,7 @@ public class BasketController extends ControllerHelper {
     }
 
     @Post("/baskets/to/orders")
-    @ApiDoc("crearte an order liste from basket")
+    @ApiDoc("create an order liste from basket")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(PersonnelRight.class)
     public void takeOrder(final HttpServerRequest  request){
@@ -164,13 +164,14 @@ public class BasketController extends ControllerHelper {
                     final Integer idCampaign = object.getInteger("id_campaign");
                     final String idStructure = object.getString("id_structure");
                     final String nameStructure = object.getString("structure_name");
+                    final Integer idProject = object.getInteger("id_project");
                     basketService.listebasketItemForOrder(idCampaign, idStructure,
                             new Handler<Either<String, JsonArray>>() {
                                 @Override
                                 public void handle(Either<String, JsonArray> listBasket) {
                                     if(listBasket.isRight() && listBasket.right().getValue().size() > 0){
                                         basketService.takeOrder(request , listBasket.right().getValue(),
-                                                idCampaign , idStructure, nameStructure,
+                                                idCampaign, idStructure, nameStructure, idProject,
                                                 Logging.defaultCreateResponsesHandler(eb,
                                                         request,
                                                         Contexts.ORDER.toString(),

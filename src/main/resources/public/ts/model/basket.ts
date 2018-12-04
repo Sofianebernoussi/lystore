@@ -133,12 +133,14 @@ export class Baskets extends Selection<Basket> {
             notify.error('lystore.basket.sync.err');
         }
     }
-    async takeOrder (idCampaign: number , Structure: Structure ) {
+
+    async takeOrder(idCampaign: number, Structure: Structure, idProject: number) {
         try {
             return await http.post(`/lystore/baskets/to/orders`, {
                 id_campaign: idCampaign,
                 id_structure: Structure.id,
-                structure_name: Structure.name
+                structure_name: Structure.name,
+                id_project: idProject
             });
         } catch (e) {
             notify.error('lystore.order.create.err');

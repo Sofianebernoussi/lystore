@@ -2,6 +2,9 @@ import {_, model, moment, notify} from 'entcore';
 import {Mix, Selectable, Selection} from 'entcore-toolkit';
 import {Campaign, Contract, Structure, Supplier, TechnicalSpec, Utils} from './index';
 import http from 'axios';
+import {Project} from "./project";
+import {Title} from "./title";
+import {Grade} from "./grade";
 
 export class OrderClient implements Selectable {
     id?: number;
@@ -16,6 +19,8 @@ export class OrderClient implements Selectable {
     status: string;
     number_validation: string;
     priceTTCtotal: number ;
+    grade?: Grade;
+    title?: Title;
     options: OrderOptionClient[];
     technical_spec: TechnicalSpec[];
     contract: Contract;
@@ -26,6 +31,7 @@ export class OrderClient implements Selectable {
     label_program?: string;
     contract_name?: string;
     supplier_name?: string;
+    project: Project;
     files: any;
 
     name_structure: string;
@@ -33,10 +39,13 @@ export class OrderClient implements Selectable {
     id_campaign: number;
     id_structure: string;
     id_supplier: string;
+    id_project: number;
     selected: boolean;
     comment?: string;
     price_proposal?: number;
-    constructor() {}
+
+    constructor() {
+    }
 
     calculatePriceTTC ( roundNumber?: number)  {
         let price = parseFloat(Utils.calculatePriceTTC(this.price , this.tax_amount).toString());
@@ -77,22 +86,43 @@ export class OrdersClient extends Selection<OrderClient> {
     bc_number?: string;
     id_program?: number;
     engagement_number?: string;
+    projects: Selection<Project>;
+
     dateGeneration?: Date;
+    id_project_use?: number;
 
     constructor(supplier?: Supplier) {
         super([]);
         this.supplier = supplier ? supplier : new Supplier();
         this.dateGeneration = new Date();
+        this.projects = new Selection<Project>([]);
+        this.id_project_use = -1;
+
     }
+
 
     async sync (status: string, structures: Structure[] = [], idCampaign?: number, idStructure?: string) {
         try {
+            this.projects = new Selection<Project>([]);
+
             if (idCampaign && idStructure ) {
                 let { data } = await http.get(  `/lystore/orders/${idCampaign}/${idStructure}` );
                 this.all = Mix.castArrayAs(OrderClient, data);
                 this.all.map((order) => {
                     order.price = parseFloat(order.price.toString());
                     order.tax_amount = parseFloat(order.tax_amount.toString());
+                    order.project = Mix.castAs(Project, JSON.parse(order.project.toString()));
+                    order.project.title = Mix.castAs(Title, JSON.parse(order.title.toString()));
+                    order.project.grade = Mix.castAs(Grade, JSON.parse(order.grade.toString()));
+
+                    if (this.id_project_use != order.project.id) {
+                        this.id_project_use = order.project.id;
+                        this.projects.push(order.project);
+                    }
+
+
+                    order.options.toString() !== '[null]' && order.options !== null ?
+                        order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
                     order.options = order.options.toString() !== '[null]' && order.options !== null ?
                         Mix.castArrayAs(OrderOptionClient, JSON.parse(order.options.toString()))
                         : order.options = [];
@@ -112,6 +142,14 @@ export class OrdersClient extends Selection<OrderClient> {
                         order.supplier = Mix.castAs(Supplier,  JSON.parse(order.supplier.toString()));
                         order.id_supplier = order.supplier.id;
                         order.campaign = Mix.castAs(Campaign,  JSON.parse(order.campaign.toString()));
+                        order.project = Mix.castAs(Project, JSON.parse(order.project.toString()));
+                        order.project.title = Mix.castAs(Title, JSON.parse(order.title.toString()));
+                        order.project.grade = Mix.castAs(Grade, JSON.parse(order.grade.toString()));
+
+                        if (this.id_project_use != order.project.id) {
+                            this.id_project_use = order.project.id;
+                            this.projects.push(order.project);
+                        }
                         order.creation_date = moment(order.creation_date).format('L');
                         order.options.toString() !== '[null]' && order.options !== null ?
                             order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))

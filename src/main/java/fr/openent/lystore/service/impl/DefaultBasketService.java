@@ -46,7 +46,8 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
 
     public void listBasket(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler){
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
-        String query = "SELECT basket.id, basket.amount, basket.comment, basket.price_proposal::float, contract.price_editable , basket.processing_date, basket.id_campaign, basket.id_structure, array_to_json(array_agg( e.* )) as equipment," +
+        String query = "SELECT basket.id, basket.amount, basket.comment, basket.price_proposal::float, contract.price_editable , basket.processing_date, basket.id_campaign, basket.id_structure, " +
+                "array_to_json(array_agg( e.* )) as equipment," +
                 "array_to_json(array_agg(DISTINCT ep.*)) as options, array_to_json(array_agg(DISTINCT basket_file.*)) as files " +
                 "FROM " + Lystore.lystoreSchema + ".basket_equipment basket " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".basket_option ON basket_option.id_basket_equipment = basket.id " +
@@ -226,8 +227,8 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
     }
 
     public void takeOrder(final HttpServerRequest request, final JsonArray baskets, Integer idCampaign,
-                          String idStructure, final String nameStructure ,
-                          final Handler<Either<String, JsonObject>> handler ){
+                          String idStructure, final String nameStructure,
+                          Integer idProject, final Handler<Either<String, JsonObject>> handler) {
         try {
             JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
             JsonObject basket;
@@ -237,7 +238,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                     statements.add(purseService.updatePurseAmountStatement(Float.valueOf(basket.getString("total_price")),
                             idCampaign, idStructure, "-"));
                 }
-                statements.add(getInsertEquipmentOrderStatement( basket));
+                statements.add(getInsertEquipmentOrderStatement(basket, idProject));
                 if(! "[null]".equals( basket.getString("options"))) {
                     statements.add(getInsertEquipmentOptionsStatement(basket));
                     statements.add(getDeletionBasketsOptionsStatments(basket.getInteger("id_basket")));
@@ -332,6 +333,8 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
      * @return basket equipment relationship transaction statement
      */
     private JsonObject getBasketEquipmentCreationStatement(Number id, JsonObject basket) {
+
+
         String insertBasketEquipmentRelationshipQuery =
                 "INSERT INTO " + Lystore.lystoreSchema + ".basket_equipment(" +
                         "id, amount, processing_date, id_equipment, id_campaign, id_structure)" +
@@ -344,6 +347,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 .add(basket.getInteger("equipment"))
                 .add(basket.getInteger("id_campaign"))
                 .add(basket.getString("id_structure"));
+
 
         return new JsonObject()
                 .put("statement", insertBasketEquipmentRelationshipQuery)
@@ -374,18 +378,46 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
     /**
      * Basket to order
      * @param basket
+     * @param idProject
      * @return
      */
-    private static JsonObject getInsertEquipmentOrderStatement (JsonObject basket){
+    private static JsonObject getInsertEquipmentOrderStatement(JsonObject basket, Integer idProject) {
         StringBuilder queryEquipmentOrder;
         JsonArray params;
         try {
             queryEquipmentOrder = new StringBuilder()
                     .append(" INSERT INTO lystore.order_client_equipment ")
                     .append(" (id, price, tax_amount, amount,  id_campaign, id_structure, name, summary," +
-                            " description, image, technical_spec, status, " +
+                            " description, image, technical_spec, status, id_project, " +
                             " id_contract, equipment_key, comment, price_proposal ) VALUES ")
-                    .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?, ?, ?); ");
+                    .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?, ?, ?, ?); ");
+            params = new fr.wseduc.webutils.collections.JsonArray();
+
+            params.add(basket.getInteger("id_order"))
+                    .add(Float.valueOf(basket.getString("price")))
+                    .add(Float.valueOf(basket.getString("tax_amount")))
+                    .add(basket.getInteger("amount"))
+                    .add(basket.getInteger("id_campaign"))
+                    .add(basket.getString("id_structure"))
+                    .add(basket.getString("name"))
+                    .add(basket.getString("summary"))
+                    .add(basket.getString("description"))
+                    .add(basket.getString("image"))
+                    .add(basket.getString("technical_specs"))
+                    .add("WAITING")
+                    .add(idProject)
+                    .add(basket.getInteger("id_contract"))
+                    .add(basket.getInteger("id_equipment"))
+                    .add(basket.getString("comment"))
+                    .add(Float.valueOf(basket.getString("price_proposal")));
+
+        } catch (java.lang.NullPointerException e) {
+            queryEquipmentOrder = new StringBuilder()
+                    .append(" INSERT INTO lystore.order_client_equipment ")
+                    .append(" (id, price, tax_amount, amount,  id_campaign, id_structure, name, summary," +
+                            " description, image, technical_spec, status, " +
+                            " id_contract, equipment_key, comment, price_proposal, id_project ) VALUES ")
+                    .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?, ?, null, ?); ");
             params = new fr.wseduc.webutils.collections.JsonArray();
 
             params.add(basket.getInteger("id_order"))
@@ -403,32 +435,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                     .add(basket.getInteger("id_contract"))
                     .add(basket.getInteger("id_equipment"))
                     .add(basket.getString("comment"))
-                    .add(Float.valueOf(basket.getString("price_proposal")));
-
-        } catch (java.lang.NullPointerException e) {
-            queryEquipmentOrder = new StringBuilder()
-                    .append(" INSERT INTO lystore.order_client_equipment ")
-                    .append(" (id, price, tax_amount, amount,  id_campaign, id_structure, name, summary," +
-                            " description, image, technical_spec, status, " +
-                            " id_contract, equipment_key, comment, price_proposal ) VALUES ")
-                    .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?, ?, null); ");
-            params = new fr.wseduc.webutils.collections.JsonArray();
-
-            params.add(basket.getInteger("id_order"))
-                    .add(Float.valueOf(basket.getString("price")))
-                    .add(Float.valueOf(basket.getString("tax_amount")))
-                    .add(basket.getInteger("amount"))
-                    .add(basket.getInteger("id_campaign"))
-                    .add(basket.getString("id_structure"))
-                    .add(basket.getString("name"))
-                    .add(basket.getString("summary"))
-                    .add(basket.getString("description"))
-                    .add(basket.getString("image"))
-                    .add(basket.getString("technical_specs"))
-                    .add("WAITING")
-                    .add(basket.getInteger("id_contract"))
-                    .add(basket.getInteger("id_equipment"))
-                    .add(basket.getString("comment"));
+                    .add(idProject);
 
         }
 
@@ -541,4 +548,6 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
         }
         return total;
     }
+
+
 }

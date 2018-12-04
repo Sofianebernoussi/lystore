@@ -8,6 +8,7 @@ export const basketController = ng.controller('basketController',
             lightbox : {
                 deleteBasket : false,
                 confirmOrder: false,
+                createProject: false,
                 addDocuments: false
             }
         };
@@ -139,8 +140,8 @@ export const basketController = ng.controller('basketController',
             Utils.safeApply($scope);
         }
 
-        $scope.takeClientOrder = async (baskets: Baskets) => {
-            let { status, data } = await baskets.takeOrder(parseInt($routeParams.idCampaign), $scope.current.structure);
+        $scope.takeClientOrder = async (baskets: Baskets, idProject: number) => {
+            let {status, data} = await baskets.takeOrder(parseInt($routeParams.idCampaign), $scope.current.structure, idProject);
             $scope.totalPrice = $scope.calculatePriceOfEquipments(baskets, 2);
             //   $scope.totalPriceProposal = $scope.calculatePriceOfEquipmentsProposal(baskets, 2)
             await baskets.sync(parseInt($routeParams.idCampaign), $scope.current.structure.id);
@@ -166,6 +167,16 @@ export const basketController = ng.controller('basketController',
                 && _.findWhere( equipmentsBasket, {status : 'OUT_OF_STOCK'}) === undefined
                 &&  _.findWhere( equipmentsBasket, {status : 'UNAVAILABLE'}) === undefined;
         };
+        $scope.takeClientProject = async (baskets: Baskets) => {
+            template.open('basket.project', 'customer/campaign/basket/project-confirmation');
+            $scope.display.lightbox.createProject = true;
+        }
+        $scope.cancelProjectCreate = () => {
+            $scope.display.lightbox.createProject = false;
+            template.close('basket.project');
+            Utils.safeApply($scope);
+        }
+
 
         $scope.openAddDocumentsLightbox = (basket: Basket) => {
             $scope.basket = basket;

@@ -38,17 +38,23 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     @Override
     public void listOrder(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
-        String query = "SELECT oe.id, oe.comment, oe.price_proposal, oe.price, oe.tax_amount, oe.amount,oe.creation_date, oe.id_campaign," +
+        String query = "SELECT oe.id as id, oe.comment, oe.price_proposal, prj.id as id_project, oe.id_project, oe.price, oe.tax_amount, oe.amount,oe.creation_date, oe.id_campaign," +
                 " oe.id_structure, oe.name, oe.summary, oe.image, oe.status, oe.id_contract," +
-                " array_to_json(array_agg(order_opts)) as options, c.name as name_supplier, array_to_json(array_agg(DISTINCT order_file.*)) as files  " +
+                " array_to_json(array_agg(order_opts)) as options, to_json(prj.*) as project,to_json(tt.*) as title," +
+                " to_json(gr.*) as grade, c.name as name_supplier, array_to_json(array_agg(DISTINCT order_file.*)) as files  " +
                 "FROM "+ Lystore.lystoreSchema + ".order_client_equipment  oe " +
                 "LEFT JOIN "+ Lystore.lystoreSchema + ".order_client_options order_opts ON " +
                 "oe.id = order_opts.id_order_client_equipment " +
+                "INNER JOIN lystore.project as prj ON oe.id_project = prj.id " +
+                "INNER JOIN lystore.title as tt ON tt.id = prj.id_title " +
+                "INNER JOIN lystore.grade as gr ON gr.id = prj.id_grade " +
+                "INNER JOIN (SELECT supplier.name, contract.id FROM " + Lystore.lystoreSchema + ".supplier " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON contract.id_supplier = supplier.id) c " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".order_file ON oe.id = order_file.id_order_client_equipment " +
                 "INNER JOIN (SELECT supplier.name, contract.id FROM " + Lystore.lystoreSchema + ".supplier INNER JOIN "
                 + Lystore.lystoreSchema + ".contract ON contract.id_supplier = supplier.id) c " +
                 "ON oe.id_contract = c.id WHERE id_campaign = ? AND id_structure = ? " +
-                "GROUP BY (oe.id, c.name) ORDER BY creation_date";
+                "GROUP BY (prj.id , oe.id, tt.id, gr.id, c.name) ORDER BY oe.id_project DESC ,creation_date";
 
         values.add(idCampaign).add(idStructure);
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
@@ -57,38 +63,46 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
     @Override
     public  void listOrder(String status, Handler<Either<String, JsonArray>> handler){
-        String query = "SELECT oce.* , to_json(contract.*) contract ,to_json(supplier.*) supplier, " +
+        String query = "SELECT oce.*, prj.id as id_project, to_json(contract.*) contract ,to_json(supplier.*) supplier, " +
                 "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options, " +
-                "array_to_json(array_agg(distinct structure_group.name)) as structure_groups, lystore.order.order_number " +
+                "array_to_json(array_agg( distinct structure_group.name)) as structure_groups,to_json(prj.*) as project, to_json(  tt.*) as title," +
+                "to_json(  gr.*) as grade, lystore.order.order_number " +
                 "FROM lystore.order_client_equipment oce " +
                 "LEFT JOIN lystore.order_client_options oco " +
                 "ON oco.id_order_client_equipment = oce.id " +
                 "LEFT JOIN lystore.contract ON oce.id_contract = contract.id " +
                 "INNER JOIN lystore.supplier ON contract.id_supplier = supplier.id " +
-                "INNER JOIN lystore.campaign ON oce.id_campaign = campaign.id " +
+                "INNER JOIN lystore.campaign ON oce.id_campaign = campaign.id" +
+                "INNER JOIN lystore.project as prj ON oce.id_project = prj.id " +
+                "INNER JOIN lystore.title as tt ON tt.id = prj.id_title " +
+                "INNER JOIN lystore.grade as gr ON gr.id = prj.id_grade " +
                 "INNER JOIN lystore.rel_group_campaign ON (oce.id_campaign = rel_group_campaign.id_campaign) " +
                 "INNER JOIN lystore.rel_group_structure ON (oce.id_structure = rel_group_structure.id_structure) " +
                 "LEFT OUTER JOIN lystore.order ON (oce.id_order = lystore.order.id) " +
                 "INNER JOIN lystore.structure_group ON (rel_group_structure.id_structure_group = structure_group.id " +
                 "AND rel_group_campaign.id_structure_group = structure_group.id) " +
                 "WHERE oce.status = ? " +
-                "GROUP BY (oce.id, contract.id, supplier.id, campaign.id, lystore.order.order_number);";
+                "GROUP BY (prj.id , oce.id, contract.id, supplier.id, campaign.id, tt.id, gr.id, lystore.order.order_number) ORDER BY oce.id_project DESC;";
         sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray().add(status), SqlResult.validResultHandler(handler));
     }
 
     @Override
     public void listOrders(List<Integer> ids, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT oce.* , oce.price * oce.amount as total_price , " +
+        String query = "SELECT oce.* , prj.id as id_project , oce.price * oce.amount as total_price , " +
                 "to_json(contract.*) contract ,to_json(supplier.*) supplier, " +
-                "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options " +
+                "to_json(campaign.* ) campaign, to_json( prj.*) as project, to_json( tt.*) as title," +
+                "to_json( gr.*) as grade, array_to_json(array_agg(  oco.*)) as options " +
                 "FROM lystore.order_client_equipment oce " +
                 "LEFT JOIN "+ Lystore.lystoreSchema + ".order_client_options oco " +
                 "ON oco.id_order_client_equipment = oce.id " +
                 "LEFT JOIN "+ Lystore.lystoreSchema + ".contract ON oce.id_contract = contract.id " +
-                "INNER JOIN "+ Lystore.lystoreSchema + ".supplier ON contract.id_supplier = supplier.id  " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".supplier ON contract.id_supplier = supplier.id " +
+                "INNER JOIN lystore.project as prj ON oce.id_project = prj.id " +
+                "INNER JOIN lystore.title as tt ON tt.id = prj.id_title " +
+                "INNER JOIN lystore.grade as gr ON gr.id = prj.id_grade " +
                 "INNER JOIN "+ Lystore.lystoreSchema + ".campaign ON oce.id_campaign = campaign.id " +
                 "WHERE oce.id in "+ Sql.listPrepared(ids.toArray()) +
-                " GROUP BY (oce.id, contract.id, supplier.id, campaign.id); ";
+                " GROUP BY (prj.id , oce.id, tt.id, gr.id, contract.id, supplier.id, campaign.id) ORDER BY oce.id_project DESC; ";
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
 
         for (Integer id : ids) {

@@ -11,7 +11,15 @@
     },
     "structure_name":{
       "type": "string"
+    },
+    "id_project": {
+      "type": "number"
     }
   },
-  "required": [ "id_campaign", "id_structure", "structure_name" ]
+  "required": [
+    "id_campaign",
+    "id_structure",
+    "structure_name",
+    "id_project"
+  ]
 }

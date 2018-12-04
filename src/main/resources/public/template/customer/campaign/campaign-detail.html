@@ -29,7 +29,8 @@
             <i18n>CATALOG</i18n>
         </header>
         <header class="horizontal-spacing" ng-click="openOrder()" >
-            <i18n>lystore.order.tracking</i18n>
+            <span ng-if="campaign.purse_enabled"><i18n>lystore.order.tracking</i18n></span>
+            <span ng-if="!campaign.purse_enabled"><i18n>lystore.request.tracking</i18n></span>
             <span class="notification-bull right-magnet" ng-if="campaign.nb_order > 0">
                     [[campaign.nb_order]]
             </span>

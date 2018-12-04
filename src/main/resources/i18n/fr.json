@@ -33,6 +33,7 @@
   "description": "Description",
   "lystore.catalog.management": "Gestion du catalogue",
   "lystore.order.tracking": "Suivi des commandes",
+  "lystore.request.tracking": "Suivi des demandes",
   "lystore.agent.add": "Ajouter un correspondant",
   "lystore.agent.modify": "Modifier un correspondant",
   "lystore.locality.agents": "Correspondants région",

@@ -132,10 +132,14 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
 
     public void updateComment(Integer idBasket, String comment, Handler<Either<String, JsonObject>> handler) {
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
+        String commentParameter = "".equals(comment.trim()) ? "null" : "?";
         String query = " UPDATE " + Lystore.lystoreSchema + ".basket_equipment " +
-                " SET comment = ? " +
+                " SET comment = " + commentParameter +
                 " WHERE id = ?; ";
-        values.add(comment).add(idBasket);
+        if (!"".equals(comment.trim())) {
+            values.add(comment);
+        }
+        values.add(idBasket);
 
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
     }

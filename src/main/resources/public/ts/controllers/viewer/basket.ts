@@ -151,17 +151,15 @@ export const basketController = ng.controller('basketController',
                 basket.updateAmount();
             }
         };
-        $scope.updateBasketComment= (basket: Basket) =>{
-            if (!basket.comment || basket.comment.trim() == " ") {
+        $scope.updateBasketComment = async (basket: Basket) => {
+            if (!basket.comment || basket.comment.trim() == "") {
                 basket.comment = "";
             }
-            basket.updateComment();
+            await basket.updateComment();
+            Utils.safeApply($scope);
         }
 
         $scope.updateBasketPriceProposal = (basket: Basket) => {
-            if (!basket.price_proposal) {
-                basket.price_proposal = Math.round($scope.calculatePriceOfBasket(basket, basket.amount, true));
-            }
             basket.updatePriceProposal();
             basket.display_price_editable = false;
             Utils.safeApply($scope);

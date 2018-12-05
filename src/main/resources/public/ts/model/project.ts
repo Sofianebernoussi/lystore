@@ -46,22 +46,7 @@ export class Project implements Selectable {
     async
 
     toJson() {
-        console.log(this.building);
-        console.log(this.site);
-        console.log(this.stair);
-        console.log(this.room);
-        console.log(this.description);
-        console.log({
-            id: this.id,
-            description: this.description,
-            name: this.name,
-            id_title: this.title.id,
-            id_grade: this.grade.id,
-            building: this.building,
-            site: this.site,
-            stair: this.stair,
-            room: this.room,
-        });
+            
 
         return {
             id: this.id,

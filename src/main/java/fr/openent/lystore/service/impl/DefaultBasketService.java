@@ -153,9 +153,10 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
     }
 
 
-    public void listebasketItemForOrder( Integer idCampaign, String idStructure,
-                                         Handler<Either<String, JsonArray>> handler ){
+    public void listebasketItemForOrder(Integer idCampaign, String idStructure, JsonArray baskets,
+                                        Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
+        String basketFilter = baskets.size() > 0 ? "AND basket.id IN " + Sql.listPrepared(baskets.getList()) : "";
         String query = "SELECT  basket.id id_basket, (basket.price_proposal * basket.amount) as price_proposal ,basket.amount, basket.comment, basket.processing_date,  basket.id_campaign, " +
                 "basket.id_structure, e.id id_equipment, e.name,e.summary, e.description, e.price, e.image, e.id_contract, e.status, jsonb(e.technical_specs) technical_specs, e.tax_amount, nextval('" + Lystore.lystoreSchema + ".order_client_equipment_id_seq' ) as id_order, Case Count(ep) " +
                 "when 0 " +
@@ -179,10 +180,16 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 "WHERE equipment.status = 'AVAILABLE' " +
                 ") as e ON e.id = basket.id_equipment " +
                 "WHERE basket.id_campaign = ? " +
-                "AND basket.id_structure = ? " +
+                "AND basket.id_structure = ? " + basketFilter +
                 "GROUP BY (basket.id, basket.amount, basket.processing_date,basket.id_campaign, basket.id_structure, e.id, e.price, e.name, e.summary, e.description, " +
                 "e.price, e.image, e.id_contract, e.status, jsonb(e.technical_specs),  e.tax_amount, campaign.purse_enabled);";
         values.add(idCampaign).add(idStructure);
+
+        if (baskets.size() > 0) {
+            for (int i = 0; i < baskets.size(); i++) {
+                values.add(baskets.getInteger(i));
+            }
+        }
 
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
     }
@@ -228,9 +235,10 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
 
     public void takeOrder(final HttpServerRequest request, final JsonArray baskets, Integer idCampaign,
                           String idStructure, final String nameStructure,
-                          Integer idProject, final Handler<Either<String, JsonObject>> handler) {
+                          Integer idProject, JsonArray baskets_objects, final Handler<Either<String, JsonObject>> handler) {
         try {
             JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
+
             JsonObject basket;
             for (int i = 0; i < baskets.size(); i++) {
                 basket = baskets.getJsonObject(i);
@@ -248,7 +256,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                     statements.add(deleteFilesFromBasket(basket.getInteger("id_basket")));
                 }
             }
-            statements.add(getDeletionBasketsEquipmentStatments(idCampaign, idStructure));
+            statements.add(getDeletionBasketsEquipmentStatments(idCampaign, idStructure, baskets_objects));
 
             sql.transaction(statements, new Handler<Message<JsonObject>>() {
                 @Override
@@ -480,14 +488,21 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 .put("values",  new fr.wseduc.webutils.collections.JsonArray().add(idBasketEquipment))
                 .put("action", "prepared");
     }
-    private static JsonObject getDeletionBasketsEquipmentStatments(Integer idCampaign, String idStructure){
+
+    private static JsonObject getDeletionBasketsEquipmentStatments(Integer idCampaign, String idStructure, JsonArray baskets) {
+        String basketFilter = baskets.size() > 0 ? "AND basket_equipment.id IN " + Sql.listPrepared(baskets.getList()) : "";
+
         StringBuilder queryEquipmentOrder = new StringBuilder()
+
                 .append( " DELETE FROM " + Lystore.lystoreSchema + ".basket_equipment " )
-                .append( " WHERE id_campaign = ? AND id_structure = ? RETURNING ")
+                .append(" WHERE id_campaign = ? AND id_structure = ? " + basketFilter + " RETURNING ")
                 .append(getReturningQueryOfTakeOrder()) ;
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
-                .add(idCampaign).add(idStructure)
-                .add(idCampaign).add(idStructure)
+                .add(idCampaign).add(idStructure);
+        for (int i = 0; i < baskets.size(); i++) {
+            params.add(baskets.getInteger(i));
+        }
+        params.add(idCampaign).add(idStructure)
                 .add(idCampaign).add(idStructure);
         return new JsonObject()
                 .put("statement", queryEquipmentOrder.toString())

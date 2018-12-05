@@ -17,21 +17,48 @@ export const basketController = ng.controller('basketController',
             return (basket.price_proposal);
         }
 
+        $scope.hasOneSelected = (baskets: Baskets) => {
+            let hasSelected = false;
+            baskets.all.map((basket) => {
+                if (basket.selected) {
+                    hasSelected = true;
+                }
+            })
+            return hasSelected;
+        }
         $scope.calculatePriceOfEquipments = (baskets: Baskets, roundNumber?: number) => {
             let totalPrice = 0;
             baskets.all.map((basket) => {
                 if (basket.equipment.status !== 'AVAILABLE') return false;
-                let basketItemPrice = $scope.calculatePriceOfBasket(basket, 2, false);
-                totalPrice += !isNaN(basketItemPrice) ? parseFloat(basketItemPrice) : 0;
+                if (!$scope.hasOneSelected(baskets)) {
+                    let basketItemPrice = $scope.calculatePriceOfBasket(basket, 2, false);
+                    totalPrice += !isNaN(basketItemPrice) ? parseFloat(basketItemPrice) : 0;
+                } else {
+                    if (basket.selected) {
+                        let basketItemPrice = $scope.calculatePriceOfBasket(basket, 2, false);
+                        totalPrice += !isNaN(basketItemPrice) ? parseFloat(basketItemPrice) : 0;
+                    }
+                }
             });
+            console.log(totalPrice);
             return (!isNaN(totalPrice)) ? (roundNumber ? totalPrice.toFixed(roundNumber) : totalPrice ) : '';
         };
         $scope.calculatePriceOfEquipmentsProposal = (baskets: Baskets, roundNumber?: number) => {
             let totalPrice = 0;
             baskets.all.map((basket) => {
                 if (basket.equipment.status !== 'AVAILABLE') return false;
-                let basketItemPrice = $scope.calculatePriceOfBasketProposal(basket, 2, false);
-                totalPrice += !isNaN(basketItemPrice) ? parseFloat(basketItemPrice) : 0;
+
+                if (!$scope.hasOneSelected(baskets)) {
+                    let basketItemPrice = $scope.calculatePriceOfBasketProposal(basket, 2, false);
+                    totalPrice += !isNaN(basketItemPrice) ? parseFloat(basketItemPrice) : 0;
+                }
+
+                else {
+                    if (basket.selected) {
+                        let basketItemPrice = $scope.calculatePriceOfBasketProposal(basket, 2, false);
+                        totalPrice += !isNaN(basketItemPrice) ? parseFloat(basketItemPrice) : 0;
+                    }
+                }
             });
             return (!isNaN(totalPrice)) ? (roundNumber ? totalPrice.toFixed(roundNumber) : totalPrice) : '';
         };
@@ -141,12 +168,13 @@ export const basketController = ng.controller('basketController',
         }
 
         $scope.takeClientOrder = async (baskets: Baskets, idProject: number) => {
+            $scope.totalPriceOrder = $scope.calculatePriceOfEquipments(baskets, 2);
             let {status, data} = await baskets.takeOrder(parseInt($routeParams.idCampaign), $scope.current.structure, idProject);
             $scope.totalPrice = $scope.calculatePriceOfEquipments(baskets, 2);
+
             //   $scope.totalPriceProposal = $scope.calculatePriceOfEquipmentsProposal(baskets, 2)
             await baskets.sync(parseInt($routeParams.idCampaign), $scope.current.structure.id);
             status === 200 ?  $scope.confirmOrder(data) :  null ;
-            Utils.safeApply($scope);
         };
         $scope.confirmOrder = (data) => {
             $scope.campaign.nb_panier = $scope.baskets.all.length;
@@ -208,4 +236,5 @@ export const basketController = ng.controller('basketController',
                 Utils.safeApply($scope);
             }
         };
+
     }]);

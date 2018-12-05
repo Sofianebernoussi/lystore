@@ -5,10 +5,7 @@
     <div class="twelve cell ">
         <img class="three cell centered  " src="/lystore/public/img/information.png"/>
         <i18n class="nine cell">lystore.project.info.phrase</i18n>
-        <span>[[project.id]]</span>
-        <div class="twelve cell">
-
-
+        <form class="twelve cell" ng-submit="confirmProject(project)">
             <div>
                 <div class="twelve cell">
                     <h2>
@@ -55,13 +52,15 @@
                               style="resize: none;" ng-model="project.description"></textarea>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="row">
-        <input type="button" ng-click="cancelProjectConfirmation()" class="cancel right-magnet" i18n-value="cancel"/>
+            <div class="row">
+                <input type="button" ng-click="cancelProjectConfirmation()" class="cancel right-magnet"
+                       i18n-value="cancel"/>
 
-
-        <input type="button" ng-click="confirmProject(project)" class="cancel right-magnet" i18n-value="ok"/>
+                <button class="cancel right-magnet">
+                    <i18n>ok</i18n>
+                </button>
+            </div>
+        </form>
     </div>
 
 </div>

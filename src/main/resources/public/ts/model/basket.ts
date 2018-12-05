@@ -112,8 +112,10 @@ export class Basket implements Selectable {
 }
 
 export class Baskets extends Selection<Basket> {
+    basketsToOrder: Selection<Basket>
     constructor() {
         super([]);
+        this.basketsToOrder = new Selection<Basket>([]);
     }
 
     async sync (idCampaign: number , idStructure: string ) {
@@ -136,12 +138,28 @@ export class Baskets extends Selection<Basket> {
 
     async takeOrder(idCampaign: number, Structure: Structure, idProject: number) {
         try {
-            return await http.post(`/lystore/baskets/to/orders`, {
+            let baskets = [];
+            let newlistBaskets = new Selection<Basket>([]);
+            this.all.map((basket: Basket) => {
+                    if (basket.selected) {
+                        baskets.push(basket.id);
+                    } else {
+                        newlistBaskets.push(basket);
+                    }
+                }
+            )
+            this.all = newlistBaskets.all;
+
+            let data = {
                 id_campaign: idCampaign,
                 id_structure: Structure.id,
                 structure_name: Structure.name,
-                id_project: idProject
-            });
+                id_project: idProject,
+                baskets: baskets
+            };
+            console.log(data);
+
+            return await http.post(`/lystore/baskets/to/orders`, data);
         } catch (e) {
             notify.error('lystore.order.create.err');
         }

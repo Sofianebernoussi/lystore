@@ -12,14 +12,19 @@
     "structure_name":{
       "type": "string"
     },
+
     "id_project": {
       "type": "number"
+    },
+    "baskets": {
+      "type": "array"
     }
   },
   "required": [
     "id_campaign",
     "id_structure",
     "structure_name",
-    "id_project"
+    "id_project",
+    "baskets"
   ]
 }

@@ -20,4 +20,4 @@ ALTER TABLE lystore.order_client_equipment
 ALTER TABLE lystore.basket_equipment
   ADD COLUMN "comment" TEXT ;
 
-UPDATE lystore.equipment SET reference = 'REF#' WHERE reference IS NULL;
+UPDATE lystore.equipment SET reference = ('REF#' || id ) WHERE reference IS NULL;

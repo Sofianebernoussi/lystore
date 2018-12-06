@@ -29,35 +29,40 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     }
 
     public void listEquipments(Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT equip.*, tax.value as tax_amount, array_to_json( " +
+        String query = "SELECT equip.*, tax.value as tax_amount, equipment_type.name as nametype, array_to_json( " +
                 "(SELECT array_agg(id_tag) " +
                 "FROM " + Lystore.lystoreSchema + ".equipment INNER JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (equipment.id = rel_equipment_tag.id_equipment) " +
                 "WHERE equip.id = rel_equipment_tag.id_equipment)) as tags, array_to_json(array_agg(opts.*)) as options " +
                 "FROM " + Lystore.lystoreSchema + ".equipment equip " +
+                "LEFT JOIN " + Lystore.lystoreSchema + ".equipment_type ON (equipment_type.id = equip.id_type) " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".equipment_option ON (equip.id = equipment_option.id_equipment) " +
                 "LEFT JOIN (" +
-                " SELECT equipment.id as id_equipment, equipment_option.id, equipment_option.id_option, equipment.name, equipment.price, equipment_option.amount, equipment_option.required, tax.value as tax_amount, equipment_option.id_equipment as master_equipment " +
+                " SELECT equipment.id as id_equipment, equipment.reference, equipment.id_type, equipment_option.id, equipment_option.id_option, equipment.name, equipment.price, " +
+                "equipment_option.amount, equipment_option.required, tax.value as tax_amount, equipment_option.id_equipment as master_equipment, equipment_type.name as nametype " +
                 " FROM " + Lystore.lystoreSchema + ".equipment " +
                 " INNER JOIN " + Lystore.lystoreSchema + ".tax ON (equipment.id_tax = tax.id) " +
                 " INNER JOIN " + Lystore.lystoreSchema + ".equipment_option ON (equipment_option.id_option = equipment.id) " +
+                " INNER JOIN " + Lystore.lystoreSchema + ".equipment_type ON (equipment_type.id = equipment.id_type) " +
                 ") opts ON (equipment_option.id_option = opts.id_equipment AND opts.master_equipment = equip.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax ON tax.id = equip.id_tax " +
-                "WHERE equip.catalog_enabled = true " +
-                "GROUP BY (equip.id, tax.id)";
+                "GROUP BY (equip.id, tax.id,equipment_type.name)";
         sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray(), SqlResult.validResultHandler(handler));
     }
     public void equipment(Integer idEquipment,  Handler<Either<String, JsonArray>> handler){
         String query = "SELECT e.*, tax.value tax_amount, array_to_json(array_agg(opts)) as options " +
                 "FROM " + Lystore.lystoreSchema + ".equipment e " +
                 "LEFT JOIN (" +
-                "SELECT equipment_option.id_equipment, opt.id, opt.name, opt.price, equipment_option.amount, equipment_option.required, tax.value as tax_amount " +
+                "SELECT equipment_option.id_equipment, opt.id, opt.reference,eq_type.name as nametype, opt.name, opt.price, equipment_option.amount, equipment_option.required, tax.value as tax_amount, " +
+                "opt.id_type " +
                 "FROM " + Lystore.lystoreSchema + ".equipment " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".equipment_option ON (equipment.id = equipment_option.id_equipment) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".equipment opt ON (equipment_option.id_option = opt.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax ON (opt.id_tax = tax.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".equipment_type eq_type on (equipment_type.id = opt.id_type)" +
                 "WHERE equipment_option.id_equipment = ? " +
                 ") opts ON opts.id_equipment = e.id " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax on tax.id = e.id_tax WHERE e.id = ? " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".equipment_type on equipment_type.id = e.id_type WHERE e.id = ? " +
                 "GROUP BY (e.id, tax.id)";
 
         this.sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray().add(idEquipment).add(idEquipment), SqlResult.validResultHandler(handler));
@@ -65,7 +70,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     public void listEquipments(Integer idCampaign, String idStructure,
                                Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
-        String query = "SELECT e.*, tax.value tax_amount, array_to_json(array_agg(DISTINCT opts)) as options, array_to_json(array_agg(DISTINCT  rel_equipment_tag.id_tag)) tags " +
+        String query = "SELECT e.*, equipment_type.name as nametype, tax.value tax_amount, array_to_json(array_agg(DISTINCT opts)) as options, array_to_json(array_agg(DISTINCT  rel_equipment_tag.id_tag)) tags " +
                 "FROM " + Lystore.lystoreSchema + ".equipment e LEFT JOIN ( " +
                 "SELECT option.*, equipment.name, equipment.price, tax.value tax_amount " +
                 "FROM " + Lystore.lystoreSchema + ".equipment_option option " +
@@ -73,6 +78,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax on tax.id = equipment.id_tax " +
                 ") opts ON opts.id_equipment = e.id " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax on tax.id = e.id_tax " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".equipment_type on equipment_type.id = e.id_type " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (e.id = rel_equipment_tag.id_equipment) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_campaign ON (" +
                 "rel_group_campaign.id_tag = rel_equipment_tag.id_tag " +
@@ -80,7 +86,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 "AND rel_group_campaign.id_structure_group IN (" +
                 "SELECT structure_group.id FROM " + Lystore.lystoreSchema + ".structure_group " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON rel_group_structure.id_structure_group = structure_group.id " +
-                "WHERE rel_group_structure.id_structure = ?)) " +
+                "WHERE rel_group_structure.id_structure = ?)) and e.catalog_enabled = true " +
                 "GROUP BY (e.id, tax.id);";
         values.add(idCampaign).add(idStructure);
 
@@ -136,8 +142,8 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
             JsonObject equipment = equipments.getJsonObject(i);
 
             Boolean referenceValue = !"".equals(equipment.getString("reference").trim());
-            String insertImportEquipmentQuery = "INSERT INTO " + Lystore.lystoreSchema + ".equipment(" + (referenceValue ? "reference, " : "") + "name, " +
-                    "price, id_tax, warranty, catalog_enabled, id_contract, status) VALUES (" + (referenceValue ? "?," : "") + "?, ?, ?, ?, ?, ?, ?)";
+            String insertImportEquipmentQuery = "INSERT INTO " + Lystore.lystoreSchema + ".equipment(" + (referenceValue ? " reference, " : "") + "name, " +
+                    "price, id_tax, warranty, catalog_enabled, id_contract, status, id_type, option_enabled) VALUES (" + (referenceValue ? "?," : "") + "?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             if (referenceValue) {
                 params.add(equipment.getString("reference"));
@@ -149,6 +155,8 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
             params.add(equipment.getBoolean("catalog_enabled"));
             params.add(equipment.getInteger("id_contract"));
             params.add(equipment.getString("status"));
+            params.add(equipment.getInteger("id_type"));
+            params.add(equipment.getBoolean("option_enabled"));
 
             statement.put(STATEMENT, insertImportEquipmentQuery);
             statement.put(VALUES, params);
@@ -285,18 +293,26 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     }
 
     @Override
-    public void search(String query, Handler<Either<String, JsonArray>> handler) {
-        String sqlQuery = "SELECT e.id, e.name, e.summary, e.description, CAST(e.price AS FLOAT) as price, t.value as tax_amount, t.id as id_tax, e.image, e.reference, e.warranty " +
+    public void search(String query,  List<String> listFields, Handler<Either<String, JsonArray>> handler) {
+
+        String sqlQuery = "SELECT e.id, e.name, e.summary, e.description, CAST(e.price AS FLOAT) as price, t.value as tax_amount, t.id as id_tax, e.image, e.reference, e.warranty, " +
+                                    "e.id_type, e.option_enabled, et.name as nameType "+
                 "FROM " + Lystore.lystoreSchema + ".equipment as e " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax as t ON (e.id_tax = t.id) " +
-                "WHERE e.status = 'AVAILABLE' " +
-                "AND (LOWER(e.name) ~ LOWER(?) " +
-                "OR LOWER(reference) ~ LOWER(?));";
+                "INNER JOIN " + Lystore.lystoreSchema + ".equipment_type as et ON (e.id_type = et.id) " +
+                "WHERE e.status = 'AVAILABLE' AND e.option_enabled = true ";
 
-        JsonArray params = new JsonArray().add(query).add(query);
+        String fieldName=listFields.get(0);
+        if (listFields.size()==1) {
+            sqlQuery = sqlQuery + "AND LOWER(e." + fieldName + ") IS NOT NULL AND LOWER(e." + fieldName + ") ~ LOWER(?);";
+        }
+
+        JsonArray params = new JsonArray().add(query);
 
         Sql.getInstance().prepared(sqlQuery, params, SqlResult.validResultHandler(handler));
     }
+
+
 
     /**
      * Returns transaction handler. Manage response based on PostgreSQL event
@@ -356,8 +372,8 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     private JsonObject getEquipmentCreationStatement(Number id, JsonObject equipment) {
         String insertEquipmentQuery =
                 "INSERT INTO " + Lystore.lystoreSchema + ".equipment(id, name, summary, description, price, id_tax," +
-                        " image, id_contract, status, technical_specs, warranty) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?) RETURNING id;";
+                        " image, id_contract, status, technical_specs, warranty, reference, id_type, option_enabled) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?, ?) RETURNING id;";
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(id)
                 .add(equipment.getString("name"))
@@ -369,7 +385,10 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 .add(equipment.getInteger("id_contract"))
                 .add(equipment.getString("status"))
                 .add(equipment.getJsonArray("technical_specs"))
-                .add(equipment.getInteger("warranty"));
+                .add(equipment.getInteger("warranty"))
+                .add(equipment.getString("reference"))
+                .add(equipment.getInteger("id_type"))
+                .add(equipment.getBoolean("option_enabled"));
 
         return new JsonObject()
                 .put(STATEMENT, insertEquipmentQuery)
@@ -509,7 +528,8 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     private JsonObject getEquipmentUpdateStatement(Number id, JsonObject equipment) {
         String query = "UPDATE " + Lystore.lystoreSchema + ".equipment SET " +
                 "name = ?, summary = ?, description = ?, price = ?, id_tax = ?, image = ?, " +
-                "id_contract = ?, status = ?, technical_specs = to_json(?::text) " +
+                "id_contract = ?, status = ?, technical_specs = to_json(?::text), " +
+                "id_type = ?, catalog_enabled = ?, option_enabled = ?, reference = ? "+
                 "WHERE id = ?";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
@@ -522,6 +542,10 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 .add(equipment.getInteger("id_contract"))
                 .add(equipment.getString("status"))
                 .add(equipment.getJsonArray("technical_specs"))
+                .add(equipment.getInteger("id_type"))
+                .add(equipment.getBoolean("catalog_enabled"))
+                .add(equipment.getBoolean("option_enabled"))
+                .add(equipment.getString("reference"))
                 .add(id);
 
         return new JsonObject()

@@ -97,10 +97,10 @@ export const orderController = ng.controller('orderController',
 
                 searchResult = _.filter(searchItems, (order: OrderClient) => {
                     return ('name_structure' in order ? regex.test(order.name_structure.toLowerCase()) : false)
-                        || regex.test('contract' in order
+                        || regex.test('contract' in (order as OrderClient)
                             ? order.contract.name.toLowerCase()
                             : order.contract_name)
-                        || regex.test('supplier' in order
+                        || regex.test('supplier' in (order as OrderClient)
                             ? order.supplier.name.toLowerCase()
                             : order.supplier_name)
                         || ('campaign' in order ? regex.test(order.campaign.name.toLowerCase()) : false)

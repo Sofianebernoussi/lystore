@@ -20,7 +20,9 @@ import {
     Suppliers,
     Tags,
     Taxes,
+    EquipmentTypes,
     Utils
+
 } from '../model';
 import {Mix} from "entcore-toolkit";
 
@@ -50,6 +52,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.baskets = new Baskets();
         $scope.ordersClient = new OrdersClient();
         $scope.displayedOrders = new OrdersClient();
+        $scope.equipmentTypes = new EquipmentTypes();
         route({
             main: async () => {
                 if ($scope.isManager() || $scope.isAdministrator()) {
@@ -89,6 +92,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('equipments-main', 'administrator/equipment/manage-equipments');
                 await $scope.equipments.sync();
                 await $scope.contracts.sync();
+                await $scope.equipmentTypes.sync();
                 $scope.taxes.sync();
                 $scope.tags.sync();
                 Utils.safeApply($scope);

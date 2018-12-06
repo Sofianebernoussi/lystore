@@ -23,6 +23,20 @@
                     </label>
                     <label class="row twelve vertical-spacing">
                         <span class="twelve">
+                            <i18n>lystore.equipment.reference</i18n>
+                        </span>
+                        <input type="text" class="twelve" ng-model="equipment.reference" required>
+                    </label>
+                    <label class="five twelve vertical-spacing cell">
+                        <span class="twelve">
+                            <i18n>lystore.equipment_type</i18n>
+                        </span>
+                            <select  ng-model="equipment.id_type" class="twelve"
+                                     ng-init="equipment.id_type = equipment.id_type || (equipmentTypes.all.length > 0 ? equipmentTypes.all[0].id : null)"
+                                     ng-options="EquipmentType.id as EquipmentType.name for EquipmentType in equipmentTypes.all" required></select>
+                    </label>
+                    <label class="row twelve vertical-spacing">
+                        <span class="twelve">
                             <i18n>lystore.equipment.summary</i18n>
                             <em class="smaller-text"><i18n>lystore.equipment.summary.length</i18n></em>
                         </span>
@@ -45,6 +59,14 @@
                         </span>
                         <span class="eight cell twelve-mobile">
                             <input type="number" step="0.01" class="twelve" ng-model="equipment.price" required>
+                        </span>
+                    </label>
+                    <label class="five twelve-mobile vertical-spacing cell">
+                        <span class="four cell twelve-mobile">
+                            <i18n>lystore.warranty</i18n>
+                        </span>
+                        <span class="eight cell twelve-mobile">
+                            <input type="number" min="0" value="1" ng-model="equipment.warranty" class="twelve" >
                         </span>
                     </label>
                 </div>
@@ -93,11 +115,13 @@
                 <article class="responsive-table row">
                     <table class="twelve">
                         <thead>
+                            <td class="two"><i18n>reference</i18n></td>
                             <td class="two"><i18n>name</i18n></td>
                             <td class="two"><i18n>lystore.unit.price.ht</i18n></td>
                             <td class="two"><i18n>lystore.amount</i18n></td>
                             <td class="one aligne-text-center "><i18n>lystore.price.TTC</i18n></td>
                             <td class="two"><i18n>lystore.tax</i18n></td>
+                            <td class="two"><i18n>lystore.type</i18n></td>
                             <td class="two "><i18n>lystore.required</i18n></td>
                             <td class="one aligne-text-center">&nbsp;</td>
                         </thead>
@@ -106,7 +130,14 @@
                             <td class="two">
                                 <async-autocomplete ng-model="option" ng-disabled="false"
                                                     ng-change="selectOption"
-                                                    on-search="searchOption"
+                                                    on-search="searchOptionByReference"
+                                                    options="option.searchReference"
+                                                    search="option.reference"></async-autocomplete>
+                            </td>
+                            <td class="two">
+                                <async-autocomplete ng-model="option" ng-disabled="false"
+                                                    ng-change="selectOption"
+                                                    on-search="searchOptionByName"
                                                     options="option.search"
                                                     search="option.name"></async-autocomplete>
                             </td>
@@ -116,8 +147,13 @@
                                 <td class="two">
                                     <select ng-model="option.id_tax" class="twelve"
                                             ng-init="option.id_tax = option.id_tax || (taxes.all.length > 0 ? taxes.all[0].id : null)"
-                                            ng-options="tax.id as tax.value + '%' for tax in taxes.all" required></select>
+                                            ng-options="tax.id as tax.value for tax in taxes.all" required></select>
                                 </td>
+                                <td class="two" >
+                                <label  ng-model="option.nametype"
+                                         class="twelve" >[[option.nametype]]</label>
+                                </td>
+
                             <td class="two aligne-text-center">
                                 <switch-toggle ng-model="option.required"></switch-toggle>
                             </td>
@@ -200,6 +236,23 @@
                                 <input type="radio" class="cell"
                                        ng-model="equipment.status"
                                        value="UNAVAILABLE">
+                            </label>
+                        </div>
+                        <div class="row seven twelve-mobile">
+
+                            <label class="vertical-spacing twelve-mobile row-mobile">
+                                <span class="horizontal-spacing six-mobile cell">
+                                    <i18n>lystore.AVAILABLE_ON_THE_CATALOG</i18n>
+                                </span>
+                                <switch-toggle ng-model="equipment.catalog_enabled"
+                                               class="cell"></switch-toggle>
+                            </label><br/>
+                            <label class="vertical-spacing twelve-mobile row-mobile">
+                                <span class="horizontal-spacing six-mobile cell">
+                                    <i18n>lystore.AVAILABLE_AS_AN_OPTION</i18n>
+                                </span>
+                                <switch-toggle ng-model="equipment.option_enabled"
+                                               class="cell"></switch-toggle>
                             </label>
                         </div>
                     </div>

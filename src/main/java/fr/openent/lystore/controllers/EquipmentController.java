@@ -63,7 +63,6 @@ public class EquipmentController extends ControllerHelper {
             Integer idEquipment = request.params().contains("id")
                     ? Integer.parseInt(request.params().get("id"))
                     : null;
-
             equipmentService.equipment(idEquipment, arrayResponseHandler(request));
         } catch (ClassCastException e) {
             log.error("An error occurred casting campaign id", e);
@@ -287,13 +286,16 @@ public class EquipmentController extends ControllerHelper {
         }
     }
 
+
+
     @Get("/equipments/search")
     @ApiDoc("Search equipment through reference and name")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void search(HttpServerRequest request) {
-        if (request.params().contains("q") && request.params().get("q").trim() != "") {
+        if (request.params().contains("q") && request.params().get("q").trim() != "" && request.params().contains("field")) {
             String query = request.getParam("q");
-            equipmentService.search(query, arrayResponseHandler(request));
+            List<String> params = request.params().getAll("field");
+                equipmentService.search(query,params, arrayResponseHandler(request));
         } else {
             badRequest(request);
         }

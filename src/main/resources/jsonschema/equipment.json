@@ -27,6 +27,18 @@
     "status": {
       "type": "string"
     },
+    "id_type" : {
+      "type": "integer"
+    },
+    "reference" : {
+      "type": "string"
+    },
+    "catalog_enabled" : {
+      "type": "boolean"
+    },
+    "option_enabled" : {
+      "type": "boolean"
+    },
     "tags": {
       "type": "array"
     },

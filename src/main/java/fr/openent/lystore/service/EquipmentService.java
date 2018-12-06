@@ -86,7 +86,7 @@ public interface EquipmentService {
      * @param query   queyr searching
      * @param handler Function handler returning data
      */
-    void search(String query, Handler<Either<String, JsonArray>> handler);
+    void search(String query,  List<String> listFields, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Create equipments due to an import

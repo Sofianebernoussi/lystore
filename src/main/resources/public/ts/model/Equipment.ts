@@ -14,7 +14,6 @@ export class Equipment implements Selectable {
     status: string;
     image: string;
     reference: string;
-    search?: Equipment[];
     id_option?: number;
     technical_specs: TechnicalSpec[];
     tags: Tag[];
@@ -22,7 +21,10 @@ export class Equipment implements Selectable {
     selected: boolean;
     options: EquipmentOption[];
     deletedOptions?: EquipmentOption[];
-
+    warranty: number;
+    catalog_enabled: boolean;
+    option_enabled: boolean;
+    id_type: number;
     constructor (name?: string, price?: number) {
         if (name) this.name = name;
         if (price) this.price = price;
@@ -44,7 +46,11 @@ export class Equipment implements Selectable {
             price: parseFloat(this.price.toString()),
             id_tax: this.id_tax,
             status: this.status,
-            warranty: 1,
+            warranty: this.warranty,
+            catalog_enabled: this.catalog_enabled,
+            option_enabled: this.option_enabled,
+            id_type: this.id_type,
+            reference : this.reference,
             image: this.image || null,
             id_contract: this.id_contract,
             technical_specs: this.technical_specs.map((spec: TechnicalSpec) => spec.toJson()),
@@ -167,16 +173,17 @@ export class Equipments extends Selection<Equipment> {
         }
     }
 
-    async search(text: String) {
+    async search(text: String, fieldName: String) {
         try {
-            if (text.trim() === '' || !text) return;
-            const {data} = await http.get(`/lystore/equipments/search?q=${text}`);
+            if ((text.trim() === '' || !text) || (fieldName.trim() === '' || !fieldName)) return;
+            const {data} = await http.get(`/lystore/equipments/search?q=${text}&field=${fieldName}`);
             return Mix.castArrayAs(Equipment, data);
         } catch (err) {
             notify.error('lystore.option.search.err');
             throw err;
         }
     }
+
 }
 
 export class EquipmentOption implements Selectable {
@@ -186,6 +193,9 @@ export class EquipmentOption implements Selectable {
     required: boolean;
     selected: boolean;
     id_option: number;
+    search?: Equipment[];
+    searchReference?: Equipment[];
+
 
     constructor () {
         this.amount = 1;

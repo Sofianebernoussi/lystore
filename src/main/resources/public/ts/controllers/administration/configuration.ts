@@ -14,7 +14,8 @@ import {
     Supplier,
     Tag,
     TechnicalSpec,
-    Utils
+    Utils,
+    EquipmentType
 } from '../../model';
 
 export const configurationController = ng.controller('configurationController',
@@ -554,14 +555,14 @@ export const configurationController = ng.controller('configurationController',
             Utils.safeApply($scope);
         };
 
-        $scope.searchOption = async (searchText: string, model: Equipment) => {
+        $scope.searchOption = async (searchText: string, field: string, model: EquipmentOption, varName: string) => {
             try {
-                const options: Equipment[] = await $scope.equipments.search(searchText);
+                const options: Equipment[] = await $scope.equipments.search(searchText,field);
                 options.map((equipment: Equipment) => {
                     equipment.id_option = equipment.id;
                     delete equipment.id;
                 });
-                model.search = options;
+                model[varName] = options;
                 $scope.$apply();
             } catch (err) {
                 console.error(err);
@@ -569,6 +570,12 @@ export const configurationController = ng.controller('configurationController',
                 return;
             }
         };
+        $scope.searchOptionByName =(searchText : string, model: EquipmentOption)=>{
+            $scope.searchOption(searchText,'name',model, 'search');
+        }
+        $scope.searchOptionByReference= (searchText: string, model: EquipmentOption) => {
+            $scope.searchOption(searchText,'reference',model, 'searchReference');
+        }
 
         $scope.selectOption = function (model: EquipmentOption, option: Equipment) {
             const alreadyAdded = _.findWhere($scope.equipment.options, {id: option.id});

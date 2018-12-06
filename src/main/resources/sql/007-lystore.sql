@@ -10,7 +10,7 @@ $BODY$
 LANGUAGE plpgsql VOLATILE;
 
 CREATE TRIGGER on_equipment_insert
-AFTER INSERT ON lystore.equipment
+AFTER INSERT  ON lystore.equipment
 FOR EACH ROW
 EXECUTE PROCEDURE lystore.create_equipment_reference();
 
@@ -19,3 +19,5 @@ ALTER TABLE lystore.order_client_equipment
 
 ALTER TABLE lystore.basket_equipment
   ADD COLUMN "comment" TEXT ;
+
+UPDATE lystore.equipment SET reference = 'REF#' WHERE reference IS NULL;

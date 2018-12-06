@@ -1,26 +1,28 @@
-CREATE TABLE lystore.equipment_type
-(
+CREATE TABLE lystore.equipment_type (
   id bigserial NOT NULL,
   name character varying(255) NOT NULL,
   CONSTRAINT equipment_type_pkey PRIMARY KEY (id)
 );
 
-INSERT INTO Lystore.equipment_type
+INSERT INTO lystore.equipment_type
 	VALUES (1,'EQUIPEMENT');
-INSERT INTO Lystore.equipment_type
+INSERT INTO lystore.equipment_type
 	VALUES (2,'PRESTATION');
 
 
-ALTER TABLE lystore.EQUIPMENT
-  ADD COLUMN id_type bigint NOT NULL DEFAULT 1;
-ALTER TABLE lystore.EQUIPMENT
+ALTER TABLE lystore.equipment
+  ADD COLUMN id_type bigint;
+ALTER TABLE lystore.equipment
   ADD COLUMN option_enabled boolean NOT NULL DEFAULT false;
 
 UPDATE lystore.equipment SET id_type = 1 WHERE id_type IS NULL;
 
-ALTER TABLE lystore.EQUIPMENT
+ALTER TABLE lystore.equipment
+ALTER COLUMN id_type SET NOT NULL;
+
+ALTER TABLE lystore.equipment
   ADD CONSTRAINT fk_equipment_type_id FOREIGN KEY (id_type)
-	REFERENCES lystore.equipment (id) MATCH SIMPLE
+	REFERENCES lystore.equipment_type (id) MATCH SIMPLE
 	ON UPDATE NO ACTION ON DELETE CASCADE;
 
 

@@ -16,6 +16,8 @@ ALTER TABLE lystore.EQUIPMENT
 ALTER TABLE lystore.EQUIPMENT
   ADD COLUMN option_enabled boolean NOT NULL DEFAULT false;
 
+UPDATE lystore.equipment SET id_type = 1 WHERE id_type IS NULL;
+
 ALTER TABLE lystore.EQUIPMENT
   ADD CONSTRAINT fk_equipment_type_id FOREIGN KEY (id_type)
 	REFERENCES lystore.equipment (id) MATCH SIMPLE

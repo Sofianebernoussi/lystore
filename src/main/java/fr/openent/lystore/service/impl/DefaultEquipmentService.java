@@ -87,7 +87,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 "SELECT structure_group.id FROM " + Lystore.lystoreSchema + ".structure_group " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON rel_group_structure.id_structure_group = structure_group.id " +
                 "WHERE rel_group_structure.id_structure = ?)) and e.catalog_enabled = true " +
-                "GROUP BY (e.id, tax.id);";
+                "GROUP BY (e.id, tax.id , nametype );";
         values.add(idCampaign).add(idStructure);
 
         sql.prepared(query, values, SqlResult.validResultHandler(handler));

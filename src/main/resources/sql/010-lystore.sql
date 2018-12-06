@@ -1,5 +1,3 @@
-DROP TABLE lystore.equipment_type;
-
 CREATE TABLE lystore.equipment_type
 (
   id bigserial NOT NULL,

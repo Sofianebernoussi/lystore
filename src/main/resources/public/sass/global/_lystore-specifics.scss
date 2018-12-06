@@ -329,6 +329,7 @@ body.lystore {
       max-width: 300px;
       width: 16%;
       margin: 7px 0;
+      box-shadow: none !important;
 
       &.list-item {
         width: 90% !important;
@@ -552,19 +553,18 @@ body.lystore {
     }
   }
 
-  .project-creator {
-    img {
-      float: unset;
-      display: block;
-    }
-    input {
-      margin: 5px 0px;
-    }
-  }
   .basket-list{
     .basket-item{
       margin-bottom: 15px;
       height: auto;
+
+      .width-40 {
+        width: 40px;
+      }
+
+      .width-100-40 {
+        width: calc(100% - 40px);
+      }
 
       .article-equipment {
         .basket-image {
@@ -726,4 +726,52 @@ body.lystore {
   .number-input {
     width: 60px;
   }
+
+  .project-creator {
+    input:not(input[type="button"]) {
+      margin: 5px 0 0 0;
+    }
+
+    .image-container {
+      text-align: center;
+
+      img {
+        height: 100px;
+        width: auto;
+        margin: 0 auto;
+      }
+    }
+
+    .projet-text-container {
+      > div {
+        padding: 25px 0;
+      }
+
+      h4 {
+        line-height: normal !important;
+      }
+    }
+
+    select {
+      margin-bottom: 0 !important;
+    }
+
+    input[type="number"] {
+      height: 25px;
+      line-height: 25px;
+    }
+
+    .right-padding-form-field {
+      padding-right: 20px;
+    }
+    .left-padding-form-field {
+      padding-left: 20px;
+    }
+
+    form strong {
+      padding-top: 7px;
+    }
+  }
+
+
 }

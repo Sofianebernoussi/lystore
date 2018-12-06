@@ -340,7 +340,7 @@
   "sites": "Site(s)",
   "room.site": "Site",
   "lystore.grade": "Diplôme",
-  "lystore.project.create.err": "Erreur lors de la création du projet"
+  "lystore.project.create.err": "Erreur lors de la création du projet",
   "lystore.priceProposal": "Prix souhaité",
   "lystore.price.edit": "Modifier le prix",
   "lystore.price.reset": "Réinitialiser le prix"

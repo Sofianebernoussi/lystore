@@ -350,7 +350,7 @@
   "lystore.project.create.err": "Erreur lors de la création du projet",
   "lystore.priceProposal": "Prix souhaité",
   "lystore.price.edit": "Modifier le prix",
-  "lystore.price.reset": "Réinitialiser le prix"
+  "lystore.price.reset": "Réinitialiser le prix",
   "lystore.project.create.err": "Erreur lors de la création du projet",
   "lystore.project.delete.title": "Suppression d'un projet",
   "lystore.project.delete.message": "Ce projet sera supprimé et ses commandes renvoyées dans le panier",

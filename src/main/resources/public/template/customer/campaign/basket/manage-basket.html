@@ -162,6 +162,10 @@
                             </div>
                         </div>
                         <div class="row border top">
+                            <div class="cell">
+                                <input type="button" ng-click="displayLightboxDelete(basket)"
+                                       class="right-magnet cancel vertical-spacing" i18n-value="delete"/>
+                            </div>
                             <h1 class="right-magnet vertical-spacing">
                                 <span ng-bind="calculatePriceOfBasketProposal(basket , 2, true) | currency"></span>
                             </h1>

@@ -1,5 +1,5 @@
 <div ng-controller="orderPersonnelController">
-    <div ng-show="ordersClient.all.length > 0">
+    <div ng-show="ordersClient.all.length > 0" class="basket-list">
         <h1>
             <i18n>lystore.orderEquipment.manage.title</i18n>
             <button class="right-magnet" ng-click="exportCSV()"><i18n>lystore.orderEquipment.manage.exportCSV</i18n></button>
@@ -8,172 +8,128 @@
                  ng-repeat="project in ordersClient.projects.all track by $index">
             <div>
                 <h3>
-                    [[project.name]]
+                    <em>[[project.name]]</em>
                 </h3>
-                <h4>
-                    [[project.title.name]]
-                </h4>
-                <h4>
-                    [[project.grade.name]]
-                </h4>
-
-
-                <button class="right-magnet" ng-click="displayLightboxProjectDelete(project)">
-                    <i18n>delete</i18n>
-                </button>
-            </div>
-            <div ng-show="projectHasDescription(project)">
-                <h4>
-                    <i18n>description</i18n>
-                    :
-                </h4>
-                <p>[[project.description]]</p>
-            </div>
-            <div ng-if="projectHasSite(project)">
-                <h4>
-                    <i18n>room.site</i18n>
-                    :
-                </h4>
-                <span>[[project.site]]</span>
-            </div>
-            <div ng-if="projectHasRoom(project)">
-                <h4>
-                    <i18n>room.number</i18n>
-                    :
-                </h4>
-                <span>[[project.room]]</span>
-            </div>
-            <div ng-if="projectHasStair(project)">
-                <h4>
-                    <i18n>lystore.project.stage</i18n>
-                    :
-                </h4>
-                <span>[[project.stair]]</span>
-            </div>
-
-            <article style="border-left: 1px #cccccc solid;
-            border-top: 1px #cccccc solid;" class="twelve cell order-equipment-manage"
-                     ng-repeat="orderClient in ordersClient.all track by $index"
-                     ng-if="project.id == orderClient.project.id">
-            <div class="four cell twelve-mobile">
-                <h3><em>
-                    <i18n>lystore.orderEquipment.manage.order</i18n>
-                    [[formatDate(orderClient.creation_date,'dddd Do MMMM YYYY')]]</em></h3>
-                <div class="four cell zero-mobile">
-                    <img ng-src="[[orderClient.image]]"
-                         ng-show="orderClient.image !== null && orderClient.image !== undefined"/>
-                    <img skin-src="/img/illustrations/pages-default.png"
-                         ng-show="orderClient.image===null || orderClient.image===undifined"/>
-                </div>
-                <div class="seven cell horizontal-margin twelve-mobile">
-                    <h4>[[orderClient.name]]</h4>
-                    <p>[[orderClient.summary]]</p>
-                    <div>
-                        <a ng-init="display.ordersClientOption[$index] = false"
-                           ng-click="displayEquipmentOption($index)" ng-show="orderClient.options.length > 0">
-                            [[lang.translate(display.ordersClientOption[$index] ? 'lystore.options.hide' :
-                            'lystore.options.show')]]
-                        </a>
+                <article class="basket-item twelve cell" ng-repeat="orderClient in ordersClient.all track by $index"
+                         ng-if="project.id == orderClient.project.id">
+                    <div class="cell width-40">
+                        <label class="checkbox">
+                            <input type="checkbox" ng-model="orderClient.selected"
+                                   ng-checked="orderClient.selected">
+                            <span></span>
+                        </label>
                     </div>
-                </div>
-                <div ng-show="orderClient.options.length > 0 && display.ordersClientOption[$index]"
-                     class="twelve-mobile">
-                    <table class="centered ten vertical-spacing option-table">
-                        <thead>
-                        <tr>
-                            <td>
-                                <i18n>name</i18n>
-                            </td>
-                            <td>
-                                <i18n>lystore.quantity</i18n>
-                            </td>
-                            <td>
-                                <i18n>price</i18n>
-                            </td>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr ng-repeat="option in orderClient.options">
-                            <td>[[option.name]]</td>
-                            <td>[[option.amount]]</td>
-                            <td><span
-                                    ng-bind="calculatePriceTTC(option.price, option.tax_amount, 2) | currency"></span>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="four cell centered-text twelve-mobile">
-                &nbsp;
-                <!--<h3 class="row">-->
-                    <!--<i18n>-->
-                <!--lystore.expected.delivery-->
-                    <!--</i18n>-->
-                <!--</h3>-->
-                <!--<p>[[calculateDelivreryDate(orderClient.creation_date)]]</p>-->
-            </div>
-            <div class="four cell twelve-mobile">
-                <div class="row cell centered-text order-amount-price vertical-spacing-twice">
-                    <h3 class="four">
-                        <i18n>lystore.quantity</i18n>
-                        : [[orderClient.amount]]
-                    </h3>
-                    <p class="four" ng-if="!hasAProposalPrice(orderClient)"
-                       ng-bind="calculateTotal(orderClient,2) | currency">
-                        <div class="right-magnet four cell">
+                    <div class="cell width-100-40">
+                        <div class="row article-equipment">
+                            <div class="one cell basket-image zero-mobile">
+                                <img ng-src="[[orderClient.image]]"
+                                     ng-show="orderClient.image!==null && orderClient.image!==undefined "/>
+                                <img skin-src="/img/illustrations/pages-default.png"
+                                     ng-show="orderClient.image===null || orderClient.image===undefined "/>
+                            </div>
+                            <div class="cell eight">
+                                <div class="eleven centered">
+                                    <h3>[[orderClient.name]]</h3>
+                                    <p ng-bind-html="orderClient.summary"></p>
+                                    <a ng-init="display.ordersClientOption[$index] = false"
+                                       ng-click="displayEquipmentOption($index)"
+                                       ng-show="orderClient.options.length > 0">
+                                        [[lang.translate(
+                                        display.ordersClientOption[$index]
+                                        ? 'lystore.options.hide'
+                                        :'lystore.options.show'
+                                        )]]
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="three cell text-right">
+                                <div class="vertical-spacing-twice">
+                                    <span ng-if="hasAProposalPrice(orderClient)"> <i18n>lystore.priceProposal</i18n> :</span>
+                                    <span ng-if="!hasAProposalPrice(orderClient)"><i18n>price</i18n> :</span>
+                                    <span ng-if="hasAProposalPrice(orderClient)"
+                                          ng-bind="orderClient.price_proposal | currency" class="price-label"></span>
+                                    <span ng-if="!hasAProposalPrice(orderClient)"
+                                          ng-bind="calculateTotal(orderClient,2) | currency" class="price-label"></span>
+                                </div>
+                                <div class="vertical-spacing-twice">
+                                    <i18n>lystore.quantity</i18n>
+                                    :
+                                    [[orderClient.amount]]
+                                    <!--p ng-bind="calculatePriceOfBasket(basket , 2, true) | currency"></p-->
+                                </div>
 
-                    <p ng-bind="orderClient.price_proposal | currency" ng-if="hasAProposalPrice(orderClient)"></p>
-
-                </div>
-
-            </div>
-            <div clas="twelve cell">
-                <div class="[[orderClient.status]] status-cirle cell row">
-                    <i></i>
-                </div>
-
-                <div class="row">
-                    <input ng-show = "orderClient.status === 'WAITING'" type="button" ng-click="displayLightboxDelete(orderClient)"
-                           class = "right-magnet cancel vertical-spacing" i18n-value="delete"/>
-                </div>
-
-            <div ng-show="orderClient.options.length > 0 && display.ordersClientOption[$index]" class="zero-mobile">
-                <table class="centered ten vertical-spacing option-table">
-                    <thead>
-                    <tr>
-                        <td><i18n>name</i18n></td>
-                        <td><i18n>lystore.quantity</i18n></td>
-                        <td><i18n>price</i18n></td>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="option in orderClient.options">
-                        <td>[[option.name]]</td>
-                        <td>[[option.amount]]</td>
-                        <td><span ng-bind="calculatePriceTTC(option.price, option.tax_amount, 2) | currency"></span></td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="twelve cell">
-                <h2><i18n>comment</i18n></h2>
-                <textarea style="resize: none;" ng-blur="updateComment(orderClient)" ng-model="orderClient.comment"></textarea>
-            </div>
-            <div class="row twelve">
-                <div class="row basket-file-list"
-                     ng-if="orderClient.files.length > 0">
-                    <h3>
-                        <i18n>lystore.basket.file.name</i18n>
-                    </h3>
-                    <ul class="twelve">
-                        <li ng-repeat="file in orderClient.files" class="twelve basket-file"
-                            ng-click="orderClient.downloadFile(file)">
-                            <a>[[ file.filename ]]</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+                            </div>
+                        </div>
+                        <div ng-show="orderClient.options.length > 0 && display.ordersClientOption[$index]">
+                            <div class="twelve row">
+                                <h4 class="cell">
+                                    <i18n>lystore.options</i18n>
+                                    :
+                                </h4>
+                            </div>
+                            <table class="twelve vertical-spacing option-table">
+                                <thead>
+                                <tr>
+                                    <td>
+                                        <i18n>price</i18n>
+                                    </td>
+                                    <td>
+                                        <i18n>lystore.quantity</i18n>
+                                    </td>
+                                    <td>
+                                        <i18n>price</i18n>
+                                    </td>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="option in orderClient.options">
+                                    <td>[[option.name]]</td>
+                                    <td>[[option.amount]]</td>
+                                    <td><span
+                                            ng-bind="calculatePriceTTC(option.price, option.tax_amount, 2) | currency"></span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row twelve vertical-spacing-four" ng-if="orderClient.files.length > 0">
+                            <div class="twelve row">
+                                <h4 class="cell">
+                                    <i18n>lystore.basket.file.name</i18n>
+                                    :
+                                </h4>
+                            </div>
+                            <div class="row basket-file-list">
+                                <ul class="twelve">
+                                    <li ng-repeat="file in orderClient.files" class="twelve basket-file row">
+                                        <a class="cell twelve" ng-click="orderClient.downloadFile(file)">[[ file.name ||
+                                            file.filename ]]</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="twelve cell vertical-spacing-four">
+                            <div class="row">
+                                <h4 class="cell">
+                                    <i18n>comment</i18n>
+                                    :
+                                </h4>
+                            </div>
+                            <div class="row">
+                                <p ng-if="orderClient.comment === null">
+                                    Aucun commentaire sur la demande
+                                </p>
+                                <p ng-if="orderClient.comment !== null">
+                                    [[orderClient.comment]]
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row border top">
+                            <h1 class="right-magnet vertical-spacing">
+                                <span ng-bind="calculateTotal(orderClient,2) | currency"></span>
+                            </h1>
+                        </div>
+                    </div>
             </article>
         </article>
     </div>

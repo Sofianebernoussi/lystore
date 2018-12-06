@@ -104,7 +104,7 @@ export class OrdersClient extends Selection<OrderClient> {
     async sync (status: string, structures: Structure[] = [], idCampaign?: number, idStructure?: string) {
         try {
             this.projects = new Selection<Project>([]);
-
+            this.id_project_use = -1;
             if (idCampaign && idStructure ) {
                 let { data } = await http.get(  `/lystore/orders/${idCampaign}/${idStructure}` );
                 this.all = Mix.castArrayAs(OrderClient, data);

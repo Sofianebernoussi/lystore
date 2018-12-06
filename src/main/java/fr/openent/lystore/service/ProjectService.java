@@ -17,4 +17,9 @@ public interface ProjectService {
 
 
     void getProject(Integer id, Handler<Either<String, JsonObject>> handler);
+
+
+    void revertOrderAndDeleteProject(JsonArray value, Integer id, Handler<Either<String, JsonObject>> handler);
+
+    void selectOrdersToBaskets(Integer id, Handler<Either<String, JsonArray>> handler);
 }

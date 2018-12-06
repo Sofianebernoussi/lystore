@@ -11,18 +11,16 @@
                     [[project.name]]
                 </h3>
                 <h4>
-
                     [[project.title.name]]
-
                 </h4>
-
-
                 <h4>
-
                     [[project.grade.name]]
-
                 </h4>
 
+
+                <button class="right-magnet" ng-click="displayLightboxProjectDelete(project)">
+                    <i18n>delete</i18n>
+                </button>
             </div>
             <div ng-show="projectHasDescription(project)">
                 <h4>
@@ -184,5 +182,8 @@
     </article>
     <lightbox show="display.lightbox.deleteOrder" on-close="cancelOrderEquipmentDelete()">
         <container template="orderClient.delete"></container>
+    </lightbox>
+    <lightbox show="display.lightbox.deleteProject" on-close="cancelProjectDelete()">
+        <container template="orderClient.deleteProject"></container>
     </lightbox>
 </div>

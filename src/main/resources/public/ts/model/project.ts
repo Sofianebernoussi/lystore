@@ -72,6 +72,14 @@ export class Project implements Selectable {
             notify.error('lystore.project.create.err');
         }
     }
+
+    async delete() {
+        try {
+            return await http.delete(`/lystore/project/${this.id}`);
+        } catch (e) {
+            notify.error('lystore.project.delete.err')
+        }
+    }
 }
 
 

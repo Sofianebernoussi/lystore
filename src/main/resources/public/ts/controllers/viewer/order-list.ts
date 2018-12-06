@@ -10,6 +10,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             ordersClientOption : [],
             lightbox : {
                 deleteOrder : false,
+                deleteProject: false,
             }
         };
 
@@ -38,7 +39,31 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             return totalPrice.toFixed(roundNumber);
         };
 
+        $scope.displayLightboxProjectDelete = (project: Project) => {
+            template.open('orderClient.deleteProject', 'customer/campaign/order/delete-project-confirmation');
+            $scope.projectToDelete = project;
+            $scope.display.lightbox.deleteProject = true;
+            Utils.safeApply($scope);
+        }
 
+        $scope.cancelProjectDelete = () => {
+            delete $scope.projectToDelete;
+            $scope.display.lightbox.deleteProject = false;
+            template.close('orderClient.deleteProject');
+            Utils.safeApply($scope);
+        }
+
+        $scope.deleteProject = async (project: Project) => {
+            let {status} = await project.delete();
+            if (status == 200) {
+                $scope.notifications.push(new Notification('lystore.project.delete.confirm', 'confirm'));
+            }
+            await $scope.ordersClient.sync(null, [], $routeParams.idCampaign, $scope.current.structure.id);
+            $scope.display.lightbox.deleteProject = false;
+            template.close('orderClient.deleteProject');
+            Utils.safeApply($scope);
+
+        }
         $scope.updateComment= (orderClient: OrderClient) =>{
             if (!orderClient.comment || orderClient.comment.trim() == " ") {
                 orderClient.comment="";
@@ -60,6 +85,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             delete $scope.orderEquipmentToDelete;
             $scope.display.lightbox.deleteOrder = false;
             template.close('orderClient.delete');
+
             Utils.safeApply($scope);
         };
 
@@ -76,23 +102,38 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
         };
 
         $scope.projectHasBuilding = (project: Project) => {
-            return (project.building);
+            if (project)
+                return (project.building);
+            else
+                return false;
         }
 
         $scope.projectHasRoom = (project: Project) => {
-            return (project.room);
+            if (project)
+                return (project.room);
+            else
+                return false;
         }
 
         $scope.projectHasStair = (project: Project) => {
-            return (project.stair);
+            if (project)
+                return (project.stair);
+            else
+                return false;
         }
 
         $scope.projectHasDescription = (project: Project) => {
-            return (project.description);
+            if (project)
+                return (project.description);
+            else
+                return false;
         }
 
         $scope.projectHasSite = (project: Project) => {
-            return (project.site);
+            if (project)
+                return (project.site);
+            else
+                return false;
         }
 
     }]);

@@ -79,7 +79,6 @@
   "lystore.equipment.contract": "Marché support",
   "lystore.equipment.delete": "Êtes-vous sur de vouloir supprimer le(s) équipment(s) : ",
   "lystore.tax": "TVA",
-  "lystore.type": "Type",
   "lystore.price": "Prix (HT)",
   "lystore.price.TTC": "Prix (TTC)",
   "lystore.information": "Informations",
@@ -336,6 +335,7 @@
   "lystore.project.info.phrase": "Vos demandes d'équipements doivent être motivées en précisant le projet pédagogique",
   "lystore.project.err": "Erreur lors de la récupération du projet",
   "lystore.project.grade": "Diplôme",
+  "lystore.project.delete.err": "Erreur lors de la suppression du projet",
   "comment":"Commentaire",
   "seemore": "Voir la suite",
   "noresult": "La recherche n'a retournée aucun résultat",
@@ -351,4 +351,8 @@
   "lystore.priceProposal": "Prix souhaité",
   "lystore.price.edit": "Modifier le prix",
   "lystore.price.reset": "Réinitialiser le prix"
+  "lystore.project.create.err": "Erreur lors de la création du projet",
+  "lystore.project.delete.title": "Suppression d'un projet",
+  "lystore.project.delete.message": "Ce projet sera supprimé et ses commandes renvoyées dans le panier",
+  "lystore.project.delete.confirm": "Le projet a bien été supprimé"
 }

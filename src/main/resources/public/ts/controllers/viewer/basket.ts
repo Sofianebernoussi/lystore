@@ -40,7 +40,6 @@ export const basketController = ng.controller('basketController',
                     }
                 }
             });
-            console.log(totalPrice);
             return (!isNaN(totalPrice)) ? (roundNumber ? totalPrice.toFixed(roundNumber) : totalPrice ) : '';
         };
         $scope.calculatePriceOfEquipmentsProposal = (baskets: Baskets, roundNumber?: number) => {

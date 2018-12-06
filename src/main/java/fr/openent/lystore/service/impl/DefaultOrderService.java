@@ -70,7 +70,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "ON oco.id_order_client_equipment = oce.id " +
                 "LEFT JOIN lystore.contract ON oce.id_contract = contract.id " +
                 "INNER JOIN lystore.supplier ON contract.id_supplier = supplier.id " +
-                "INNER JOIN lystore.campaign ON oce.id_campaign = campaign.id" +
+                "INNER JOIN lystore.campaign ON oce.id_campaign = campaign.id " +
                 "INNER JOIN lystore.project as prj ON oce.id_project = prj.id " +
                 "INNER JOIN lystore.title as tt ON tt.id = prj.id_title " +
                 "INNER JOIN lystore.grade as gr ON gr.id = prj.id_grade " +

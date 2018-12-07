@@ -117,11 +117,11 @@
                                     :
                                 </h4>
                                 <button class="right-magnet" ng-click="openAddDocumentsLightbox(basket)">
-                                    Ajouter un document
+                                    <i18n>lystore.basket.add-file</i18n>
                                 </button>
                             </div>
                             <p ng-if="basket.files.length === 0">
-                                Aucun document ajouté sur la demande
+                                <i18n>lystore.basket.no-file</i18n>
                             </p>
                             <div class="row basket-file-list"
                                  ng-if="basket.equipment.file === true && basket.files.length > 0">
@@ -144,12 +144,12 @@
                                 </h4>
                                 <button class="right-magnet" ng-if="basket.comment === null"
                                         ng-click="basket.commentOnEdition = true">
-                                    Ajouter un commentaire
+                                    <i18n>lystore.basket.add-comment</i18n>
                                 </button>
                             </div>
                             <div class="row" ng-init="basket.commentOnEdition = false">
-                                <p ng-if="basket.comment === null && basket.commentOnEdition === false">
-                                    Aucun commentaire sur la demande
+                                <p ng-if="(basket.comment === null || basket.comment.trim() === '') && basket.commentOnEdition === false">
+                                    <i18n>lystore.basket.no-comment</i18n>
                                 </p>
                                 <p ng-if="basket.comment !== null && basket.commentOnEdition === false"
                                    ng-click="basket.commentOnEdition = true" tooltip="Modifier le commentaire">

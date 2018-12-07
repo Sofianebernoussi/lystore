@@ -108,7 +108,8 @@
                                 </ul>
                             </div>
                         </div>
-                        <div class="twelve cell vertical-spacing-four">
+                        <div class="twelve cell vertical-spacing-four"
+                             ng-if="orderClient.comment !== null && orderClient.comment.trim() !== ''">
                             <div class="row">
                                 <h4 class="cell">
                                     <i18n>comment</i18n>
@@ -116,10 +117,7 @@
                                 </h4>
                             </div>
                             <div class="row">
-                                <p ng-if="orderClient.comment === null">
-                                    Aucun commentaire sur la demande
-                                </p>
-                                <p ng-if="orderClient.comment !== null">
+                                <p>
                                     [[orderClient.comment]]
                                 </p>
                             </div>

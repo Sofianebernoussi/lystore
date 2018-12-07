@@ -354,5 +354,9 @@
   "lystore.project.create.err": "Erreur lors de la création du projet",
   "lystore.project.delete.title": "Suppression d'un projet",
   "lystore.project.delete.message": "Ce projet sera supprimé et ses commandes renvoyées dans le panier",
-  "lystore.project.delete.confirm": "Le projet a bien été supprimé"
+  "lystore.project.delete.confirm": "Le projet a bien été supprimé",
+  "lystore.basket.no-comment": "Aucun commentaire sur la demande",
+  "lystore.basket.add-comment": "Ajouter un commentaire",
+  "lystore.basket.no-file": "Aucun document ajouté sur la demande",
+  "lystore.basket.add-file": "Ajouter un document"
 }

@@ -85,32 +85,40 @@ public class ProjectController extends ControllerHelper {
         try {
             final Integer id = Integer.parseInt(request.getParam("id"));
             List<String> params = new ArrayList<>();
-            projectService.selectOrdersToBaskets(id,
-                    new Handler<Either<String, JsonArray>>() {
-                        @Override
-                        public void handle(Either<String, JsonArray> listOrder) {
-                            if (listOrder.isRight() && listOrder.right().getValue().size() > 0) {
-                                projectService.revertOrderAndDeleteProject(listOrder.right().getValue(), id, event -> {
-                                    if (event.isRight()) {
-                                        renderJson(request, event.right().getValue());
-                                        UserUtils.getUserInfos(eb, request, user -> {
-                                            Logging.add(eb, request, Contexts.PROJECT.toString(),
-                                                    Actions.DELETE.toString(),
-                                                    id.toString(), null, user);
-                                        });
-                                    } else {
-                                        renderError(request);
+            projectService.deletableProject(id, new Handler<Either<String, JsonObject>>() {
+                @Override
+                public void handle(Either<String, JsonObject> deletableEvent) {
+                    if (deletableEvent.isRight() && deletableEvent.right().getValue().getInteger("count") == 0) {
+                        projectService.selectOrdersToBaskets(id,
+                                new Handler<Either<String, JsonArray>>() {
+                                    @Override
+                                    public void handle(Either<String, JsonArray> listOrder) {
+                                        if (listOrder.isRight() && listOrder.right().getValue().size() > 0) {
+                                            projectService.revertOrderAndDeleteProject(listOrder.right().getValue(), id, event -> {
+                                                if (event.isRight()) {
+                                                    renderJson(request, event.right().getValue());
+                                                    UserUtils.getUserInfos(eb, request, user -> {
+                                                        Logging.add(eb, request, Contexts.PROJECT.toString(),
+                                                                Actions.DELETE.toString(),
+                                                                id.toString(), null, user);
+                                                    });
+                                                } else {
+                                                    renderError(request);
+                                                }
+                                            });
+
+
+                                        } else {
+                                            log.error("An error occurred when listing Order in Project");
+                                            badRequest(request);
+                                        }
                                     }
                                 });
-
-
-                            } else {
-                                log.error("An error occurred when listing Order in Project");
-                                badRequest(request);
-                            }
-                        }
-                    });
-
+                    } else {
+                        badRequest(request);
+                    }
+                }
+            });
         } catch (ClassCastException e) {
             log.error("An error occurred when casting Project information", e);
             renderError(request);

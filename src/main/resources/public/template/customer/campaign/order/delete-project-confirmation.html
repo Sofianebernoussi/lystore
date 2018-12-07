@@ -2,18 +2,22 @@
     <h2>
         <i18n>lystore.project.delete.title</i18n>
     </h2>
-    <p>
+    <p ng-show="projectsToDelete.length === 1 ">
         <i18n>lystore.project.delete.message</i18n>
         :
     </p>
-    <div ng-repeat="projectToDelete in projectsToDelete.all track by $index">
+    <p ng-show="projectsToDelete.length > 1">
+        <i18n>lystore.projects.delete.message</i18n>
+        :
+    </p>
+    <div ng-repeat="project in projectsToDelete track by $index">
 
         <div style="border-bottom: #cccccc solid 1px;">
-            <h3>[[projectToDelete.name]]</h3>
+            <h3>[[project.name]]</h3>
         </div>
         <div>
-            <h4>[[projectToDelete.title.name]]</h4>
-            <h4>[[projectToDelete.grade.name]]</h4>
+            <h4>[[project.title.name]]</h4>
+            <h4>[[project.grade.name]]</h4>
 
         </div>
         <div ng-show="projectHasDescription(projectToDelete)">
@@ -21,28 +25,28 @@
                 <i18n>description</i18n>
                 :
             </h4>
-            <p>[[projectToDelete.description]]</p>
+            <p>[[project.description]]</p>
         </div>
-        <div ng-if="projectHasSite(proprojectToDeleteject)">
+        <div ng-if="projectHasSite(project)">
             <h4>
                 <i18n>room.site</i18n>
                 :
             </h4>
-            <span>[[projectToDelete.site]]</span>
+            <span>[[project.site]]</span>
         </div>
-        <div ng-if="projectHasRoom(projectToDelete)">
+        <div ng-if="projectHasRoom(project)">
             <h4>
                 <i18n>room.number</i18n>
                 :
             </h4>
             <span>[[projectToDelete.room]]</span>
         </div>
-        <div ng-if="projectHasStair(projectToDelete)">
+        <div ng-if="projectHasStair(project)">
             <h4>
                 <i18n>lystore.project.stage</i18n>
                 :
             </h4>
-            <span>[[projectToDelete.stair]]</span>
+            <span>[[project.stair]]</span>
         </div>
     </div>
     <div class="right-magnet">

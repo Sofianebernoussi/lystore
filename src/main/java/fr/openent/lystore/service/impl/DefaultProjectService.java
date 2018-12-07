@@ -172,6 +172,18 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
+    @Override
+    public void deletableProject(Integer id, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT count(project.id) as count" +
+                " FROM " + Lystore.lystoreSchema + ".project " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".order_client_equipment oce " +
+                "ON project.id = oce.id_project " +
+                "WHERE oce.status != 'WAITING' AND project.id = ? ;";
+        JsonArray params = new JsonArray().add(id);
+
+        sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
     private JsonObject deleteProject(Integer id) {
         JsonArray params = new JsonArray();
         String queryDeletionProject = " DELETE FROM " + Lystore.lystoreSchema + ".project " +

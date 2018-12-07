@@ -113,15 +113,15 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
         }
 
 
-        $scope.displayLightboxProjectDelete = (projects: Projects) => {
+        $scope.displayLightboxProjectDelete = (project: Project) => {
             template.open('orderClient.deleteProject', 'customer/campaign/order/delete-project-confirmation');
-            $scope.projectsToDelete = projects;
+            $scope.projectToDelete = project;
             $scope.display.lightbox.deleteProject = true;
             Utils.safeApply($scope);
         }
 
         $scope.cancelProjectDelete = () => {
-            delete $scope.projectToDelete;
+            delete $scope.projectsToDelete;
             $scope.display.lightbox.deleteProject = false;
             template.close('orderClient.deleteProject');
             Utils.safeApply($scope);
@@ -129,9 +129,11 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
 
         $scope.deleteProject = async (projects: Projects) => {
             for (let i = 0; i < projects.length; i++) {
-                let {status} = await projects[i].delete();
-                if (status == 200) {
-                    $scope.notifications.push(new Notification('lystore.project.delete.confirm', 'confirm'));
+                if ($scope.projectIsDeletable(projects[i])) {
+                    let {status} = await projects[i].delete();
+                    if (status == 200) {
+                        $scope.notifications.push(new Notification('lystore.project.delete.confirm', 'confirm'));
+                    }
                 }
             }
             await $scope.ordersClient.sync(null, [], $routeParams.idCampaign, $scope.current.structure.id);
@@ -151,10 +153,9 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
         }
 
         $scope.openProjectsDeletion = (projects: Projects) => {
-            template.open('orderClient.deleteProject', 'customer/campaign/order/delete-project-confirmation');
             $scope.projectsToDelete = projects;
             $scope.display.lightbox.deleteProject = true;
-            Utils.safeApply($scope);
+            template.open('orderClient.deleteProject', 'customer/campaign/order/delete-project-confirmation');
         }
 
         $scope.updateProject = async () => {
@@ -163,5 +164,26 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             $scope.display.lightbox.udpateProject = false;
             template.close('orderClient.updateProject');
             Utils.safeApply($scope);
+        }
+
+
+        $scope.alltheProjectsDeletable = (projects: Projects) => {
+            let oneDeletable = true;
+            for (let i = 0; i < projects.length; i++) {
+                oneDeletable = oneDeletable && $scope.projectIsDeletable(projects[i]);
+            }
+            return oneDeletable;
+        }
+
+        $scope.projectIsDeletable = (project: Project) => {
+            let isDeletable = true;
+            let orderTemp;
+            for (let i = 0; i < $scope.ordersClient.all.length; i++) {
+                orderTemp = $scope.ordersClient.all[i];
+                if (orderTemp.project.id == project.id && orderTemp.status !== "WAITING") {
+                    isDeletable = false;
+                }
+            }
+            return isDeletable;
         }
     }]);

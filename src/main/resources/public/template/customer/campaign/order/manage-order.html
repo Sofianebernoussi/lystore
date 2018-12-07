@@ -10,15 +10,18 @@
                 <label class="checkbox">
                     <input type="checkbox" ng-model="project.selected"
                            ng-checked="project.selected">
+
                     <span></span>
+
+                    <h3>
+                        <em>[[project.name]]</em>
+                    </h3>
                 </label>
-                <h3>
-                    <em>[[project.name]]</em>
-                </h3>
+
                 <article class="basket-item twelve cell" ng-repeat="orderClient in ordersClient.all track by $index"
                          ng-if="project.id == orderClient.project.id">
                     <div class="cell width-40">
-                        <label class="checkbox">
+                        <label ng-show="orderClient.status === 'WAITING'" class="checkbox">
                             <input type="checkbox" ng-model="orderClient.selected"
                                    ng-checked="orderClient.selected">
                             <span></span>
@@ -156,7 +159,8 @@
                         ng-show="ordersClient.projects.selected.length === 1">
                     <i18n>modify</i18n>
                 </button>
-                <button ng-click="openProjectsDeletion(ordersClient.projects.selected)">
+                <button ng-if="alltheProjectsDeletable(ordersClient.projects.selected)"
+                        ng-click="openProjectsDeletion(ordersClient.projects.selected)">
                     <i18n>delete</i18n>
                 </button>
             </div>

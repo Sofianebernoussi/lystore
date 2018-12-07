@@ -54,4 +54,12 @@ public interface ProjectService {
      * @param id
      */
     void updateProject(JsonObject project, Handler<Either<String, JsonObject>> handler, Integer id);
+
+    /**
+     * Check if the project can be delete
+     *
+     * @param id
+     * @param handler
+     */
+    void deletableProject(Integer id, Handler<Either<String, JsonObject>> handler);
 }

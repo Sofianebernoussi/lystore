@@ -7,6 +7,11 @@
         <article class="twelve cell order-equipment-manage"
                  ng-repeat="project in ordersClient.projects.all track by $index">
             <div>
+                <label class="checkbox">
+                    <input type="checkbox" ng-model="project.selected"
+                           ng-checked="project.selected">
+                    <span></span>
+                </label>
                 <h3>
                     <em>[[project.name]]</em>
                 </h3>
@@ -140,4 +145,21 @@
     <lightbox show="display.lightbox.deleteProject" on-close="cancelProjectDelete()">
         <container template="orderClient.deleteProject"></container>
     </lightbox>
+    <lightbox show="display.lightbox.udpateProject" on-close="cancelProjectUpdate()">
+        <container template="orderClient.updateProject"></container>
+    </lightbox>
+
+    <section class="toggle-buttons" ng-class="{ hide: ordersClient.projects.selected.length === 0 }">
+        <div class="toggle">
+            <div class="row">
+                <button ng-click="openProjectForm(ordersClient.projects.selected[0])"
+                        ng-show="ordersClient.projects.selected.length === 1">
+                    <i18n>modify</i18n>
+                </button>
+                <button ng-click="openProjectsDeletion(ordersClient.projects.selected)">
+                    <i18n>delete</i18n>
+                </button>
+            </div>
+        </div>
+    </section>
 </div>

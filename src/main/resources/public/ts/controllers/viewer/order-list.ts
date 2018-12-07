@@ -1,5 +1,5 @@
 import {moment, ng, template} from 'entcore';
-import {Notification, OrderClient, Project, Utils} from '../../model';
+import {Notification, OrderClient, Project, Projects, Utils} from '../../model';
 
 declare let window: any;
 
@@ -11,6 +11,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             lightbox : {
                 deleteOrder : false,
                 deleteProject: false,
+                udpateProject: false,
             }
         };
 
@@ -39,31 +40,6 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             return totalPrice.toFixed(roundNumber);
         };
 
-        $scope.displayLightboxProjectDelete = (project: Project) => {
-            template.open('orderClient.deleteProject', 'customer/campaign/order/delete-project-confirmation');
-            $scope.projectToDelete = project;
-            $scope.display.lightbox.deleteProject = true;
-            Utils.safeApply($scope);
-        }
-
-        $scope.cancelProjectDelete = () => {
-            delete $scope.projectToDelete;
-            $scope.display.lightbox.deleteProject = false;
-            template.close('orderClient.deleteProject');
-            Utils.safeApply($scope);
-        }
-
-        $scope.deleteProject = async (project: Project) => {
-            let {status} = await project.delete();
-            if (status == 200) {
-                $scope.notifications.push(new Notification('lystore.project.delete.confirm', 'confirm'));
-            }
-            await $scope.ordersClient.sync(null, [], $routeParams.idCampaign, $scope.current.structure.id);
-            $scope.display.lightbox.deleteProject = false;
-            template.close('orderClient.deleteProject');
-            Utils.safeApply($scope);
-
-        }
         $scope.updateComment= (orderClient: OrderClient) =>{
             if (!orderClient.comment || orderClient.comment.trim() == " ") {
                 orderClient.comment="";
@@ -136,4 +112,56 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
                 return false;
         }
 
+
+        $scope.displayLightboxProjectDelete = (projects: Projects) => {
+            template.open('orderClient.deleteProject', 'customer/campaign/order/delete-project-confirmation');
+            $scope.projectsToDelete = projects;
+            $scope.display.lightbox.deleteProject = true;
+            Utils.safeApply($scope);
+        }
+
+        $scope.cancelProjectDelete = () => {
+            delete $scope.projectToDelete;
+            $scope.display.lightbox.deleteProject = false;
+            template.close('orderClient.deleteProject');
+            Utils.safeApply($scope);
+        }
+
+        $scope.deleteProject = async (projects: Projects) => {
+            for (let i = 0; i < projects.length; i++) {
+                let {status} = await projects[i].delete();
+                if (status == 200) {
+                    $scope.notifications.push(new Notification('lystore.project.delete.confirm', 'confirm'));
+                }
+            }
+            await $scope.ordersClient.sync(null, [], $routeParams.idCampaign, $scope.current.structure.id);
+            $scope.display.lightbox.deleteProject = false;
+            template.close('orderClient.deleteProject');
+            Utils.safeApply($scope);
+
+        }
+
+        $scope.openProjectForm = (project: Project) => {
+            $scope.display.lightbox.udpateProject = true;
+            $scope.projectToUpdate = project;
+            template.open('orderClient.updateProject', 'customer/campaign/order/update-project-confirmation');
+        }
+        $scope.cancelProjectUpdate = () => {
+            delete $scope.projectToUpdate;
+        }
+
+        $scope.openProjectsDeletion = (projects: Projects) => {
+            template.open('orderClient.deleteProject', 'customer/campaign/order/delete-project-confirmation');
+            $scope.projectsToDelete = projects;
+            $scope.display.lightbox.deleteProject = true;
+            Utils.safeApply($scope);
+        }
+
+        $scope.updateProject = async () => {
+            let {status} = await $scope.projectToUpdate.update();
+            delete $scope.projectToUpdate;
+            $scope.display.lightbox.udpateProject = false;
+            template.close('orderClient.updateProject');
+            Utils.safeApply($scope);
+        }
     }]);

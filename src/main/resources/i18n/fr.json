@@ -358,5 +358,8 @@
   "lystore.basket.no-comment": "Aucun commentaire sur la demande",
   "lystore.basket.add-comment": "Ajouter un commentaire",
   "lystore.basket.no-file": "Aucun document ajouté sur la demande",
-  "lystore.basket.add-file": "Ajouter un document"
+  "lystore.basket.add-file": "Ajouter un document",
+  "lystore.project.delete.confirm": "Le projet a bien été supprimé",
+  "lystore.project.update.err": "Erreur lors de la mise à jour du projet",
+  "lystore.update.project.title": "Mise à jour du projet"
 }

@@ -4,12 +4,10 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
+import fr.openent.lystore.security.AccesProjectRight;
 import fr.openent.lystore.service.ProjectService;
 import fr.openent.lystore.service.impl.DefaultProjectService;
-import fr.wseduc.rs.ApiDoc;
-import fr.wseduc.rs.Delete;
-import fr.wseduc.rs.Get;
-import fr.wseduc.rs.Post;
+import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
@@ -19,6 +17,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
 
 import java.util.ArrayList;
@@ -80,7 +79,8 @@ public class ProjectController extends ControllerHelper {
 
     @Delete("/project/:id")
     @ApiDoc("Delete a project")
-    @SecuredAction(value = " ", type = ActionType.AUTHENTICATED)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AccesProjectRight.class)
     public void deleteProject(HttpServerRequest request) {
         try {
             final Integer id = Integer.parseInt(request.getParam("id"));
@@ -116,6 +116,24 @@ public class ProjectController extends ControllerHelper {
             renderError(request);
         }
 
+    }
+
+    @Put("/project/:id")
+    @ApiDoc("Update a project")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AccesProjectRight.class)
+    public void updateProject(HttpServerRequest request) {
+        final Integer id = Integer.parseInt(request.getParam("id"));
+        RequestUtils.bodyToJson(request, pathPrefix + "project", new Handler<JsonObject>() {
+            @Override
+            public void handle(JsonObject project) {
+                try {
+                    projectService.updateProject(project, defaultResponseHandler(request), id);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
 }

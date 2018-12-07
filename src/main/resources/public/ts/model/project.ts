@@ -43,13 +43,10 @@ export class Project implements Selectable {
         this.eventer.trigger('init:end');
     }
 
-    async
-
     toJson() {
             
 
         return {
-            id: this.id,
             description: this.description,
             name: this.name,
             id_title: this.title.id,
@@ -78,6 +75,14 @@ export class Project implements Selectable {
             return await http.delete(`/lystore/project/${this.id}`);
         } catch (e) {
             notify.error('lystore.project.delete.err')
+        }
+    }
+
+    async update() {
+        try {
+            return await  http.put(`/lystore/project/${this.id}`, this.toJson());
+        } catch (e) {
+            notify.error('lystore.project.update.err');
         }
     }
 }

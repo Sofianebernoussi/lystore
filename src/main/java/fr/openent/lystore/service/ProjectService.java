@@ -13,13 +13,45 @@ public interface ProjectService {
      */
     void getProjects(Handler<Either<String, JsonArray>> handler);
 
-    void createProject(JsonObject projet, Handler<Either<String, JsonObject>> eitherHandler);
+    /**
+     * Create a project
+     *
+     * @param project
+     * @param eitherHandler
+     */
+    void createProject(JsonObject project, Handler<Either<String, JsonObject>> eitherHandler);
 
-
+    /**
+     * Get a single project by his id
+     *
+     * @param id
+     * @param handler
+     */
     void getProject(Integer id, Handler<Either<String, JsonObject>> handler);
 
-
+    /**
+     * Create baskets from orders an delete the project
+     *
+     * @param value
+     * @param id
+     * @param handler
+     */
     void revertOrderAndDeleteProject(JsonArray value, Integer id, Handler<Either<String, JsonObject>> handler);
 
+    /**
+     * Select all the orders and their parameters to prepare the baskets insert
+     *
+     * @param id
+     * @param handler
+     */
     void selectOrdersToBaskets(Integer id, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Update the project
+     *
+     * @param handler
+     * @param project
+     * @param id
+     */
+    void updateProject(JsonObject project, Handler<Either<String, JsonObject>> handler, Integer id);
 }

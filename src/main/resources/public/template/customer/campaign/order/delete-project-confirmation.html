@@ -6,47 +6,48 @@
         <i18n>lystore.project.delete.message</i18n>
         :
     </p>
+    <div ng-repeat="projectToDelete in projectsToDelete.all track by $index">
 
-    <div style="border-bottom: #cccccc solid 1px;">
-        <h3>[[projectToDelete.name]]</h3>
-    </div>
-    <div>
-        <h4>[[projectToDelete.title.name]]</h4>
-        <h4>[[projectToDelete.grade.name]]</h4>
+        <div style="border-bottom: #cccccc solid 1px;">
+            <h3>[[projectToDelete.name]]</h3>
+        </div>
+        <div>
+            <h4>[[projectToDelete.title.name]]</h4>
+            <h4>[[projectToDelete.grade.name]]</h4>
 
+        </div>
+        <div ng-show="projectHasDescription(projectToDelete)">
+            <h4>
+                <i18n>description</i18n>
+                :
+            </h4>
+            <p>[[projectToDelete.description]]</p>
+        </div>
+        <div ng-if="projectHasSite(proprojectToDeleteject)">
+            <h4>
+                <i18n>room.site</i18n>
+                :
+            </h4>
+            <span>[[projectToDelete.site]]</span>
+        </div>
+        <div ng-if="projectHasRoom(projectToDelete)">
+            <h4>
+                <i18n>room.number</i18n>
+                :
+            </h4>
+            <span>[[projectToDelete.room]]</span>
+        </div>
+        <div ng-if="projectHasStair(projectToDelete)">
+            <h4>
+                <i18n>lystore.project.stage</i18n>
+                :
+            </h4>
+            <span>[[projectToDelete.stair]]</span>
+        </div>
     </div>
-    <div ng-show="projectHasDescription(projectToDelete)">
-        <h4>
-            <i18n>description</i18n>
-            :
-        </h4>
-        <p>[[projectToDelete.description]]</p>
-    </div>
-    <div ng-if="projectHasSite(proprojectToDeleteject)">
-        <h4>
-            <i18n>room.site</i18n>
-            :
-        </h4>
-        <span>[[projectToDelete.site]]</span>
-    </div>
-    <div ng-if="projectHasRoom(projectToDelete)">
-        <h4>
-            <i18n>room.number</i18n>
-            :
-        </h4>
-        <span>[[projectToDelete.room]]</span>
-    </div>
-    <div ng-if="projectHasStair(projectToDelete)">
-        <h4>
-            <i18n>lystore.project.stage</i18n>
-            :
-        </h4>
-        <span>[[projectToDelete.stair]]</span>
-    </div>
-
     <div class="right-magnet">
         <input type="button" class="cancel" ng-click="cancelProjectDelete()" i18n-value="cancel"/>
-        <input type="button" class="button" ng-click="deleteProject(projectToDelete)" i18n-value="ok"/>
+        <input type="button" class="button" ng-click="deleteProject(projectsToDelete)" i18n-value="ok"/>
     </div>
 
 

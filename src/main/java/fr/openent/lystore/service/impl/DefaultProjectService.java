@@ -38,7 +38,7 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
 
 
     @Override
-    public void createProject(JsonObject projet, Handler<Either<String, JsonObject>> handler) {
+    public void createProject(JsonObject project, Handler<Either<String, JsonObject>> handler) {
 
 
         String query = "INSERT INTO " +
@@ -47,14 +47,14 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                 "Values ( ?, ?, ?, ?, ?, ?, ?, ? ) RETURNING id ;";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
-                .add(projet.getInteger("id_title"))
-                .add(projet.getInteger("id_grade"))
-                .add(projet.getString("description"))
-                .add(projet.getString("building"))
-                .add(projet.getInteger("stair"))
-                .add(projet.getString("room"))
-                .add(projet.getString("site"))
-                .add(projet.getString("name"));
+                .add(project.getInteger("id_title"))
+                .add(project.getInteger("id_grade"))
+                .add(project.getString("description"))
+                .add(project.getString("building"))
+                .add(project.getInteger("stair"))
+                .add(project.getString("room"))
+                .add(project.getString("site"))
+                .add(project.getString("name"));
 
 
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
@@ -117,6 +117,59 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
 
 
         sql.prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void updateProject(JsonObject project, Handler<Either<String, JsonObject>> handler, Integer id) {
+        JsonArray params = new JsonArray();
+        String query;
+        try {
+            params.add(project.getInteger("id_title"))
+                    .add(project.getInteger("id_grade"))
+                    .add(project.getString("description"))
+                    .add(project.getString("building"))
+                    .add(project.getInteger("stair"))
+                    .add(project.getString("room"))
+                    .add(project.getString("site"))
+                    .add(project.getString("name"))
+                    .add(id);
+
+            query = "UPDATE " + Lystore.lystoreSchema + ".project " +
+                    "SET id_title = ?, " +
+                    "id_grade = ?, " +
+                    "description = ?, " +
+                    "building = ?, " +
+                    "stair = ?, " +
+                    "room = ?, " +
+                    "site = ?, " +
+                    "name = ? " +
+                    "WHERE id = ? ;";
+
+
+        } catch (NullPointerException e) {
+
+            params.add(project.getInteger("id_title"))
+                    .add(project.getInteger("id_grade"))
+                    .add(project.getString("description"))
+                    .add(project.getString("building"))
+                    .add(project.getString("room"))
+                    .add(project.getString("site"))
+                    .add(project.getString("name"))
+                    .add(id);
+
+
+            query = "UPDATE " + Lystore.lystoreSchema + ".project " +
+                    "SET id_title = ?, " +
+                    "id_grade = ?, " +
+                    "description = ?, " +
+                    "building = ?, " +
+                    "stair = null, " +
+                    "room = ?, " +
+                    "site = ?, " +
+                    "name = ? " +
+                    "WHERE id = ? ;";
+        }
+        sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     private JsonObject deleteProject(Integer id) {

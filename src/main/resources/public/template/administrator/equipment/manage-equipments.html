@@ -15,10 +15,25 @@
         </button>
     </div>
 </div>
+<nav class="prev-next vertical-spacing-four">
+    <button ng-click="equipments.loadPrev()" ng-disabled="equipments.page === 0">
+        <i class="left-open"></i>
+    </button>
+    <span class="pagination">
+				<span>[[ equipments.page + 1 ]]</span>
+				<i18n class="zero-mobile"><i18n>lystore.pages.separator</i18n></i18n>
+				<span class="zero-desktop">/</span>
+				<span>[[ equipments.page_count ]]</span>
+			</span>
+    <button ng-click="equipments.loadNext()" ng-disabled="equipments.page + 1 === equipments.page_count">
+        <i class="open-right"></i>
+    </button>
+</nav>
 <article class="responsive-table">
     <h2>
         <i18n>lystore.catalog</i18n>
     </h2>
+    <div class="loading-bar" ng-class="{loading: equipments.loading}"></div>
     <table class="twelve">
         <thead>
         <tr>
@@ -68,25 +83,53 @@
             </td>
         </tr>
         </thead>
-        <tbody>
-            <tr ng-repeat="equipment in equipments.all | filter:equipmentSearchFilter | orderBy:sort.equipment.type:sort.equipment.reverse">
-                <td workflow="lystore.administrator">
-                    <label class="checkbox">
-                        <input type="checkbox" ng-model="equipment.selected">
-                        <span></span>
-                    </label>
-                </td>
-                <td ng-class="{'color-grey': equipment.status === 'UNAVAILABLE'}">[[ equipment.reference ]]</td>
-                <td ng-class="{'color-grey': equipment.status === 'UNAVAILABLE'}">[[ equipment.name ]]</td>
-                <td class="color-orange"
-                    ng-class="{'color-grey': equipment.status === 'UNAVAILABLE'||equipment.status === 'OUT_OF_STOCK'}">
-                    <span ng-bind="calculatePriceOfEquipment(equipment, false , 2) | currency"></span>
-                </td>
-                <td>[[ contracts.get(equipment.id_contract).supplier_display_name ]]</td>
-                <td>[[ contracts.get(equipment.id_contract).name ]]</td>
-                <td ng-class="{'color-green': equipment.status === 'AVAILABLE','color-red': equipment.status === 'OUT_OF_STOCK', 'color-orange': equipment.status === 'UNAVAILABLE'}">
-                    [[ lang.translate('lystore.' + equipment.status) ]]
-                </td>
+        <tbody ng-if="!equipments.loading">
+        <tr ng-repeat="equipment in equipments.all | filter:equipmentSearchFilter | orderBy:sort.equipment.type:sort.equipment.reverse">
+            <td workflow="lystore.administrator">
+                <label class="checkbox">
+                    <input type="checkbox" ng-model="equipment.selected">
+                    <span></span>
+                </label>
+            </td>
+            <td ng-class="{'color-grey': equipment.status === 'UNAVAILABLE'}">[[ equipment.reference ]]</td>
+            <td ng-class="{'color-grey': equipment.status === 'UNAVAILABLE'}">[[ equipment.name ]]</td>
+            <td class="color-orange"
+                ng-class="{'color-grey': equipment.status === 'UNAVAILABLE'||equipment.status === 'OUT_OF_STOCK'}">
+                <span ng-bind="calculatePriceOfEquipment(equipment, false , 2) | currency"></span>
+            </td>
+            <td>[[ contracts.get(equipment.id_contract).supplier_display_name ]]</td>
+            <td>[[ contracts.get(equipment.id_contract).name ]]</td>
+            <td ng-class="{'color-green': equipment.status === 'AVAILABLE','color-red': equipment.status === 'OUT_OF_STOCK', 'color-orange': equipment.status === 'UNAVAILABLE'}">
+                [[ lang.translate('lystore.' + equipment.status) ]]
+            </td>
+        </tr>
+        </tbody>
+        <tbody ng-if="equipments.loading">
+        <tr ng-repeat="x in [].constructor(15) track by $index" class="twelve">
+            <td>
+                <label class="checkbox">
+                    <input type="checkbox">
+                    <span></span>
+                </label>
+            </td>
+            <td class="one">
+                <div class="grey-matter">&nbsp;</div>
+            </td>
+            <td class="four">
+                <div class="grey-matter">&nbsp;</div>
+            </td>
+            <td class="one">
+                <div class="grey-matter">&nbsp;</div>
+            </td>
+            <td class="two">
+                <div class="grey-matter">&nbsp;</div>
+            </td>
+            <td class="three">
+                <div class="grey-matter">&nbsp;</div>
+            </td>
+            <td class="one">
+                <div class="grey-matter">&nbsp;</div>
+            </td>
         </tr>
         </tbody>
     </table>

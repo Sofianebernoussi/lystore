@@ -11,6 +11,8 @@ public class Lystore extends BaseServer {
 
     public static String lystoreSchema;
 
+    public static Integer PAGE_SIZE = 50;
+
     public static final String ADMINISTRATOR_RIGHT = "lystore.administrator";
     public static final String MANAGER_RIGHT = "lystore.manager";
 

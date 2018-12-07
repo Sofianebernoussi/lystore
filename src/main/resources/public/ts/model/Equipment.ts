@@ -1,6 +1,6 @@
 import {Tag, Utils} from './index';
 import {_, notify} from 'entcore';
-import {Mix, Selectable, Selection} from 'entcore-toolkit';
+import {Eventer, Mix, Selectable, Selection} from 'entcore-toolkit';
 import http from 'axios';
 
 export class Equipment implements Selectable {
@@ -124,10 +124,22 @@ export class TechnicalSpec {
     }
 }
 
+export interface Equipments {
+    eventer: Eventer;
+    page: number;
+    _loading: boolean;
+    all: Equipment[];
+    page_count: number;
+}
+
 export class Equipments extends Selection<Equipment> {
 
-    constructor () {
+    constructor() {
         super([]);
+        this.eventer = new Eventer();
+        this.page = 0;
+        this._loading = false;
+        this.getPageCount();
     }
 
     async delete (equipments: Equipment[]): Promise<void> {
@@ -141,9 +153,15 @@ export class Equipments extends Selection<Equipment> {
         }
     }
 
-    async sync (idCampaign?: number , idStructure?: string ) {
+    async getPageCount() {
+        const {data} = await http.get('/lystore/equipments/pages/count');
+        this.page_count = data.count;
+    }
+
+    async sync(idCampaign?: number, idStructure?: string, page: number = this.page) {
+        this.loading = true;
         try {
-            let { data } = idCampaign ? await http.get(`/lystore/equipments/campaign/${idCampaign}?idStructure=${idStructure}`) : await http.get(`/lystore/equipments`) ;
+            let {data} = idCampaign ? await http.get(`/lystore/equipments/campaign/${idCampaign}?idStructure=${idStructure}`) : await http.get(`/lystore/equipments?page=${page}`);
             this.all = Mix.castArrayAs(Equipment, data);
             this.all.map((equipment) => {
                 equipment.price = parseFloat(equipment.price.toString());
@@ -160,7 +178,27 @@ export class Equipments extends Selection<Equipment> {
                     : equipment.technical_specs);
         } catch (e) {
             notify.error('lystore.equipment.sync.err');
+            throw e;
+        } finally {
+            this.loading = false;
         }
+    }
+
+    set loading(state: boolean) {
+        this._loading = state;
+        this.eventer.trigger(`loading::${this._loading}`);
+    }
+
+    get loading() {
+        return this._loading;
+    }
+
+    loadNext(idCampaign?: number, idStructure?: string) {
+        return this.sync(idCampaign, idStructure, ++this.page);
+    }
+
+    loadPrev(idCampaign?: number, idStructure?: string) {
+        return this.sync(idCampaign, idStructure, --this.page);
     }
 
     async setStatus (status: string): Promise<void> {

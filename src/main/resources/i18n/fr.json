@@ -364,5 +364,7 @@
   "lystore.basket.add-file": "Ajouter un document",
   "lystore.project.delete.confirm": "Le projet a bien été supprimé",
   "lystore.project.update.err": "Erreur lors de la mise à jour du projet",
-  "lystore.update.project.title": "Mise à jour du projet"
+  "lystore.update.project.title": "Mise à jour du projet",
+  "lystore.basket.add-file": "Ajouter un document",
+  "lystore.pages.separator": "sur"
 }

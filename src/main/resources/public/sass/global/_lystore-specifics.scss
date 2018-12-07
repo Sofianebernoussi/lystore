@@ -777,5 +777,24 @@ body.lystore {
     }
   }
 
+  .grey-matter {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 2px;
+  }
 
+  @include keyframes(loadingBar) {
+    to {
+      width: 95%;
+    }
+  }
+
+  .loading-bar {
+    width: 0;
+    height: 5px;
+    background-color: $accent;
+
+    &.loading {
+      animation: loadingBar 5s cubic-bezier(0, .95, 0.99, 1.00);
+    }
+  }
 }

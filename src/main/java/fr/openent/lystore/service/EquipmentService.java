@@ -11,9 +11,10 @@ public interface EquipmentService {
 
     /**
      * List all equipments in database
+     * @param page page number
      * @param handler function handler returning data
      */
-    void listEquipments(Handler<Either<String, JsonArray>> handler);
+    void listEquipments(Integer page, Handler<Either<String, JsonArray>> handler);
 
     /**
      * List equipments of Campaign and a structure  in database
@@ -95,4 +96,11 @@ public interface EquipmentService {
      * @param handler    Function handler returning data
      */
     void importEquipments(JsonArray equipments, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Get equipment page numbers
+     *
+     * @param handler Function handler returning data
+     */
+    void getNumberPages(Handler<Either<String, JsonObject>> handler);
 }

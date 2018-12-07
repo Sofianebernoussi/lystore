@@ -28,7 +28,8 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         super(schema, table);
     }
 
-    public void listEquipments(Handler<Either<String, JsonArray>> handler) {
+    public void listEquipments(Integer page, Handler<Either<String, JsonArray>> handler) {
+        JsonArray params = new JsonArray();
         String query = "SELECT equip.*, tax.value as tax_amount, equipment_type.name as nametype, array_to_json( " +
                 "(SELECT array_agg(id_tag) " +
                 "FROM " + Lystore.lystoreSchema + ".equipment INNER JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (equipment.id = rel_equipment_tag.id_equipment) " +
@@ -45,8 +46,14 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 " INNER JOIN " + Lystore.lystoreSchema + ".equipment_type ON (equipment_type.id = equipment.id_type) " +
                 ") opts ON (equipment_option.id_option = opts.id_equipment AND opts.master_equipment = equip.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax ON tax.id = equip.id_tax " +
-                "GROUP BY (equip.id, tax.id,equipment_type.name)";
-        sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray(), SqlResult.validResultHandler(handler));
+                "GROUP BY (equip.id, tax.id,equipment_type.name)" +
+                "ORDER by equip.name";
+
+        if (page != null) {
+            query += " LIMIT " + Lystore.PAGE_SIZE + " OFFSET ?";
+            params.add(Lystore.PAGE_SIZE * page);
+        }
+        sql.prepared(query, params, SqlResult.validResultHandler(handler));
     }
     public void equipment(Integer idEquipment,  Handler<Either<String, JsonArray>> handler){
         String query = "SELECT e.*, tax.value tax_amount, array_to_json(array_agg(opts)) as options " +
@@ -182,6 +189,23 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
             LOGGER.error(message);
             handler.handle(new Either.Left<String, JsonObject>(message));
         }
+    }
+
+    @Override
+    public void getNumberPages(Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT COUNT(*) as count FROM " + Lystore.lystoreSchema + ".equipment";
+        Sql.getInstance().raw(query, event -> {
+            if (!"ok".equals(event.body().getString("status"))) {
+                handler.handle(new Either.Left<>("An error occurred when collecting equipment count"));
+                return;
+            }
+
+
+            Integer count = event.body().getJsonArray("results").getJsonArray(0).getInteger(0);
+            Integer pageCount = count / Lystore.PAGE_SIZE;
+            pageCount += ((count % Lystore.PAGE_SIZE) != 0 ? 1 : 0);
+            handler.handle(new Either.Right<>(new JsonObject().put("count", pageCount)));
+        });
     }
 
     @Override

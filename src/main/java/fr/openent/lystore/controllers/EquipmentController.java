@@ -52,7 +52,15 @@ public class EquipmentController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     @Override
     public void list(HttpServerRequest request) {
-        equipmentService.listEquipments(arrayResponseHandler(request));
+        Integer page = request.params().contains("page") ? Integer.parseInt(request.getParam("page")) : 0;
+        equipmentService.listEquipments(page, arrayResponseHandler(request));
+    }
+
+    @Get("/equipments/pages/count")
+    @ApiDoc("Get page number in database")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void getPageNumber(HttpServerRequest request) {
+        equipmentService.getNumberPages(defaultResponseHandler(request));
     }
 
     @Get("/equipment/:id")

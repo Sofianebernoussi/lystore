@@ -14,8 +14,7 @@ import {
     Supplier,
     Tag,
     TechnicalSpec,
-    Utils,
-    EquipmentType
+    Utils
 } from '../../model';
 
 export const configurationController = ng.controller('configurationController',
@@ -58,6 +57,9 @@ export const configurationController = ng.controller('configurationController',
                 reverse: false
             }
         };
+
+        $scope.equipments.eventer.on('loading::true', $scope.$apply);
+        $scope.equipments.eventer.on('loading::false', $scope.$apply);
 
         $scope.search = {};
 

@@ -7,6 +7,7 @@ import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AccessOrderCommentRight;
 import fr.openent.lystore.security.AccessPriceProposalRight;
 import fr.openent.lystore.security.PersonnelRight;
+import fr.openent.lystore.security.PostBasketFileRight;
 import fr.openent.lystore.service.BasketService;
 import fr.openent.lystore.service.impl.DefaultBasketService;
 import fr.wseduc.rs.*;
@@ -197,7 +198,8 @@ public class BasketController extends ControllerHelper {
 
     @Post("/basket/:id/file")
     @ApiDoc("Upload a file for a specific cart")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(PostBasketFileRight.class)
     public void uploadFile(HttpServerRequest request) {
         storage.writeUploadFile(request, entries -> {
             if (!"ok".equals(entries.getString("status"))) {
@@ -227,7 +229,8 @@ public class BasketController extends ControllerHelper {
 
     @Delete("/basket/:id/file/:fileId")
     @ApiDoc("Delete file from basket")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(PostBasketFileRight.class)
     public void deleteFileFromBasket(HttpServerRequest request) {
         Integer basketId = Integer.parseInt(request.getParam("id"));
         String fileId = request.getParam("fileId");

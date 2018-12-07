@@ -35,7 +35,7 @@
                                 <img skin-src="/img/illustrations/pages-default.png"
                                      ng-show="orderClient.image===null || orderClient.image===undefined "/>
                             </div>
-                            <div class="cell eight">
+                            <div class="cell four">
                                 <div class="eleven centered">
                                     <h3>[[orderClient.name]]</h3>
                                     <p ng-bind-html="orderClient.summary"></p>
@@ -48,6 +48,11 @@
                                         :'lystore.options.show'
                                         )]]
                                     </a>
+                                </div>
+                            </div>
+                            <div class="cell four">
+                                <div class="[[orderClient.status]] status-cirle cell row">
+                                    <i></i>
                                 </div>
                             </div>
                             <div class="three cell text-right">

@@ -110,7 +110,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="row twelve vertical-spacing-four">
+                        <div class="row twelve vertical-spacing-four" ng-if="basket.equipment.file === true">
                             <div class="twelve row">
                                 <h4 class="cell">
                                     <i18n>lystore.basket.file.name</i18n>
@@ -124,7 +124,7 @@
                                 <i18n>lystore.basket.no-file</i18n>
                             </p>
                             <div class="row basket-file-list"
-                                 ng-if="basket.equipment.file === true && basket.files.length > 0">
+                                 ng-if="basket.files.length > 0">
                                 <ul class="twelve">
                                     <li ng-repeat="file in basket.files" class="twelve basket-file row">
                                         <a class="cell eleven" ng-click="basket.downloadFile(file)">[[ file.name ||

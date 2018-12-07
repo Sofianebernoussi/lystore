@@ -1,7 +1,8 @@
 <div ng-controller="orderPersonnelController">
     <div ng-show="ordersClient.all.length > 0" class="basket-list">
         <h1>
-            <i18n>lystore.orderEquipment.manage.title</i18n>
+            <span ng-if="campaign.purse_enabled"><i18n>lystore.orderEquipment.manage.title</i18n></span>
+            <span ng-if="!campaign.purse_enabled"><i18n>lystore.requestsEquipment.manage.title</i18n></span>
             <button class="right-magnet" ng-click="exportCSV()"><i18n>lystore.orderEquipment.manage.exportCSV</i18n></button>
         </h1>
         <article class="twelve cell order-equipment-manage"

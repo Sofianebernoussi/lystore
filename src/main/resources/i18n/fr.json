@@ -156,6 +156,7 @@
   "lystore.confirm.order.message3": "' pour connaître l'état d'avancement des traitements  de vos futurs équipements ",
   "lystore.confirm.order.title": "Commande effectuée avec succès",
   "lystore.orderEquipment.manage.title": "Historique de vos commandes",
+  "lystore.requestsEquipment.manage.title": "Historique de vos demandes",
   "lystore.orderEquipment.manage.order": "Commande du ",
   "lystore.orderEquipment.manage.exportCSV": "Export CSV",
   "lystore.orderEquipment.manage.empty.order": "Vous n'avez aucune commande en cours",

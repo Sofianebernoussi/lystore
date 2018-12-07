@@ -268,6 +268,7 @@
   "REJECTED": "Commande refusée",
   "DONE": "Commande terminée",
   "SENT": "Commande envoyée au fournisseur",
+  "WAITING_FOR_ACCEPTANCE": "Demande en cours d'instruction",
   "create": "Créer",
   "money.symbol": "€",
   "total": "total",

@@ -275,12 +275,15 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
          * @returns {string | number}
          */
         $scope.calculatePriceOfEquipment = (equipment: any, selectedOptions: boolean, roundNumber: number = 2) => {
-            let price = parseFloat($scope.calculatePriceTTC(equipment.price, equipment.tax_amount));
-            equipment.options.map((option) => {
-                (option.required === true || (selectedOptions ? option.selected === true : false))
-                    ? price += parseFloat($scope.calculatePriceTTC(option.price, option.tax_amount))
-                    : null;
-            });
+            let price = parseFloat((equipment.price_proposal)? equipment.price_proposal : $scope.calculatePriceTTC(equipment.price, equipment.tax_amount));
+            if(!equipment.price_proposal){
+                equipment.options.map((option) => {
+                    (option.required === true || (selectedOptions ? option.selected === true : false))
+                        ? price += parseFloat($scope.calculatePriceTTC(option.price, option.tax_amount))
+                        : null;
+                });
+            }
+
             return (!isNaN(price)) ? (roundNumber ? price.toFixed(roundNumber) : price) : price;
         };
         $scope.initStructures = async () => {

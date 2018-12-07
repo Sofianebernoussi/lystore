@@ -307,12 +307,20 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     @Override
     public void listExport(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
+
+        String price_proposal= "CASE WHEN oe.price_proposal IS NOT NULL THEN " +
+                    "ROUND (oe.price_proposal*oe.amount,2) " +
+                    "ELSE ";
+
+        String closeCaseForPriceProposal="END ";
+        
         String query = "SELECT oe.name as equipment_name, oe.amount as equipment_quantity, " +
                 "oe.creation_date as equipment_creation_date, oe.summary as equipment_summary, " +
-                "oe.status as equipment_status,cause_status, price_all_options, CASE count(price_all_options) " +
-                "WHEN 0 THEN ROUND ((oe.price+( oe.tax_amount*oe.price)/100)*oe.amount,2) "+
-                "ELSE ROUND((price_all_options +( oe.price + ROUND((oe.tax_amount*oe.price)/100,2)))*oe.amount,2)" +
-                " END as price_total_equipment "+
+                "oe.status as equipment_status,cause_status, price_all_options, " +
+                "CASE count(price_all_options) " +
+                "WHEN 0 THEN "+price_proposal+"ROUND ((oe.price+( oe.tax_amount*oe.price)/100)*oe.amount,2) "+closeCaseForPriceProposal+
+                "ELSE "+price_proposal+"ROUND((price_all_options +( oe.price + ROUND((oe.tax_amount*oe.price)/100,2)))*oe.amount,2) " +closeCaseForPriceProposal+
+                "END as price_total_equipment "+
                 "FROM "+ Lystore.lystoreSchema + ".order_client_equipment  oe " +
                 "LEFT JOIN (SELECT ROUND (SUM(( price +( tax_amount*price)/100)*amount),2) as price_all_options," +
                 " id_order_client_equipment FROM "+ Lystore.lystoreSchema + ".order_client_options " +

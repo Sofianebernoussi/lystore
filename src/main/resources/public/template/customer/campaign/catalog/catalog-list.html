@@ -24,7 +24,23 @@
             </div>
         </div>
     </div>
-    <div class="cell catalog-list" ng-class="{twelve: !display.equipment, 'border-list': display.equipment}">
+    <nav class="prev-next vertical-spacing-four" ng-if="equipments.page_count > 1">
+        <button ng-click="equipments.loadPrev(campaign.id, current.structure.id)" ng-disabled="equipments.page === 0">
+            <i class="left-open"></i>
+        </button>
+        <span class="pagination">
+				<span>[[ equipments.page + 1 ]]</span>
+				<i18n class="zero-mobile"><i18n>lystore.pages.separator</i18n></i18n>
+				<span class="zero-desktop">/</span>
+				<span>[[ equipments.page_count ]]</span>
+			</span>
+        <button ng-click="equipments.loadNext(campaign.id, current.structure.id)"
+                ng-disabled="equipments.page + 1 === equipments.page_count">
+            <i class="open-right"></i>
+        </button>
+    </nav>
+    <div class="cell catalog-list" ng-class="{twelve: !display.equipment, 'border-list': display.equipment}"
+         ng-if="!equipments.loading">
         <div class="dominos item_hover_accent_list">
             <div class="item six-mobile" ng-class="{
                     disabled: equipment.status!== 'AVAILABLE',
@@ -45,6 +61,33 @@
                         <img skin-src="/img/illustrations/pages-default.png" ng-show="equipment.image===null || equipment.image===undefined "/>
                         <h4>[[equipment.name]]</h4>
                         <p class="ellipsis description">[[equipment.summary]]</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+    <div class="cell catalog-list" ng-if="equipments.loading">
+        <div class="dominos item_hover_accent_list loading-domino">
+            <div class="item six-mobile"
+                 ng-repeat="x in [].constructor(15) track by $index">
+                <article class="domino loading-domino">
+                    <div class="loading-bar" ng-class="{loading: equipments.loading}"></div>
+                    <h2>
+                        <div class="grey-matter max-75">&nbsp;</div>
+                    </h2>
+                    <div class="top">
+                        <div class="image-container">
+                            <div class="grey-matter grey-image">&nbsp;</div>
+                        </div>
+                        <h4 class="vertical-spacing">
+                            <div class="grey-matter">&nbsp;</div>
+                        </h4>
+                        <div class="vertical-spacing-twice summary">
+                            <div class="grey-matter">&nbsp;</div>
+                        </div>
+                        <div class="vertical-spacing-twice summary">
+                            <div class="grey-matter max-60">&nbsp;</div>
+                        </div>
                     </div>
                 </article>
             </div>

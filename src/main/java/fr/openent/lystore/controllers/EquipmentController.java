@@ -16,6 +16,7 @@ import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
@@ -60,7 +61,19 @@ public class EquipmentController extends ControllerHelper {
     @ApiDoc("Get page number in database")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void getPageNumber(HttpServerRequest request) {
-        equipmentService.getNumberPages(defaultResponseHandler(request));
+        MultiMap params = request.params();
+        if (params.contains("idCampaign") && params.contains("idStructure")) {
+            try {
+                Integer idCampaign = Integer.parseInt(params.get("idCampaign"));
+                String idStructure = params.get("idStructure");
+                equipmentService.getNumberPages(idCampaign, idStructure, defaultResponseHandler(request));
+            } catch (NumberFormatException e) {
+                badRequest(request);
+                log.error("An error occured while casting campaign identifier", e);
+            }
+        } else {
+            equipmentService.getNumberPages(defaultResponseHandler(request));
+        }
     }
 
     @Get("/equipment/:id")
@@ -81,13 +94,14 @@ public class EquipmentController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void listEquipmentFromCampaign(final HttpServerRequest request) {
         try {
+            Integer page = request.params().contains("page") ? Integer.parseInt(request.getParam("page")) : 0;
             Integer idCampaign = request.params().contains("idCampaign")
                     ? Integer.parseInt(request.params().get("idCampaign"))
                     : null;
             String idStructure = request.params().contains("idStructure")
                     ? request.params().get("idStructure")
                     : null;
-            equipmentService.listEquipments(idCampaign, idStructure, arrayResponseHandler(request));
+            equipmentService.listEquipments(idCampaign, idStructure, page, arrayResponseHandler(request));
         } catch (ClassCastException e) {
             log.error("An error occurred casting campaign id", e);
         }

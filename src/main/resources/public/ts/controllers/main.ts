@@ -9,6 +9,7 @@ import {
     ContractTypes,
     Equipment,
     Equipments,
+    EquipmentTypes,
     Logs,
     Notification,
     OrderClient,
@@ -20,9 +21,7 @@ import {
     Suppliers,
     Tags,
     Taxes,
-    EquipmentTypes,
     Utils
-
 } from '../model';
 import {Mix} from "entcore-toolkit";
 
@@ -53,6 +52,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.ordersClient = new OrdersClient();
         $scope.displayedOrders = new OrdersClient();
         $scope.equipmentTypes = new EquipmentTypes();
+
+        $scope.equipments.eventer.on('loading::true', $scope.$apply);
+        $scope.equipments.eventer.on('loading::false', $scope.$apply);
+
         route({
             main: async () => {
                 if ($scope.isManager() || $scope.isAdministrator()) {
@@ -154,12 +157,12 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             campaignCatalog: async (params) => {
                 let id = params.idCampaign;
                 $scope.idIsInteger(id);
-                $scope.current.structure ? await $scope.equipments.sync(id, $scope.current.structure.id) : null;
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/catalog/catalog-list');
                 template.close('right-side');
                 $scope.display.equipment = false;
                 Utils.safeApply($scope);
+                $scope.current.structure ? await $scope.equipments.sync(id, $scope.current.structure.id) : null;
             },
             equipmentDetail: async (params) => {
                 let idCampaign = params.idCampaign;

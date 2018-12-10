@@ -58,9 +58,6 @@ export const configurationController = ng.controller('configurationController',
             }
         };
 
-        $scope.equipments.eventer.on('loading::true', $scope.$apply);
-        $scope.equipments.eventer.on('loading::false', $scope.$apply);
-
         $scope.search = {};
 
         $scope.openAgentForm = (agent: Agent = new Agent()) => {

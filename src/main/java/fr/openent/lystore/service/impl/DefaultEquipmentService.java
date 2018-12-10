@@ -74,7 +74,8 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
 
         this.sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray().add(idEquipment).add(idEquipment), SqlResult.validResultHandler(handler));
     }
-    public void listEquipments(Integer idCampaign, String idStructure,
+
+    public void listEquipments(Integer idCampaign, String idStructure, Integer page,
                                Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
         String query = "SELECT e.*, equipment_type.name as nametype, tax.value tax_amount, array_to_json(array_agg(DISTINCT opts)) as options, array_to_json(array_agg(DISTINCT  rel_equipment_tag.id_tag)) tags " +
@@ -94,8 +95,13 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 "SELECT structure_group.id FROM " + Lystore.lystoreSchema + ".structure_group " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON rel_group_structure.id_structure_group = structure_group.id " +
                 "WHERE rel_group_structure.id_structure = ?)) and e.catalog_enabled = true " +
-                "GROUP BY (e.id, tax.id , nametype );";
+                "GROUP BY (e.id, tax.id , nametype )";
         values.add(idCampaign).add(idStructure);
+
+        if (page != null) {
+            query += " LIMIT " + Lystore.PAGE_SIZE + " OFFSET ?";
+            values.add(Lystore.PAGE_SIZE * page);
+        }
 
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
     }
@@ -200,12 +206,43 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 return;
             }
 
-
-            Integer count = event.body().getJsonArray("results").getJsonArray(0).getInteger(0);
-            Integer pageCount = count / Lystore.PAGE_SIZE;
-            pageCount += ((count % Lystore.PAGE_SIZE) != 0 ? 1 : 0);
-            handler.handle(new Either.Right<>(new JsonObject().put("count", pageCount)));
+            handler.handle(new Either.Right<>(new JsonObject().put("count", calculPagesNumber(event.body().getJsonArray("results").getJsonArray(0).getInteger(0)))));
         });
+    }
+
+    @Override
+    public void getNumberPages(Integer idCampaign, String idStructure, Handler<Either<String, JsonObject>> handler) {
+        JsonArray values = new JsonArray();
+        String query = "SELECT count(equipment.id) " +
+                "FROM " + Lystore.lystoreSchema + ".equipment " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (equipment.id = rel_equipment_tag.id_equipment) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_campaign ON (rel_group_campaign.id_tag = rel_equipment_tag.id_tag) " +
+                "AND rel_group_campaign.id_campaign = ? " +
+                "AND rel_group_campaign.id_structure_group IN ( " +
+                "SELECT structure_group.id " +
+                "FROM " + Lystore.lystoreSchema + ".structure_group " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON (rel_group_structure.id_structure_group = structure_group.id) " +
+                "WHERE rel_group_structure.id_structure = ? " +
+                ")";
+        values.add(idCampaign).add(idStructure);
+
+        Sql.getInstance().prepared(query, values, new Handler<Message<JsonObject>>() {
+            @Override
+            public void handle(Message<JsonObject> event) {
+                if (!"ok".equals(event.body().getString("status"))) {
+                    handler.handle(new Either.Left<>("An error occurred when collecting equipment count"));
+                    return;
+                }
+
+                handler.handle(new Either.Right<>(new JsonObject().put("count", calculPagesNumber(event.body().getJsonArray("results").getJsonArray(0).getInteger(0)))));
+            }
+        });
+    }
+
+    private Integer calculPagesNumber(Integer count) {
+        Integer pageCount = count / Lystore.PAGE_SIZE;
+        pageCount += ((count % Lystore.PAGE_SIZE) != 0 ? 1 : 0);
+        return pageCount;
     }
 
     @Override

@@ -140,7 +140,6 @@ export class Equipments extends Selection<Equipment> {
         this.eventer = new Eventer();
         this.page = 0;
         this._loading = false;
-        this.getPageCount();
     }
 
     async delete (equipments: Equipment[]): Promise<void> {
@@ -154,15 +153,19 @@ export class Equipments extends Selection<Equipment> {
         }
     }
 
-    async getPageCount() {
-        const {data} = await http.get('/lystore/equipments/pages/count');
+    async getPageCount(idCampaign?: number, idStructure?: string) {
+        const filter: string = idCampaign && idStructure ? `?idCampaign=${idCampaign}&idStructure=${idStructure}` : '';
+        const {data} = await http.get(`/lystore/equipments/pages/count${filter}`);
         this.page_count = data.count;
     }
 
     async sync(idCampaign?: number, idStructure?: string, page: number = this.page) {
         this.loading = true;
         try {
-            let {data} = idCampaign ? await http.get(`/lystore/equipments/campaign/${idCampaign}?idStructure=${idStructure}`) : await http.get(`/lystore/equipments?page=${page}`);
+            await this.getPageCount(idCampaign, idStructure);
+            let {data} = idCampaign
+                ? await http.get(`/lystore/equipments/campaign/${idCampaign}?idStructure=${idStructure}&page=${page}`)
+                : await http.get(`/lystore/equipments?page=${page}`);
             this.all = Mix.castArrayAs(Equipment, data);
             this.all.map((equipment) => {
                 equipment.price = parseFloat(equipment.price.toString());

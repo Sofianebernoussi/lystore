@@ -32,7 +32,6 @@
     }
   },
   "required": [
-    "ids",
-    "id_project"
+    "ids"
   ]
 }

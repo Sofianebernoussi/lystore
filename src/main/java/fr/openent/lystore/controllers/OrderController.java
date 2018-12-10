@@ -335,7 +335,7 @@ public class OrderController extends ControllerHelper {
                             }
 
                             List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
-                            final String url = request.scheme() + "://" + request.host();
+                            final String url = request.headers().get("Referer");
                             orderService.validateOrders(request, userInfos , ids, url,
                                     Logging.defaultResponsesHandler(eb,
                                             request,

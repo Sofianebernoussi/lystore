@@ -41,13 +41,20 @@ public class EmailSendService {
         final int contractNameIndex = 1;
         final int agentEmailIndex = 3;
         //FIXME FIXER CETTE PARTIE. REFAIRE COMPLETEMENT LA SEQUENCE DE GESTION DES MAILS
+
         JsonArray line = rows.getJsonArray(0);
+        //System.out.println("4");
         String agentMailObject = "[LyStore] Commandes " + line.getString(contractNameIndex);
+        //System.out.println("5");
         String agentMailBody = getAgentBodyMail(line, user, result.getString("number_validation"), url);
+      //  System.out.println("6");
         sendMail(request, line.getString(agentEmailIndex),
                 agentMailObject,
                 agentMailBody);
+      //  System.out.println("7");
         for (int i = 0; i < structureRows.size(); i++) {
+
+
             String mailObject="[LyStore] Commandes ";
             JsonObject row = structureRows.getJsonObject(i);
             String name = row.getString("name");
@@ -55,6 +62,8 @@ public class EmailSendService {
             for(int j = 0 ; j < mailsRow.size() ; j++){
                 JsonObject userMail = mailsRow.getJsonObject(j);
                 if (userMail.getString("mail") != null) {
+                    System.out.println("5");
+
                     String mailBody = getStructureBodyMail(mailsRow.getJsonObject(j), user,
                             result.getString("number_validation"), url, name);
                     sendMail(request, userMail.getString("mail"),
@@ -62,7 +71,10 @@ public class EmailSendService {
                             mailBody);
                 }
             }
+
+
         }
+
     }
 
     public void getPersonnelMailStructure (JsonArray structureIds, Handler<Either<String, JsonArray>> handler){
@@ -84,7 +96,6 @@ public class EmailSendService {
                 + "<br />" + url + "/lystore#/ <br />"
                 + "<br /> Bien Cordialement, "
                 + "<br /> L'équipe LyStore. ";
-
         return formatAccentedString(body);
 
     }

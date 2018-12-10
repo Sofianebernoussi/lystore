@@ -784,6 +784,8 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                                 final int structureIdIndex = 4;
                                 JsonArray structureIds = new fr.wseduc.webutils.collections.JsonArray();
                                 for (int j = 0; j < rows.size(); j++) {
+
+
                                     names.add((rows.getJsonArray(j)).getString(agentNameIndex));
                                     structureIds.add((rows.getJsonArray(j)).getString(structureIdIndex));
                                 }
@@ -792,6 +794,8 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                                         new Handler<Either<String, JsonArray>>() {
                                             @Override
                                             public void handle(Either<String, JsonArray> stringJsonArrayEither) {
+
+
                                                 final JsonObject result = new JsonObject()
                                                         .put("number_validation", numberOrder)
                                                         .put("agent", agentNames);
@@ -805,6 +809,8 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                     } catch (ClassCastException e) {
                         LOGGER.error("An error occurred when casting numberOrder", e);
                         handler.handle(new Either.Left<String, JsonObject>(""));
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
                     }
                 } else {
                     LOGGER.error("An error occurred when selecting number of the order");
@@ -840,6 +846,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         for (Integer id : ids) {
             params.add( id);
         }
+        System.out.println("2");
         return new JsonObject()
                 .put("statement", query)
                 .put("values", params)

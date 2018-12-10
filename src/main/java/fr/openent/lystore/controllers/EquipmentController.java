@@ -56,7 +56,8 @@ public class EquipmentController extends ControllerHelper {
         Integer page = request.params().contains("page") ? Integer.parseInt(request.getParam("page")) : 0;
         String order = request.params().contains("order") ? request.getParam("order") : "name";
         Boolean reverse = request.params().contains("reverse") ? Boolean.parseBoolean(request.getParam("reverse")) : false;
-        equipmentService.listEquipments(page, order, reverse, arrayResponseHandler(request));
+        List<String> queries = request.params().getAll("q");
+        equipmentService.listEquipments(page, order, reverse, queries, arrayResponseHandler(request));
     }
 
     @Get("/equipments/pages/count")

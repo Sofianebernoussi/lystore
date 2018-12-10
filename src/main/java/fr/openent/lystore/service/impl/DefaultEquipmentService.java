@@ -56,8 +56,23 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         return reverse ? "DESC" : "ASC";
     }
 
-    public void listEquipments(Integer page, String order, Boolean reverse, Handler<Either<String, JsonArray>> handler) {
+    public void listEquipments(Integer page, String order, Boolean reverse, List<String> filters, Handler<Either<String, JsonArray>> handler) {
         JsonArray params = new JsonArray();
+
+        String filter = "", q;
+        if (filters.size() > 0) {
+            filter = "WHERE ";
+            for (int i = 0; i < filters.size(); i++) {
+                q = filters.get(i);
+                if (i > 0) {
+                    filter += "AND ";
+                }
+
+                filter += "(LOWER(equip.name) ~ LOWER(?) OR LOWER(equip.reference) ~ LOWER(?) OR LOWER(supplier.name) ~ LOWER(?) OR LOWER(contract.name) ~ LOWER(?)) ";
+                params.add(q).add(q).add(q).add(q);
+            }
+        }
+
         String query = "SELECT equip.*, supplier.name as supplier_name, contract.name as contract_name, tax.value as tax_amount, equipment_type.name as nametype, array_to_json( " +
                 "(SELECT array_agg(id_tag) " +
                 "FROM " + Lystore.lystoreSchema + ".equipment INNER JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (equipment.id = rel_equipment_tag.id_equipment) " +
@@ -76,6 +91,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax ON tax.id = equip.id_tax " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (contract.id = equip.id_contract) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".supplier ON (contract.id_supplier = supplier.id) " +
+                filter +
                 "GROUP BY (equip.id, tax.id,equipment_type.name, supplier.name, contract.name, tax.value)" +
                 "ORDER by " + getSqlOrderValue(order) + " " + getSqlReverseString(reverse);
 

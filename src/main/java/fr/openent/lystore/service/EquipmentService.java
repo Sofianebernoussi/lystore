@@ -12,9 +12,12 @@ public interface EquipmentService {
     /**
      * List all equipments in database
      * @param page page number
+     * @param order order name
+     * @param reverse reverse list
+     * @param filters search queries
      * @param handler function handler returning data
      */
-    void listEquipments(Integer page, String order, Boolean reverse, Handler<Either<String, JsonArray>> handler);
+    void listEquipments(Integer page, String order, Boolean reverse, List<String> filters, Handler<Either<String, JsonArray>> handler);
 
     /**
      * List equipments of Campaign and a structure  in database

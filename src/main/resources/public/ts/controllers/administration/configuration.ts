@@ -1,4 +1,4 @@
-import {_, idiom as lang, moment, ng, template} from 'entcore';
+import {_, moment, ng, template} from 'entcore';
 import {Mix} from 'entcore-toolkit';
 import {
     Agent,
@@ -54,7 +54,8 @@ export const configurationController = ng.controller('configurationController',
             },
             equipment: {
                 type: 'name',
-                reverse: false
+                reverse: false,
+                filters: []
             }
         };
 
@@ -338,15 +339,17 @@ export const configurationController = ng.controller('configurationController',
             Utils.safeApply($scope);
         };
 
-        $scope.equipmentSearchFilter = (equipment: Equipment) => {
-            return $scope.search.equipment !== undefined
-                ? equipment.name.toLowerCase().includes($scope.search.equipment.toLowerCase())
-                || $scope.calculatePriceOfEquipment(equipment, false, 2).toString().includes($scope.search.equipment.toLowerCase())
-                || equipment.price.toString().includes($scope.search.equipment.toLowerCase())
-                || $scope.contracts.get(equipment.id_contract).supplier_display_name.toLowerCase().includes($scope.search.equipment.toLowerCase())
-                || $scope.contracts.get(equipment.id_contract).name.toLowerCase().includes($scope.search.equipment.toLowerCase())
-                || lang.translate('lystore.' + equipment.status).toLowerCase().includes($scope.search.equipment.toLowerCase())
-                : true;
+        $scope.addEquipmentFilter = (event?) => {
+            if (event && (event.which === 13 || event.keyCode === 13) && event.target.value.trim() !== '') {
+                $scope.sort.equipment.filters = [...$scope.sort.equipment.filters, event.target.value];
+                $scope.equipments.sync(undefined, undefined, undefined, $scope.sort.equipment);
+                event.target.value = '';
+            }
+        };
+
+        $scope.dropEquipmentFilter = (filter: string) => {
+            $scope.sort.equipment.filters = _.without($scope.sort.equipment.filters, filter);
+            $scope.equipments.sync(undefined, undefined, undefined, $scope.sort.equipment);
         };
 
         $scope.addTechnicalSpec = (equipment: Equipment) => {

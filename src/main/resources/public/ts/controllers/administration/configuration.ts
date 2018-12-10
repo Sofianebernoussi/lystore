@@ -342,6 +342,7 @@ export const configurationController = ng.controller('configurationController',
         $scope.addEquipmentFilter = (event?) => {
             if (event && (event.which === 13 || event.keyCode === 13) && event.target.value.trim() !== '') {
                 $scope.sort.equipment.filters = [...$scope.sort.equipment.filters, event.target.value];
+                $scope.equipments.page = 0;
                 $scope.equipments.sync(undefined, undefined, undefined, $scope.sort.equipment);
                 event.target.value = '';
             }
@@ -349,6 +350,7 @@ export const configurationController = ng.controller('configurationController',
 
         $scope.dropEquipmentFilter = (filter: string) => {
             $scope.sort.equipment.filters = _.without($scope.sort.equipment.filters, filter);
+            $scope.equipments.page = 0;
             $scope.equipments.sync(undefined, undefined, undefined, $scope.sort.equipment);
         };
 

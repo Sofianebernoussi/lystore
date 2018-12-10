@@ -4,7 +4,10 @@
   "additionalProperties": false,
   "properties": {
     "description": {
-      "type": "string"
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "name": {
       "type": "string"
@@ -16,16 +19,28 @@
       "type": "number"
     },
     "building": {
-      "type": "string"
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "stair": {
-      "type": "number"
+      "type": [
+        "number",
+        "null"
+      ]
     },
     "room": {
-      "type": "string"
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "site": {
-      "type": "string"
+      "type": [
+        "string",
+        "null"
+      ]
     }
   },
   "required": [

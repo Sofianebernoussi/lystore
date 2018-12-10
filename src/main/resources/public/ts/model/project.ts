@@ -44,18 +44,36 @@ export class Project implements Selectable {
     }
 
     toJson() {
-            
 
-        return {
+        let data =
+            {
             description: this.description,
             name: this.name,
+
             id_title: this.title.id,
             id_grade: this.grade.id,
-            building: this.building,
+
+
+                building: this.building,
             site: this.site,
             stair: this.stair,
             room: this.room,
-        };
+            }
+        return this.parseToJsonOptionnal(data);
+    }
+
+    parseToJsonOptionnal({description, name, id_title, id_grade, building, site, stair, room}) {
+        return {
+            ...(description && {description}),
+            id_title: id_title,
+            id_grade: id_grade,
+            ...(name && {name: name}),
+            ...(building && {building: building}),
+            ...(site && {site: site}),
+            ...((stair || stair == 0) && {stair: stair}),
+            ...(room && {room: room}),
+
+        }
     }
 
     async create() {

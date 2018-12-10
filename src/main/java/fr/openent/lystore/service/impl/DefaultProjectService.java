@@ -139,7 +139,7 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                     "id_grade = ?, " +
                     "description = ?, " +
                     "building = ?, " +
-                    "stair = ?, " +
+                    "stair = ?," +
                     "room = ?, " +
                     "site = ?, " +
                     "name = ? " +
@@ -147,29 +147,44 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
 
 
         } catch (NullPointerException e) {
-
+            params = new JsonArray();
             params.add(project.getInteger("id_title"))
-                    .add(project.getInteger("id_grade"))
-                    .add(project.getString("description"))
-                    .add(project.getString("building"))
-                    .add(project.getString("room"))
-                    .add(project.getString("site"))
-                    .add(project.getString("name"))
+                    .add(project.getInteger("id_grade"));
+
+            if (project.containsKey("description"))
+                params.add(project.getString("description"));
+            if (project.containsKey("building"))
+                params.add(project.getString("building"));
+            if (project.containsKey("stair"))
+                params.add(project.getInteger("stair"));
+            if (project.containsKey("room"))
+                params.add(project.getString("room"));
+            if (project.containsKey("site"))
+                params.add(project.getString("site"));
+
+
+            params.add(project.getString("name"))
                     .add(id);
 
 
             query = "UPDATE " + Lystore.lystoreSchema + ".project " +
                     "SET id_title = ?, " +
                     "id_grade = ?, " +
-                    "description = ?, " +
-                    "building = ?, " +
-                    "stair = null, " +
-                    "room = ?, " +
-                    "site = ?, " +
-                    "name = ? " +
+                    "description = " + (project.containsKey("description") ? "?," : "null, ") +
+                    "building =  " + (project.containsKey("building") ? "?," : "null, ") +
+                    "stair =  " + (project.containsKey("stair") ? "?," : "null, ") +
+                    "room =  " + (project.containsKey("room") ? "?," : "null, ") +
+                    "site =  " + (project.containsKey("site") ? "?," : "null, ") +
+                    "name =  " + "? " +
                     "WHERE id = ? ;";
         }
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    private String NullToStr(String stringMaybeNull) {
+        if (stringMaybeNull == null)
+            return null;
+        return stringMaybeNull;
     }
 
     @Override

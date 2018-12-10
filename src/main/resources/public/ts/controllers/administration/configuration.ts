@@ -346,6 +346,9 @@ export const configurationController = ng.controller('configurationController',
         };
 
         $scope.addTechnicalSpec = (equipment: Equipment) => {
+            if(equipment.technical_specs == null){
+                equipment.technical_specs=  [];
+            }
             equipment.technical_specs.push(new TechnicalSpec());
             Utils.safeApply($scope);
         };

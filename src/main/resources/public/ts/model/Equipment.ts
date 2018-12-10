@@ -53,7 +53,7 @@ export class Equipment implements Selectable {
             reference : this.reference,
             image: this.image || null,
             id_contract: this.id_contract,
-            technical_specs: this.technical_specs.map((spec: TechnicalSpec) => spec.toJson()),
+            technical_specs:  (this.technical_specs!=null) ? this.technical_specs.map((spec: TechnicalSpec) => spec.toJson()) : [],
             tags: this.tags.map((tag: Tag) => tag.id),
             optionsCreate : _.filter(optionList, function(option) { return option.id === null ; }) ,
             optionsUpdate : _.filter(optionList, function(option) { return option.id !== null ; }) ,
@@ -112,7 +112,8 @@ export class Equipment implements Selectable {
 export class TechnicalSpec {
     name: string;
     value: string;
-
+    constructor(){
+    }
     toJson () {
         return {
             name: this.name,

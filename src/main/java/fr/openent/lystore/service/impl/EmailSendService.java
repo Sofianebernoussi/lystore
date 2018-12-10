@@ -24,7 +24,9 @@ public class EmailSendService {
         this.emailSender = emailSender;
         this.neo4j = Neo4j.getInstance();
     }
-    public void sendMail(HttpServerRequest request, String eMail, String object , String body){
+
+    public void sendMail(HttpServerRequest request, String eMail, String object, String body) {
+
         emailSender.sendEmail(request,
                 eMail,
                 null,
@@ -34,6 +36,7 @@ public class EmailSendService {
                 null,
                 true,
                 null);
+
     }
 
     public void sendMails(HttpServerRequest request, JsonObject result, JsonArray rows, UserInfos user, String url,
@@ -43,41 +46,36 @@ public class EmailSendService {
         //FIXME FIXER CETTE PARTIE. REFAIRE COMPLETEMENT LA SEQUENCE DE GESTION DES MAILS
 
         JsonArray line = rows.getJsonArray(0);
-        //System.out.println("4");
+
         String agentMailObject = "[LyStore] Commandes " + line.getString(contractNameIndex);
-        //System.out.println("5");
         String agentMailBody = getAgentBodyMail(line, user, result.getString("number_validation"), url);
-      //  System.out.println("6");
+
+
         sendMail(request, line.getString(agentEmailIndex),
                 agentMailObject,
                 agentMailBody);
-      //  System.out.println("7");
+
         for (int i = 0; i < structureRows.size(); i++) {
-
-
-            String mailObject="[LyStore] Commandes ";
+            String mailObject = "[LyStore] Commandes ";
             JsonObject row = structureRows.getJsonObject(i);
             String name = row.getString("name");
             JsonArray mailsRow = row.getJsonArray("mails");
-            for(int j = 0 ; j < mailsRow.size() ; j++){
+            for (int j = 0; j < mailsRow.size(); j++) {
                 JsonObject userMail = mailsRow.getJsonObject(j);
                 if (userMail.getString("mail") != null) {
-                    System.out.println("5");
-
                     String mailBody = getStructureBodyMail(mailsRow.getJsonObject(j), user,
                             result.getString("number_validation"), url, name);
                     sendMail(request, userMail.getString("mail"),
                             mailObject,
                             mailBody);
+
                 }
             }
-
-
         }
-
     }
 
-    public void getPersonnelMailStructure (JsonArray structureIds, Handler<Either<String, JsonArray>> handler){
+
+    public void getPersonnelMailStructure(JsonArray structureIds, Handler<Either<String, JsonArray>> handler) {
         String query = "MATCH (w:WorkflowAction {displayName: 'lystore.access'})--(r:Role) with r , count((r)-->(w)) as NbrRows " +
                 " Match p = ((r)<--(mg:ManualGroup)-->(s:Structure)), (mg)<-[IN]-(u:User)  " +
                 "where NbrRows=1 AND s.id IN {ids} return s.id as id, s.name as name, " +
@@ -101,6 +99,7 @@ public class EmailSendService {
     }
     private static String getAgentBodyMail(JsonArray row, UserInfos user, String numberOrder, String url){
         final int contractName = 2 ;
+
         String body = null;
         body = "Bonjour " + row.getString(contractName) + ", <br/> <br/>"
                 + user.getFirstName() + " " + user.getLastName() + " vient de valider une commande sous le numéro \""
@@ -110,6 +109,7 @@ public class EmailSendService {
                 + "<br />" + url + getEncodedRedirectUri(url + "/lystore#/order/valid") + "<br />"
                 + "<br /> Bien Cordialement, "
                 + "<br /> L'équipe LyStore. ";
+
         return formatAccentedString(body);
     }
 

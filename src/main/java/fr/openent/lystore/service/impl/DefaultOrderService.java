@@ -846,7 +846,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         for (Integer id : ids) {
             params.add( id);
         }
-        System.out.println("2");
+
         return new JsonObject()
                 .put("statement", query)
                 .put("values", params)

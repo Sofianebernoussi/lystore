@@ -159,13 +159,17 @@ export class Equipments extends Selection<Equipment> {
         this.page_count = data.count;
     }
 
-    async sync(idCampaign?: number, idStructure?: string, page: number = this.page) {
+    async sync(idCampaign?: number, idStructure?: string, page: number = this.page, filter = {
+        type: 'name',
+        reverse: false
+    }) {
         this.loading = true;
         try {
             await this.getPageCount(idCampaign, idStructure);
-            let {data} = idCampaign
-                ? await http.get(`/lystore/equipments/campaign/${idCampaign}?idStructure=${idStructure}&page=${page}`)
-                : await http.get(`/lystore/equipments?page=${page}`);
+            const uri: string = idCampaign
+                ? `/lystore/equipments/campaign/${idCampaign}?idStructure=${idStructure}&page=${page}&order=${filter.type}&reverse=${filter.reverse}`
+                : `/lystore/equipments?page=${page}&order=${filter.type}&reverse=${filter.reverse}`;
+            let {data} = await http.get(uri);
             this.all = Mix.castArrayAs(Equipment, data);
             this.all.map((equipment) => {
                 equipment.price = parseFloat(equipment.price.toString());
@@ -197,12 +201,12 @@ export class Equipments extends Selection<Equipment> {
         return this._loading;
     }
 
-    loadNext(idCampaign?: number, idStructure?: string) {
-        return this.sync(idCampaign, idStructure, ++this.page);
+    loadNext(idCampaign?: number, idStructure?: string, filter?: { type: string, reverse: boolean }) {
+        return this.sync(idCampaign, idStructure, ++this.page, filter);
     }
 
-    loadPrev(idCampaign?: number, idStructure?: string) {
-        return this.sync(idCampaign, idStructure, --this.page);
+    loadPrev(idCampaign?: number, idStructure?: string, filter?: { type: string, reverse: boolean }) {
+        return this.sync(idCampaign, idStructure, --this.page, filter);
     }
 
     async setStatus (status: string): Promise<void> {

@@ -16,7 +16,8 @@
     </div>
 </div>
 <nav class="prev-next vertical-spacing-four">
-    <button ng-click="equipments.loadPrev()" ng-disabled="equipments.page === 0">
+    <button ng-click="equipments.loadPrev(undefined, undefined, { type: sort.equipment.type, reverse: sort.equipment.reverse})"
+            ng-disabled="equipments.page === 0">
         <i class="left-open"></i>
     </button>
     <span class="pagination">
@@ -25,7 +26,8 @@
 				<span class="zero-desktop">/</span>
 				<span>[[ equipments.page_count ]]</span>
 			</span>
-    <button ng-click="equipments.loadNext()" ng-disabled="equipments.page + 1 === equipments.page_count">
+    <button ng-click="equipments.loadNext(undefined, undefined, { type: sort.equipment.type, reverse: sort.equipment.reverse})"
+            ng-disabled="equipments.page + 1 === equipments.page_count">
         <i class="open-right"></i>
     </button>
 </nav>
@@ -45,46 +47,40 @@
                     <span></span>
                 </label>
             </td>
-            <td ng-click="sort.equipment.type = 'reference';
-                    sort.equipment.reverse = !sort.equipment.reverse">
+            <td ng-click="filterEquipments('reference', !sort.equipment.reverse)">
                 <i18n>reference</i18n>
                 <i class="up-open" ng-show="sort.equipment.type === 'reference' && !sort.equipment.reverse"></i>
                 <i class="down-open" ng-show="sort.equipment.type === 'reference' && sort.equipment.reverse"></i>
             </td>
-            <td ng-click="sort.equipment.type = 'name';
-                    sort.equipment.reverse = !sort.equipment.reverse">
+            <td ng-click="filterEquipments('name', !sort.equipment.reverse)">
                 <i18n>name</i18n>
                 <i class="up-open" ng-show="sort.equipment.type === 'name' && !sort.equipment.reverse"></i>
                 <i class="down-open" ng-show="sort.equipment.type === 'name' && sort.equipment.reverse"></i>
             </td>
-            <td ng-click="sort.equipment.type = 'price';
-                    sort.equipment.reverse = !sort.equipment.reverse">
+            <td ng-click="filterEquipments('price', !sort.equipment.reverse)">
                 <i18n>lystore.price.TTC</i18n>
                 <i class="up-open" ng-show="sort.equipment.type === 'price' && !sort.equipment.reverse"></i>
                 <i class="down-open" ng-show="sort.equipment.type === 'price' && sort.equipment.reverse"></i>
             </td>
-            <td ng-click="sort.equipment.type = 'id_contract';
-                    sort.equipment.reverse = !sort.equipment.reverse">
+            <td ng-click="filterEquipments('supplier', !sort.equipment.reverse)">
                 <i18n>supplier</i18n>
-                <i class="up-open" ng-show="sort.equipment.type === 'id_contract' && !sort.equipment.reverse"></i>
-                <i class="down-open" ng-show="sort.equipment.type === 'id_contract' && sort.equipment.reverse"></i>
+                <i class="up-open" ng-show="sort.equipment.type === 'supplier' && !sort.equipment.reverse"></i>
+                <i class="down-open" ng-show="sort.equipment.type === 'supplier' && sort.equipment.reverse"></i>
             </td>
-            <td ng-click="sort.equipment.type = 'id_contract';
-                    sort.equipment.reverse = !sort.equipment.reverse">
+            <td ng-click="filterEquipments('contract', !sort.equipment.reverse)">
                 <i18n>contract</i18n>
-                <i class="up-open" ng-show="sort.equipment.type === 'id_contract' && !sort.equipment.reverse"></i>
-                <i class="down-open" ng-show="sort.equipment.type === 'id_contract' && sort.equipment.reverse"></i>
+                <i class="up-open" ng-show="sort.equipment.type === 'contract' && !sort.equipment.reverse"></i>
+                <i class="down-open" ng-show="sort.equipment.type === 'contract' && sort.equipment.reverse"></i>
             </td>
-            <td ng-click="sort.equipment.type = 'status';
-                    sort.equipment.reverse = !sort.equipment.reverse">
+            <td ng-click="filterEquipments('status', !sort.equipment.reverse)">
                 <i18n>lystore.availability</i18n>
-                <i class="up-open" ng-show="sort.equipment.type === 'availability' && !sort.equipment.reverse"></i>
-                <i class="down-open" ng-show="sort.equipment.type === 'availability' && sort.equipment.reverse"></i>
+                <i class="up-open" ng-show="sort.equipment.type === 'status' && !sort.equipment.reverse"></i>
+                <i class="down-open" ng-show="sort.equipment.type === 'status' && sort.equipment.reverse"></i>
             </td>
         </tr>
         </thead>
         <tbody ng-if="!equipments.loading">
-        <tr ng-repeat="equipment in equipments.all | filter:equipmentSearchFilter | orderBy:sort.equipment.type:sort.equipment.reverse">
+        <tr ng-repeat="equipment in equipments.all | filter:equipmentSearchFilter">
             <td workflow="lystore.administrator">
                 <label class="checkbox">
                     <input type="checkbox" ng-model="equipment.selected">
@@ -97,8 +93,8 @@
                 ng-class="{'color-grey': equipment.status === 'UNAVAILABLE'||equipment.status === 'OUT_OF_STOCK'}">
                 <span ng-bind="calculatePriceOfEquipment(equipment, false , 2) | currency"></span>
             </td>
-            <td>[[ contracts.get(equipment.id_contract).supplier_display_name ]]</td>
-            <td>[[ contracts.get(equipment.id_contract).name ]]</td>
+            <td>[[ equipment.supplier_name ]]</td>
+            <td>[[equipment.contract_name]]</td>
             <td ng-class="{'color-green': equipment.status === 'AVAILABLE','color-red': equipment.status === 'OUT_OF_STOCK', 'color-orange': equipment.status === 'UNAVAILABLE'}">
                 [[ lang.translate('lystore.' + equipment.status) ]]
             </td>

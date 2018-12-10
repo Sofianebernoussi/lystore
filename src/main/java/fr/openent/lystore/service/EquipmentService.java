@@ -14,7 +14,7 @@ public interface EquipmentService {
      * @param page page number
      * @param handler function handler returning data
      */
-    void listEquipments(Integer page, Handler<Either<String, JsonArray>> handler);
+    void listEquipments(Integer page, String order, Boolean reverse, Handler<Either<String, JsonArray>> handler);
 
     /**
      * List equipments of Campaign and a structure  in database

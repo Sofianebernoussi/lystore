@@ -60,6 +60,13 @@ export const configurationController = ng.controller('configurationController',
 
         $scope.search = {};
 
+        $scope.filterEquipments = (type: string, reverse: boolean) => {
+            $scope.equipments.page = 0;
+            $scope.equipments.sync(undefined, undefined, undefined, {type, reverse});
+            $scope.sort.equipment.reverse = reverse;
+            $scope.sort.equipment.type = type;
+        };
+
         $scope.openAgentForm = (agent: Agent = new Agent()) => {
             $scope.agent = new Agent();
             Mix.extend($scope.agent, agent);

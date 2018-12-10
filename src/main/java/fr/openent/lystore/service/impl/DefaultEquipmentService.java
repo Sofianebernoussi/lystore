@@ -28,9 +28,37 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         super(schema, table);
     }
 
-    public void listEquipments(Integer page, Handler<Either<String, JsonArray>> handler) {
+    private String getSqlOrderValue(String field) {
+        String typeField;
+        switch (field) {
+            case "supplier": {
+                field = "name";
+                typeField = "supplier";
+                break;
+            }
+            case "contract": {
+                field = "name";
+                typeField = "contract";
+                break;
+            }
+            case "status":
+            case "reference":
+            case "name":
+            case "price":
+            default:
+                typeField = "equip";
+        }
+
+        return typeField + "." + field;
+    }
+
+    private String getSqlReverseString(Boolean reverse) {
+        return reverse ? "DESC" : "ASC";
+    }
+
+    public void listEquipments(Integer page, String order, Boolean reverse, Handler<Either<String, JsonArray>> handler) {
         JsonArray params = new JsonArray();
-        String query = "SELECT equip.*, tax.value as tax_amount, equipment_type.name as nametype, array_to_json( " +
+        String query = "SELECT equip.*, supplier.name as supplier_name, contract.name as contract_name, tax.value as tax_amount, equipment_type.name as nametype, array_to_json( " +
                 "(SELECT array_agg(id_tag) " +
                 "FROM " + Lystore.lystoreSchema + ".equipment INNER JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (equipment.id = rel_equipment_tag.id_equipment) " +
                 "WHERE equip.id = rel_equipment_tag.id_equipment)) as tags, array_to_json(array_agg(opts.*)) as options " +
@@ -46,8 +74,10 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 " INNER JOIN " + Lystore.lystoreSchema + ".equipment_type ON (equipment_type.id = equipment.id_type) " +
                 ") opts ON (equipment_option.id_option = opts.id_equipment AND opts.master_equipment = equip.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax ON tax.id = equip.id_tax " +
-                "GROUP BY (equip.id, tax.id,equipment_type.name)" +
-                "ORDER by equip.name";
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (contract.id = equip.id_contract) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".supplier ON (contract.id_supplier = supplier.id) " +
+                "GROUP BY (equip.id, tax.id,equipment_type.name, supplier.name, contract.name, tax.value)" +
+                "ORDER by " + getSqlOrderValue(order) + " " + getSqlReverseString(reverse);
 
         if (page != null) {
             query += " LIMIT " + Lystore.PAGE_SIZE + " OFFSET ?";

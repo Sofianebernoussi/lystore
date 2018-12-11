@@ -158,6 +158,9 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
         }
         $scope.cancelProjectUpdate = () => {
             delete $scope.projectToUpdate;
+            $scope.display.lightbox.udpateProject = false;
+            template.close('orderClient.updateProject');
+            Utils.safeApply($scope);
         }
 
         $scope.openProjectsDeletion = (projects: Projects) => {

@@ -4,9 +4,13 @@
     </h2>
     <p ng-if="ordersEquipmentToDelete.all.length === 1 ">
         <i18n>lystore.orderEquipment.delete.message</i18n>
+        :
+
     </p>
     <p ng-if="ordersEquipmentToDelete.all.length !== 1">
         <i18n>lystore.ordersEquipment.delete.message</i18n>
+        :
+
     </p>
     <div ng-repeat="orderClient in ordersEquipmentToDelete track by $index">
         <div class="cell twelve">

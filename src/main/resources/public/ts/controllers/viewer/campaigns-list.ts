@@ -1,10 +1,5 @@
-import { ng, template, _ } from 'entcore';
-import { Mix } from 'entcore-toolkit';
-import {
-    Campaign,
-    Utils
-} from '../../model';
-
+import {ng} from 'entcore';
+import {Campaign, Utils} from '../../model';
 
 export const campaignsListController = ng.controller('campaignsListController',
     ['$scope', '$rootScope', ($scope, $rootScope) => {

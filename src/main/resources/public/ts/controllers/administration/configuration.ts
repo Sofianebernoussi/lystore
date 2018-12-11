@@ -52,11 +52,7 @@ export const configurationController = ng.controller('configurationController',
                 type: 'name',
                 reverse: false
             },
-            equipment: {
-                type: 'name',
-                reverse: false,
-                filters: []
-            }
+            equipment: $scope.equipments.sort
         };
 
         $scope.search = {};

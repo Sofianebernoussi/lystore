@@ -131,6 +131,12 @@ export interface Equipments {
     _loading: boolean;
     all: Equipment[];
     page_count: number;
+
+    sort: {
+        type: string,
+        reverse: boolean,
+        filters: string[]
+    }
 }
 
 export class Equipments extends Selection<Equipment> {
@@ -140,6 +146,11 @@ export class Equipments extends Selection<Equipment> {
         this.eventer = new Eventer();
         this.page = 0;
         this._loading = false;
+        this.sort = {
+            type: 'name',
+            reverse: false,
+            filters: []
+        };
     }
 
     async delete (equipments: Equipment[]): Promise<void> {
@@ -154,7 +165,8 @@ export class Equipments extends Selection<Equipment> {
     }
 
     async getPageCount(idCampaign?: number, idStructure?: string) {
-        const filter: string = idCampaign && idStructure ? `?idCampaign=${idCampaign}&idStructure=${idStructure}` : '';
+        let filter: string = idCampaign && idStructure ? `?idCampaign=${idCampaign}&idStructure=${idStructure}` : '?';
+        filter += `${Utils.formatGetParameters({q: this.sort.filters})}`;
         const {data} = await http.get(`/lystore/equipments/pages/count${filter}`);
         this.page_count = data.count;
     }

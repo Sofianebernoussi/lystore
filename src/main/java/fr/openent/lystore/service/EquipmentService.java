@@ -102,10 +102,10 @@ public interface EquipmentService {
 
     /**
      * Get equipment page numbers
-     *
+     * @param filters Filters list
      * @param handler Function handler returning data
      */
-    void getNumberPages(Handler<Either<String, JsonObject>> handler);
+    void getNumberPages(List<String> filters, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Get equipment pages number

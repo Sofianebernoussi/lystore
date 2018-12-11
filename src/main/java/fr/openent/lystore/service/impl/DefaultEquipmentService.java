@@ -56,9 +56,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         return reverse ? "DESC" : "ASC";
     }
 
-    public void listEquipments(Integer page, String order, Boolean reverse, List<String> filters, Handler<Either<String, JsonArray>> handler) {
-        JsonArray params = new JsonArray();
-
+    private String getTextFilter(List<String> filters) {
         String filter = "", q;
         if (filters.size() > 0) {
             filter = "WHERE ";
@@ -69,7 +67,18 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 }
 
                 filter += "(LOWER(equip.name) ~ LOWER(?) OR LOWER(equip.reference) ~ LOWER(?) OR LOWER(supplier.name) ~ LOWER(?) OR LOWER(contract.name) ~ LOWER(?)) ";
-                params.add(q).add(q).add(q).add(q);
+            }
+        }
+
+        return filter;
+    }
+
+    public void listEquipments(Integer page, String order, Boolean reverse, List<String> filters, Handler<Either<String, JsonArray>> handler) {
+        JsonArray params = new JsonArray();
+
+        if (!filters.isEmpty()) {
+            for (String filter : filters) {
+                params.add(filter).add(filter).add(filter).add(filter);
             }
         }
 
@@ -91,7 +100,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax ON tax.id = equip.id_tax " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (contract.id = equip.id_contract) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".supplier ON (contract.id_supplier = supplier.id) " +
-                filter +
+                getTextFilter(filters) +
                 "GROUP BY (equip.id, tax.id,equipment_type.name, supplier.name, contract.name, tax.value)" +
                 "ORDER by " + getSqlOrderValue(order) + " " + getSqlReverseString(reverse);
 
@@ -244,9 +253,21 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     }
 
     @Override
-    public void getNumberPages(Handler<Either<String, JsonObject>> handler) {
-        String query = "SELECT COUNT(*) as count FROM " + Lystore.lystoreSchema + ".equipment";
-        Sql.getInstance().raw(query, event -> {
+    public void getNumberPages(List<String> filters, Handler<Either<String, JsonObject>> handler) {
+        JsonArray params = new JsonArray();
+
+        if (!filters.isEmpty()) {
+            for (String filter : filters) {
+                params.add(filter).add(filter).add(filter).add(filter);
+            }
+        }
+
+        String query = "SELECT count(equip.id)" +
+                "FROM " + Lystore.lystoreSchema + ".equipment equip " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (contract.id = equip.id_contract) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".supplier ON (contract.id_supplier = supplier.id) " +
+                getTextFilter(filters);
+        Sql.getInstance().prepared(query, params, event -> {
             if (!"ok".equals(event.body().getString("status"))) {
                 handler.handle(new Either.Left<>("An error occurred when collecting equipment count"));
                 return;

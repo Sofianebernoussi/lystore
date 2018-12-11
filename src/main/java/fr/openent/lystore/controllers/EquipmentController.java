@@ -65,6 +65,7 @@ public class EquipmentController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void getPageNumber(HttpServerRequest request) {
         MultiMap params = request.params();
+        List<String> queries = params.getAll("q");
         if (params.contains("idCampaign") && params.contains("idStructure")) {
             try {
                 Integer idCampaign = Integer.parseInt(params.get("idCampaign"));
@@ -75,7 +76,7 @@ public class EquipmentController extends ControllerHelper {
                 log.error("An error occured while casting campaign identifier", e);
             }
         } else {
-            equipmentService.getNumberPages(defaultResponseHandler(request));
+            equipmentService.getNumberPages(queries, defaultResponseHandler(request));
         }
     }
 

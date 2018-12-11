@@ -223,7 +223,7 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
 
             params.add(order.getInteger("id_basket_equipment"))
                     .add(order.getInteger("amount"))
-                    .add(order.getInteger("amount"))
+                    .add(order.getInteger("id_equipment"))
                     .add(order.getInteger("id_campaign"))
                     .add(order.getString("id_structure"))
                     .add(order.getString("comment"))
@@ -238,7 +238,7 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
 
             params.add(order.getInteger("id_basket_equipment"))
                     .add(order.getInteger("amount"))
-                    .add(order.getInteger("amount"))
+                    .add(order.getInteger("id_equipment"))
                     .add(order.getInteger("id_campaign"))
                     .add(order.getString("id_structure"))
                     .add(order.getString("comment"));

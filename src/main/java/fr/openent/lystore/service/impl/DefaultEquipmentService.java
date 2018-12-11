@@ -130,9 +130,16 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         this.sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray().add(idEquipment).add(idEquipment), SqlResult.validResultHandler(handler));
     }
 
-    public void listEquipments(Integer idCampaign, String idStructure, Integer page,
+    public void listEquipments(Integer idCampaign, String idStructure, Integer page, List<String> filters,
                                Handler<Either<String, JsonArray>> handler) {
-        JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
+        JsonArray values = new JsonArray().add(idCampaign).add(idStructure);
+        String queryFilter = "";
+        if (!filters.isEmpty()) {
+            for (String filter : filters) {
+                queryFilter += "AND lower(e.name) ~ lower(?) ";
+                values.add(filter);
+            }
+        }
         String query = "SELECT e.*, equipment_type.name as nametype, tax.value tax_amount, array_to_json(array_agg(DISTINCT opts)) as options, array_to_json(array_agg(DISTINCT  rel_equipment_tag.id_tag)) tags " +
                 "FROM " + Lystore.lystoreSchema + ".equipment e LEFT JOIN ( " +
                 "SELECT option.*, equipment.name, equipment.price, tax.value tax_amount " +
@@ -149,9 +156,9 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 "AND rel_group_campaign.id_structure_group IN (" +
                 "SELECT structure_group.id FROM " + Lystore.lystoreSchema + ".structure_group " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON rel_group_structure.id_structure_group = structure_group.id " +
-                "WHERE rel_group_structure.id_structure = ?)) and e.catalog_enabled = true " +
+                "WHERE rel_group_structure.id_structure = ?)) and e.catalog_enabled = true " + queryFilter +
                 "GROUP BY (e.id, tax.id , nametype )";
-        values.add(idCampaign).add(idStructure);
+
 
         if (page != null) {
             query += " LIMIT " + Lystore.PAGE_SIZE + " OFFSET ?";
@@ -278,8 +285,19 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     }
 
     @Override
-    public void getNumberPages(Integer idCampaign, String idStructure, Handler<Either<String, JsonObject>> handler) {
-        JsonArray values = new JsonArray();
+    public void getNumberPages(Integer idCampaign, String idStructure, List<String> filters, Handler<Either<String, JsonObject>> handler) {
+        JsonArray values = new JsonArray().add(idCampaign).add(idStructure);
+        String queryFilter = "";
+        if (!filters.isEmpty()) {
+            queryFilter = "WHERE ";
+            for (int i = 0; i < filters.size(); i++) {
+                if (i > 0) {
+                    queryFilter += "AND ";
+                }
+                queryFilter += "lower(equipment.name) ~ lower(?) ";
+                values.add(filters.get(i));
+            }
+        }
         String query = "SELECT count(equipment.id) " +
                 "FROM " + Lystore.lystoreSchema + ".equipment " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (equipment.id = rel_equipment_tag.id_equipment) " +
@@ -290,8 +308,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 "FROM " + Lystore.lystoreSchema + ".structure_group " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON (rel_group_structure.id_structure_group = structure_group.id) " +
                 "WHERE rel_group_structure.id_structure = ? " +
-                ")";
-        values.add(idCampaign).add(idStructure);
+                ")" + queryFilter;
 
         Sql.getInstance().prepared(query, values, new Handler<Message<JsonObject>>() {
             @Override

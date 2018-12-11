@@ -23,9 +23,11 @@ public interface EquipmentService {
      * List equipments of Campaign and a structure  in database
      * @param idCampaign campaign identifier
      * @param idStructure structure identifier
+     * @param page Page number
+     * @param filters Filter list
      * @param handler function handler returning data
      */
-    void listEquipments(Integer idCampaign, String idStructure, Integer page,
+    void listEquipments(Integer idCampaign, String idStructure, Integer page, List<String> filters,
                         Handler<Either<String, JsonArray>> handler);
 
     /**
@@ -112,7 +114,8 @@ public interface EquipmentService {
      *
      * @param idCampaign  Campaign identifier
      * @param idStructure Structure identifier
+     * @param filters     Filter list
      * @param handler     Function handler returning data
      */
-    void getNumberPages(Integer idCampaign, String idStructure, Handler<Either<String, JsonObject>> handler);
+    void getNumberPages(Integer idCampaign, String idStructure, List<String> filters, Handler<Either<String, JsonObject>> handler);
 }

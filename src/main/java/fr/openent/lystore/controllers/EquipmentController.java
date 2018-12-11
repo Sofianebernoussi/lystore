@@ -70,7 +70,7 @@ public class EquipmentController extends ControllerHelper {
             try {
                 Integer idCampaign = Integer.parseInt(params.get("idCampaign"));
                 String idStructure = params.get("idStructure");
-                equipmentService.getNumberPages(idCampaign, idStructure, defaultResponseHandler(request));
+                equipmentService.getNumberPages(idCampaign, idStructure, queries, defaultResponseHandler(request));
             } catch (NumberFormatException e) {
                 badRequest(request);
                 log.error("An error occured while casting campaign identifier", e);
@@ -105,7 +105,8 @@ public class EquipmentController extends ControllerHelper {
             String idStructure = request.params().contains("idStructure")
                     ? request.params().get("idStructure")
                     : null;
-            equipmentService.listEquipments(idCampaign, idStructure, page, arrayResponseHandler(request));
+            List<String> filters = request.params().getAll("q");
+            equipmentService.listEquipments(idCampaign, idStructure, page, filters, arrayResponseHandler(request));
         } catch (ClassCastException e) {
             log.error("An error occurred casting campaign id", e);
         }

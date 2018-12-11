@@ -6,21 +6,18 @@
             <i18n>back.to.catalog</i18n>
         </a>
         <div class="row twelve vertical-spacing" ng-show="!display.equipment">
-            <input  class="row"
-                    type="text"
-                    ng-model="search.filterWrod"
-                    ng-change="filterByTag(search.filterWrod)"
-                    ng-keydown="addFilter(search.filterWrod, $event)"
-                    i18n-placeholder="add.a.filter" />
-            <i class="search flex-row" ng-click="addFilter(search.filterWrod)"></i>
+            <input class="row"
+                   type="text"
+                   ng-keyup="addFilter($event)"
+                   i18n-placeholder="add.a.filter"/></i>
         </div>
     </div>
     <div class="row horizontal-spacing">
         <div class="select-blocks">
-            <div ng-repeat="filterWrod in search.filterWrods"
-                 ng-click="pullFilterWord(filterWrod)"
+            <div ng-repeat="filter in equipments.sort.filters"
+                 ng-click="dropEquipmentFilter(filter)"
                  class="labels-in-ligne">
-                <div > [[ filterWrod ]] </div>
+                <div> [[ filter ]]</div>
             </div>
         </div>
     </div>
@@ -46,7 +43,7 @@
                     disabled: equipment.status!== 'AVAILABLE',
                     'list-item': display.equipment
                  }"
-                 ng-repeat="equipment in equipments.all|catalogSearchFilter:search.filterWrods"
+                 ng-repeat="equipment in equipments.all"
                  ng-click="openEquipment(equipment)">
 
                 <div ng-class="{disabled: equipment.status!== 'AVAILABLE'} "></div>

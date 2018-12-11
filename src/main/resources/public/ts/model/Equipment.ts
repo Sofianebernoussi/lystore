@@ -171,17 +171,13 @@ export class Equipments extends Selection<Equipment> {
         this.page_count = data.count;
     }
 
-    async sync(idCampaign?: number, idStructure?: string, page: number = this.page, filter = {
-        type: 'name',
-        reverse: false,
-        filters: []
-    }) {
+    async sync(idCampaign?: number, idStructure?: string, page: number = this.page, filter = this.sort) {
         this.loading = true;
         try {
             await this.getPageCount(idCampaign, idStructure);
             const queriesFilter = Utils.formatGetParameters({q: filter.filters});
             const uri: string = idCampaign
-                ? `/lystore/equipments/campaign/${idCampaign}?idStructure=${idStructure}&page=${page}&order=${filter.type}&reverse=${filter.reverse}`
+                ? `/lystore/equipments/campaign/${idCampaign}?idStructure=${idStructure}&page=${page}&order=${filter.type}&reverse=${filter.reverse}&${queriesFilter}`
                 : `/lystore/equipments?page=${page}&order=${filter.type}&reverse=${filter.reverse}&${queriesFilter}`;
             let {data} = await http.get(uri);
             this.all = Mix.castArrayAs(Equipment, data);

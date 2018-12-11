@@ -4,28 +4,19 @@
 /**
  * Created by rahnir on 18/01/2018.
  */
-import { ng, template, _} from 'entcore';
-import {
-    Equipment,
-    Basket,
-    Utils
-} from '../../model';
-
+import {_, ng} from 'entcore';
+import {Basket, Equipment, Utils} from '../../model';
 
 
 export const catalogController = ng.controller('catalogController',
     ['$scope', '$routeParams', ($scope, $routeParams) => {
-        $scope.search = {
-            filterWrod: '',
-            filterWrods: []
-        };
         $scope.alloptionsSelected = false;
         $scope.equipment = new Equipment();
-        $scope.addFilter = (filterWrod: string, event?) => {
+        $scope.addFilter = (event) => {
             if (event && (event.which === 13 || event.keyCode === 13 )) {
-                $scope.addfilterWords(filterWrod);
-            } else if (!event) {
-                $scope.addfilterWords(filterWrod);
+                $scope.equipments.sort.filters.push(event.target.value);
+                $scope.equipments.sync($routeParams.idCampaign, $scope.current.structure.id);
+                event.target.value = '';
             }
         };
         $scope.addfilterWords = (filterWrod) => {
@@ -35,9 +26,12 @@ export const catalogController = ng.controller('catalogController',
                 Utils.safeApply($scope);
             }
         };
-        $scope.pullFilterWord = (filterWord) => {
-            $scope.search.filterWrods = _.without( $scope.search.filterWrods , filterWord);
+
+        $scope.dropEquipmentFilter = (filter: string) => {
+            $scope.equipments.sort.filters = _.without($scope.equipments.sort.filters, filter);
+            $scope.equipments.sync($routeParams.idCampaign, $scope.current.structure.id);
         };
+
         $scope.openEquipment = (equipment: Equipment) => {
             if (equipment.status === 'AVAILABLE') {
                 $scope.redirectTo(`/campaign/${$routeParams.idCampaign}/catalog/equipment/${equipment.id}`);

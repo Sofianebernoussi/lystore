@@ -82,7 +82,11 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
 
             statements.add(getInsertBasketEquipmentOrderStatement(order));
             if (order.containsKey("options")) {
-                statements.add(getInsertBasketOptionOrderStatement(order));
+                try {
+                    statements.add(getInsertBasketOptionOrderStatement(order));
+                } catch (NullPointerException e) {
+
+                }
             }
         }
         statements.add(deleteProject(id));
@@ -179,12 +183,6 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                     "WHERE id = ? ;";
         }
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
-    }
-
-    private String NullToStr(String stringMaybeNull) {
-        if (stringMaybeNull == null)
-            return null;
-        return stringMaybeNull;
     }
 
     @Override

@@ -43,9 +43,17 @@ public interface OrderService {
      * @param idOrder id order
      * @param handler function handler returning idCampaign, price of Equipment
      */
-    void orderForDelete(Integer idOrder, Handler<Either<String,JsonObject>> handler);
+    void orderForDelete(Integer idOrder, Handler<Either<String, JsonObject>> handler);
 
-    /**
+ /**
+  * Check if the order can be delete
+  *
+  * @param idOrder
+  * @param handler
+  */
+ void deletableOrder(Integer idOrder, Handler<Either<String, JsonObject>> handler);
+
+ /**
      * delete an order
      * @param idOrder id of the order item
      * @param order order to delete

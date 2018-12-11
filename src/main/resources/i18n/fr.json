@@ -162,6 +162,8 @@
   "lystore.orderEquipment.manage.empty.order": "Vous n'avez aucune commande en cours",
   "lystore.orderEquipment.delete.title": "Suppression d'une commande",
   "lystore.orderEquipment.delete.message": "Cette commande sera supprimée",
+  "lystore.ordersEquipment.delete.message": "Ces commandes seront supprimées",
+
   "lystore.orderEquipment.delete.confirm": "Votre commande a été supprimée",
   "lystore.info.empty.basket": "Le panier est vide",
   "lystore.order.valided.generateBC": "Valider BC",

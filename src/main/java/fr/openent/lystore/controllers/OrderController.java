@@ -205,16 +205,26 @@ public class OrderController extends ControllerHelper {
         try {
             final Integer idOrder = Integer.parseInt(request.params().get("idOrder"));
             final String idStructure = request.params().get("idStructure");
-            orderService.orderForDelete(idOrder, new Handler<Either<String, JsonObject>>() {
+            orderService.deletableOrder(idOrder, new Handler<Either<String, JsonObject>>() {
                 @Override
-                public void handle(Either<String, JsonObject> order) {
-                    if(order.isRight()){
-                        orderService.deleteOrder(idOrder,order.right().getValue(),idStructure,
-                                Logging.defaultResponseHandler(eb,request, Contexts.ORDER.toString(),
-                                        Actions.DELETE.toString(),"idOrder",order.right().getValue()));
+                public void handle(Either<String, JsonObject> deletableEvent) {
+                    if (deletableEvent.isRight() && deletableEvent.right().getValue().getInteger("count") == 0) {
+                        orderService.orderForDelete(idOrder, new Handler<Either<String, JsonObject>>() {
+                            @Override
+                            public void handle(Either<String, JsonObject> order) {
+                                if (order.isRight()) {
+                                    orderService.deleteOrder(idOrder, order.right().getValue(), idStructure,
+                                            Logging.defaultResponseHandler(eb, request, Contexts.ORDER.toString(),
+                                                    Actions.DELETE.toString(), "idOrder", order.right().getValue()));
+                                }
+                            }
+                        });
+                    } else {
+                        badRequest(request);
                     }
                 }
             });
+
 
         } catch (ClassCastException e){
             log.error("An error occurred when casting order id", e);

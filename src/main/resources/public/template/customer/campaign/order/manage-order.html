@@ -9,7 +9,7 @@
                  ng-repeat="project in ordersClient.projects.all track by $index">
             <div>
                 <label class="checkbox">
-                    <input type="checkbox" ng-model="project.selected"
+                    <input ng-disabled="ordersClient.selected.length !== 0" type="checkbox" ng-model="project.selected"
                            ng-checked="project.selected">
 
                     <span></span>
@@ -23,7 +23,8 @@
                          ng-if="project.id == orderClient.project.id">
                     <div class="cell width-40">
                         <label ng-show="orderClient.status === 'WAITING'" class="checkbox">
-                            <input type="checkbox" ng-model="orderClient.selected"
+                            <input ng-disabled="ordersClient.projects.selected.length !== 0" type="checkbox"
+                                   ng-model="orderClient.selected"
                                    ng-checked="orderClient.selected">
                             <span></span>
                         </label>
@@ -167,6 +168,19 @@
                 </button>
                 <button ng-if="alltheProjectsDeletable(ordersClient.projects.selected)"
                         ng-click="openProjectsDeletion(ordersClient.projects.selected)">
+                    <i18n>delete</i18n>
+                </button>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="toggle-buttons" ng-class="{ hide: ordersClient.selected.length === 0 }">
+        <div class="toggle">
+            <div class="row">
+
+                <button ng-if="(ordersClient.selected)"
+                        ng-click="displayLightboxDelete(ordersClient.selected)">
                     <i18n>delete</i18n>
                 </button>
             </div>

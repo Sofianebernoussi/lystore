@@ -1,5 +1,5 @@
 import {moment, ng, template} from 'entcore';
-import {Notification, OrderClient, Project, Projects, Utils} from '../../model';
+import {Notification, OrderClient, OrdersClient, Project, Projects, Utils} from '../../model';
 
 declare let window: any;
 
@@ -51,9 +51,11 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
         $scope.priceProposal = (orderClient: OrderClient) => {
 
         }
-        $scope.displayLightboxDelete = (orderEquipment: OrderClient) => {
+
+
+        $scope.displayLightboxDelete = (orderEquipments: OrdersClient) => {
             template.open('orderClient.delete', 'customer/campaign/order/delete-confirmation');
-            $scope.orderEquipmentToDelete = orderEquipment;
+            $scope.ordersEquipmentToDelete = orderEquipments;
             $scope.display.lightbox.deleteOrder = true;
             Utils.safeApply($scope);
         };
@@ -65,6 +67,12 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             Utils.safeApply($scope);
         };
 
+
+        $scope.deleteOrdersEquipment = (ordersEquipment: OrdersClient) => {
+            for (let i = 0; i < ordersEquipment.length; i++) {
+                $scope.deleteOrderEquipment(ordersEquipment[i]);
+            }
+        }
         $scope.deleteOrderEquipment = async (orderEquipmentToDelete: OrderClient) => {
             let { status, data } = await orderEquipmentToDelete.delete();
             if (status === 200) {

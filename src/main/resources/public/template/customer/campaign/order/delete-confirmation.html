@@ -2,24 +2,29 @@
     <h2>
         <i18n>lystore.orderEquipment.delete.title</i18n>
     </h2>
-    <p>
+    <p ng-if="ordersEquipmentToDelete.all.length === 1 ">
         <i18n>lystore.orderEquipment.delete.message</i18n>
     </p>
-
-    <div class="cell twelve">
+    <p ng-if="ordersEquipmentToDelete.all.length !== 1">
+        <i18n>lystore.ordersEquipment.delete.message</i18n>
+    </p>
+    <div ng-repeat="orderClient in ordersEquipmentToDelete track by $index">
+        <div class="cell twelve">
         <div class="row article-equipment">
             <h4 class="highlighted"><i18n>description</i18n></h4>
             <div class="two cell basket-image">
-                <img ng-src="[[orderEquipmentToDelete.image]]" ng-show="orderEquipmentToDelete.image!==null && orderEquipmentToDelete.image!==undefined " />
-                <img skin-src="/img/illustrations/pages-default.png" ng-show="orderEquipmentToDelete.image===null || orderEquipmentToDelete.image===undefined "/>
+                <img ng-src="[[orderClient.image]]"
+                     ng-show="orderClient.image!==null && orderClient.image!==undefined "/>
+                <img skin-src="/img/illustrations/pages-default.png"
+                     ng-show="orderClient.image===null || orderClient.image===undefined "/>
             </div>
             <div class="nine cell basket-equipment">
-                <h3>[[orderEquipmentToDelete.name]]</h3>
-                <p ng-bind-html="orderEquipmentToDelete.summary" ></p>
+                <h3>[[orderClient.name]]</h3>
+                <p ng-bind-html="orderClient.summary"></p>
                 <p>
             </div>
         </div>
-        <div class="row options-head" ng-show="orderEquipmentToDelete.options.length > 0">
+            <div class="row options-head" ng-show="orderClient.options.length > 0">
             <h4 class="highlighted"><i18n>multi-combo.options</i18n></h4>
             <table class="twelve option-table">
                 <thead>
@@ -30,7 +35,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="option in orderEquipmentToDelete.options">
+                <tr ng-repeat="option in orderClient.options">
                     <td>[[option.name]]</td>
                     <td><span ng-bind="calculatePriceTTC(option.price, option.tax_amount, 2) | currency"></span></td>
                     <td>[[option.amount]]</td>
@@ -49,21 +54,25 @@
                 <i18n>
                     lystore.expected.delivery
                 </i18n>
-                <strong>[[calculateDelivreryDate(orderEquipmentToDelete.creation_date)]]</strong>
+                <strong>[[calculateDelivreryDate(orderClient.creation_date)]]</strong>
             </p>
             <p>
-                <span> <i18n>lystore.quantity</i18n> : </span><strong>[[orderEquipmentToDelete.amount]]</strong>
+                <span> <i18n>lystore.quantity</i18n> : </span><strong>[[orderClient.amount]]</strong>
             </p>
             <p>
                 <span><i18n>price</i18n> : </span>
-                <strong ng-bind="calculateTotal(orderEquipmentToDelete,2) | currency"></strong>
+                <strong ng-bind="calculateTotal(orderClient,2) | currency"></strong>
             </p>
-            <p ng-if="hasAProposalPrice(orderEquipmentToDelete)">
+            <p ng-if="hasAProposalPrice(orderClient)">
                 <span><i18n>lystore.priceProposal</i18n></span>
-                <strong ng-bind="orderEquipmentToDelete.price_proposal | currency"></strong>
+                <strong ng-bind="orderClient.price_proposal | currency"></strong>
             </p>
         </div>
+        </div>
+    </div>
 
+    <div>
+        <input type="button" i18n-value="delete" ng-click="deleteOrdersEquipment(ordersEquipmentToDelete)">
     </div>
 
 

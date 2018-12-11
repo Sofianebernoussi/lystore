@@ -309,11 +309,11 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
 
         String price_proposal= "CASE WHEN oe.price_proposal IS NOT NULL THEN " +
-                    "ROUND (oe.price_proposal*oe.amount,2) " +
-                    "ELSE ";
+                "ROUND (oe.price_proposal*oe.amount,2) " +
+                "ELSE ";
 
         String closeCaseForPriceProposal="END ";
-        
+
         String query = "SELECT oe.name as equipment_name, oe.amount as equipment_quantity, " +
                 "oe.creation_date as equipment_creation_date, oe.summary as equipment_summary, " +
                 "oe.status as equipment_status,cause_status, price_all_options, " +
@@ -350,6 +350,20 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
         sql.prepared(query,new fr.wseduc.webutils.collections.JsonArray().add(idOrder),SqlResult.validUniqueResultHandler(handler));
     }
+
+    @Override
+    public void deletableOrder(Integer idOrder, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT count(oce.id) as count" +
+                " FROM " + Lystore.lystoreSchema + ".order_client_equipment oce " +
+                "WHERE oce.status != 'WAITING' AND oce.id = ? ;";
+
+        JsonArray params = new JsonArray().add(idOrder);
+
+        sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+
+
 
 
     @Override
@@ -403,6 +417,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
             }
         }));
     }
+
     @Override
     public  void windUpOrders(List<Integer> ids, Handler<Either<String, JsonObject>> handler){
         JsonObject statement = getUpdateStatusStatement(ids, "DONE");
@@ -421,6 +436,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 .put("values", params)
                 .put("action", "prepared");
     }
+
     @Override
     public void sendOrders(List<Integer> ids,final Handler<Either<String, JsonObject>> handler){
 
@@ -444,8 +460,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                                                         getOrdersFormatedBC(ordersObject.getJsonArray("order"),
                                                                 (JsonArray) structureArray.right().getValue()))
                                                 .put("total",
-                                                        getTotalsOrdersPrices(ordersObject.getJsonArray("order")))
-                                                ;
+                                                        getTotalsOrdersPrices(ordersObject.getJsonArray("order")));
                                         either = new Either.Right<>(returns);
                                         handler.handle(either);
                                     }
@@ -655,6 +670,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         }
         return orders;
     }
+
     private JsonObject getStructureObject(JsonArray structures, String structureId ){
         JsonObject structure = new JsonObject();
         for (int i = 0; i < structures.size() ; i++) {
@@ -664,6 +680,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         }
         return structure;
     }
+
     private JsonObject getStructureObject(JsonArray structures, String structureId,
                                           String amount, String numberValidation ){
         JsonObject structure = new JsonObject();
@@ -676,6 +693,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         }
         return structure;
     }
+
     private JsonObject getTotalsOrdersPrices(JsonArray orders){
 
         Float tva = new Float(0);
@@ -687,7 +705,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         }catch (ClassCastException e) {
             LOGGER.error("An error occurred when casting tax amount", e);
         }
-        for(int i = 0 ; i < orders.size(); i++) {
+        for (int i = 0; i < orders.size(); i++) {
             try {
                 total += Float.parseFloat((orders.getJsonObject(0)).getString("price")) *
                         Float.parseFloat((orders.getJsonObject(0)).getInstant("amount").toString());
@@ -721,6 +739,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 .put ("id_structures", structures);
         return orderObject;
     }
+
     private JsonObject getEquipmentOrderDeletion (Integer idOrder){
         String queryDeleteEquipmentOrder = "DELETE FROM " + Lystore.lystoreSchema + ".order_client_equipment"
                 + " WHERE id = ? ";
@@ -733,6 +752,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 .put("values", params)
                 .put("action", "prepared");
     }
+
     private  JsonObject getNewPurse(Integer idCampaign, String idStructure){
         String query = "SELECT amount FROM " + Lystore.lystoreSchema + ".purse " +
                 "WHERE id_campaign = ? " +
@@ -762,7 +782,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     }
 
     @Override
-    public void validateOrders(final HttpServerRequest request,final UserInfos user, final List<Integer> ids,
+    public void validateOrders(final HttpServerRequest request, final UserInfos user, final List<Integer> ids,
                                final String url, final Handler<Either<String, JsonObject>> handler){
         String getIdQuery = "Select "+ Lystore.lystoreSchema + ".get_validation_number() as numberOrder ";
         sql.raw(getIdQuery, SqlResult.validUniqueResultHandler(new Handler<Either<String, JsonObject>>() {
@@ -836,6 +856,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 .put("values", params)
                 .put("action", "prepared");
     }
+
     private static JsonObject getValidateStatusStatement(List<Integer>  ids, String numberOrder, String status){
 
         String query = "UPDATE lystore.order_client_equipment " +
@@ -870,8 +891,8 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     }
 
 
-    private static void getTransactionHandler( Message<JsonObject> event, JsonObject amountPurseNbOrder,
-                                               Handler<Either<String, JsonObject>> handler){
+    private static void getTransactionHandler(Message<JsonObject> event, JsonObject amountPurseNbOrder,
+                                              Handler<Either<String, JsonObject>> handler) {
         JsonObject result = event.body();
         if (result.containsKey("status")&& "ok".equals(result.getString("status"))){
             JsonObject returns = new JsonObject();
@@ -884,6 +905,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         }
 
     }
+
     @Override
     public void getExportCsvOrdersAdmin(List<Integer> idsOrders, Handler<Either<String, JsonArray>> handler) {
 

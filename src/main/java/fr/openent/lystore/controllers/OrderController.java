@@ -271,7 +271,8 @@ public class OrderController extends ControllerHelper {
                     I18n.getInstance().translate("name.equipment", getHost(request), I18n.acceptLanguage(request)) + ";" +
                     I18n.getInstance().translate("quantity", getHost(request), I18n.acceptLanguage(request)) + ";" +
                     I18n.getInstance().translate("price.equipment", getHost(request), I18n.acceptLanguage(request)) + ";" +
-                    I18n.getInstance().translate("status", getHost(request), I18n.acceptLanguage(request))
+                    I18n.getInstance().translate("status", getHost(request), I18n.acceptLanguage(request)) + ";" +
+                    I18n.getInstance().translate("name.project", getHost(request), I18n.acceptLanguage(request))
                     + "\n";
         }else if (request.params().contains("id")) {
             return I18n.getInstance().translate("Structure", getHost(request), I18n.acceptLanguage(request)) + ";" +
@@ -306,6 +307,8 @@ public class OrderController extends ControllerHelper {
                     translate("money.symbol", getHost(request), I18n.acceptLanguage(request)) + ";" +
                     I18n.getInstance().translate(order.getString("equipment_status"), getHost(request),
                             I18n.acceptLanguage(request)) + ";" +
+                    order.getString("project_name") + ";" +
+
                     "\n";
         }else if (request.params().contains("id")){
             try {

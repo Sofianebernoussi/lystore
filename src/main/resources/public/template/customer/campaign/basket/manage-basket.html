@@ -5,7 +5,12 @@
                 <span class="color-orange" ng-bind="calculatePriceOfEquipmentsProposal(baskets, 2)| currency"></span>
             </h3>
             <input type="button" ng-click="takeClientProject(baskets)" i18n-value="lystore.take.order"
-                   ng-disabled="campaign.purse_enabled && !validOrder(baskets)"/>
+                   ng-disabled="campaign.purse_enabled && !validOrder(baskets)"
+                   ng-if="campaign.purse_enabled"/>
+
+            <input type="button" ng-click="takeClientProject(baskets)" i18n-value="lystore.take.request"
+                   ng-disabled="campaign.purse_enabled && !validOrder(baskets)"
+                   ng-if="!campaign.purse_enabled"/>
         </div>
         <div class="basket-list">
             <div ng-repeat="basket in baskets.all track by $index" class="row">

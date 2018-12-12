@@ -46,7 +46,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
 
     public void listBasket(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler){
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
-        String query = "SELECT basket.id, basket.amount, basket.comment, basket.price_proposal::float, contract.price_editable , basket.processing_date, basket.id_campaign, basket.id_structure, " +
+        String query = "SELECT basket.id, basket.amount, basket.comment, basket.price_proposal::float , basket.processing_date, basket.id_campaign, basket.id_structure, " +
                 "array_to_json(array_agg( e.* )) as equipment," +
                 "array_to_json(array_agg(DISTINCT ep.*)) as options, array_to_json(array_agg(DISTINCT basket_file.*)) as files " +
                 "FROM " + Lystore.lystoreSchema + ".basket_equipment basket " +
@@ -67,7 +67,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract ON contract.id = e.id_contract " +
                 "WHERE basket.id_campaign = ? " +
                 "AND basket.id_structure = ? " +
-                "GROUP BY (basket.id, basket.amount, basket.processing_date, basket.id_campaign, basket.id_structure, contract.price_editable);";
+                "GROUP BY (basket.id, basket.amount, basket.processing_date, basket.id_campaign, basket.id_structure);";
         values.add(idCampaign).add(idStructure);
 
         sql.prepared(query, values, SqlResult.validResultHandler(handler));

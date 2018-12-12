@@ -558,8 +558,8 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     private JsonObject getEquipmentCreationStatement(Number id, JsonObject equipment) {
         String insertEquipmentQuery =
                 "INSERT INTO " + Lystore.lystoreSchema + ".equipment(id, name, summary, description, price, id_tax," +
-                        " image, id_contract, status, technical_specs, warranty, reference, id_type, option_enabled) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?, ?) RETURNING id;";
+                        " image, id_contract, status, technical_specs, warranty, reference, id_type, option_enabled, price_editable) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?, ?, ?) RETURNING id;";
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(id)
                 .add(equipment.getString("name"))
@@ -574,7 +574,8 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 .add(equipment.getInteger("warranty"))
                 .add(equipment.getString("reference"))
                 .add(equipment.getInteger("id_type"))
-                .add(equipment.getBoolean("option_enabled"));
+                .add(equipment.getBoolean("option_enabled"))
+                .add(equipment.getBoolean("price_editable"));
 
         return new JsonObject()
                 .put(STATEMENT, insertEquipmentQuery)
@@ -715,7 +716,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         String query = "UPDATE " + Lystore.lystoreSchema + ".equipment SET " +
                 "name = ?, summary = ?, description = ?, price = ?, id_tax = ?, image = ?, " +
                 "id_contract = ?, status = ?, technical_specs = to_json(?::text), " +
-                "id_type = ?, catalog_enabled = ?, option_enabled = ?, reference = ? "+
+                "id_type = ?, catalog_enabled = ?, option_enabled = ?, reference = ?, price_editable = ? " +
                 "WHERE id = ?";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
@@ -732,6 +733,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 .add(equipment.getBoolean("catalog_enabled"))
                 .add(equipment.getBoolean("option_enabled"))
                 .add(equipment.getString("reference"))
+                .add(equipment.getBoolean("price_editable"))
                 .add(id);
 
         return new JsonObject()

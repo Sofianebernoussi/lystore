@@ -19,7 +19,7 @@ public class AccessPriceProposalRight implements ResourcesProvider {
         query = "SELECT count(basket_equipment.id) FROM "+ Lystore.lystoreSchema + ".basket_equipment "
                 + " INNER JOIN " + Lystore.lystoreSchema + ".equipment ON equipment.id = basket_equipment.id_equipment "
                 + " INNER JOIN " + Lystore.lystoreSchema + ".contract ON contract.id = equipment.id_contract "
-                + " WHERE contract.price_editable IS TRUE AND basket_equipment.id = ? ";
+                + " WHERE equipment.price_editable IS TRUE AND basket_equipment.id = ? ";
         id = request.getParam("idBasket");
 
 

@@ -52,14 +52,6 @@
                         <i class="up-open" ng-show="sort.contract.type === 'file' && !sort.contract.reverse"></i>
                         <i class="down-open" ng-show="sort.contract.type === 'file' && sort.contract.reverse"></i>
                     </td>
-                    <td ng-click="sort.contract.type = 'price_editable';
-                    sort.contract.reverse = !sort.contract.reverse">
-                        <i18n>lystore.contract.price_editable.label</i18n>
-                        <i class="up-open"
-                           ng-show="sort.contract.type === 'price_editable' && !sort.contract.reverse"></i>
-                        <i class="down-open"
-                           ng-show="sort.contract.type === 'price_editable' && sort.contract.reverse"></i>
-                    </td>
                 </tr>
                 </thead>
                 <tbody>
@@ -87,9 +79,6 @@
                     </td>
                     <td>
                         <i ng-if="contract.file" class="checked-value">&nbsp;</i>
-                    </td>
-                    <td>
-                        <i ng-if="contract.price_editable" class="checked-value">&nbsp;</i>
                     </td>
                 </tr>
                 </tbody>

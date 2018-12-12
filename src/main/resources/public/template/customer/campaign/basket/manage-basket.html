@@ -65,7 +65,7 @@
                                     <span ng-bind="priceDisplay(basket) | currency" class="price-label"
                                           ng-if="!basket.display_price_editable"></span>
                                     <i class="notes-icon" tooltip="lystore.price.edit"
-                                       ng-show="basket.price_editable && !basket.display_price_editable"
+                                       ng-show="basket.equipment.price_editable && !basket.display_price_editable"
                                        ng-click="displayPriceEdition(basket)"></i>
                                     <i class="refused-status" tooltip="lystore.price.reset"
                                        ng-show="basket.display_price_editable"

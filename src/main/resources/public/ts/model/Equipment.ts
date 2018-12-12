@@ -24,6 +24,7 @@ export class Equipment implements Selectable {
     warranty: number;
     catalog_enabled: boolean;
     option_enabled: boolean;
+    price_editable: boolean;
     id_type: number;
     constructor (name?: string, price?: number) {
         if (name) this.name = name;
@@ -31,6 +32,9 @@ export class Equipment implements Selectable {
         this.technical_specs = [];
         this.tags = [];
         this.options = [];
+        this.price_editable = false;
+        this.option_enabled = false;
+        this.catalog_enabled = true;
     }
 
     toString(): string {
@@ -51,6 +55,7 @@ export class Equipment implements Selectable {
             option_enabled: this.option_enabled,
             id_type: this.id_type,
             reference : this.reference,
+            price_editable: this.price_editable,
             image: this.image || null,
             id_contract: this.id_contract,
             technical_specs:  (this.technical_specs!=null) ? this.technical_specs.map((spec: TechnicalSpec) => spec.toJson()) : [],

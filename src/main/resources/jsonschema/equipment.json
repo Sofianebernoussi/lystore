@@ -59,6 +59,9 @@
     },
     "warranty": {
       "type": "integer"
+    },
+    "price_editable": {
+      "type": "boolean"
     }
   },
   "required": [

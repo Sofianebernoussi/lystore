@@ -41,9 +41,6 @@
     },
     "file": {
       "type": "boolean"
-    },
-    "price_editable": {
-      "type": "boolean"
     }
   },
   "required": [
@@ -56,7 +53,6 @@
     "id_agent",
     "end_date",
     "renewal_end",
-    "file",
-    "price_editable"
+    "file"
   ]
 }

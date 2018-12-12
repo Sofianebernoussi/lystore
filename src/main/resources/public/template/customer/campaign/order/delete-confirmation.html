@@ -1,14 +1,19 @@
 <div class="delete-confirmation">
     <h2>
-        <i18n>lystore.orderEquipment.delete.title</i18n>
+        <span ng-if="campaign.purse_enabled"> <i18n>lystore.orderEquipment.delete.title</i18n></span>
+        <span ng-if="!campaign.purse_enabled"><i18n>lystore.requestEquipment.delete.title</i18n></span>
+
     </h2>
     <p ng-if="ordersEquipmentToDelete.all.length === 1 ">
         <i18n>lystore.orderEquipment.delete.message</i18n>
+        <span ng-if="campaign.purse_enabled"> <i18n>lystore.orderEquipment.delete.message</i18n></span>
+        <span ng-if="!campaign.purse_enabled"><i18n>lystore.requestEquipment.delete.message</i18n></span>
         :
-
     </p>
     <p ng-if="ordersEquipmentToDelete.all.length !== 1">
-        <i18n>lystore.ordersEquipment.delete.message</i18n>
+        <span ng-if="campaign.purse_enabled"> <i18n>lystore.orderEquipment.delete.message</i18n></span>
+        <span ng-if="!campaign.purse_enabled"><i18n>lystore.requestsEquipment.delete.message</i18n></span>
+
         :
 
     </p>

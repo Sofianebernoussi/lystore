@@ -163,7 +163,10 @@
   "lystore.orderEquipment.delete.title": "Suppression d'une commande",
   "lystore.orderEquipment.delete.message": "Cette commande sera supprimée",
   "lystore.ordersEquipment.delete.message": "Ces commandes seront supprimées",
-
+  "lystore.requestEquipment.delete.title": "Suppression d'une demande",
+  "lystore.requestEquipment.delete.message": "Cette demande sera supprimée",
+  "lystore.requestsEquipment.delete.message": "Ces demandes seront supprimées",
+  "lystore.requestEquipment.delete.confirm": "Votre demande a été suprrimée",
   "lystore.orderEquipment.delete.confirm": "Votre commande a été supprimée",
   "lystore.info.empty.basket": "Le panier est vide",
   "lystore.order.valided.generateBC": "Valider BC",

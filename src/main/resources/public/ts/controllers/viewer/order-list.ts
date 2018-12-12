@@ -78,7 +78,11 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             if (status === 200) {
                 $scope.campaign.nb_order = data.nb_order;
                 $scope.campaign.purse_amount = data.amount;
-                $scope.notifications.push(new Notification('lystore.orderEquipment.delete.confirm', 'confirm'));
+                ($scope.campaign.purse_enabled) ? $scope.notifications.push(new Notification('lystore.orderEquipment.delete.confirm', 'confirm'))
+                    : $scope.notifications.push(new Notification('lystore.requestEquipment.delete.confirm', 'confirm'));
+
+
+
             }
             $scope.cancelOrderEquipmentDelete();
             await $scope.ordersClient.sync(null, [], $routeParams.idCampaign, $scope.current.structure.id );

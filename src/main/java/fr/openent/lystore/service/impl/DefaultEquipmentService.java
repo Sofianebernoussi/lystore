@@ -255,8 +255,9 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
             Boolean referenceValue = !"".equals(equipment.getString("reference").trim());
             String insertImportEquipmentQuery =
                     "WITH equipmentId_rows AS (" +
-                            "INSERT INTO " + Lystore.lystoreSchema + ".equipment(" + (referenceValue ? " reference, " : "") + "name, price, id_tax, warranty, catalog_enabled, id_contract, status) " +
-                            "VALUES (" + (referenceValue ? "?," : "") + "?, ?, (SELECT id FROM " + Lystore.lystoreSchema + ".tax WHERE value = ? LIMIT 1), ?, ?, ?, ?) RETURNING id)" +
+                            "INSERT INTO " + Lystore.lystoreSchema + ".equipment(" + (referenceValue ? " reference, " : "") + "name, price, id_tax, warranty, catalog_enabled, id_contract, status, id_type, price_editable) " +
+                            "VALUES (" + (referenceValue ? "?," : "") + "?, ?, (SELECT id FROM " + Lystore.lystoreSchema + ".tax WHERE value = ? LIMIT 1), ?, ?, ?, ?, " +
+                            "(SELECT id FROM " + Lystore.lystoreSchema + ".equipment_type WHERE name = ?), ?) RETURNING id)" +
                             "INSERT INTO " + Lystore.lystoreSchema + ".rel_equipment_tag (id_equipment, id_tag) " +
                             "SELECT equipmentId_rows.id, tag.id FROM " + Lystore.lystoreSchema + ".tag, equipmentId_rows WHERE lower(name) IN " + tagFilter;
 
@@ -270,6 +271,8 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
             params.add(equipment.getBoolean("catalog_enabled"));
             params.add(equipment.getInteger("id_contract"));
             params.add(equipment.getString("status"));
+            params.add(equipment.getString("type"));
+            params.add(equipment.getBoolean("price_editable"));
             for (String tag : tags) {
                 params.add(tag.trim());
             }

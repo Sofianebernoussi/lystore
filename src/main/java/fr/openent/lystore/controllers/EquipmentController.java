@@ -219,6 +219,10 @@ public class EquipmentController extends ControllerHelper {
         });
     }
 
+    private Boolean isATrueValue(String value) {
+        return "oui".equals(value.trim()) || "o".equals(value.trim()) || "yes".equals(value.trim()) || "y".equals(value.trim());
+    }
+
     /**
      * Parse CSV file
      *
@@ -241,8 +245,10 @@ public class EquipmentController extends ControllerHelper {
                 object.put("warranty", 1);
                 object.put("catalog_enabled", true);
                 object.put("id_contract", Integer.parseInt(request.getParam("id")));
-                object.put("status", "AVAILABLE");
-                object.put("name_tag", values[5]);
+                object.put("type", values[5].trim());
+                object.put("status", isATrueValue(values[6]) ? "AVAILABLE" : "UNAVAILABLE");
+                object.put("price_editable", isATrueValue(values[7]));
+                object.put("name_tag", values[8]);
 
                 equipments.add(object);
             }

@@ -236,12 +236,13 @@ public class EquipmentController extends ControllerHelper {
                 JsonObject object = new JsonObject();
                 object.put("reference", values[0]);
                 object.put("name", values[1]);
-                object.put("price", Float.parseFloat(values[2]));
-                object.put("id_tax", 1);
+                object.put("price", values[2]);
+                object.put("id_tax", values[3]);
                 object.put("warranty", 1);
                 object.put("catalog_enabled", true);
                 object.put("id_contract", Integer.parseInt(request.getParam("id")));
                 object.put("status", "AVAILABLE");
+                object.put("name_tag", values[5]);
 
                 equipments.add(object);
             }

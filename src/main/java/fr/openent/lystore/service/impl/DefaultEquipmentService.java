@@ -209,29 +209,70 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         JsonArray statements = new JsonArray();
         JsonArray params;
         JsonObject statement;
+        JsonObject statementTag;
+        JsonObject statementTax;
 
         for (int i = 0; i < equipments.size(); i++) {
+            JsonObject equipment = equipments.getJsonObject(i);
             statement = new JsonObject();
             params = new JsonArray();
 
-            JsonObject equipment = equipments.getJsonObject(i);
+            String[] tags = equipment.getString("name_tag").split(",");
+
+            for (String tag : tags) {
+                statementTag = new JsonObject();
+                String insertNotExistentTagQuery = "INSERT INTO " + Lystore.lystoreSchema + ".tag (name, color) SELECT ?, '#0033cc' WHERE NOT EXISTS (SELECT 1 FROM " + Lystore.lystoreSchema + ".tag WHERE lower(name) = lower(?))";
+                JsonArray tagValues = new JsonArray();
+                tagValues.add(tag.trim()).add(tag.trim());
+
+                statementTag.put(STATEMENT, insertNotExistentTagQuery);
+                statementTag.put(VALUES, tagValues);
+                statementTag.put(ACTION, PREPARED);
+
+                statements.add(statementTag);
+            }
+
+            Double tax = Double.parseDouble(equipment.getValue("id_tax").toString().trim().replace(",", "."));
+            Double price = Double.parseDouble(equipment.getValue("price").toString().trim().replace(",", "."));
+
+            statementTax = new JsonObject();
+            String insertNotExistentTaxQuery = "INSERT INTO " + Lystore.lystoreSchema + ".tax (value, name) SELECT ?, ? WHERE NOT EXISTS (SELECT 1 FROM " + Lystore.lystoreSchema + ".tax WHERE value = ?)";
+            JsonArray taxValues = new JsonArray();
+            taxValues.add(tax).add("Taxe " + tax + "%").add(tax);
+
+            statementTax.put(STATEMENT, insertNotExistentTaxQuery);
+            statementTax.put(VALUES, taxValues);
+            statementTax.put(ACTION, PREPARED);
+
+            statements.add(statementTax);
+
+            String tagFilter = "(";
+            for (int j = 0; j < tags.length; j++) {
+                tagFilter += j == tags.length - 1 ? "lower(?)" : "lower(?),";
+            }
+            tagFilter += ")";
 
             Boolean referenceValue = !"".equals(equipment.getString("reference").trim());
-            String insertImportEquipmentQuery = "INSERT INTO " + Lystore.lystoreSchema + ".equipment(" + (referenceValue ? " reference, " : "") + "name, " +
-                    "price, id_tax, warranty, catalog_enabled, id_contract, status, id_type, option_enabled) VALUES (" + (referenceValue ? "?," : "") + "?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String insertImportEquipmentQuery =
+                    "WITH equipmentId_rows AS (" +
+                            "INSERT INTO " + Lystore.lystoreSchema + ".equipment(" + (referenceValue ? " reference, " : "") + "name, price, id_tax, warranty, catalog_enabled, id_contract, status) " +
+                            "VALUES (" + (referenceValue ? "?," : "") + "?, ?, (SELECT id FROM " + Lystore.lystoreSchema + ".tax WHERE value = ? LIMIT 1), ?, ?, ?, ?) RETURNING id)" +
+                            "INSERT INTO " + Lystore.lystoreSchema + ".rel_equipment_tag (id_equipment, id_tag) " +
+                            "SELECT equipmentId_rows.id, tag.id FROM " + Lystore.lystoreSchema + ".tag, equipmentId_rows WHERE lower(name) IN " + tagFilter;
 
             if (referenceValue) {
                 params.add(equipment.getString("reference"));
             }
             params.add(equipment.getString("name"));
-            params.add(equipment.getFloat("price"));
-            params.add(equipment.getInteger("id_tax"));
+            params.add(price);
+            params.add(tax);
             params.add(equipment.getInteger("warranty"));
             params.add(equipment.getBoolean("catalog_enabled"));
             params.add(equipment.getInteger("id_contract"));
             params.add(equipment.getString("status"));
-            params.add(equipment.getInteger("id_type"));
-            params.add(equipment.getBoolean("option_enabled"));
+            for (String tag : tags) {
+                params.add(tag.trim());
+            }
 
             statement.put(STATEMENT, insertImportEquipmentQuery);
             statement.put(VALUES, params);
@@ -248,12 +289,12 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                     } else {
                         String message = "An error occurred when handling equipment transaction";
                         LOGGER.error(message);
-                        handler.handle(new Either.Left<>(message));
+                        handler.handle(new Either.Left<String, JsonObject>(message));
                     }
                 }
             });
         } else {
-            String message = "An error occurred when creating the statement";
+            String message = "An error occurred when assembling the transaction";
             LOGGER.error(message);
             handler.handle(new Either.Left<String, JsonObject>(message));
         }

@@ -111,7 +111,7 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                 "oe.price_proposal as price_proposal, oe.amount as amount  " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment as oe " +
                 "LEFT JOIN ( " +
-                "SELECT  equipment_option.id_equipment as id,equipment_option.id_option as id_option " +
+                "SELECT  equipment_option.id_equipment as id,equipment_option.id as id_option " +
                 "FROM " + Lystore.lystoreSchema + ".equipment_option " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".equipment ON equipment_option.id_equipment= equipment.id " +
                 ") bo ON oe.equipment_key = bo.id " +
@@ -270,7 +270,7 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
 
         for (int i = 0; i < options.size(); i++) {
             option = options.getJsonObject(i);
-            params.add(option.getInteger("id")).add(order.getInteger("id_basket_equipment"));
+            params.add(option.getInteger("id_option")).add(order.getInteger("id_basket_equipment"));
         }
         return new JsonObject()
                 .put("statement", queryBasketOption.toString())

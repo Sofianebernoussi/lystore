@@ -236,15 +236,19 @@ public class EquipmentController extends ControllerHelper {
                     ';', '"', 1);
             String[] values;
             JsonArray equipments = new JsonArray();
+            JsonArray references = new JsonArray();
             while ((values = csv.readNext()) != null) {
                 JsonObject object = new JsonObject();
-                object.put("reference", values[0]);
-                object.put("name", values[1]);
-                object.put("price", values[2]);
-                object.put("id_tax", values[3]);
-                object.put("warranty", 1);
+                if (!"".equals(values[0].trim())) {
+                    references.add(values[0].trim());
+                }
+                object.put("reference", values[0].trim());
+                object.put("name", values[1].trim());
+                object.put("price", values[2].trim());
+                object.put("id_tax", values[3].trim());
+                object.put("warranty", Integer.parseInt(values[4].trim()));
                 object.put("catalog_enabled", true);
-                object.put("id_contract", Integer.parseInt(request.getParam("id")));
+                object.put("id_contract", Integer.parseInt(request.getParam("id").trim()));
                 object.put("type", values[5].trim());
                 object.put("status", isATrueValue(values[6]) ? "AVAILABLE" : "UNAVAILABLE");
                 object.put("price_editable", isATrueValue(values[7]));
@@ -253,11 +257,11 @@ public class EquipmentController extends ControllerHelper {
                 equipments.add(object);
             }
             if (equipments.size() > 0) {
-                equipmentService.importEquipments(equipments, new Handler<Either<String, JsonObject>>() {
+                equipmentService.importEquipments(equipments, references, new Handler<Either<String, JsonObject>>() {
                     @Override
                     public void handle(Either<String, JsonObject> event) {
                         if (event.isRight()) {
-                            request.response().setStatusCode(201).end();
+                            created(request);
                         } else {
                             returnErrorMessage(request, new Throwable(event.left().getValue()), path);
                         }

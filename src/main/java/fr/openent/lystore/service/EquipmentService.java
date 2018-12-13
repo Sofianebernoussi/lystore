@@ -100,7 +100,7 @@ public interface EquipmentService {
      * @param equipments Array of equipments
      * @param handler    Function handler returning data
      */
-    void importEquipments(JsonArray equipments, Handler<Either<String, JsonObject>> handler);
+    void importEquipments(JsonArray equipments, JsonArray referencesToUpdate, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Get equipment page numbers

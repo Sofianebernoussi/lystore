@@ -205,102 +205,177 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         }));
     }
 
-    public void importEquipments(final JsonArray equipments, Handler<Either<String, JsonObject>> handler) {
-        JsonArray statements = new JsonArray();
-        JsonArray params;
-        JsonObject statement;
-        JsonObject statementTag;
-        JsonObject statementTax;
-
-        for (int i = 0; i < equipments.size(); i++) {
-            JsonObject equipment = equipments.getJsonObject(i);
-            statement = new JsonObject();
-            params = new JsonArray();
-
-            String[] tags = equipment.getString("name_tag").split(",");
-
-            for (String tag : tags) {
-                statementTag = new JsonObject();
-                String insertNotExistentTagQuery = "INSERT INTO " + Lystore.lystoreSchema + ".tag (name, color) SELECT ?, '#0033cc' WHERE NOT EXISTS (SELECT 1 FROM " + Lystore.lystoreSchema + ".tag WHERE lower(name) = lower(?))";
-                JsonArray tagValues = new JsonArray();
-                tagValues.add(tag.trim()).add(tag.trim());
-
-                statementTag.put(STATEMENT, insertNotExistentTagQuery);
-                statementTag.put(VALUES, tagValues);
-                statementTag.put(ACTION, PREPARED);
-
-                statements.add(statementTag);
-            }
-
-            Double tax = Double.parseDouble(equipment.getValue("id_tax").toString().trim().replace(",", "."));
-            Double price = Double.parseDouble(equipment.getValue("price").toString().trim().replace(",", "."));
-
-            statementTax = new JsonObject();
-            String insertNotExistentTaxQuery = "INSERT INTO " + Lystore.lystoreSchema + ".tax (value, name) SELECT ?, ? WHERE NOT EXISTS (SELECT 1 FROM " + Lystore.lystoreSchema + ".tax WHERE value = ?)";
-            JsonArray taxValues = new JsonArray();
-            taxValues.add(tax).add("Taxe " + tax + "%").add(tax);
-
-            statementTax.put(STATEMENT, insertNotExistentTaxQuery);
-            statementTax.put(VALUES, taxValues);
-            statementTax.put(ACTION, PREPARED);
-
-            statements.add(statementTax);
-
-            String tagFilter = "(";
-            for (int j = 0; j < tags.length; j++) {
-                tagFilter += j == tags.length - 1 ? "lower(?)" : "lower(?),";
-            }
-            tagFilter += ")";
-
-            Boolean referenceValue = !"".equals(equipment.getString("reference").trim());
-            String insertImportEquipmentQuery =
-                    "WITH equipmentId_rows AS (" +
-                            "INSERT INTO " + Lystore.lystoreSchema + ".equipment(" + (referenceValue ? " reference, " : "") + "name, price, id_tax, warranty, catalog_enabled, id_contract, status, id_type, price_editable) " +
-                            "VALUES (" + (referenceValue ? "?," : "") + "?, ?, (SELECT id FROM " + Lystore.lystoreSchema + ".tax WHERE value = ? LIMIT 1), ?, ?, ?, ?, " +
-                            "(SELECT id FROM " + Lystore.lystoreSchema + ".equipment_type WHERE name = ?), ?) RETURNING id)" +
-                            "INSERT INTO " + Lystore.lystoreSchema + ".rel_equipment_tag (id_equipment, id_tag) " +
-                            "SELECT equipmentId_rows.id, tag.id FROM " + Lystore.lystoreSchema + ".tag, equipmentId_rows WHERE lower(name) IN " + tagFilter;
-
-            if (referenceValue) {
-                params.add(equipment.getString("reference"));
-            }
-            params.add(equipment.getString("name"));
-            params.add(price);
-            params.add(tax);
-            params.add(equipment.getInteger("warranty"));
-            params.add(equipment.getBoolean("catalog_enabled"));
-            params.add(equipment.getInteger("id_contract"));
-            params.add(equipment.getString("status"));
-            params.add(equipment.getString("type"));
-            params.add(equipment.getBoolean("price_editable"));
-            for (String tag : tags) {
-                params.add(tag.trim());
-            }
-
-            statement.put(STATEMENT, insertImportEquipmentQuery);
-            statement.put(VALUES, params);
-            statement.put(ACTION, PREPARED);
-
-            statements.add(statement);
+    private String getImportTagFilter(String[] tags) {
+        StringBuilder tagFilter = new StringBuilder("(");
+        for (int j = 0; j < tags.length; j++) {
+            tagFilter.append((j == tags.length - 1) ? "lower(?)" : "lower(?),");
         }
-        if (statements.size() > 0) {
-            sql.transaction(statements, new Handler<Message<JsonObject>>() {
-                @Override
-                public void handle(Message<JsonObject> event) {
-                    if (event.body().containsKey("status") && "ok".equals(event.body().getString("status"))) {
-                        handler.handle(new Either.Right<>(new JsonObject().put("message", "Imported")));
+        tagFilter.append(")");
+
+        return tagFilter.toString();
+    }
+
+    private JsonObject getInsertImportStatement(JsonObject equipment) {
+        JsonArray params = new JsonArray();
+        Double price = Double.parseDouble(equipment.getValue("price").toString().replace(",", "."));
+        Double tax = Double.parseDouble(equipment.getValue("id_tax").toString().replace(",", "."));
+
+        boolean referenceValue = !"".equals(equipment.getString("reference"));
+        String[] tags = equipment.getString("name_tag").split(",");
+
+        String query = "WITH equipmentId_rows AS (" +
+                "INSERT INTO " + Lystore.lystoreSchema + ".equipment(" + (referenceValue ? " reference, " : "") + "name, price, id_tax, warranty, catalog_enabled, id_contract, status, id_type, price_editable) " +
+                "VALUES (" + (referenceValue ? "?," : "") + "?, ?, (SELECT id FROM " + Lystore.lystoreSchema + ".tax WHERE value = ? LIMIT 1), ?, ?, ?, ?, " +
+                "(SELECT id FROM " + Lystore.lystoreSchema + ".equipment_type WHERE name = ?), ?) RETURNING id)" +
+                "INSERT INTO " + Lystore.lystoreSchema + ".rel_equipment_tag (id_equipment, id_tag) " +
+                "SELECT equipmentId_rows.id, tag.id FROM " + Lystore.lystoreSchema + ".tag, equipmentId_rows WHERE lower(name) IN " + getImportTagFilter(tags);
+
+        if (referenceValue) {
+            params.add(equipment.getString("reference"));
+        }
+        params.add(equipment.getString("name"));
+        params.add(price);
+        params.add(tax);
+        params.add(equipment.getInteger("warranty"));
+        params.add(equipment.getBoolean("catalog_enabled"));
+        params.add(equipment.getInteger("id_contract"));
+        params.add(equipment.getString("status"));
+        params.add(equipment.getString("type"));
+        params.add(equipment.getBoolean("price_editable"));
+        for (String tag : tags) {
+            params.add(tag.trim());
+        }
+
+        return new JsonObject()
+                .put(STATEMENT, query)
+                .put(VALUES, params)
+                .put(ACTION, PREPARED);
+    }
+
+    private JsonObject getDeleteTagImportStatement(String reference) {
+        String query = "DELETE FROM " + Lystore.lystoreSchema + ".rel_equipment_tag " +
+                "USING " + Lystore.lystoreSchema + ".equipment " +
+                "WHERE equipment.id = rel_equipment_tag.id_equipment " +
+                "AND equipment.reference = ?;";
+        JsonArray params = new JsonArray().add(reference);
+        return new JsonObject()
+                .put(STATEMENT, query)
+                .put(VALUES, params)
+                .put(ACTION, PREPARED);
+    }
+
+    private JsonObject getUpdateImportStatement(JsonObject equipment) {
+        String[] tags = equipment.getString("name_tag").split(",");
+        Double price = Double.parseDouble(equipment.getValue("price").toString().replace(",", "."));
+        Double tax = Double.parseDouble(equipment.getValue("id_tax").toString().replace(",", "."));
+        JsonArray params = new JsonArray();
+        String query = "WITH equipmentId_rows AS (UPDATE " + Lystore.lystoreSchema + ".equipment " +
+                "SET name = ?, price = ?, id_tax = (SELECT id FROM " + Lystore.lystoreSchema + ".tax WHERE value = ? LIMIT 1), warranty = ?," +
+                "id_type = (SELECT id FROM " + Lystore.lystoreSchema + ".equipment_type WHERE name = ? LIMIT 1), catalog_enabled = ?, price_editable = ?, status = ?" +
+                "WHERE equipment.reference = ? RETURNING id)" +
+                "INSERT INTO " + Lystore.lystoreSchema + ".rel_equipment_tag (id_equipment, id_tag) " +
+                "SELECT equipmentId_rows.id, tag.id FROM " + Lystore.lystoreSchema + ".tag, equipmentId_rows WHERE lower(name) IN " + getImportTagFilter(tags);
+
+        params.add(equipment.getString("name"))
+                .add(price)
+                .add(tax)
+                .add(equipment.getInteger("warranty"))
+                .add(equipment.getString("type"))
+                .add(equipment.getBoolean("catalog_enabled"))
+                .add(equipment.getBoolean("price_editable"))
+                .add(equipment.getString("status"))
+                .add(equipment.getString("reference"));
+
+        for (String tag : tags) {
+            params.add(tag.trim());
+        }
+
+        return new JsonObject()
+                .put(STATEMENT, query)
+                .put(VALUES, params)
+                .put(ACTION, PREPARED);
+    }
+
+    public void importEquipments(final JsonArray equipments, JsonArray referencesToUpdate, Handler<Either<String, JsonObject>> handler) {
+        String matchReferencesQuery = "SELECT reference FROM " + Lystore.lystoreSchema + ".equipment  WHERE reference IN " + Sql.listPrepared(referencesToUpdate.getList());
+        Sql.getInstance().prepared(matchReferencesQuery, referencesToUpdate, SqlResult.validResultHandler(event -> {
+            if (event.isRight()) {
+                JsonArray values = event.right().getValue();
+                JsonObject o;
+                JsonArray refs = new JsonArray();
+                for (int h = 0; h < values.size(); h++) {
+                    o = values.getJsonObject(h);
+                    refs.add(o.getString("reference"));
+                }
+
+                JsonArray statements = new JsonArray();
+                JsonArray params;
+                JsonObject statement;
+                JsonObject statementTag;
+                JsonObject statementTax;
+
+                for (int i = 0; i < equipments.size(); i++) {
+                    JsonObject equipment = equipments.getJsonObject(i);
+
+                    String[] tags = equipment.getString("name_tag").split(",");
+
+                    for (String tag : tags) {
+                        statementTag = new JsonObject();
+                        String insertNotExistentTagQuery = "INSERT INTO " + Lystore.lystoreSchema + ".tag (name, color) SELECT ?, '#0033cc' WHERE NOT EXISTS (SELECT 1 FROM " + Lystore.lystoreSchema + ".tag WHERE lower(name) = lower(?))";
+                        JsonArray tagValues = new JsonArray();
+                        tagValues.add(tag.trim()).add(tag.trim());
+
+                        statementTag.put(STATEMENT, insertNotExistentTagQuery);
+                        statementTag.put(VALUES, tagValues);
+                        statementTag.put(ACTION, PREPARED);
+
+                        statements.add(statementTag);
+                    }
+
+                    Double tax = Double.parseDouble(equipment.getValue("id_tax").toString().replace(",", "."));
+
+                    statementTax = new JsonObject();
+                    String insertNotExistentTaxQuery = "INSERT INTO " + Lystore.lystoreSchema + ".tax (value, name) SELECT ?, ? WHERE NOT EXISTS (SELECT 1 FROM " + Lystore.lystoreSchema + ".tax WHERE value = ?)";
+                    JsonArray taxValues = new JsonArray();
+                    taxValues.add(tax).add("Taxe " + tax + "%").add(tax);
+
+                    statementTax.put(STATEMENT, insertNotExistentTaxQuery);
+                    statementTax.put(VALUES, taxValues);
+                    statementTax.put(ACTION, PREPARED);
+
+                    statements.add(statementTax);
+
+                    if (refs.contains(equipment.getString("reference"))) {
+                        statements.add(getDeleteTagImportStatement(equipment.getString("reference")));
+                        statements.add(getUpdateImportStatement(equipment));
                     } else {
-                        String message = "An error occurred when handling equipment transaction";
-                        LOGGER.error(message);
-                        handler.handle(new Either.Left<String, JsonObject>(message));
+                        statements.add(getInsertImportStatement(equipment));
                     }
                 }
-            });
-        } else {
-            String message = "An error occurred when assembling the transaction";
-            LOGGER.error(message);
-            handler.handle(new Either.Left<String, JsonObject>(message));
-        }
+                if (statements.size() > 0) {
+                    sql.transaction(statements, new Handler<Message<JsonObject>>() {
+                        @Override
+                        public void handle(Message<JsonObject> event) {
+                            if (event.body().containsKey("status") && "ok".equals(event.body().getString("status"))) {
+                                handler.handle(new Either.Right<>(new JsonObject().put("message", "Imported")));
+                            } else {
+                                String message = "An error occurred when handling equipment transaction";
+                                LOGGER.error(message);
+                                handler.handle(new Either.Left<String, JsonObject>(message));
+                            }
+                        }
+                    });
+                } else {
+                    String message = "An error occurred when assembling the transaction";
+                    LOGGER.error(message);
+                    handler.handle(new Either.Left<String, JsonObject>(message));
+                }
+            } else {
+                String message = "An error occurred when matching references to update";
+                LOGGER.error(message);
+                handler.handle(new Either.Left<String, JsonObject>(message));
+            }
+        }));
     }
 
     @Override

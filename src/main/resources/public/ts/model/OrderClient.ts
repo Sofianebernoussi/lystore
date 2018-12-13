@@ -149,6 +149,7 @@ export class OrdersClient extends Selection<OrderClient> {
                             this.id_project_use = order.project.id;
                             this.projects.push(order.project);
                         }
+
                         order.creation_date = moment(order.creation_date).format('L');
                         order.options.toString() !== '[null]' && order.options !== null ?
                             order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))

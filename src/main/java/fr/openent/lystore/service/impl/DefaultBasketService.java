@@ -519,7 +519,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 " where p.id_campaign = ? " +
                 " AND p.id_structure = ? " +
                 " AND  o.id_campaign = ? " +
-                " AND o.id_structure = ? " +
+                " AND o.id_structure = ? AND o.status != 'VALID' " +
                 " GROUP BY(p.amount) )";
     }
     /**

@@ -56,7 +56,7 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 .append(" LEFT JOIN " + Lystore.lystoreSchema + ".basket_equipment ")
                 .append(" ON (basket_equipment.id_campaign = campaign.id AND basket_equipment.id_structure = ? ) ")
                 .append("LEFT JOIN Lystore.order_client_equipment order_c_e ")
-                .append(" ON (order_c_e.id_campaign = campaign.id AND order_c_e.id_structure = ? ) ")
+                .append(" ON (order_c_e.id_campaign = campaign.id AND order_c_e.id_structure = ? AND order_c_e.status != 'VALID' ) ")
                 .append(" LEFT JOIN Lystore.purse ON purse.id_campaign = campaign.id AND purse.id_structure = ? ")
                 .append(" LEFT JOIN " + Lystore.lystoreSchema + ".rel_group_campaign")
                 .append(" ON (campaign.id = rel_group_campaign.id_campaign) ")

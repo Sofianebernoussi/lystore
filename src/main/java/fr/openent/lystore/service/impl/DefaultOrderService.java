@@ -769,11 +769,11 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 .put("values",params)
                 .put("action", "prepared");
     }
-
     private JsonObject getNewNbOrder(Integer idCampaign, String idStructure) {
+
         String query = "SELECT count(id) FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
                 "WHERE id_campaign = ? " +
-                "AND id_structure = ?;";
+                "AND id_structure = ? AND status != 'VALID';";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(idCampaign).add(idStructure);

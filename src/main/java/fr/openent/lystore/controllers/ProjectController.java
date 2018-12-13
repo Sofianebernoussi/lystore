@@ -77,13 +77,15 @@ public class ProjectController extends ControllerHelper {
         });
     }
 
-    @Delete("/project/:id")
+    @Delete("/project/:id/:idCampaign/:idStructure")
     @ApiDoc("Delete a project")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AccesProjectRight.class)
     public void deleteProject(HttpServerRequest request) {
         try {
             final Integer id = Integer.parseInt(request.getParam("id"));
+            final String idStructure = request.getParam("idStructure");
+            final Integer idCampaign = Integer.parseInt(request.getParam("idCampaign"));
             List<String> params = new ArrayList<>();
             projectService.deletableProject(id, new Handler<Either<String, JsonObject>>() {
                 @Override
@@ -94,7 +96,7 @@ public class ProjectController extends ControllerHelper {
                                     @Override
                                     public void handle(Either<String, JsonArray> listOrder) {
                                         if (listOrder.isRight() && listOrder.right().getValue().size() > 0) {
-                                            projectService.revertOrderAndDeleteProject(listOrder.right().getValue(), id, event -> {
+                                            projectService.revertOrderAndDeleteProject(listOrder.right().getValue(), id, idCampaign, idStructure, event -> {
                                                 if (event.isRight()) {
                                                     renderJson(request, event.right().getValue());
                                                     UserUtils.getUserInfos(eb, request, user -> {

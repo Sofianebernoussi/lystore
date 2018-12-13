@@ -142,9 +142,13 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
         $scope.deleteProject = async (projects: Projects) => {
             for (let i = 0; i < projects.length; i++) {
                 if ($scope.projectIsDeletable(projects[i])) {
-                    let {status} = await projects[i].delete();
+                    let {status, data} = await projects[i].delete($scope.campaign.id, $scope.ordersClient.all[0].id_structure);
                     if (status == 200) {
                         $scope.notifications.push(new Notification('lystore.project.delete.confirm', 'confirm'));
+                    }
+                    if (data) {
+                        $scope.campaign.nb_order = data.nb_order;
+                        $scope.campaign.nb_panier = data.nb_basket;
                     }
                 }
             }

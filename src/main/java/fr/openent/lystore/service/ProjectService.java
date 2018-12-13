@@ -31,12 +31,12 @@ public interface ProjectService {
 
     /**
      * Create baskets from orders an delete the project
-     *
-     * @param value
+     *  @param value
      * @param id
+     * @param idCampaign
      * @param handler
      */
-    void revertOrderAndDeleteProject(JsonArray value, Integer id, Handler<Either<String, JsonObject>> handler);
+    void revertOrderAndDeleteProject(JsonArray value, Integer id, Integer idCampaign, String idStructure, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Select all the orders and their parameters to prepare the baskets insert

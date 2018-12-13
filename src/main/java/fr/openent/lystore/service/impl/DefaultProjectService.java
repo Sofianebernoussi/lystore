@@ -74,7 +74,7 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
 
 
     @Override
-    public void revertOrderAndDeleteProject(JsonArray orders, Integer id, Handler<Either<String, JsonObject>> handler) {
+    public void revertOrderAndDeleteProject(JsonArray orders, Integer id, Integer idCampaign, String idStructure, Handler<Either<String, JsonObject>> handler) {
         JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
         JsonObject order;
         for (int i = 0; i < orders.size(); i++) {
@@ -89,7 +89,10 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                 }
             }
         }
+        statements.add(getNewNbBasket(idCampaign, idStructure));
         statements.add(deleteProject(id));
+        statements.add(getNewNbORDER(idCampaign, idStructure));
+
 
         sql.transaction(statements, new Handler<Message<JsonObject>>() {
             @Override
@@ -99,10 +102,67 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                     log.error(message);
                     handler.handle(new Either.Left<>(message));
                 } else {
-                    handler.handle(new Either.Right<>(new JsonObject().put("status", "ok")));
+                    JsonArray results = event.body().getJsonArray("results");
+                    JsonObject res;
+                    Integer nb_order = -1;
+                    Integer nb_basket = -1;
+                    JsonArray fields, nb_order_array, nb_basket_array;
+                    for (int i = 0; i < results.size(); i++) {
+                        res = results.getJsonObject(i);
+                        fields = res.getJsonArray("fields");
+                        if (fields.size() != 0) {
+                            String type = fields.getString(0);
+
+                            if (type.equals("nb_order")) {
+                                nb_order_array = res.getJsonArray("results");
+                                nb_order_array = nb_order_array.getJsonArray(0);
+                                nb_order = nb_order_array.getInteger(0);
+                            }
+                            if (type.equals("nb_basket")) {
+                                nb_basket_array = res.getJsonArray("results");
+                                nb_basket_array = nb_basket_array.getJsonArray(0);
+                                nb_basket = nb_basket_array.getInteger(0);
+                            }
+                        }
+
+
+                    }
+                    JsonObject resultfinal = new JsonObject().put("status", "ok");
+                    if (nb_basket >= 0 && nb_order >= 0) {
+                        resultfinal.put("nb_order", nb_order).put("nb_basket", nb_basket);
+                    }
+                    handler.handle(new Either.Right<>(resultfinal));
                 }
             }
         });
+    }
+
+    private JsonObject getNewNbORDER(Integer idCampaign, String idStructure) {
+        String query = "SELECT count(id) as nb_order FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
+                "WHERE id_campaign = ? " +
+                "AND id_structure = ? AND status != 'VALID';";
+
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(idCampaign).add(idStructure);
+
+        return new JsonObject()
+                .put("statement", query)
+                .put("values", params)
+                .put("action", "prepared");
+    }
+
+    private JsonObject getNewNbBasket(Integer idCampaign, String idStructure) {
+        String query = "SELECT count(id) as nb_basket FROM " + Lystore.lystoreSchema + ".basket_equipment " +
+                "WHERE id_campaign = ? " +
+                "AND id_structure = ? ;";
+
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(idCampaign).add(idStructure);
+
+        return new JsonObject()
+                .put("statement", query)
+                .put("values", params)
+                .put("action", "prepared");
     }
 
     public void selectOrdersToBaskets(Integer id, Handler<Either<String, JsonArray>> handler) {

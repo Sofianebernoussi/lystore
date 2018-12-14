@@ -4,28 +4,22 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
-import fr.openent.lystore.security.ManagerOrPersonnelRight;
-import fr.openent.lystore.security.ManagerRight;
-import fr.openent.lystore.security.WorkflowActionUtils;
-import fr.openent.lystore.security.WorkflowActions;
+import fr.openent.lystore.security.*;
 import fr.openent.lystore.service.CampaignService;
 import fr.openent.lystore.service.impl.DefaultCampaignService;
 import fr.openent.lystore.utils.SqlQueryUtils;
-import fr.wseduc.rs.ApiDoc;
-import fr.wseduc.rs.Delete;
-import fr.wseduc.rs.Get;
-import fr.wseduc.rs.Post;
-import fr.wseduc.rs.Put;
+import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.Handler;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
-import io.vertx.core.Handler;
-import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonObject;
 
 import java.util.List;
 
@@ -117,7 +111,31 @@ public class CampaignController extends ControllerHelper {
             }
         });
     }
-
+    @Put("/campaign/:idCampaign/projects/:idProject/preferences")
+    @ApiDoc("Update an preference in project")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+   @ResourceFilter(AccesProjectPriority.class)
+    public void updatePriority(final HttpServerRequest request) {
+        RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+            @Override
+            public void handle(JsonObject campaign){
+                if (!campaign.containsKey("preferences")) {
+                    badRequest(request);
+                    return;
+                }
+                JsonArray projectOrders = new fr.wseduc.webutils.collections.JsonArray();
+                projectOrders =campaign.getJsonArray("preferences");
+                Integer campaignId = Integer.parseInt(request.params().get("idCampaign"));
+                Integer projectId = Integer.parseInt(request.params().get("idProject"));
+                String structureId = request.getParam("structureId");
+                try{
+                    campaignService.updatePreference(campaignId, projectId, structureId,projectOrders, defaultResponseHandler(request));
+                }catch(Exception e){
+                    log.error(" An error occurred when casting campaign id", e);
+                }
+            }
+        });
+    }
     @Put("/campaign/:id")
     @ApiDoc("Update a campaign")
     @SecuredAction(value = "", type = ActionType.RESOURCE)

@@ -23,6 +23,7 @@ export class OrderClient implements Selectable {
     title?: Title;
     options: OrderOptionClient[];
     technical_spec: TechnicalSpec[];
+    preference: number;
     contract: Contract;
     supplier: Supplier;
     campaign: Campaign;
@@ -33,7 +34,6 @@ export class OrderClient implements Selectable {
     supplier_name?: string;
     project: Project;
     files: any;
-
     name_structure: string;
     id_contract: number;
     id_campaign: number;
@@ -45,6 +45,7 @@ export class OrderClient implements Selectable {
     price_proposal?: number;
 
     constructor() {
+
     }
 
     calculatePriceTTC ( roundNumber?: number)  {
@@ -87,7 +88,6 @@ export class OrdersClient extends Selection<OrderClient> {
     id_program?: number;
     engagement_number?: string;
     projects: Selection<Project>;
-
     dateGeneration?: Date;
     id_project_use?: number;
 
@@ -100,13 +100,20 @@ export class OrdersClient extends Selection<OrderClient> {
 
     }
 
-
-    async sync (status: string, structures: Structure[] = [], idCampaign?: number, idStructure?: string) {
+    async updateReference(tabIdsProjects: Array<object>, id_campaign:number, id_project:number, id_structure:string) {
+        try {
+             await  http.put(`/lystore/campaign/${id_campaign}/projects/${id_project}/preferences?structureId=${id_structure}`,
+                { preferences: tabIdsProjects });
+        }catch (e) {
+            notify.error('lystore.project.update.err');
+        }
+    }
+    async sync (priority_enabled: boolean,status: string, structures: Structure[] = [], idCampaign?: number, idStructure?: string) {
         try {
             this.projects = new Selection<Project>([]);
             this.id_project_use = -1;
             if (idCampaign && idStructure ) {
-                let { data } = await http.get(  `/lystore/orders/${idCampaign}/${idStructure}` );
+                let { data } = await http.get(  `/lystore/orders/${idCampaign}/${idStructure}/${priority_enabled}` );
                 this.all = Mix.castArrayAs(OrderClient, data);
                 this.all.map((order) => {
                     order.price = parseFloat(order.price.toString());

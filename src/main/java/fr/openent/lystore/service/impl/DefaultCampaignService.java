@@ -41,7 +41,7 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 "LEFT JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (rel_equipment_tag.id_tag = rel_group_campaign.id_tag)" +
                 "GROUP BY campaign.id, campaign_amounts.sum) as C " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".order_client_equipment oce ON oce.id_campaign = C.id and  oce.status in ( 'WAITING', 'VALID', 'SENT') " +
-                "group by c.id, c.name, c.description, c.image, c.accessible, c.nb_structures, c.purse_amount, c.nb_equipments, c.purse_enabled";
+                "group by c.id, c.name, c.description, c.image, c.accessible, c.nb_structures, c.purse_amount, c.nb_equipments, c.purse_enabled, c.priority_enabled";
         sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray(), SqlResult.validResultHandler(handler));
     }
 
@@ -159,6 +159,41 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
         sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray().add(campaignId), SqlResult.validResultHandler(handler));
     }
 
+    @Override
+    public void updatePreference(Integer campaignId,Integer projectId, String structureId,
+                                 JsonArray projectOrders, Handler<Either<String, JsonObject>> handler) {
+        String query= "UPDATE " + Lystore.lystoreSchema + ".project SET "+
+                "preference = ? " +
+                "WHERE id = ?; " +
+                "UPDATE " + Lystore.lystoreSchema + ".project SET "+
+                "preference = ? " +
+                "WHERE id = ?; ";
+
+
+        int size=projectOrders.getList().size();
+        JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
+        for(int i=0;i<size;i++) {
+            if (i == 0) {
+                values.add(projectOrders.getJsonObject(i + 1).getInteger("preference"));
+            } else {
+                values.add(projectOrders.getJsonObject(i - 1).getInteger("preference"));
+            }
+            values.add(projectOrders.getJsonObject(i).getInteger("id"));
+
+        }
+            JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
+            statements.add(new JsonObject()
+                    .put("statement",query)
+                    .put("values",values)
+                    .put("action","prepared"));
+            sql.transaction(statements,new Handler<Message<JsonObject>>() {
+
+                @Override
+                public void handle(Message<JsonObject> jsonObjectMessage) {
+                    handler.handle(getTransactionHandler(jsonObjectMessage,projectId));
+                }
+            });
+    }
 
     public void updateAccessibility(final Integer id,final JsonObject campaign,
                                     final Handler<Either<String, JsonObject>> handler){
@@ -184,7 +219,7 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
     private JsonObject getCampaignTagsGroupsRelationshipStatement(Number id, JsonArray groups) {
         StringBuilder insertTagCampaignRelationshipQuery = new StringBuilder("INSERT INTO " +
                 Lystore.lystoreSchema + ".rel_group_campaign" +
-                        "(id_campaign, id_structure_group, id_tag) VALUES ");
+                "(id_campaign, id_structure_group, id_tag) VALUES ");
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
         for(int j = 0; j < groups.size(); j++ ){
             JsonObject group =  groups.getJsonObject(j);
@@ -224,7 +259,7 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
      */
     private JsonObject getCampaignUpdateStatement(Number id, JsonObject campaign) {
         String query = "UPDATE " + Lystore.lystoreSchema + ".campaign " +
-                "SET  name=?, description=?, image=?, purse_enabled=? " +
+                "SET  name=?, description=?, image=?, purse_enabled=?, priority_enabled=? " +
                 "WHERE id = ?";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
@@ -232,6 +267,7 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 .add(campaign.getString("description"))
                 .add(campaign.getString("image"))
                 .add(campaign.getBoolean("purse_enabled"))
+                .add(campaign.getBoolean("priority_enabled"))
                 .add(id);
 
         return new JsonObject()
@@ -241,15 +277,16 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
     }
     private JsonObject getCampaignCreationStatement(Number id, JsonObject campaign) {
         String insertCampaignQuery =
-                "INSERT INTO " + Lystore.lystoreSchema + ".campaign(id, name, description, image, accessible, purse_enabled )" +
-                        "VALUES (?, ?, ?, ?, ?, ?) RETURNING id; ";
+                "INSERT INTO " + Lystore.lystoreSchema + ".campaign(id, name, description, image, accessible, purse_enabled, priority_enabled )" +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id; ";
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(id)
                 .add(campaign.getString("name"))
                 .add(campaign.getString("description"))
                 .add(campaign.getString("image"))
                 .add(campaign.getBoolean("accessible"))
-                .add(campaign.getBoolean("purse_enabled"));
+                .add(campaign.getBoolean("purse_enabled"))
+                .add(campaign.getBoolean("priority_enabled"));
 
         return new JsonObject()
                 .put("statement", insertCampaignQuery)

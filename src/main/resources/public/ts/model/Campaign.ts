@@ -18,6 +18,7 @@ export class Campaign implements Selectable  {
     purses?: Purses;
     nb_panier?: number;
     purse_enabled: boolean;
+    priority_enabled: boolean;
 
     constructor (name?: string, description?: string) {
         if (name) this.name = name;
@@ -25,6 +26,7 @@ export class Campaign implements Selectable  {
         this.groups = [];
         this.image = '';
         this.purse_enabled = false;
+        this.priority_enabled = true;
     }
 
     toJson () {
@@ -36,7 +38,8 @@ export class Campaign implements Selectable  {
             groups: this.groups.map((group) => {
                 return group.toJson();
             }),
-            purse_enabled: this.purse_enabled
+            purse_enabled: this.purse_enabled,
+            priority_enabled: this.priority_enabled
         };
     }
 

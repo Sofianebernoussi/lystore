@@ -26,6 +26,9 @@
     },
     "site": {
       "type": "string"
+    },
+    "preference": {
+      "type": "number"
     }
   },
   "required": [

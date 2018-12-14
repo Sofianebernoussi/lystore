@@ -1,0 +1,30 @@
+.priority_carree {
+  width: 60px;
+  height: 60px;
+  @include fonticon();
+
+  &.UP{
+    background-color: $white;
+    display: block;
+    &:after{
+      content: '\e838';
+      color: $black;
+      font-size:30px;
+      font-weight:bold;
+    }
+
+  }
+
+  &.DOWN{
+    color: $white;
+    display: block;
+    &:after{
+      content: '\e868';
+      color: $black;
+      font-size:30px;
+      font-weight:bold;
+    }
+
+  }
+
+}

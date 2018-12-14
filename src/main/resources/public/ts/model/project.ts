@@ -10,6 +10,7 @@ export class Project implements Selectable {
     title: Title;
     grade: Grade;
     building?: string;
+    preference?: number;
     stair?: number;
     room?: string;
     name: string;
@@ -54,7 +55,7 @@ export class Project implements Selectable {
             building: this.building,
             site: this.site,
             stair: this.stair,
-            room: this.room,
+            room: this.room
         };
     }
 
@@ -85,6 +86,8 @@ export class Project implements Selectable {
             notify.error('lystore.project.update.err');
         }
     }
+
+
 }
 
 

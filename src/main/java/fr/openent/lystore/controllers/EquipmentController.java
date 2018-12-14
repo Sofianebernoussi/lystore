@@ -250,21 +250,18 @@ public class EquipmentController extends ControllerHelper {
                 object.put("catalog_enabled", true);
                 object.put("id_contract", Integer.parseInt(request.getParam("id").trim()));
                 object.put("type", values[5].trim());
-                object.put("status", isATrueValue(values[6]) ? "AVAILABLE" : "UNAVAILABLE");
+                object.put("status", isATrueValue(values[6]) ? "AVAILABLE" : "OUT_OF_STOCK");
                 object.put("price_editable", isATrueValue(values[7]));
                 object.put("name_tag", values[8]);
 
                 equipments.add(object);
             }
             if (equipments.size() > 0) {
-                equipmentService.importEquipments(equipments, references, new Handler<Either<String, JsonObject>>() {
-                    @Override
-                    public void handle(Either<String, JsonObject> event) {
-                        if (event.isRight()) {
-                            created(request);
-                        } else {
-                            returnErrorMessage(request, new Throwable(event.left().getValue()), path);
-                        }
+                equipmentService.importEquipments(equipments, references, event -> {
+                    if (event.isRight()) {
+                        created(request);
+                    } else {
+                        returnErrorMessage(request, new Throwable(event.left().getValue()), path);
                     }
                 });
             } else {

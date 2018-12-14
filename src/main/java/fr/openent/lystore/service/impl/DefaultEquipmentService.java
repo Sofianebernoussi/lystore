@@ -156,7 +156,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 "AND rel_group_campaign.id_structure_group IN (" +
                 "SELECT structure_group.id FROM " + Lystore.lystoreSchema + ".structure_group " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON rel_group_structure.id_structure_group = structure_group.id " +
-                "WHERE rel_group_structure.id_structure = ?)) and e.catalog_enabled = true " + queryFilter +
+                "WHERE rel_group_structure.id_structure = ?)) and e.catalog_enabled = true AND e.status != 'OUT_OF_STOCK' " + queryFilter +
                 "GROUP BY (e.id, tax.id , nametype )";
 
 
@@ -412,14 +412,10 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     @Override
     public void getNumberPages(Integer idCampaign, String idStructure, List<String> filters, Handler<Either<String, JsonObject>> handler) {
         JsonArray values = new JsonArray().add(idCampaign).add(idStructure);
-        String queryFilter = "";
+        String queryFilter = "WHERE equipment.status != 'OUT_OF_STOCK' ";
         if (!filters.isEmpty()) {
-            queryFilter = "WHERE ";
             for (int i = 0; i < filters.size(); i++) {
-                if (i > 0) {
-                    queryFilter += "AND ";
-                }
-                queryFilter += "lower(equipment.name) ~ lower(?) ";
+                queryFilter += "AND lower(equipment.name) ~ lower(?) ";
                 values.add(filters.get(i));
             }
         }

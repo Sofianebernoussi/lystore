@@ -55,11 +55,10 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "ON oe.id_contract = c.id WHERE id_campaign = ? AND id_structure = ? " +
                 "GROUP BY (prj.id , oe.id, tt.id, gr.id, c.name,prj.preference,campaign.priority_enabled) " +
                 "ORDER BY CASE WHEN campaign.priority_enabled IS TRUE " +
-                                "THEN 'prj.preference ASC' " +
-                                "ELSE 'creation_date ASC' " +
-                         "END;";
+                                "THEN 'prj.preference' " +
+                                "ELSE 'creation_date' " +
+                         "END ASC;";
 
-//oe.id_project DESC ,
         values.add(idCampaign).add(idStructure);
 
         sql.prepared(query, values, SqlResult.validResultHandler(handler));

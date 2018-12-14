@@ -18,7 +18,21 @@
                         <em>[[project.name]]</em>
                     </h3>
                 </label>
+                <div class="cell" ng-if="campaign.priority_enabled">
 
+                    <div class="priority_carree UP cell row" ng-show=" $index>0 && $index <= (ordersClient.projects.all.length - 1)"
+
+                         ng-click="upButton(project,$index) ">
+
+                    </div>
+
+                    <div class="priority_carree DOWN cell row" ng-show=" $index>=0 && $index < (ordersClient.projects.all.length - 1)"
+
+                         ng-click="downButton(project,$index)">
+
+                    </div>
+
+                </div>
                 <article class="basket-item twelve cell" ng-repeat="orderClient in ordersClient.all track by $index"
                          ng-if="project.id == orderClient.project.id">
                     <div class="cell width-40">

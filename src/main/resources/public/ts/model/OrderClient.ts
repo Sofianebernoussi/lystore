@@ -108,12 +108,12 @@ export class OrdersClient extends Selection<OrderClient> {
             notify.error('lystore.project.update.err');
         }
     }
-    async sync (priority_enabled: boolean,status: string, structures: Structure[] = [], idCampaign?: number, idStructure?: string) {
+    async sync (status: string, structures: Structure[] = [], idCampaign?: number, idStructure?: string) {
         try {
             this.projects = new Selection<Project>([]);
             this.id_project_use = -1;
             if (idCampaign && idStructure ) {
-                let { data } = await http.get(  `/lystore/orders/${idCampaign}/${idStructure}/${priority_enabled}` );
+                let { data } = await http.get(  `/lystore/orders/${idCampaign}/${idStructure}` );
                 this.all = Mix.castArrayAs(OrderClient, data);
                 this.all.map((order) => {
                     order.price = parseFloat(order.price.toString());

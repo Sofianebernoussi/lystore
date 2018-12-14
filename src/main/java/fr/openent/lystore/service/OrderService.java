@@ -18,7 +18,7 @@ public interface OrderService {
      * @param idStructure structure identifier
      * @param handler function handler returning data
      */
-    void listOrder(Integer idCampaign, String idStructure,boolean priorityEnabled, Handler<Either<String, JsonArray>> handler);
+    void listOrder(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler);
 
     void listExport(Integer idCampaign, String idStructure,Handler<Either<String, JsonArray>> handler);
     /**

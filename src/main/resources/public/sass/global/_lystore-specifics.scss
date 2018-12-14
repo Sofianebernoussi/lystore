@@ -849,4 +849,14 @@ body.lystore {
       padding: 20px;
     }
   }
+
+  .order-equipment-manage {
+    .priority-manager {
+      width: 40px;
+    }
+
+    .basket-item {
+      width: calc(100% - 50px);
+    }
+  }
 }

@@ -390,5 +390,7 @@
   "lystore.update.project.title": "Mise à jour du projet",
   "lystore.basket.add-file": "Ajouter un document",
   "lystore.pages.separator": "sur",
-  "lystore.equipments.import.warning": "Ajouter toutes les références du BPU dans le marché cible si elles n'existent pas déjà"
+  "lystore.equipments.import.warning": "Ajouter toutes les références du BPU dans le marché cible si elles n'existent pas déjà",
+  "lystore.order.priority.up": "Augmenter la priorité",
+  "lystore.order.priority.down": "Baisser la priorité"
 }

@@ -8,30 +8,27 @@
         <article class="twelve cell order-equipment-manage"
                  ng-repeat="project in ordersClient.projects.all track by $index">
             <div>
-                <label class="checkbox">
-                    <input type="checkbox" ng-model="project.selected"
-                           ng-checked="project.selected">
-
-                    <span></span>
-
-                    <h3>
-                        <em>[[project.name]]</em>
-                    </h3>
-                </label>
-                <div class="cell" ng-if="campaign.priority_enabled">
-
-                    <div class="priority_carree UP cell row" ng-show=" $index>0 && $index <= (ordersClient.projects.all.length - 1)"
-
+                <div class="row">
+                    <label>
+                        <label class="checkbox vertical-spacing-four cell">
+                            <input type="checkbox" ng-model="project.selected"
+                                   ng-checked="project.selected">
+                            <span></span>
+                        </label>
+                        <h3 class="cell horizontal-margin">
+                            <em>[[project.name]]</em>
+                        </h3>
+                    </label>
+                </div>
+                <div class="cell priority-manager" ng-if="campaign.priority_enabled">
+                    <div class="priority_carree UP cell row" tooltip="lystore.order.priority.up"
+                         ng-show=" $index>0 && $index <= (ordersClient.projects.all.length - 1)"
                          ng-click="upButton(project,$index) ">
-
                     </div>
-
-                    <div class="priority_carree DOWN cell row" ng-show=" $index>=0 && $index < (ordersClient.projects.all.length - 1)"
-
+                    <div class="priority_carree DOWN cell row" tooltip="lystore.order.priority.down"
+                         ng-show=" $index>=0 && $index < (ordersClient.projects.all.length - 1)"
                          ng-click="downButton(project,$index)">
-
                     </div>
-
                 </div>
                 <article class="basket-item twelve cell" ng-repeat="orderClient in ordersClient.all track by $index"
                          ng-if="project.id == orderClient.project.id">
@@ -157,7 +154,7 @@
                             </h1>
                         </div>
                     </div>
-            </article>
+                </article>
         </article>
     </div>
     <article ng-show = "ordersClient.all.length === 0 " class="centered-text row">

@@ -16,14 +16,3 @@ CREATE TRIGGER check_empty_project AFTER DELETE
 ON Lystore.order_client_equipment
 FOR EACH ROW
 EXECUTE PROCEDURE delete_empty_project();
-
-
-ALTER TABLE lystore.project
-  ADD COLUMN preference bigint;
-
-ALTER TABLE lystore.campaign
-  ADD COLUMN priority_enabled boolean DEFAULT true ;
-
-UPDATE lystore.project
-  SET preference=id
-WHERE preference IS NULL;

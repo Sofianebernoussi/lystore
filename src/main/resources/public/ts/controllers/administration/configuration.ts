@@ -247,7 +247,16 @@ export const configurationController = ng.controller('configurationController',
         };
 
         $scope.openEquipmentImporter = (): void => {
+            delete $scope.importer;
             $scope.importer = new EquipmentImporter();
+            $scope.importer.eventer.on('loading::true', () => $scope.$apply());
+            $scope.importer.eventer.on('loading::false', () => {
+                $scope.notifications.push(new Notification(
+                    $scope.importer.err ? 'lystore.equipments.import.error' : 'lystore.equipments.import.success',
+                    $scope.importer.err ? 'warning' : 'confirm'
+                ));
+                $scope.$apply();
+            });
             template.open('equipment.lightbox', 'administrator/equipment/equipment-importer');
             $scope.display.lightbox.equipment = true;
         };

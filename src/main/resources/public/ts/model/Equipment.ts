@@ -276,11 +276,16 @@ export class EquipmentOption implements Selectable {
 
 export class EquipmentImporter {
     files: File[];
+    eventer: Eventer;
     message: string;
     id_contract?: number;
+    _loading: boolean;
+    err: boolean;
 
     constructor() {
         this.files = [];
+        this.eventer = new Eventer();
+        this._loading = false;
     }
 
     isValid(): boolean {
@@ -291,11 +296,25 @@ export class EquipmentImporter {
         }
     }
 
+    set loading(value) {
+        this._loading = value;
+        this.eventer.trigger(`loading::${value}`);
+    }
+
+    get loading() {
+        return this._loading;
+    }
+
     async validate(): Promise<any> {
+        this.loading = true;
         try {
             await this.postFile();
         } catch (err) {
+            this.err = err;
             throw err;
+        }
+        finally {
+            this.loading = false;
         }
     }
 

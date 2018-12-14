@@ -810,7 +810,7 @@ body.lystore {
     background-color: $accent;
 
     &.loading {
-      animation: loadingBar 5s cubic-bezier(0, .95, 0.99, 1.00);
+      animation: loadingBar 50s cubic-bezier(0, .98, 0.99, 1.00);
     }
   }
 

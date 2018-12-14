@@ -54,10 +54,10 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 + Lystore.lystoreSchema + ".contract ON contract.id_supplier = supplier.id) c " +
                 "ON oe.id_contract = c.id WHERE id_campaign = ? AND id_structure = ? " +
                 "GROUP BY (prj.id , oe.id, tt.id, gr.id, c.name,prj.preference,campaign.priority_enabled) " +
-                "ORDER BY CASE WHEN campaign.priority_enabled IS TRUE " +
-                                "THEN 'prj.preference' " +
-                                "ELSE 'creation_date' " +
-                         "END ASC;";
+                "ORDER BY CASE WHEN campaign.priority_enabled = false " +
+                          "THEN oe.creation_date END ASC, " +
+                          "CASE WHEN campaign.priority_enabled = true "+
+                          "THEN preference END ASC";
 
         values.add(idCampaign).add(idStructure);
 

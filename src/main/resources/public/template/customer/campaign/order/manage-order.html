@@ -187,4 +187,15 @@
             </div>
         </div>
     </section>
+    <section class="toggle-buttons" ng-class="{ hide: ordersClient.selected.length === 0 }">
+        <div class="toggle">
+            <div class="row">
+
+                <button
+                        ng-click="displayLightboxDelete(ordersClient.selected)">
+                    <i18n>delete</i18n>
+                </button>
+            </div>
+        </div>
+    </section>
 </div>

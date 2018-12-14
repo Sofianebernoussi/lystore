@@ -10,6 +10,7 @@ export class Project implements Selectable {
     title: Title;
     grade: Grade;
     building?: string;
+    preference?: number;
     stair?: number;
     room?: string;
     name: string;
@@ -44,21 +45,20 @@ export class Project implements Selectable {
     }
 
     toJson() {
+            
 
         let data =
             {
             description: this.description,
             name: this.name,
-
             id_title: this.title.id,
             id_grade: this.grade.id,
-
-
-                building: this.building,
+            building: this.building,
             site: this.site,
             stair: this.stair,
-            room: this.room,
-            }
+            room: this.room
+        }
+
         return this.parseToJsonOptionnal(data);
     }
 
@@ -88,9 +88,9 @@ export class Project implements Selectable {
         }
     }
 
-    async delete(idCampaign, idStructure) {
+    async delete() {
         try {
-            return await http.delete(`/lystore/project/${this.id}/${idCampaign}/${idStructure}`);
+            return await http.delete(`/lystore/project/${this.id}`);
         } catch (e) {
             notify.error('lystore.project.delete.err')
         }

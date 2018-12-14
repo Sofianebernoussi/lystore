@@ -71,7 +71,7 @@ public class OrderController extends ControllerHelper {
         this.programService = new DefaultProgramService(Lystore.lystoreSchema, "program");
     }
 
-    @Get("/orders/:idCampaign/:idStructure")
+    @Get("/orders/:idCampaign/:idStructure/:priorityEnabled")
     @ApiDoc("Get the list of orders by idCampaign and idstructure")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AccessOrderRight.class)
@@ -79,7 +79,8 @@ public class OrderController extends ControllerHelper {
         try {
             Integer idCampaign = Integer.parseInt(request.params().get("idCampaign"));
             String idStructure = request.params().get("idStructure");
-            orderService.listOrder(idCampaign,idStructure, arrayResponseHandler(request));
+            boolean priorityEnabled = Boolean.parseBoolean(request.params().get("priorityEnabled"));
+            orderService.listOrder(idCampaign,idStructure,priorityEnabled, arrayResponseHandler(request));
         }catch (ClassCastException e ){
             log.error("An error occured when casting campaign id ",e);
         }

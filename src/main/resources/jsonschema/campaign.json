@@ -20,6 +20,9 @@
     },
     "purse_enabled": {
       "type": "boolean"
+    },
+    "priority_enabled": {
+      "type": "boolean"
     }
   },
   "required": [

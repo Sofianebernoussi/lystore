@@ -41,6 +41,9 @@
         "string",
         "null"
       ]
+    },
+    "preference": {
+      "type": "number"
     }
   },
   "required": [

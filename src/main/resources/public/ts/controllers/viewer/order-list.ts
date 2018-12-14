@@ -4,12 +4,12 @@ import {Notification, OrderClient, OrdersClient, Project, Projects, Utils} from 
 declare let window: any;
 
 export const orderPersonnelController = ng.controller('orderPersonnelController',
-    ['$scope', '$routeParams',  ($scope, $routeParams) => {
+    ['$scope', '$routeParams', ($scope, $routeParams) => {
 
         $scope.display = {
-            ordersClientOption : [],
-            lightbox : {
-                deleteOrder : false,
+            ordersClientOption: [],
+            lightbox: {
+                deleteOrder: false,
                 deleteProject: false,
                 udpateProject: false,
             }
@@ -22,7 +22,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
         };
 
         $scope.hasAProposalPrice = (orderClient: OrderClient) => {
-            
+
             return (orderClient.price_proposal);
         }
 
@@ -40,9 +40,9 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             return totalPrice.toFixed(roundNumber);
         };
 
-        $scope.updateComment= (orderClient: OrderClient) =>{
+        $scope.updateComment = (orderClient: OrderClient) => {
             if (!orderClient.comment || orderClient.comment.trim() == " ") {
-                orderClient.comment="";
+                orderClient.comment = "";
 
             }
             orderClient.updateComment();
@@ -74,7 +74,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             }
         }
         $scope.deleteOrderEquipment = async (orderEquipmentToDelete: OrderClient) => {
-            let { status, data } = await orderEquipmentToDelete.delete();
+            let {status, data} = await orderEquipmentToDelete.delete();
             if (status === 200) {
                 $scope.campaign.nb_order = data.nb_order;
                 $scope.campaign.purse_amount = data.amount;
@@ -85,7 +85,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
 
             }
             $scope.cancelOrderEquipmentDelete();
-            await $scope.ordersClient.sync(null, [], $routeParams.idCampaign, $scope.current.structure.id );
+            await $scope.ordersClient.sync($scope.campaign.priority_enabled, null, [], $routeParams.idCampaign, $scope.current.structure.id);
             Utils.safeApply($scope);
         };
 
@@ -152,7 +152,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
                     }
                 }
             }
-            await $scope.ordersClient.sync(null, [], $routeParams.idCampaign, $scope.current.structure.id);
+            await $scope.ordersClient.sync($scope.campaign.priority_enabled,null, [], $routeParams.idCampaign, $scope.current.structure.id);
             $scope.display.lightbox.deleteProject = false;
             template.close('orderClient.deleteProject');
             Utils.safeApply($scope);
@@ -205,4 +205,41 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             }
             return isDeletable;
         }
+        $scope.upButton = (project: Project, index: number) => {
+            let TabIdsProjects = $scope.getIdprojectsFromOrdersClientProject(project, $scope.ordersClient.projects.all[index - 1]);
+            $scope.ordersClient.updateReference(TabIdsProjects, $scope.ordersClient.all[index].id_campaign,
+                $scope.ordersClient.all[index].id_project, $scope.ordersClient.all[index].id_structure);
+            let tmpPreference = project.preference;
+            project.preference = $scope.ordersClient.projects.all[index - 1].preference;
+            $scope.ordersClient.projects.all[index - 1].preference = tmpPreference;
+            $scope.ordersClient.projects.all[index] = $scope.ordersClient.projects.all[index - 1];
+            $scope.ordersClient.projects.all[index - 1] = project;
+            Utils.safeApply($scope);
+
+        }
+        $scope.downButton = (project: Project, index: number) => {
+            let TabIdsProjects = $scope.getIdprojectsFromOrdersClientProject($scope.ordersClient.projects.all[index + 1], project);
+            $scope.ordersClient.updateReference(TabIdsProjects, $scope.ordersClient.all[index].id_campaign,
+                $scope.ordersClient.all[index].id_project, $scope.ordersClient.all[index].id_structure);
+            let tmpPreference = project.preference;
+            project.preference = $scope.ordersClient.projects.all[index + 1].preference;
+            $scope.ordersClient.projects.all[index + 1].preference = tmpPreference;
+            $scope.ordersClient.projects.all[index] = $scope.ordersClient.projects.all[index + 1];
+            $scope.ordersClient.projects.all[index + 1] = project;
+            Utils.safeApply($scope);
+
+        }
+        $scope.getIdprojectsFromOrdersClientProject = (projectUp: Project, projectDown: Project) => {
+            let tabIdsProjects = new Array(2);
+            tabIdsProjects[0] = {
+                id: projectUp.id,
+                preference: projectUp.preference
+            }
+            tabIdsProjects[1] = {
+                id: projectDown.id,
+                preference: projectDown.preference
+            }
+            return tabIdsProjects;
+        }
+
     }]);

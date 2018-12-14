@@ -369,7 +369,7 @@
   "room.number": "N°salle(s)",
   "sites": "Site(s)",
   "room.site": "Site",
-  "lystore.grade": "Filière",
+  "lystore.grade": "Diplôme concerné ",
   "lystore.project.create.err": "Erreur lors de la création du projet",
   "lystore.priceProposal": "Prix souhaité",
   "lystore.price.edit": "Modifier le prix",

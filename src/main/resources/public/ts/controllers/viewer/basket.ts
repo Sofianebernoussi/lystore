@@ -10,7 +10,8 @@ export const basketController = ng.controller('basketController',
                 confirmOrder: false,
                 createProject: false,
                 addDocuments: false
-            }
+            },
+            grade: "",
         };
 
         $scope.isProposed = (basket: Basket) => {

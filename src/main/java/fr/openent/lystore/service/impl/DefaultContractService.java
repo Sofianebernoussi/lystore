@@ -24,7 +24,8 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
                 "id_contract_type, max_brink, id_supplier, id_agent, reference, renewal_end, end_date, " +
                 "supplier.name as supplier_display_name, contract.file as file " +
                 "FROM " + Lystore.lystoreSchema + ".contract INNER JOIN " + Lystore.lystoreSchema +
-                ".supplier on (contract.id_supplier = supplier.id)";
+                ".supplier on (contract.id_supplier = supplier.id) " +
+                "ORDER BY contract.name ASC";
 
         this.sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray(), SqlResult.validResultHandler(handler));
     }

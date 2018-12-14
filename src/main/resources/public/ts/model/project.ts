@@ -88,9 +88,9 @@ export class Project implements Selectable {
         }
     }
 
-    async delete() {
+    async delete(id_campaign, id_structure) {
         try {
-            return await http.delete(`/lystore/project/${this.id}`);
+            return await http.delete(`/lystore/project/${this.id}/${id_campaign}/${id_structure}`);
         } catch (e) {
             notify.error('lystore.project.delete.err')
         }

@@ -82,26 +82,12 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
             }
         }
 
-        String query = "SELECT equip.*, supplier.name as supplier_name, contract.name as contract_name, tax.value as tax_amount, equipment_type.name as nametype, array_to_json( " +
-                "(SELECT array_agg(id_tag) " +
-                "FROM " + Lystore.lystoreSchema + ".equipment INNER JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (equipment.id = rel_equipment_tag.id_equipment) " +
-                "WHERE equip.id = rel_equipment_tag.id_equipment)) as tags, array_to_json(array_agg(opts.*)) as options " +
+        String query = "SELECT equip.reference, equip.name, equip.id, equip.status,  equip.price, supplier.name as supplier_name, contract.name as contract_name, tax.value as tax_amount " +
                 "FROM " + Lystore.lystoreSchema + ".equipment equip " +
-                "LEFT JOIN " + Lystore.lystoreSchema + ".equipment_type ON (equipment_type.id = equip.id_type) " +
-                "LEFT JOIN " + Lystore.lystoreSchema + ".equipment_option ON (equip.id = equipment_option.id_equipment) " +
-                "LEFT JOIN (" +
-                " SELECT equipment.id as id_equipment, equipment.reference, equipment.id_type, equipment_option.id, equipment_option.id_option, equipment.name, equipment.price, " +
-                "equipment_option.amount, equipment_option.required, tax.value as tax_amount, equipment_option.id_equipment as master_equipment, equipment_type.name as nametype " +
-                " FROM " + Lystore.lystoreSchema + ".equipment " +
-                " INNER JOIN " + Lystore.lystoreSchema + ".tax ON (equipment.id_tax = tax.id) " +
-                " INNER JOIN " + Lystore.lystoreSchema + ".equipment_option ON (equipment_option.id_option = equipment.id) " +
-                " INNER JOIN " + Lystore.lystoreSchema + ".equipment_type ON (equipment_type.id = equipment.id_type) " +
-                ") opts ON (equipment_option.id_option = opts.id_equipment AND opts.master_equipment = equip.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax ON tax.id = equip.id_tax " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (contract.id = equip.id_contract) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".supplier ON (contract.id_supplier = supplier.id) " +
                 getTextFilter(filters) +
-                "GROUP BY (equip.id, tax.id,equipment_type.name, supplier.name, contract.name, tax.value)" +
                 "ORDER by " + getSqlOrderValue(order) + " " + getSqlReverseString(reverse);
 
         if (page != null) {
@@ -111,23 +97,34 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         sql.prepared(query, params, SqlResult.validResultHandler(handler));
     }
     public void equipment(Integer idEquipment,  Handler<Either<String, JsonArray>> handler){
-        String query = "SELECT e.*, tax.value tax_amount, array_to_json(array_agg(opts)) as options " +
-                "FROM " + Lystore.lystoreSchema + ".equipment e " +
-                "LEFT JOIN (" +
-                "SELECT equipment_option.id_equipment, opt.id, opt.reference,eq_type.name as nametype, opt.name, opt.price, equipment_option.amount, equipment_option.required, tax.value as tax_amount, " +
-                "opt.id_type " +
+        String query = "SELECT equip.*, supplier.name as supplier_name, contract.name as contract_name, tax.value as tax_amount, equipment_type.name as nametype, array_to_json( " +
+                "(SELECT array_agg(tag.*) " +
                 "FROM " + Lystore.lystoreSchema + ".equipment " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".equipment_option ON (equipment.id = equipment_option.id_equipment) " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".equipment opt ON (equipment_option.id_option = opt.id) " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".tax ON (opt.id_tax = tax.id) " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".equipment_type eq_type on (equipment_type.id = opt.id_type)" +
-                "WHERE equipment_option.id_equipment = ? " +
-                ") opts ON opts.id_equipment = e.id " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".tax on tax.id = e.id_tax WHERE e.id = ? " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".equipment_type on equipment_type.id = e.id_type WHERE e.id = ? " +
-                "GROUP BY (e.id, tax.id)";
+                "INNER JOIN  " + Lystore.lystoreSchema + ".rel_equipment_tag ON (equipment.id = rel_equipment_tag.id_equipment) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".tag ON rel_equipment_tag.id_tag = tag.id" +
+                " WHERE equip.id = rel_equipment_tag.id_equipment)) as tags, " +
+                "array_to_json(array_agg(opts.*)) as options " +
+                "FROM  " + Lystore.lystoreSchema + ".equipment equip    " +
+                "LEFT JOIN " + Lystore.lystoreSchema + ".equipment_type ON (equipment_type.id = equip.id_type) " +
+                "LEFT JOIN " + Lystore.lystoreSchema + ".equipment_option ON (equip.id = equipment_option.id_equipment) " +
+                "LEFT JOIN ( " +
+                "SELECT equipment.id as id_equipment, equipment.reference, equipment.id_type, equipment_option.id, equipment_option.id_option, equipment.name, equipment.price, equipment_option.amount, " +
+                "equipment_option.required, tax.value as tax_amount, equipment_option.id_equipment as master_equipment, equipment_type.name as nametype " +
+                "FROM " + Lystore.lystoreSchema + ".equipment " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".tax  ON (equipment.id_tax = tax.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".equipment_option  ON (equipment_option.id_option = equipment.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".equipment_type ON (equipment_type.id = equipment.id_type) " +
+                ") opts ON (equipment_option.id_option = opts.id_equipment AND opts.master_equipment = equip.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".tax ON tax.id = equip.id_tax " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (contract.id = equip.id_contract) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".supplier ON (contract.id_supplier = supplier.id) " +
+                "WHERE equip.id = ? " +
+                "GROUP BY (equip.id, tax.id,equipment_type.name, supplier.name, contract.name, tax.value) " +
+                "ORDER by equip.name ASC " +
+                "LIMIT 50 OFFSET 0";
 
-        this.sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray().add(idEquipment).add(idEquipment), SqlResult.validResultHandler(handler));
+
+        this.sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray().add(idEquipment), SqlResult.validResultHandler(handler));
     }
 
     public void listEquipments(Integer idCampaign, String idStructure, Integer page, List<String> filters,

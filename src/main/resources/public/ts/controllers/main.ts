@@ -1,27 +1,8 @@
 import {_, Behaviours, idiom as lang, model, moment, ng, template} from 'entcore';
 import {
-    Agents,
-    Basket,
-    Baskets,
-    Campaign,
-    Campaigns,
-    Contracts,
-    ContractTypes,
-    Equipment,
-    Equipments,
-    EquipmentTypes,
-    Logs,
-    Notification,
-    OrderClient,
-    OrdersClient,
-    Programs,
-    StructureGroups,
-    Structures,
-    Supplier,
-    Suppliers,
-    Tags,
-    Taxes,
-    Utils
+    Agents, Basket, Baskets, Campaign, Campaigns, Contracts, ContractTypes, Equipment, Equipments, EquipmentTypes,
+    Logs, Notification, OrderClient, OrdersClient, Programs, StructureGroups, Structures, Supplier, Suppliers, Tags,
+    Taxes, Utils
 } from '../model';
 import {Mix} from "entcore-toolkit";
 
@@ -91,6 +72,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             manageEquipments: async () => {
+                delete $scope.equipment;
+
                 template.open('administrator-main', 'administrator/equipment/equipment-container');
                 template.open('equipments-main', 'administrator/equipment/manage-equipments');
                 await $scope.equipments.sync();

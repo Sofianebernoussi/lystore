@@ -26,7 +26,12 @@ export class Equipment implements Selectable {
     option_enabled: boolean;
     price_editable: boolean;
     id_type: number;
+    eventer: Eventer;
+    _loading: boolean;
+
     constructor (name?: string, price?: number) {
+        this.eventer = new Eventer();
+        this._loading = false;
         if (name) this.name = name;
         if (price) this.price = price;
         this.technical_specs = [];
@@ -100,6 +105,8 @@ export class Equipment implements Selectable {
     }
 
     async sync (id) {
+        this.loading = true;
+
         try {
             let { data } =  await http.get(`/lystore/equipment/${id}`);
             Mix.extend(this, data[0]);
@@ -108,10 +115,27 @@ export class Equipment implements Selectable {
             this.options.toString() !== '[null]' && this.options !== null ?
                 this.options = Mix.castArrayAs(EquipmentOption, JSON.parse(this.options.toString()))
                 : this.options = [];
+            this.tags.toString() !== '[null]' && this.options !== null ?
+                this.tags = Mix.castArrayAs(Tag, JSON.parse(this.tags.toString()))
+                : this.tags = [];
+            this.eventer.trigger(`get:end`)
         } catch (e) {
             notify.error('lystore.equipment.sync.err');
         }
+        finally {
+            this.loading = false;
+        }
     }
+
+    set loading(state: boolean) {
+        this._loading = state;
+        this.eventer.trigger(`loading::${this._loading}`);
+    }
+
+    get loading() {
+        return this._loading;
+    }
+
 }
 
 export class TechnicalSpec {
@@ -158,6 +182,7 @@ export class Equipments extends Selection<Equipment> {
         };
     }
 
+
     async delete (equipments: Equipment[]): Promise<void> {
         try {
             let filter = '';
@@ -189,16 +214,8 @@ export class Equipments extends Selection<Equipment> {
             this.all.map((equipment) => {
                 equipment.price = parseFloat(equipment.price.toString());
                 equipment.tax_amount = parseFloat(equipment.tax_amount.toString());
-                equipment.tags = equipment.tags !== null && equipment.tags.toString() !==  '[null]' ? JSON.parse(equipment.tags.toString()) : [];
-                equipment.options.toString() !== '[null]' && equipment.options !== null ?
-                    equipment.options = Mix.castArrayAs(EquipmentOption, JSON.parse(equipment.options.toString()))
-                    : equipment.options = [];
-
             });
-            this.all.map((equipment) =>
-                equipment.technical_specs = equipment.technical_specs !== null
-                    ? Mix.castArrayAs(TechnicalSpec, Utils.parsePostgreSQLJson(equipment.technical_specs.toString()))
-                    : equipment.technical_specs);
+
         } catch (e) {
             notify.error('lystore.equipment.sync.err');
             throw e;

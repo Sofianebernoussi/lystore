@@ -1,8 +1,15 @@
-<div class="row ten centered">
+<div class="loading-bar" ng-class="{loading: equipment.loading}"></div>
+
+<div ng-if="equipment.loading">
+    <h1> Chargement en cours ...</h1>
+</div>
+
+<div ng-if="!equipment.loading" class="row ten centered">
     <h1>
         <i18n ng-show="equipment.id == undefined">lystore.equipment.add</i18n>
         <i18n ng-show="equipment.id !== undefined">lystore.equipment.modify</i18n>
     </h1>
+
     <article>
         <form >
             <div class="row horizontal-spacing vertical-spacing">

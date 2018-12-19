@@ -13,7 +13,6 @@ export class Project implements Selectable {
     preference?: number;
     stair?: number;
     room?: string;
-    name: string;
     site?: string;
     titles: Titles;
     grades: Grades;
@@ -31,9 +30,9 @@ export class Project implements Selectable {
         this.eventer = new Eventer();
     }
 
-    async init() {
+    async init(idCampaign: number, idStructure: string) {
         this.eventer.trigger('init:start');
-        await this.titles.sync();
+        await this.titles.sync(idCampaign, idStructure);
         await this.grades.sync();
         if (!this.grade) {
             this.grade = this.grades.all[0];
@@ -50,7 +49,6 @@ export class Project implements Selectable {
         let data =
             {
             description: this.description,
-            name: this.name,
             id_title: this.title.id,
             id_grade: this.grade.id,
             building: this.building,
@@ -62,12 +60,11 @@ export class Project implements Selectable {
         return this.parseToJsonOptionnal(data);
     }
 
-    parseToJsonOptionnal({description, name, id_title, id_grade, building, site, stair, room}) {
+    parseToJsonOptionnal({description, id_title, id_grade, building, site, stair, room}) {
         return {
             ...(description && {description}),
             id_title: id_title,
             id_grade: id_grade,
-            ...(name && {name: name}),
             ...(building && {building: building}),
             ...(site && {site: site}),
             ...((stair || stair == 0) && {stair: stair}),

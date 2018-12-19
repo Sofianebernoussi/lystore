@@ -43,8 +43,8 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
 
         String query = "INSERT INTO " +
                 Lystore.lystoreSchema + ".project (" +
-                "id_title, id_grade, description, building, stair, room, site, name) " +
-                "Values ( ?, ?, ?, ?, ?, ?, ?, ? ) RETURNING id ;";
+                "id_title, id_grade, description, building, stair, room, site) " +
+                "Values ( ?, ?, ?, ?, ?, ?, ?) RETURNING id ;";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(project.getInteger("id_title"))
@@ -53,8 +53,7 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                 .add(project.getString("building"))
                 .add(project.getInteger("stair"))
                 .add(project.getString("room"))
-                .add(project.getString("site"))
-                .add(project.getString("name"));
+                .add(project.getString("site"));
 
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
 
@@ -194,7 +193,6 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                     .add(project.getInteger("stair"))
                     .add(project.getString("room"))
                     .add(project.getString("site"))
-                    .add(project.getString("name"))
                     .add(id);
 
             query = "UPDATE " + Lystore.lystoreSchema + ".project " +
@@ -204,8 +202,7 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                     "building = ?, " +
                     "stair = ?," +
                     "room = ?, " +
-                    "site = ?, " +
-                    "name = ? " +
+                    "site = ? " +
                     "WHERE id = ? ;";
 
 
@@ -226,9 +223,6 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                 params.add(project.getString("site"));
 
 
-            params.add(project.getString("name"))
-                    .add(id);
-
 
             query = "UPDATE " + Lystore.lystoreSchema + ".project " +
                     "SET id_title = ?, " +
@@ -237,9 +231,10 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                     "building =  " + (project.containsKey("building") ? "?," : "null, ") +
                     "stair =  " + (project.containsKey("stair") ? "?," : "null, ") +
                     "room =  " + (project.containsKey("room") ? "?," : "null, ") +
-                    "site =  " + (project.containsKey("site") ? "?," : "null, ") +
-                    "name =  " + "? " +
+                    "site =  " + (project.containsKey("site") ? "? " : "null ") +
                     "WHERE id = ? ;";
+
+            params.add(id);
         }
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }

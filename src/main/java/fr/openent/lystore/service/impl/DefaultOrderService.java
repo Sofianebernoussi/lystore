@@ -46,8 +46,8 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "LEFT JOIN "+ Lystore.lystoreSchema + ".order_client_options order_opts ON " +
                 "oe.id = order_opts.id_order_client_equipment " +
                 "INNER JOIN lystore.project as prj ON oe.id_project = prj.id " +
-                "INNER JOIN lystore.title as tt ON tt.id = prj.id_title " +
-                "INNER JOIN lystore.grade as gr ON gr.id = prj.id_grade " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".title as tt ON tt.id = prj.id_title " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".grade as gr ON gr.id = prj.id_grade " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".order_file ON oe.id = order_file.id_order_client_equipment " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".campaign ON oe.id_campaign = campaign.id " +
                 "INNER JOIN (SELECT supplier.name, contract.id FROM " + Lystore.lystoreSchema + ".supplier INNER JOIN "

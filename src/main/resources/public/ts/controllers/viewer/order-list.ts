@@ -179,9 +179,11 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
 
         $scope.updateProject = async () => {
             let {status} = await $scope.projectToUpdate.update();
+            $scope.projectToUpdate.selected = false;
             delete $scope.projectToUpdate;
             $scope.display.lightbox.udpateProject = false;
             template.close('orderClient.updateProject');
+            $scope.notifications.push(new Notification('lystore.project.update.success', 'confirm'));
             Utils.safeApply($scope);
         }
 

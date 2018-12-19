@@ -1,7 +1,7 @@
 import http from 'axios';
 import {_, notify} from 'entcore';
 import {Mix, Selectable, Selection} from 'entcore-toolkit';
-import {Purses, StructureGroup, Tags} from './index';
+import {Purses, StructureGroup, Tags, Titles} from './index';
 
 
 export class Campaign implements Selectable  {
@@ -16,6 +16,7 @@ export class Campaign implements Selectable  {
     nb_structures: number;
     nb_equipments: number;
     purses?: Purses;
+    titles: Titles;
     nb_panier?: number;
     purse_enabled: boolean;
     priority_enabled: boolean;
@@ -24,6 +25,7 @@ export class Campaign implements Selectable  {
         if (name) this.name = name;
         if (description) this.description = description;
         this.groups = [];
+        this.titles = new Titles();
         this.image = '';
         this.purse_enabled = false;
         this.priority_enabled = true;

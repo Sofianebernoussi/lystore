@@ -9,9 +9,6 @@
         "null"
       ]
     },
-    "name": {
-      "type": "string"
-    },
     "id_grade": {
       "type": "number"
     },
@@ -47,7 +44,6 @@
     }
   },
   "required": [
-    "id_title",
-    "id_grade"
+    "id_title"
   ]
 }

@@ -10,7 +10,7 @@ export const projectController = ng.controller("projectController",
         $scope.project.eventer.on('init:end', () => {
             Utils.safeApply($scope);
         });
-        $scope.project.init();
+        $scope.project.init($scope.campaign.id, $scope.current.structure.id);
 
         $scope.confirmProject = (project: Project) => {
             project.create();

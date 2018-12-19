@@ -139,6 +139,14 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('campaigns-main', 'administrator/campaign/purse/manage-purse');
                 Utils.safeApply($scope);
             },
+            manageTitles: async (params) => {
+                const campaign = $scope.campaigns.get(parseInt(params.idCampaign));
+                if (template.isEmpty('administrator-main') || campaign === undefined) {
+                    $scope.redirectTo('/campaigns');
+                }
+                template.open('campaigns-main', 'administrator/campaign/title/manage-title');
+                Utils.safeApply($scope);
+            },
             manageStructureGroups: async () => {
                 template.open('administrator-main', 'administrator/structureGroup/structureGroup-container');
                 await $scope.structureGroups.sync();

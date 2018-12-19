@@ -119,7 +119,7 @@ export class OrdersClient extends Selection<OrderClient> {
                     order.price = parseFloat(order.price.toString());
                     order.tax_amount = parseFloat(order.tax_amount.toString());
                     order.project = Mix.castAs(Project, JSON.parse(order.project.toString()));
-                    order.project.init();
+                    order.project.init(idCampaign, idStructure);
                     order.project.title = Mix.castAs(Title, JSON.parse(order.title.toString()));
                     order.project.grade = Mix.castAs(Grade, JSON.parse(order.grade.toString()));
 

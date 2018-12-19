@@ -1,4 +1,4 @@
-import { ng, routes, model, Behaviours } from 'entcore';
+import {Behaviours, model, ng, routes} from 'entcore';
 import * as controllers from './controllers';
 import * as directives from './directives';
 import * as filters from './filters';
@@ -62,6 +62,9 @@ routes.define(($routeProvider) => {
             })
             .when('/campaigns/:idCampaign/purse', {
                 action: 'managePurse'
+            })
+            .when('/campaigns/:idCampaign/titles', {
+                action: 'manageTitles'
             })
             .when('/order/waiting', {
                 action: 'orderWaiting'

@@ -173,6 +173,7 @@ public class ImportCSVHelper {
                             } else {
                                 handler.handle(new Either.Left<>("Can not read the file"));
                             }
+                            deleteImportPath(vertx, path);
                         }
                     });
                 } else {

@@ -70,4 +70,12 @@ public interface CampaignService {
      * @param handler
      */
     void updatePreference(Integer campaignId,Integer projectId, String structureId,JsonArray projectOrders, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * List all structure identifiers in the campaign
+     *
+     * @param idCampaign Campaign identifier
+     * @param handler    Function handler returning data
+     */
+    void getStructures(Integer idCampaign, Handler<Either<String, JsonArray>> handler);
 }

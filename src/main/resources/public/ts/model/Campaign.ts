@@ -25,7 +25,6 @@ export class Campaign implements Selectable  {
         if (name) this.name = name;
         if (description) this.description = description;
         this.groups = [];
-        this.titles = new Titles();
         this.image = '';
         this.purse_enabled = false;
         this.priority_enabled = true;

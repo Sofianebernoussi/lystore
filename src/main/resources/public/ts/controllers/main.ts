@@ -1,8 +1,28 @@
 import {_, Behaviours, idiom as lang, model, moment, ng, template} from 'entcore';
 import {
-    Agents, Basket, Baskets, Campaign, Campaigns, Contracts, ContractTypes, Equipment, Equipments, EquipmentTypes,
-    Logs, Notification, OrderClient, OrdersClient, Programs, StructureGroups, Structures, Supplier, Suppliers, Tags,
-    Taxes, Utils
+    Agents,
+    Basket,
+    Baskets,
+    Campaign,
+    Campaigns,
+    Contracts,
+    ContractTypes,
+    Equipment,
+    Equipments,
+    EquipmentTypes,
+    Logs,
+    Notification,
+    OrderClient,
+    OrdersClient,
+    Programs,
+    StructureGroups,
+    Structures,
+    Supplier,
+    Suppliers,
+    Tags,
+    Taxes,
+    Titles,
+    Utils
 } from '../model';
 import {Mix} from "entcore-toolkit";
 
@@ -124,6 +144,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
             manageTitles: async (params) => {
                 const campaign = $scope.campaigns.get(parseInt(params.idCampaign));
+                campaign.titles = new Titles();
                 if (template.isEmpty('administrator-main') || campaign === undefined) {
                     $scope.redirectTo('/campaigns');
                 }

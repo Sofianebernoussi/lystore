@@ -22,7 +22,8 @@
         </div>
     </div>
     <nav class="prev-next vertical-spacing-four" ng-if="equipments.page_count > 1">
-        <button ng-click="equipments.loadPrev(campaign.id, current.structure.id)" ng-disabled="equipments.page === 0">
+        <button ng-click="display.equipment = false; equipments.loadPrev(campaign.id, current.structure.id)"
+                ng-disabled="equipments.page === 0">
             <i class="left-open"></i>
         </button>
         <span class="pagination">
@@ -31,7 +32,7 @@
 				<span class="zero-desktop">/</span>
 				<span>[[ equipments.page_count ]]</span>
 			</span>
-        <button ng-click="equipments.loadNext(campaign.id, current.structure.id)"
+        <button ng-click="display.equipment = false; equipments.loadNext(campaign.id, current.structure.id);"
                 ng-disabled="equipments.page + 1 === equipments.page_count">
             <i class="open-right"></i>
         </button>

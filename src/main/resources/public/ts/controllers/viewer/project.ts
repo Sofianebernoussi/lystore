@@ -18,11 +18,10 @@ export const projectController = ng.controller("projectController",
             $scope.display.lightbox.createProject = false;
             template.close('basket.project');
             Utils.safeApply($scope);
-        }
+        };
 
         $scope.project.eventer.on('create:end', () => {
             $scope.takeClientOrder($scope.baskets, $scope.project.id);
-
         });
 
         $scope.cancelProjectConfirmation = () => {

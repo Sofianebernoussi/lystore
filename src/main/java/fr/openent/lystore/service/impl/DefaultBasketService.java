@@ -244,9 +244,10 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
 
             JsonObject basket;
+            Boolean purse_enabled = baskets.getJsonObject(0).getBoolean("purse_enabled");
             for (int i = 0; i < baskets.size(); i++) {
                 basket = baskets.getJsonObject(i);
-                if (basket.getBoolean("purse_enabled")) {
+                if (purse_enabled) {
                     statements.add(purseService.updatePurseAmountStatement(Float.valueOf(basket.getString("total_price")),
                             idCampaign, idStructure, "-"));
                 }
@@ -260,7 +261,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                     statements.add(deleteFilesFromBasket(basket.getInteger("id_basket")));
                 }
             }
-            statements.add(getDeletionBasketsEquipmentStatments(idCampaign, idStructure, baskets_objects));
+            statements.add(getDeletionBasketsEquipmentStatments(idCampaign, idStructure, baskets_objects, purse_enabled));
 
             sql.transaction(statements, new Handler<Message<JsonObject>>() {
                 @Override
@@ -493,34 +494,45 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 .put("action", "prepared");
     }
 
-    private static JsonObject getDeletionBasketsEquipmentStatments(Integer idCampaign, String idStructure, JsonArray baskets) {
+    private static JsonObject getDeletionBasketsEquipmentStatments(Integer idCampaign, String idStructure, JsonArray baskets, Boolean purse_enabled) {
         String basketFilter = baskets.size() > 0 ? "AND basket_equipment.id IN " + Sql.listPrepared(baskets.getList()) : "";
 
         StringBuilder queryEquipmentOrder = new StringBuilder()
 
                 .append( " DELETE FROM " + Lystore.lystoreSchema + ".basket_equipment " )
                 .append(" WHERE id_campaign = ? AND id_structure = ? " + basketFilter + " RETURNING ")
-                .append(getReturningQueryOfTakeOrder()) ;
+                .append(getReturningQueryOfTakeOrder(purse_enabled));
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(idCampaign).add(idStructure);
         for (int i = 0; i < baskets.size(); i++) {
             params.add(baskets.getInteger(i));
         }
-        params.add(idCampaign).add(idStructure)
-                .add(idCampaign).add(idStructure);
+        params.add(idCampaign).add(idStructure);
+        if (purse_enabled) {
+            params.add(idCampaign).add(idStructure);
+        }
         return new JsonObject()
                 .put("statement", queryEquipmentOrder.toString())
                 .put("values", params )
                 .put("action", "prepared");
     }
-    private static String getReturningQueryOfTakeOrder() {
-        return "( SELECT row_to_json(row(p.amount, count(o.id ) )) " +
-                " FROM " + Lystore.lystoreSchema + ".purse p, " + Lystore.lystoreSchema + ".order_client_equipment o " +
-                " where p.id_campaign = ? " +
-                " AND p.id_structure = ? " +
-                " AND  o.id_campaign = ? " +
-                " AND o.id_structure = ? AND o.status != 'VALID' " +
-                " GROUP BY(p.amount) )";
+
+    private static String getReturningQueryOfTakeOrder(Boolean purse_enabled) {
+        if (purse_enabled) {
+            return "( SELECT row_to_json(row(p.amount, count(o.id ) )) " +
+                    " FROM " + Lystore.lystoreSchema + ".purse p, " + Lystore.lystoreSchema + ".order_client_equipment o " +
+                    " where p.id_campaign = ? " +
+                    " AND p.id_structure = ? " +
+                    " AND  o.id_campaign = ? " +
+                    " AND o.id_structure = ? AND o.status != 'VALID' " +
+                    " GROUP BY(p.amount) )";
+        } else {
+            return "(SELECT row_to_json(row(count(o.id)))\n" +
+                    "FROM " + Lystore.lystoreSchema + ".order_client_equipment o " +
+                    "WHERE  o.id_campaign = ? " +
+                    "  AND o.id_structure = ? " +
+                    "  AND o.status != 'VALID')";
+        }
     }
     /**
      * Returns the amount of purse from an order transactions.
@@ -535,8 +547,10 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
         JsonObject result = event.body();
         if (result.containsKey("status") && "ok".equals(result.getString("status"))) {
             JsonObject returns = new JsonObject()
-                    .put("amount", basicBDObject.getInteger("f1"))
-                    .put("nb_order", basicBDObject.getInteger("f2"));
+                    .put("nb_order", basicBDObject.getInteger(basicBDObject.containsKey("f2") ? "f2" : "f1"));
+            if (basicBDObject.containsKey("f2")) {
+                returns.put("amount", basicBDObject.getInteger("f1"));
+            }
             DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
             final double cons = 100.0;
             Number total = Math.round(totalPrice * cons) / cons;

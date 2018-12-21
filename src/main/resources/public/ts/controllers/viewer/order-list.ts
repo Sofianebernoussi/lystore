@@ -68,11 +68,15 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
         };
 
 
-        $scope.deleteOrdersEquipment = (ordersEquipment: OrdersClient) => {
+        $scope.deleteOrdersEquipment = async (ordersEquipment: OrdersClient) => {
             for (let i = 0; i < ordersEquipment.length; i++) {
-                $scope.deleteOrderEquipment(ordersEquipment[i]);
+                await $scope.deleteOrderEquipment(ordersEquipment[i]);
             }
-        }
+            $scope.cancelOrderEquipmentDelete();
+            await $scope.ordersClient.sync(null, [], $routeParams.idCampaign, $scope.current.structure.id);
+            Utils.safeApply($scope);
+        };
+
         $scope.deleteOrderEquipment = async (orderEquipmentToDelete: OrderClient) => {
             let {status, data} = await orderEquipmentToDelete.delete();
             if (status === 200) {
@@ -80,13 +84,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
                 $scope.campaign.purse_amount = data.amount;
                 ($scope.campaign.purse_enabled) ? $scope.notifications.push(new Notification('lystore.orderEquipment.delete.confirm', 'confirm'))
                     : $scope.notifications.push(new Notification('lystore.requestEquipment.delete.confirm', 'confirm'));
-
-
-
             }
-            $scope.cancelOrderEquipmentDelete();
-            await $scope.ordersClient.sync( null, [], $routeParams.idCampaign, $scope.current.structure.id);
-            Utils.safeApply($scope);
         };
 
         $scope.projectHasBuilding = (project: Project) => {

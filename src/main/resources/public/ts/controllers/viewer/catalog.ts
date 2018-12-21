@@ -15,6 +15,7 @@ export const catalogController = ng.controller('catalogController',
         $scope.addFilter = (event) => {
             if (event && (event.which === 13 || event.keyCode === 13 )) {
                 $scope.equipments.sort.filters.push(event.target.value);
+                $scope.equipments.page = 0;
                 $scope.equipments.sync($routeParams.idCampaign, $scope.current.structure.id);
                 event.target.value = '';
             }

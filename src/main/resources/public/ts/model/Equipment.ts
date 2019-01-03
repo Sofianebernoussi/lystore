@@ -89,7 +89,7 @@ export class Equipment implements Selectable {
 
     async update () {
         try {
-           await http.put(`/lystore/equipment/${this.id}`, this.toJson());
+            await http.put(`/lystore/equipment/${this.id}`, this.toJson());
         } catch (e) {
             notify.error('lystore.equipment.update.err');
             throw e;
@@ -118,6 +118,9 @@ export class Equipment implements Selectable {
             this.tags.toString() !== '[null]' && this.options !== null ?
                 this.tags = Mix.castArrayAs(Tag, JSON.parse(this.tags.toString()))
                 : this.tags = [];
+            this.technical_specs = this.technical_specs.toString() !== '[null]'
+                ? Mix.castArrayAs(TechnicalSpec, Utils.parsePostgreSQLJson(this.technical_specs))
+                : this.technical_specs;
             this.eventer.trigger(`get:end`)
         } catch (e) {
             notify.error('lystore.equipment.sync.err');
@@ -214,6 +217,15 @@ export class Equipments extends Selection<Equipment> {
             this.all.map((equipment) => {
                 equipment.price = parseFloat(equipment.price.toString());
                 equipment.tax_amount = parseFloat(equipment.tax_amount.toString());
+                if (idCampaign) {
+                    equipment.tags = equipment.tags !== null && equipment.tags.toString() !== '[null]' ? JSON.parse(equipment.tags.toString()) : [];
+                    equipment.options.toString() !== '[null]' && equipment.options !== null ?
+                        equipment.options = Mix.castArrayAs(EquipmentOption, JSON.parse(equipment.options.toString()))
+                        : equipment.options = [];
+                    equipment.technical_specs = equipment.technical_specs !== null
+                        ? Mix.castArrayAs(TechnicalSpec, Utils.parsePostgreSQLJson(equipment.technical_specs.toString()))
+                        : equipment.technical_specs;
+                }
             });
 
         } catch (e) {

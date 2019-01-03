@@ -1,8 +1,20 @@
 import {_, moment, ng, template} from 'entcore';
 import {Mix} from 'entcore-toolkit';
 import {
-    Agent, Campaign, COMBO_LABELS, Contract, Equipment, EquipmentImporter, EquipmentOption, Notification,
-    StructureGroup, StructureGroupImporter, Supplier, Tag, TechnicalSpec, Utils
+    Agent,
+    Campaign,
+    COMBO_LABELS,
+    Contract,
+    Equipment,
+    EquipmentImporter,
+    EquipmentOption,
+    Notification,
+    StructureGroup,
+    StructureGroupImporter,
+    Supplier,
+    Tag,
+    TechnicalSpec,
+    Utils
 } from '../../model';
 
 export const configurationController = ng.controller('configurationController',
@@ -227,13 +239,15 @@ export const configurationController = ng.controller('configurationController',
         $scope.openEquipmentForm = (equipment: Equipment = new Equipment()) => {
             $scope.redirectTo('/equipments/create');
             $scope.equipment = new Equipment();
-            $scope.equipment.eventer.on('loading::true', $scope.$apply);
-            $scope.equipment.eventer.on('loading::false', $scope.$apply);
-            Mix.extend($scope.equipment, equipment);
-            $scope.equipment.sync(equipment.id);
-            $scope.equipment.tags = $scope.equipment.tags.map(
-                (tagId) => _.findWhere($scope.tags.all, {id: tagId})
-            );
+            if ('id' in equipment) {
+                Mix.extend($scope.equipment, equipment);
+                $scope.equipment.eventer.on('loading::true', $scope.$apply);
+                $scope.equipment.eventer.on('loading::false', $scope.$apply);
+                $scope.equipment.sync(equipment.id);
+                $scope.equipment.tags = $scope.equipment.tags.map(
+                    (tagId) => _.findWhere($scope.tags.all, {id: tagId})
+                );
+            }
             Utils.safeApply($scope);
         };
 
@@ -588,7 +602,7 @@ export const configurationController = ng.controller('configurationController',
         }
 
         $scope.selectOption = function (model: EquipmentOption, option: Equipment) {
-            const alreadyAdded = _.findWhere($scope.equipment.options, {id: option.id});
+            const alreadyAdded = _.findWhere($scope.equipment.options, {id_option: option.id_option});
             if (!alreadyAdded) {
                 let index = _.indexOf($scope.equipment.options, model);
                 $scope.equipment.options[index] = Mix.castAs(EquipmentOption, {...model, ...option});

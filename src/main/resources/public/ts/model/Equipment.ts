@@ -118,11 +118,11 @@ export class Equipment implements Selectable {
             this.tags.toString() !== '[null]' && this.options !== null ?
                 this.tags = Mix.castArrayAs(Tag, JSON.parse(this.tags.toString()))
                 : this.tags = [];
-            this.technical_specs = this.technical_specs.toString() !== '[null]'
+            this.technical_specs = this.technical_specs !== null && this.technical_specs.toString() !== '[null]'
                 ? Mix.castArrayAs(TechnicalSpec, Utils.parsePostgreSQLJson(this.technical_specs))
                 : this.technical_specs;
-            this.eventer.trigger(`get:end`)
         } catch (e) {
+            console.error(e);
             notify.error('lystore.equipment.sync.err');
         }
         finally {

@@ -14,7 +14,8 @@ export const projectController = ng.controller("projectController",
 
         $scope.confirmProject = (project: Project) => {
             project.create();
-            $scope.display.grade = project.grade.name;
+            $scope.display.title = project.title ? project.title.name : undefined;
+            $scope.display.grade = project.grade ? project.grade.name : undefined;
             $scope.display.lightbox.createProject = false;
             template.close('basket.project');
             Utils.safeApply($scope);

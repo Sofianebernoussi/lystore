@@ -34,9 +34,6 @@ export class Project implements Selectable {
         this.eventer.trigger('init:start');
         await this.titles.sync(idCampaign, idStructure);
         await this.grades.sync();
-        if (!this.grade) {
-            this.grade = this.grades.all[0];
-        }
         if (!this.title) {
             this.title = this.titles.all[0];
         }
@@ -50,7 +47,7 @@ export class Project implements Selectable {
             {
             description: this.description,
             id_title: this.title.id,
-            id_grade: this.grade.id,
+                id_grade: (this.grade ? this.grade.id : undefined),
             building: this.building,
             site: this.site,
             stair: this.stair,

@@ -121,7 +121,6 @@ export class OrdersClient extends Selection<OrderClient> {
                     order.project = Mix.castAs(Project, JSON.parse(order.project.toString()));
                     order.project.init(idCampaign, idStructure);
                     order.project.title = Mix.castAs(Title, JSON.parse(order.title.toString()));
-                    order.project.grade = Mix.castAs(Grade, JSON.parse(order.grade.toString()));
 
                     if (this.id_project_use != order.project.id) {
                         this.id_project_use = order.project.id;
@@ -150,7 +149,6 @@ export class OrdersClient extends Selection<OrderClient> {
                         order.campaign = Mix.castAs(Campaign,  JSON.parse(order.campaign.toString()));
                         order.project = Mix.castAs(Project, JSON.parse(order.project.toString()));
                         order.project.title = Mix.castAs(Title, JSON.parse(order.title.toString()));
-                        order.project.grade = Mix.castAs(Grade, JSON.parse(order.grade.toString()));
 
                         if (this.id_project_use != order.project.id) {
                             this.id_project_use = order.project.id;

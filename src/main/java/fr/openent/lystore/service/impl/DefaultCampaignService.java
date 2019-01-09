@@ -3,6 +3,8 @@ package fr.openent.lystore.service.impl;
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.CampaignService;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
@@ -14,6 +16,8 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
 import java.util.List;
+import java.util.Map;
+
 public class DefaultCampaignService extends SqlCrudService implements CampaignService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCampaignService.class);
 
@@ -22,27 +26,90 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
         super(schema, table);
     }
 
-    public void listCampaigns( Handler<Either<String, JsonArray>> handler) {
-        String query = "select c.* , " +
-                "SUM (CASE WHEN oce.status = 'WAITING' THEN 1 ELSE 0 END ) as nb_orders_WAITING, " +
-                "SUM (CASE WHEN oce.status = 'VALID' THEN 1 ELSE 0 END ) as nb_orders_VALID, " +
-                "SUM (CASE WHEN oce.status = 'SENT' THEN 1 ELSE 0 END ) as nb_orders_SENT " +
-                "FROM (" +
-                "WITH campaign_amounts AS (" +
-                "SELECT SUM(amount) as sum, purse.id_campaign " +
-                "FROM " + Lystore.lystoreSchema + ".purse GROUP BY id_campaign " +
-                ") " +
-                "SELECT  campaign.*, COUNT(distinct rel_group_structure.id_structure) as nb_structures, " +
-                "campaign_amounts.sum as purse_amount, COUNT(distinct rel_equipment_tag.id_equipment) as nb_equipments " +
+    public void listCampaigns(Handler<Either<String, JsonArray>> handler) {
+        Future<JsonArray> campaignFuture = Future.future();
+        Future<JsonArray> purseFuture = Future.future();
+        Future<JsonArray> orderFuture = Future.future();
+
+        CompositeFuture.all(campaignFuture, purseFuture, orderFuture).setHandler(event -> {
+            if (event.succeeded()) {
+                JsonArray campaigns = campaignFuture.result();
+                JsonArray purses = purseFuture.result();
+                JsonArray orders = orderFuture.result();
+
+                JsonObject campaignMap = new JsonObject();
+                JsonObject object, campaign;
+                for (int i = 0; i < campaigns.size(); i++) {
+                    object = campaigns.getJsonObject(i);
+                    object.put("nb_orders_waiting", 0).put("nb_orders_valid", 0).put("nb_orders_sent", 0);
+                    campaignMap.put(object.getInteger("id").toString(), object);
+                }
+
+                for (int i = 0; i < purses.size(); i++) {
+                    object = purses.getJsonObject(i);
+                    campaign = campaignMap.getJsonObject(object.getInteger("id_campaign").toString());
+                    campaign.put("purse_amount", object.getString("purse"));
+                }
+
+                for (int i = 0; i < orders.size(); i++) {
+                    object = orders.getJsonObject(i);
+                    campaign = campaignMap.getJsonObject(object.getInteger("id_campaign").toString());
+                    campaign.put("nb_orders_" + object.getString("status").toLowerCase(), object.getLong("count"));
+                }
+
+                JsonArray campaignList = new JsonArray();
+                for (Map.Entry<String, Object> aCampaign : campaignMap) {
+                    campaignList.add(aCampaign.getValue());
+                }
+
+                handler.handle(new Either.Right<>(campaignList));
+
+            } else {
+                handler.handle(new Either.Left<>("An error occurred when retrieving campaigns"));
+            }
+        });
+
+        getCampaignsInfo(handlerFuture(campaignFuture));
+        getCampaignsPurses(handlerFuture(purseFuture));
+        getCampaignOrderStatusCount(handlerFuture(orderFuture));
+    }
+
+    private Handler<Either<String, JsonArray>> handlerFuture(Future<JsonArray> future) {
+        return event -> {
+            if (event.isRight()) {
+                future.complete(event.right().getValue());
+            } else {
+                LOGGER.error(event.left().getValue());
+                future.fail(event.left().getValue());
+            }
+        };
+    }
+
+    private void getCampaignsPurses(Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT SUM(amount) as purse, purse.id_campaign " +
+                "FROM " + Lystore.lystoreSchema + ".purse " +
+                "GROUP BY id_campaign;";
+
+        Sql.getInstance().prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
+    }
+
+    private void getCampaignOrderStatusCount(Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT count(*), id_campaign, status " +
+                "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
+                "GROUP BY id_campaign, status;";
+
+        Sql.getInstance().prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
+    }
+
+    private void getCampaignsInfo(Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT campaign.*, COUNT(DISTINCT rel_group_structure.id_structure) as nb_structures, count(DISTINCT rel_equipment_tag.id_equipment) as nb_equipments " +
                 "FROM " + Lystore.lystoreSchema + ".campaign " +
-                "LEFT JOIN campaign_amounts ON (campaign.id = campaign_amounts.id_campaign) " +
-                "LEFT JOIN " + Lystore.lystoreSchema + ".rel_group_campaign ON (campaign.id = rel_group_campaign.id_campaign) " +
-                "LEFT JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON (rel_group_campaign.id_structure_group = rel_group_structure.id_structure_group) " +
-                "LEFT JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (rel_equipment_tag.id_tag = rel_group_campaign.id_tag)" +
-                "GROUP BY campaign.id, campaign_amounts.sum) as C " +
-                "LEFT JOIN " + Lystore.lystoreSchema + ".order_client_equipment oce ON oce.id_campaign = C.id and  oce.status in ( 'WAITING', 'VALID', 'SENT') " +
-                "group by c.id, c.name, c.description, c.image, c.accessible, c.nb_structures, c.purse_amount, c.nb_equipments, c.purse_enabled, c.priority_enabled";
-        sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray(), SqlResult.validResultHandler(handler));
+                "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_campaign ON (campaign.id = rel_group_campaign.id_campaign) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON (rel_group_structure.id_structure_group = rel_group_campaign.id_structure_group) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (rel_equipment_tag.id_tag = rel_group_campaign.id_tag) " +
+                "GROUP BY campaign.id;";
+
+        Sql.getInstance().prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
     }
 
     public void listCampaigns(String idStructure,  Handler<Either<String, JsonArray>> handler) {

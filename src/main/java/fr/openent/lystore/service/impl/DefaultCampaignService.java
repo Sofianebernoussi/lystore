@@ -28,12 +28,14 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
 
     public void listCampaigns(Handler<Either<String, JsonArray>> handler) {
         Future<JsonArray> campaignFuture = Future.future();
+        Future<JsonArray> equipmentFuture = Future.future();
         Future<JsonArray> purseFuture = Future.future();
         Future<JsonArray> orderFuture = Future.future();
 
-        CompositeFuture.all(campaignFuture, purseFuture, orderFuture).setHandler(event -> {
+        CompositeFuture.all(campaignFuture, equipmentFuture, purseFuture, orderFuture).setHandler(event -> {
             if (event.succeeded()) {
                 JsonArray campaigns = campaignFuture.result();
+                JsonArray equipments = equipmentFuture.result();
                 JsonArray purses = purseFuture.result();
                 JsonArray orders = orderFuture.result();
 
@@ -57,6 +59,12 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                     campaign.put("nb_orders_" + object.getString("status").toLowerCase(), object.getLong("count"));
                 }
 
+                for (int i = 0; i < equipments.size(); i++) {
+                    object = equipments.getJsonObject(i);
+                    campaign = campaignMap.getJsonObject(object.getInteger("id").toString());
+                    campaign.put("nb_equipments", object.getLong("nb_equipments"));
+                }
+
                 JsonArray campaignList = new JsonArray();
                 for (Map.Entry<String, Object> aCampaign : campaignMap) {
                     campaignList.add(aCampaign.getValue());
@@ -70,6 +78,7 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
         });
 
         getCampaignsInfo(handlerFuture(campaignFuture));
+        getCampaignEquipmentCount(handlerFuture(equipmentFuture));
         getCampaignsPurses(handlerFuture(purseFuture));
         getCampaignOrderStatusCount(handlerFuture(orderFuture));
     }
@@ -83,6 +92,16 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 future.fail(event.left().getValue());
             }
         };
+    }
+
+    private void getCampaignEquipmentCount(Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT campaign.id, COUNT(DISTINCT rel_equipment_tag.id_equipment) as nb_equipments " +
+                "FROM " + Lystore.lystoreSchema + ".campaign " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_campaign ON (campaign.id = rel_group_campaign.id_campaign) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".tag ON (rel_group_campaign.id_tag = tag.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (tag.id = rel_equipment_tag.id_tag) " +
+                "GROUP BY campaign.id";
+        Sql.getInstance().prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
     }
 
     private void getCampaignsPurses(Handler<Either<String, JsonArray>> handler) {
@@ -102,11 +121,10 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
     }
 
     private void getCampaignsInfo(Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT campaign.*, COUNT(DISTINCT rel_group_structure.id_structure) as nb_structures, count(DISTINCT rel_equipment_tag.id_equipment) as nb_equipments " +
+        String query = "SELECT campaign.*, COUNT(DISTINCT rel_group_structure.id_structure) as nb_structures " +
                 "FROM " + Lystore.lystoreSchema + ".campaign " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_campaign ON (campaign.id = rel_group_campaign.id_campaign) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON (rel_group_structure.id_structure_group = rel_group_campaign.id_structure_group) " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (rel_equipment_tag.id_tag = rel_group_campaign.id_tag) " +
                 "GROUP BY campaign.id;";
 
         Sql.getInstance().prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));

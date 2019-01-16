@@ -859,4 +859,22 @@ body.lystore {
       width: calc(100% - 50px);
     }
   }
+
+  .price-field {
+    i {
+      margin-left: 10px;
+
+      &:before {
+        font-size: 20px !important;
+      }
+
+      &.notes-icon {
+        color: $primary-dark;
+      }
+
+      &.refused-status {
+        color: $red;
+      }
+    }
+  }
 }

@@ -133,11 +133,11 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         String queryFilter = "";
         if (!filters.isEmpty()) {
             for (String filter : filters) {
-                queryFilter += "AND lower(e.name) ~ lower(?) ";
-                values.add(filter);
+                queryFilter += "AND (lower(e.name) ~ lower(?) OR lower(contract.name) ~ lower(?))";
+                values.add(filter).add(filter);
             }
         }
-        String query = "SELECT e.*, equipment_type.name as nametype, tax.value tax_amount, array_to_json(array_agg(DISTINCT opts)) as options, array_to_json(array_agg(DISTINCT  rel_equipment_tag.id_tag)) tags " +
+        String query = "SELECT e.*, equipment_type.name as nametype, tax.value tax_amount, array_to_json(array_agg(DISTINCT opts)) as options, contract.name as contract_name, array_to_json(array_agg(DISTINCT  rel_equipment_tag.id_tag)) tags " +
                 "FROM " + Lystore.lystoreSchema + ".equipment e LEFT JOIN ( " +
                 "SELECT option.*, equipment.name, equipment.price, tax.value tax_amount " +
                 "FROM " + Lystore.lystoreSchema + ".equipment_option option " +
@@ -145,6 +145,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax on tax.id = equipment.id_tax " +
                 ") opts ON opts.id_equipment = e.id " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax on tax.id = e.id_tax " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (e.id_contract = contract.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".equipment_type on equipment_type.id = e.id_type " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (e.id = rel_equipment_tag.id_equipment) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_campaign ON (" +
@@ -154,7 +155,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 "SELECT structure_group.id FROM " + Lystore.lystoreSchema + ".structure_group " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON rel_group_structure.id_structure_group = structure_group.id " +
                 "WHERE rel_group_structure.id_structure = ?)) and e.catalog_enabled = true AND e.status != 'OUT_OF_STOCK' " + queryFilter +
-                "GROUP BY (e.id, tax.id , nametype )";
+                "GROUP BY (e.id, tax.id , nametype, contract.name )";
 
 
         if (page != null) {

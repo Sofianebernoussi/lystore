@@ -32,19 +32,24 @@ public class ImportCSVHelper {
         this.eb = eb;
     }
 
+    public void getParsedCSV(final HttpServerRequest request, final String path, final Handler<Either<String, Buffer>> handler) {
+        getParsedCSV(request, path, true, handler);
+    }
+
     /**
      * Get Parsed CSV
      *
      * @param request Http request
      * @param path    File path
+     * @param deletePath Delete path after reading
      * @param handler Function handler returning data
      */
-    public void getParsedCSV(final HttpServerRequest request, final String path, final Handler<Either<String, Buffer>> handler) {
+    public void getParsedCSV(final HttpServerRequest request, final String path, Boolean deletePath, final Handler<Either<String, Buffer>> handler) {
         uploadImport(request, path, new Handler<AsyncResult>() {
             @Override
             public void handle(AsyncResult event) {
                 if (event.succeeded()) {
-                    readCsv(request, path, handler);
+                    readCsv(request, path, deletePath, handler);
                 } else {
                     handler.handle(new Either.Left<>("Can not upload import"));
                 }
@@ -157,9 +162,10 @@ public class ImportCSVHelper {
      * Read CSV file
      *
      * @param request Http request
+     * @param deletePath Delete path after reading
      * @param path    Temp directory path
      */
-    public void readCsv(final HttpServerRequest request, final String path, final Handler<Either<String, Buffer>> handler) {
+    public void readCsv(final HttpServerRequest request, final String path, Boolean deletePath, final Handler<Either<String, Buffer>> handler) {
         vertx.fileSystem().readDir(path, new Handler<AsyncResult<List<String>>>() {
             @Override
             public void handle(final AsyncResult<List<String>> event) {
@@ -173,7 +179,9 @@ public class ImportCSVHelper {
                             } else {
                                 handler.handle(new Either.Left<>("Can not read the file"));
                             }
-                            deleteImportPath(vertx, path);
+                            if (deletePath) {
+                                deleteImportPath(vertx, path);
+                            }
                         }
                     });
                 } else {

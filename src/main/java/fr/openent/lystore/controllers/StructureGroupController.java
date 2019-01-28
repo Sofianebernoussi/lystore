@@ -65,7 +65,7 @@ public class StructureGroupController extends ControllerHelper {
     public void groupStructure(final HttpServerRequest request) {
         final String importId = UUID.randomUUID().toString();
         final String path = config.getString("import-folder", "/tmp") + File.separator + importId;
-        importCSVHelper.getParsedCSV(request, path, new Handler<Either<String, Buffer>>() {
+        importCSVHelper.getParsedCSV(request, path, false, new Handler<Either<String, Buffer>>() {
             @Override
             public void handle(Either<String, Buffer> event) {
                 if (event.isRight()) {
@@ -128,6 +128,7 @@ public class StructureGroupController extends ControllerHelper {
                                 Pattern r = Pattern.compile(regexp);
                                 Matcher m = r.matcher(event.result().get(0));
                                 String name = m.find() ? m.group(0).replace(".csv", "") : UUID.randomUUID().toString();
+                                deleteImportPath(vertx, path);
 
                                 JsonArray data = uaisEvent.right().getValue();
                                 JsonArray ids = new JsonArray();

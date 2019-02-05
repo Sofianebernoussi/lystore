@@ -183,59 +183,33 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
 
     @Override
     public void updateProject(JsonObject project, Handler<Either<String, JsonObject>> handler, Integer id) {
-        JsonArray params = new JsonArray();
         String query;
-        try {
-            params.add(project.getInteger("id_title"))
-                    .add(project.getInteger("id_grade"))
-                    .add(project.getString("description"))
-                    .add(project.getString("building"))
-                    .add(project.getInteger("stair"))
-                    .add(project.getString("room"))
-                    .add(project.getString("site"))
-                    .add(id);
+        JsonArray params = new JsonArray();
+        params.add(project.getInteger("id_title"));
+        if (project.containsKey("id_grade"))
+            params.add(project.getInteger("id_grade"));
+        if (project.containsKey("description"))
+            params.add(project.getString("description"));
+        if (project.containsKey("building"))
+            params.add(project.getString("building"));
+        if (project.containsKey("stair"))
+            params.add(project.getInteger("stair"));
+        if (project.containsKey("room"))
+            params.add(project.getString("room"));
+        if (project.containsKey("site"))
+            params.add(project.getString("site"));
 
-            query = "UPDATE " + Lystore.lystoreSchema + ".project " +
-                    "SET id_title = ?, " +
-                    "id_grade = ?, " +
-                    "description = ?, " +
-                    "building = ?, " +
-                    "stair = ?," +
-                    "room = ?, " +
-                    "site = ? " +
-                    "WHERE id = ? ;";
+        query = "UPDATE " + Lystore.lystoreSchema + ".project " +
+                "SET id_title = ?, " +
+                "id_grade = " + (project.containsKey("id_grade") ? "?," : "null, ") +
+                "description = " + (project.containsKey("description") ? "?," : "null, ") +
+                "building =  " + (project.containsKey("building") ? "?," : "null, ") +
+                "stair =  " + (project.containsKey("stair") ? "?," : "null, ") +
+                "room =  " + (project.containsKey("room") ? "?," : "null, ") +
+                "site =  " + (project.containsKey("site") ? "? " : "null ") +
+                "WHERE id = ? ;";
 
-
-        } catch (NullPointerException e) {
-            params = new JsonArray();
-            params.add(project.getInteger("id_title"))
-                    .add(project.getInteger("id_grade"));
-
-            if (project.containsKey("description"))
-                params.add(project.getString("description"));
-            if (project.containsKey("building"))
-                params.add(project.getString("building"));
-            if (project.containsKey("stair"))
-                params.add(project.getInteger("stair"));
-            if (project.containsKey("room"))
-                params.add(project.getString("room"));
-            if (project.containsKey("site"))
-                params.add(project.getString("site"));
-
-
-
-            query = "UPDATE " + Lystore.lystoreSchema + ".project " +
-                    "SET id_title = ?, " +
-                    "id_grade = ?, " +
-                    "description = " + (project.containsKey("description") ? "?," : "null, ") +
-                    "building =  " + (project.containsKey("building") ? "?," : "null, ") +
-                    "stair =  " + (project.containsKey("stair") ? "?," : "null, ") +
-                    "room =  " + (project.containsKey("room") ? "?," : "null, ") +
-                    "site =  " + (project.containsKey("site") ? "? " : "null ") +
-                    "WHERE id = ? ;";
-
-            params.add(id);
-        }
+        params.add(id);
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 

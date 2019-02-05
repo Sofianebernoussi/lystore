@@ -1,7 +1,7 @@
 import {Eventer, Mix, Selectable, Selection} from "entcore-toolkit";
 import {Grade, Grades, Title, Titles} from './index';
 import http from "axios";
-import {notify} from "entcore";
+import {_, notify} from "entcore";
 
 export class Project implements Selectable {
     selected: boolean;
@@ -17,6 +17,7 @@ export class Project implements Selectable {
     titles: Titles;
     grades: Grades;
     eventer: Eventer;
+    id_grade: number;
 
     constructor() {
         if (this.title) {
@@ -36,6 +37,9 @@ export class Project implements Selectable {
         await this.grades.sync();
         if (!this.title) {
             this.title = this.titles.all[0];
+        }
+        if (!this.grade) {
+            this.grade = _.findWhere(this.grades.all, {id: this.id_grade});
         }
         this.eventer.trigger('init:end');
     }

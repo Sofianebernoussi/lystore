@@ -1,6 +1,7 @@
-import {ng, moment, template, _, model} from 'entcore';
-import {OrderClient, Utils, OrdersClient, Notification, Supplier} from '../../model';
+import {_, model, ng, template} from 'entcore';
+import {Notification, OrderClient, OrdersClient, Utils} from '../../model';
 import {Mix} from 'entcore-toolkit';
+
 declare let window: any;
 export const orderController = ng.controller('orderController',
     ['$scope',  ($scope) => {
@@ -250,7 +251,7 @@ export const orderController = ng.controller('orderController',
         $scope.exportOrder = (orders: OrderClient[]) => {
             if (_.where(orders, { status : 'SENT' }).length === orders.length && $scope.validateSentOrders(orders)) {
                 let orderNumber = _.uniq(_.pluck(orders, 'order_number'));
-                window.location = `/lystore/order/${orderNumber}`;
+                window.location = `/lystore/order?number=${orderNumber}`;
             } else {
                 $scope.exportValidOrders(orders, 'order');
             }

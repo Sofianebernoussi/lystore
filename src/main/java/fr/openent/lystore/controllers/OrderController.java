@@ -134,14 +134,12 @@ public class OrderController extends ControllerHelper {
     }
 
 
-
-
-    @Get("/order/:orderNumber")
+    @Get("/order")
     @ApiDoc("Get the list of orders")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void getOrderPDF (final HttpServerRequest request) {
-        final String orderNumber = request.params().get("orderNumber");
+        final String orderNumber = request.params().get("number");
         orderService.getOrderFileId(orderNumber, new Handler<Either<String, JsonObject>>() {
             @Override
             public void handle(Either<String, JsonObject> event) {

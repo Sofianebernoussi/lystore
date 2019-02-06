@@ -318,7 +318,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         String closeCaseForPriceProposal="END ";
 
         String query = "SELECT oe.name as equipment_name, oe.amount as equipment_quantity, " +
-                "oe.creation_date as equipment_creation_date,project.name as project_name, oe.summary as equipment_summary, " +
+                "oe.creation_date as equipment_creation_date,title.name as project_name, oe.summary as equipment_summary, " +
                 "oe.status as equipment_status,cause_status, price_all_options, " +
                 "CASE count(price_all_options) " +
                 "WHEN 0 THEN "+price_proposal+"ROUND ((oe.price+( oe.tax_amount*oe.price)/100)*oe.amount,2) "+closeCaseForPriceProposal+
@@ -330,9 +330,10 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
                 "GROUP BY id_order_client_equipment)" +
                 " opts ON oe.id = opts.id_order_client_equipment " +
-                " INNER JOIN " + Lystore.lystoreSchema + ".project on project.id = oe.id_project  " +
+                " INNER JOIN " + Lystore.lystoreSchema + ".project on project.id = oe.id_project " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".title ON (project.id_title = title.id) " +
                 " WHERE id_campaign = ? AND id_structure = ?" +
-                " GROUP BY oe.id, price_all_options, project.name ORDER BY creation_date";
+                " GROUP BY oe.id, price_all_options, title.name ORDER BY creation_date";
 
         values.add(idCampaign).add(idStructure);
         sql.prepared(query, values, SqlResult.validResultHandler(handler));

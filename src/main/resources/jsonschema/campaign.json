@@ -23,6 +23,9 @@
     },
     "priority_enabled": {
       "type": "boolean"
+    },
+    "priority_field":{
+      "type": "string"
     }
   },
   "required": [

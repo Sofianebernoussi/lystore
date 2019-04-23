@@ -426,7 +426,7 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
      */
     private JsonObject getCampaignUpdateStatement(Number id, JsonObject campaign) {
         String query = "UPDATE " + Lystore.lystoreSchema + ".campaign " +
-                "SET  name=?, description=?, image=?, purse_enabled=?, priority_enabled=? " +
+                "SET  name=?, description=?, image=?, purse_enabled=?, priority_enabled=?, priority_field=? " +
                 "WHERE id = ?";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
@@ -435,6 +435,7 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 .add(campaign.getString("image"))
                 .add(campaign.getBoolean("purse_enabled"))
                 .add(campaign.getBoolean("priority_enabled"))
+                .add(campaign.getString("priority_field"))
                 .add(id);
 
         return new JsonObject()
@@ -444,8 +445,8 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
     }
     private JsonObject getCampaignCreationStatement(Number id, JsonObject campaign) {
         String insertCampaignQuery =
-                "INSERT INTO " + Lystore.lystoreSchema + ".campaign(id, name, description, image, accessible, purse_enabled, priority_enabled )" +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id; ";
+                "INSERT INTO " + Lystore.lystoreSchema + ".campaign(id, name, description, image, accessible, purse_enabled, priority_enabled, priority_field )" +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id; ";
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(id)
                 .add(campaign.getString("name"))
@@ -453,7 +454,8 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 .add(campaign.getString("image"))
                 .add(campaign.getBoolean("accessible"))
                 .add(campaign.getBoolean("purse_enabled"))
-                .add(campaign.getBoolean("priority_enabled"));
+                .add(campaign.getBoolean("priority_enabled"))
+                .add(campaign.getString("priority_field"));
 
         return new JsonObject()
                 .put("statement", insertCampaignQuery)

@@ -107,6 +107,16 @@
                 </span>
                 <switch-toggle ng-model="campaign.priority_enabled" class="cell horizontal-margin-four"></switch-toggle>
             </div>
+            <div ng-if="campaign.priority_enabled" class="priority_field" >
+                <div>
+                    <input type="radio" ng-model="campaign.priority_field" value="ORDER" >
+                    <label ><i18n>lystore.on.order</i18n></label>
+                </div>
+                <div>
+                    <input type="radio" ng-model="campaign.priority_field" value="PROJECT" >
+                    <label ><i18n>lystore.on.project</i18n></label>
+                </div>
+            </div>
         </article>
 
         <div class="row">

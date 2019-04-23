@@ -859,7 +859,11 @@ body.lystore {
       width: calc(100% - 50px);
     }
   }
-
+  .priority_field{
+    border-left: #2a9cc8 5px solid;
+    padding-left: 2px;
+    margin-top: 5px;
+  }
   .price-field {
     i {
       margin-left: 10px;
@@ -876,5 +880,16 @@ body.lystore {
         color: $red;
       }
     }
+  }
+
+  .priority_number{
+    width: 25px;
+    height: 30px;
+    text-align: center;
+    font-size: large;
+    border-bottom: #4bafd5 3px solid;
+    box-shadow: #aaa 0px 4px 4px 0px;
+    margin-bottom: 5px;
+    padding: 5px;
   }
 }

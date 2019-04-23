@@ -20,6 +20,7 @@ export class Campaign implements Selectable  {
     nb_panier?: number;
     purse_enabled: boolean;
     priority_enabled: boolean;
+    priority_field: null|PRIORITY_FIELD;
 
     constructor (name?: string, description?: string) {
         if (name) this.name = name;
@@ -28,6 +29,7 @@ export class Campaign implements Selectable  {
         this.image = '';
         this.purse_enabled = false;
         this.priority_enabled = true;
+        this.priority_field = PRIORITY_FIELD.ORDER
     }
 
     toJson () {
@@ -40,7 +42,8 @@ export class Campaign implements Selectable  {
                 return group.toJson();
             }),
             purse_enabled: this.purse_enabled,
-            priority_enabled: this.priority_enabled
+            priority_enabled: this.priority_enabled,
+            priority_field: this.priority_field
         };
     }
 
@@ -137,4 +140,9 @@ export class Campaigns extends Selection<Campaign> {
     isEmpty (): boolean {
         return this.all.length === 0;
     }
+}
+
+export enum PRIORITY_FIELD {
+    PROJECT = 'PROJECT',
+    ORDER = 'ORDER'
 }

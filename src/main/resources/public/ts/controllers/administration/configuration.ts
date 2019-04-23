@@ -14,7 +14,8 @@ import {
     Supplier,
     Tag,
     TechnicalSpec,
-    Utils
+    Utils,
+    PRIORITY_FIELD
 } from '../../model';
 
 export const configurationController = ng.controller('configurationController',

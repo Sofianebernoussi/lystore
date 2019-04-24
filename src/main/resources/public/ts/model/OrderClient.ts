@@ -43,7 +43,7 @@ export class OrderClient implements Selectable {
     selected: boolean;
     comment?: string;
     price_proposal?: number;
-
+    rank?:number;
     constructor() {
 
     }
@@ -115,18 +115,18 @@ export class OrdersClient extends Selection<OrderClient> {
             if (idCampaign && idStructure ) {
                 let { data } = await http.get(  `/lystore/orders/${idCampaign}/${idStructure}` );
                 this.all = Mix.castArrayAs(OrderClient, data);
+
                 this.all.map((order) => {
                     order.price = parseFloat(order.price.toString());
                     order.tax_amount = parseFloat(order.tax_amount.toString());
                     order.project = Mix.castAs(Project, JSON.parse(order.project.toString()));
                     order.project.init(idCampaign, idStructure);
                     order.project.title = Mix.castAs(Title, JSON.parse(order.title.toString()));
-
                     if (this.id_project_use != order.project.id) {
                         this.id_project_use = order.project.id;
                         this.projects.push(order.project);
                     }
-
+                    order.rank = order.rank ? parseInt(order.rank.toString()) : null ;
 
                     order.options = order.options.toString() !== '[null]' && order.options !== null ?
                         Mix.castArrayAs(OrderOptionClient, JSON.parse(order.options.toString()))
@@ -149,7 +149,7 @@ export class OrdersClient extends Selection<OrderClient> {
                         order.campaign = Mix.castAs(Campaign,  JSON.parse(order.campaign.toString()));
                         order.project = Mix.castAs(Project, JSON.parse(order.project.toString()));
                         order.project.title = Mix.castAs(Title, JSON.parse(order.title.toString()));
-
+                        order.rank = order.rank ? parseInt(order.rank.toString()) : null ;
                         if (this.id_project_use != order.project.id) {
                             this.id_project_use = order.project.id;
                             this.projects.push(order.project);
@@ -208,6 +208,14 @@ export class OrdersClient extends Selection<OrderClient> {
         }
     }
 
+    async updateOrderRanks(tabIdsProjects: Array<object>, structureId:string){
+        try {
+            await  http.put(`/lystore/order/rank?idStructure=${structureId}`,
+                { orders: tabIdsProjects });
+        }catch (e) {
+            notify.error('lystore.project.update.err');
+        }
+    }
 
     initNameStructure (idStructure: string, structures: Structure[]) {
         let structure = _.findWhere(structures, { id : idStructure});

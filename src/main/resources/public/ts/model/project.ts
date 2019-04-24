@@ -19,6 +19,7 @@ export class Project implements Selectable {
     eventer: Eventer;
     id_grade: number;
 
+
     constructor() {
         if (this.title) {
             this.title = Mix.castAs(Title, JSON.parse(this.title.toString()));

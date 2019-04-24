@@ -39,7 +39,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     public void listOrder(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
         String query = "SELECT oe.id as id, oe.comment, oe.price_proposal,prj.preference as preference, prj.id as id_project, oe.id_project, oe.price, oe.tax_amount, oe.amount,oe.creation_date, oe.id_campaign," +
-                " oe.id_structure, oe.name, oe.summary, oe.image, oe.status, oe.id_contract," +
+                " oe.id_structure, oe.name, oe.summary, oe.image, oe.status, oe.id_contract, oe.rank," +
                 " array_to_json(array_agg(order_opts)) as options, to_json(prj.*) as project,to_json(tt.*) as title," +
                 " c.name as name_supplier, array_to_json(array_agg(DISTINCT order_file.*)) as files  " +
                 "FROM "+ Lystore.lystoreSchema + ".order_client_equipment  oe " +
@@ -941,6 +941,26 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
         sql.prepared(query, params, SqlResult.validResultHandler(handler));
 
+    }
+    @Override
+    public void updateRank( JsonArray orders, Handler<Either<String, JsonObject>> handler) {
+        String query= "UPDATE " + Lystore.lystoreSchema + ".order_client_equipment SET "+
+                "rank = ? " +
+                "WHERE id = ? RETURNING order_client_equipment.id  ;  " +
+                "UPDATE " + Lystore.lystoreSchema + ".order_client_equipment SET "+
+                "rank = ? " +
+                "WHERE id = ? RETURNING order_client_equipment.id ; ";
+        JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
+        for(Object object : orders){
+            values.add(((JsonObject) object).getInteger("rank"));
+            values.add(((JsonObject) object).getInteger("id"));
+        }
+        JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
+        statements.add(new JsonObject()
+                .put("statement",query)
+                .put("values",values)
+                .put("action","prepared"));
+       sql.transaction(statements, SqlResult.validRowsResultHandler(handler));
     }
 
 }

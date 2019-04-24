@@ -85,6 +85,12 @@ export class Campaign implements Selectable  {
             notify.error('lystore.campaign.update.err');
         }
     }
+    projectPriorityEnable(){
+        return (this.priority_field == PRIORITY_FIELD.PROJECT || !this.priority_field )  && this.priority_enabled ;
+    }
+    orderPriorityEnable(){
+        return this.priority_field == PRIORITY_FIELD.ORDER  && this.priority_enabled ;
+    }
     async sync (id, tags?: Tags) {
         try {
             let { data } = await http.get(`/lystore/campaigns/${id}`);

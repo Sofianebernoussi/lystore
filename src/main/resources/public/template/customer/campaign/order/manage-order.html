@@ -20,7 +20,10 @@
                         </h3>
                     </label>
                 </div>
-                <div class="cell priority-manager" ng-if="campaign.priority_enabled">
+                <div class="cell priority-manager" ng-if="campaign.projectPriorityEnable()">
+                    <div class="priority_number cell">
+                       [[$index + 1]]
+                    </div>
                     <div class="priority_carree UP cell row" tooltip="lystore.order.priority.up"
                          ng-show=" $index>0 && $index <= (ordersClient.projects.all.length - 1)"
                          ng-click="upButton(project,$index) ">
@@ -31,14 +34,26 @@
                     </div>
                 </div>
                 <div ng-class="{'order-item-list': campaign.priority_enabled}" class="cell">
-                    <article class="basket-item twelve cell" ng-repeat="orderClient in ordersClient.all track by $index"
-                             ng-if="project.id == orderClient.project.id">
+                    <article class="basket-item twelve cell" ng-repeat="orderClient in orders = ( ordersClient.all | filter:{id_project: project.id}| orderBy:'rank' ) track by $index" >
                         <div class="cell width-40">
                             <label ng-show="orderClient.status === 'WAITING'" class="checkbox">
                                 <input type="checkbox" ng-model="orderClient.selected"
                                        ng-checked="orderClient.selected">
                                 <span></span>
                             </label>
+                            <div class="cell priority-manager order vertical-spacing" ng-if="campaign.orderPriorityEnable()">
+                                <div class="priority_carree UP cell row" tooltip="lystore.order.priority.up"
+                                     ng-show=" $index>0 && $index <= (orders.length - 1)"
+                                     ng-click="switchOrderClient(orderClient,$index, project.id, 'up') ">
+                                </div>
+                                <div class="priority_number cell">
+                                    [[$index + 1]]
+                                </div>
+                                <div class="priority_carree DOWN cell row" tooltip="lystore.order.priority.down"
+                                     ng-show=" $index>=0 && $index < (orders.length - 1)"
+                                     ng-click="switchOrderClient(orderClient,$index, project.id, 'down')">
+                                </div>
+                            </div>
                         </div>
                         <div class="cell width-100-40">
                             <div class="row article-equipment">

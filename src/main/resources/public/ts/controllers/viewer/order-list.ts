@@ -1,5 +1,6 @@
-import {moment, ng, template} from 'entcore';
+import {_, moment, ng, template} from 'entcore';
 import {Notification, OrderClient, OrdersClient, Project, Projects, Utils} from '../../model';
+
 
 declare let window: any;
 
@@ -204,7 +205,33 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
                 }
             }
             return isDeletable;
-        }
+        };
+
+        $scope.switchOrderClient = async (order: OrderClient, index: number, projectId: number, to: string) =>{
+            let orderProject = _.where($scope.ordersClient.all,{id_project: projectId});
+            let ordersJson = await $scope.getOrdersRanksSwitchedToJson(orderProject, index, to);
+            await $scope.ordersClient.updateOrderRanks(ordersJson,order.id_structure);
+            $scope.ordersClient.all = _.sortBy($scope.ordersClient.all, (order)=> order.rank != null ? order.rank : $scope.ordersClient.all.length );
+            Utils.safeApply($scope);
+        };
+
+        $scope.getOrdersRanksSwitchedToJson = (orders:Array<OrderClient> ,index:number, to:string )=>{
+            let order1 = orders[index];
+             let rang = to == 'up'? -1 : +1;
+            let order2 = orders[index + rang];
+            let index2 = _.indexOf($scope.ordersClient.all, order1 );
+            $scope.ordersClient.all[index2].rank = index2 + rang;
+            $scope.ordersClient.all[index2 + rang].rank = $scope.ordersClient.all[index2].rank - rang ;
+            return [{
+                id: order1.id,
+                rank: $scope.ordersClient.all[index2].rank
+            },{
+                id: order2.id,
+                rank: $scope.ordersClient.all[index2 + rang].rank
+            }]
+        };
+
+
         $scope.upButton = (project: Project, index: number) => {
             let TabIdsProjects = $scope.getIdprojectsFromOrdersClientProject(project, $scope.ordersClient.projects.all[index - 1]);
             $scope.ordersClient.updateReference(TabIdsProjects, $scope.ordersClient.all[index].id_campaign,
@@ -215,8 +242,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             $scope.ordersClient.projects.all[index] = $scope.ordersClient.projects.all[index - 1];
             $scope.ordersClient.projects.all[index - 1] = project;
             Utils.safeApply($scope);
-
-        }
+        };
         $scope.downButton = (project: Project, index: number) => {
             let TabIdsProjects = $scope.getIdprojectsFromOrdersClientProject($scope.ordersClient.projects.all[index + 1], project);
             $scope.ordersClient.updateReference(TabIdsProjects, $scope.ordersClient.all[index].id_campaign,
@@ -227,18 +253,18 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             $scope.ordersClient.projects.all[index] = $scope.ordersClient.projects.all[index + 1];
             $scope.ordersClient.projects.all[index + 1] = project;
             Utils.safeApply($scope);
+        };
 
-        }
         $scope.getIdprojectsFromOrdersClientProject = (projectUp: Project, projectDown: Project) => {
             let tabIdsProjects = new Array(2);
             tabIdsProjects[0] = {
                 id: projectUp.id,
                 preference: projectUp.preference
-            }
+            };
             tabIdsProjects[1] = {
                 id: projectDown.id,
                 preference: projectDown.preference
-            }
+            };
             return tabIdsProjects;
         }
 

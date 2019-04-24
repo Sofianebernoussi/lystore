@@ -162,4 +162,12 @@ public interface OrderService {
     void getFile(Integer orderId, String fileId, Handler<Either<String, JsonObject>> handler);
 
     void updatePriceProposal(Integer id, Float price_proposal, Handler<Either<String, JsonObject>> eitherHandler);
+
+    /**
+     * Update the rank of two orders
+     *
+     * @param orders orders to update
+     * @param handler Function handler returning data
+     */
+    void updateRank( JsonArray orders, Handler<Either<String, JsonObject>> handler);
 }

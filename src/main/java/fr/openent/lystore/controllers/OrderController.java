@@ -84,7 +84,24 @@ public class OrderController extends ControllerHelper {
             log.error("An error occured when casting campaign id ",e);
         }
     }
-
+    @Put("/order/rank")
+    @ApiDoc("Update the rank of tow orders")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AccessOrderRight.class)
+    public void updatePriority(final HttpServerRequest request) {
+        RequestUtils.bodyToJson(request, campaign -> {
+            if (!campaign.containsKey("orders")) {
+                badRequest(request);
+                return;
+            }
+            JsonArray orders = campaign.getJsonArray("orders");
+            try{
+                orderService.updateRank(orders, defaultResponseHandler(request));
+            }catch(Exception e){
+                log.error(" An error occurred when casting campaign id", e);
+            }
+        });
+    }
     @Get("/orders")
     @ApiDoc("Get the list of orders")
     @SecuredAction(value = "", type = ActionType.RESOURCE)

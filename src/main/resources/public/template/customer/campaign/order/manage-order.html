@@ -26,11 +26,11 @@
                     </div>
                     <div class="priority_carree UP cell row" tooltip="lystore.order.priority.up"
                          ng-show=" $index>0 && $index <= (ordersClient.projects.all.length - 1)"
-                         ng-click="upButton(project,$index) ">
+                         ng-click="switchProjectClient($index, 'up') ">
                     </div>
                     <div class="priority_carree DOWN cell row" tooltip="lystore.order.priority.down"
                          ng-show=" $index>=0 && $index < (ordersClient.projects.all.length - 1)"
-                         ng-click="downButton(project,$index)">
+                         ng-click="switchProjectClient($index, 'down')">
                     </div>
                 </div>
                 <div ng-class="{'order-item-list': campaign.priority_enabled}" class="cell">

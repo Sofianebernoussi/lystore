@@ -400,5 +400,8 @@
   "lystore.order.priority.up": "Augmenter la priorité",
   "lystore.order.priority.down": "Baisser la priorité",
   "lystore.on.project":"par project",
-  "lystore.on.order":"par demande"
+  "lystore.on.order":"par demande",
+  "lystore.project.preference":"Priorité project",
+  "lystore.order.rank":"Priorité équipement",
+  "lystore.order.not.prioritized":"non priorisé"
 }

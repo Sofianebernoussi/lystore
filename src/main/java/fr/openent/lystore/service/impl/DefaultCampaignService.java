@@ -321,31 +321,17 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 "UPDATE " + Lystore.lystoreSchema + ".project SET "+
                 "preference = ? " +
                 "WHERE id = ?; ";
-
-
-        int size=projectOrders.getList().size();
-        JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
-        for(int i=0;i<size;i++) {
-            if (i == 0) {
-                values.add(projectOrders.getJsonObject(i + 1).getInteger("preference"));
-            } else {
-                values.add(projectOrders.getJsonObject(i - 1).getInteger("preference"));
-            }
-            values.add(projectOrders.getJsonObject(i).getInteger("id"));
-
+        JsonArray values = new JsonArray();
+        for(Object object : projectOrders){
+            values.add(((JsonObject) object).getInteger("preference"));
+            values.add(((JsonObject) object).getInteger("id"));
         }
-            JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
-            statements.add(new JsonObject()
-                    .put("statement",query)
-                    .put("values",values)
-                    .put("action","prepared"));
-            sql.transaction(statements,new Handler<Message<JsonObject>>() {
-
-                @Override
-                public void handle(Message<JsonObject> jsonObjectMessage) {
-                    handler.handle(getTransactionHandler(jsonObjectMessage,projectId));
-                }
-            });
+        JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
+        statements.add(new JsonObject()
+                .put("statement",query)
+                .put("values",values)
+                .put("action","prepared"));
+         sql.transaction(statements, jsonObjectMessage -> handler.handle(getTransactionHandler(jsonObjectMessage,projectId)));
     }
 
     @Override

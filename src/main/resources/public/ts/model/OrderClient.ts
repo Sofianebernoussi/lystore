@@ -134,6 +134,10 @@ export class OrdersClient extends Selection<OrderClient> {
                     order.options.map((order) => order.selected = true);
                     order.files = order.files !== '[null]' ? Utils.parsePostgreSQLJson(order.files) : [];
                 });
+                this.all = _.sortBy(this.all, (order)=> order.rank != null ? order.rank : this.all.length );
+                this.projects.all = _.sortBy(this.projects.all, (project)=> project.preference != null
+                  ? project.preference
+                  : this.projects.all.length );
             } else {
                 let { data } = await http.get(  `/lystore/orders?status=${status}` );
                 this.all = Mix.castArrayAs(OrderClient, data);
@@ -163,6 +167,7 @@ export class OrdersClient extends Selection<OrderClient> {
                     }
                 });
             }
+
         } catch (e) {
             notify.error('lystore.order.sync.err');
         }

@@ -34,53 +34,13 @@
                         <span></span>
                     </label>
                 </td>
-                <td ng-click="sort.order.type = 'name_structure';
+                <td ng-repeat="field in tableFields "
+                    ng-hide="!field.display"
+                    ng-click="sort.order.type = field.fieldName;
                     sort.order.reverse = !sort.order.reverse">
-                    <i18n>Structure</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'name_structure' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'name_structure' && sort.order.reverse"></i>
-                </td>
-                <td ng-click="sort.order.type = 'contract.name';
-                    sort.order.reverse = !sort.order.reverse">
-                    <i18n>contract</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'contract.name' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'contract.name' && sort.order.reverse"></i>
-                </td>
-                <td ng-click="sort.order.type = 'supplier.name';
-                    sort.order.reverse = !sort.order.reverse">
-                    <i18n>EQUIPMENT</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'supplier.name' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'supplier.name' && sort.order.reverse"></i>
-                </td>
-                <td ng-click="sort.order.type = 'amount';
-                    sort.order.reverse = !sort.order.reverse">
-                    <i18n>lystore.amount</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'amount' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'amount' && sort.order.reverse"></i>
-                </td>
-                <td ng-click="sort.order.type = 'id';
-                    sort.order.reverse = !sort.order.reverse">
-                    <i18n>date</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'id' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'id' && sort.order.reverse"></i>
-                </td>
-                <td ng-click="sort.order.type = 'structure_groups';
-                    sort.order.reverse = !sort.order.reverse">
-                    <i18n>STRUCTUREGROUP</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'structure_groups' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'structure_groups' && sort.order.reverse"></i>
-                </td>
-                <td ng-click="sort.order.type = 'campaign.name';
-                    sort.order.reverse = !sort.order.reverse">
-                    <i18n>lystore.campaigns</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'campaign.name' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'campaign.name' && sort.order.reverse"></i>
-                </td>
-                <td ng-click="sort.order.type = 'priceTTCtotal';
-                    sort.order.reverse = !sort.order.reverse">
-                    <i18n>lystore.price.TTC</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'priceTTCtotal' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'priceTTCtotal' && sort.order.reverse"></i>
+                    [[lang.translate(field.name)]]
+                    <i class="up-open" ng-show="sort.order.type === field.fieldName && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === field.fieldName && sort.order.reverse"></i>
                 </td>
             </tr>
             </thead>
@@ -92,25 +52,30 @@
                         <span></span>
                     </label>
                 </td>
-                <td >[[order.name_structure]]</td>
-                <td >
-                    [[order.contract.name]]
-                </td>
-                <td> [[order.name]]</td>
-                <td>[[order.amount ]]</td>
-                <td>[[order.creation_date ]]</td>
-                <td>[[getStructureGroupsList(order.structure_groups)]]</td>
-                <td>[[order.campaign.name ]]</td>
-                <td><span ng-bind="order.priceTTCtotal | currency"></span></td>
+                <td ng-hide="!tableFields[0].display">[[order.name_structure]]</td>
+                <td ng-hide="!tableFields[1].display">
+                    [[order.contract.name]]</td>
+                <td ng-hide="!tableFields[2].display"> [[order.name]]</td>
+                <td ng-hide="!tableFields[3].display">[[order.amount ]]</td>
+                <td ng-hide="!tableFields[4].display">[[order.creation_date ]]</td>
+                <td ng-hide="!tableFields[5].display">[[getStructureGroupsList(order.structure_groups)]]</td>
+                <td ng-hide="!tableFields[6].display">[[order.campaign.name ]]</td>
+                <td ng-hide="!tableFields[7].display" >
+                    [[order.project.preference!= null && order.rank != undefined && order.campaign.projectPriorityEnable()
+                    ? order.project.preference + 1 : lang.translate('lystore.order.not.prioritized') ]]</td>
+                <td ng-hide="!tableFields[8].display" >
+                    [[order.rank != null && order.rank != undefined && order.campaign.orderPriorityEnable()
+                    ? order.rank + 1 :  lang.translate('lystore.order.not.prioritized') ]]</td>
+                <td ng-hide="!tableFields[9].display"><span ng-bind="order.priceTTCtotal | currency"></span></td>
             </tr>
             </tbody>
             <tfoot>
             <tr >
-                <td colspan="[[ isManager() ? 4 : 3 ]]">
+                <td colspan="[[countColSpan('totaux')]]">
                     <i18n>totals</i18n>
                 </td>
-                <td>[[displayedOrders.calculTotalAmount() ]]</td>
-                <td colspan="4" class="text-right"> [[displayedOrders.calculTotalPriceTTC() | currency]]</td>
+                <td ng-if="tableFields[3].display">[[displayedOrders.calculTotalAmount() ]]</td>
+                <td colspan="[[countColSpan('price')]]" class="text-right"> [[displayedOrders.calculTotalPriceTTC() | currency]]</td>
             </tr>
             </tfoot>
         </table>
@@ -119,6 +84,8 @@
               show="display.lightbox.validOrder">
         <container template="validOrder.lightbox"></container>
     </lightbox>
+    <parameter-table ng-model="tableFields">
+    </parameter-table>
     <section class="toggle-buttons" ng-class="{ hide: ordersClient.selected.length === 0 }">
         <div class="toggle">
             <div class="row">
@@ -132,3 +99,4 @@
         </div>
     </section>
 </div>
+

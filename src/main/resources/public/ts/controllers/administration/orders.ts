@@ -1,12 +1,14 @@
 import {_, model, ng, template} from 'entcore';
-import {Notification, OrderClient, OrdersClient, Utils} from '../../model';
+import {Notification, OrderClient, OrdersClient, orderWaiting, Utils} from '../../model';
 import {Mix} from 'entcore-toolkit';
+
 
 declare let window: any;
 export const orderController = ng.controller('orderController',
     ['$scope',  ($scope) => {
 
         $scope.allOrdersSelected = false;
+        $scope.tableFields = orderWaiting;
         $scope.sort = {
             order : {
                 type: 'name',
@@ -79,7 +81,7 @@ export const orderController = ng.controller('orderController',
                 reg = '.*';
             }
             return new RegExp(reg);
-        };
+        }
 
         $scope.filterDisplayedOrders = () => {
             let searchResult = [];
@@ -281,4 +283,17 @@ export const orderController = ng.controller('orderController',
         $scope.getProgramName = (idProgram: number) => idProgram !== undefined
             ? _.findWhere($scope.programs.all, { id: idProgram }).name
             : '';
+
+        $scope.countColSpan = (field:string):number =>{
+            let totaux = $scope.isManager() ? 1 :0;
+            let price = $scope.isManager() ? 1 : 0;
+            for (let _i = 0; _i < $scope.tableFields.length; _i++) {
+                if(_i < 3 && $scope.tableFields[_i].display){
+                    totaux++;
+                }else if(_i>3 && $scope.tableFields[_i].display)  {
+                    price++;
+                }
+            }
+            return field == 'totaux' ? totaux : price;
+        };
     }]);

@@ -1,10 +1,10 @@
 <div class="twelve-mobile ten centered row" ng-controller="campaignsListController">
-    <div class="row" ng-if="structures.all.length > 1">
+    <div class="row aligned" ng-if="structures.all.length > 1">
         <h4 class="right-magnet"><i18n>multi-structures.choice</i18n> :
-            <select ng-model="current.structure" class="twelve-mobile"
-                    ng-change="initCampaign(current.structure)"
-                    ng-options="structure.name for structure in structures.all " ></select>
+            <search-and-select class="cell right-magnet horizontal-margin" options="structures.all" ng-model="current.structure" search-on="name" order-by="name"  ng-change="initCampaign(current.structure)">
+            </search-and-select>
         </h4>
+
     </div>
     <div class="item_hover_accent_list">
         <article class="twelve cell"

@@ -410,5 +410,7 @@
   "lystore.structure.type":"Cités mixtes",
   "Academy":"Academie",
   "lystore.project":"Projet",
-  "lystore.contract.type.name":"Nature du marché"
+  "lystore.contract.type.name":"Nature du marché",
+  "lystore.instruction":"Instruction",
+  "lystore.instruction.add":"Ajouter une instruction"
 }

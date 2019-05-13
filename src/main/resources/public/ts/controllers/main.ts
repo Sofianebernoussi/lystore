@@ -9,7 +9,7 @@ import {
     ContractTypes,
     Equipment,
     Equipments,
-    EquipmentTypes,
+    EquipmentTypes, Instructions,
     Logs,
     Notification,
     OrderClient,
@@ -229,8 +229,18 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             previewOrder: async () => {
                 template.open('administrator-main', 'administrator/order/order-send-prepare');
                 template.open('sendOrder.preview', 'pdf/preview');
+            },
+            instruction: async () =>{
+                $scope.initInstructions();
+                template.open('administrator-main', 'administrator/instruction/instruction-container');
+                template.open('instruction-main', 'administrator/instruction/manage-instruction');
+                Utils.safeApply($scope);
             }
         });
+        $scope.initInstructions = ()=>{
+            $scope.instructions = new Instructions();
+
+        };
         $scope.initCampaignOrderView=()=>{
           if( $scope.campaign.priority_enabled == true && $scope.campaign.priority_field == PRIORITY_FIELD.ORDER){
               template.open('order-list', 'customer/campaign/order/orders-by-equipment');

@@ -36,7 +36,11 @@ routes.define(($routeProvider) => {
             .when('/structureGroups/create', {
                     action: 'createStructureGroup'
                 }
-            );
+            )
+            .when('/order/instruction', {
+                action: 'instruction'
+            })
+        ;
     }
     if (model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.manager)) {
         $routeProvider.when('/campaigns', {

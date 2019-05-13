@@ -9,11 +9,15 @@ import {
     ContractTypes,
     Equipment,
     Equipments,
-    EquipmentTypes, labels,
+    Instructions,
+    EquipmentTypes,
+    labels,
     Logs,
-    Notification, Operations,
+    Notification,
+    Operations,
     OrderClient,
-    OrdersClient, PRIORITY_FIELD,
+    OrdersClient,
+    PRIORITY_FIELD,
     Programs,
     StructureGroups,
     Structures,
@@ -231,6 +235,12 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('administrator-main', 'administrator/order/order-send-prepare');
                 template.open('sendOrder.preview', 'pdf/preview');
             },
+            instruction: async () =>{
+                $scope.initInstructions();
+                template.open('administrator-main', 'administrator/instruction/instruction-container');
+                template.open('instruction-main', 'administrator/instruction/manage-instruction');
+                Utils.safeApply($scope);
+            },
             operation: async () =>{
                 $scope.initOperation();
                 template.open('administrator-main', 'administrator/operation/operation-container');
@@ -238,6 +248,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             }
         });
+        $scope.initInstructions = ()=>{
+            $scope.instructions = new Instructions();
+
+        };
         $scope.initCampaignOrderView=()=>{
           if( $scope.campaign.priority_enabled == true && $scope.campaign.priority_field == PRIORITY_FIELD.ORDER){
               template.open('order-list', 'customer/campaign/order/orders-by-equipment');

@@ -435,4 +435,7 @@
   "lysctore.operation.text.delete.one.end": " instruction. Ceci ne s'appliqueque sur des instruction vides.",
   "lystore.operation.title.delete.reject": "Suppression impossible",
   "lystore.operation.text.delete.reject": "Cette opération n'est pas possible car une des opérations sélectionnées n'est pas vide."
+  "lystore.contract.type.name":"Nature du marché",
+  "lystore.instruction":"Instruction",
+  "lystore.instruction.add":"Ajouter une instruction"
 }

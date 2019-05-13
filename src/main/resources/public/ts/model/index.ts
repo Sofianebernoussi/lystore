@@ -23,4 +23,6 @@ export * from './project';
 export * from './title';
 export * from './grade';
 export * from './tableFields';
+export * from  './instruction';
+export * from './tableFields';
 export * from './operation'

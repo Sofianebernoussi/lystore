@@ -58,7 +58,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.ordersClient = new OrdersClient();
         $scope.displayedOrders = new OrdersClient();
         $scope.equipmentTypes = new EquipmentTypes();
-
+        $scope.instructions = new Instructions();
         $scope.equipments.eventer.on('loading::true', $scope.$apply);
         $scope.equipments.eventer.on('loading::false', $scope.$apply);
 
@@ -249,8 +249,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             }
         });
         $scope.initInstructions = ()=>{
-            $scope.instructions = new Instructions();
-
+            $scope.instructions.sync();
         };
         $scope.initCampaignOrderView=()=>{
           if( $scope.campaign.priority_enabled == true && $scope.campaign.priority_field == PRIORITY_FIELD.ORDER){

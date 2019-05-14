@@ -26,4 +26,7 @@ export class Instructions extends Selection<Instruction>{
         super([]);
     }
 
+    async sync () {
+
+    }
 }

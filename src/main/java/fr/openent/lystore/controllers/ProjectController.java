@@ -59,22 +59,26 @@ public class ProjectController extends ControllerHelper {
         });
     }
 
-    @Post("/project")
+    @Post("/project/:idcampaign/:idstructure")
     @ApiDoc("Create a project")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void createProject(HttpServerRequest request) {
-        RequestUtils.bodyToJson(request, pathPrefix + "project", new Handler<JsonObject>() {
-
-            @Override
-            public void handle(JsonObject projet) {
-                projectService.createProject(projet, Logging.defaultResponseHandler(eb,
+        RequestUtils.bodyToJson(request, pathPrefix + "project", projet -> {
+            try {
+                final Integer idCampaign = Integer.parseInt(request.params().get("idcampaign"));
+                final String idStructure= request.params().get("idstructure");
+                projectService.createProject(projet, idCampaign, idStructure,  Logging.defaultResponseHandler(eb,
                         request,
                         Contexts.PROJECT.toString(),
                         Actions.CREATE.toString(),
                         null,
                         projet));
+            } catch (NumberFormatException e) {
+                log.error("An error occurred when casting project information", e);
+                renderError(request);
             }
         });
+
     }
 
     @Delete("/project/:id/:idCampaign/:idStructure")

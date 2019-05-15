@@ -38,13 +38,13 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
 
 
     @Override
-    public void createProject(JsonObject project, Handler<Either<String, JsonObject>> handler) {
+    public void createProject(JsonObject project, Integer idCampaign, String idStructure, Handler<Either<String, JsonObject>> handler) {
 
 
         String query = "INSERT INTO " +
                 Lystore.lystoreSchema + ".project (" +
-                "id_title, id_grade, description, building, stair, room, site) " +
-                "Values ( ?, ?, ?, ?, ?, ?, ?) RETURNING id ;";
+                "id_title, id_grade, description, building, stair, room, site, preference) " +
+                "Values ( ?, ?, ?, ?, ?, ?, ?, "+ getTheLastPreferenceProject()+") RETURNING id ;";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(project.getInteger("id_title"))
@@ -53,10 +53,21 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                 .add(project.getString("building"))
                 .add(project.getInteger("stair"))
                 .add(project.getString("room"))
-                .add(project.getString("site"));
+                .add(project.getString("site"))
+                .add(idCampaign)
+                .add(idStructure);
 
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
 
+    }
+
+    private String getTheLastPreferenceProject() {
+        return "(select case  WHEN max(p.preference) is null THEN 0 " +
+            "ELSE max(p.preference + 1) " +
+            "END " +
+            "from "+ Lystore.lystoreSchema+".order_client_equipment as oce " +
+            "inner join "+Lystore.lystoreSchema+".project p ON p.id = oce.id_project "+
+            "where oce.id_campaign = ? and oce.id_structure = ? ) ";
     }
 
     @Override

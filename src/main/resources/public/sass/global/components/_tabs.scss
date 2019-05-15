@@ -1,0 +1,26 @@
+.tabs-container{
+  height: 40px;
+  border-bottom: #ddd 1px solid;
+  padding: 0;
+  margin-bottom: 10px;
+  .menu{
+    background: white;
+    margin: 0;
+    height: 34px;
+    max-height: 40px;
+    padding: 5px 15px 0 15px;
+    border: #ccc 0.5px solid;
+    border-radius: 15px 15px 0% 0%;
+    line-height: 30px;
+    z-index: 0;
+    position: relative;
+    &.selected{
+      cursor: context-menu;
+      background: #4bafd5 !important;
+      color: white;
+      margin-left: -5px;
+      margin-right: -5px;
+      z-index: 2 !important;
+    }
+  }
+}

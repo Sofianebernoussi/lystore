@@ -17,9 +17,11 @@ public interface ProjectService {
      * Create a project
      *
      * @param project
+     * @param idCampaign
+     * @param idStructure
      * @param eitherHandler
      */
-    void createProject(JsonObject project, Handler<Either<String, JsonObject>> eitherHandler);
+    void createProject(JsonObject project, Integer idCampaign, String idStructure, Handler<Either<String, JsonObject>> eitherHandler);
 
     /**
      * Get a single project by his id

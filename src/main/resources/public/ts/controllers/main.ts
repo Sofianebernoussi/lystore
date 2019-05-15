@@ -13,7 +13,7 @@ import {
     Logs,
     Notification,
     OrderClient,
-    OrdersClient,
+    OrdersClient, PRIORITY_FIELD,
     Programs,
     StructureGroups,
     Structures,
@@ -196,6 +196,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                     : null;
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/order/manage-order');
+                $scope.initCampaignOrderView();
                 Utils.safeApply($scope);
             },
             campaignBasket: async (params) => {
@@ -230,6 +231,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('sendOrder.preview', 'pdf/preview');
             }
         });
+        $scope.initCampaignOrderView=()=>{
+          if( $scope.campaign.priority_enabled == true && $scope.campaign.priority_field == PRIORITY_FIELD.ORDER){
+              template.open('order-list', 'customer/campaign/order/orders-by-equipment');
+          } else {
+              template.open('order-list', 'customer/campaign/order/orders-by-project');
+          }
+        };
         $scope.initBasketItem = async (idEquipment: number, idCampaign: number, structure) => {
             $scope.equipment = _.findWhere($scope.equipments.all, {id: idEquipment});
             if ($scope.equipment === undefined && !isNaN(idEquipment)) {

@@ -168,23 +168,20 @@ public class BasketController extends ControllerHelper {
                     final Integer idProject = object.getInteger("id_project");
                     JsonArray baskets = object.containsKey("baskets") ? object.getJsonArray("baskets") : new JsonArray();
                     basketService.listebasketItemForOrder(idCampaign, idStructure, baskets,
-                            new Handler<Either<String, JsonArray>>() {
-                                @Override
-                                public void handle(Either<String, JsonArray> listBasket) {
-                                    if(listBasket.isRight() && listBasket.right().getValue().size() > 0){
-                                        basketService.takeOrder(request , listBasket.right().getValue(),
-                                                idCampaign, idStructure, nameStructure, idProject, baskets,
-                                                Logging.defaultCreateResponsesHandler(eb,
-                                                        request,
-                                                        Contexts.ORDER.toString(),
-                                                        Actions.CREATE.toString(),
-                                                        "id_order",
-                                                        listBasket.right().getValue()));
+                            listBasket -> {
+                                if(listBasket.isRight() && listBasket.right().getValue().size() > 0){
+                                    basketService.takeOrder(request , listBasket.right().getValue(),
+                                            idCampaign, idStructure, nameStructure, idProject, baskets,
+                                            Logging.defaultCreateResponsesHandler(eb,
+                                                    request,
+                                                    Contexts.ORDER.toString(),
+                                                    Actions.CREATE.toString(),
+                                                    "id_order",
+                                                    listBasket.right().getValue()));
 
-                                    }else{
-                                        log.error("An error occurred when listing Baskets");
-                                        badRequest(request);
-                                    }
+                                }else{
+                                    log.error("An error occurred when listing Baskets");
+                                    badRequest(request);
                                 }
                             });
 

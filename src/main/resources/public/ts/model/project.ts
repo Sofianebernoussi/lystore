@@ -46,18 +46,16 @@ export class Project implements Selectable {
     }
 
     toJson() {
-            
-
         let data =
             {
             description: this.description,
             id_title: this.title.id,
-                id_grade: (this.grade ? this.grade.id : undefined),
+            id_grade: (this.grade ? this.grade.id : undefined),
             building: this.building,
             site: this.site,
             stair: this.stair,
             room: this.room
-        }
+        };
 
         return this.parseToJsonOptionnal(data);
     }
@@ -75,9 +73,9 @@ export class Project implements Selectable {
         }
     }
 
-    async create() {
+    async create(id_campaign: number, id_structure:string ) {
         try {
-            let id_project = await  http.post(`/lystore/project`, this.toJson());
+            let id_project = await  http.post(`/lystore/project/${id_campaign}/${id_structure}`, this.toJson());
             this.id = (id_project.data["id"]);
             this.eventer.trigger('create:end');
             return id_project;

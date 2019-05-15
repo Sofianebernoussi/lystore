@@ -1,5 +1,5 @@
 import {_, moment, ng, template} from 'entcore';
-import {Notification, OrderClient, OrdersClient, Project, Projects, Utils} from '../../model';
+import {Notification, OrderClient, OrdersClient, PRIORITY_FIELD, Project, Projects, Utils} from '../../model';
 
 
 declare let window: any;
@@ -13,9 +13,16 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
                 deleteOrder: false,
                 deleteProject: false,
                 udpateProject: false,
-            }
+            },
+            list: $scope.campaign.priority_field
         };
-
+        $scope.menu = [{
+            name:'lystore.by.project',
+            value:PRIORITY_FIELD.PROJECT
+        },{
+            name:'lystore.by.equipment',
+            value:PRIORITY_FIELD.ORDER
+        }];
         $scope.exportCSV = () => {
             let idCampaign = $scope.ordersClient.all[0].id_campaign;
             let idStructure = $scope.ordersClient.all[0].id_structure;
@@ -204,26 +211,22 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
         };
 
         $scope.switchOrderClient = async (order: OrderClient, index: number, projectId: number, to: string) =>{
-            let orderProject = _.where($scope.ordersClient.all,{id_project: projectId});
-            let ordersJson = await $scope.getOrdersRanksSwitchedToJson(orderProject, index, to);
+            let ordersJson = await $scope.getOrdersRanksSwitchedToJson( index, to);
             await $scope.ordersClient.updateOrderRanks(ordersJson,order.id_structure);
             $scope.ordersClient.all = _.sortBy($scope.ordersClient.all, (order)=> order.rank != null ? order.rank : $scope.ordersClient.all.length );
             Utils.safeApply($scope);
         };
 
-        $scope.getOrdersRanksSwitchedToJson = (orders:Array<OrderClient> ,index:number, to:string )=>{
-            let order1 = orders[index];
-             let rang = to == 'up'? -1 : +1;
-            let order2 = orders[index + rang];
-            let index2 = _.indexOf($scope.ordersClient.all, order1 );
-            $scope.ordersClient.all[index2].rank = index2 + rang;
-            $scope.ordersClient.all[index2 + rang].rank = $scope.ordersClient.all[index2].rank - rang ;
+        $scope.getOrdersRanksSwitchedToJson = (index:number, to:string )=>{
+            let rang = to == 'up'? -1 : +1;
+            $scope.ordersClient.all[index].rank = index + rang;
+            $scope.ordersClient.all[index + rang].rank = $scope.ordersClient.all[index].rank - rang ;
             return [{
-                id: order1.id,
-                rank: $scope.ordersClient.all[index2].rank
+                id:  $scope.ordersClient.all[index].id,
+                rank: $scope.ordersClient.all[index].rank
             },{
-                id: order2.id,
-                rank: $scope.ordersClient.all[index2 + rang].rank
+                id: $scope.ordersClient.all[index + rang].id,
+                rank: $scope.ordersClient.all[index + rang].rank
             }]
         };
 
@@ -238,19 +241,25 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
         };
 
         $scope.getProjectRanksSwitchedToJson = (index:number, to:string )=>{
-            let order1 =  $scope.ordersClient.projects.all[index];
             let rang = to == 'up'? -1 : +1;
-            let order2 =  $scope.ordersClient.projects.all[index + rang];
             $scope.ordersClient.projects.all[index].preference = index + rang;
             $scope.ordersClient.projects.all[index + rang].preference = $scope.ordersClient.projects.all[index].preference - rang ;
             return [{
-                id: order1.id,
+                id:  $scope.ordersClient.projects.all[index].id,
                 preference: $scope.ordersClient.projects.all[index].preference
             },{
-                id: order2.id,
+                id:  $scope.ordersClient.projects.all[index + rang].id,
                 preference: $scope.ordersClient.projects.all[index + rang].preference
             }]
         };
 
+        $scope.switchView = (display)=> {
+            if(display == PRIORITY_FIELD.ORDER){
+                template.open('order-list', 'customer/campaign/order/orders-by-equipment');
+            }else{
+                template.open('order-list', 'customer/campaign/order/orders-by-project');
+            }
+            Utils.safeApply($scope);
+        }
 
     }]);

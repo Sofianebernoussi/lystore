@@ -13,7 +13,7 @@ export const projectController = ng.controller("projectController",
         $scope.project.init($scope.campaign.id, $scope.current.structure.id);
 
         $scope.confirmProject = (project: Project) => {
-            project.create();
+            project.create($scope.campaign.id,$scope.current.structure.id);
             $scope.display.title = project.title ? project.title.name : undefined;
             $scope.display.grade = project.grade ? project.grade.name : undefined;
             $scope.display.lightbox.createProject = false;

@@ -147,7 +147,7 @@ export class Baskets extends Selection<Basket> {
                         newlistBaskets.push(basket);
                     }
                 }
-            )
+            );
             this.all = newlistBaskets.all;
 
             let data = {
@@ -157,7 +157,6 @@ export class Baskets extends Selection<Basket> {
                 id_project: idProject,
                 baskets: baskets
             };
-            console.log(data);
 
             return await http.post(`/lystore/baskets/to/orders`, data);
         } catch (e) {

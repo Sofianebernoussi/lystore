@@ -569,7 +569,11 @@ body.lystore {
       .width-100-40 {
         width: calc(100% - 40px);
       }
-
+      .project{
+        font-size: small;
+        font-style: italic;
+        text-align: end;
+      }
       .article-equipment {
         .basket-image {
           img{

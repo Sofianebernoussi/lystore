@@ -251,7 +251,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                     statements.add(purseService.updatePurseAmountStatement(Float.valueOf(basket.getString("total_price")),
                             idCampaign, idStructure, "-"));
                 }
-                statements.add(getInsertEquipmentOrderStatement(basket, idProject,i));
+                statements.add(getInsertEquipmentOrderStatement(basket, idProject));
                 if(! "[null]".equals( basket.getString("options"))) {
                     statements.add(getInsertEquipmentOptionsStatement(basket));
                     statements.add(getDeletionBasketsOptionsStatments(basket.getInteger("id_basket")));
@@ -263,16 +263,13 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             }
             statements.add(getDeletionBasketsEquipmentStatments(idCampaign, idStructure, baskets_objects, purse_enabled));
 
-            sql.transaction(statements, new Handler<Message<JsonObject>>() {
-                @Override
-                public void handle(Message<JsonObject> event) {
-                    JsonObject results = event.body().getJsonArray("results")
-                            .getJsonObject(event.body().getJsonArray("results").size()-1);
-                    JsonArray objectResult = results.getJsonArray("results").getJsonArray(0);
-                    String jsonValue = objectResult.getString(0) == null ? "{}" : objectResult.getString(0);
-                    getTransactionHandler(request, nameStructure, getTotalPriceOfBasketList(baskets),
-                            event, new JsonObject(jsonValue), handler);
-                }
+            sql.transaction(statements, event -> {
+                JsonObject results = event.body().getJsonArray("results")
+                        .getJsonObject(event.body().getJsonArray("results").size()-1);
+                JsonArray objectResult = results.getJsonArray("results").getJsonArray(0);
+                String jsonValue = objectResult.getString(0) == null ? "{}" : objectResult.getString(0);
+                getTransactionHandler(request, nameStructure, getTotalPriceOfBasketList(baskets),
+                        event, new JsonObject(jsonValue), handler);
             });
         }catch (ClassCastException e) {
             LOGGER.error("An error occurred when casting baskets elements", e);
@@ -388,13 +385,14 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 .put("action", "prepared");
     }
 
+
     /**
      * Basket to order
      * @param basket
      * @param idProject
      * @return
      */
-    private static JsonObject getInsertEquipmentOrderStatement(JsonObject basket, Integer idProject, Integer i) {
+    private JsonObject getInsertEquipmentOrderStatement(JsonObject basket, Integer idProject) {
         StringBuilder queryEquipmentOrder;
         JsonArray params;
         try {
@@ -403,7 +401,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                     .append(" (id, price, tax_amount, amount,  id_campaign, id_structure, name, summary," +
                             " description, image, technical_spec, status, id_project, " +
                             " id_contract, equipment_key, comment, price_proposal, rank ) VALUES ")
-                    .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?, ?, ?, ?, ?); ");
+                    .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?, ?, ?, ?, "+ getTheLastRankOrder() +"); ");
             params = new fr.wseduc.webutils.collections.JsonArray();
 
             params.add(basket.getInteger("id_order"))
@@ -423,7 +421,9 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                     .add(basket.getInteger("id_equipment"))
                     .add(basket.getString("comment"))
                     .add(Float.valueOf(basket.getString("price_proposal")))
-                    .add(i);
+                    .add(basket.getInteger("id_campaign"))
+                    .add(basket.getString("id_structure"))
+                    ;
 
         } catch (java.lang.NullPointerException e) {
             queryEquipmentOrder = new StringBuilder()
@@ -431,7 +431,9 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                     .append(" (id, price, tax_amount, amount,  id_campaign, id_structure, name, summary," +
                             " description, image, technical_spec, status, " +
                             " id_contract, equipment_key, comment, price_proposal, id_project, rank ) VALUES ")
-                    .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?, ?, null, ?, ?); ");
+                    .append(" (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?, to_json(?::text), ?, ?, ?, ?, null, ?, ")
+                    .append(getTheLastRankOrder())
+                    .append( "); ");
             params = new fr.wseduc.webutils.collections.JsonArray();
 
             params.add(basket.getInteger("id_order"))
@@ -450,7 +452,9 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                     .add(basket.getInteger("id_equipment"))
                     .add(basket.getString("comment"))
                     .add(idProject)
-                    .add(i);
+                    .add(basket.getInteger("id_campaign"))
+                    .add(basket.getString("id_structure"))
+                    ;
 
         }
 
@@ -461,7 +465,15 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 .put("action", "prepared");
 
     }
-
+    private String getTheLastRankOrder () {
+        return "(select " +
+                "case " +
+                "       WHEN max(oce.rank) is null THEN 0 " +
+                "       ELSE max(oce.rank + 1) " +
+                "END " +
+                "from lystore.order_client_equipment as oce  " +
+                "where oce.id_campaign = ? and oce.id_structure = ? )";
+    }
     private static JsonObject getInsertEquipmentOptionsStatement (JsonObject basket){
         JsonArray options = new fr.wseduc.webutils.collections.JsonArray(basket.getString("options"))  ;
         StringBuilder queryEOptionEquipmentOrder = new StringBuilder()

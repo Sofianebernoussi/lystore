@@ -21,7 +21,7 @@ public class DefaultStructureService implements StructureService {
     @Override
     public void getStructures(Handler<Either<String, JsonArray>> handler) {
         String query = "MATCH (s:Structure) WHERE s.UAI IS NOT NULL "+
-                "RETURN s.id as id, s.name as name,s.city as city,s.UAI as uai";
+                "RETURN s.id as id, s.name as name,s.city as city,s.UAI as uai, s.academy as academy, s.type as type";
         neo4j.execute(query, new JsonObject(), Neo4jResult.validResultHandler(handler));
     }
 

@@ -1,4 +1,3 @@
-import { model } from 'entcore';
 import { Selectable, Mix, Selection } from 'entcore-toolkit';
 import http from 'axios';
 
@@ -7,6 +6,8 @@ export class Structure implements Selectable {
     name: string;
     uai: string;
     city: string;
+    academy: string;
+    type:string;
 
     selected: boolean;
 

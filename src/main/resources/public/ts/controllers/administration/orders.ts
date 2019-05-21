@@ -93,13 +93,18 @@ export const orderController = ng.controller('orderController',
                 structureGroups.map((groupName) => bool = bool || regex.test(groupName.toLowerCase()));
                 return bool;
             };
-
+            if($scope.search.filterWords.length > 0){
             $scope.search.filterWords.map((searchTerm: string, index: number): void => {
                 let searchItems: OrderClient[] = index === 0 ? $scope.ordersClient.all : searchResult;
                 regex = generateRegexp([searchTerm]);
 
                 searchResult = _.filter(searchItems, (order: OrderClient) => {
                     return ('name_structure' in order ? regex.test(order.name_structure.toLowerCase()) : false)
+                        || ('structure' in order && order.structure['name'] ? regex.test(order.structure.name.toLowerCase()): false)
+                        || ('structure' in order && order.structure['academy'] ? regex.test(order.structure.academy.toLowerCase()) : false)
+                        || ('structure' in order && order.structure['type'] ? regex.test(order.structure.type.toLowerCase()) : false)
+                        || ('project' in order ? regex.test(order.project.title['name'].toLowerCase()) : false)
+                        || ('contract_type' in order ? regex.test(order.contract_type.name.toLowerCase()) : false)
                         || regex.test('contract' in (order as OrderClient)
                             ? order.contract.name.toLowerCase()
                             : order.contract_name)
@@ -118,10 +123,14 @@ export const orderController = ng.controller('orderController',
                         || (order.label_program !== null && 'label_program' in order
                             ? regex.test(order.label_program.toLowerCase())
                             : false);
+
                 });
             });
 
             $scope.displayedOrders.all = searchResult;
+            }else{
+                $scope.displayedOrders.all = $scope.ordersClient.all;
+            }
         };
 
         $scope.pullFilterWord = (filterWord) => {
@@ -287,10 +296,11 @@ export const orderController = ng.controller('orderController',
         $scope.countColSpan = (field:string):number =>{
             let totaux = $scope.isManager() ? 1 :0;
             let price = $scope.isManager() ? 1 : 0;
+            let amount_field  =7;
             for (let _i = 0; _i < $scope.tableFields.length; _i++) {
-                if(_i < 3 && $scope.tableFields[_i].display){
+                if(_i < amount_field && $scope.tableFields[_i].display){
                     totaux++;
-                }else if(_i>3 && $scope.tableFields[_i].display)  {
+                }else if(_i> amount_field && $scope.tableFields[_i].display)  {
                     price++;
                 }
             }

@@ -5,8 +5,28 @@ export const orderWaiting = [
         display:true,
     },
     {
+        name:'Academy',
+        fieldName:'structure.academy',
+        display:true,
+    },
+    {
+        name:'lystore.structure.type',
+        fieldName:'structure.type',
+        display:true,
+    },
+    {
         name:'contract',
         fieldName:'contract.name',
+        display:true,
+    },
+    {
+        name:'lystore.contract.type.name',
+        fieldName:'contract_type.name',
+        display:true,
+    },
+    {
+        name:'lystore.project',
+        fieldName:'project.title.name',
         display:true,
     },
     {

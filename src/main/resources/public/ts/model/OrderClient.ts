@@ -1,6 +1,6 @@
 import {_, model, moment, notify} from 'entcore';
 import {Mix, Selectable, Selection} from 'entcore-toolkit';
-import {Campaign, Contract, Structure, Supplier, TechnicalSpec, Utils} from './index';
+import {Campaign, Contract, ContractType, Structure, Supplier, TechnicalSpec, Utils} from './index';
 import http from 'axios';
 import {Project} from "./project";
 import {Title} from "./title";
@@ -34,6 +34,7 @@ export class OrderClient implements Selectable {
     supplier_name?: string;
     project: Project;
     files: any;
+    contract_type: ContractType;
     name_structure: string;
     id_contract: number;
     id_campaign: number;
@@ -44,6 +45,7 @@ export class OrderClient implements Selectable {
     comment?: string;
     price_proposal?: number;
     rank?:number;
+    structure: Structure;
     constructor() {
 
     }
@@ -143,11 +145,13 @@ export class OrdersClient extends Selection<OrderClient> {
                 this.all = Mix.castArrayAs(OrderClient, data);
                 this.all.map((order: OrderClient) => {
                     order.name_structure =  structures.length > 0 ? this.initNameStructure(order.id_structure, structures) : '';
+                    order.structure = structures.length > 0 ? this.initStructure(order.id_structure, structures) : new Structure();
                     order.price = parseFloat(status === 'VALID' ? order.price.toString().replace(',', '.') : order.price.toString());
                     order.structure_groups = Utils.parsePostgreSQLJson(order.structure_groups);
                     if (status !== 'VALID') {
                         order.tax_amount = parseFloat(order.tax_amount.toString());
                         order.contract = Mix.castAs(Contract,  JSON.parse(order.contract.toString()));
+                        order.contract_type = Mix.castAs(ContractType,  JSON.parse(order.contract_type.toString()));
                         order.supplier = Mix.castAs(Supplier,  JSON.parse(order.supplier.toString()));
                         order.id_supplier = order.supplier.id;
                         order.campaign = Mix.castAs(Campaign,  JSON.parse(order.campaign.toString()));
@@ -225,6 +229,10 @@ export class OrdersClient extends Selection<OrderClient> {
     initNameStructure (idStructure: string, structures: Structure[]) {
         let structure = _.findWhere(structures, { id : idStructure});
         return  structure ? structure.uai + '-' + structure.name : '' ;
+    }
+    initStructure (idStructure: string, structures: Structure[]) {
+        let structure = _.findWhere(structures, { id : idStructure});
+        return  structure ? structure : new Structure() ;
     }
     calculTotalAmount () {
         let total = 0;

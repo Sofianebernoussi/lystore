@@ -402,9 +402,13 @@
   "lystore.order.priority.down": "Baisser la priorité",
   "lystore.on.project":"par projet",
   "lystore.on.order":"par demande",
-  "lystore.project.preference":"Priorité project",
+  "lystore.project.preference":"Priorité projet",
   "lystore.order.rank":"Priorité équipement",
   "lystore.order.not.prioritized":"non priorisé",
   "lystore.by.project":"Par projet",
-  "lystore.by.equipment":"Par demande"
+  "lystore.by.equipment":"Par demande",
+  "lystore.structure.type":"Cités mixtes",
+  "Academy":"Academie",
+  "lystore.project":"Projet",
+  "lystore.contract.type.name":"Nature du marché"
 }

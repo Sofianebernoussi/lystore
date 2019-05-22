@@ -4,10 +4,10 @@ import http from 'axios';
 export class Instruction implements Selectable {
     id?:number;
     object:string;
-    exercice_number:number;
+    exercice_number:number|ExerciceNumber;
     cp_number:string;
     service_number:string;
-    subject_to_cp:boolean;
+    submitted_to_cp:boolean;
     date_cp: object;
     comment:string;
     amount:number;
@@ -29,4 +29,14 @@ export class Instructions extends Selection<Instruction>{
     async sync () {
 
     }
+}
+
+export class ExerciceNumber {
+    id: number;
+    title: string;
+}
+export class ExerciceNumbers {
+   async sync() {
+
+   }
 }

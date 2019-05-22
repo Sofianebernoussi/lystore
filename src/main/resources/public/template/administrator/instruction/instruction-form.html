@@ -1,0 +1,83 @@
+<div class="loading-bar" ng-class="{loading: instruction.loading}"></div>
+
+<div ng-if="instruction.loading">
+    <h1> Chargement en cours ...</h1>
+</div>
+<div ng-if="!instruction.loading" class="row ten centered">
+    <h1>
+        <i18n ng-show="instruction.id == undefined">lystore.instruction.add</i18n>
+        <i18n ng-show="instruction.id !== undefined">lystore.instruction.modify</i18n>
+    </h1>
+    <article>
+        <form >
+            <label class="row twelve vertical-spacing">
+                        <span class="twelve">
+                            <i18n>lystore.instruction.objet</i18n>
+                        </span>
+                <input type="text" class="twelve" ng-model="instruction.object" required>
+            </label>
+            <label class="row twelve vertical-spacing">
+                        <span class="twelve">
+                            <i18n>lystore.exercise.number</i18n>
+                        </span>
+                <select  ng-model="instruction.exerciseNumber" class="twelve"
+                         ng-init="instruction.exerciseNumber = instruction.exerciseNumber|| (exerciseNumber.all.length > 0 ? exerciseNumber.all[0].id : null)"
+                         ng-options="ExerciseNumber.id as ExerciseNumber.title for ExerciseNumber in exerciseNumber.all" required></select>
+            </label>
+            <label class="row twelve vertical-spacing">
+                        <span class="twelve">
+                            <i18n>lystore.instruction.official.number</i18n>
+                        </span>
+                <input type="text" class="twelve" ng-model="instruction.cp_number" required>
+            </label>
+            <label class="row twelve vertical-spacing">
+                        <span class="twelve">
+                            <i18n>lystore.instruction.service.number</i18n>
+                        </span>
+                <input type="text" class="twelve" ng-model="instruction.service_number" required>
+            </label>
+            <label class="row vertical-spacing twelve-mobile row-mobile">
+                                <span class="cell ">
+                                    <i18n>lystore.submitted.to.cp</i18n>
+                                </span>
+                <switch-toggle ng-model="instruction.submitted_to_cp"
+                               class="cell"></switch-toggle>
+                <date-picker ng-model="instruction.date_cp" ng-disaled >
+                </date-picker>
+            </label>
+
+            <label class="row twelve vertical-spacing">
+                        <span class="twelve">
+                            <i18n>lystore.instruction.commenter</i18n>
+                        </span>
+                <textarea ng-model="instruction.comment"
+                          cols="20" rows="10" maxlength="300"></textarea>
+            </label>
+            <div class="row twelve">
+                <h2 class="vertical-spacing">
+                    <i18n>lystore.instruction.operations</i18n>
+                </h2>
+                <article><table class="twelve">
+                    <thead>
+                    <td class="two"><i18n>label</i18n></td>
+                    <td class="two"><i18n>lystore.number.sub</i18n></td>
+                    <td class="two"><i18n>amount</i18n></td>
+                    <td class="two"><i18n>lystore.operation.status</i18n></td>
+                    <td class="one aligne-text-center">&nbsp;</td>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="operation in instruction.operation">
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="one aligne-text-center" ng-click="dropOperation(operation, $index)"><i  class="trash"></i></td>
+                    </tr>
+                    </tbody>
+                </table>
+                    <input type="button"  ng-click="addOperationLigne()" i18n-value="add" />
+
+                </article>
+            </div>
+        </form>
+    </article>
+</div>

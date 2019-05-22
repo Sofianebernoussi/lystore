@@ -437,5 +437,16 @@
   "lystore.operation.text.delete.reject": "Cette opération n'est pas possible car une des opérations sélectionnées n'est pas vide."
   "lystore.contract.type.name":"Nature du marché",
   "lystore.instruction":"Instruction",
-  "lystore.instruction.add":"Ajouter une instruction"
+  "lystore.instruction.add":"Ajouter une instruction",
+  "lystore.instruction.modify":"Modifier une instruction",
+  "lystore.instruction.objet":"Object",
+  "lystore.exercise.number":"Numéro d'éxercice",
+  "label":"Libellé",
+  "lystore.submitted.to.cp":"Soumis à CP",
+  "lystore.instruction.commenter":"Commentaie",
+  "lystore.instruction.official.number":"N° officiel CP",
+  "lystore.instruction.service.number":"N° service",
+  "lystore.number.sub":"Nbre sub",
+  "lystore.operation.status":"Statut",
+  "lystore.instruction.operations":"Opérations associées"
 }

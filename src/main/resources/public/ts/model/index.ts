@@ -22,4 +22,5 @@ export * from './EquipmentType';
 export * from './project';
 export * from './title';
 export * from './grade';
-export * from './tableFields'
+export * from './tableFields';
+export * from './operation'

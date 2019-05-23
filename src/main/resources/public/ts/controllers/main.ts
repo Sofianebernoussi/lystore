@@ -229,6 +229,12 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             previewOrder: async () => {
                 template.open('administrator-main', 'administrator/order/order-send-prepare');
                 template.open('sendOrder.preview', 'pdf/preview');
+            },
+            operation: async () =>{
+                $scope.initOperation();
+                template.open('administrator-main', 'administrator/operation/operation-container');
+                template.open('operation-main', 'administrator/operation/manage-operation');
+                Utils.safeApply($scope);
             }
         });
         $scope.initCampaignOrderView=()=>{
@@ -237,6 +243,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
           } else {
               template.open('order-list', 'customer/campaign/order/orders-by-project');
           }
+        };
+        $scope.initOperation =() =>{
+
         };
         $scope.initBasketItem = async (idEquipment: number, idCampaign: number, structure) => {
             $scope.equipment = _.findWhere($scope.equipments.all, {id: idEquipment});

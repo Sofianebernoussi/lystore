@@ -1,0 +1,23 @@
+<h1><i18n>lystore.operations</i18n></h1>
+<div class="row">
+    <div class="cell twelve-mobile horizontal-spacing search-pagination four">
+        <div class="row twelve vertical-spacing">
+            <input type="text" class="twelve" ng-keydown="addOperationFilter($event)"
+                   i18n-placeholder="add.a.filter">
+            <i class="search flex-row"></i>
+        </div>
+        <div class="row horizontal-spacing">
+            <div class="select-blocks">
+                <div ng-repeat="filter in search.filterWords"
+                     ng-click="dropFilter(filter)" class="labels-in-ligne">
+                    <div> [[ filter ]]</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="right-magnet twelve-mobile">
+        <button workflow="lystore.administrator" class="twelve-mobile" ng-click="openOperationForm()">
+            <i18n>lystore.operation.add</i18n>
+        </button>
+    </div>
+</div>

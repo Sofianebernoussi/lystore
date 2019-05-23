@@ -1,5 +1,5 @@
 import { ng, template, notify, moment, _ } from 'entcore';
-import {Utils} from "../../model";
+import {Instruction, Utils} from "../../model";
 
 
 declare let window: any;
@@ -30,9 +30,10 @@ export const instructionController = ng.controller('instructionController',
                 event.target.value = '';
             }
         };
-        $scope.openInstructionForm = () =>{
+        $scope.openInstructionForm = () => {
+            $scope.instruction = new Instruction();
             template.open('instruction-main', 'administrator/instruction/instruction-form');
-            //TODO
-        }
+            Utils.safeApply($scope);
+        };
 
     }]);

@@ -416,5 +416,8 @@
   "lystore.operation.modify":"Modifier une operation",
   "label":"Libellé",
   "lystore.operation.status":"Statut",
-  "":""
+  "lystore.operation.create.err": "Erreur lors de la création d'une operation",
+  "lystore.operation.update.err": "Erreur lors de la mise à jour d'une operation ",
+  "lystore.operation.delete.err": "Erreur lors de la suppression d'une operation",
+  "lystore.operation.sync.err": "Erreur lors de la récupération des operations"
 }

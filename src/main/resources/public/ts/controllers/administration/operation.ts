@@ -1,5 +1,5 @@
 import { ng, template, notify, moment, _ } from 'entcore';
-import {Operation, Utils} from "../../model";
+import {labels, Operation, Utils} from "../../model";
 
 
 declare let window: any;
@@ -32,19 +32,22 @@ export const operationController = ng.controller('operationController',
             }
         };
         $scope.openOperationForm = () =>{
+            $scope.labelOperation = new labels();
+            $scope.labelOperation.sync();
             $scope.operation = new Operation();
             $scope.display.lightbox.operation = true;
             template.open('operation.lightbox', 'administrator/operation/operation-form');
             Utils.safeApply($scope);
         };
-        $scope.validOperation = () =>{
-            //TODO
+        $scope.validOperationForm = (operation:Operation) =>{
+         return  operation.id_label && operation.status;
         };
         $scope.cancelOperationForm = () =>{
             $scope.display.lightbox.operation = false;
             template.close('operation.lightbox');
         };
-        $scope.validOperationForm = (operation:Operation) =>{
-
+        $scope.validOperation = async (operation:Operation) =>{
+           await operation.save();
+           $scope.cancelOperationForm();
         }
     }]);

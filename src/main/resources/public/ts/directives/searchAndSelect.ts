@@ -38,8 +38,8 @@ export const searchAndSelect = ng.directive('searchAndSelect', function() {
             };
             $scope.fsearch = (item) => {
               if ($scope.search.input){
-                  return (item.name.toLowerCase()).includes($scope.search.input.toLowerCase())
-                      || (item.UAI.toLowerCase()).includes($scope.search.input.toLowerCase())
+                  return (item.name ?   (item.name.toLowerCase() ).includes($scope.search.input.toLowerCase()) : false)
+                      || (item.UAI ? ( item.UAI.toLowerCase()).includes($scope.search.input.toLowerCase()) : false)
               }else
                   return true
             };

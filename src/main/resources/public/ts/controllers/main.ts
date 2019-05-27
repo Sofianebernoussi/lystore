@@ -9,9 +9,9 @@ import {
     ContractTypes,
     Equipment,
     Equipments,
-    EquipmentTypes,
+    EquipmentTypes, labels,
     Logs,
-    Notification,
+    Notification, Operations,
     OrderClient,
     OrdersClient, PRIORITY_FIELD,
     Programs,
@@ -48,6 +48,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.campaign = new Campaign();
         $scope.structureGroups = new StructureGroups();
         $scope.taxes = new Taxes();
+        $scope.operations= new Operations();
         $scope.logs = new Logs();
         $scope.baskets = new Baskets();
         $scope.ordersClient = new OrdersClient();
@@ -244,8 +245,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
               template.open('order-list', 'customer/campaign/order/orders-by-project');
           }
         };
-        $scope.initOperation =() =>{
-
+        $scope.initOperation = async () =>{
+            $scope.labelOperation = new labels();
+            $scope.labelOperation.sync();
+            await $scope.operations.sync();
         };
         $scope.initBasketItem = async (idEquipment: number, idCampaign: number, structure) => {
             $scope.equipment = _.findWhere($scope.equipments.all, {id: idEquipment});

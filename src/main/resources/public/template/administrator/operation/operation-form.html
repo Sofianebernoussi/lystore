@@ -8,7 +8,7 @@
             </span>
             <select  ng-model="operation.id_label" class="twelve"
                      ng-init="operation.id_label = operation.id_label || (labelOperation.all.length > 0 ? labelOperation.all[0].id : null)"
-                     ng-options="LabelOperation.id as LabelOperation.title for LabelOperation in labelOperation.all" required></select>
+                     ng-options="LabelOperation.id as LabelOperation.label for LabelOperation in labelOperation.all" required></select>
         </label>
     </div>
     <label class="row vertical-spacing twelve-mobile row-mobile">

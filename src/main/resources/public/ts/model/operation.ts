@@ -1,12 +1,18 @@
 import { Mix, Selectable, Selection} from 'entcore-toolkit';
 import http from 'axios';
-import {notify} from "entcore";
+import {notify, _} from "entcore";
+
+
 
 export class Operation implements Selectable {
     id?:number;
     id_label:number;
-    status:boolean;
+    label : label;
+    status:boolean = false;
 
+    bc_numbers:Array<any> ;
+    programs : Array<any> ;
+    contracts: Array<any> ;
     nbr_sub: number;
     amount: number;
     selected:boolean;
@@ -39,7 +45,10 @@ export class Operation implements Selectable {
     }
 
     toJson(){
-        return this;
+        return {
+            id_label : this.id_label,
+            status : (this.status)
+        };
     }
 
 }
@@ -48,6 +57,16 @@ export class Operations extends Selection<Operation>{
 
     constructor() {
         super([]);
+    }
+
+    async sync() {
+        let { data } = await http.get('/lystore/operations');
+        this.all = Mix.castArrayAs(Operation, data);
+        this.all.map( (operation)=>{
+            operation.label.toString() !== 'null' && operation.label !== null ?
+                operation.label = Mix.castAs(label, JSON.parse(operation.label.toString()))
+                : operation.label = new label();
+            })
     }
 
 }

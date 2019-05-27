@@ -19,7 +19,21 @@ public class DefaultOperationService extends SqlCrudService implements Operation
     public void getLabels (Handler<Either<String, JsonArray>> handler) {
 
         String query = "SELECT * FROM " + Lystore.lystoreSchema +".label_operation";
-        sql.prepared(query,null, SqlResult.validResultHandler(handler) );
+        sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler) );
+    }
+    public void getOperations(Handler<Either<String, JsonArray>> handler){
+        String query =  "SELECT  operation.* , to_json(label.*) as label, count(oce.*) as nbr_sub, " +
+                "array_to_json(array_agg(o.order_number)) as bc_number, " +
+                "array_to_json(array_agg(o.label_program)) as programs," +
+
+                " array_to_json(array_agg(c.name)) as contracts " +
+        "FROM  " + Lystore.lystoreSchema +".operation "+
+                "Inner join " + Lystore.lystoreSchema +".label_operation label on label.id = operation.id_label "+
+                "Left join " + Lystore.lystoreSchema +".order_client_equipment oce on oce.id_operation = operation.id "+
+                "left join " + Lystore.lystoreSchema +".order o on o.id = oce.id_order "+
+                "left join " + Lystore.lystoreSchema +".contract c on c.id = oce.id_contract "+
+                "group By (operation.id, label.*)";
+        sql.prepared(query, new JsonArray(), SqlResult.validResultHandler(handler) );
     }
 
     public void create(JsonObject operation, Handler<Either<String, JsonObject>> handler){
@@ -27,8 +41,8 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 "VALUES (?, ?) RETURNING id;";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
-                .add(operation.getString("id_label"))
-                .add(operation.getString("status"));
+                .add(operation.getInteger("id_label"))
+                .add(operation.getBoolean("status"));
 
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }

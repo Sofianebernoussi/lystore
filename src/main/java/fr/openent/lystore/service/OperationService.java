@@ -9,6 +9,8 @@ public interface OperationService {
 
     void getLabels (Handler<Either<String, JsonArray>> handler);
 
+    void getOperations(Handler<Either<String, JsonArray>> handler);
+
     void create(JsonObject operation,  Handler<Either<String, JsonObject>> handler);
 
     void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler);

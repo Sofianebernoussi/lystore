@@ -4,15 +4,19 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
+import fr.openent.lystore.security.AdministratorRight;
+import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.OperationService;
 import fr.openent.lystore.service.impl.DefaultOperationService;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
 import fr.wseduc.rs.Post;
+import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.http.filter.ResourceFilter;
 
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
@@ -27,15 +31,23 @@ public class OperationController  extends ControllerHelper {
 
     @Get("/labels")
     @ApiDoc("Returns all labels in database")
-    @SecuredAction(Lystore.MANAGER_RIGHT)
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void getLabels (HttpServerRequest request) {
         operationService.getLabels(arrayResponseHandler(request));
     }
 
+    @Get("/operations")
+    @ApiDoc("List all operations in database")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void getOperations(HttpServerRequest request) {
+        operationService.getOperations(arrayResponseHandler(request));
+    }
 
     @Post("/operation")
     @ApiDoc("Create an operation")
-    @SecuredAction(Lystore.MANAGER_RIGHT)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
+    @Override
     public void create(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "operation", operation -> operationService.create(operation, Logging.defaultResponseHandler(eb,
                 request,

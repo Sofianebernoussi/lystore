@@ -13,6 +13,7 @@ export const operationController = ng.controller('operationController',
                 reverse: false
             }
         };
+        $scope.allOrdersSelected = false;
         $scope.search = {
             filterWord : '',
             filterWords : []
@@ -32,15 +33,13 @@ export const operationController = ng.controller('operationController',
             }
         };
         $scope.openOperationForm = () =>{
-            $scope.labelOperation = new labels();
-            $scope.labelOperation.sync();
             $scope.operation = new Operation();
             $scope.display.lightbox.operation = true;
             template.open('operation.lightbox', 'administrator/operation/operation-form');
             Utils.safeApply($scope);
         };
         $scope.validOperationForm = (operation:Operation) =>{
-         return  operation.id_label && operation.status;
+         return  operation.id_label ;
         };
         $scope.cancelOperationForm = () =>{
             $scope.display.lightbox.operation = false;
@@ -49,5 +48,8 @@ export const operationController = ng.controller('operationController',
         $scope.validOperation = async (operation:Operation) =>{
            await operation.save();
            $scope.cancelOperationForm();
+        }
+        $scope.switchAllOperations = ()=>{
+
         }
     }]);

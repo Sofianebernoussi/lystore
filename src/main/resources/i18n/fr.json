@@ -419,5 +419,7 @@
   "lystore.operation.create.err": "Erreur lors de la création d'une operation",
   "lystore.operation.update.err": "Erreur lors de la mise à jour d'une operation ",
   "lystore.operation.delete.err": "Erreur lors de la suppression d'une operation",
-  "lystore.operation.sync.err": "Erreur lors de la récupération des operations"
+  "lystore.operation.sync.err": "Erreur lors de la récupération des operations",
+  "lystore.operation.number.structure":"Nombre de demandes",
+  "lystore.operation.name":"Nom de l'operation"
 }

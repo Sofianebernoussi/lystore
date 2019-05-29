@@ -1,6 +1,6 @@
 {
   "lystore.title": "Lystore",
-  "lystore.orders": "Commandes",
+  "lystore.orders": "Demandes",
   "lystore.order": "Commande",
   "lystore.order.waiting": "Commandes en attente de validation",
   "lystore.order.valid": "Commandes validées, prêtes pour le bon de commandes",
@@ -421,5 +421,8 @@
   "lystore.operation.delete.err": "Erreur lors de la suppression d'une operation",
   "lystore.operation.sync.err": "Erreur lors de la récupération des operations",
   "lystore.operation.number.structure":"Nombre de demandes",
-  "lystore.operation.name":"Nom de l'operation"
+  "lystore.operation.name":"Nom de l'operation",
+  "lystore.operation.bc_numbers":"N°BC",
+  "lystore.operation.contracts":"Marchés",
+  "lystore.operation.programs":"Programmes"
 }

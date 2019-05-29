@@ -28,6 +28,7 @@
                 <td workflow="lystore.manager" class="table-selector">
                     <label class="checkbox">
                         <input type="checkbox"
+                               ng-show="operations.all.length > 0"
                                ng-change="switchAllOperations()"
                                ng-model="allOperationsSelected">
                         <span></span>
@@ -55,29 +56,30 @@
 
                 <td ng-click="sort.operation.type = bc_numbers;
                     sort.operation.reverse = !sort.operation.reverse">
-                    <i18n>bc_numbers</i18n>
+                    <i18n>lystore.operation.bc_numbers</i18n>
                     <i class="up-open" ng-show="sort.operation.type === 'bc_numbers' && !sort.operation.reverse"></i>
                     <i class="down-open" ng-show="sort.operation.type === 'bc_numbers' && sort.operation.reverse"></i>
                 </td>
 
                 <td ng-click="sort.operation.type = contracts;
                     sort.operation.reverse = !sort.operation.reverse">
-                    <i18n>contracts</i18n>
+                    <i18n>lystore.operation.contracts</i18n>
                     <i class="up-open" ng-show="sort.operation.type === 'contracts' && !sort.operation.reverse"></i>
                     <i class="down-open" ng-show="sort.operation.type === 'contracts' && sort.operation.reverse"></i>
                 </td>
 
                 <td ng-click="sort.operation.type = programs;
                     sort.operation.reverse = !sort.operation.reverse">
-                    <i18n>programs</i18n>
+                    <i18n>lystore.operation.programs</i18n>
                     <i class="up-open" ng-show="sort.operation.type === 'programs' && !sort.operation.reverse"></i>
                     <i class="down-open" ng-show="sort.operation.type === 'programs' && sort.operation.reverse"></i>
                 </td>
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="operation in operations.all | orderBy:sort.operation.type:sort.operation.reverse">
-                <td workflow="lystore.manager" class="table-selector">
+            <tr ng-repeat="operation in operations.all | orderBy:sort.operation.type:sort.operation.reverse"
+                ng-class="{ disableRow: operation.status === 'false' }">
+                <td workflow="lystore.manager" class="table-selector" >
                     <label class="checkbox">
                         <input type="checkbox" ng-model="operation.selected">
                         <span></span>
@@ -87,8 +89,16 @@
                 <td >[[operation.amount]]</td>
                 <td >[[operation.nbr_sub]]</td>
                 <td >[[operation.bc_numbers]]</td>
-                <td >[[operation.contracts]]</td>
-                <td > [[ operation.programs.toString() ]]</td>
+                <td tooltip=[[operation.contracts]] >
+                    [[operation.contracts.split(',').length !== 1 && operation.contracts.split(',')[0] === "[null]" ?
+                    operation.contracts.split(',')[0]
+                    : "-" ]]
+                </td>
+                <td tooltip=[[operation.programs]] >
+                    [[operation.programs.split(',').length !== 1 && operation.programs.split(',')[0] === "[null]" ?
+                    operation.programs.split(',')[0]
+                    : "-" ]]
+                </td>
             </tr>
             </tbody>
         </table>

@@ -48,8 +48,17 @@ export const operationController = ng.controller('operationController',
         $scope.validOperation = async (operation:Operation) =>{
            await operation.save();
            $scope.cancelOperationForm();
-        }
-        $scope.switchAllOperations = ()=>{
-
+           await $scope.initOperation();
+           Utils.safeApply($scope);
+        };
+        $scope.isAllOperationSelected = false;
+        $scope.switchAllOperations = () => {
+            $scope.isAllOperationSelected  =  !$scope.isAllOperationSelected
+            if ( $scope.isAllOperationSelected) {
+                $scope.operations.all.map(operationSelected => operationSelected.selected = true)
+            } else {
+                $scope.operations.all.map(operationSelected => operationSelected.selected = false)
+            }
+            Utils.safeApply($scope);
         }
     }]);

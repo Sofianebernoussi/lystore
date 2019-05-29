@@ -9,7 +9,7 @@ export class Operation implements Selectable {
     id_label:number;
     label : label;
     status:boolean = false;
-
+    Operations : any;
     bc_numbers:Array<any> ;
     programs : Array<any> ;
     contracts: Array<any> ;
@@ -62,7 +62,7 @@ export class Operations extends Selection<Operation>{
     async sync() {
         let { data } = await http.get('/lystore/operations');
         this.all = Mix.castArrayAs(Operation, data);
-        this.all.map( (operation)=>{
+        this.all.map( operation => {
             operation.label.toString() !== 'null' && operation.label !== null ?
                 operation.label = Mix.castAs(label, JSON.parse(operation.label.toString()))
                 : operation.label = new label();

@@ -45,6 +45,10 @@ body.lystore {
       tr.SENT, tr.DONE {
         color: #999 !important;
       }
+      tr.disableRow{
+        background-color: #f6f6f6;
+        color: #bfbfbf !important;
+      }
     }
   }
 
@@ -902,5 +906,4 @@ body.lystore {
     margin-top: 5px;
     margin-bottom: 5px;
   }
-
 }

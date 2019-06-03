@@ -47,7 +47,7 @@ export class Operation implements Selectable {
     toJson(){
         return {
             id_label : this.id_label,
-            status : (this.status)
+            status : this.status,
         };
     }
 
@@ -68,7 +68,15 @@ export class Operations extends Selection<Operation>{
                 : operation.label = new label();
             })
     }
-
+    async delete (){
+        let operationsIds = this.selected.map(operation => operation.id);
+        console.log(operationsIds);
+        try{
+            //await http.delete('/lystore/operations', operationsIds);
+        } catch(err){
+            notify.error('lystore.operation.delete.err');
+        }
+    }
 }
 
 export class label implements Selectable{

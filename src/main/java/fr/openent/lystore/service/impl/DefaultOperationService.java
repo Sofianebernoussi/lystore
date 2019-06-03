@@ -25,7 +25,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
         String query =  "SELECT  operation.* , to_json(label.*) as label, count(oce.*) as nbr_sub, " +
                 "array_to_json(array_agg(o.order_number)) as bc_number, " +
                 "array_to_json(array_agg(o.label_program)) as programs," +
-
+                "SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2)) AS amount," +
                 " array_to_json(array_agg(c.name)) as contracts " +
         "FROM  " + Lystore.lystoreSchema +".operation "+
                 "Inner join " + Lystore.lystoreSchema +".label_operation label on label.id = operation.id_label "+
@@ -48,5 +48,15 @@ public class DefaultOperationService extends SqlCrudService implements Operation
     }
     public  void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler){
 
+        String query = " UPDATE " + Lystore.lystoreSchema + ".operation " +
+                "SET id_label = ?, " +
+                "status = ? " +
+                " WHERE id = ?;";
+        JsonArray values = new fr.wseduc.webutils.collections.JsonArray()
+                .add(operation.getInteger("id_label"))
+                .add(operation.getBoolean("status"))
+                .add(id);
+
+        sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
     }
 }

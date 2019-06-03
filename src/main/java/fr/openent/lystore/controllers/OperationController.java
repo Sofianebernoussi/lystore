@@ -8,9 +8,7 @@ import fr.openent.lystore.security.AdministratorRight;
 import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.OperationService;
 import fr.openent.lystore.service.impl.DefaultOperationService;
-import fr.wseduc.rs.ApiDoc;
-import fr.wseduc.rs.Get;
-import fr.wseduc.rs.Post;
+import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
@@ -56,4 +54,32 @@ public class OperationController  extends ControllerHelper {
                 null,
                 operation)));
     }
+
+    @Put("/operation/:idOperation")
+    @ApiDoc("Uptdate an operation")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
+    public void updateOperation(final HttpServerRequest request) {
+        final Integer idOperation = Integer.parseInt(request.params().get("idOperation"));
+        RequestUtils.bodyToJson(request, pathPrefix + "operation", operation -> operationService.updateOperation(idOperation, operation, Logging.defaultResponseHandler(eb,
+                request,
+                Contexts.OPERATION.toString(),
+                Actions.UPDATE.toString(),
+                null,
+                operation)));
+    }
+
+//    @Delete("/operation")
+//    @ApiDoc("Delete operations")
+//    @SecuredAction(value = "", type = ActionType.RESOURCE)
+//    @ResourceFilter(AdministratorRight.class)
+//    @Override
+//    public void create(final HttpServerRequest request) {
+//        RequestUtils.bodyToJson(request, pathPrefix + "operation", operation -> operationService.create(operation, Logging.defaultResponseHandler(eb,
+//                request,
+//                Contexts.OPERATION.toString(),
+//                Actions.CREATE.toString(),
+//                null,
+//                operation)));
+//    }
 }

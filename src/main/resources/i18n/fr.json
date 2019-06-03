@@ -424,5 +424,15 @@
   "lystore.operation.name":"Nom de l'operation",
   "lystore.operation.bc_numbers":"N°BC",
   "lystore.operation.contracts":"Marchés",
-  "lystore.operation.programs":"Programmes"
+  "lystore.operation.programs":"Programmes",
+  "lystore.terminate": "Clôturer",
+  "lystore.export.airDelib":"Export air'delib",
+  "lystore.export.airIris":"Export iris",
+  "lystore.list.equipment":"List des demandes",
+  "lystore.operation.title.delete": "Supprimer des operations",
+  "lysctore.operation.text.delete.start": "Vous êtes sur le point de supprimer ",
+  "lysctore.operation.text.delete.many.end": " instructions. Ceci ne s'appliqueque sur des instruction vides.",
+  "lysctore.operation.text.delete.one.end": " instruction. Ceci ne s'appliqueque sur des instruction vides.",
+  "lystore.operation.title.delete.reject": "Suppression impossible",
+  "lystore.operation.text.delete.reject": "Cette opération n'est pas possible car une des opérations sélectionnées n'est pas vide."
 }

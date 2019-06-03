@@ -59,4 +59,8 @@ export class Utils {
         return parameters.slice(0, -1);
     }
 
+    static formatDataStringArrayToArray (stringLookForArray: String) {
+        return stringLookForArray.substr(0, stringLookForArray.length-1).substr(1).split(',')
+            .map(element => element !== 'null'? element.substr(0,element.length-1).substr(1) : null)
+    }
 }

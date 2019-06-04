@@ -46,7 +46,7 @@ export const operationController = ng.controller('operationController',
                     $scope.operation = new Operation();
                 } else if (action === 'edit'){
                     $scope.operation = $scope.operations.selected[0];
-                    $scope.operation.status = !!$scope.operation.status;
+                    $scope.operation.status = ($scope.operation.status === 'true');
                 }
             $scope.display.lightbox.operation = true;
             template.open('operation.lightbox', 'administrator/operation/operation-form');

@@ -86,14 +86,14 @@
                     </label>
                 </td>
                 <td >[[operation.label.label]]</td>
-                <td >[[operation.amoun || '-']]</td>
+                <td >[[operation.amount || '-']]</td>
                 <td >[[operation.nbr_sub]]</td>
                 <td >[[operation.bc_numbers || '-']]</td>
                 <td tooltip=[[operation.contracts]] >
-                    [[formatDataStringArrayToArray(operation.contracts)]]
+                    [[getFirstElement(operation.contracts)]]
                 </td>
                 <td tooltip=[[operation.programs]] >
-                    [[formatDataStringArrayToArray(operation.programs)]]
+                    [[getFirstElement(operation.programs)]]
                 </td>
             </tr>
             </tbody>

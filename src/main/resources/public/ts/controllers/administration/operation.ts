@@ -23,10 +23,11 @@ export const operationController = ng.controller('operationController',
             }
         };
 
-        $scope.formatDataStringArrayToArray = stringLookForArray => {
-            return Utils.formatDataStringArrayToArray(stringLookForArray).length !== 1 &&
-            Utils.formatDataStringArrayToArray(stringLookForArray)[0] !== null ?
-                Utils.formatDataStringArrayToArray(stringLookForArray)[0] : "-";
+        $scope.getFirstElement = jsonArray => {
+            let arrayLookFor = JSON.parse(jsonArray);
+            return arrayLookFor.length !== 1 &&
+            arrayLookFor[0] !== null ?
+                arrayLookFor[0] : "-";
         };
 
         $scope.switchAll = (model: boolean, collection) => {

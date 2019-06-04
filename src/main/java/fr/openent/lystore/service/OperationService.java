@@ -5,15 +5,18 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.List;
+
 public interface OperationService {
 
     void getLabels (Handler<Either<String, JsonArray>> handler);
 
-    void getOperations(Handler<Either<String, JsonArray>> handler);
+    void getOperations(List<String> filters, Handler<Either<String, JsonArray>> handler);
 
     void create(JsonObject operation,  Handler<Either<String, JsonObject>> handler);
 
     void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler);
 
     void deleteOperation(JsonArray operationIds,  Handler<Either<String, JsonObject>> handler);
+
 }

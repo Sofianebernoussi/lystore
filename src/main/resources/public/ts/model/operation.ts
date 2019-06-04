@@ -1,6 +1,8 @@
 import { Mix, Selectable, Selection} from 'entcore-toolkit';
 import http from 'axios';
 import {notify, _} from "entcore";
+import {Equipment} from "./Equipment";
+import {Utils} from "./Utils";
 
 
 
@@ -32,6 +34,7 @@ export class Operation implements Selectable {
             await http.post(`/lystore/operation`, this.toJson());
         } catch (e) {
             notify.error('lystore.operation.create.err');
+            throw e;
         }
     }
 
@@ -55,19 +58,29 @@ export class Operation implements Selectable {
 
 export class Operations extends Selection<Operation>{
 
+    filters: Array<string>;
+
     constructor() {
         super([]);
+        this.filters = [];
     }
 
     async sync() {
-        let { data } = await http.get('/lystore/operations');
-        this.all = Mix.castArrayAs(Operation, data);
-        this.all.map( operation => {
-            operation.label.toString() !== 'null' && operation.label !== null ?
-                operation.label = Mix.castAs(label, JSON.parse(operation.label.toString()))
-                : operation.label = new label();
+        try{
+            const queriesFilter = Utils.formatGetParameters({q: this.filters});
+            let { data } = await http.get(`/lystore/operations/?${queriesFilter}`);
+            this.all = Mix.castArrayAs(Operation, data);
+            this.all.map( operation => {
+                operation.label.toString() !== 'null' && operation.label !== null ?
+                    operation.label = Mix.castAs(label, JSON.parse(operation.label.toString()))
+                    : operation.label = new label();
             })
+        } catch(e){
+            notify.error('lystore.operation.sync.err');
+            throw e;
+        }
     }
+
     async delete (){
         let operationsIds = this.selected.map(operation => operation.id);
         try{
@@ -83,6 +96,7 @@ export class label implements Selectable{
     title: string;
     selected: boolean;
 }
+
 export class labels extends Selection<label>{
 
     constructor() {

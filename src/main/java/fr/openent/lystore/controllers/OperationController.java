@@ -18,6 +18,8 @@ import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 
 
+import java.util.List;
+
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 
 public class OperationController  extends ControllerHelper {
@@ -35,11 +37,11 @@ public class OperationController  extends ControllerHelper {
         operationService.getLabels(arrayResponseHandler(request));
     }
 
-    @Get("/operations")
+    @Get("/operations/")
     @ApiDoc("List all operations in database")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void getOperations(HttpServerRequest request) {
-        operationService.getOperations(arrayResponseHandler(request));
+        operationService.getOperations(request.params().getAll("q"), arrayResponseHandler(request));
     }
 
     @Post("/operation")

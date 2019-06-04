@@ -25,9 +25,7 @@ export const operationController = ng.controller('operationController',
 
         $scope.getFirstElement = jsonArray => {
             let arrayLookFor = JSON.parse(jsonArray);
-            return arrayLookFor.length !== 1 &&
-            arrayLookFor[0] !== null ?
-                arrayLookFor[0] : "-";
+            return arrayLookFor[0] !== null ? arrayLookFor[0] : "-" ;
         };
 
         $scope.switchAll = (model: boolean, collection) => {
@@ -35,13 +33,24 @@ export const operationController = ng.controller('operationController',
             Utils.safeApply($scope);
         };
 
-        $scope.addEquipmentFilter = (event?) => {
+        $scope.addOperationFilter = async (event?) => {
             if (event && (event.which === 13 || event.keyCode === 13) && event.target.value.trim() !== '') {
+                if(!_.contains($scope.operations.filters, event.target.value)){
+                    $scope.operations.filters = [...$scope.operations.filters, event.target.value];
+                }
                 event.target.value = '';
+                await $scope.initOperation();
+                Utils.safeApply($scope);
             }
         };
 
-        $scope.openOperationForm = action => {
+        $scope.dropOperatonFilter = async (filter: string) => {
+            $scope.operations.filters = $scope.operations.filters.filter( filterWord => filterWord !== filter);
+            await $scope.initOperation();
+            Utils.safeApply($scope);
+        };
+
+        $scope.openOperationForm = (action: string) => {
                 if(action === 'create'){
                     $scope.operation = new Operation();
                 } else if (action === 'edit'){

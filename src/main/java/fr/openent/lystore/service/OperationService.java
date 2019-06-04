@@ -14,4 +14,6 @@ public interface OperationService {
     void create(JsonObject operation,  Handler<Either<String, JsonObject>> handler);
 
     void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler);
+
+    void deleteOperation(JsonArray operationIds,  Handler<Either<String, JsonObject>> handler);
 }

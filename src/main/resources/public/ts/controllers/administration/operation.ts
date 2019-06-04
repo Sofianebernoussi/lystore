@@ -86,13 +86,15 @@ export const operationController = ng.controller('operationController',
             Utils.safeApply($scope);
         };
 
-        $scope.deleteOperations = () => {
+        $scope.deleteOperations = async () => {
             if($scope.operations.selected.some(operation => operation.nbr_sub !== 0 )){
                 template.open('operation.lightbox', 'administrator/operation/operation-delete-reject-lightbox');
             } else {
-                $scope.operations.delete();
+                await $scope.operations.delete();
+                await $scope.initOperation();
                 template.close('operation.lightbox');
                 $scope.display.lightbox.operation = false;
+                Utils.safeApply($scope);
             }
         };
     }]);

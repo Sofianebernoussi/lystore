@@ -9,6 +9,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.SqlResult;
+import org.entcore.common.sql.Sql;
 
 public class DefaultOperationService extends SqlCrudService implements OperationService {
 
@@ -47,7 +48,6 @@ public class DefaultOperationService extends SqlCrudService implements Operation
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
     public  void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler){
-
         String query = " UPDATE " + Lystore.lystoreSchema + ".operation " +
                 "SET id_label = ?, " +
                 "status = ? " +
@@ -56,7 +56,15 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 .add(operation.getInteger("id_label"))
                 .add(operation.getBoolean("status"))
                 .add(id);
+        sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
+    }
 
+    public  void deleteOperation(JsonArray operationIds, Handler<Either<String, JsonObject>> handler){
+        JsonArray values = new JsonArray();
+        for (int i = 0; i < operationIds.size(); i++) {
+            values.add(operationIds.getValue(i));
+        }
+        String query = "DELETE FROM " + Lystore.lystoreSchema + ".operation" + " WHERE id IN " + Sql.listPrepared(operationIds.getList());
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
     }
 }

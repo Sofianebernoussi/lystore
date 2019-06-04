@@ -13,6 +13,7 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 
@@ -69,17 +70,16 @@ public class OperationController  extends ControllerHelper {
                 operation)));
     }
 
-//    @Delete("/operation")
-//    @ApiDoc("Delete operations")
-//    @SecuredAction(value = "", type = ActionType.RESOURCE)
-//    @ResourceFilter(AdministratorRight.class)
-//    @Override
-//    public void create(final HttpServerRequest request) {
-//        RequestUtils.bodyToJson(request, pathPrefix + "operation", operation -> operationService.create(operation, Logging.defaultResponseHandler(eb,
-//                request,
-//                Contexts.OPERATION.toString(),
-//                Actions.CREATE.toString(),
-//                null,
-//                operation)));
-//    }
+    @Delete("/operations")
+    @ApiDoc("Delete operations")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
+    public void deleteOperaton(final HttpServerRequest request) {
+        RequestUtils.bodyToJsonArray(request, operationIds -> operationService.deleteOperation(operationIds, Logging.defaultResponseHandler(eb,
+                request,
+                Contexts.OPERATION.toString(),
+                Actions.DELETE.toString(),
+                null,
+                new JsonObject().put("ids", operationIds))));
+    }
 }

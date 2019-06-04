@@ -70,9 +70,8 @@ export class Operations extends Selection<Operation>{
     }
     async delete (){
         let operationsIds = this.selected.map(operation => operation.id);
-        console.log(operationsIds);
         try{
-            //await http.delete('/lystore/operations', operationsIds);
+            await http.delete('/lystore/operations', { data: operationsIds });
         } catch(err){
             notify.error('lystore.operation.delete.err');
         }

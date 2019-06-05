@@ -12,17 +12,20 @@
         <form >
             <label class="row twelve vertical-spacing">
                         <span class="twelve">
-                            <i18n>lystore.instruction.objet</i18n>
+                            <i18n>lystore.instruction.object</i18n>
                         </span>
-                <input type="text" class="twelve" ng-model="instruction.object" required>
+                <input type="text" class="twelve" ng-model="instruction.object" required/>
             </label>
             <label class="row twelve vertical-spacing">
                         <span class="twelve">
                             <i18n>lystore.exercise.number</i18n>
                         </span>
-                <select  ng-model="instruction.exerciseNumber" class="twelve"
-                         ng-init="instruction.exerciseNumber = instruction.exerciseNumber|| (exerciseNumber.all.length > 0 ? exerciseNumber.all[0].id : null)"
-                         ng-options="ExerciseNumber.id as ExerciseNumber.title for ExerciseNumber in exerciseNumber.all" required></select>
+                <select  ng-model="instruction.id_exercise" class="twelve"
+                         ng-init="instruction.id_exercise = instruction.id_exercise ||
+                         (exerciseNumbers.all.length > 0 ? exerciseNumbers.all[0].id : null)"
+                         ng-options="exercise.id as exercise.year for exercise in exerciseNumbers.all"
+                         required>
+                </select>
             </label>
             <label class="row twelve vertical-spacing">
                         <span class="twelve">
@@ -42,7 +45,7 @@
                                 </span>
                 <switch-toggle ng-model="instruction.submitted_to_cp"
                                class="cell"></switch-toggle>
-                <date-picker ng-model="instruction.date_cp" ng-disaled >
+                <date-picker i18n-placeholder="lystore.instruction.date.place_holder" ng-model="instruction.date_cp" ng-disaled >
                 </date-picker>
             </label>
 
@@ -57,26 +60,43 @@
                 <h2 class="vertical-spacing">
                     <i18n>lystore.instruction.operations</i18n>
                 </h2>
-                <article><table class="twelve">
-                    <thead>
-                    <td class="two"><i18n>label</i18n></td>
-                    <td class="two"><i18n>lystore.number.sub</i18n></td>
-                    <td class="two"><i18n>amount</i18n></td>
-                    <td class="two"><i18n>lystore.operation.status</i18n></td>
-                    <td class="one aligne-text-center">&nbsp;</td>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="operation in instruction.operation">
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td class="one aligne-text-center" ng-click="dropOperation(operation, $index)"><i  class="trash"></i></td>
-                    </tr>
-                    </tbody>
-                </table>
+                <article>
+                    <table class="twelve">
+                        <thead>
+                            <td class="two"><i18n>label</i18n></td>
+                            <td class="two"><i18n>lystore.number.sub</i18n></td>
+                            <td class="two"><i18n>amount</i18n></td>
+                            <td class="two"><i18n>lystore.operation.status</i18n></td>
+                            <td class="one aligne-text-center">&nbsp;</td>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="operation in instruction.operations">
+                                <td>
+                                    <select ng-model="operation.id_label" class="twelve"
+                                             ng-init="operation.id_label = operation.id_label ||
+                                              (labelOperation.all.length > 0 ? labelOperation.all[0].id : null)"
+                                             ng-options="LabelOperation.id as LabelOperation.label for LabelOperation in labelOperation.all"
+                                            required>
+                                    </select>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <switch-toggle ng-model="operation.status" class="cell">
+                                    </switch-toggle>
+                                </td>
+                                <td class="one aligne-text-center" ng-click="dropOperation($index)">
+                                    <i  class="trash"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                     <input type="button"  ng-click="addOperationLigne()" i18n-value="add" />
-
                 </article>
+            </div>
+            <div class="right-magnet vertical-spacing">
+                <input type="button" class="cancel" ng-click="cancelInstructionForm()" i18n-value="cancel"/>
+                <input type="submit" class="button" ng-disabled="!(instruction.object && instruction.exerciseNumber)"/>
             </div>
         </form>
     </article>

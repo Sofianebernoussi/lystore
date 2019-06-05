@@ -434,12 +434,12 @@
   "lysctore.operation.text.delete.many.end": " instructions. Ceci ne s'appliqueque sur des instruction vides.",
   "lysctore.operation.text.delete.one.end": " instruction. Ceci ne s'appliqueque sur des instruction vides.",
   "lystore.operation.title.delete.reject": "Suppression impossible",
-  "lystore.operation.text.delete.reject": "Cette opération n'est pas possible car une des opérations sélectionnées n'est pas vide."
+  "lystore.operation.text.delete.reject": "Cette opération n'est pas possible car une des opérations sélectionnées n'est pas vide.",
   "lystore.contract.type.name":"Nature du marché",
   "lystore.instruction":"Instruction",
   "lystore.instruction.add":"Ajouter une instruction",
   "lystore.instruction.modify":"Modifier une instruction",
-  "lystore.instruction.objet":"Object",
+  "lystore.instruction.object":"Object",
   "lystore.exercise.number":"Numéro d'éxercice",
   "label":"Libellé",
   "lystore.submitted.to.cp":"Soumis à CP",
@@ -448,5 +448,11 @@
   "lystore.instruction.service.number":"N° service",
   "lystore.number.sub":"Nbre sub",
   "lystore.operation.status":"Statut",
-  "lystore.instruction.operations":"Opérations associées"
+  "lystore.instruction.operations":"Opérations associées",
+  "lystore.instruction.exercise_number":"N° Exercice",
+  "lystore.instruction.service_number":"N° Service",
+  "lystore.instruction.cp_number":"N° Officiel",
+  "lystore.instruction.date_cp":"Date CP",
+  "lystore.exercise.err":"Erreur lors de la récupération des exercices",
+  "lystore.instruction.date.place_holder":"01/01/1988"
 }

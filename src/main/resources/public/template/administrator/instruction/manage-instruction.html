@@ -21,3 +21,77 @@
         </button>
     </div>
 </div>
+<article class="responsive-table">
+    <table class="twelve">
+        <thead>
+        <tr>
+            <td workflow="lystore.manager" class="table-selector">
+                <label class="checkbox">
+                    <input type="checkbox"
+                           ng-show="instructions.all.length > 0"
+                           ng-change="switchAllInstruction()"
+                           ng-model="allInstructionsSelected">
+                    <span></span>
+                </label>
+            </td>
+            <td ng-click="sort.instruction.type = label.name;
+                   sort.instruction.reverse = !sort.instruction.reverse">
+                <i18n>lystore.instruction.object</i18n>
+                <i class="up-open" ng-show="sort.instruction.type === 'object' && !sort.instruction.reverse"></i>
+                <i class="down-open" ng-show="sort.instruction.type === 'object' && sort.instruction.reverse"></i>
+            </td>
+            <td ng-click="sort.instruction.type = amount;
+                    sort.instruction.reverse = !sort.instruction.reverse">
+                <i18n>amount</i18n>
+                <i class="up-open" ng-show="sort.instruction.type === 'amount' && !sort.instruction.reverse"></i>
+                <i class="down-open" ng-show="sort.instruction.type === 'amount' && sort.instruction.reverse"></i>
+            </td>
+
+            <td ng-click="sort.instruction.type = nbr_sub;
+                    sort.instruction.reverse = !sort.instruction.reverse">
+                <i18n>lystore.instruction.exercise_number</i18n>
+                <i class="up-open" ng-show="sort.instruction.type === 'exercise_number' && !sort.instruction.reverse"></i>
+                <i class="down-open" ng-show="sort.instruction.type === 'exercise_number' && sort.instruction.reverse"></i>
+            </td>
+
+            <td ng-click="sort.instruction.type = bc_numbers;
+                    sort.instruction.reverse = !sort.instruction.reverse">
+                <i18n>lystore.instruction.service_number</i18n>
+                <i class="up-open" ng-show="sort.instruction.type === 'service_number' && !sort.instruction.reverse"></i>
+                <i class="down-open" ng-show="sort.instruction.type === 'service_number' && sort.instruction.reverse"></i>
+            </td>
+
+            <td ng-click="sort.instruction.type = contracts;
+                    sort.instruction.reverse = !sort.instruction.reverse">
+                <i18n>lystore.instruction.cp_number</i18n>
+                <i class="up-open" ng-show="sort.instruction.type === 'cp_number' && !sort.instruction.reverse"></i>
+                <i class="down-open" ng-show="sort.instruction.type === 'cp_number' && sort.instruction.reverse"></i>
+            </td>
+
+            <td ng-click="sort.instruction.type = programs;
+                    sort.instruction.reverse = !sort.instruction.reverse">
+                <i18n>lystore.instruction.date_cp</i18n>
+                <i class="up-open" ng-show="sort.instruction.type === 'date_cp' && !sort.instruction.reverse"></i>
+                <i class="down-open" ng-show="sort.instruction.type === 'date_cp' && sort.instruction.reverse"></i>
+            </td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="instruction in instructions.all | orderBy:sort.instruction.type:sort.instruction.reverse"
+            ng-class="{ disableRow: instruction.status === 'false' }">
+            <td workflow="lystore.manager" class="table-selector" >
+                <label class="checkbox">
+                    <input type="checkbox" ng-model="instruction.selected">
+                    <span></span>
+                </label>
+            </td>
+            <td >[[instruction.object]]</td>
+            <td >[[instruction.amount]]</td>
+            <td >[[instruction.exercise_number]]</td>
+            <td >[[instruction.service_number]]</td>
+            <td >[[instruction.cp_number]]</td>
+            <td >[[instruction.date_cp]]</td>
+        </tr>
+        </tbody>
+    </table>
+</article>

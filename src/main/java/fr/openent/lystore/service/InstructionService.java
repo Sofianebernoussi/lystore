@@ -9,6 +9,13 @@ import java.util.List;
 
 public interface InstructionService {
 
-    void getExercises (Handler<Either<String, JsonArray>> handler);
+    void getExercises(Handler<Either<String, JsonArray>> handler);
 
+    void getInstructions(List<String> filters, Handler<Either<String, JsonArray>> handler);
+
+ /*   void create(JsonObject operation,  Handler<Either<String, JsonObject>> handler);
+
+  /*  void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler);
+
+  /*  void deleteOperation(JsonArray operationIds,  Handler<Either<String, JsonObject>> handler);*/
 }

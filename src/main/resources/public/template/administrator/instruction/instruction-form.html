@@ -23,7 +23,7 @@
                 <select  ng-model="instruction.id_exercise" class="twelve"
                          ng-init="instruction.id_exercise = instruction.id_exercise ||
                          (exerciseNumbers.all.length > 0 ? exerciseNumbers.all[0].id : null)"
-                         ng-options="exercise.id as exercise.year for exercise in exerciseNumbers.all"
+                         ng-options="exercise.id as exercise.year_exercise for exercise in exerciseNumbers.all"
                          required>
                 </select>
             </label>

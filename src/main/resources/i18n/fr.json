@@ -454,5 +454,9 @@
   "lystore.instruction.cp_number":"N° Officiel",
   "lystore.instruction.date_cp":"Date CP",
   "lystore.exercise.err":"Erreur lors de la récupération des exercices",
-  "lystore.instruction.date.place_holder":"01/01/1988"
+  "lystore.instruction.date.place_holder":"01/01/1988",
+  "lystore.instruction.get.err":"Erreur lors de la récupération des instructions",
+  "lystore.instruction.create.err": "Erreur lors de la création d'une operation",
+  "lystore.instruction.update.err": "Erreur lors de la mise à jour d'une operation ",
+  "lystore.instruction.delete.err": "Erreur lors de la suppression d'une operation"
 }

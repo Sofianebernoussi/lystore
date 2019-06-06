@@ -9,7 +9,7 @@
         <i18n ng-show="instruction.id !== undefined">lystore.instruction.modify</i18n>
     </h1>
     <article>
-        <form >
+        <form ng-submit="validInstruction(instruction)" >
             <label class="row twelve vertical-spacing">
                         <span class="twelve">
                             <i18n>lystore.instruction.object</i18n>
@@ -24,7 +24,7 @@
                          ng-init="instruction.id_exercise = instruction.id_exercise ||
                          (exercises.all.length > 0 ? exercises.all[0].id : null)"
                          ng-options="exercise.id as exercise.year_exercise for exercise in exercises.all"
-                         required>
+                         >
                 </select>
             </label>
             <label class="row twelve vertical-spacing">
@@ -70,19 +70,19 @@
                             <td class="one aligne-text-center">&nbsp;</td>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="operation in instruction.operations">
+                            <tr ng-repeat="operationToInstruction in instruction.operations">
                                 <td>
-                                    <select ng-model="operation.id_label" class="twelve"
-                                             ng-init="operation.id_label = operation.id_label ||
-                                              (labelOperation.all.length > 0 ? labelOperation.all[0].id : null)"
-                                             ng-options="LabelOperation.id as LabelOperation.label for LabelOperation in labelOperation.all"
+                                    <select ng-model="operationToInstruction.id_label" class="twelve"
+                                             ng-init="operationToInstruction.id_label = operationToInstruction.id_label ||
+                                              (operationToInstruction.length > 0 ? operationToInstruction[0].id : null)"
+                                             ng-options="operationSelect.label.id as operationSelect.label.label for operationSelect in operationToInstruction"
                                             required>
                                     </select>
                                 </td>
                                 <td></td>
                                 <td></td>
                                 <td>
-                                    <switch-toggle ng-model="operation.status" class="cell">
+                                    <switch-toggle ng-model="operationToInstruction.status" class="cell">
                                     </switch-toggle>
                                 </td>
                                 <td class="one aligne-text-center" ng-click="dropOperation($index)">
@@ -96,7 +96,7 @@
             </div>
             <div class="right-magnet vertical-spacing">
                 <input type="button" class="cancel" ng-click="cancelInstructionForm()" i18n-value="cancel"/>
-                <input type="submit" class="button" ng-disabled="!(instruction.object && instruction.exercise.id)"/>
+                <input type="submit" class="button" ng-disabled="!(instruction.object)"/>
             </div>
         </form>
     </article>

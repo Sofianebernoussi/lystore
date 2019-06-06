@@ -60,29 +60,41 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
         sql.prepared(query, params, SqlResult.validResultHandler(handler) );
     }
 
-/*    public void create(JsonObject operation, Handler<Either<String, JsonObject>> handler){
-        String query = "INSERT INTO " + Lystore.lystoreSchema + ".operation(id_label, status) " +
-                "VALUES (?, ?) RETURNING id;";
+    public void create(JsonObject instruction, Handler<Either<String, JsonObject>> handler){
+        String query = "INSERT INTO " + Lystore.lystoreSchema +".instruction (" +
+                "id_exercise," +
+                "object, " +
+                "service_number, " +
+                "cp_number, " +
+                "submitted_to_cp, " +
+                "date_cp, " +
+                "comment) " +
+                "VALUES (? ,? ,? ,? ,? ,? ,?) RETURNING id;";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
-                .add(operation.getInteger("id_label"))
-                .add(operation.getBoolean("status"));
+                .add(instruction.getInteger("id_exercise"))
+                .add(instruction.getBoolean("object"))
+                .add(instruction.getBoolean("service_number"))
+                .add(instruction.getBoolean("cp_number"))
+                .add(instruction.getBoolean("submitted_to_cp"))
+                .add(instruction.getBoolean("date_cp"))
+                .add(instruction.getBoolean("comment"));
 
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
- /*   public  void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler){
-        String query = " UPDATE " + Lystore.lystoreSchema + ".operation " +
-                "SET id_label = ?, " +
-                "status = ? " +
-                " WHERE id = ?;";
-        JsonArray values = new fr.wseduc.webutils.collections.JsonArray()
-                .add(operation.getInteger("id_label"))
-                .add(operation.getBoolean("status"))
-                .add(id);
-        sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
-    }
-*/
-   public  void deleteInstruction(JsonArray instructionIds, Handler<Either<String, JsonObject>> handler){
+    /*   public  void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler){
+           String query = " UPDATE " + Lystore.lystoreSchema + ".operation " +
+                   "SET id_label = ?, " +
+                   "status = ? " +
+                   " WHERE id = ?;";
+           JsonArray values = new fr.wseduc.webutils.collections.JsonArray()
+                   .add(operation.getInteger("id_label"))
+                   .add(operation.getBoolean("status"))
+                   .add(id);
+           sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
+       }
+   */
+    public  void deleteInstruction(JsonArray instructionIds, Handler<Either<String, JsonObject>> handler){
         JsonArray values = new JsonArray();
         for (int i = 0; i < instructionIds.size(); i++) {
             values.add(instructionIds.getValue(i));

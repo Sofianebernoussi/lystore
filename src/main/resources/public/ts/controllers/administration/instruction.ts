@@ -1,5 +1,5 @@
 import { ng, template, notify, moment, _ } from 'entcore';
-import {Exercises, Instruction, labels, Operation, Utils} from "../../model";
+import {Exercises, Instruction, labels, Operation ,Operations , Utils} from "../../model";
 
 
 declare let window: any;
@@ -27,22 +27,23 @@ export const instructionController = ng.controller('instructionController',
             model ? collection.selectAll() : collection.deselectAll();
             Utils.safeApply($scope);
         };
-        $scope.addEquipmentFilter = (event?) => {
-            if (event && (event.which === 13 || event.keyCode === 13) && event.target.value.trim() !== '') {
-                event.target.value = '';
-            }
-        };
-        $scope.openInstructionForm = () => {
+
+        $scope.openInstructionForm = async () => {
             $scope.instruction = new Instruction();
-            $scope.labelOperation = new labels();
-            $scope.labelOperation.sync();
+            $scope.operation = new Operation();
+            await $scope.initOperation();
             template.open('instruction-main', 'administrator/instruction/instruction-form');
             Utils.safeApply($scope);
         };
         $scope.addOperationLigne = () => {
-            $scope.operation = new Operation();
-            $scope.operation.status = true;
-            $scope.instruction.operations.push($scope.operation);
+            if ( $scope.operations.all.length !== 0) {
+                $scope.operation = $scope.instruction.operations[0];
+                $scope.operationsPush = $scope.operations.all;
+                $scope.operationsPush.map(ope => ope.status = true);
+                $scope.instruction.operations.push($scope.operationsPush);
+            } else {
+
+            }
             Utils.safeApply($scope);
         };
         $scope.dropOperation = (indexSelect: Number) => {
@@ -91,7 +92,7 @@ export const instructionController = ng.controller('instructionController',
             Utils.safeApply($scope);
         };
         $scope.deleteInstructions = async () => {
-            if($scope.instructions.selected.some(instruction => instruction.operations[0] !== null )){
+            if($scope.instructions.selected.some(instruction => Object.keys(instruction.operations).length !== 0 )){
                 template.open('instruction.lightbox', 'administrator/instruction/instruction-delete-reject-lightbox');
             } else {
                 await $scope.instructions.delete();
@@ -101,4 +102,11 @@ export const instructionController = ng.controller('instructionController',
                 Utils.safeApply($scope);
             }
         };
+        $scope.validInstruction = async (instruction:Instruction) =>{
+            await instruction.save();
+            $scope.cancelOperationForm();
+            await $scope.initOperation();
+            Utils.safeApply($scope);
+        };
+
     }]);

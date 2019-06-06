@@ -39,34 +39,34 @@ public class InstructionController extends ControllerHelper {
         instructionService.getInstructions(request.params().getAll("q"), arrayResponseHandler(request));
     }
 
-/*    @Post("/operation")
-    @ApiDoc("Create an operation")
+    @Post("/instruction")
+    @ApiDoc("Create an instruction")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
     @Override
     public void create(final HttpServerRequest request) {
-        RequestUtils.bodyToJson(request, pathPrefix + "operation", operation -> operationService.create(operation, Logging.defaultResponseHandler(eb,
+        RequestUtils.bodyToJson(request, pathPrefix + "instruction", instruction -> instructionService.create(instruction, Logging.defaultResponseHandler(eb,
                 request,
-                Contexts.OPERATION.toString(),
+                Contexts.INSTRUCTION.toString(),
                 Actions.CREATE.toString(),
                 null,
-                operation)));
+                instruction)));
     }
-/*
-    @Put("/operation/:idOperation")
-    @ApiDoc("Uptdate an operation")
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(AdministratorRight.class)
-    public void updateOperation(final HttpServerRequest request) {
-        final Integer idOperation = Integer.parseInt(request.params().get("idOperation"));
-        RequestUtils.bodyToJson(request, pathPrefix + "operation", operation -> operationService.updateOperation(idOperation, operation, Logging.defaultResponseHandler(eb,
-                request,
-                Contexts.OPERATION.toString(),
-                Actions.UPDATE.toString(),
-                null,
-                operation)));
-    }
-*/
+    /*
+        @Put("/operation/:idOperation")
+        @ApiDoc("Uptdate an operation")
+        @SecuredAction(value = "", type = ActionType.RESOURCE)
+        @ResourceFilter(AdministratorRight.class)
+        public void updateOperation(final HttpServerRequest request) {
+            final Integer idOperation = Integer.parseInt(request.params().get("idOperation"));
+            RequestUtils.bodyToJson(request, pathPrefix + "operation", operation -> operationService.updateOperation(idOperation, operation, Logging.defaultResponseHandler(eb,
+                    request,
+                    Contexts.OPERATION.toString(),
+                    Actions.UPDATE.toString(),
+                    null,
+                    operation)));
+        }
+    */
     @Delete("/instructions")
     @ApiDoc("Delete instructions")
     @SecuredAction(value = "", type = ActionType.RESOURCE)

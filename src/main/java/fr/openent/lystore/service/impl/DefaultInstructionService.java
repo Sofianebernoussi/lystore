@@ -45,11 +45,15 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                 params.add(filter).add(filter);
             }
         }
-        String query =  "SELECT  instruction.* , to_json(exercise_years.*) AS exercise_years " +
+        String query =  "SELECT  instruction.* , " +
+                "to_json(exercise.*) AS exercise, " +
+                "array_to_json(array_agg(operations.*)) AS operations " +
                 "FROM  " + Lystore.lystoreSchema +".instruction " +
-                "INNER JOIN " + Lystore.lystoreSchema +".exercise exercise_years ON exercise_years.id = instruction.id_exercise " +
-                "GROUP BY (instruction.id, exercise_years.*)";
+                "INNER JOIN " + Lystore.lystoreSchema +".exercise exercise ON exercise.id = instruction.id_exercise " +
+                "LEFT JOIN " + Lystore.lystoreSchema +".operation operations ON operations.id_instruction = instruction.id " +
                 //getTextFilter(filters);
+                "GROUP BY (instruction.id, exercise.*)";
+
         sql.prepared(query, params, SqlResult.validResultHandler(handler) );
     }
 

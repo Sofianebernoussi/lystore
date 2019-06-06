@@ -1,5 +1,5 @@
 import { ng, template, notify, moment, _ } from 'entcore';
-import {ExerciseNumbers, Instruction, labels, Operation, Utils} from "../../model";
+import {Exercises, Instruction, labels, Operation, Utils} from "../../model";
 
 
 declare let window: any;
@@ -7,7 +7,7 @@ declare let window: any;
 export const instructionController = ng.controller('instructionController',
     ['$scope', '$routeParams', ($scope, $routeParams) => {
 
-    $scope.exerciseNumbers = new ExerciseNumbers();
+    $scope.exercises = new Exercises();
 
         $scope.sort = {
             instruction : {

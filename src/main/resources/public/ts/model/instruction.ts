@@ -8,7 +8,7 @@ export class Instruction implements Selectable {
     id?:number;
     object:string;
     id_exercise:number;
-    exercise_years:ExerciseNumber;
+    exercise:Exercise;
     cp_number:string;
     service_number:string;
     submitted_to_cp:boolean;
@@ -71,6 +71,10 @@ export class Instructions extends Selection<Instruction>{
             const queriesFilter = Utils.formatGetParameters({q: this.filters});
             let {data} = await http.get(`/lystore/instructions/?${queriesFilter}`);
             this.all = Mix.castArrayAs(Instruction, data);
+            this.all.forEach(instructionGet => {
+                instructionGet.exercise = Mix.castAs(Exercise, JSON.parse(instructionGet.exercise.toString()));
+                instructionGet.operations = Mix.castAs(Operation, JSON.parse(instructionGet.operations.toString()));
+            })
         } catch (e) {
             notify.error('lystore.instruction.get.err');
         }
@@ -85,19 +89,19 @@ export class Instructions extends Selection<Instruction>{
     }
 }
 
-export class ExerciseNumber {
+export class Exercise {
     id: number;
     year_exercise: string;
 }
-export class ExerciseNumbers{
-    all:Array<ExerciseNumber>;
+export class Exercises{
+    all:Array<Exercise>;
     constructor() {
         this.sync();
     }
    async sync() {
         try{
             let {data} = await http.get('/lystore/exercises');
-            this.all = Mix.castArrayAs(ExerciseNumber, data);
+            this.all = Mix.castArrayAs(Exercise, data);
         } catch (e) {
             notify.error('lystore.exercise.err');
         }

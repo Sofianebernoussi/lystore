@@ -8,8 +8,8 @@
         </div>
         <div class="row horizontal-spacing">
             <div class="select-blocks">
-                <div ng-repeat="filter in search.filterWords"
-                     ng-click="dropFilter(filter)" class="labels-in-ligne">
+                <div ng-repeat="filter in instructions.filters"
+                     ng-click="dropInstructionFilter(filter)" class="labels-in-ligne">
                     <div> [[ filter ]]</div>
                 </div>
             </div>
@@ -90,8 +90,56 @@
             <td >[[instruction.exercise.year_exercise]]</td>
             <td >[[instruction.service_number]]</td>
             <td >[[instruction.cp_number]]</td>
-            <td >[[instruction.date_cp]]</td>
+            <td >[[formatDate(instruction.date_cp)]]</td>
         </tr>
         </tbody>
     </table>
 </article>
+
+<section class="toggle-buttons" ng-class="{ hide:instructions.selected.length === 0 }">
+    <div class="toggle">
+        <div class="row">
+            <button
+                    ng-click="openOperationForm('edit')"
+                    ng-show="instructions.selected.length === 1"
+            >
+                <i18n>modify</i18n>
+            </button>
+            <button
+                    ng-click=""
+                    ng-show="instructions.selected.length === 1"
+            >
+                <i18n>lystore.close</i18n>
+            </button>
+            <button
+                    ng-click=""
+                    ng-show="instructions.selected.length === 1"
+            >
+                <i18n>lystore.logs.csv.export</i18n>
+            </button>
+            <button
+                    ng-click=""
+                    ng-show="instructions.selected.length === 1"
+            >
+                <i18n>lystore.export.airDelib</i18n>
+            </button
+            ><button
+                ng-click=""
+                ng-show="instructions.selected.length === 1"
+        >
+            <i18n>lystore.export.airIris</i18n>
+        </button>
+            <button
+                    ng-click=""
+                    ng-show="instructions.selected.length === 1"
+            >
+                <i18n>lystore.list.equipment</i18n>
+            </button>
+            <button
+                    ng-click="openLightboxDeleteInstruction()"
+            >
+                <i18n>delete</i18n>
+            </button>
+        </div>
+    </div>
+</section>

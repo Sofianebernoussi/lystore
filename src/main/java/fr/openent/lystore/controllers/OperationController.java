@@ -5,7 +5,6 @@ import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AdministratorRight;
-import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.OperationService;
 import fr.openent.lystore.service.impl.DefaultOperationService;
 import fr.wseduc.rs.*;
@@ -16,9 +15,6 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
-
-
-import java.util.List;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 

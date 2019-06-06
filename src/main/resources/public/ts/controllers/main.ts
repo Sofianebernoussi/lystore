@@ -26,7 +26,8 @@ import {
     Tags,
     Taxes,
     Titles,
-    Utils
+    Utils,
+    Exercises,
 } from '../model';
 import {Mix} from "entcore-toolkit";
 
@@ -59,6 +60,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.displayedOrders = new OrdersClient();
         $scope.equipmentTypes = new EquipmentTypes();
         $scope.instructions = new Instructions();
+        $scope.exercises = new Exercises();
         $scope.equipments.eventer.on('loading::true', $scope.$apply);
         $scope.equipments.eventer.on('loading::false', $scope.$apply);
 
@@ -236,7 +238,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('sendOrder.preview', 'pdf/preview');
             },
             instruction: async () =>{
-                $scope.initInstructions();
+                await $scope.initInstructions();
                 template.open('administrator-main', 'administrator/instruction/instruction-container');
                 template.open('instruction-main', 'administrator/instruction/manage-instruction');
                 Utils.safeApply($scope);
@@ -248,8 +250,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             }
         });
-        $scope.initInstructions = ()=>{
-            $scope.instructions.sync();
+        $scope.initInstructions = async ()=>{
+            await $scope.instructions.sync();
         };
         $scope.initCampaignOrderView=()=>{
           if( $scope.campaign.priority_enabled == true && $scope.campaign.priority_field == PRIORITY_FIELD.ORDER){

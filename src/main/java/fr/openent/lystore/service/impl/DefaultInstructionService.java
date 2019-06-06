@@ -7,6 +7,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.SqlResult;
+import io.vertx.core.json.JsonObject;
+import org.entcore.common.sql.Sql;
 
 import java.util.List;
 
@@ -30,11 +32,12 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                 if (i > 0) {
                     filter += "AND ";
                 }
-
-                filter += "(LOWER(label.label) ~ LOWER(?) OR LOWER(o.order_number) ~ LOWER(?)) ";
+                filter += "(LOWER(instruction.object) ~ LOWER(?) OR " +
+                        "LOWER(instruction.service_number) ~ LOWER(?) OR " +
+                        "LOWER(instruction.cp_number) ~ LOWER(?) OR " +
+                        "LOWER(exercise.year_exercise) ~ LOWER(?)) ";
             }
         }
-
         return filter;
     }
 
@@ -42,7 +45,7 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
         JsonArray params = new JsonArray();
         if (!filters.isEmpty()) {
             for (String filter : filters) {
-                params.add(filter).add(filter);
+                params.add(filter).add(filter).add(filter).add(filter);
             }
         }
         String query =  "SELECT  instruction.* , " +
@@ -51,7 +54,7 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                 "FROM  " + Lystore.lystoreSchema +".instruction " +
                 "INNER JOIN " + Lystore.lystoreSchema +".exercise exercise ON exercise.id = instruction.id_exercise " +
                 "LEFT JOIN " + Lystore.lystoreSchema +".operation operations ON operations.id_instruction = instruction.id " +
-                //getTextFilter(filters);
+                getTextFilter(filters) +
                 "GROUP BY (instruction.id, exercise.*)";
 
         sql.prepared(query, params, SqlResult.validResultHandler(handler) );
@@ -78,14 +81,13 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                 .add(id);
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
     }
-
-/*    public  void deleteOperation(JsonArray operationIds, Handler<Either<String, JsonObject>> handler){
+*/
+   public  void deleteInstruction(JsonArray instructionIds, Handler<Either<String, JsonObject>> handler){
         JsonArray values = new JsonArray();
-        for (int i = 0; i < operationIds.size(); i++) {
-            values.add(operationIds.getValue(i));
+        for (int i = 0; i < instructionIds.size(); i++) {
+            values.add(instructionIds.getValue(i));
         }
-        String query = "DELETE FROM " + Lystore.lystoreSchema + ".operation" + " WHERE id IN " + Sql.listPrepared(operationIds.getList());
+        String query = "DELETE FROM " + Lystore.lystoreSchema + ".instruction" + " WHERE id IN " + Sql.listPrepared(instructionIds.getList());
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
     }
- */
 }

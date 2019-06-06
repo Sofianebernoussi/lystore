@@ -66,17 +66,17 @@ public class InstructionController extends ControllerHelper {
                 null,
                 operation)));
     }
-/*
-    @Delete("/operations")
-    @ApiDoc("Delete operations")
+*/
+    @Delete("/instructions")
+    @ApiDoc("Delete instructions")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
-    public void deleteOperaton(final HttpServerRequest request) {
-        RequestUtils.bodyToJsonArray(request, operationIds -> operationService.deleteOperation(operationIds, Logging.defaultResponseHandler(eb,
+    public void deleteInstruction(final HttpServerRequest request) {
+        RequestUtils.bodyToJsonArray(request, instructionIds -> instructionService.deleteInstruction(instructionIds, Logging.defaultResponseHandler(eb,
                 request,
-                Contexts.OPERATION.toString(),
+                Contexts.INSTRUCTION.toString(),
                 Actions.DELETE.toString(),
                 null,
-                new JsonObject().put("ids", operationIds))));
-    }*/
+                new JsonObject().put("ids", instructionIds))));
+    }
 }

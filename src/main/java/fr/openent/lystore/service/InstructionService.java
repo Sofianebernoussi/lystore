@@ -15,7 +15,7 @@ public interface InstructionService {
 
  /*   void create(JsonObject operation,  Handler<Either<String, JsonObject>> handler);
 
-  /*  void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler);
+  /*  void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler);*/
 
-  /*  void deleteOperation(JsonArray operationIds,  Handler<Either<String, JsonObject>> handler);*/
+    void deleteInstruction(JsonArray instructionIds,  Handler<Either<String, JsonObject>> handler);
 }

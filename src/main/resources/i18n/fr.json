@@ -431,8 +431,8 @@
   "lystore.list.equipment":"List des demandes",
   "lystore.operation.title.delete": "Supprimer des operations",
   "lysctore.operation.text.delete.start": "Vous êtes sur le point de supprimer ",
-  "lysctore.operation.text.delete.many.end": " instructions. Ceci ne s'appliqueque sur des instruction vides.",
-  "lysctore.operation.text.delete.one.end": " instruction. Ceci ne s'appliqueque sur des instruction vides.",
+  "lysctore.operation.text.delete.many.end": " operations. Ceci ne s'applique que sur des operations vides.",
+  "lysctore.operation.text.delete.one.end": " operation. Ceci ne s'applique que sur des operations vide.",
   "lystore.operation.title.delete.reject": "Suppression impossible",
   "lystore.operation.text.delete.reject": "Cette opération n'est pas possible car une des opérations sélectionnées n'est pas vide.",
   "lystore.contract.type.name":"Nature du marché",
@@ -458,5 +458,12 @@
   "lystore.instruction.get.err":"Erreur lors de la récupération des instructions",
   "lystore.instruction.create.err": "Erreur lors de la création d'une operation",
   "lystore.instruction.update.err": "Erreur lors de la mise à jour d'une operation ",
-  "lystore.instruction.delete.err": "Erreur lors de la suppression d'une operation"
+  "lystore.instruction.delete.err": "Erreur lors de la suppression d'une operation",
+  "lystore.close": "Clôturer",
+  "lystore.instruction.title.delete": "Supprimer des instructions",
+  "lysctore.instruction.text.delete.start": "Vous êtes sur le point de supprimer ",
+  "lysctore.instruction.text.delete.many.end": " instructions. Ceci ne s'appliqueque sur des instructions vides.",
+  "lysctore.instruction.text.delete.one.end": " instruction. Ceci ne s'appliqueque sur des instructions vides.",
+  "lystore.instruction.title.delete.reject": "Suppression impossible",
+  "lystore.instruction.text.delete.reject": "Cette opération n'est pas possible car une des instructions sélectionnées n'est pas vide."
 }

@@ -7,8 +7,6 @@ declare let window: any;
 export const instructionController = ng.controller('instructionController',
     ['$scope', '$routeParams', ($scope, $routeParams) => {
 
-    $scope.exercises = new Exercises();
-
         $scope.sort = {
             instruction : {
                 type: 'name',
@@ -21,6 +19,7 @@ export const instructionController = ng.controller('instructionController',
         };
         $scope.display = {
             lightbox : {
+                instruction:false,
             }
         };
 
@@ -53,5 +52,53 @@ export const instructionController = ng.controller('instructionController',
         };
         $scope.cancelInstructionForm = () =>{
             template.open('instruction-main', 'administrator/instruction/manage-instruction');
+        };
+        $scope.formatDate = (date:Date) => {
+            return Utils.formatDate(date)
+        };
+        $scope.isAllInstructionSelected = false;
+        $scope.switchAllInstruction = () => {
+            $scope.isAllInstructionSelected  =  !$scope.isAllInstructionSelected;
+            if ( $scope.isAllInstructionSelected) {
+                $scope.instructions.all.map(instructionSelected => instructionSelected.selected = true)
+            } else {
+                $scope.instructions.all.map(instructionSelected => instructionSelected.selected = false)
+            }
+            Utils.safeApply($scope);
+        };
+        $scope.addInstructionFilter = async (event?) => {
+            if (event && (event.which === 13 || event.keyCode === 13) && event.target.value.trim() !== '') {
+                if(!_.contains($scope.instructions.filters, event.target.value)){
+                    $scope.instructions.filters = [...$scope.instructions.filters, event.target.value];
+                }
+                event.target.value = '';
+                await $scope.initInstructions();
+                Utils.safeApply($scope);
+            }
+        };
+        $scope.dropInstructionFilter = async (filter: string) => {
+            $scope.instructions.filters = $scope.instructions.filters.filter( filterWord => filterWord !== filter);
+            await $scope.initInstructions();
+            Utils.safeApply($scope);
+        };
+        $scope.cancelInstructionForm = () =>{
+            $scope.display.lightbox.instruction = false;
+            template.close('instruction.lightbox');
+        };
+        $scope.openLightboxDeleteInstruction = () => {
+            $scope.display.lightbox.instruction = true;
+            template.open('instruction.lightbox', 'administrator/instruction/instruction-delete-lightbox');
+            Utils.safeApply($scope);
+        };
+        $scope.deleteInstructions = async () => {
+            if($scope.instructions.selected.some(instruction => instruction.operations[0] !== null )){
+                template.open('instruction.lightbox', 'administrator/instruction/instruction-delete-reject-lightbox');
+            } else {
+                await $scope.instructions.delete();
+                await $scope.initInstructions();
+                template.close('instruction.lightbox');
+                $scope.display.lightbox.instruction = false;
+                Utils.safeApply($scope);
+            }
         };
     }]);

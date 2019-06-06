@@ -16,7 +16,8 @@ export class Instruction implements Selectable {
     comment:string;
     amount:number;
     operations:Array<Operation> = [];
-    selected:boolean;
+    selected:boolean = false;
+
     constructor(){
     }
     async save () {
@@ -73,7 +74,9 @@ export class Instructions extends Selection<Instruction>{
             this.all = Mix.castArrayAs(Instruction, data);
             this.all.forEach(instructionGet => {
                 instructionGet.exercise = Mix.castAs(Exercise, JSON.parse(instructionGet.exercise.toString()));
-                instructionGet.operations = Mix.castAs(Operation, JSON.parse(instructionGet.operations.toString()));
+                instructionGet.operations.toString() !== 'null' && instructionGet.operations !== null ?
+                    instructionGet.operations = Mix.castAs(Operation, JSON.parse(instructionGet.operations.toString())) :
+                    instructionGet.operations = [];
             })
         } catch (e) {
             notify.error('lystore.instruction.get.err');

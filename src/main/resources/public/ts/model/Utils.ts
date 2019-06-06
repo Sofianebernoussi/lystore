@@ -1,3 +1,5 @@
+import {moment} from "entcore";
+
 export class Utils {
 
     static parsePostgreSQLJson (json: any): any {
@@ -57,5 +59,8 @@ export class Utils {
         });
 
         return parameters.slice(0, -1);
+    }
+    static formatDate (date:Date) {
+        return moment(date).format('DD/MM/YY');
     }
 }

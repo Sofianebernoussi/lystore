@@ -14,7 +14,8 @@ public enum Contexts {
     GRADE("GRADE"),
     PROJECT("PROJECT"),
     ORDER ("ORDER"),
-    OPERATION("OPERATION");
+    OPERATION("OPERATION"),
+    INSTRUCTION("INSTRUCTION");
 
     private final String contextName;
 

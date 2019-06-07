@@ -52,21 +52,21 @@ public class InstructionController extends ControllerHelper {
                 null,
                 instruction)));
     }
-    /*
-        @Put("/operation/:idOperation")
-        @ApiDoc("Uptdate an operation")
-        @SecuredAction(value = "", type = ActionType.RESOURCE)
-        @ResourceFilter(AdministratorRight.class)
-        public void updateOperation(final HttpServerRequest request) {
-            final Integer idOperation = Integer.parseInt(request.params().get("idOperation"));
-            RequestUtils.bodyToJson(request, pathPrefix + "operation", operation -> operationService.updateOperation(idOperation, operation, Logging.defaultResponseHandler(eb,
-                    request,
-                    Contexts.OPERATION.toString(),
-                    Actions.UPDATE.toString(),
-                    null,
-                    operation)));
-        }
-    */
+
+    @Put("/instruction/:idInstruction")
+    @ApiDoc("Uptdate an instruction")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
+    public void updateInstruction(final HttpServerRequest request) {
+        final Integer idInstruction = Integer.parseInt(request.params().get("idInstruction"));
+        RequestUtils.bodyToJson(request, pathPrefix + "instruction", instruction -> instructionService.updateInstruction(idInstruction, instruction, Logging.defaultResponseHandler(eb,
+                request,
+                Contexts.INSTRUCTION.toString(),
+                Actions.UPDATE.toString(),
+                null,
+                instruction)));
+    }
+
     @Delete("/instructions")
     @ApiDoc("Delete instructions")
     @SecuredAction(value = "", type = ActionType.RESOURCE)

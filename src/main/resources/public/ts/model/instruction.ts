@@ -74,8 +74,8 @@ export class Instructions extends Selection<Instruction>{
             this.all = Mix.castArrayAs(Instruction, data);
             this.all.forEach(instructionGet => {
                 instructionGet.exercise = Mix.castAs(Exercise, JSON.parse(instructionGet.exercise.toString()));
-                instructionGet.operations.toString() !== 'null' && instructionGet.operations !== null ?
-                    instructionGet.operations = Mix.castAs(Operation, JSON.parse(instructionGet.operations.toString())) :
+                instructionGet.operations.toString() !== "[null]" ?
+                    instructionGet.operations = JSON.parse(instructionGet.operations.toString()):
                     instructionGet.operations = [];
             })
         } catch (e) {

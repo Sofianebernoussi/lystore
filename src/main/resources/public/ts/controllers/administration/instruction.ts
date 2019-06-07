@@ -34,7 +34,7 @@ export const instructionController = ng.controller('instructionController',
                 $scope.instruction = new Instruction();
                 $scope.operation = new Operation();
             } else if (action === 'edit'){
-                $scope.instruction = $scope.instruction.selected[0];
+                $scope.instruction = $scope.instructions.selected[0];
             }
             template.open('instruction-main', 'administrator/instruction/instruction-form');
             Utils.safeApply($scope);
@@ -96,7 +96,7 @@ export const instructionController = ng.controller('instructionController',
             Utils.safeApply($scope);
         };
         $scope.deleteInstructions = async () => {
-            if($scope.instructions.selected.some(instruction => instruction.operations[0] !== null )){
+            if($scope.instructions.selected.some(instruction => instruction.operations.length !== 0 )){
                 template.open('instruction.lightbox', 'administrator/instruction/instruction-delete-reject-lightbox');
             } else {
                 await $scope.instructions.delete();

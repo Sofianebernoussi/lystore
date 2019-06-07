@@ -84,18 +84,29 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
 
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
-    /*   public  void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler){
-           String query = " UPDATE " + Lystore.lystoreSchema + ".operation " +
-                   "SET id_label = ?, " +
-                   "status = ? " +
-                   " WHERE id = ?;";
-           JsonArray values = new fr.wseduc.webutils.collections.JsonArray()
-                   .add(operation.getInteger("id_label"))
-                   .add(operation.getBoolean("status"))
-                   .add(id);
-           sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
-       }
-   */
+    public  void updateInstruction(Integer id, JsonObject instruction, Handler<Either<String, JsonObject>> handler){
+        String query = " UPDATE " + Lystore.lystoreSchema + ".instruction " +
+                "SET " +
+                "id_exercise = ? ," +
+                "object = ? , " +
+                "service_number = ? , " +
+                "cp_number = ? , " +
+                "submitted_to_cp = ? , " +
+                "date_cp = ? , " +
+                "comment = ? " +
+                " WHERE id = ?;";
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(instruction.getInteger("id_exercise"))
+                .add(instruction.getString("object"))
+                .add(instruction.getString("service_number"))
+                .add(instruction.getString("cp_number"))
+                .add(instruction.getBoolean("submitted_to_cp"))
+                .add(instruction.getString("date_cp"))
+                .add(instruction.getString("comment"))
+                .add(id);
+        sql.prepared(query, params, SqlResult.validRowsResultHandler(handler));
+    }
+
     public  void deleteInstruction(JsonArray instructionIds, Handler<Either<String, JsonObject>> handler){
         JsonArray values = new JsonArray();
         for (int i = 0; i < instructionIds.size(); i++) {

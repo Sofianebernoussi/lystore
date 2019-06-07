@@ -1,5 +1,5 @@
 import { Mix, Selectable, Selection} from 'entcore-toolkit';
-import { notify} from 'entcore';
+import {moment, notify} from 'entcore';
 import http from 'axios';
 import {label, Operation} from "./operation";
 import {Utils} from "./Utils";
@@ -11,7 +11,7 @@ export class Instruction implements Selectable {
     exercise:Exercise;
     cp_number:string;
     service_number:string;
-    submitted_to_cp:boolean;
+    submitted_to_cp:boolean = false;
     date_cp: object;
     comment:string;
     amount:number;
@@ -52,8 +52,8 @@ export class Instruction implements Selectable {
             object: this.object,
             service_number: this.service_number,
             cp_number: this.service_number,
-            submitted_to_cp: this.submitted_to_cp,
-            date_cp: this.date_cp,
+            submitted_to_cp: this.submitted_to_cp? true : false,
+            date_cp: moment(this.date_cp).format('YYYY-MM-DD'),
             comment: this.comment,
         };
     }

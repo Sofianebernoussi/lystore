@@ -14,20 +14,22 @@
     },
 
     "service_number": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "cp_number": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "date_cp": {
-      "type": "date"
+      "type": ["string", "null"]
     },
     "comment": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "submitted_to_cp": {
       "type": "boolean"
     }
-  },
-  "required": [ "id_exercise", "object"]
+  }, "required": [
+  "id_exercise",
+  "object"
+]
 }

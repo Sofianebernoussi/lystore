@@ -86,7 +86,7 @@
                 </label>
             </td>
             <td >[[instruction.object]]</td>
-            <td >[[instruction.amount]]</td>
+            <td >[[instruction.amount || 0]]</td>
             <td >[[instruction.exercise.year_exercise]]</td>
             <td >[[instruction.service_number]]</td>
             <td >[[instruction.cp_number]]</td>
@@ -100,7 +100,7 @@
     <div class="toggle">
         <div class="row">
             <button
-                    ng-click="openOperationForm('edit')"
+                    ng-click="openInstructionForm('edit')"
                     ng-show="instructions.selected.length === 1"
             >
                 <i18n>modify</i18n>

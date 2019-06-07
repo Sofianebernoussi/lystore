@@ -50,10 +50,12 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
         }
         String query =  "SELECT  instruction.* , " +
                 "to_json(exercise.*) AS exercise, " +
-                "array_to_json(array_agg(operations.*)) AS operations " +
+                "array_to_json(array_agg(operations.*)) AS operations, " +
+                "SUM(ROUND(oce.price + ((oce.price * oce.tax_amount) /100), 2)) AS amount " +
                 "FROM  " + Lystore.lystoreSchema +".instruction " +
                 "INNER JOIN " + Lystore.lystoreSchema +".exercise exercise ON exercise.id = instruction.id_exercise " +
                 "LEFT JOIN " + Lystore.lystoreSchema +".operation operations ON operations.id_instruction = instruction.id " +
+                "LEFT JOIN " + Lystore.lystoreSchema +".order_client_equipment oce ON oce.id_operation = operations.id " +
                 getTextFilter(filters) +
                 "GROUP BY (instruction.id, exercise.*)";
 
@@ -73,12 +75,12 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(instruction.getInteger("id_exercise"))
-                .add(instruction.getBoolean("object"))
-                .add(instruction.getBoolean("service_number"))
-                .add(instruction.getBoolean("cp_number"))
+                .add(instruction.getString("object"))
+                .add(instruction.getString("service_number"))
+                .add(instruction.getString("cp_number"))
                 .add(instruction.getBoolean("submitted_to_cp"))
-                .add(instruction.getBoolean("date_cp"))
-                .add(instruction.getBoolean("comment"));
+                .add(instruction.getString("date_cp"))
+                .add(instruction.getString("comment"));
 
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }

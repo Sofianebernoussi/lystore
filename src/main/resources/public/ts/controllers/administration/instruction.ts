@@ -28,10 +28,14 @@ export const instructionController = ng.controller('instructionController',
             Utils.safeApply($scope);
         };
 
-        $scope.openInstructionForm = async () => {
-            $scope.instruction = new Instruction();
-            $scope.operation = new Operation();
+        $scope.openInstructionForm = async (action: string) => {
             await $scope.initOperation();
+            if(action === 'create'){
+                $scope.instruction = new Instruction();
+                $scope.operation = new Operation();
+            } else if (action === 'edit'){
+                $scope.instruction = $scope.instruction.selected[0];
+            }
             template.open('instruction-main', 'administrator/instruction/instruction-form');
             Utils.safeApply($scope);
         };
@@ -82,7 +86,7 @@ export const instructionController = ng.controller('instructionController',
             await $scope.initInstructions();
             Utils.safeApply($scope);
         };
-        $scope.cancelInstructionForm = () =>{
+        $scope.cancelInstructionLightbox = () =>{
             $scope.display.lightbox.instruction = false;
             template.close('instruction.lightbox');
         };
@@ -92,7 +96,7 @@ export const instructionController = ng.controller('instructionController',
             Utils.safeApply($scope);
         };
         $scope.deleteInstructions = async () => {
-            if($scope.instructions.selected.some(instruction => Object.keys(instruction.operations).length !== 0 )){
+            if($scope.instructions.selected.some(instruction => instruction.operations[0] !== null )){
                 template.open('instruction.lightbox', 'administrator/instruction/instruction-delete-reject-lightbox');
             } else {
                 await $scope.instructions.delete();
@@ -102,11 +106,10 @@ export const instructionController = ng.controller('instructionController',
                 Utils.safeApply($scope);
             }
         };
-        $scope.validInstruction = async (instruction:Instruction) =>{
+        $scope.validInstruction = async (instruction:Instruction) => {
             await instruction.save();
-            $scope.cancelOperationForm();
-            await $scope.initOperation();
+            await $scope.initInstructions();
+            $scope.cancelInstructionForm();
             Utils.safeApply($scope);
         };
-
     }]);

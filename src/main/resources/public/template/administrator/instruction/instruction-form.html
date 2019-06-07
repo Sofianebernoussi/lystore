@@ -24,7 +24,7 @@
                          ng-init="instruction.id_exercise = instruction.id_exercise ||
                          (exercises.all.length > 0 ? exercises.all[0].id : null)"
                          ng-options="exercise.id as exercise.year_exercise for exercise in exercises.all"
-                         >
+                >
                 </select>
             </label>
             <label class="row twelve vertical-spacing">
@@ -63,29 +63,29 @@
                 <article>
                     <table class="twelve">
                         <thead>
-                            <td class="two"><i18n>label</i18n></td>
-                            <td class="two"><i18n>lystore.number.sub</i18n></td>
-                            <td class="two"><i18n>amount</i18n></td>
-                            <td class="two"><i18n>lystore.operation.status</i18n></td>
-                            <td class="one aligne-text-center">&nbsp;</td>
+                        <td class="two"><i18n>label</i18n></td>
+                        <td class="two"><i18n>lystore.number.sub</i18n></td>
+                        <td class="two"><i18n>amount</i18n></td>
+                        <td class="two"><i18n>lystore.operation.status</i18n></td>
+                        <td class="one aligne-text-center">&nbsp;</td>
                         </thead>
                         <tbody>
                             <tr ng-repeat="operationToInstruction in instruction.operations">
                                 <td>
-                                    <select ng-model="operationToInstruction.id_label" class="twelve"
-                                             ng-init="operationToInstruction.id_label = operationToInstruction.id_label ||
-                                              (operationToInstruction.length > 0 ? operationToInstruction[0].id : null)"
-                                             ng-options="operationSelect.label.id as operationSelect.label.label for operationSelect in operationToInstruction"
+                                    <select ng-model="instruction.operation" class="twelve" ng-change="selectOperation()"
                                             required>
+                                        <option value=""><i18n>choose ...</i18n></option>
+                                        <option ng-repeat="operationSelect in operationToInstruction" value=[[operationSelect]]>[[operationSelect.label.label]]</option>
                                     </select>
                                 </td>
+                                <td></td>
                                 <td></td>
                                 <td></td>
                                 <td>
                                     <switch-toggle ng-model="operationSelect.status" class="cell">
                                     </switch-toggle>
                                 </td>
-                                <td class="one aligne-text-center" ng-click="dropOperation($index)">
+                                <td class="one aligne-text-center" ng-click="dropOperation($index, operationToInstruction)">
                                     <i  class="trash"></i>
                                 </td>
                             </tr>

@@ -39,21 +39,27 @@ export const instructionController = ng.controller('instructionController',
             template.open('instruction-main', 'administrator/instruction/instruction-form');
             Utils.safeApply($scope);
         };
+
         $scope.addOperationLigne = () => {
             if ( $scope.operations.all.length !== 0) {
-                $scope.operation = $scope.instruction.operations[0];
-                $scope.operationsPush = $scope.operations.all;
-                $scope.operationsPush.map(ope => ope.status = true);
+                $scope.operationsPush = [...$scope.operations.all];
                 $scope.instruction.operations.push($scope.operationsPush);
             } else {
 
             }
             Utils.safeApply($scope);
         };
-        $scope.dropOperation = (indexSelect: Number) => {
+        $scope.dropOperation = (indexSelect: Number, operation: Operation) => {
             $scope.instruction.operations = $scope.instruction.operations
                 .filter((operation, index) => index !== indexSelect);
+            $scope.operations.all.push(operation);
             Utils.safeApply($scope);
+        };
+        $scope.operationSelectedInSelect = [];
+        $scope.selectOperation = () => {
+            // finir la gestion du select
+            $scope.operation = $scope.instruction.operations[0];
+            $scope.operationsPush.map(ope => ope.status = true);
         };
         $scope.cancelInstructionForm = () =>{
             template.open('instruction-main', 'administrator/instruction/manage-instruction');

@@ -107,7 +107,7 @@ export const instructionController = ng.controller('instructionController',
             Utils.safeApply($scope);
         };
         $scope.deleteInstructions = async () => {
-            if($scope.isContainOperation($scope.instructions.selected)){
+            if($scope.instructions.selected.some(instruction => instruction.operations.length !== 0)){
                 template.open('instruction.lightbox', 'administrator/instruction/instruction-delete-reject-lightbox');
             } else {
                 await $scope.instructions.delete();
@@ -117,21 +117,16 @@ export const instructionController = ng.controller('instructionController',
                 Utils.safeApply($scope);
             }
         };
-        $scope.sendInstruction = async (instruction:Instruction) => {
+        $scope.sendInstruction = async () => {
             await $scope.instruction.save();
-            if($scope.isContainOperation($scope.instructions.all)){
-                $scope.instruction.operations.all.forEach(async operation => {
-                    if($scope.instruction.id){
-                        operation.id_instruction = $scope.instruction.id;
-                        await operation.save();
-                    }
-                })
+            if($scope.instruction.operations.length !== 0){
+                let operationIds = $scope.instruction.operations.all.map( operation => operation.id );
+                if($scope.instruction.id){
+                    await $scope.operations.updateOperations($scope.instruction.id, operationIds);
+                }
             }
             await $scope.initInstructions();
             $scope.cancelInstructionForm();
             Utils.safeApply($scope);
         };
-        $scope.isContainOperation = (instructions) => {
-           return instructions.some(instruction => instruction.operations.length !== 0);
-        }
     }]);

@@ -1,7 +1,7 @@
 import { Mix, Selectable, Selection} from 'entcore-toolkit';
 import {moment, notify} from 'entcore';
 import http from 'axios';
-import {label, Operation} from "./operation";
+import {label, Operation, Operations} from "./operation";
 import {Utils} from "./Utils";
 
 export class Instruction implements Selectable {
@@ -58,7 +58,6 @@ export class Instruction implements Selectable {
             comment: this.comment,
         };
     }
-
 }
 
 export class Instructions extends Selection<Instruction>{
@@ -75,7 +74,7 @@ export class Instructions extends Selection<Instruction>{
             this.all = Mix.castArrayAs(Instruction, data);
             this.all.forEach(instructionGet => {
                 instructionGet.exercise = Mix.castAs(Exercise, JSON.parse(instructionGet.exercise.toString()));
-                instructionGet.operations = Mix.castAs(Operation,JSON.parse(instructionGet.operations.toString()));
+                instructionGet.operations = Mix.castArrayAs(Operation, JSON.parse(instructionGet.operations.toString()));
                 instructionGet.date_cp = Utils.formatDate(instructionGet.date_cp);
             })
         } catch (e) {
@@ -101,12 +100,12 @@ export class Exercises{
     constructor() {
         this.sync();
     }
-   async sync() {
+    async sync() {
         try{
             let {data} = await http.get('/lystore/exercises');
             this.all = Mix.castArrayAs(Exercise, data);
         } catch (e) {
             notify.error('lystore.exercise.err');
         }
-   }
+    }
 }

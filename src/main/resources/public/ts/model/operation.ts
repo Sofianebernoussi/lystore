@@ -52,7 +52,6 @@ export class Operation implements Selectable {
         return {
             id_label : this.id_label,
             status : this.status,
-            id_instruction : this.id_instruction,
         };
     }
 
@@ -89,6 +88,14 @@ export class Operations extends Selection<Operation>{
             await http.delete('/lystore/operations', { data: operationsIds });
         } catch(err){
             notify.error('lystore.operation.delete.err');
+        }
+    }
+    async updateOperations(id_instruction: number, operationIds: Array<number>){
+        try {
+            await http.put(`/lystore/operations/instructionAttribute/${id_instruction}`, operationIds);
+        } catch (e) {
+            notify.error('lystore.operation.update.err');
+            throw e;
         }
     }
 }

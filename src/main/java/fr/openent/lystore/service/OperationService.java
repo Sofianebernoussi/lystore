@@ -17,6 +17,8 @@ public interface OperationService {
 
     void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler);
 
+    void addInstructionId(Integer instructionId, JsonArray operationIds, Handler<Either<String, JsonObject>> handler);
+
     void deleteOperation(JsonArray operationIds,  Handler<Either<String, JsonObject>> handler);
 
 }

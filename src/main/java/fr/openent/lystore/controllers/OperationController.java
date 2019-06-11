@@ -12,6 +12,7 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
@@ -66,6 +67,20 @@ public class OperationController  extends ControllerHelper {
                 Actions.UPDATE.toString(),
                 null,
                 operation)));
+    }
+
+    @Put("/operations/instructionAttribute/:idInstruction")
+    @ApiDoc("Uptdate an operation for to give id instruction")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
+    public void addInstructionId(final HttpServerRequest request) {
+        final Integer idInstruction = Integer.parseInt(request.params().get("idInstruction"));
+        RequestUtils.bodyToJsonArray(request, operationIds -> operationService.addInstructionId(idInstruction, operationIds, Logging.defaultResponseHandler(eb,
+                request,
+                Contexts.OPERATION.toString(),
+                Actions.UPDATE.toString(),
+                null,
+                new JsonObject().put("ids", operationIds))));
     }
 
     @Delete("/operations")

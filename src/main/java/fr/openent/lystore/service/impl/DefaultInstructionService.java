@@ -71,7 +71,8 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                 "submitted_to_cp, " +
                 "date_cp, " +
                 "comment) " +
-                "VALUES (? ,? ,? ,? ,? ,? ,?) RETURNING id;";
+                "VALUES (? ,? ,? ,? ,? ,? ,? ) " +
+                "RETURNING id; ";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(instruction.getInteger("id_exercise"))
@@ -94,7 +95,8 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                 "submitted_to_cp = ? , " +
                 "date_cp = ? , " +
                 "comment = ? " +
-                " WHERE id = ?;";
+                "WHERE id = ? " +
+                "RETURNING id";
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(instruction.getInteger("id_exercise"))
                 .add(instruction.getString("object"))
@@ -112,7 +114,12 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
         for (int i = 0; i < instructionIds.size(); i++) {
             values.add(instructionIds.getValue(i));
         }
-        String query = "DELETE FROM " + Lystore.lystoreSchema + ".instruction" + " WHERE id IN " + Sql.listPrepared(instructionIds.getList());
+        String query = "DELETE FROM " +
+                Lystore.lystoreSchema +
+                ".instruction" +
+                " WHERE id IN " +
+                Sql.listPrepared(instructionIds.getList()) +
+                " RETURNING id";
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
     }
 }

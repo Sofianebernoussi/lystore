@@ -76,11 +76,13 @@ public class DefaultOperationService extends SqlCrudService implements Operation
     public  void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler){
         String query = " UPDATE " + Lystore.lystoreSchema + ".operation " +
                 "SET id_label = ?, " +
-                "status = ? " +
+                "status = ?, " +
+                "id_instruction = ? " +
                 " WHERE id = ?;";
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray()
                 .add(operation.getInteger("id_label"))
                 .add(operation.getBoolean("status"))
+                .add(operation.getInteger("id_instruction"))
                 .add(id);
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
     }

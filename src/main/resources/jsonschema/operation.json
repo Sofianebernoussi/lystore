@@ -11,6 +11,9 @@
     },
     "status": {
       "type": "boolean"
+    },
+    "id_instruction": {
+      "type": ["number", "null"]
     }
   },
   "required": [ "id_label", "status"]

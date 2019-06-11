@@ -30,42 +30,47 @@ export const instructionController = ng.controller('instructionController',
 
         $scope.openInstructionForm = async (action: string) => {
             await $scope.initOperation();
+
             if(action === 'create'){
                 $scope.instruction = new Instruction();
-                $scope.operation = new Operation();
+                $scope.instruction.operations = new Operations();
             } else if (action === 'edit'){
                 $scope.instruction = $scope.instructions.selected[0];
             }
             template.open('instruction-main', 'administrator/instruction/instruction-form');
             Utils.safeApply($scope);
         };
-
+        $scope.isNewOperation = false;
         $scope.addOperationLigne = () => {
             if ( $scope.operations.all.length !== 0) {
-                $scope.operationsPush = [...$scope.operations.all];
-                $scope.instruction.operations.push($scope.operationsPush);
-            } else {
-
+                $scope.isNewOperation = true;
             }
             Utils.safeApply($scope);
         };
+        $scope.operationSelected = [];
+        $scope.operationIsSelect = () => {
+            $scope.operation = new Operation();
+            $scope.operationAdd = JSON.parse($scope.instruction.operation);
+            $scope.operation.id = $scope.operationAdd.id;
+            $scope.operation.label = $scope.operationAdd.label;
+            $scope.operation.id_label = $scope.operationAdd.id_label;
+            $scope.operation.amount = $scope.operationAdd.amount;
+            $scope.operation.status = true;
+            $scope.operations.all = $scope.operations.all.filter( operation => operation.id !== $scope.operation.id);
+            $scope.instruction.operations.all.push($scope.operation);
+            $scope.isNewOperation = false;
+        };
         $scope.dropOperation = (indexSelect: Number, operation: Operation) => {
-            $scope.instruction.operations = $scope.instruction.operations
+            $scope.instruction.operations.all = $scope.instruction.operations.all
                 .filter((operation, index) => index !== indexSelect);
             $scope.operations.all.push(operation);
             Utils.safeApply($scope);
         };
-        $scope.operationSelectedInSelect = [];
-        $scope.selectOperation = () => {
-            // finir la gestion du select
-            $scope.operation = $scope.instruction.operations[0];
-            $scope.operationsPush.map(ope => ope.status = true);
+        $scope.cancelFormAddOperation = () => {
+            $scope.isNewOperation = false;
         };
         $scope.cancelInstructionForm = () =>{
             template.open('instruction-main', 'administrator/instruction/manage-instruction');
-        };
-        $scope.formatDate = (date:Date) => {
-            return Utils.formatDate(date)
         };
         $scope.isAllInstructionSelected = false;
         $scope.switchAllInstruction = () => {
@@ -102,7 +107,7 @@ export const instructionController = ng.controller('instructionController',
             Utils.safeApply($scope);
         };
         $scope.deleteInstructions = async () => {
-            if($scope.instructions.selected.some(instruction => instruction.operations.length !== 0 )){
+            if($scope.isContainOperation($scope.instructions.selected)){
                 template.open('instruction.lightbox', 'administrator/instruction/instruction-delete-reject-lightbox');
             } else {
                 await $scope.instructions.delete();
@@ -112,10 +117,21 @@ export const instructionController = ng.controller('instructionController',
                 Utils.safeApply($scope);
             }
         };
-        $scope.validInstruction = async (instruction:Instruction) => {
-            await instruction.save();
+        $scope.sendInstruction = async (instruction:Instruction) => {
+            await $scope.instruction.save();
+            if($scope.isContainOperation($scope.instructions.all)){
+                $scope.instruction.operations.all.forEach(async operation => {
+                    if($scope.instruction.id){
+                        operation.id_instruction = $scope.instruction.id;
+                        await operation.save();
+                    }
+                })
+            }
             await $scope.initInstructions();
             $scope.cancelInstructionForm();
             Utils.safeApply($scope);
         };
+        $scope.isContainOperation = (instructions) => {
+           return instructions.some(instruction => instruction.operations.length !== 0);
+        }
     }]);

@@ -18,6 +18,7 @@ export class Operation implements Selectable {
     nbr_sub: number;
     amount: number;
     selected:boolean;
+    id_instruction: number;
     constructor(){
 
     }
@@ -51,6 +52,7 @@ export class Operation implements Selectable {
         return {
             id_label : this.id_label,
             status : this.status,
+            id_instruction : this.id_instruction,
         };
     }
 

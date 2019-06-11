@@ -12,7 +12,7 @@ export class Instruction implements Selectable {
     cp_number:string;
     service_number:string;
     submitted_to_cp:boolean = false;
-    date_cp: object;
+    date_cp: Date;
     comment:string;
     amount:number;
     operations:Array<Operation> = [];
@@ -30,7 +30,8 @@ export class Instruction implements Selectable {
 
     async create () {
         try {
-            await http.post(`/lystore/instruction`, this.toJson());
+            let {data : {id} } = await http.post(`/lystore/instruction`, this.toJson());
+            this.id = id;
         } catch (e) {
             notify.error('lystore.instruction.create.err');
             throw e;
@@ -74,9 +75,8 @@ export class Instructions extends Selection<Instruction>{
             this.all = Mix.castArrayAs(Instruction, data);
             this.all.forEach(instructionGet => {
                 instructionGet.exercise = Mix.castAs(Exercise, JSON.parse(instructionGet.exercise.toString()));
-                instructionGet.operations.toString() !== "[null]" ?
-                    instructionGet.operations = JSON.parse(instructionGet.operations.toString()):
-                    instructionGet.operations = [];
+                instructionGet.operations = Mix.castAs(Operation,JSON.parse(instructionGet.operations.toString()));
+                instructionGet.date_cp = Utils.formatDate(instructionGet.date_cp);
             })
         } catch (e) {
             notify.error('lystore.instruction.get.err');

@@ -74,8 +74,11 @@ export class Instructions extends Selection<Instruction>{
             this.all = Mix.castArrayAs(Instruction, data);
             this.all.forEach(instructionGet => {
                 instructionGet.exercise = Mix.castAs(Exercise, JSON.parse(instructionGet.exercise.toString()));
-                instructionGet.operations = Mix.castArrayAs(Operation, JSON.parse(instructionGet.operations.toString()));
+                //instructionGet.operations = Mix.castArrayAs(Operation, JSON.parse(instructionGet.operations.toString()));
                 instructionGet.date_cp = Utils.formatDate(instructionGet.date_cp);
+                JSON.stringify(instructionGet.operations)[0] !== null && instructionGet.operations.toString() !== "[null]"?
+                    instructionGet.operations = Mix.castArrayAs(Operation, JSON.parse(instructionGet.operations.toString()))
+                    : instructionGet.operations = [];
             })
         } catch (e) {
             notify.error('lystore.instruction.get.err');

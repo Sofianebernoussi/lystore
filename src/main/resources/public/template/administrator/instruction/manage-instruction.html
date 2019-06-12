@@ -86,7 +86,7 @@
                 </label>
             </td>
             <td >[[instruction.object]]</td>
-            <td >[[instruction.amount || 0]]</td>
+            <td >[[instruction.amount? instruction.amount + " €" : '-']]</td>
             <td >[[instruction.exercise.year_exercise]]</td>
             <td >[[instruction.service_number]]</td>
             <td >[[instruction.cp_number]]</td>

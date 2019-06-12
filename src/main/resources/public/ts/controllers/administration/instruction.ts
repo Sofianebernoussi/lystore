@@ -119,7 +119,7 @@ export const instructionController = ng.controller('instructionController',
         };
         $scope.sendInstruction = async () => {
             await $scope.instruction.save();
-            if($scope.instruction.operations.length !== 0){
+            if($scope.instruction.operations.all.length !== 0){
                 let operationIds = $scope.instruction.operations.all.map( operation => operation.id );
                 if($scope.instruction.id){
                     await $scope.operations.updateOperations($scope.instruction.id, operationIds);

@@ -261,7 +261,14 @@ export class OrdersClient extends Selection<OrderClient> {
             throw e;
         }
     }
-
+    addOperation (idOperation:number, idsOrder: Array<number>) {
+        try{
+            http.put(`/lystore/orders/opeartion/${idOperation}`, idsOrder);
+        }catch (e){
+            notify.error('lystore.basket.update.err');
+            throw e;
+        }
+    }
 }
 
 export class OrderOptionClient implements Selectable {

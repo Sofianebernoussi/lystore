@@ -906,4 +906,22 @@ body.lystore {
     margin-top: 5px;
     margin-bottom: 5px;
   }
+  .listOperationSelect{
+    width: 90%;
+    margin: auto;
+    tr{
+      border: none;
+    }
+    .selectOperationRow{
+      background-color: #efefef;
+      color: black;
+      text-align: center;
+    }
+    .selectOperationRow:hover{
+      background-color: #dadada;
+    }
+    .greyRow{
+      background-color: transparent;
+    }
+  }
 }

@@ -964,5 +964,20 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
        sql.transaction(statements, SqlResult.validRowsResultHandler(handler));
     }
 
+    @Override
+    public void updateOperation(Integer idOperation, JsonArray idOrders, Handler<Either<String, JsonObject>> handler) {
+        String query = " UPDATE " + Lystore.lystoreSchema + ".order_client_equipment " +
+                " SET id_operation = " +
+                idOperation +
+                " WHERE id IN " +
+                Sql.listPrepared(idOrders.getList()) +
+                " RETURNING id";
+        JsonArray values = new JsonArray();
+        for (int i = 0; i < idOrders.size(); i++) {
+            values.add(idOrders.getValue(i));
+        }
+        // send validation
+        sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
+    }
 }
 

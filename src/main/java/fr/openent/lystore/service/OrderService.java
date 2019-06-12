@@ -170,4 +170,13 @@ public interface OrderService {
      * @param handler Function handler returning data
      */
     void updateRank( JsonArray orders, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Update the rank of two orders
+     *
+     * @param orders orders to update
+     * @param handler Function handler returning data
+     */
+    void updateOperation( Integer id, JsonArray orders, Handler<Either<String, JsonObject>> handler);
+
 }

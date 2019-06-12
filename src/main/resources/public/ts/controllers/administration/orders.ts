@@ -1,5 +1,5 @@
 import {_, model, ng, template} from 'entcore';
-import {Notification, OrderClient, OrdersClient, orderWaiting, Utils} from '../../model';
+import {Notification, Operation, OrderClient, OrdersClient, orderWaiting, Utils} from '../../model';
 import {Mix} from 'entcore-toolkit';
 
 
@@ -305,5 +305,18 @@ export const orderController = ng.controller('orderController',
                 }
             }
             return field == 'totaux' ? totaux : price;
+        };
+        $scope.selectOperationForOrder = async () =>{
+            await $scope.initOperation();
+            template.open('validOrder.lightbox', 'administrator/order/order-select-operation');
+            $scope.display.lightbox.validOrder = true;
+        };
+        $scope.operationSelected = async (operation:Operation) => {
+            let idsOrder = $scope.ordersClient.selected.map(order => order.id);
+            await $scope.ordersClient.addOperation(operation.id, idsOrder);
+            await $scope.validateOrders($scope.getSelectedOrders());
+            template.close('validOrder.lightbox');
+            $scope.display.lightbox.validOrder = false;
+            await $scope.syncOrders('WAITING');
         };
     }]);

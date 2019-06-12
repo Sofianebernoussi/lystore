@@ -1125,4 +1125,17 @@ public class OrderController extends ControllerHelper {
         });
     }
 
+    @Put("/orders/opeartion/:idOperation")
+    @ApiDoc("update operation in orders")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void updateOperation(final HttpServerRequest request) {
+        final Integer idOperation = Integer.parseInt(request.params().get("idOperation"));
+        RequestUtils.bodyToJsonArray(request, idOrders -> orderService.updateOperation(idOperation, idOrders, Logging.defaultResponseHandler(eb,
+                request,
+                Contexts.ORDER.toString(),
+                Actions.UPDATE.toString(),
+                null,
+                new JsonObject().put("ids", idOrders))));
+    }
 }

@@ -100,6 +100,9 @@
                 <button ng-click="exportCSV()" >
                     <i18n>lystore.logs.csv.export</i18n>
                 </button>
+                <button ng-click="selectOperationForOrder()" ng-disabled="!isValidOrdersWaitingSelection()">
+                    <i18n>lystore.order.operation.select</i18n>
+                </button>
             </div>
         </div>
     </section>

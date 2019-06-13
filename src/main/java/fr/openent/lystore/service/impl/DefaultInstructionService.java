@@ -119,11 +119,15 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
 
     private void getOperationsWithIdInstruction(JsonArray IdInstructions, Handler<Either<String, JsonArray>> handler) {
         String queryOperation = "SELECT operation.*, " +
-                "to_json(label_operation.*) AS label " +
+                "to_json(label_operation.*) AS label, " +
+                "count(oce.*) AS nbr_sub, " +
+                "SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2)) AS amount " +
                 "FROM " + Lystore.lystoreSchema +".operation " +
                 "INNER JOIN lystore.label_operation ON operation.id_label = label_operation.id " +
+                "LEFT JOIN " + Lystore.lystoreSchema +".order_client_equipment oce ON oce.id_operation = operation.id "+
                 "WHERE id_instruction IN " +
-                Sql.listPrepared(IdInstructions.getList());
+                Sql.listPrepared(IdInstructions.getList()) +
+                " GROUP BY (operation.id, label_operation.id)";
 
         Sql.getInstance().prepared(queryOperation, IdInstructions, SqlResult.validResultHandler(handler));
     }
@@ -136,7 +140,7 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                 "INNER JOIN " + Lystore.lystoreSchema +".order_client_equipment oce ON (oce.id_operation = operation.id) " +
                 "WHERE instruction.id IN " +
                 Sql.listPrepared(IdInstructions.getList()) +
-                " GROUP BY instruction.id ";
+                " GROUP BY instruction.id";
 
 
         Sql.getInstance().prepared(queryAmount, IdInstructions, SqlResult.validResultHandler(handler));

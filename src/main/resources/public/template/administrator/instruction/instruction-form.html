@@ -71,7 +71,7 @@
                         <tbody>
                         <tr ng-repeat="operationAdd in instruction.operations">
                             <td>[[operationAdd.label.label]]</td>
-                            <td></td>
+                            <td>[[operationAdd.nbr_sub]]</td>
                             <td>[[operationAdd.amount? operationAdd.amount + " €" : '-']]</td>
                             <td>
                                 <switch-toggle ng-model="operationAdd.status" class="cell">

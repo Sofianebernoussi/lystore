@@ -54,14 +54,16 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
         String query =  "SELECT instruction.*, " +
                 "to_json(exercise.*) AS exercise " +
                 "FROM  " + Lystore.lystoreSchema +".instruction " +
-                "INNER JOIN " + Lystore.lystoreSchema +".exercise exercise ON exercise.id = instruction.id_exercise ;";
-        //getTextFilter(filters) +
+                "INNER JOIN " + Lystore.lystoreSchema +".exercise exercise ON exercise.id = instruction.id_exercise " +
+                getTextFilter(filters);
 
-        //sql.prepared(query, params, SqlResult.validResultHandler(handler) );
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(instructionsEither -> {
             try{
                 if (instructionsEither.isRight()) {
                     JsonArray instructions = instructionsEither.right().getValue();
+                    if(instructions.size() == 0){
+                        return;
+                    }
                     JsonArray idsInstructions = new JsonArray();
                     for (int i = 0; i < instructions.size(); i++) {
                         JsonObject instruction = instructions.getJsonObject(i);

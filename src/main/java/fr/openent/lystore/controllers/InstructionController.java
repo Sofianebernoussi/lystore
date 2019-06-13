@@ -16,6 +16,8 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 
+import java.util.ArrayList;
+
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 
 public class InstructionController extends ControllerHelper {
@@ -36,7 +38,17 @@ public class InstructionController extends ControllerHelper {
     @ApiDoc("List all instructions in database")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void getInstructions(HttpServerRequest request) {
-        instructionService.getInstructions(request.params().getAll("q"), arrayResponseHandler(request));
+        instructionService.getInstructions(new ArrayList<>(), either -> {
+            if (either.isLeft()) {
+                if ("404".equals(either.left().getValue())) {
+                    //notFound(request);
+                } else {
+                    renderError(request);
+                }
+            } else {
+                renderJson(request, either.right().getValue());
+            }
+        });
     }
 
     @Post("/instruction")

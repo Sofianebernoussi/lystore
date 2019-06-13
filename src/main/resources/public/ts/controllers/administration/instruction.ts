@@ -22,7 +22,9 @@ export const instructionController = ng.controller('instructionController',
                 instruction:false,
             }
         };
-
+        $scope.formatDate = (date) => {
+            return Utils.formatDate(date)
+        };
         $scope.switchAll = (model: boolean, collection) => {
             model ? collection.selectAll() : collection.deselectAll();
             Utils.safeApply($scope);
@@ -30,12 +32,33 @@ export const instructionController = ng.controller('instructionController',
 
         $scope.openInstructionForm = async (action: string) => {
             await $scope.initOperation();
-
             if(action === 'create'){
                 $scope.instruction = new Instruction();
-                $scope.instruction.operations = new Operations();
+                $scope.instruction.operations = [];
             } else if (action === 'edit'){
                 $scope.instruction = $scope.instructions.selected[0];
+
+
+                // let result1 = $scope.instruction.operations, result2 = $scope.operations.all;
+                //
+                //
+                // var uniqueResultOne = result1.filter(function(obj) {
+                //     return !result2.some(function(obj2) {
+                //         return obj.value == obj2.value;
+                //     });
+                // });
+                //
+                //
+                // var uniqueResultTwo = result2.filter(function(obj) {
+                //     return !result1.some(function(obj2) {
+                //         return obj.value == obj2.value;
+                //     });
+                // });
+                //
+                //
+                // $scope.operations.all = uniqueResultOne.concat(uniqueResultTwo);
+
+
             }
             template.open('instruction-main', 'administrator/instruction/instruction-form');
             Utils.safeApply($scope);
@@ -57,11 +80,11 @@ export const instructionController = ng.controller('instructionController',
             $scope.operation.amount = $scope.operationAdd.amount;
             $scope.operation.status = true;
             $scope.operations.all = $scope.operations.all.filter( operation => operation.id !== $scope.operation.id);
-            $scope.instruction.operations.all.push($scope.operation);
+            $scope.instruction.operations.push($scope.operation);
             $scope.isNewOperation = false;
         };
         $scope.dropOperation = (indexSelect: Number, operation: Operation) => {
-            $scope.instruction.operations.all = $scope.instruction.operations.all
+            $scope.instruction.operations = $scope.instruction.operations
                 .filter((operation, index) => index !== indexSelect);
             $scope.operations.all.push(operation);
             Utils.safeApply($scope);
@@ -70,6 +93,7 @@ export const instructionController = ng.controller('instructionController',
             $scope.isNewOperation = false;
         };
         $scope.cancelInstructionForm = () =>{
+            $scope.cancelFormAddOperation();
             template.open('instruction-main', 'administrator/instruction/manage-instruction');
         };
         $scope.isAllInstructionSelected = false;
@@ -119,8 +143,8 @@ export const instructionController = ng.controller('instructionController',
         };
         $scope.sendInstruction = async () => {
             await $scope.instruction.save();
-            if($scope.instruction.operations.all.length !== 0){
-                let operationIds = $scope.instruction.operations.all.map( operation => operation.id );
+            if($scope.instruction.operations.length !== 0){
+                let operationIds = $scope.instruction.operations.map( operation => operation.id );
                 if($scope.instruction.id){
                     await $scope.operations.updateOperations($scope.instruction.id, operationIds);
                 }

@@ -15,7 +15,7 @@ export class Instruction implements Selectable {
     date_cp: Date;
     comment:string;
     amount:number;
-    operations:Array<Operation> = [];
+    operations:Array<Operation> ;
     selected:boolean = false;
 
     constructor(){
@@ -74,11 +74,12 @@ export class Instructions extends Selection<Instruction>{
             this.all = Mix.castArrayAs(Instruction, data);
             this.all.forEach(instructionGet => {
                 instructionGet.exercise = Mix.castAs(Exercise, JSON.parse(instructionGet.exercise.toString()));
-                //instructionGet.operations = Mix.castArrayAs(Operation, JSON.parse(instructionGet.operations.toString()));
-                instructionGet.date_cp = Utils.formatDate(instructionGet.date_cp);
-                JSON.stringify(instructionGet.operations)[0] !== null && instructionGet.operations.toString() !== "[null]"?
-                    instructionGet.operations = Mix.castArrayAs(Operation, JSON.parse(instructionGet.operations.toString()))
-                    : instructionGet.operations = [];
+                instructionGet.date_cp = moment(instructionGet.date_cp);
+                instructionGet.operations
+                    .forEach(operation => {
+                        operation.label = JSON.parse(operation.label.toString());
+                        operation.status = operation.status? true : false;
+                    });
             })
         } catch (e) {
             notify.error('lystore.instruction.get.err');

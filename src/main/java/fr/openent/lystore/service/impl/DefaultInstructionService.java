@@ -1,8 +1,11 @@
 package fr.openent.lystore.service.impl;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.helpers.FutureHelper;
 import fr.openent.lystore.service.InstructionService;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import org.entcore.common.service.impl.SqlCrudService;
@@ -48,18 +51,95 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                 params.add(filter).add(filter).add(filter).add(filter);
             }
         }
-        String query =  "SELECT  instruction.* , " +
-                "to_json(exercise.*) AS exercise, " +
-                "array_to_json(array_agg(operations.*)) AS operations, " +
-                "SUM(ROUND(oce.price + ((oce.price * oce.tax_amount) /100), 2)) AS amount " +
+        String query =  "SELECT instruction.*, " +
+                "to_json(exercise.*) AS exercise " +
                 "FROM  " + Lystore.lystoreSchema +".instruction " +
-                "INNER JOIN " + Lystore.lystoreSchema +".exercise exercise ON exercise.id = instruction.id_exercise " +
-                "LEFT JOIN " + Lystore.lystoreSchema +".operation operations ON operations.id_instruction = instruction.id " +
-                "LEFT JOIN " + Lystore.lystoreSchema +".order_client_equipment oce ON oce.id_operation = operations.id " +
-                getTextFilter(filters) +
-                "GROUP BY (instruction.id, exercise.*)";
+                "INNER JOIN " + Lystore.lystoreSchema +".exercise exercise ON exercise.id = instruction.id_exercise ;";
+        //getTextFilter(filters) +
 
-        sql.prepared(query, params, SqlResult.validResultHandler(handler) );
+        //sql.prepared(query, params, SqlResult.validResultHandler(handler) );
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(instructionsEither -> {
+            try{
+                if (instructionsEither.isRight()) {
+                    JsonArray instructions = instructionsEither.right().getValue();
+                    JsonArray idsInstructions = new JsonArray();
+                    for (int i = 0; i < instructions.size(); i++) {
+                        JsonObject instruction = instructions.getJsonObject(i);
+                        idsInstructions.add(instruction.getInteger("id"));
+                    }
+
+                    Future<JsonArray> operationsWithIdInstructionFuture = Future.future();
+                    Future<JsonArray> amountDemandOperationFuture = Future.future();
+
+                    CompositeFuture.all(operationsWithIdInstructionFuture, amountDemandOperationFuture).setHandler(asyncEvent -> {
+                        if (asyncEvent.failed()) {
+                            String message = "Failed to retrieve instructions";
+                            handler.handle(new Either.Left<>(message));
+                            return;
+                        }
+
+                        JsonArray getOperations = operationsWithIdInstructionFuture.result();
+                        JsonArray getAmountsDemands = amountDemandOperationFuture.result();
+
+                        JsonArray getInstructions = new JsonArray();
+                        for (int i = 0; i < instructions.size(); i++) {
+                            JsonObject instruction = instructions.getJsonObject(i);
+                            for (int j = 0; j < getAmountsDemands.size(); j++){
+                                JsonObject amountDemand = getAmountsDemands.getJsonObject(j);
+                                if(instruction.getInteger("id") == amountDemand.getInteger("id")){
+                                    instruction.put("amount", amountDemand.getString("amount"));
+                                }
+                            }
+                            JsonArray operations = new JsonArray();
+                            for (int k = 0; k < getOperations.size(); k++){
+                                JsonObject operation = getOperations.getJsonObject(k);
+                                if(instruction.getInteger("id") == operation.getInteger("id_instruction")){
+                                    operations.add(operation);
+                                }
+                            }
+                            instruction.put("operations", operations);
+                            getInstructions.add(instruction);
+                        }
+                        handler.handle(new Either.Right<>(getInstructions));
+                    });
+
+                    getOperationsWithIdInstruction(idsInstructions, FutureHelper.handlerJsonArray(operationsWithIdInstructionFuture));
+                    getAmountDemandOperation(idsInstructions, FutureHelper.handlerJsonArray(amountDemandOperationFuture));
+
+                } else {
+                    handler.handle(new Either.Left<>("404"));
+                    return;
+                }
+            } catch( Exception e){
+                System.out.println(e);
+            }
+        }));
+    }
+
+    private void getOperationsWithIdInstruction(JsonArray IdInstructions, Handler<Either<String, JsonArray>> handler) {
+        String queryOperation = "SELECT *, " +
+                "to_json(operation.*), " +
+                "to_json(label_operation.*) AS label " +
+                "FROM " + Lystore.lystoreSchema +".operation " +
+                "INNER JOIN lystore.label_operation ON operation.id_label = label_operation.id " +
+                "WHERE id_instruction IN " +
+                Sql.listPrepared(IdInstructions.getList());
+
+        Sql.getInstance().prepared(queryOperation, IdInstructions, SqlResult.validResultHandler(handler));
+    }
+
+    private void getAmountDemandOperation(JsonArray IdInstructions, Handler<Either<String, JsonArray>> handler) {
+        String queryAmount = "SELECT instruction.id, " +
+                "SUM(ROUND(oce.price + ((oce.price * oce.tax_amount) /100), 2)) AS amount " +
+                "FROM " + Lystore.lystoreSchema + ".instruction " +
+                "INNER JOIN " + Lystore.lystoreSchema +".operation ON (instruction.id = operation.id_instruction) " +
+                "INNER JOIN " + Lystore.lystoreSchema +".order_client_equipment oce ON (oce.id_operation = operation.id) " +
+                "WHERE instruction.id IN " +
+                Sql.listPrepared(IdInstructions.getList()) +
+                " GROUP BY instruction.id ";
+
+
+        Sql.getInstance().prepared(queryAmount, IdInstructions, SqlResult.validResultHandler(handler));
     }
 
     public void create(JsonObject instruction, Handler<Either<String, JsonObject>> handler){

@@ -69,7 +69,7 @@
                         <td class="one aligne-text-center">&nbsp</td>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="operationAdd in instruction.operations.all">
+                        <tr ng-repeat="operationAdd in instruction.operations">
                             <td>[[operationAdd.label.label]]</td>
                             <td></td>
                             <td>[[operationAdd.amount? operationAdd.amount + " €" : '-']]</td>

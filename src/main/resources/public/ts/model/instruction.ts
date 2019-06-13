@@ -69,6 +69,7 @@ export class Instructions extends Selection<Instruction>{
 
     async sync () {
         try{
+            this.all = [];
             const queriesFilter = Utils.formatGetParameters({q: this.filters});
             let {data} = await http.get(`/lystore/instructions/?${queriesFilter}`);
             this.all = Mix.castArrayAs(Instruction, data);

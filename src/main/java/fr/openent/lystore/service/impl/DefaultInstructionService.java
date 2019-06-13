@@ -108,7 +108,6 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
 
                 } else {
                     handler.handle(new Either.Left<>("404"));
-                    return;
                 }
             } catch( Exception e){
                 System.out.println(e);
@@ -117,8 +116,7 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
     }
 
     private void getOperationsWithIdInstruction(JsonArray IdInstructions, Handler<Either<String, JsonArray>> handler) {
-        String queryOperation = "SELECT *, " +
-                "to_json(operation.*), " +
+        String queryOperation = "SELECT operation.*, " +
                 "to_json(label_operation.*) AS label " +
                 "FROM " + Lystore.lystoreSchema +".operation " +
                 "INNER JOIN lystore.label_operation ON operation.id_label = label_operation.id " +

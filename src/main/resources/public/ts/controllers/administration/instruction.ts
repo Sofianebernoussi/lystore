@@ -30,47 +30,28 @@ export const instructionController = ng.controller('instructionController',
             Utils.safeApply($scope);
         };
 
+        $scope.isOperationEdit = false;
         $scope.openInstructionForm = async (action: string) => {
             await $scope.initOperation();
+            $scope.operationEditRemoveInstructionIds = [];
             if(action === 'create'){
                 $scope.instruction = new Instruction();
                 $scope.instruction.operations = [];
             } else if (action === 'edit'){
                 $scope.instruction = $scope.instructions.selected[0];
-
-
-                // let result1 = $scope.instruction.operations, result2 = $scope.operations.all;
-                //
-                //
-                // var uniqueResultOne = result1.filter(function(obj) {
-                //     return !result2.some(function(obj2) {
-                //         return obj.value == obj2.value;
-                //     });
-                // });
-                //
-                //
-                // var uniqueResultTwo = result2.filter(function(obj) {
-                //     return !result1.some(function(obj2) {
-                //         return obj.value == obj2.value;
-                //     });
-                // });
-                //
-                //
-                // $scope.operations.all = uniqueResultOne.concat(uniqueResultTwo);
-
-
+                $scope.isOperationEdit = true;
             }
             template.open('instruction-main', 'administrator/instruction/instruction-form');
             Utils.safeApply($scope);
         };
         $scope.isNewOperation = false;
         $scope.addOperationLigne = () => {
+            if($scope.isOperationEdit)
             if ( $scope.operations.all.length !== 0) {
                 $scope.isNewOperation = true;
             }
             Utils.safeApply($scope);
         };
-        $scope.operationSelected = [];
         $scope.operationIsSelect = () => {
             $scope.operation = new Operation();
             $scope.operationAdd = JSON.parse($scope.instruction.operation);
@@ -82,8 +63,13 @@ export const instructionController = ng.controller('instructionController',
             $scope.operations.all = $scope.operations.all.filter( operation => operation.id !== $scope.operation.id);
             $scope.instruction.operations.push($scope.operation);
             $scope.isNewOperation = false;
+            if($scope.isOperationEdit) {
+                $scope.operationEditRemoveInstructionIds = $scope.operationEditRemoveInstructionIds
+                    .filter( id => id !== $scope.operation.id);
+            }
         };
         $scope.dropOperation = (indexSelect: Number, operation: Operation) => {
+            if($scope.isOperationEdit) $scope.operationEditRemoveInstructionIds.push(operation.id);
             $scope.instruction.operations = $scope.instruction.operations
                 .filter((operation, index) => index !== indexSelect);
             $scope.operations.all.push(operation);
@@ -94,6 +80,7 @@ export const instructionController = ng.controller('instructionController',
         };
         $scope.cancelInstructionForm = () =>{
             $scope.cancelFormAddOperation();
+            $scope.isOperationEdit = false;
             template.open('instruction-main', 'administrator/instruction/manage-instruction');
         };
         $scope.isAllInstructionSelected = false;
@@ -149,6 +136,10 @@ export const instructionController = ng.controller('instructionController',
                     await $scope.operations.updateOperations($scope.instruction.id, operationIds);
                 }
             }
+            if($scope.operationEditRemoveInstructionIds.length !== 0){
+                await $scope.operations.updateRemoveOperations($scope.operationEditRemoveInstructionIds);
+            }
+            $scope.isOperationEdit = false;
             await $scope.initInstructions();
             $scope.cancelInstructionForm();
             Utils.safeApply($scope);

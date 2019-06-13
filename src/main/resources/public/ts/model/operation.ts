@@ -98,6 +98,14 @@ export class Operations extends Selection<Operation>{
             throw e;
         }
     }
+    async updateRemoveOperations(operationIds: Array<number>){
+        try {
+            await http.put('/lystore/operations/instructionRemove', operationIds);
+        } catch (e) {
+            notify.error('lystore.operation.update.err');
+            throw e;
+        }
+    }
 }
 
 export class label implements Selectable{

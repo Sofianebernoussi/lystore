@@ -83,6 +83,19 @@ public class OperationController  extends ControllerHelper {
                 new JsonObject().put("ids", operationIds))));
     }
 
+    @Put("/operations/instructionRemove")
+    @ApiDoc("Uptdate an operation for to give id instruction")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
+    public void removeInstructionId(final HttpServerRequest request) {
+        RequestUtils.bodyToJsonArray(request, operationIds -> operationService.removeInstructionId( operationIds, Logging.defaultResponseHandler(eb,
+                request,
+                Contexts.OPERATION.toString(),
+                Actions.UPDATE.toString(),
+                null,
+                new JsonObject().put("ids", operationIds))));
+    }
+
     @Delete("/operations")
     @ApiDoc("Delete operations")
     @SecuredAction(value = "", type = ActionType.RESOURCE)

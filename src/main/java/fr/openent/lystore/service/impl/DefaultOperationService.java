@@ -37,7 +37,6 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 filter += "(LOWER(label.label) ~ LOWER(?) OR LOWER(o.order_number) ~ LOWER(?)) ";
             }
         }
-
         return filter;
     }
 
@@ -95,6 +94,19 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 "SET status = true, " +
                 "id_instruction = " +
                 instructionId +
+                " WHERE id IN " +
+                Sql.listPrepared(operationIds.getList()) +
+                " RETURNING id";
+        JsonArray values = new JsonArray();
+        for (int i = 0; i < operationIds.size(); i++) {
+            values.add(operationIds.getValue(i));
+        }
+        sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
+    }
+
+    public  void removeInstructionId( JsonArray operationIds, Handler<Either<String, JsonObject>> handler){
+        String query = " UPDATE " + Lystore.lystoreSchema + ".operation " +
+                "SET id_instruction = null " +
                 " WHERE id IN " +
                 Sql.listPrepared(operationIds.getList()) +
                 " RETURNING id";

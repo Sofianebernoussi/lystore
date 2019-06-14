@@ -74,8 +74,9 @@
                             <td>[[operationAdd.nbr_sub]]</td>
                             <td>[[operationAdd.amount? operationAdd.amount + " €" : '-']]</td>
                             <td>
-                                <switch-toggle ng-model="operationAdd.status" class="cell">
-                                </switch-toggle>
+                                <i18n>lystore.campaign.accessibility</i18n>
+                                <!--<switch-toggle ng-model="operationAdd.status" class="cell">
+                                </switch-toggle>-->
                             </td>
                             <td class="one aligne-text-center" ng-click="dropOperation($index, operationAdd)">
                                 <i  class="trash"></i>
@@ -97,7 +98,7 @@
                         </tr>
                         </tbody>
                     </table>
-                    <input type="button"  ng-disabled="isNewOperation" ng-click="addOperationLigne()" i18n-value="add" />
+                    <input type="button"  ng-disabled="isNewOperation || isOperationsIsEmpty" ng-click="addOperationRow()" i18n-value="add" />
                 </article>
             </div>
             <div class="right-magnet vertical-spacing">

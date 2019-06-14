@@ -908,9 +908,10 @@ body.lystore {
   }
   .listOperationSelect{
     width: 90%;
-    margin: auto;
+    margin: 20px auto;
     tr{
       border: none;
+      transition-duration: 0.4s;
     }
     .selectOperationRow{
       background-color: #efefef;
@@ -919,6 +920,7 @@ body.lystore {
     }
     .selectOperationRow:hover{
       background-color: #dadada;
+      transition-duration: 0.4s;
     }
     .greyRow{
       background-color: transparent;

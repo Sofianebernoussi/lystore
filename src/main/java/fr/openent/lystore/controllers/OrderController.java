@@ -1125,7 +1125,7 @@ public class OrderController extends ControllerHelper {
         });
     }
 
-    @Put("/orders/opeartion/:idOperation")
+    @Put("/orders/operation/:idOperation")
     @ApiDoc("update operation in orders")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
@@ -1135,7 +1135,7 @@ public class OrderController extends ControllerHelper {
                 request,
                 Contexts.ORDER.toString(),
                 Actions.UPDATE.toString(),
-                null,
+                idOperation.toString(),
                 new JsonObject().put("ids", idOrders))));
     }
 }

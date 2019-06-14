@@ -64,7 +64,7 @@ public class OperationController  extends ControllerHelper {
                 request,
                 Contexts.OPERATION.toString(),
                 Actions.UPDATE.toString(),
-                null,
+                idOperation.toString(),
                 operation)));
     }
 
@@ -78,7 +78,7 @@ public class OperationController  extends ControllerHelper {
                 request,
                 Contexts.OPERATION.toString(),
                 Actions.UPDATE.toString(),
-                null,
+                idInstruction.toString(),
                 new JsonObject().put("ids", operationIds))));
     }
 
@@ -91,7 +91,7 @@ public class OperationController  extends ControllerHelper {
                 request,
                 Contexts.OPERATION.toString(),
                 Actions.UPDATE.toString(),
-                null,
+                operationIds.toString(),
                 new JsonObject().put("ids", operationIds))));
     }
 
@@ -104,7 +104,7 @@ public class OperationController  extends ControllerHelper {
                 request,
                 Contexts.OPERATION.toString(),
                 Actions.DELETE.toString(),
-                null,
+                operationIds.toString(),
                 new JsonObject().put("ids", operationIds))));
     }
 }

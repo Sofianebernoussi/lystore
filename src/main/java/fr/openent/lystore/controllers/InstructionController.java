@@ -59,7 +59,7 @@ public class InstructionController extends ControllerHelper {
                 request,
                 Contexts.INSTRUCTION.toString(),
                 Actions.CREATE.toString(),
-                null,
+                instruction.toString(),
                 instruction)));
     }
 
@@ -73,7 +73,7 @@ public class InstructionController extends ControllerHelper {
                 request,
                 Contexts.INSTRUCTION.toString(),
                 Actions.UPDATE.toString(),
-                null,
+                idInstruction.toString(),
                 instruction)));
     }
 
@@ -86,7 +86,7 @@ public class InstructionController extends ControllerHelper {
                 request,
                 Contexts.INSTRUCTION.toString(),
                 Actions.DELETE.toString(),
-                null,
+                instructionIds.toString(),
                 new JsonObject().put("ids", instructionIds))));
     }
 }

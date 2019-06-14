@@ -62,6 +62,7 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                 if (instructionsEither.isRight()) {
                     JsonArray instructions = instructionsEither.right().getValue();
                     if(instructions.size() == 0){
+                        handler.handle(new Either.Right<>(instructions));
                         return;
                     }
                     JsonArray idsInstructions = new JsonArray();
@@ -200,8 +201,8 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
         }
         String query = "DELETE FROM " +
                 Lystore.lystoreSchema +
-                ".instruction" +
-                " WHERE id IN " +
+                ".instruction " +
+                "WHERE id IN " +
                 Sql.listPrepared(instructionIds.getList()) +
                 " RETURNING id";
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));

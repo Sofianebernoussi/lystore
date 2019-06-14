@@ -39,7 +39,7 @@ public class InstructionController extends ControllerHelper {
         instructionService.getInstructions(request.params().getAll("q"), either -> {
             if (either.isLeft()) {
                 if ("404".equals(either.left().getValue())) {
-                    //notFound(request);
+                    notFound(request);
                 } else {
                     renderError(request);
                 }

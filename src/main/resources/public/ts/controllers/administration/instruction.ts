@@ -59,6 +59,7 @@ export const instructionController = ng.controller('instructionController',
             $scope.operationAdd = JSON.parse($scope.instruction.operation);
             $scope.operation.id = $scope.operationAdd.id;
             $scope.operation.label = $scope.operationAdd.label;
+            $scope.operation.nbr_sub = $scope.operationAdd.nbr_sub;
             $scope.operation.id_label = $scope.operationAdd.id_label;
             $scope.operation.amount = $scope.operationAdd.amount;
             $scope.operation.status = true;
@@ -85,9 +86,10 @@ export const instructionController = ng.controller('instructionController',
         $scope.cancelFormAddOperation = () => {
             $scope.isNewOperation = false;
         };
-        $scope.cancelInstructionForm = () =>{
+        $scope.cancelInstructionForm = async () =>{
             $scope.cancelFormAddOperation();
             $scope.isOperationEdit = false;
+            await $scope.initOperation();
             template.open('instruction-main', 'administrator/instruction/manage-instruction');
         };
         $scope.isAllInstructionSelected = false;

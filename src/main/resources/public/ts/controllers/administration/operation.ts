@@ -20,6 +20,7 @@ export const operationController = ng.controller('operationController',
         $scope.display = {
             lightbox : {
                 operation:false,
+                ordersListToOperation:false,
             }
         };
 
@@ -88,13 +89,11 @@ export const operationController = ng.controller('operationController',
             }
             Utils.safeApply($scope);
         };
-
         $scope.openLightboxDeleteOperation = () => {
             $scope.display.lightbox.operation = true;
             template.open('operation.lightbox', 'administrator/operation/operation-delete-lightbox');
             Utils.safeApply($scope);
         };
-
         $scope.deleteOperations = async () => {
             if($scope.operations.selected.some(operation => operation.nbr_sub !== 0 )){
                 template.open('operation.lightbox', 'administrator/operation/operation-delete-reject-lightbox');
@@ -105,5 +104,12 @@ export const operationController = ng.controller('operationController',
                 $scope.display.lightbox.operation = false;
                 Utils.safeApply($scope);
             }
+        };
+        $scope.openLightBoxOrdersList = () => {
+            $scope.display.lightbox.ordersListToOperation = true;
+            $scope.operation = $scope.operations.selected[0];
+            $scope.ordersClientToOperation = []
+            template.open('operation.lightbox', 'administrator/operation/operation-orders-list-lightbox');
+            Utils.safeApply($scope);
         };
     }]);

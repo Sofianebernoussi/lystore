@@ -1,0 +1,86 @@
+<h2><i18n>lystore.order.management</i18n></h2>
+<div class="row">
+    <div class="cell twelve-mobile horizontal-spacing search-pagination four">
+        <div class="row twelve vertical-spacing">
+            <input  class="row"
+                    type="text"
+                    ng-model="search.filterWord"
+                    ng-keydown="addFilter(search.filterWord, $event)"
+                    i18n-placeholder="add.a.filter" />
+
+            <i class="search flex-row" ng-click="addFilter(search.filterWord)"></i>
+        </div>
+        <div class="row horizontal-spacing">
+            <div class="select-blocks">
+                <div ng-repeat="filterWord in search.filterWords"
+                     ng-click="pullFilterWord(filterWord)"
+                     class="labels-in-ligne">
+                    <div > [[ filterWord ]] </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<article class="responsive-table">
+    <table class="twelve">
+        <thead>
+        <tr>
+            <td workflow="lystore.manager" class="table-selector">
+                <label class="checkbox">
+                    <input type="checkbox"
+                           ng-change="switchAllOrders()"
+                           ng-model="allOrdersSelected">
+                    <span></span>
+                </label>
+            </td>
+            <td ng-repeat="field in tableFields "
+                ng-hide="!field.display"
+                ng-click="sort.order.type = field.fieldName;
+                    sort.order.reverse = !sort.order.reverse">
+                [[lang.translate(field.name)]]
+                <i class="up-open" ng-show="sort.order.type === field.fieldName && !sort.order.reverse"></i>
+                <i class="down-open" ng-show="sort.order.type === field.fieldName && sort.order.reverse"></i>
+            </td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="order in ordersClientToOperation.all | orderBy:sort.order.type:sort.order.reverse">
+            <td workflow="lystore.manager" class="table-selector">
+                <label class="checkbox">
+                    <input type="checkbox" ng-model="order.selected">
+                    <span></span>
+                </label>
+            </td>
+            <td ng-hide="!tableFields[0].display">[[order.name_structure]]</td>
+            <td ng-hide="!tableFields[1].display">[[order.structure.academy]]</td>
+            <td ng-hide="!tableFields[2].display">[[order.structure.type]]</td>
+            <td ng-hide="!tableFields[3].display">
+                [[order.contract.name]]</td>
+            <td ng-hide="!tableFields[4].display">
+                [[order.contract_type.name]]</td>
+            <td ng-hide="!tableFields[5].display"> [[ order.project.title.name.toString() ]]</td>
+            <td ng-hide="!tableFields[6].display"> [[order.name]]</td>
+            <td ng-hide="!tableFields[7].display">[[order.amount ]]</td>
+            <td ng-hide="!tableFields[8].display">[[order.creation_date ]]</td>
+            <td ng-hide="!tableFields[9].display">[[getStructureGroupsList(order.structure_groups)]]</td>
+            <td ng-hide="!tableFields[10].display">[[order.campaign.name ]]</td>
+            <td ng-hide="!tableFields[11].display" >
+                [[order.project.preference!= null && order.rank != undefined && order.campaign.projectPriorityEnable()
+                ? order.project.preference + 1 : lang.translate('lystore.order.not.prioritized') ]]</td>
+            <td ng-hide="!tableFields[12].display" >
+                [[order.rank != null && order.rank != undefined && order.campaign.orderPriorityEnable()
+                ? order.rank + 1 :  lang.translate('lystore.order.not.prioritized') ]]</td>
+            <td ng-hide="!tableFields[13].display"><span ng-bind="order.priceTTCtotal | currency"></span></td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr >
+            <td colspan="[[countColSpan('totaux')]]">
+                <i18n>totals</i18n>
+            </td>
+            <td ng-if="tableFields[7].display">[[displayedOrders.calculTotalAmount() ]]</td>
+            <td colspan="[[countColSpan('price')]]" class="text-right"> [[displayedOrders.calculTotalPriceTTC() | currency]]</td>
+        </tr>
+        </tfoot>
+    </table>
+</article>

@@ -92,6 +92,7 @@ export class OrdersClient extends Selection<OrderClient> {
     projects: Selection<Project>;
     dateGeneration?: Date;
     id_project_use?: number;
+    filters: Array<string>;
 
     constructor(supplier?: Supplier) {
         super([]);
@@ -99,7 +100,7 @@ export class OrdersClient extends Selection<OrderClient> {
         this.dateGeneration = new Date();
         this.projects = new Selection<Project>([]);
         this.id_project_use = -1;
-
+        this.filters = [];
     }
 
     async updateReference(tabIdsProjects: Array<object>, id_campaign:number, id_project:number, id_structure:string) {
@@ -162,7 +163,6 @@ export class OrdersClient extends Selection<OrderClient> {
                             this.id_project_use = order.project.id;
                             this.projects.push(order.project);
                         }
-
                         order.creation_date = moment(order.creation_date).format('L');
                         order.options.toString() !== '[null]' && order.options !== null ?
                             order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
@@ -265,6 +265,16 @@ export class OrdersClient extends Selection<OrderClient> {
         try{
             http.put(`/lystore/orders/operation/${idOperation}`, idsOrder);
         }catch (e){
+            notify.error('lystore.basket.update.err');
+            throw e;
+        }
+    }
+    async ordersClientOfOperation (idOperation:Number){
+        try{
+            const queriesFilter = Utils.formatGetParameters({q: this.filters});
+            let { data } = await http.get(`/lystore/orders/${idOperation}/operation/?${queriesFilter}`);
+            return data;
+        } catch (e){
             notify.error('lystore.basket.update.err');
             throw e;
         }

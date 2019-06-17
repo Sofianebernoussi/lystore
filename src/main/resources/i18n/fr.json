@@ -469,5 +469,6 @@
   "lystore.instruction.choose.operation":"Selectionnez une operation",
   "lystore.order.operation.select": "Affecter une operation",
   "lystore.order.operation.title": "Selectionner l'opération cible",
-  "lystore.order.operation.select": "Affecter une operation"
+  "lystore.order.operation.select": "Affecter une operation",
+  "lystore.operation.order.management.title": "Liste des demandes pour l'opération "
 }

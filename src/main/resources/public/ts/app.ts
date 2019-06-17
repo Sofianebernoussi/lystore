@@ -37,9 +37,6 @@ routes.define(($routeProvider) => {
                     action: 'createStructureGroup'
                 }
             )
-            .when('/order/instruction', {
-                action: 'instruction'
-            })
         ;
     }
     if (model.me.hasWorkflow(Behaviours.applicationsBehaviours.lystore.rights.workflow.manager)) {
@@ -84,6 +81,9 @@ routes.define(($routeProvider) => {
             })
             .when('/order/operation',{
                 action:'operation'
+            })
+            .when('/order/instruction', {
+                action: 'instruction'
             });
     } else {
         $routeProvider

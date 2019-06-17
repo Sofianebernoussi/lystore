@@ -16,7 +16,7 @@
         </div>
     </div>
     <div class="right-magnet twelve-mobile">
-        <button workflow="lystore.administrator" class="twelve-mobile" ng-click="openOperationForm('create')">
+        <button workflow="lystore.manager" class="twelve-mobile" ng-click="openOperationForm('create')">
             <i18n>lystore.operation.add</i18n>
         </button>
     </div>
@@ -131,6 +131,7 @@
             <i18n>lystore.orders.valid.structure.list.export</i18n>
         </button>
             <button
+                    ng-disabled="true"
                     ng-click="openLightBoxOrdersList()"
                     ng-show="operations.selected.length === 1"
             >

@@ -1,11 +1,12 @@
 import { ng, template, notify, moment, _ } from 'entcore';
-import {labels, Operation, Utils} from "../../model";
+import {labels, Operation, OrderClient, orderWaiting, Utils} from "../../model";
 
 declare let window: any;
 
 export const operationController = ng.controller('operationController',
     ['$scope', '$routeParams', ($scope, $routeParams) => {
 
+        $scope.tableFields = orderWaiting;
         $scope.sort = {
             operation : {
                 type: 'name',
@@ -20,7 +21,7 @@ export const operationController = ng.controller('operationController',
         $scope.display = {
             lightbox : {
                 operation:false,
-                ordersListToOperation:false,
+                ordersListOfOperation:false,
             }
         };
 
@@ -106,10 +107,26 @@ export const operationController = ng.controller('operationController',
             }
         };
         $scope.openLightBoxOrdersList = () => {
-            $scope.display.lightbox.ordersListToOperation = true;
+            $scope.display.lightbox.ordersListOfOperation = true;
             $scope.operation = $scope.operations.selected[0];
-            $scope.ordersClientToOperation = []
+            $scope.ordersClientOfOperation = $scope.ordersClient.ordersClientOfOperation($scope.operation.id);
             template.open('operation.lightbox', 'administrator/operation/operation-orders-list-lightbox');
             Utils.safeApply($scope);
         };
+        $scope.addOrderFilter = (event?) => {
+            if (event && (event.which === 13 || event.keyCode === 13) && event.target.value.trim() !== '') {
+                if(!_.contains($scope.ordersClient.filters, event.target.value)){
+                    $scope.ordersClient.filters = [...$scope.ordersClient.filters, event.target.value];
+                }
+                event.target.value = '';
+                Utils.safeApply($scope);
+            }
+        };
+        $scope.dropOrderFilter = (filter: string) =>{
+            $scope.ordersClient.filters = $scope.ordersClient.filters.filter( filterWord => filterWord !== filter);
+            Utils.safeApply($scope);
+        };
+        $scope.dropOrderOperation = (order:OrderClient) => {
+            console.log(order)
+        }
     }]);

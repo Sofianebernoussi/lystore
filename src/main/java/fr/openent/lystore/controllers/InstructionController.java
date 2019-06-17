@@ -5,6 +5,7 @@ import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AdministratorRight;
+import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.InstructionService;
 import fr.openent.lystore.service.impl.DefaultInstructionService;
 import fr.wseduc.rs.*;
@@ -52,7 +53,7 @@ public class InstructionController extends ControllerHelper {
     @Post("/instruction")
     @ApiDoc("Create an instruction")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(AdministratorRight.class)
+    @ResourceFilter(ManagerRight.class)
     @Override
     public void create(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "instruction", instruction -> instructionService.create(instruction, Logging.defaultResponseHandler(eb,
@@ -66,7 +67,7 @@ public class InstructionController extends ControllerHelper {
     @Put("/instruction/:idInstruction")
     @ApiDoc("Uptdate an instruction")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(AdministratorRight.class)
+    @ResourceFilter(ManagerRight.class)
     public void updateInstruction(final HttpServerRequest request) {
         final Integer idInstruction = Integer.parseInt(request.params().get("idInstruction"));
         RequestUtils.bodyToJson(request, pathPrefix + "instruction", instruction -> instructionService.updateInstruction(idInstruction, instruction, Logging.defaultResponseHandler(eb,
@@ -80,7 +81,7 @@ public class InstructionController extends ControllerHelper {
     @Delete("/instructions")
     @ApiDoc("Delete instructions")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(AdministratorRight.class)
+    @ResourceFilter(ManagerRight.class)
     public void deleteInstruction(final HttpServerRequest request) {
         RequestUtils.bodyToJsonArray(request, instructionIds -> instructionService.deleteInstruction(instructionIds, Logging.defaultResponseHandler(eb,
                 request,

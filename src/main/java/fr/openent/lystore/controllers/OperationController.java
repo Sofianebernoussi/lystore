@@ -5,6 +5,7 @@ import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AdministratorRight;
+import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.OperationService;
 import fr.openent.lystore.service.impl.DefaultOperationService;
 import fr.wseduc.rs.*;
@@ -43,7 +44,7 @@ public class OperationController  extends ControllerHelper {
     @Post("/operation")
     @ApiDoc("Create an operation")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(AdministratorRight.class)
+    @ResourceFilter(ManagerRight.class)
     @Override
     public void create(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "operation", operation -> operationService.create(operation, Logging.defaultResponseHandler(eb,
@@ -57,7 +58,7 @@ public class OperationController  extends ControllerHelper {
     @Put("/operation/:idOperation")
     @ApiDoc("Uptdate an operation")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(AdministratorRight.class)
+    @ResourceFilter(ManagerRight.class)
     public void updateOperation(final HttpServerRequest request) {
         final Integer idOperation = Integer.parseInt(request.params().get("idOperation"));
         RequestUtils.bodyToJson(request, pathPrefix + "operation", operation -> operationService.updateOperation(idOperation, operation, Logging.defaultResponseHandler(eb,
@@ -71,7 +72,7 @@ public class OperationController  extends ControllerHelper {
     @Put("/operations/instructionAttribute/:idInstruction")
     @ApiDoc("Uptdate an operation for to give id instruction")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(AdministratorRight.class)
+    @ResourceFilter(ManagerRight.class)
     public void addInstructionId(final HttpServerRequest request) {
         final Integer idInstruction = Integer.parseInt(request.params().get("idInstruction"));
         RequestUtils.bodyToJsonArray(request, operationIds -> operationService.addInstructionId(idInstruction, operationIds, Logging.defaultResponseHandler(eb,
@@ -85,7 +86,7 @@ public class OperationController  extends ControllerHelper {
     @Put("/operations/instructionRemove")
     @ApiDoc("Uptdate an operation for to give id instruction")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(AdministratorRight.class)
+    @ResourceFilter(ManagerRight.class)
     public void removeInstructionId(final HttpServerRequest request) {
         RequestUtils.bodyToJsonArray(request, operationIds -> operationService.removeInstructionId( operationIds, Logging.defaultResponseHandler(eb,
                 request,
@@ -98,7 +99,7 @@ public class OperationController  extends ControllerHelper {
     @Delete("/operations")
     @ApiDoc("Delete operations")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(AdministratorRight.class)
+    @ResourceFilter(ManagerRight.class)
     public void deleteOperaton(final HttpServerRequest request) {
         RequestUtils.bodyToJsonArray(request, operationIds -> operationService.deleteOperation(operationIds, Logging.defaultResponseHandler(eb,
                 request,

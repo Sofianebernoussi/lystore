@@ -93,6 +93,7 @@ export class OrdersClient extends Selection<OrderClient> {
     dateGeneration?: Date;
     id_project_use?: number;
     filters: Array<string>;
+    ordersOfOperation: Array<OrderClient>;
 
     constructor(supplier?: Supplier) {
         super([]);
@@ -269,13 +270,39 @@ export class OrdersClient extends Selection<OrderClient> {
             throw e;
         }
     }
-    async ordersClientOfOperation (idOperation:Number){
+    async ordersClientOfOperation (idOperation:Number, structures: Structure[] = [],){
         try{
             const queriesFilter = Utils.formatGetParameters({q: this.filters});
-            let { data } = await http.get(`/lystore/orders/${idOperation}/operation/?${queriesFilter}`);
-            return data;
+            let {data} = await http.get(`/lystore/orders/${idOperation}/operation/?${queriesFilter}`);
+            this.ordersOfOperation = Mix.castArrayAs(OrderClient, data);
+            this.ordersOfOperation.map((order: OrderClient) => {
+                order.name_structure =  structures.length > 0 ? this.initNameStructure(order.id_structure, structures) : '';
+                order.structure = structures.length > 0 ? this.initStructure(order.id_structure, structures) : new Structure();
+                order.price = parseFloat(status === 'VALID' ? order.price.toString().replace(',', '.') : order.price.toString());
+                order.structure_groups = Utils.parsePostgreSQLJson(order.structure_groups);
+                if (status !== 'VALID') {
+                    order.tax_amount = parseFloat(order.tax_amount.toString());
+                    order.contract = Mix.castAs(Contract,  JSON.parse(order.contract.toString()));
+                    order.contract_type = Mix.castAs(ContractType,  JSON.parse(order.contract_type.toString()));
+                    order.supplier = Mix.castAs(Supplier,  JSON.parse(order.supplier.toString()));
+                    order.id_supplier = order.supplier.id;
+                    order.campaign = Mix.castAs(Campaign,  JSON.parse(order.campaign.toString()));
+                    order.project = Mix.castAs(Project, JSON.parse(order.project.toString()));
+                    order.project.title = Mix.castAs(Title, JSON.parse(order.title.toString()));
+                    order.rank = order.rank ? parseInt(order.rank.toString()) : null ;
+                    if (this.id_project_use != order.project.id) {
+                        this.id_project_use = order.project.id;
+                        this.projects.push(order.project);
+                    }
+                    order.creation_date = moment(order.creation_date).format('L');
+                    order.options.toString() !== '[null]' && order.options !== null ?
+                        order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
+                        : order.options = [];
+                    order.priceTTCtotal = parseFloat((order.calculatePriceTTC(2) as number).toString()) * order.amount;
+                }
+            });
         } catch (e){
-            notify.error('lystore.basket.update.err');
+            notify.error('lystore.order.operation.update.err');
             throw e;
         }
     }

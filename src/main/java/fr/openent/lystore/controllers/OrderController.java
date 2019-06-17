@@ -1125,6 +1125,15 @@ public class OrderController extends ControllerHelper {
         });
     }
 
+    @Get("/orders/:idOperation/operation/")
+    @ApiDoc("get order of operation ")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void getOrderWithIdOperation(HttpServerRequest request) {
+        Integer idOperation = Integer.parseInt(request.getParam("idOperation"));
+        orderService.getOrderWithIdOperation(request.params().getAll("q"), idOperation, arrayResponseHandler(request));
+
+    }
+
     @Put("/orders/operation/:idOperation")
     @ApiDoc("update operation in orders")
     @SecuredAction(value = "", type = ActionType.RESOURCE)

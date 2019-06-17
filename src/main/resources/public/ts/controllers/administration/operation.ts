@@ -1,12 +1,11 @@
 import { ng, template, notify, moment, _ } from 'entcore';
-import {labels, Operation, OrderClient, orderWaiting, Utils} from "../../model";
+import {labels, Operation, OrderClient, Utils} from "../../model";
 
 declare let window: any;
 
 export const operationController = ng.controller('operationController',
     ['$scope', '$routeParams', ($scope, $routeParams) => {
 
-        $scope.tableFields = orderWaiting;
         $scope.sort = {
             operation : {
                 type: 'name',
@@ -70,6 +69,7 @@ export const operationController = ng.controller('operationController',
 
         $scope.cancelOperationForm = () =>{
             $scope.display.lightbox.operation = false;
+            $scope.display.lightbox.ordersListOfOperation = false;
             template.close('operation.lightbox');
         };
 
@@ -106,11 +106,11 @@ export const operationController = ng.controller('operationController',
                 Utils.safeApply($scope);
             }
         };
-        $scope.openLightBoxOrdersList = () => {
+        $scope.openLightBoxOrdersList = async () => {
             $scope.display.lightbox.ordersListOfOperation = true;
             $scope.operation = $scope.operations.selected[0];
-            $scope.ordersClientOfOperation = $scope.ordersClient.ordersClientOfOperation($scope.operation.id);
-            template.open('operation.lightbox', 'administrator/operation/operation-orders-list-lightbox');
+            await $scope.ordersClient.ordersClientOfOperation($scope.operation.id);
+                template.open('operation.lightbox', 'administrator/operation/operation-orders-list-lightbox');
             Utils.safeApply($scope);
         };
         $scope.addOrderFilter = (event?) => {

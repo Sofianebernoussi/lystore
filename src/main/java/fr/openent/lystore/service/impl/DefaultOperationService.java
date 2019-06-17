@@ -50,7 +50,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
         String query =  "SELECT  operation.* , to_json(label.*) as label, count(oce.*) as nbr_sub, " +
                 "array_to_json(array_agg(o.order_number)) as bc_number, " +
                 "array_to_json(array_agg(o.label_program)) as programs," +
-                "SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2)) AS amount," +
+                "SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) AS amount," +
                 " array_to_json(array_agg(c.name)) as contracts " +
                 "FROM  " + Lystore.lystoreSchema +".operation "+
                 "Inner join " + Lystore.lystoreSchema +".label_operation label on label.id = operation.id_label "+

@@ -470,5 +470,6 @@
   "lystore.order.operation.select": "Affecter une operation",
   "lystore.order.operation.title": "Selectionner l'opération cible",
   "lystore.order.operation.select": "Affecter une operation",
-  "lystore.operation.order.management.title": "Liste des demandes pour l'opération "
+  "lystore.operation.order.management.title": "Liste des demandes pour l'opération ",
+  "lystore.order.operation.update.err": "Erreur lors de la récupération des demandes de l'operation"
 }

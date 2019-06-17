@@ -131,9 +131,8 @@
             <i18n>lystore.orders.valid.structure.list.export</i18n>
         </button>
             <button
-                    ng-disabled="true"
                     ng-click="openLightBoxOrdersList()"
-                    ng-show="operations.selected.length === 1"
+                    ng-show="operations.selected[0].nbr_sub !== 0"
             >
                 <i18n>lystore.list.equipment</i18n>
             </button>

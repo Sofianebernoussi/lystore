@@ -35,23 +35,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         this.structureService = new DefaultStructureService();
     }
 
-    private String getTextFilter(List<String> filters) {
-        String filter = "";
-        if (filters.size() > 0) {
-            filter = "WHERE ";
-            for (int i = 0; i < filters.size(); i++) {
-                if (i > 0) {
-                    filter += "AND ";
-                }
-                filter += "(LOWER(instruction.object) ~ LOWER(?) OR " +
-                        "LOWER(instruction.service_number) ~ LOWER(?) OR " +
-                        "LOWER(instruction.cp_number) ~ LOWER(?) OR " +
-                        "LOWER(exercise.year_exercise) ~ LOWER(?)) ";
-            }
-        }
-        return filter;
-    }
-
     @Override
     public void listOrder(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
@@ -981,33 +964,56 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
        sql.transaction(statements, SqlResult.validRowsResultHandler(handler));
     }
 
+    private String getTextFilter(List<String> filters) {
+        String filter = "";
+        if (filters.size() > 0) {
+            filter = " AND ";
+            for (int i = 0; i < filters.size(); i++) {
+                if (i > 0) {
+                    filter += "AND ";
+                }
+                filter += "(LOWER(oce.name) ~ LOWER(?) OR " +
+                        "LOWER(contract.name) ~ LOWER(?) OR " +
+                        "LOWER(supplier.name) ~ LOWER(?)) ";
+            }
+        }
+        return filter;
+    }
+
     @Override
     public void getOrderWithIdOperation(List<String> filters, Integer idOperation, Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
-        String query =  "SELECT oce.*, prj.id as id_project,prj.preference as preference , to_json(contract.*) contract,  to_json(ct.*) contract_type ,to_json(supplier.*) supplier, " +
-                "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options, " +
-                "array_to_json(array_agg( distinct structure_group.name)) as structure_groups,to_json(prj.*) as project, to_json(  tt.*) as title, lystore.order.order_number " +
-                "FROM lystore.order_client_equipment oce " +
-                "LEFT JOIN lystore.order_client_options oco " +
-                "ON oco.id_order_client_equipment = oce.id " +
-                "LEFT JOIN lystore.contract ON oce.id_contract = contract.id " +
-                "Inner join lystore.contract_type ct ON ct.id = contract.id_contract_type "+
-                "INNER JOIN lystore.supplier ON contract.id_supplier = supplier.id " +
-                "INNER JOIN lystore.campaign ON oce.id_campaign = campaign.id " +
-                "INNER JOIN lystore.project as prj ON oce.id_project = prj.id " +
-                "INNER JOIN lystore.title as tt ON tt.id = prj.id_title " +
-                "INNER JOIN lystore.rel_group_campaign ON (oce.id_campaign = rel_group_campaign.id_campaign) " +
-                "INNER JOIN lystore.rel_group_structure ON (oce.id_structure = rel_group_structure.id_structure) " +
-                "LEFT OUTER JOIN lystore.order ON (oce.id_order = lystore.order.id) " +
-                "INNER JOIN lystore.structure_group ON (rel_group_structure.id_structure_group = structure_group.id " +
+        String query =  "SELECT oce.*, " +
+                "prj.id as id_project,prj.preference as preference , " +
+                "to_json(contract.*) contract,  " +
+                "to_json(ct.*) contract_type , " +
+                "to_json(supplier.*) supplier, " +
+                "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) AS options, " +
+                "array_to_json(array_agg( distinct structure_group.name)) AS structure_groups," +
+                "to_json(prj.*) AS project," +
+                " to_json(  tt.*) AS title, " +
+                Lystore.lystoreSchema + ".order.order_number " +
+                "FROM " + Lystore.lystoreSchema + ".order_client_equipment oce " +
+                "LEFT JOIN " + Lystore.lystoreSchema + ".order_client_options oco ON oco.id_order_client_equipment = oce.id " +
+                "LEFT JOIN " + Lystore.lystoreSchema + ".contract ON oce.id_contract = contract.id " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract_type ct ON ct.id = contract.id_contract_type "+
+                "INNER JOIN " + Lystore.lystoreSchema + ".supplier ON contract.id_supplier = supplier.id " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".campaign ON oce.id_campaign = campaign.id " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".project as prj ON oce.id_project = prj.id " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".title as tt ON tt.id = prj.id_title " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_campaign ON (oce.id_campaign = rel_group_campaign.id_campaign) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON (oce.id_structure = rel_group_structure.id_structure) " +
+                "LEFT OUTER JOIN " + Lystore.lystoreSchema + ".order ON (oce.id_order = lystore.order.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".structure_group ON (rel_group_structure.id_structure_group = structure_group.id " +
                 "AND rel_group_campaign.id_structure_group = structure_group.id) " +
                 "WHERE oce.id_operation = ? " +
                 getTextFilter(filters) +
-                "GROUP BY (prj.preference, prj.id , oce.id, contract.id, ct.id, supplier.id, campaign.id, tt.id, lystore.order.order_number) ORDER BY oce.id_project DESC;";
+                " GROUP BY (prj.preference, prj.id , oce.id, contract.id, ct.id, supplier.id, campaign.id, tt.id, lystore.order.order_number) " +
+                "ORDER BY oce.id_project DESC;";
         values.add(idOperation);
         if (!filters.isEmpty()) {
             for (String filter : filters) {
-                values.add(filter).add(filter).add(filter).add(filter);
+                values.add(filter).add(filter).add(filter);
             }
         }
         sql.prepared(query, values, SqlResult.validResultHandler(handler));
@@ -1026,7 +1032,20 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         for (int i = 0; i < idOrders.size(); i++) {
             values.add(idOrders.getValue(i));
         }
-        // send validation
+        sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
+    }
+
+    @Override
+    public void updateStatusOrder(Integer idOrder, JsonObject orderStatus, Handler<Either<String, JsonObject>> handler) {
+        JsonArray values = new JsonArray();
+        String query = " UPDATE " + Lystore.lystoreSchema + ".order_client_equipment " +
+                "SET id_operation = null, " +
+                "status = ? " +
+                "WHERE id = " +
+                idOrder +
+                " RETURNING id";
+
+        values.add(orderStatus.getString("status"));
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
     }
 }

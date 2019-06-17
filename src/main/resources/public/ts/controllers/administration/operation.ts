@@ -52,19 +52,19 @@ export const operationController = ng.controller('operationController',
         };
 
         $scope.openOperationForm = (action: string) => {
-                if(action === 'create'){
-                    $scope.operation = new Operation();
-                } else if (action === 'edit'){
-                    $scope.operation = $scope.operations.selected[0];
-                    $scope.operation.status = ($scope.operation.status === 'true');
-                }
+            if(action === 'create'){
+                $scope.operation = new Operation();
+            } else if (action === 'edit'){
+                $scope.operation = $scope.operations.selected[0];
+                $scope.operation.status = ($scope.operation.status === 'true');
+            }
             $scope.display.lightbox.operation = true;
             template.open('operation.lightbox', 'administrator/operation/operation-form');
             Utils.safeApply($scope);
         };
 
         $scope.validOperationForm = (operation:Operation) =>{
-         return  operation.id_label;
+            return  operation.id_label;
         };
 
         $scope.cancelOperationForm = () =>{
@@ -74,10 +74,10 @@ export const operationController = ng.controller('operationController',
         };
 
         $scope.validOperation = async (operation:Operation) =>{
-           await operation.save();
-           $scope.cancelOperationForm();
-           await $scope.initOperation();
-           Utils.safeApply($scope);
+            await operation.save();
+            $scope.cancelOperationForm();
+            await $scope.initOperation();
+            Utils.safeApply($scope);
         };
 
         $scope.isAllOperationSelected = false;
@@ -110,23 +110,30 @@ export const operationController = ng.controller('operationController',
             $scope.display.lightbox.ordersListOfOperation = true;
             $scope.operation = $scope.operations.selected[0];
             await $scope.ordersClient.ordersClientOfOperation($scope.operation.id);
-                template.open('operation.lightbox', 'administrator/operation/operation-orders-list-lightbox');
+            template.open('operation.lightbox', 'administrator/operation/operation-orders-list-lightbox');
             Utils.safeApply($scope);
         };
-        $scope.addOrderFilter = (event?) => {
+        $scope.addOrderFilter = async (event?) => {
             if (event && (event.which === 13 || event.keyCode === 13) && event.target.value.trim() !== '') {
                 if(!_.contains($scope.ordersClient.filters, event.target.value)){
                     $scope.ordersClient.filters = [...$scope.ordersClient.filters, event.target.value];
                 }
                 event.target.value = '';
+                await $scope.ordersClient.ordersClientOfOperation($scope.operation.id);
                 Utils.safeApply($scope);
             }
         };
-        $scope.dropOrderFilter = (filter: string) =>{
+        $scope.dropOrderFilter = async (filter: string) =>{
             $scope.ordersClient.filters = $scope.ordersClient.filters.filter( filterWord => filterWord !== filter);
+            await $scope.ordersClient.ordersClientOfOperation($scope.operation.id);
             Utils.safeApply($scope);
         };
-        $scope.dropOrderOperation = (order:OrderClient) => {
-            console.log(order)
+        $scope.dropOrderOperation = async (order:OrderClient) => {
+            await order.updateStatusOrder('WAITING');
+            await Promise.all([
+                await $scope.ordersClient.ordersClientOfOperation($scope.operation.id),
+                await $scope.initOperation(),
+            ]);
+            Utils.safeApply($scope);
         }
     }]);

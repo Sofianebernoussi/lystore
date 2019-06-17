@@ -181,11 +181,21 @@ public interface OrderService {
     void getOrderWithIdOperation( List<String> filters, Integer idOperation, Handler<Either<String, JsonArray>> handler);
 
     /**
-     * Update the rank of two orders
+     * Update the operations of  orders
      *
      * @param orders orders to update
      * @param handler Function handler returning data
      */
     void updateOperation( Integer id, JsonArray orders, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Update the status orders
+     *
+     * @param idOrder orders to update
+     * @param status status to update
+     * @param handler Function handler returning data
+     */
+    void updateStatusOrder( Integer idOrder, JsonObject status, Handler<Either<String, JsonObject>> handler);
+
 
 }

@@ -82,6 +82,13 @@ export class OrderClient implements Selectable {
     downloadFile(file) {
         window.open(`/lystore/order/${this.id}/file/${file.id}`);
     }
+    async updateStatusOrder(status: String){
+        try {
+            await http.put(`/lystore/order/${this.id}`, {status: status});
+        } catch (e) {
+            notify.error('lystore.order.update.err');
+        }
+    }
 }
 export class OrdersClient extends Selection<OrderClient> {
 
@@ -106,7 +113,7 @@ export class OrdersClient extends Selection<OrderClient> {
 
     async updateReference(tabIdsProjects: Array<object>, id_campaign:number, id_project:number, id_structure:string) {
         try {
-             await  http.put(`/lystore/campaign/${id_campaign}/projects/${id_project}/preferences?structureId=${id_structure}`,
+            await  http.put(`/lystore/campaign/${id_campaign}/projects/${id_project}/preferences?structureId=${id_structure}`,
                 { preferences: tabIdsProjects });
         }catch (e) {
             notify.error('lystore.project.update.err');
@@ -140,8 +147,8 @@ export class OrdersClient extends Selection<OrderClient> {
                 });
                 this.all = _.sortBy(this.all, (order)=> order.rank != null ? order.rank : this.all.length );
                 this.projects.all = _.sortBy(this.projects.all, (project)=> project.preference != null
-                  ? project.preference
-                  : this.projects.all.length );
+                    ? project.preference
+                    : this.projects.all.length );
             } else {
                 let { data } = await http.get(  `/lystore/orders?status=${status}` );
                 this.all = Mix.castArrayAs(OrderClient, data);

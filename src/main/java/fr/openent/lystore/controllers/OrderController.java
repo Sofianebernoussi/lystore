@@ -1147,4 +1147,18 @@ public class OrderController extends ControllerHelper {
                 idOperation.toString(),
                 new JsonObject().put("ids", idOrders))));
     }
+
+    @Put("/order/:idOrder")
+    @ApiDoc("update status in orders")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void updateStatusOrder(final HttpServerRequest request) {
+        final Integer idOrder = Integer.parseInt(request.params().get("idOrder"));
+        RequestUtils.bodyToJson(request, statusEdit -> orderService.updateStatusOrder(idOrder, statusEdit, Logging.defaultResponseHandler(eb,
+                request,
+                Contexts.ORDER.toString(),
+                Actions.UPDATE.toString(),
+                idOrder.toString(),
+                statusEdit)));
+    }
 }

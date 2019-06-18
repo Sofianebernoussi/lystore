@@ -20,11 +20,11 @@
     <table class="twelve">
         <thead>
         <tr>
-            <td ng-click="sort.order.type = 'name_structure';
+            <td ng-click="sort.order.type = 'number_validation';
                     sort.order.reverse = !sort.order.reverse">
-                <i18n>Structure</i18n>
-                <i class="up-open" ng-show="sort.order.type === 'name_structure' && !sort.order.reverse"></i>
-                <i class="down-open" ng-show="sort.order.type === 'name_structure' && sort.order.reverse"></i>
+                <i18n>number.validation</i18n>
+                <i class="up-open" ng-show="sort.order.type === 'number_validation' && !sort.order.reverse"></i>
+                <i class="down-open" ng-show="sort.order.type === 'number_validation' && sort.order.reverse"></i>
             </td>
             <td ng-click="sort.order.type = 'order_number';
                     sort.order.reverse = !sort.order.reverse">
@@ -44,29 +44,35 @@
                 <i class="up-open" ng-show="sort.order.type === 'supplier.name' && !sort.order.reverse"></i>
                 <i class="down-open" ng-show="sort.order.type === 'supplier.name' && sort.order.reverse"></i>
             </td>
-            <td ng-click="sort.order.type = 'amount';
+            <td ng-click="sort.order.type = 'structure_count';
                     sort.order.reverse = !sort.order.reverse">
-                <i18n>lystore.amount</i18n>
-                <i class="up-open" ng-show="sort.order.type === 'amount' && !sort.order.reverse"></i>
-                <i class="down-open" ng-show="sort.order.type === 'amount' && sort.order.reverse"></i>
+                <i18n>lystore.structures.number</i18n>
+                <i class="up-open" ng-show="sort.order.type === 'structure_count' && !sort.order.reverse"></i>
+                <i class="down-open" ng-show="sort.order.type === 'structure_count' && sort.order.reverse"></i>
             </td>
-            <td ng-click="sort.order.type = 'priceTTCtotal';
+            <td ng-click="sort.order.type = 'label_program';
+                    sort.order.reverse = !sort.order.reverse">
+                <i18n>lystore.program</i18n>
+                <i class="up-open" ng-show="sort.order.type === 'label_program' && !sort.order.reverse"></i>
+                <i class="down-open" ng-show="sort.order.type === 'label_program' && sort.order.reverse"></i>
+            </td>
+            <td ng-click="sort.order.type = 'price';
                     sort.order.reverse = !sort.order.reverse">
                 <i18n>lystore.price.TTC</i18n>
-                <i class="up-open" ng-show="sort.order.type === 'priceTTCtotal' && !sort.order.reverse"></i>
-                <i class="down-open" ng-show="sort.order.type === 'priceTTCtotal' && sort.order.reverse"></i>
+                <i class="up-open" ng-show="sort.order.type === 'price' && !sort.order.reverse"></i>
+                <i class="down-open" ng-show="sort.order.type === 'price' && sort.order.reverse"></i>
             </td>
             <td></td>
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="order in ordersClient.ordersOfOperation">
-            <td >[[order.name_structure]]</td>
-            <td >[[order.order_number]]</td>
-            <td >[[order.contract.name]]</td>
-            <td> [[order.supplier.name]]</td>
-            <td>[[order.amount ]]</td>
-            <td><span ng-bind="order.priceTTCtotal | currency"></span></td>
+        <tr ng-repeat="order in ordersClient.all">
+            <td>[[order.number_validation]]</td>
+            <td>[[order.order_number]]</td>
+            <td>[[order.contract_name]]</td>
+            <td>[[order.supplier_name]]</td>
+            <td>[[order.structure_count]]</td>
+            <td>[[order.label_program]]</td>
             <td class="one aligne-text-center" ng-click="dropOrderOperation(order)">
                 <i  class="trash"></i>
             </td>

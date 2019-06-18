@@ -972,9 +972,9 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 if (i > 0) {
                     filter += "AND ";
                 }
-                filter += "(LOWER(oce.name) ~ LOWER(?) OR " +
-                        "LOWER(contract.name) ~ LOWER(?) OR " +
-                        "LOWER(supplier.name) ~ LOWER(?)) ";
+                filter += "(LOWER(oce.number_validation) ~ LOWER(?) OR " +
+                        "LOWER(c.name) ~ LOWER(?) OR " +
+                        "LOWER(s.name) ~ LOWER(?)) ";
             }
         }
         return filter;
@@ -1001,7 +1001,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "AND id_operation = ? " +
                 getTextFilter(filters) +
                 "GROUP BY ( " +
-                "oce.id, " +
                 "oce.number_validation, " +
                 "o.order_number, " +
                 "c.name, " +

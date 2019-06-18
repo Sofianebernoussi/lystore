@@ -73,6 +73,7 @@
             <td>[[order.supplier_name]]</td>
             <td>[[order.structure_count]]</td>
             <td>[[order.label_program]]</td>
+            <td><span ng-bind="order.price | currency"></span></td>
             <td class="one aligne-text-center" ng-click="dropOrderOperation(order)">
                 <i  class="trash"></i>
             </td>

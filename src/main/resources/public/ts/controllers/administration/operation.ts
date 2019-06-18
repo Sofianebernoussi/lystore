@@ -141,7 +141,7 @@ export const operationController = ng.controller('operationController',
             if(tooltips.some(tooltip => tooltip === null) || (tooltips.length === 1 && tooltips[0] === null)){
                 return ""
             } else {
-                return tooltips.join(" - ")
+                return _.uniq(tooltips).join(" - ");
             }
         }
     }]);

@@ -38,7 +38,7 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                 filter += "(LOWER(instruction.object) ~ LOWER(?) OR " +
                         "LOWER(instruction.service_number) ~ LOWER(?) OR " +
                         "LOWER(instruction.cp_number) ~ LOWER(?) OR " +
-                        "LOWER(exercise.year_exercise) ~ LOWER(?)) ";
+                        "LOWER(exercise.year) ~ LOWER(?)) ";
             }
         }
         return filter;

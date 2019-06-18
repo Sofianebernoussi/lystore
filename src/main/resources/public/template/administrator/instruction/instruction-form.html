@@ -101,7 +101,7 @@
             </div>
             <div class="right-magnet vertical-spacing">
                 <input type="button" class="cancel" ng-click="cancelInstructionForm()" i18n-value="cancel"/>
-                <input type="submit" class="button" ng-disabled="!(instruction.object)"/>
+                <input type="submit" class="button" ng-disabled="!(instruction.object && instruction.date_cp)"/>
             </div>
         </form>
     </article>

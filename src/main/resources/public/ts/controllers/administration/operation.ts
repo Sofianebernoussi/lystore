@@ -135,5 +135,13 @@ export const operationController = ng.controller('operationController',
                 await $scope.initOperation(),
             ]);
             Utils.safeApply($scope);
+        };
+        $scope.formatArrayToolTip = (tooltipsIn:string) => {
+            let tooltips = JSON.parse(tooltipsIn);
+            if(tooltips.some(tooltip => tooltip === null) || (tooltips.length === 1 && tooltips[0] === null)){
+                return ""
+            } else {
+                return tooltips.join(" - ")
+            }
         }
     }]);

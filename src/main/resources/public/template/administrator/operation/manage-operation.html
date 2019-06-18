@@ -89,10 +89,10 @@
             <td >[[operation.amount? operation.amount + " €" : '-']]</td>
             <td >[[operation.nbr_sub]]</td>
             <td >[[operation.bc_numbers || '-']]</td>
-            <td tooltip=[[operation.contracts]] >
+            <td tooltip=[[formatArrayToolTip(operation.contracts)]] >
                 [[getFirstElement(operation.contracts)]]
             </td>
-            <td tooltip=[[operation.programs]] >
+            <td tooltip=[[formatArrayToolTip(operation.programs)]] >
                 [[getFirstElement(operation.programs)]]
             </td>
         </tr>

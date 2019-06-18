@@ -315,8 +315,6 @@ export const orderController = ng.controller('orderController',
             let idsOrder = $scope.ordersClient.selected.map(order => order.id);
             await $scope.ordersClient.addOperation(operation.id, idsOrder);
             await $scope.validateOrders($scope.getSelectedOrders());
-            template.close('validOrder.lightbox');
-            $scope.display.lightbox.validOrder = false;
             await Promise.all([
                 await $scope.syncOrders('WAITING'),
                 await $scope.initOperation()

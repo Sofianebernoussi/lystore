@@ -172,15 +172,6 @@ public interface OrderService {
     void updateRank( JsonArray orders, Handler<Either<String, JsonObject>> handler);
 
     /**
-     * List orders of a operation with filter
-     *
-     * @param filters orders to update
-     * @param idOperation orders to update
-     * @param handler Function handler returning data
-     */
-    void getOrderWithIdOperation( List<String> filters, Integer idOperation, Handler<Either<String, JsonArray>> handler);
-
-    /**
      * Update the operations of  orders
      *
      * @param orders orders to update

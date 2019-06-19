@@ -277,16 +277,6 @@ export class OrdersClient extends Selection<OrderClient> {
             throw e;
         }
     }
-    async ordersClientOfOperation (idOperation:Number, structures: Structure[] = [],){
-        try{
-            const queriesFilter = Utils.formatGetParameters({q: this.filters});
-            let {data} = await http.get(`/lystore/orders/${idOperation}/operation/?${queriesFilter}`);
-            this.all = Mix.castArrayAs(OrderClient, data);
-        } catch (e){
-            notify.error('lystore.order.operation.update.err');
-            throw e;
-        }
-    }
 }
 
 export class OrderOptionClient implements Selectable {

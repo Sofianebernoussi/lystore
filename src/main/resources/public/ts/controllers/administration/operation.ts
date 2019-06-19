@@ -1,5 +1,6 @@
 import { ng, template, notify, moment, _ } from 'entcore';
 import {labels, Operation, OrderClient, Utils} from "../../model";
+import {Mix} from 'entcore-toolkit';
 
 declare let window: any;
 
@@ -106,32 +107,20 @@ export const operationController = ng.controller('operationController',
                 Utils.safeApply($scope);
             }
         };
+        $scope.syncOrderByOperation = async (operation: Operation) =>{
+            $scope.ordersClient.all = Mix.castArrayAs(OrderClient, await operation.getOrders());
+        };
         $scope.openLightBoxOrdersList = async () => {
             $scope.display.lightbox.ordersListOfOperation = true;
             $scope.operation = $scope.operations.selected[0];
-            await $scope.ordersClient.ordersClientOfOperation($scope.operation.id);
+            await $scope.syncOrderByOperation($scope.operation);
             template.open('operation.lightbox', 'administrator/operation/operation-orders-list-lightbox');
-            Utils.safeApply($scope);
-        };
-        $scope.addOrderFilter = async (event?) => {
-            if (event && (event.which === 13 || event.keyCode === 13) && event.target.value.trim() !== '') {
-                if(!_.contains($scope.ordersClient.filters, event.target.value)){
-                    $scope.ordersClient.filters = [...$scope.ordersClient.filters, event.target.value];
-                }
-                event.target.value = '';
-                await $scope.ordersClient.ordersClientOfOperation($scope.operation.id);
-                Utils.safeApply($scope);
-            }
-        };
-        $scope.dropOrderFilter = async (filter: string) =>{
-            $scope.ordersClient.filters = $scope.ordersClient.filters.filter( filterWord => filterWord !== filter);
-            await $scope.ordersClient.ordersClientOfOperation($scope.operation.id);
             Utils.safeApply($scope);
         };
         $scope.dropOrderOperation = async (order:OrderClient) => {
             await order.updateStatusOrder('WAITING');
             await Promise.all([
-                await $scope.ordersClient.ordersClientOfOperation($scope.operation.id),
+                await $scope.syncOrderByOperation($scope.operation),
                 await $scope.initOperation(),
             ]);
             Utils.safeApply($scope);
@@ -144,4 +133,7 @@ export const operationController = ng.controller('operationController',
                 return _.uniq(tooltips).join(" - ");
             }
         }
+        $scope.formatDate = (date) => {
+            return Utils.formatDate(date)
+        };
     }]);

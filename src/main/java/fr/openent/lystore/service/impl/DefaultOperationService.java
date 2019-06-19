@@ -7,6 +7,8 @@ import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.entcore.common.neo4j.Neo4j;
+import org.entcore.common.neo4j.Neo4jResult;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.Sql;
@@ -128,5 +130,57 @@ public class DefaultOperationService extends SqlCrudService implements Operation
             values.add(operationIds.getValue(i));
         }
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
+    }
+
+    @Override
+    public void getOperationOrders(Integer operationId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT oce.*, contract.name as contract_name " +
+                "FROM  " + Lystore.lystoreSchema + ".order_client_equipment oce  " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".contract ON oce.id_contract = contract.id  " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id) " +
+                "WHERE operation.id = ?  ";
+
+        JsonArray params = new JsonArray()
+                .add(operationId);
+
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(event -> {
+            if (event.isLeft()) {
+                handler.handle(event.left());
+                return;
+            }
+
+            JsonArray orders = event.right().getValue();
+            JsonArray structures = new JsonArray();
+            for (int i = 0; i < orders.size(); i++) {
+                structures.add(orders.getJsonObject(i).getString("id_structure"));
+            }
+
+            String nQuery = "MATCH (s:Structure) WHERE s.id IN {structures} RETURN s.id as id, s.name as name, s.uai as uai";
+            JsonObject nParams = new JsonObject()
+                    .put("structures", structures);
+
+            Neo4j.getInstance().execute(nQuery, nParams, Neo4jResult.validResultHandler(nEvent -> {
+                if (nEvent.isLeft()) {
+                    handler.handle(nEvent.left());
+                    return;
+                }
+
+                JsonArray structureList = nEvent.right().getValue();
+                JsonObject map = new JsonObject();
+                for (int i = 0; i < structureList.size(); i++) {
+                    map.put(structureList.getJsonObject(i).getString("id"), structureList.getJsonObject(i));
+                }
+
+                JsonObject order, structure;
+                for (int i = 0; i < orders.size(); i++) {
+                    order = orders.getJsonObject(i);
+                    structure = map.getJsonObject(order.getString("id_structure"));
+                    order.put("structure_name", structure.getString("name"));
+                    order.put("structure_uai", structure.getString("uai"));
+                }
+
+                handler.handle(new Either.Right<>(orders));
+            }));
+        }));
     }
 }

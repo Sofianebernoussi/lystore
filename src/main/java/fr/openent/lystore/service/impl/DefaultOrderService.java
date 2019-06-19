@@ -184,7 +184,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
     @Override
     public void getOrdersGroupByValidationNumber(JsonArray status, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT row.number_validation, row.status, contract.name as contract_name, contract.id as id_contract, supplier.name as supplier_name, " +
+        String query = "SELECT row.id_operation, row.number_validation, row.status, contract.name as contract_name, contract.id as id_contract, supplier.name as supplier_name, " +
                 "array_to_json(array_agg(structure_group.name)) as structure_groups, count(distinct row.id_structure) as structure_count, supplier.id as supplierId, " +
                 Lystore.lystoreSchema + ".order.label_program, " + Lystore.lystoreSchema + ".order.order_number " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment row " +
@@ -195,7 +195,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "INNER JOIN " + Lystore.lystoreSchema + ".structure_group ON (rel_group_structure.id_structure_group = structure_group.id) " +
                 "LEFT OUTER JOIN " + Lystore.lystoreSchema + ".order ON (row.id_order = lystore.order.id)  " +
                 "WHERE row.status IN " + Sql.listPrepared(status.getList()) +
-                " GROUP BY row.number_validation, contract.name, supplier.name, contract.id, supplierId, row.status, " + Lystore.lystoreSchema +
+                " GROUP BY row.id_operation, row.number_validation, contract.name, supplier.name, contract.id, supplierId, row.status, " + Lystore.lystoreSchema +
                 ".order.label_program, " + Lystore.lystoreSchema + ".order.order_number;";
 
         this.sql.prepared(query, status, SqlResult.validResultHandler(handler));
@@ -978,45 +978,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
             }
         }
         return filter;
-    }
-
-    @Override
-    public void getOrderWithIdOperation(List<String> filters, Integer idOperation, Handler<Either<String, JsonArray>> handler) {
-        JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
-
-
-        String query = "SELECT " +
-                "oce.number_validation, " +
-                "o.order_number, " +
-                "c.name AS contract_name, " +
-                "s.name AS supplier_name, " +
-                "count(distinct oce.id_structure) as structure_count, " +
-                "o.label_program " +
-                "FROM lystore.order_client_equipment AS oce " +
-                "INNER JOIN lystore.equipment AS e ON (oce.equipment_key = e.id)  " +
-                "INNER JOIN lystore.contract AS c ON (e.id_contract = c.id)  " +
-                "INNER JOIN lystore.supplier AS s ON (c.id_supplier = s.id)  " +
-                "LEFT OUTER JOIN lystore.order AS o ON (oce.id_order = o.id)  " +
-                "WHERE oce.status = 'VALID'  " +
-                "AND id_operation = ? " +
-                getTextFilter(filters) +
-                "GROUP BY ( " +
-                "oce.number_validation, " +
-                "o.order_number, " +
-                "c.name, " +
-                "s.name, " +
-                "o.label_program " +
-                ") " +
-                "ORDER BY oce.number_validation DESC;";
-
-        values.add(idOperation);
-
-        if (!filters.isEmpty()) {
-            for (String filter : filters) {
-                values.add(filter).add(filter).add(filter);
-            }
-        }
-        sql.prepared(query, values, SqlResult.validResultHandler(handler));
     }
 
 

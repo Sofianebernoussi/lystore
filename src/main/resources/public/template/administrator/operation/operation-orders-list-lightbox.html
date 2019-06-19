@@ -1,64 +1,41 @@
 <h2><i18n>lystore.operation.order.management.title</i18n>[[operation.label.label]]</h2>
-<div class="row">
-    <div class="cell twelve-mobile horizontal-spacing search-pagination four">
-        <div class="row twelve vertical-spacing">
-            <input type="text" class="twelve" ng-keydown="addOrderFilter($event)"
-                   i18n-placeholder="add.a.filter">
-            <i class="search flex-row"></i>
-        </div>
-        <div class="row horizontal-spacing">
-            <div class="select-blocks">
-                <div ng-repeat="filter in ordersClient.filters"
-                     ng-click="dropOrderFilter(filter)" class="labels-in-ligne">
-                    <div> [[ filter ]]</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 <article class="responsive-table">
     <table class="twelve">
         <thead>
         <tr>
-            <td ng-click="sort.order.type = 'number_validation';
+            <td ng-click="sort.order.type = 'structure_uai';
                     sort.order.reverse = !sort.order.reverse">
-                <i18n>number.validation</i18n>
-                <i class="up-open" ng-show="sort.order.type === 'number_validation' && !sort.order.reverse"></i>
-                <i class="down-open" ng-show="sort.order.type === 'number_validation' && sort.order.reverse"></i>
+                <i18n>Etablissement</i18n>
+                <i class="up-open" ng-show="sort.order.type === 'structure_uai' && !sort.order.reverse"></i>
+                <i class="down-open" ng-show="sort.order.type === 'structure_uai' && sort.order.reverse"></i>
             </td>
-            <td ng-click="sort.order.type = 'order_number';
+            <td ng-click="sort.order.type = 'contract_name';
                     sort.order.reverse = !sort.order.reverse">
-                <i18n>lystore.orders.order.number</i18n>
-                <i class="up-open" ng-show="sort.order.type === 'order_number' && !sort.order.reverse"></i>
-                <i class="down-open" ng-show="sort.order.type === 'order_number' && sort.order.reverse"></i>
+                <i18n>Marché</i18n>
+                <i class="up-open" ng-show="sort.order.type === 'contract_name' && !sort.order.reverse"></i>
+                <i class="down-open" ng-show="sort.order.type === 'contract_name' && sort.order.reverse"></i>
             </td>
-            <td ng-click="sort.order.type = 'contract.name';
+            <td ng-click="sort.order.type = 'name';
                     sort.order.reverse = !sort.order.reverse">
-                <i18n>contract</i18n>
-                <i class="up-open" ng-show="sort.order.type === 'contract.name' && !sort.order.reverse"></i>
-                <i class="down-open" ng-show="sort.order.type === 'contract.name' && sort.order.reverse"></i>
+                <i18n>Equipement</i18n>
+                <i class="up-open" ng-show="sort.order.type === 'name' && !sort.order.reverse"></i>
+                <i class="down-open" ng-show="sort.order.type === 'name' && sort.order.reverse"></i>
             </td>
-            <td ng-click="sort.order.type = 'supplier.name';
+            <td ng-click="sort.order.type = 'amount';
                     sort.order.reverse = !sort.order.reverse">
-                <i18n>supplier</i18n>
-                <i class="up-open" ng-show="sort.order.type === 'supplier.name' && !sort.order.reverse"></i>
-                <i class="down-open" ng-show="sort.order.type === 'supplier.name' && sort.order.reverse"></i>
+                <i18n>QTE</i18n>
+                <i class="up-open" ng-show="sort.order.type === 'amount' && !sort.order.reverse"></i>
+                <i class="down-open" ng-show="sort.order.type === 'amount' && sort.order.reverse"></i>
             </td>
-            <td ng-click="sort.order.type = 'structure_count';
+            <td ng-click="sort.order.type = 'creation_date';
                     sort.order.reverse = !sort.order.reverse">
-                <i18n>lystore.structures.number</i18n>
-                <i class="up-open" ng-show="sort.order.type === 'structure_count' && !sort.order.reverse"></i>
-                <i class="down-open" ng-show="sort.order.type === 'structure_count' && sort.order.reverse"></i>
-            </td>
-            <td ng-click="sort.order.type = 'label_program';
-                    sort.order.reverse = !sort.order.reverse">
-                <i18n>lystore.program</i18n>
-                <i class="up-open" ng-show="sort.order.type === 'label_program' && !sort.order.reverse"></i>
-                <i class="down-open" ng-show="sort.order.type === 'label_program' && sort.order.reverse"></i>
+                <i18n>Date</i18n>
+                <i class="up-open" ng-show="sort.order.type === 'creation_date' && !sort.order.reverse"></i>
+                <i class="down-open" ng-show="sort.order.type === 'creation_date' && sort.order.reverse"></i>
             </td>
             <td ng-click="sort.order.type = 'price';
                     sort.order.reverse = !sort.order.reverse">
-                <i18n>lystore.price.TTC</i18n>
+                <i18n>Montant</i18n>
                 <i class="up-open" ng-show="sort.order.type === 'price' && !sort.order.reverse"></i>
                 <i class="down-open" ng-show="sort.order.type === 'price' && sort.order.reverse"></i>
             </td>
@@ -67,13 +44,12 @@
         </thead>
         <tbody>
         <tr ng-repeat="order in ordersClient.all">
-            <td>[[order.number_validation]]</td>
-            <td>[[order.order_number]]</td>
+            <td>[[order.structure_uai]] - [[order.structure_name]]</td>
             <td>[[order.contract_name]]</td>
-            <td>[[order.supplier_name]]</td>
-            <td>[[order.structure_count]]</td>
-            <td>[[order.label_program]]</td>
-            <td><span ng-bind="order.price | currency"></span></td>
+            <td>[[order.name]]</td>
+            <td>[[order.amount]]</td>
+            <td>[[formatDate(order.creation_date)]]</td>
+            <td>[[order.price]]</td>
             <td class="one aligne-text-center" ng-click="dropOrderOperation(order)">
                 <i  class="trash"></i>
             </td>

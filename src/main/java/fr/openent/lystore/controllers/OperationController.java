@@ -108,4 +108,14 @@ public class OperationController  extends ControllerHelper {
                 operationIds.toString(),
                 new JsonObject().put("ids", operationIds))));
     }
+
+
+    @Get("/operations/:id/orders")
+    @ApiDoc("Retrieve orders based on given operation identifier")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void getOperationOrders(HttpServerRequest request) {
+        Integer operationId = Integer.parseInt(request.getParam("id"));
+        operationService.getOperationOrders(operationId, arrayResponseHandler(request));
+    }
 }

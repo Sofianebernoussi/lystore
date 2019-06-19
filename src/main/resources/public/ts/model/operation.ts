@@ -48,6 +48,17 @@ export class Operation implements Selectable {
         }
     }
 
+
+    async getOrders() {
+        try {
+            const {data} = await http.get(`/lystore/operations/${this.id}/orders`);
+            return data;
+        } catch (e) {
+            notify.error("lystore.operation.orders.sync.err");
+            throw e;
+        }
+    }
+
     toJson(){
         return {
             id_label : this.id_label,

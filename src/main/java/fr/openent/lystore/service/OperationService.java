@@ -23,4 +23,5 @@ public interface OperationService {
 
     void deleteOperation(JsonArray operationIds,  Handler<Either<String, JsonObject>> handler);
 
+    void getOperationOrders(Integer operationId, Handler<Either<String, JsonArray>> handler);
 }

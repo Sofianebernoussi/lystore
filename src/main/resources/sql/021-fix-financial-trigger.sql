@@ -1,5 +1,7 @@
 DROP TRIGGER IF EXISTS fill_program_action ON lystore.order_client_equipment;
 
+DROP FUNCTION IF EXISTS lystore.getAction(orderId in bigint);
+
 CREATE OR REPLACE FUNCTION lystore.getAction(orderId in bigint) RETURNS character varying AS
 $BODY$
 DECLARE
@@ -41,6 +43,8 @@ BEGIN
 END;
 $BODY$
 LANGUAGE plpgsql VOLATILE;
+
+DROP FUNCTION IF EXISTS lystore.fill_program_action();
 
 CREATE OR REPLACE FUNCTION lystore.fill_program_action() RETURNS TRIGGER AS $order_client_equipment$
 DECLARE

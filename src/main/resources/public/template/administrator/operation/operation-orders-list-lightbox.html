@@ -43,7 +43,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="order in ordersClientByOperation">
+        <tr ng-repeat="order in ordersClientByOperation | orderBy:sort.order.type:sort.order.reverse">
             <td>[[order.structure_uai]] - [[order.structure_name]]</td>
             <td>[[order.contract_name]]</td>
             <td>[[order.name]]</td>

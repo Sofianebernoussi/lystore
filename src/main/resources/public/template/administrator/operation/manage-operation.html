@@ -34,41 +34,41 @@
                     <span></span>
                 </label>
             </td>
-            <td ng-click="sort.operation.type = label.name;
+            <td ng-click="sort.operation.type = 'label.label';
                     sort.operation.reverse = !sort.operation.reverse">
                 <i18n>lystore.operation.name</i18n>
-                <i class="up-open" ng-show="sort.operation.type === 'label.name' && !sort.operation.reverse"></i>
-                <i class="down-open" ng-show="sort.operation.type === 'label.name' && sort.operation.reverse"></i>
+                <i class="up-open" ng-show="sort.operation.type === 'label.label' && !sort.operation.reverse"></i>
+                <i class="down-open" ng-show="sort.operation.type === 'label.label' && sort.operation.reverse"></i>
             </td>
-            <td ng-click="sort.operation.type = amount;
+            <td ng-click="sort.operation.type = 'amount';
                     sort.operation.reverse = !sort.operation.reverse">
                 <i18n>amount</i18n>
                 <i class="up-open" ng-show="sort.operation.type === 'amount' && !sort.operation.reverse"></i>
                 <i class="down-open" ng-show="sort.operation.type === 'amount' && sort.operation.reverse"></i>
             </td>
 
-            <td ng-click="sort.operation.type = nbr_sub;
+            <td ng-click="sort.operation.type = 'nbr_sub';
                     sort.operation.reverse = !sort.operation.reverse">
                 <i18n>lystore.operation.number.structure</i18n>
                 <i class="up-open" ng-show="sort.operation.type === 'nbr_sub' && !sort.operation.reverse"></i>
                 <i class="down-open" ng-show="sort.operation.type === 'nbr_sub' && sort.operation.reverse"></i>
             </td>
 
-            <td ng-click="sort.operation.type = bc_numbers;
+            <td ng-click="sort.operation.type = 'bc_numbers';
                     sort.operation.reverse = !sort.operation.reverse">
                 <i18n>lystore.operation.bc_numbers</i18n>
                 <i class="up-open" ng-show="sort.operation.type === 'bc_numbers' && !sort.operation.reverse"></i>
                 <i class="down-open" ng-show="sort.operation.type === 'bc_numbers' && sort.operation.reverse"></i>
             </td>
 
-            <td ng-click="sort.operation.type = contracts;
+            <td ng-click="sort.operation.type = 'contracts';
                     sort.operation.reverse = !sort.operation.reverse">
                 <i18n>lystore.operation.contracts</i18n>
                 <i class="up-open" ng-show="sort.operation.type === 'contracts' && !sort.operation.reverse"></i>
                 <i class="down-open" ng-show="sort.operation.type === 'contracts' && sort.operation.reverse"></i>
             </td>
 
-            <td ng-click="sort.operation.type = programs;
+            <td ng-click="sort.operation.type = 'programs';
                     sort.operation.reverse = !sort.operation.reverse">
                 <i18n>lystore.operation.programs</i18n>
                 <i class="up-open" ng-show="sort.operation.type === 'programs' && !sort.operation.reverse"></i>

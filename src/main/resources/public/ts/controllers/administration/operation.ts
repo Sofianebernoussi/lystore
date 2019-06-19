@@ -132,7 +132,7 @@ export const operationController = ng.controller('operationController',
             } else {
                 return _.uniq(tooltips).join(" - ");
             }
-        }
+        };
         $scope.formatDate = (date) => {
             return Utils.formatDate(date)
         };

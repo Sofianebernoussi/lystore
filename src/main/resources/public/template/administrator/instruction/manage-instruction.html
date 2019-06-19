@@ -34,41 +34,41 @@
                     <span></span>
                 </label>
             </td>
-            <td ng-click="sort.instruction.type = label.name;
+            <td ng-click="sort.instruction.type = 'object';
                    sort.instruction.reverse = !sort.instruction.reverse">
                 <i18n>lystore.instruction.object</i18n>
                 <i class="up-open" ng-show="sort.instruction.type === 'object' && !sort.instruction.reverse"></i>
                 <i class="down-open" ng-show="sort.instruction.type === 'object' && sort.instruction.reverse"></i>
             </td>
-            <td ng-click="sort.instruction.type = amount;
+            <td ng-click="sort.instruction.type = 'amount';
                     sort.instruction.reverse = !sort.instruction.reverse">
                 <i18n>amount</i18n>
                 <i class="up-open" ng-show="sort.instruction.type === 'amount' && !sort.instruction.reverse"></i>
                 <i class="down-open" ng-show="sort.instruction.type === 'amount' && sort.instruction.reverse"></i>
             </td>
 
-            <td ng-click="sort.instruction.type = nbr_sub;
+            <td ng-click="sort.instruction.type = 'exercise.year';
                     sort.instruction.reverse = !sort.instruction.reverse">
                 <i18n>lystore.instruction.exercise_number</i18n>
-                <i class="up-open" ng-show="sort.instruction.type === 'exercise_number' && !sort.instruction.reverse"></i>
-                <i class="down-open" ng-show="sort.instruction.type === 'exercise_number' && sort.instruction.reverse"></i>
+                <i class="up-open" ng-show="sort.instruction.type === 'exercise.year' && !sort.instruction.reverse"></i>
+                <i class="down-open" ng-show="sort.instruction.type === 'exercise.year' && sort.instruction.reverse"></i>
             </td>
 
-            <td ng-click="sort.instruction.type = bc_numbers;
+            <td ng-click="sort.instruction.type = 'service_number';
                     sort.instruction.reverse = !sort.instruction.reverse">
                 <i18n>lystore.instruction.service_number</i18n>
                 <i class="up-open" ng-show="sort.instruction.type === 'service_number' && !sort.instruction.reverse"></i>
                 <i class="down-open" ng-show="sort.instruction.type === 'service_number' && sort.instruction.reverse"></i>
             </td>
 
-            <td ng-click="sort.instruction.type = contracts;
+            <td ng-click="sort.instruction.type = 'cp_number';
                     sort.instruction.reverse = !sort.instruction.reverse">
                 <i18n>lystore.instruction.cp_number</i18n>
                 <i class="up-open" ng-show="sort.instruction.type === 'cp_number' && !sort.instruction.reverse"></i>
                 <i class="down-open" ng-show="sort.instruction.type === 'cp_number' && sort.instruction.reverse"></i>
             </td>
 
-            <td ng-click="sort.instruction.type = programs;
+            <td ng-click="sort.instruction.type = 'date_cp';
                     sort.instruction.reverse = !sort.instruction.reverse">
                 <i18n>lystore.instruction.date_cp</i18n>
                 <i class="up-open" ng-show="sort.instruction.type === 'date_cp' && !sort.instruction.reverse"></i>

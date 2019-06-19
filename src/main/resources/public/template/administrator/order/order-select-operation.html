@@ -3,6 +3,8 @@
     <tbody>
         <tr ng-repeat="operation in operations.all">
             <td class="selectOperationRow" ng-class="{ greyRow: $index % 2 === 0 }" ng-click="operationSelected(operation)">
+                <i18n>lystore.instruction</i18n>&nbsp
+                [[operation.instruction? operation.instruction.cp_number  : ' non affectée ' ]] &nbsp - &nbsp
                 [[operation.label.label]]
             </td>
         </tr>

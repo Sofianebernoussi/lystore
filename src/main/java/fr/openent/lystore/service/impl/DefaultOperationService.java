@@ -49,18 +49,24 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 params.add(filter).add(filter);
             }
         }
-        String query =  "SELECT  operation.* , to_json(label.*) as label, count(oce.*) as nbr_sub, " +
+        String query =  "SELECT " +
+                "operation.* , " +
+                "to_json(i.*) AS instruction, " +
+                "to_json(label.*) as label, " +
+                "count(oce.*) as nbr_sub, " +
                 "array_to_json(array_agg(o.order_number)) as bc_number, " +
-                "array_to_json(array_agg(o.label_program)) as programs," +
-                "SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) AS amount," +
-                " array_to_json(array_agg(c.name)) as contracts " +
+                "array_to_json(array_agg(o.label_program)) as programs, " +
+                "SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) AS amount, " +
+                "array_to_json(array_agg(c.name)) as contracts, " +
+                "array_to_json(array_agg(i.*)) AS instruction " +
                 "FROM  " + Lystore.lystoreSchema +".operation "+
-                "Inner join " + Lystore.lystoreSchema +".label_operation label on label.id = operation.id_label "+
-                "Left join " + Lystore.lystoreSchema +".order_client_equipment oce on oce.id_operation = operation.id "+
-                "left join " + Lystore.lystoreSchema +".order o on o.id = oce.id_order "+
-                "left join " + Lystore.lystoreSchema +".contract c on c.id = oce.id_contract "+
+                "INNER JOIN " + Lystore.lystoreSchema +".label_operation label on label.id = operation.id_label "+
+                "LEFT JOIN " + Lystore.lystoreSchema +".order_client_equipment oce on oce.id_operation = operation.id "+
+                "LEFT JOIN " + Lystore.lystoreSchema +".order o on o.id = oce.id_order "+
+                "LEFT JOIN " + Lystore.lystoreSchema +".contract c on c.id = oce.id_contract " +
+                "LEFT JOIN " + Lystore.lystoreSchema + ".instruction i on i.id = operation.id_instruction "+
                 getTextFilter(filters) +
-                "GROUP BY (operation.id, label.*)";
+                "GROUP BY (operation.id, label.*, i.*)";
         sql.prepared(query, params, SqlResult.validResultHandler(handler) );
     }
 
@@ -134,11 +140,24 @@ public class DefaultOperationService extends SqlCrudService implements Operation
 
     @Override
     public void getOperationOrders(Integer operationId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT oce.*, contract.name as contract_name " +
+        String query = "SELECT " +
+                "oce.id, " +
+                "oce.creation_date, " +
+                "SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) AS price, " +
+                "oce.amount, " +
+                "oce.name, " +
+                "oce.id_structure, " +
+                "contract.name as contract_name " +
                 "FROM  " + Lystore.lystoreSchema + ".order_client_equipment oce  " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".contract ON oce.id_contract = contract.id  " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id) " +
-                "WHERE operation.id = ?  ";
+                "WHERE operation.id = ? " +
+                "GROUP BY ( " +
+                "oce.id, " +
+                "oce.price, " +
+                "oce.name,oce.id_structure, " +
+                "contract.name " +
+                ");";
 
         JsonArray params = new JsonArray()
                 .add(operationId);
@@ -155,7 +174,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 structures.add(orders.getJsonObject(i).getString("id_structure"));
             }
 
-            String nQuery = "MATCH (s:Structure) WHERE s.id IN {structures} RETURN s.id as id, s.name as name, s.uai as uai";
+            String nQuery = "MATCH (s:Structure) WHERE s.id IN {structures} RETURN s.id as id, s.name as name, s.UAI as uai";
             JsonObject nParams = new JsonObject()
                     .put("structures", structures);
 

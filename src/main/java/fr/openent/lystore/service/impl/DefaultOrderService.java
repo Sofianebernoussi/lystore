@@ -964,23 +964,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         sql.transaction(statements, SqlResult.validRowsResultHandler(handler));
     }
 
-    private String getTextFilter(List<String> filters) {
-        String filter = "";
-        if (filters.size() > 0) {
-            filter = " AND ";
-            for (int i = 0; i < filters.size(); i++) {
-                if (i > 0) {
-                    filter += "AND ";
-                }
-                filter += "(LOWER(oce.number_validation) ~ LOWER(?) OR " +
-                        "LOWER(c.name) ~ LOWER(?) OR " +
-                        "LOWER(s.name) ~ LOWER(?)) ";
-            }
-        }
-        return filter;
-    }
-
-
     @Override
     public void updateOperation(Integer idOperation, JsonArray idOrders, Handler<Either<String, JsonObject>> handler) {
         String query = " UPDATE " + Lystore.lystoreSchema + ".order_client_equipment " +

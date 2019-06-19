@@ -5,37 +5,37 @@
         <tr>
             <td ng-click="sort.order.type = 'structure_uai';
                     sort.order.reverse = !sort.order.reverse">
-                <i18n>Etablissement</i18n>
+                <i18n>Structure</i18n>
                 <i class="up-open" ng-show="sort.order.type === 'structure_uai' && !sort.order.reverse"></i>
                 <i class="down-open" ng-show="sort.order.type === 'structure_uai' && sort.order.reverse"></i>
             </td>
             <td ng-click="sort.order.type = 'contract_name';
                     sort.order.reverse = !sort.order.reverse">
-                <i18n>Marché</i18n>
+                <i18n>contract</i18n>
                 <i class="up-open" ng-show="sort.order.type === 'contract_name' && !sort.order.reverse"></i>
                 <i class="down-open" ng-show="sort.order.type === 'contract_name' && sort.order.reverse"></i>
             </td>
             <td ng-click="sort.order.type = 'name';
                     sort.order.reverse = !sort.order.reverse">
-                <i18n>Equipement</i18n>
+                <i18n>EQUIPMENT</i18n>
                 <i class="up-open" ng-show="sort.order.type === 'name' && !sort.order.reverse"></i>
                 <i class="down-open" ng-show="sort.order.type === 'name' && sort.order.reverse"></i>
             </td>
             <td ng-click="sort.order.type = 'amount';
                     sort.order.reverse = !sort.order.reverse">
-                <i18n>QTE</i18n>
+                <i18n>quantity</i18n>
                 <i class="up-open" ng-show="sort.order.type === 'amount' && !sort.order.reverse"></i>
                 <i class="down-open" ng-show="sort.order.type === 'amount' && sort.order.reverse"></i>
             </td>
             <td ng-click="sort.order.type = 'creation_date';
                     sort.order.reverse = !sort.order.reverse">
-                <i18n>Date</i18n>
+                <i18n>date</i18n>
                 <i class="up-open" ng-show="sort.order.type === 'creation_date' && !sort.order.reverse"></i>
                 <i class="down-open" ng-show="sort.order.type === 'creation_date' && sort.order.reverse"></i>
             </td>
             <td ng-click="sort.order.type = 'price';
                     sort.order.reverse = !sort.order.reverse">
-                <i18n>Montant</i18n>
+                <i18n>amountTTC</i18n>
                 <i class="up-open" ng-show="sort.order.type === 'price' && !sort.order.reverse"></i>
                 <i class="down-open" ng-show="sort.order.type === 'price' && sort.order.reverse"></i>
             </td>
@@ -43,13 +43,13 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="order in ordersClient.all">
+        <tr ng-repeat="order in ordersClientByOperation">
             <td>[[order.structure_uai]] - [[order.structure_name]]</td>
             <td>[[order.contract_name]]</td>
             <td>[[order.name]]</td>
             <td>[[order.amount]]</td>
             <td>[[formatDate(order.creation_date)]]</td>
-            <td>[[order.price]]</td>
+            <td>[[order.price]] €</td>
             <td class="one aligne-text-center" ng-click="dropOrderOperation(order)">
                 <i  class="trash"></i>
             </td>

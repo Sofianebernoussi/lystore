@@ -52,7 +52,7 @@ export class Instruction implements Selectable {
             id_exercise: this.id_exercise,
             object: this.object,
             service_number: this.service_number,
-            cp_number: this.service_number,
+            cp_number: this.cp_number,
             submitted_to_cp: this.submitted_to_cp? true : false,
             date_cp: moment(this.date_cp).format('YYYY-MM-DD'),
             comment: this.comment,

@@ -108,7 +108,7 @@ export const operationController = ng.controller('operationController',
             }
         };
         $scope.syncOrderByOperation = async (operation: Operation) =>{
-            $scope.ordersClient.all = Mix.castArrayAs(OrderClient, await operation.getOrders());
+            $scope.ordersClientByOperation = Mix.castArrayAs(OrderClient, await operation.getOrders());
         };
         $scope.openLightBoxOrdersList = async () => {
             $scope.display.lightbox.ordersListOfOperation = true;

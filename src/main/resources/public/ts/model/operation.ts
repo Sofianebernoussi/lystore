@@ -3,6 +3,7 @@ import http from 'axios';
 import {notify, _} from "entcore";
 import {Equipment} from "./Equipment";
 import {Utils} from "./Utils";
+import {Instruction} from "./instruction";
 
 
 
@@ -19,6 +20,7 @@ export class Operation implements Selectable {
     amount: number;
     selected:boolean;
     id_instruction: number;
+    instruction: Instruction;
     constructor(){
 
     }
@@ -86,6 +88,9 @@ export class Operations extends Selection<Operation>{
                 operation.label.toString() !== 'null' && operation.label !== null ?
                     operation.label = Mix.castAs(label, JSON.parse(operation.label.toString()))
                     : operation.label = new label();
+                JSON.parse(operation.instruction.toString())[0] !== null ?
+                    operation.instruction =  JSON.parse(operation.instruction.toString())[0]
+                    : operation.instruction = null;
             })
         } catch(e){
             notify.error('lystore.operation.sync.err');

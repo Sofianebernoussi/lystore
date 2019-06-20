@@ -8,7 +8,7 @@
         <i18n ng-show="instruction.id == undefined">lystore.instruction.add</i18n>
         <i18n ng-show="instruction.id !== undefined">lystore.instruction.modify</i18n>
     </h1>
-    <article>
+    <article class="responsive-table">
         <form ng-submit="sendInstruction()" >
             <label class="row twelve vertical-spacing">
                         <span class="twelve">
@@ -96,8 +96,8 @@
                         </tr>
                         </tbody>
                     </table>
-                    <input type="button"  ng-disabled="isNewOperation || isOperationsIsEmpty" ng-click="addOperationRow()" i18n-value="add" />
                 </article>
+                <input class="vertical-spacing" type="button"  ng-disabled="isNewOperation || isOperationsIsEmpty" ng-click="addOperationRow()" i18n-value="lystore.operation.add" />
             </div>
             <div class="right-magnet vertical-spacing">
                 <input type="button" class="cancel" ng-click="cancelInstructionForm()" i18n-value="cancel"/>

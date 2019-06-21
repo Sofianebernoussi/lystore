@@ -969,7 +969,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         String query = " UPDATE " + Lystore.lystoreSchema + ".order_client_equipment " +
                 " SET id_operation = " +
                 idOperation +
-                " WHERE id = " +
+                " WHERE id IN " +
                 Sql.listPrepared(idOrders.getList()) +
                 " RETURNING id";
         JsonArray values = new JsonArray();

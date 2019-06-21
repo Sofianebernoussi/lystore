@@ -42,7 +42,7 @@
             </td>
             <td ng-click="sort.operation.type = 'amount';
                     sort.operation.reverse = !sort.operation.reverse">
-                <i18n>amount</i18n>
+                <i18n>amountTTC</i18n>
                 <i class="up-open" ng-show="sort.operation.type === 'amount' && !sort.operation.reverse"></i>
                 <i class="down-open" ng-show="sort.operation.type === 'amount' && sort.operation.reverse"></i>
             </td>
@@ -86,7 +86,7 @@
                 </label>
             </td>
             <td >[[operation.label.label]]</td>
-            <td >[[operation.amount? operation.amount + " €" : '-']]</td>
+            <td ><span ng-bind="operation.amount | currency"></span></td>
             <td >[[operation.nbr_sub]]</td>
             <td >[[operation.bc_numbers || '-']]</td>
             <td tooltip=[[formatArrayToolTip(operation.contracts)]] >

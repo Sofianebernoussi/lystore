@@ -72,7 +72,7 @@
                         <tr ng-repeat="operationAdd in instruction.operations">
                             <td>[[operationAdd.label.label]]</td>
                             <td>[[operationAdd.nbr_sub]]</td>
-                            <td>[[operationAdd.amount? operationAdd.amount + " €" : '-']]</td>
+                            <td ><span ng-bind="operationAdd.amount | currency"></span></td>
                             <td>
                                 <i18n>lystore.campaign.accessibility</i18n>
                             </td>

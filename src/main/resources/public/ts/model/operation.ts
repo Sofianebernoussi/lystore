@@ -91,7 +91,6 @@ export class Operations extends Selection<Operation>{
                 JSON.parse(operation.instruction.toString())[0] !== null ?
                     operation.instruction =  JSON.parse(operation.instruction.toString())[0]
                     : operation.instruction = null;
-
             })
         } catch(e){
             notify.error('lystore.operation.sync.err');

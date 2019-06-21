@@ -49,7 +49,7 @@
             <td>[[order.name]]</td>
             <td>[[order.amount]]</td>
             <td>[[formatDate(order.creation_date)]]</td>
-            <td>[[order.price]] €</td>
+            <td ><span ng-bind="order.price | currency"></span></td>
             <td class="one aligne-text-center" ng-click="dropOrderOperation(order)">
                 <i  class="trash"></i>
             </td>

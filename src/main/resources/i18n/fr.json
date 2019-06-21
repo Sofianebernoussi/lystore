@@ -475,5 +475,7 @@
   "lystore.order.operation.update.err": "Erreur lors de la récupération des demandes de l'operation",
   "lystore.order.update.err": "Erreur lors de la modification du status de la demandes",
   "lystore.operation.orders.sync.err": "Une erreur est survenue lors de la récupération de la liste des demandes",
-  "amountTTC": "Montant (TTC)"
+  "amountTTC": "Montant (TTC)",
+  "lystore.operation.empty": "Aucune opération est créée ou est ouverte, pour les gérer cliquer ici",
+  "lystore.order.operation.selected": "Vous avez choisi l'operation : "
 }

@@ -154,6 +154,8 @@ export const orderController = ng.controller('orderController',
             Utils.safeApply($scope);
         };
         $scope.cancelBasketDelete = () => {
+            $scope.operation = undefined;
+            $scope.isOperationSelected = false;
             $scope.display.lightbox.validOrder = false;
             template.close('validOrder.lightbox');
             Utils.safeApply($scope);
@@ -306,12 +308,17 @@ export const orderController = ng.controller('orderController',
             }
             return field == 'totaux' ? totaux : price;
         };
+        $scope.isOperationsIsEmpty = false;
         $scope.selectOperationForOrder = async () =>{
             await $scope.initOperation();
+            $scope.isOperationsIsEmpty = !$scope.operations.all.some(operation => operation.status === 'true');
             template.open('validOrder.lightbox', 'administrator/order/order-select-operation');
             $scope.display.lightbox.validOrder = true;
         };
+        $scope.isOperationSelected = false;
         $scope.operationSelected = async (operation:Operation) => {
+            $scope.isOperationSelected = true;
+            $scope.operation = operation;
             let idsOrder = $scope.ordersClient.selected.map(order => order.id);
             await $scope.ordersClient.addOperation(operation.id, idsOrder);
             await $scope.validateOrders($scope.getSelectedOrders());

@@ -477,5 +477,7 @@
   "lystore.operation.orders.sync.err": "Une erreur est survenue lors de la récupération de la liste des demandes",
   "amountTTC": "Montant (TTC)",
   "lystore.operation.empty": "Aucune opération est créée ou est ouverte, pour les gérer cliquer ici",
-  "lystore.order.operation.selected": "Vous avez choisi l'operation : "
+  "lystore.order.operation.selected": "Vous avez choisi l'operation : ",
+  "close" : "Fermé",
+  "lystore.operation.empty": "Aucune opérations disponibles"
 }

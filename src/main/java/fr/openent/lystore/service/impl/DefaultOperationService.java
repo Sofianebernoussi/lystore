@@ -99,8 +99,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
 
     public  void addInstructionId(Integer instructionId, JsonArray operationIds, Handler<Either<String, JsonObject>> handler){
         String query = " UPDATE " + Lystore.lystoreSchema + ".operation " +
-                "SET status = true, " +
-                "id_instruction = " +
+                "SET id_instruction = " +
                 instructionId +
                 " WHERE id IN " +
                 Sql.listPrepared(operationIds.getList()) +

@@ -74,7 +74,7 @@
                             <td>[[operationAdd.nbr_sub]]</td>
                             <td ><span ng-bind="operationAdd.amount | currency"></span></td>
                             <td>
-                                <i18n>lystore.campaign.accessibility</i18n>
+                                <i18n>close</i18n>
                             </td>
                             <td class="one aligne-text-center" ng-click="dropOperation($index, operationAdd)">
                                 <i  class="trash"></i>
@@ -84,7 +84,9 @@
                             <td>
                                 <select ng-model="instruction.operation" class="twelve" ng-change="operationIsSelect()">
                                     <option value="" disabled selected ><i18n>Selectionnez une opération</i18n></option>
-                                    <option ng-repeat="operationSelect in operations.all" value=[[operationSelect]]>[[operationSelect.label.label]]</option>
+                                    <option ng-repeat="operationSelect in operations.all" value=[[operationSelect]]>
+                                        [[operationSelect.label.label]]
+                                    </option>
                                 </select>
                             </td>
                             <td></td>
@@ -97,7 +99,21 @@
                         </tbody>
                     </table>
                 </article>
-                <input class="vertical-spacing" type="button"  ng-disabled="isNewOperation || isOperationsIsEmpty" ng-click="addOperationRow()" i18n-value="lystore.operation.add" />
+                <input
+                        ng-show="isOperationsIsEmpty"
+                        class="vertical-spacing"
+                        type="button"
+                        ng-disabled="true"
+                        i18n-value="lystore.operation.empty"
+                />
+                <input
+                        ng-show="!isOperationsIsEmpty"
+                        class="vertical-spacing"
+                        type="button"
+                        ng-disabled="isNewOperation"
+                        ng-click="addOperationRow()"
+                        i18n-value="lystore.operation.add"
+                />
             </div>
             <div class="right-magnet vertical-spacing">
                 <input type="button" class="cancel" ng-click="cancelInstructionForm()" i18n-value="cancel"/>

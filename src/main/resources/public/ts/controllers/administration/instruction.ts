@@ -34,14 +34,14 @@ export const instructionController = ng.controller('instructionController',
         $scope.openInstructionForm = async (action: string) => {
             await $scope.initOperation();
             $scope.operationEditRemoveInstructionIds = [];
+            $scope.operations.all = $scope.operations.all
+                .filter(operation => operation.instruction === null && operation.status === 'false')
             if(action === 'create'){
                 $scope.instruction = new Instruction();
                 $scope.instruction.operations = [];
             } else if (action === 'edit'){
                 $scope.instruction = $scope.instructions.selected[0];
                 $scope.isOperationEdit = true;
-            }
-            if($scope.isOperationEdit) {
                 $scope.operations.all = $scope.operations.all
                     .filter(operation => operation.id_instruction !== $scope.instruction.id);
             }

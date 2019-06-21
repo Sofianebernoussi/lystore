@@ -98,7 +98,7 @@ public class InstructionController extends ControllerHelper {
     @Get("/instructions/:id/export")
     @ApiDoc("Export given instruction")
     public void exportInstruction(HttpServerRequest request) {
-        new Instruction(Integer.parseInt(request.getParam("id"))).export(event -> {
+        new Instruction(Integer.parseInt(request.getParam("id")), config).export(event -> {
             if (event.isLeft()) {
                 renderError(request);
             } else {
@@ -106,7 +106,7 @@ public class InstructionController extends ControllerHelper {
                 request.response()
                         .putHeader("Content-Type", "application/vnd.ms-excel")
                         .putHeader("Content-Length", file.length() + "")
-                        .putHeader("Content-Disposition", "attachment; filename=export.xls")
+                        .putHeader("Content-Disposition", "attachment; filename=export.xlsx")
                         .write(file);
             }
         });

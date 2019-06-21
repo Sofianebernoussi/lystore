@@ -11,7 +11,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
-public class LyceeTab {
+public class CMRTab {
     private Workbook wb;
     private Sheet sheet;
     private JsonObject instruction;
@@ -20,10 +20,10 @@ public class LyceeTab {
     private String TITLE = "Récapitulatif des mesures engagées";
     private String SUBTITLE = "Récapitulatif investissement";
 
-    public LyceeTab(Workbook wb, JsonObject instruction) {
+    public CMRTab(Workbook wb, JsonObject instruction) {
         this.wb = wb;
         this.instruction = instruction;
-        this.sheet = wb.getSheet("Investissement-LYCEES");
+        this.sheet = wb.getSheet("Investissement-CMR");
         this.excel = new ExcelHelper(wb, sheet);
     }
 
@@ -32,13 +32,11 @@ public class LyceeTab {
         excel.setDefaultFont();
         excel.setCPNumber(instruction.getString("cp_number"));
         setTableTitle();
-
         getPrograms(event -> {
             if (event.isLeft()) {
                 handler.handle(new Either.Left<>("Failed to retrieve programs"));
                 return;
             }
-
             JsonArray programs = event.right().getValue();
             setPrograms(programs);
         });
@@ -122,4 +120,5 @@ public class LyceeTab {
             }
         }));
     }
+
 }

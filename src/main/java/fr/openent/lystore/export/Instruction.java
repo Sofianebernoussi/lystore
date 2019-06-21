@@ -2,6 +2,7 @@ package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
 import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.data.FileResolver;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -9,12 +10,13 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.buffer.impl.BufferImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +26,11 @@ public class Instruction {
     private Integer id;
     private JsonObject instruction;
     private Workbook workbook;
+    private JsonObject config;
 
-    public Instruction(Integer instructionId) {
+    public Instruction(Integer instructionId, JsonObject config) {
         this.id = instructionId;
+        this.config = config;
     }
 
     public void export(Handler<Either<String, Buffer>> handler) {
@@ -47,39 +51,47 @@ public class Instruction {
                 "WHERE instruction.id = ? " +
                 "GROUP BY instruction.id";
 
+
         Sql.getInstance().prepared(query, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
                 handler.handle(new Either.Left<>(either.left().getValue()));
                 return;
             }
 
-
             instruction = either.right().getValue();
-            instruction.put("operations", new JsonArray(instruction.getString("operations")));
-
-            Workbook workbook = new HSSFWorkbook();
-            this.workbook = workbook;
-            List<Future> futures = new ArrayList<>();
-            Future<Boolean> lyceeFuture = Future.future();
-            futures.add(lyceeFuture);
-            CompositeFuture.all(futures).setHandler(event -> {
-                if (event.succeeded()) {
-                    try {
-                        ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
-                        workbook.write(fileOut);
-                        Buffer buff = new BufferImpl();
-                        buff.appendBytes(fileOut.toByteArray());
-                        handler.handle(new Either.Right<>(buff));
-                    } catch (IOException e) {
-                        handler.handle(new Either.Left<>(e.getMessage()));
+            String path = FileResolver.absolutePath("./public/template/excel/template.xlsx");
+            try {
+                FileInputStream templateInputStream = new FileInputStream(path);
+                Workbook workbook = new XSSFWorkbook(templateInputStream);
+                this.workbook = workbook;
+                List<Future> futures = new ArrayList<>();
+                Future<Boolean> lyceeFuture = Future.future();
+                futures.add(lyceeFuture);
+                CompositeFuture.all(futures).setHandler(event -> {
+                    if (event.succeeded()) {
+                        try {
+                            ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
+                            workbook.write(fileOut);
+                            Buffer buff = new BufferImpl();
+                            buff.appendBytes(fileOut.toByteArray());
+                            handler.handle(new Either.Right<>(buff));
+                        } catch (IOException e) {
+                            handler.handle(new Either.Left<>(e.getMessage()));
+                        }
+                    } else {
+                        handler.handle(new Either.Left<>(event.cause().toString()));
                     }
-                } else {
-                    handler.handle(new Either.Left<>(event.cause().toString()));
-                }
-            });
+                });
 
-            new LyceeTab(workbook, instruction).create(getHandler(lyceeFuture));
+                new LyceeTab(workbook, instruction).create(getHandler(lyceeFuture));
+//                new CMRTab(workbook, instruction).create(getHandler(lyceeFuture));
+            } catch (IOException e) {
+                System.out.println("Xlsx Failed to read template");
+                return;
+            }
         }));
+
+
     }
 
     private Handler<Either<String, Boolean>> getHandler(Future<Boolean> future) {

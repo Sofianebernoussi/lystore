@@ -54,7 +54,7 @@ export class Instruction implements Selectable {
             service_number: this.service_number,
             cp_number: this.cp_number,
             submitted_to_cp: this.submitted_to_cp? true : false,
-            date_cp: moment(this.date_cp).format('YYYY-MM-DD'),
+            date_cp: Utils.formatDatePost(this.date_cp),
             comment: this.comment,
         };
     }

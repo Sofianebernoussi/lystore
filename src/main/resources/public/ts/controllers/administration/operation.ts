@@ -68,10 +68,12 @@ export const operationController = ng.controller('operationController',
             return  operation.id_label;
         };
 
-        $scope.cancelOperationForm = () =>{
+        $scope.cancelOperationForm = async () =>{
             $scope.display.lightbox.operation = false;
             $scope.display.lightbox.ordersListOfOperation = false;
             template.close('operation.lightbox');
+            await $scope.initOperation();
+            Utils.safeApply($scope);
         };
 
         $scope.validOperation = async (operation:Operation) =>{
@@ -136,4 +138,5 @@ export const operationController = ng.controller('operationController',
         $scope.formatDate = (date) => {
             return Utils.formatDate(date)
         };
+
     }]);

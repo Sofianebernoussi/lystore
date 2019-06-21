@@ -26,7 +26,3 @@ CREATE TABLE lystore.instruction
 ALTER TABLE lystore.operation
     ADD CONSTRAINT fk_instruction_id FOREIGN KEY (id_instruction)
     REFERENCES lystore.instruction (id) MATCH SIMPLE;
-
--- Add the data in entcore
--- INSERT INTO lystore.exercise(year)
--- VALUES ('2018/2019'), ('2019/2020'), ('2020/2021');

@@ -12,6 +12,9 @@
     "status": {
       "type": "boolean"
     },
+    "date_cp": {
+      "type": ["string", "null"]
+    },
     "id_instruction": {
       "type": ["number", "null"]
     }

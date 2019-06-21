@@ -90,7 +90,9 @@ export const instructionController = ng.controller('instructionController',
             $scope.cancelFormAddOperation();
             $scope.isOperationEdit = false;
             await $scope.initOperation();
+            await $scope.initInstructions();
             template.open('instruction-main', 'administrator/instruction/manage-instruction');
+            Utils.safeApply($scope);
         };
         $scope.isAllInstructionSelected = false;
         $scope.switchAllInstruction = () => {

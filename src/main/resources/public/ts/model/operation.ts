@@ -1,6 +1,6 @@
 import { Mix, Selectable, Selection} from 'entcore-toolkit';
 import http from 'axios';
-import {notify, _} from "entcore";
+import {notify, _, moment} from "entcore";
 import {Equipment} from "./Equipment";
 import {Utils} from "./Utils";
 import {Instruction} from "./instruction";
@@ -21,6 +21,7 @@ export class Operation implements Selectable {
     selected:boolean;
     id_instruction: number;
     instruction: Instruction;
+    date_cp: Date;
     constructor(){
 
     }
@@ -65,6 +66,7 @@ export class Operation implements Selectable {
         return {
             id_label : this.id_label,
             status : this.status,
+            date_cp: this.date_cp? Utils.formatDatePost(this.date_cp) : null,
         };
     }
 
@@ -85,6 +87,7 @@ export class Operations extends Selection<Operation>{
             let { data } = await http.get(`/lystore/operations/?${queriesFilter}`);
             this.all = Mix.castArrayAs(Operation, data);
             this.all.map( operation => {
+                operation.date_cp = operation.date_cp !== null ? moment(operation.date_cp) : null;
                 operation.label.toString() !== 'null' && operation.label !== null ?
                     operation.label = Mix.castAs(label, JSON.parse(operation.label.toString()))
                     : operation.label = new label();

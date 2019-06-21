@@ -61,6 +61,10 @@ export class Utils {
         return parameters.slice(0, -1);
     }
     static formatDate (date:Date) {
+        if (date === null) return '-';
         return moment(date).format('DD/MM/YY');
+    }
+    static formatDatePost (date:Date) {
+        return  moment(date).format('YYYY-MM-DD');
     }
 }

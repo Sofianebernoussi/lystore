@@ -27,7 +27,6 @@ public class CMRTab {
         this.excel = new ExcelHelper(wb, sheet);
     }
 
-
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
         excel.setCPNumber(instruction.getString("cp_number"));
@@ -72,7 +71,7 @@ public class CMRTab {
     private void setTableTitle() {
         Font font = wb.createFont();
         Row row = sheet.getRow(7);
-        Cell cell = row.createCell(1);
+        Cell cell = row.createCell(3);
         CellRangeAddress merge = new CellRangeAddress(7, 8, 3, 3);
         CellStyle style = wb.createCellStyle();
         style.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());

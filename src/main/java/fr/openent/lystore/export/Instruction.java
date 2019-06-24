@@ -59,6 +59,7 @@ public class Instruction {
             }
 
             instruction = either.right().getValue();
+            instruction.put("operations", new JsonArray(instruction.getString("operations")));
             String path = FileResolver.absolutePath("./public/template/excel/template.xlsx");
             try {
                 FileInputStream templateInputStream = new FileInputStream(path);
@@ -66,7 +67,9 @@ public class Instruction {
                 this.workbook = workbook;
                 List<Future> futures = new ArrayList<>();
                 Future<Boolean> lyceeFuture = Future.future();
+                Future<Boolean> CMRfuture = Future.future();
                 futures.add(lyceeFuture);
+                futures.add(CMRfuture);
                 CompositeFuture.all(futures).setHandler(event -> {
                     if (event.succeeded()) {
                         try {
@@ -84,7 +87,7 @@ public class Instruction {
                 });
 
                 new LyceeTab(workbook, instruction).create(getHandler(lyceeFuture));
-//                new CMRTab(workbook, instruction).create(getHandler(lyceeFuture));
+                new CMRTab(workbook, instruction).create(getHandler(CMRfuture));
             } catch (IOException e) {
                 System.out.println("Xlsx Failed to read template");
                 return;

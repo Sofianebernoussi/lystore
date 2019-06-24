@@ -244,7 +244,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             operation: async () =>{
-                $scope.initOperation();
+                await $scope.initOperation();
                 template.open('administrator-main', 'administrator/operation/operation-container');
                 template.open('operation-main', 'administrator/operation/manage-operation');
                 Utils.safeApply($scope);

@@ -71,7 +71,7 @@
                 <td ng-hide="!tableFields[12].display" >
                     [[order.rank != null && order.rank != undefined && order.campaign.orderPriorityEnable()
                     ? order.rank + 1 :  lang.translate('lystore.order.not.prioritized') ]]</td>
-                <td ng-hide="!tableFields[13].display"><span ng-bind="order.priceTTCtotal | currency"></span></td>
+                <td ng-hide="!tableFields[13].display"><span ng-bind="showPriceProposalOrNot(order) | currency"></span></td>
             </tr>
             </tbody>
             <tfoot>

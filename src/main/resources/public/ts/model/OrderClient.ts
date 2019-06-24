@@ -19,6 +19,7 @@ export class OrderClient implements Selectable {
     status: string;
     number_validation: string;
     priceTTCtotal: number ;
+    priceProposalTTCTotal: number;
     grade?: Grade;
     title?: Title;
     options: OrderOptionClient[];
@@ -50,8 +51,8 @@ export class OrderClient implements Selectable {
 
     }
 
-    calculatePriceTTC ( roundNumber?: number)  {
-        let price = parseFloat(Utils.calculatePriceTTC(this.price , this.tax_amount).toString());
+    calculatePriceTTC ( roundNumber?: number, priceCalculate?: number)  {
+        let price = parseFloat(Utils.calculatePriceTTC(priceCalculate , this.tax_amount).toString());
         if (this.options !== undefined) {
             this.options.map((option) => {
                 price += parseFloat(Utils.calculatePriceTTC(option.price , option.tax_amount).toString() );
@@ -129,6 +130,7 @@ export class OrdersClient extends Selection<OrderClient> {
 
                 this.all.map((order) => {
                     order.price = parseFloat(order.price.toString());
+                    order.price_proposal = parseFloat( order.price_proposal.toString());
                     order.tax_amount = parseFloat(order.tax_amount.toString());
                     order.project = Mix.castAs(Project, JSON.parse(order.project.toString()));
                     order.project.init(idCampaign, idStructure);
@@ -175,7 +177,10 @@ export class OrdersClient extends Selection<OrderClient> {
                         order.options.toString() !== '[null]' && order.options !== null ?
                             order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
                             : order.options = [];
-                        order.priceTTCtotal = parseFloat((order.calculatePriceTTC(2) as number).toString()) * order.amount;
+                        order.priceTTCtotal = parseFloat((order.calculatePriceTTC(2, order.price) as number).toString()) * order.amount;
+                        order.priceProposalTTCTotal = order.price_proposal !== null ?
+                            parseFloat((order.calculatePriceTTC(2, order.price_proposal) as number).toString()) * order.amount :
+                            null;
                     }
                 });
             }

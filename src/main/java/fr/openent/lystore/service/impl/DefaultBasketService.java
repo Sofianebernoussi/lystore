@@ -31,10 +31,12 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
 
     private static NotificationService notificationService;
     private PurseService purseService;
+    private static JsonObject mail;
 
-    public DefaultBasketService(String schema, String table, Vertx vertx, JsonObject slackConfiguration) {
+    public DefaultBasketService(String schema, String table, Vertx vertx, JsonObject slackConfiguration,JsonObject mail) {
         super(schema, table);
         this.purseService = new DefaultPurseService();
+        this.mail = mail;
         notificationService = new SlackService(
                 vertx,
                 slackConfiguration.getString("api-uri"),
@@ -569,19 +571,24 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             final double cons = 100.0;
             Number total = Math.round(totalPrice * cons) / cons;
             handler.handle(new Either.Right<String, JsonObject>(returns));
-            notificationService.sendMessage(
-                    I18n.getInstance().translate("the.structure",
-                            getHost(request), I18n.acceptLanguage(request))
-                            + " " + nameStructure + " " +
-                            I18n.getInstance().translate("lystore.slack.order.message1",
-                                    getHost(request), I18n.acceptLanguage(request))
-                            + " " + total.toString() + " " +
-                            I18n.getInstance().translate("money.symbol",
-                                    getHost(request), I18n.acceptLanguage(request))
-                            + " " +
-                            I18n.getInstance().translate("determiner.male",
-                                    getHost(request), I18n.acceptLanguage(request))
-                            + " " + format.format(new Date()) + " ");
+
+            if (mail.getBoolean("enableMail")) {
+                LOGGER.info("Sending mails is enable in conf.json.template");
+            } else {
+                notificationService.sendMessage(
+                        I18n.getInstance().translate("the.structure",
+                                getHost(request), I18n.acceptLanguage(request))
+                                + " " + nameStructure + " " +
+                                I18n.getInstance().translate("lystore.slack.order.message1",
+                                        getHost(request), I18n.acceptLanguage(request))
+                                + " " + total.toString() + " " +
+                                I18n.getInstance().translate("money.symbol",
+                                        getHost(request), I18n.acceptLanguage(request))
+                                + " " +
+                                I18n.getInstance().translate("determiner.male",
+                                        getHost(request), I18n.acceptLanguage(request))
+                                + " " + format.format(new Date()) + " ");
+            }
         } else {
             LOGGER.error("An error occurred when launching 'order' transaction");
             handler.handle(new Either.Left<String, JsonObject>(""));

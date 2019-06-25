@@ -31,10 +31,10 @@ public class BasketController extends ControllerHelper {
     private final BasketService basketService;
     private final Storage storage;
 
-    public BasketController(Vertx vertx, Storage storage, JsonObject slackConfiguration) {
+    public BasketController(Vertx vertx, Storage storage, JsonObject slackConfiguration,JsonObject mail) {
         super();
         this.storage = storage;
-        this.basketService = new DefaultBasketService(Lystore.lystoreSchema, "basket", vertx, slackConfiguration);
+        this.basketService = new DefaultBasketService(Lystore.lystoreSchema, "basket", vertx, slackConfiguration, mail);
     }
     @Get("/basket/:idCampaign/:idStructure")
     @ApiDoc("List  basket liste of a campaigne and a structure")

@@ -26,6 +26,9 @@
             "api-uri": "",
             "bot-username": "Lystore Bot",
             "channel": ""
-        }
+        },
+         "mail": {
+            "enableMail": true
+         }
       }
     }

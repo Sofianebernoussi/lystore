@@ -22,6 +22,7 @@ public class Lystore extends BaseServer {
         lystoreSchema = config.getString("db-schema");
         EventBus eb = getEventBus(vertx);
         Storage storage = new StorageFactory(vertx, config).getStorage();
+        JsonObject mail = config.getJsonObject("mail", new JsonObject());
 
         addController(new LystoreController());
         addController(new AgentController());
@@ -37,7 +38,7 @@ public class Lystore extends BaseServer {
         addController(new PurseController(vertx));
         addController(new StructureGroupController(vertx));
         addController(new StructureController());
-        addController(new BasketController(vertx, storage, config.getJsonObject("slack", new JsonObject())));
+        addController(new BasketController(vertx, storage, config.getJsonObject("slack", new JsonObject()), mail));
         addController(new OrderController(storage, vertx, config, eb));
         addController(new UserController());
         addController(new EquipmentTypeController());

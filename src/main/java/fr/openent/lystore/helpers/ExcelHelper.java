@@ -2,6 +2,7 @@ package fr.openent.lystore.helpers;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.RegionUtil;
 
 public class ExcelHelper {
@@ -10,6 +11,8 @@ public class ExcelHelper {
     public final CellStyle headCellStyle;
     private final CellStyle labelStyle;
     private final CellStyle tabStyle;
+    private final CellStyle totalStyle;
+    private DataFormat format;
     public static final String totalLabel = "Totaux";
     public ExcelHelper(Workbook wb, Sheet sheet) {
         this.wb = wb;
@@ -17,10 +20,17 @@ public class ExcelHelper {
         this.headCellStyle = wb.createCellStyle();
         this.labelStyle = wb.createCellStyle();
         this.tabStyle = wb.createCellStyle();
-        initStyles();
+        this.totalStyle = wb.createCellStyle();
+        format = wb.createDataFormat();
+        format.getFormat("#.#");
+
+        this.initStyles();
 
     }
 
+    /**
+     * Init all the stles of the sheet
+     */
     private void initStyles() {
         //INIT HEader style
         Font headerFont = this.wb.createFont();
@@ -50,6 +60,22 @@ public class ExcelHelper {
         this.labelStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         this.labelStyle.setFont(labelFont);
 
+        //TotalStyle
+        Font totalFont = this.wb.createFont();
+        totalFont.setFontHeightInPoints((short) 11);
+        totalFont.setFontName("Calibri");
+        totalFont.setBold(true);
+
+        this.totalStyle.setBorderLeft(BorderStyle.THIN);
+        this.totalStyle.setBorderRight(BorderStyle.THIN);
+        this.totalStyle.setBorderTop(BorderStyle.THIN);
+        this.totalStyle.setBorderBottom(BorderStyle.THIN);
+        this.totalStyle.setWrapText(true);
+        this.totalStyle.setAlignment(HorizontalAlignment.RIGHT);
+        this.totalStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.totalStyle.setFont(totalFont);
+        this.totalStyle.setDataFormat(format.getFormat("#,##0.00"));
+
         //TabStyle
         Font tabFont = this.wb.createFont();
         tabFont.setFontHeightInPoints((short) 11);
@@ -63,6 +89,7 @@ public class ExcelHelper {
         this.tabStyle.setAlignment(HorizontalAlignment.RIGHT);
         this.tabStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         this.tabStyle.setFont(tabFont);
+        this.tabStyle.setDataFormat(format.getFormat("#,##0.00"));
     }
     public void setBold(Cell cell) {
         Font font = wb.createFont();
@@ -112,6 +139,13 @@ public class ExcelHelper {
 
     }
 
+    /**
+     * insert Header
+     *
+     * @param row
+     * @param cellColumn
+     * @param data
+     */
     public void insertHeader(Row row, int cellColumn, String data) {
         Cell cell = row.createCell(cellColumn);
         cell.setCellValue(data);
@@ -119,21 +153,43 @@ public class ExcelHelper {
 
     }
 
+    /**
+     * insert a cell with label style
+     *
+     * @param row
+     * @param cellColumn
+     * @param data       data to insert
+     */
     public void insertLabel(Row row, int cellColumn, String data) {
         Cell cell = row.createCell(cellColumn);
         cell.setCellValue(data);
         cell.setCellStyle(this.labelStyle);
     }
 
-    public void insertCellTab(int cellColumn, int line, String data) {
+    /**
+     * insert a cell in the tab
+     *
+     * @param cellColumn
+     * @param line
+     * @param data       data to insert
+     */
+    public void insertCellTabFloat(int cellColumn, int line, float data) {
         Row tab;
         tab = sheet.getRow(line);
         Cell cell = tab.createCell(cellColumn);
-
+        cell.setCellValue(data);
         cell.setCellStyle(this.tabStyle);
     }
 
-    public void fillTab(int columnStart, int columnEnd, int lineStart, int lineEnd, Sheet sheet) {
+    /**
+     * Set style for a tab
+     *
+     * @param columnStart
+     * @param columnEnd
+     * @param lineStart
+     * @param lineEnd
+     */
+    public void fillTab(int columnStart, int columnEnd, int lineStart, int lineEnd) {
         Row tab;
         Cell cell;
         for (int line = lineStart; line < lineEnd; line++) {
@@ -145,4 +201,53 @@ public class ExcelHelper {
         }
     }
 
+    /**
+     * Set total column and  line of a tab
+     *
+     * @param columnEnd
+     * @param lineEnd
+     * @param columnStart
+     * @param lineStart
+     */
+    public void setTotal(int columnEnd, int lineEnd, int columnStart, int lineStart) {
+        Row tab, tabStart, tabEnd;
+        Cell cell, cellStartSum, cellEndSum;
+        // totalY
+        tabStart = sheet.getRow(lineStart);
+        tabEnd = sheet.getRow(lineEnd - 1);
+
+        for (int i = lineStart; i < lineEnd; i++) {
+            tab = sheet.getRow(i);
+            cell = tab.createCell(columnEnd);
+            cellStartSum = tab.getCell(columnStart);
+            cellEndSum = tab.getCell(columnEnd - 1);
+            cell.setCellStyle(this.totalStyle);
+            cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
+
+
+        }
+        //totalX
+        tab = sheet.getRow(lineEnd);
+
+        for (int i = columnStart; i < columnEnd; i++) {
+            cell = tab.createCell(i);
+            cell.setCellStyle(this.totalStyle);
+            cell.setCellValue("total");
+
+            cellStartSum = tabStart.getCell(i);
+            cellEndSum = tabEnd.getCell(i);
+
+
+            cell.setCellStyle(this.totalStyle);
+            cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
+        }
+        cellStartSum = tabStart.getCell(columnEnd);
+        cellEndSum = tabEnd.getCell(columnEnd);
+
+
+        cell = tab.createCell(columnEnd);
+        cell.setCellStyle(this.totalStyle);
+        cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
+
+    }
 }

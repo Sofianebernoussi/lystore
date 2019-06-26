@@ -24,6 +24,9 @@ public class LyceeTab {
     final int yTab = 9;
     final int xTab = 1;
     private int cellColumn = 1;
+    /**
+     * Format : H-code
+     */
     private JsonObject tabx;
     private JsonArray taby;
 
@@ -56,7 +59,7 @@ public class LyceeTab {
 
             JsonArray programs = event.right().getValue();
             setPrograms(programs);
-            excel.fillTab(xTab, this.cellColumn, yTab, this.operationsRowNumber, this.sheet);
+            excel.fillTab(xTab, this.cellColumn, yTab, this.operationsRowNumber);
             initTabValue(xTab, this.cellColumn, yTab, this.operationsRowNumber);
             getPrices(event1 -> {
                 if (event.isLeft()) {
@@ -69,6 +72,14 @@ public class LyceeTab {
         });
     }
 
+    /**
+     * Init all the tab
+     *
+     * @param i
+     * @param cellColumn
+     * @param j
+     * @param operationsRowNumber
+     */
     private void initTabValue(int i, int cellColumn, int j, int operationsRowNumber) {
         for (int ii = 0; ii < cellColumn - i; ii++) {
             priceTab.add(ii, new ArrayList<Float>());
@@ -79,6 +90,9 @@ public class LyceeTab {
         }
     }
 
+    /**
+     * Set labels of the tabs
+     */
     private void setLabels() {
         int cellLabelColumn = 0;
 
@@ -96,6 +110,11 @@ public class LyceeTab {
         excel.insertHeader(sheet.createRow(this.operationsRowNumber), cellLabelColumn, excel.totalLabel);
     }
 
+    /**
+     * Set the headers of tab
+     *
+     * @param programs
+     */
     private void setPrograms(JsonArray programs) {
         int posx = 0;
         int programRowNumber = 6;
@@ -137,17 +156,25 @@ public class LyceeTab {
         excel.insertHeader(sheet.getRow(programRowNumber), cellColumn, excel.totalLabel);
     }
 
+    /**
+     * Insert prices into the tab
+     */
     private void setPrices() {
         for (int i = 0; i < priceTab.size(); i++) {
             for (int j = 0; j < priceTab.get(i).size(); j++) {
                 if (priceTab.get(i).get(j) != 0.f)
-                    excel.insertCellTab(i + xTab, j + yTab, priceTab.get(i).get(j).toString());
+                    excel.insertCellTabFloat(i + xTab, j + yTab, priceTab.get(i).get(j));
             }
         }
-
-        wb.setForceFormulaRecalculation(true);
+        excel.setTotal(cellColumn, operationsRowNumber, xTab, yTab);
     }
 
+
+    /**
+     * Get all the prices of equipments
+     *
+     * @param handler
+     */
     private void getPrices(Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT oce.price, oce.amount, oce.tax_amount ,contract_type.code as code, program_action.id_program as id_program ,oce.id_operation " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment oce  " +
@@ -165,14 +192,12 @@ public class LyceeTab {
             if (event.isLeft()) {
                 handler.handle(event.left());
             } else {
-                Float totalPrice = 0.f;
                 JsonArray commands = event.right().getValue();
                 for (int i = 0; i < commands.size(); i++) {
                     JsonObject command = commands.getJsonObject(i);
                     float priceCommand = (Float.parseFloat(command.getString("price")) +
                             Float.parseFloat(command.getString("price")) * Float.parseFloat(command.getString("tax_amount")) / 100) * command.getLong("amount");
 
-                    totalPrice += priceCommand;
                     for (int y = 0; y < taby.size(); y++) {
                         if (command.getInteger("id_operation") == taby.getInteger(y)) {
                             priceTab.get(tabx.getInteger(command.getInteger("id_program").toString() + "-" + command.getString("code"))).set(y, priceTab.get(0).get(y) + priceCommand);
@@ -186,6 +211,11 @@ public class LyceeTab {
 
     }
 
+    /**
+     * Get header of the tab
+     *
+     * @param handler
+     */
     private void getPrograms(Handler<Either<String, JsonArray>> handler) {
         String query = "WITH values AS (" +
                 "   SELECT distinct contract_type.code, program_action.description, program_action.id_program  " +

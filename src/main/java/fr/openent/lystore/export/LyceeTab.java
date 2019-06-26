@@ -13,21 +13,32 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
+import java.util.ArrayList;
+
 public class LyceeTab {
     private Workbook wb;
     private Sheet sheet;
     private JsonObject instruction;
     private ExcelHelper excel;
     private int operationsRowNumber = 9;
+    final int yTab = 9;
+    final int xTab = 1;
     private int cellColumn = 1;
+    private JsonObject tabx;
+    private JsonArray taby;
+
     private String TITLE = "Récapitulatif des mesures engagées";
     private String SUBTITLE = "Récapitulatif investissement";
+    private ArrayList<ArrayList<Float>> priceTab;
 
     public LyceeTab(Workbook wb, JsonObject instruction) {
         this.wb = wb;
+        this.tabx = new JsonObject();
+        this.taby = new JsonArray();
         this.instruction = instruction;
         this.sheet = wb.getSheet("Investissement-LYCEES");
         this.excel = new ExcelHelper(wb, sheet);
+        priceTab = new ArrayList<ArrayList<Float>>();
 
 
     }
@@ -45,9 +56,27 @@ public class LyceeTab {
 
             JsonArray programs = event.right().getValue();
             setPrograms(programs);
-//            excel.fillTab(1, this.cellColumn, 9, this.operationsRowNumber, this.sheet);
-            handler.handle(new Either.Right<>(true));
+            excel.fillTab(xTab, this.cellColumn, yTab, this.operationsRowNumber, this.sheet);
+            initTabValue(xTab, this.cellColumn, yTab, this.operationsRowNumber);
+            getPrices(event1 -> {
+                if (event.isLeft()) {
+                    handler.handle(new Either.Left<>("Failed to retrieve prices"));
+                    return;
+                }
+                handler.handle(new Either.Right<>(true));
+            });
+
         });
+    }
+
+    private void initTabValue(int i, int cellColumn, int j, int operationsRowNumber) {
+        for (int ii = 0; ii < cellColumn - i; ii++) {
+            priceTab.add(ii, new ArrayList<Float>());
+            for (int jj = 0; jj < operationsRowNumber - j; jj++) {
+                priceTab.get(ii).add(jj, 0.f);
+            }
+
+        }
     }
 
     private void setLabels() {
@@ -59,15 +88,16 @@ public class LyceeTab {
         JsonArray operations = this.instruction.getJsonArray("operations");
         for (int i = 0; i < operations.size(); i++) {
             JsonObject operation = operations.getJsonObject(i);
-
+            taby.add(operation.getInteger("id"));
             Row operationRow = sheet.createRow(this.operationsRowNumber);
             excel.insertLabel(operationRow, cellLabelColumn, operation.getString("label"));
             this.operationsRowNumber++;
         }
+        excel.insertHeader(sheet.createRow(this.operationsRowNumber), cellLabelColumn, excel.totalLabel);
     }
 
     private void setPrograms(JsonArray programs) {
-
+        int posx = 0;
         int programRowNumber = 6;
         if (programs.isEmpty()) {
             return;
@@ -88,18 +118,77 @@ public class LyceeTab {
             }
             for (int j = 0; j < actions.size(); j++) {
                 JsonObject action = actions.getJsonObject(j);
+                if (!tabx.containsKey(action.getInteger("id_program").toString() + "-" + action.getString("code"))) {
+                    tabx.put(action.getInteger("id_program").toString() + "-" + action.getString("code"), posx);
+                    posx++;
+                }
+
                 excel.insertHeader(actionDescRow, cellColumn, action.getString("description"));
                 excel.insertHeader(actionNumRow, cellColumn, action.getString("code"));
                 this.cellColumn++;
+            }
 
+
+        }
+        //addin total
+        CellRangeAddress totalMerge = new CellRangeAddress(programRowNumber, programRowNumber + 2, cellColumn, cellColumn);
+        sheet.addMergedRegion(totalMerge);
+        excel.setRegionHeader(totalMerge, sheet);
+        excel.insertHeader(sheet.getRow(programRowNumber), cellColumn, excel.totalLabel);
+    }
+
+    private void setPrices() {
+        for (int i = 0; i < priceTab.size(); i++) {
+            for (int j = 0; j < priceTab.get(i).size(); j++) {
+                if (priceTab.get(i).get(j) != 0.f)
+                    excel.insertCellTab(i + xTab, j + yTab, priceTab.get(i).get(j).toString());
             }
         }
-        System.out.println(this.cellColumn);
+
+        wb.setForceFormulaRecalculation(true);
+    }
+
+    private void getPrices(Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT oce.price, oce.amount, oce.tax_amount ,contract_type.code as code, program_action.id_program as id_program ,oce.id_operation " +
+                "FROM " + Lystore.lystoreSchema + ".order_client_equipment oce  " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)   " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (oce.id_contract = contract.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)   " +
+                "WHERE instruction.id = 1    AND structure_program_action.structure_type = 'LYC'   " +
+                "AND oce.id_structure NOT IN (    SELECT id    FROM " + Lystore.lystoreSchema + ".specific_structures    ) " +
+                "order by id_program,code,oce.id_operation";
+
+        Sql.getInstance().prepared(query, new JsonArray(), SqlResult.validResultHandler(event -> {
+            if (event.isLeft()) {
+                handler.handle(event.left());
+            } else {
+                Float totalPrice = 0.f;
+                JsonArray commands = event.right().getValue();
+                for (int i = 0; i < commands.size(); i++) {
+                    JsonObject command = commands.getJsonObject(i);
+                    float priceCommand = (Float.parseFloat(command.getString("price")) +
+                            Float.parseFloat(command.getString("price")) * Float.parseFloat(command.getString("tax_amount")) / 100) * command.getLong("amount");
+
+                    totalPrice += priceCommand;
+                    for (int y = 0; y < taby.size(); y++) {
+                        if (command.getInteger("id_operation") == taby.getInteger(y)) {
+                            priceTab.get(tabx.getInteger(command.getInteger("id_program").toString() + "-" + command.getString("code"))).set(y, priceTab.get(0).get(y) + priceCommand);
+                        }
+                    }
+                }
+                setPrices();
+                handler.handle(new Either.Right<>(commands));
+            }
+        }));
+
     }
 
     private void getPrograms(Handler<Either<String, JsonArray>> handler) {
         String query = "WITH values AS (" +
-                "   SELECT distinct contract_type.code, program_action.description, program_action.id_program " +
+                "   SELECT distinct contract_type.code, program_action.description, program_action.id_program  " +
                 "   FROM " + Lystore.lystoreSchema + ".order_client_equipment oce " +
                 "   INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id) " +
                 "   INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id) " +

@@ -10,7 +10,7 @@ public class ExcelHelper {
     public final CellStyle headCellStyle;
     private final CellStyle labelStyle;
     private final CellStyle tabStyle;
-
+    public static final String totalLabel = "Totaux";
     public ExcelHelper(Workbook wb, Sheet sheet) {
         this.wb = wb;
         this.sheet = sheet;
@@ -125,15 +125,24 @@ public class ExcelHelper {
         cell.setCellStyle(this.labelStyle);
     }
 
+    public void insertCellTab(int cellColumn, int line, String data) {
+        Row tab;
+        tab = sheet.getRow(line);
+        Cell cell = tab.createCell(cellColumn);
+
+        cell.setCellStyle(this.tabStyle);
+    }
+
     public void fillTab(int columnStart, int columnEnd, int lineStart, int lineEnd, Sheet sheet) {
         Row tab;
         Cell cell;
         for (int line = lineStart; line < lineEnd; line++) {
-            tab = sheet.createRow(line);
+            tab = sheet.getRow(line);
             for (int column = columnStart; column < columnEnd; column++) {
                 cell = tab.createCell(column);
                 cell.setCellStyle(this.tabStyle);
             }
         }
     }
+
 }

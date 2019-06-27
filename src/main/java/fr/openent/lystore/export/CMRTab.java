@@ -23,7 +23,7 @@ public class CMRTab extends Investissement {
     @Override
     public void getPrograms(Handler<Either<String, JsonArray>> handler) {
         String query = "WITH values AS (" +
-                "   SELECT distinct contract_type.code, program_action.description, program_action.id_program  " +
+                "   SELECT distinct contract_type.code,  contract_type.name, program_action.id_program  " +
                 "   FROM " + Lystore.lystoreSchema + ".order_client_equipment oce " +
                 "   INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id) " +
                 "   INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id) " +
@@ -72,10 +72,10 @@ public class CMRTab extends Investissement {
                 "INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)   " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (oce.id_contract = contract.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id) " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id and structure_program_action.structure_type = 'CMR') " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)   " +
                 "WHERE instruction.id = ?    AND structure_program_action.structure_type = 'CMR'   " +
-                "AND oce.id_structure IN (    SELECT id    FROM " + Lystore.lystoreSchema + ".specific_structures    ) " +
+                "AND oce.id_structure IN (    SELECT id    FROM " + Lystore.lystoreSchema + ".specific_structures    where type='CMR'  ) " +
                 "order by id_program,code,oce.id_operation";
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
@@ -94,6 +94,7 @@ public class CMRTab extends Investissement {
                         }
                     }
                 }
+
                 setPrices();
                 handler.handle(new Either.Right<>(commands));
             }

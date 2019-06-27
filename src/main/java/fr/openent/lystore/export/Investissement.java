@@ -21,6 +21,7 @@ public class Investissement {
     final protected int yTab = 9;
     final protected int xTab = 1;
     protected int cellColumn = 1;
+    protected boolean isEmpty = false;
     /**
      * Format : H-code
      */
@@ -52,6 +53,12 @@ public class Investissement {
             }
 
             JsonArray programs = event.right().getValue();
+            //Delete tab if empty
+            if (programs.size() == 0) {
+                wb.removeSheetAt(wb.getSheetIndex(sheet));
+                handler.handle(new Either.Right<>(true));
+                return;
+            }
             setPrograms(programs);
             excel.fillTab(xTab, this.cellColumn, yTab, this.operationsRowNumber);
             initTabValue(xTab, this.cellColumn, yTab, this.operationsRowNumber);
@@ -107,7 +114,6 @@ public class Investissement {
             taby.add(operation.getInteger("id"));
             Row operationRow = sheet.createRow(this.operationsRowNumber);
             excel.insertLabel(operationRow, cellLabelColumn, operation.getString("label"));
-            System.out.println(operation);
             this.operationsRowNumber++;
         }
         excel.insertHeader(sheet.createRow(this.operationsRowNumber), cellLabelColumn, excel.totalLabel);
@@ -144,8 +150,7 @@ public class Investissement {
                     tabx.put(action.getInteger("id_program").toString() + "-" + action.getString("code"), posx);
                     posx++;
                 }
-
-                excel.insertHeader(actionDescRow, cellColumn, action.getString("description"));
+                excel.insertHeader(actionDescRow, cellColumn, action.getString("name"));
                 excel.insertHeader(actionNumRow, cellColumn, action.getString("code"));
                 this.cellColumn++;
             }

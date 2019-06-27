@@ -67,9 +67,11 @@ public class Instruction {
                 this.workbook = workbook;
                 List<Future> futures = new ArrayList<>();
                 Future<Boolean> lyceeFuture = Future.future();
-                Future<Boolean> CMRfuture = Future.future();
+                Future<Boolean> CMRFuture = Future.future();
+                Future<Boolean> CMDfuture = Future.future();
                 futures.add(lyceeFuture);
-                futures.add(CMRfuture);
+                futures.add(CMRFuture);
+                futures.add(CMDfuture);
                 CompositeFuture.all(futures).setHandler(event -> {
                     if (event.succeeded()) {
                         try {
@@ -87,7 +89,11 @@ public class Instruction {
                 });
 
                 new LyceeTab(workbook, instruction).create(getHandler(lyceeFuture));
-                new CMRTab(workbook, instruction).create(getHandler(CMRfuture));
+                new CMRTab(workbook, instruction).create(getHandler(CMRFuture));
+                new CMDTab(workbook, instruction).create(getHandler(CMDfuture));
+//                new FonctionnementTab(workbook, instruction).create(getHandler(Fonctionnementfuture));
+//                new RecapEPLETab(workbook, instruction).create(getHandler(RecapEPLEfuture));
+//                new RecapImputationBud(workbook, instruction).create(getHandler( RecapImputationBudfuture));
             } catch (IOException e) {
                 System.out.println("Xlsx Failed to read template");
                 return;

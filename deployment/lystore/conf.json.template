@@ -28,7 +28,7 @@
             "channel": ""
         },
          "mail": {
-            "enableMail": true
+            "enableMail": ${lystoreEnableMail}
          }
       }
     }

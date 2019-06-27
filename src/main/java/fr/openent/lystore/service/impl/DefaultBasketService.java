@@ -425,7 +425,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                     .add(Float.valueOf(basket.getString("price_proposal")))
                     .add(basket.getInteger("id_campaign"))
                     .add(basket.getString("id_structure"))
-                    ;
+            ;
 
         } catch (java.lang.NullPointerException e) {
             queryEquipmentOrder = new StringBuilder()
@@ -456,7 +456,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                     .add(idProject)
                     .add(basket.getInteger("id_campaign"))
                     .add(basket.getString("id_structure"))
-                    ;
+            ;
 
         }
 
@@ -571,23 +571,26 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             final double cons = 100.0;
             Number total = Math.round(totalPrice * cons) / cons;
             handler.handle(new Either.Right<String, JsonObject>(returns));
-
-            if (mail.getBoolean("enableMail")) {
-                LOGGER.info("Sending mails is enable in conf.json.template");
+            if(mail.containsKey("enableMail")){
+                if (!mail.getBoolean("enableMail")) {
+                    notificationService.sendMessage(
+                            I18n.getInstance().translate("the.structure",
+                                    getHost(request), I18n.acceptLanguage(request))
+                                    + " " + nameStructure + " " +
+                                    I18n.getInstance().translate("lystore.slack.order.message1",
+                                            getHost(request), I18n.acceptLanguage(request))
+                                    + " " + total.toString() + " " +
+                                    I18n.getInstance().translate("money.symbol",
+                                            getHost(request), I18n.acceptLanguage(request))
+                                    + " " +
+                                    I18n.getInstance().translate("determiner.male",
+                                            getHost(request), I18n.acceptLanguage(request))
+                                    + " " + format.format(new Date()) + " ");
+                } else {
+                    LOGGER.info("Sending mails is enable in conf.json.template");
+                }
             } else {
-                notificationService.sendMessage(
-                        I18n.getInstance().translate("the.structure",
-                                getHost(request), I18n.acceptLanguage(request))
-                                + " " + nameStructure + " " +
-                                I18n.getInstance().translate("lystore.slack.order.message1",
-                                        getHost(request), I18n.acceptLanguage(request))
-                                + " " + total.toString() + " " +
-                                I18n.getInstance().translate("money.symbol",
-                                        getHost(request), I18n.acceptLanguage(request))
-                                + " " +
-                                I18n.getInstance().translate("determiner.male",
-                                        getHost(request), I18n.acceptLanguage(request))
-                                + " " + format.format(new Date()) + " ");
+                LOGGER.info("EnableMail doesn't exist in object mail contents conf.json.template");
             }
         } else {
             LOGGER.error("An error occurred when launching 'order' transaction");

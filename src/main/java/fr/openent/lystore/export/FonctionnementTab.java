@@ -9,14 +9,14 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
-public class CMDTab extends Investissement {
+public class FonctionnementTab extends Investissement {
 
     /**
      * Format : H-code
      */
 
-    public CMDTab(Workbook wb, JsonObject instruction) {
-        super(wb, instruction, "Investissement-CMD");
+    public FonctionnementTab(Workbook wb, JsonObject instruction) {
+        super(wb, instruction, "Fonctionnement");
     }
 
 
@@ -29,20 +29,14 @@ public class CMDTab extends Investissement {
                 "   INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id) " +
                 "   INNER JOIN " + Lystore.lystoreSchema + ".contract ON (oce.id_contract = contract.id) " +
                 "   INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id) " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id " +
-                "   AND structure_program_action.structure_type = '" + this.CMD + "') " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id) " +
                 "   INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id) " +
                 "   WHERE instruction.id = ? " +
-                "   AND structure_program_action.structure_type = '" + this.CMD + "' " +
-                "   AND oce.id_structure IN ( " +
-                "   SELECT id " +
-                "   FROM " + Lystore.lystoreSchema + ".specific_structures " +
-                "   WHERE type='" + this.CMD + "')" +
                 ") " +
                 "SELECT program.*, array_to_json(array_agg(values)) as actions " +
                 "FROM " + Lystore.lystoreSchema + ".program " +
                 "INNER JOIN values ON (values.id_program = program.id) " +
-                "WHERE program.section = '" + this.Investissement + "'" +
+                "WHERE program.section = 'Fonctionnement'" +
                 "GROUP BY program.id";
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
@@ -55,6 +49,7 @@ public class CMDTab extends Investissement {
                     program.put("actions", new JsonArray(program.getString("actions")));
 
                 }
+
                 handler.handle(new Either.Right<>(programs));
             }
         }));
@@ -73,12 +68,11 @@ public class CMDTab extends Investissement {
                 "INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)   " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (oce.id_contract = contract.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id) " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id " +
-                "AND structure_program_action.structure_type =  '" + this.CMD + "') " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)  " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".program ON (program.id = program_action.id_program and program.section =  '" + this.Investissement + "')" +
-                "WHERE instruction.id = ?   AND structure_program_action.structure_type = '" + this.CMD + "'   " +
-                "AND oce.id_structure  IN (    SELECT id    FROM " + Lystore.lystoreSchema + ".specific_structures WHERE specific_structures.type = 'CMR') " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)" +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".program ON (program_action.id_program =  program.id AND program.section = 'Fonctionnement') " +
+                "WHERE instruction.id = ? " +
+                " " +
                 "order by id_program,code,oce.id_operation";
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
@@ -97,6 +91,7 @@ public class CMDTab extends Investissement {
                         }
                     }
                 }
+
                 setPrices();
                 handler.handle(new Either.Right<>(commands));
             }

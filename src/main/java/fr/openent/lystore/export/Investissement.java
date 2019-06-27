@@ -13,6 +13,11 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import java.util.ArrayList;
 
 public class Investissement {
+    protected final String CMD = "CMD";
+    protected final String CMR = "CMR";
+    protected final String Lycee = "LYC";
+    protected static final String Investissement = "Investissement";
+    protected static final String Fonctionnement = "Fonctionnement";
     protected Workbook wb;
     protected Sheet sheet;
     protected JsonObject instruction;

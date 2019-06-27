@@ -69,9 +69,11 @@ public class Instruction {
                 Future<Boolean> lyceeFuture = Future.future();
                 Future<Boolean> CMRFuture = Future.future();
                 Future<Boolean> CMDfuture = Future.future();
+                Future<Boolean> Fonctionnementfuture = Future.future();
                 futures.add(lyceeFuture);
                 futures.add(CMRFuture);
                 futures.add(CMDfuture);
+                futures.add(Fonctionnementfuture);
                 CompositeFuture.all(futures).setHandler(event -> {
                     if (event.succeeded()) {
                         try {
@@ -91,7 +93,7 @@ public class Instruction {
                 new LyceeTab(workbook, instruction).create(getHandler(lyceeFuture));
                 new CMRTab(workbook, instruction).create(getHandler(CMRFuture));
                 new CMDTab(workbook, instruction).create(getHandler(CMDfuture));
-//                new FonctionnementTab(workbook, instruction).create(getHandler(Fonctionnementfuture));
+                new FonctionnementTab(workbook, instruction).create(getHandler(Fonctionnementfuture));
 //                new RecapEPLETab(workbook, instruction).create(getHandler(RecapEPLEfuture));
 //                new RecapImputationBud(workbook, instruction).create(getHandler( RecapImputationBudfuture));
             } catch (IOException e) {

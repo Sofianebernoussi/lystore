@@ -150,6 +150,7 @@ public class ExcelHelper {
         Cell cell = row.createCell(cellColumn);
         cell.setCellValue(data);
         cell.setCellStyle(this.headCellStyle);
+        row.setHeight((short) -1);
 
     }
 
@@ -164,6 +165,7 @@ public class ExcelHelper {
         Cell cell = row.createCell(cellColumn);
         cell.setCellValue(data);
         cell.setCellStyle(this.labelStyle);
+        sheet.autoSizeColumn(cellColumn);
     }
 
     /**

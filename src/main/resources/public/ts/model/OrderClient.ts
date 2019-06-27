@@ -130,7 +130,7 @@ export class OrdersClient extends Selection<OrderClient> {
 
                 this.all.map((order) => {
                     order.price = parseFloat(order.price.toString());
-                    order.price_proposal = parseFloat( order.price_proposal.toString());
+                    order.price_proposal = order.price_proposal? parseFloat( order.price_proposal.toString()) : null;
                     order.tax_amount = parseFloat(order.tax_amount.toString());
                     order.project = Mix.castAs(Project, JSON.parse(order.project.toString()));
                     order.project.init(idCampaign, idStructure);

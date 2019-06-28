@@ -12,8 +12,11 @@ public class ExcelHelper {
     private final CellStyle labelStyle;
     private final CellStyle tabStyle;
     private final CellStyle totalStyle;
+    private final CellStyle labelHeadStyle;
+
     private DataFormat format;
     public static final String totalLabel = "Totaux";
+
     public ExcelHelper(Workbook wb, Sheet sheet) {
         this.wb = wb;
         this.sheet = sheet;
@@ -21,6 +24,8 @@ public class ExcelHelper {
         this.labelStyle = wb.createCellStyle();
         this.tabStyle = wb.createCellStyle();
         this.totalStyle = wb.createCellStyle();
+        this.labelHeadStyle = wb.createCellStyle();
+
         format = wb.createDataFormat();
         format.getFormat("#.#");
 
@@ -91,6 +96,12 @@ public class ExcelHelper {
         this.tabStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         this.tabStyle.setFont(tabFont);
         this.tabStyle.setDataFormat(format.getFormat("#,##0.00"));
+
+        //LabelHeadStyle
+        this.labelHeadStyle.setWrapText(true);
+        this.labelHeadStyle.setAlignment(HorizontalAlignment.LEFT);
+        this.labelHeadStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.labelHeadStyle.setFont(headerFont);
     }
     public void setBold(Cell cell) {
         Font font = wb.createFont();
@@ -168,6 +179,21 @@ public class ExcelHelper {
         cell.setCellStyle(this.labelStyle);
         sheet.autoSizeColumn(cellColumn);
     }
+
+    /**
+     * insert a cell with label  style out of an array
+     *
+     * @param row
+     * @param cellColumn
+     * @param data       data to insert
+     */
+    public void insertLabelHead(Row row, int cellColumn, String data) {
+        Cell cell = row.createCell(cellColumn);
+        cell.setCellValue(data);
+        cell.setCellStyle(this.labelHeadStyle);
+        sheet.autoSizeColumn(cellColumn);
+    }
+
 
     /**
      * insert a cell in the tab

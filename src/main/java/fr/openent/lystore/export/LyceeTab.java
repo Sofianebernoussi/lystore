@@ -32,10 +32,10 @@ public class LyceeTab extends Investissement {
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (oce.id_contract = contract.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id " +
-                "AND structure_program_action.structure_type =  '" + this.Lycee + "') " +
+                "AND structure_program_action.structure_type =  '" + Lycee + "') " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)  " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".program ON (program.id = program_action.id_program and program.section =  '" + this.Investissement + "')" +
-                "WHERE instruction.id = ?   AND structure_program_action.structure_type = '" + this.Lycee + "'   " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".program ON (program.id = program_action.id_program and program.section =  '" + Investissement + "')" +
+                "WHERE instruction.id = ?   AND structure_program_action.structure_type = '" + Lycee + "'   " +
                 "AND oce.id_structure NOT IN (    SELECT id    FROM " + Lystore.lystoreSchema + ".specific_structures    ) " +
                 "order by id_program,code,oce.id_operation";
 
@@ -79,7 +79,7 @@ public class LyceeTab extends Investissement {
                 "   INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id) " +
                 "   INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id) " +
                 "   WHERE instruction.id = ? " +
-                "   AND structure_program_action.structure_type =  '" + this.Lycee + "' " +
+                "   AND structure_program_action.structure_type =  '" + Lycee + "' " +
                 "   AND oce.id_structure NOT IN ( " +
                 "   SELECT id " +
                 "   FROM " + Lystore.lystoreSchema + ".specific_structures " +
@@ -88,7 +88,7 @@ public class LyceeTab extends Investissement {
                 "SELECT program.*, array_to_json(array_agg(values)) as actions " +
                 "FROM " + Lystore.lystoreSchema + ".program " +
                 "INNER JOIN values ON (values.id_program = program.id) " +
-                "WHERE program.section =  '" + this.Investissement + "'" +
+                "WHERE program.section =  '" + Investissement + "'" +
                 "GROUP BY program.id";
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {

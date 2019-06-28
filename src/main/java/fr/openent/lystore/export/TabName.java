@@ -6,7 +6,7 @@ public enum TabName {
     CMD("Investissement-CMD"),
     FONCTIONNEMENT("Fonctionnement"),
     EPLE("Récap. EPLE"),
-    IMPUTATION_BUDG("Récap. EPLE");
+    IMPUTATION_BUDG("Récap. Imputation budgétaire");
 
     private final String tabName;
 

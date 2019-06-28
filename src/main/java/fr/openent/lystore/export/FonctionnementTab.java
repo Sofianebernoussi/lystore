@@ -36,7 +36,7 @@ public class FonctionnementTab extends Investissement {
                 "SELECT program.*, array_to_json(array_agg(values)) as actions " +
                 "FROM " + Lystore.lystoreSchema + ".program " +
                 "INNER JOIN values ON (values.id_program = program.id) " +
-                "WHERE program.section = 'Fonctionnement'" +
+                "WHERE program.section = '" + Fonctionnement + "'" +
                 "GROUP BY program.id";
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
@@ -70,7 +70,7 @@ public class FonctionnementTab extends Investissement {
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)" +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".program ON (program_action.id_program =  program.id AND program.section = 'Fonctionnement') " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".program ON (program_action.id_program =  program.id AND program.section = '" + Fonctionnement + "') " +
                 "WHERE instruction.id = ? " +
                 " " +
                 "order by id_program,code,oce.id_operation";

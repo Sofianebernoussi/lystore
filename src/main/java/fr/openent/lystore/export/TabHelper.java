@@ -40,21 +40,16 @@ public abstract class TabHelper {
         this.sheet = wb.getSheet(TabName);
         this.excel = new ExcelHelper(wb, sheet);
         priceTab = new ArrayList<ArrayList<Float>>();
-
-
     }
 
 
     public void create(Handler<Either<String, Boolean>> handler) {
-
     }
 
     public void getPrograms(Handler<Either<String, JsonArray>> handler) {
-
     }
 
     public void getPrices(Handler<Either<String, JsonArray>> handler) {
-
     }
 
     /**
@@ -66,14 +61,12 @@ public abstract class TabHelper {
      * @param operationsRowNumber yMax
      */
     protected void initTabValue(int i, int cellColumn, int j, int operationsRowNumber) {
-
     }
 
     /**
      * Set labels of the tabs
      */
     protected void setLabels() {
-
     }
 
     /**
@@ -82,14 +75,12 @@ public abstract class TabHelper {
      * @param programs
      */
     protected void setPrograms(JsonArray programs) {
-
     }
 
     /**
      * Insert prices into the tab
      */
     protected void setPrices() {
-
     }
 
 

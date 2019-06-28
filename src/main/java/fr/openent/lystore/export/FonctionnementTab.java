@@ -16,7 +16,7 @@ public class FonctionnementTab extends Investissement {
      */
 
     public FonctionnementTab(Workbook wb, JsonObject instruction) {
-        super(wb, instruction, "Fonctionnement");
+        super(wb, instruction, TabName.FONCTIONNEMENT.toString());
     }
 
 

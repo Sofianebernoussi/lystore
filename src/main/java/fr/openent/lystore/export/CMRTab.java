@@ -16,7 +16,7 @@ public class CMRTab extends Investissement {
      */
 
     public CMRTab(Workbook wb, JsonObject instruction) {
-        super(wb, instruction, "Investissement-CMR");
+        super(wb, instruction, TabName.CMR.toString());
     }
 
 

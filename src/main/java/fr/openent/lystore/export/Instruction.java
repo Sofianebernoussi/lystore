@@ -70,10 +70,12 @@ public class Instruction {
                 Future<Boolean> CMRFuture = Future.future();
                 Future<Boolean> CMDfuture = Future.future();
                 Future<Boolean> Fonctionnementfuture = Future.future();
+                Future<Boolean> RecapEPLEfuture = Future.future();
                 futures.add(lyceeFuture);
                 futures.add(CMRFuture);
                 futures.add(CMDfuture);
                 futures.add(Fonctionnementfuture);
+//                futures.add(RecapEPLEfuture);
                 CompositeFuture.all(futures).setHandler(event -> {
                     if (event.succeeded()) {
                         try {

@@ -1,0 +1,21 @@
+package fr.openent.lystore.export;
+
+public enum TabName {
+    LYCEE("Investissement-LYCEES"),
+    CMR("Investissement-CMR"),
+    CMD("Investissement-CMD"),
+    FONCTIONNEMENT("Fonctionnement"),
+    EPLE("Récap. EPLE"),
+    IMPUTATION_BUDG("Récap. EPLE");
+
+    private final String tabName;
+
+    TabName(String tabName) {
+        this.tabName = tabName;
+    }
+
+    @Override
+    public String toString() {
+        return tabName;
+    }
+}

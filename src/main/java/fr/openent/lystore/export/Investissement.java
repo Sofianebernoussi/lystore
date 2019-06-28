@@ -1,52 +1,26 @@
 package fr.openent.lystore.export;
 
-import fr.openent.lystore.helpers.ExcelHelper;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.util.ArrayList;
 
-public class Investissement {
-    protected final String CMD = "CMD";
-    protected final String CMR = "CMR";
-    protected final String Lycee = "LYC";
-    protected static final String Investissement = "Investissement";
-    protected static final String Fonctionnement = "Fonctionnement";
-    protected Workbook wb;
-    protected Sheet sheet;
-    protected JsonObject instruction;
-    protected ExcelHelper excel;
-    protected int operationsRowNumber = 9;
-    final protected int yTab = 9;
-    final protected int xTab = 1;
-    protected int cellColumn = 1;
-    protected boolean isEmpty = false;
-    /**
-     * Format : H-code
-     */
-    protected JsonObject tabx;
-    protected JsonArray taby;
-    protected ArrayList<ArrayList<Float>> priceTab;
+public abstract class Investissement extends TabHelper {
+
 
     public Investissement(Workbook wb, JsonObject instruction, String TabName) {
-        this.wb = wb;
-        this.tabx = new JsonObject();
-        this.taby = new JsonArray();
-        this.instruction = instruction;
-        this.sheet = wb.getSheet(TabName);
-        this.excel = new ExcelHelper(wb, sheet);
-        priceTab = new ArrayList<ArrayList<Float>>();
+        super(wb, instruction, TabName);
 
 
     }
 
 
+    @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
         excel.setCPNumber(instruction.getString("cp_number"));
@@ -78,13 +52,7 @@ public class Investissement {
         });
     }
 
-    public void getPrograms(Handler<Either<String, JsonArray>> handler) {
 
-    }
-
-    public void getPrices(Handler<Either<String, JsonArray>> handler) {
-
-    }
 
     /**
      * Init all the tab
@@ -94,6 +62,7 @@ public class Investissement {
      * @param j                   yInit
      * @param operationsRowNumber yMax
      */
+    @Override
     protected void initTabValue(int i, int cellColumn, int j, int operationsRowNumber) {
         for (int ii = 0; ii < cellColumn - i; ii++) {
             priceTab.add(ii, new ArrayList<Float>());
@@ -107,6 +76,7 @@ public class Investissement {
     /**
      * Set labels of the tabs
      */
+    @Override
     protected void setLabels() {
         int cellLabelColumn = 0;
 
@@ -129,6 +99,7 @@ public class Investissement {
      *
      * @param programs
      */
+    @Override
     protected void setPrograms(JsonArray programs) {
         int posx = 0;
         int programRowNumber = 6;
@@ -170,6 +141,7 @@ public class Investissement {
     /**
      * Insert prices into the tab
      */
+    @Override
     protected void setPrices() {
         for (int i = 0; i < priceTab.size(); i++) {
             for (int j = 0; j < priceTab.get(i).size(); j++) {

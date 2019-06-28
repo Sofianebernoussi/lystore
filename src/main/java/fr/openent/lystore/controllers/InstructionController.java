@@ -106,7 +106,7 @@ public class InstructionController extends ControllerHelper {
                 request.response()
                         .putHeader("Content-Type", "application/vnd.ms-excel")
                         .putHeader("Content-Length", file.length() + "")
-                        .putHeader("Content-Disposition", "attachment; filename=export.xlsx")
+                        .putHeader("Content-Disposition", "attachment; filename=rapport.xlsx")
                         .write(file);
             }
         });

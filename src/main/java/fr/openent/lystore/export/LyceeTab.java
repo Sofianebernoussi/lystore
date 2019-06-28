@@ -13,7 +13,7 @@ public class LyceeTab extends Investissement {
 
 
     public LyceeTab(Workbook wb, JsonObject instruction) {
-        super(wb, instruction, "Investissement-LYCEES");
+        super(wb, instruction, TabName.LYCEE.toString());
     }
 
 

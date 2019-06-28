@@ -16,7 +16,7 @@ public class CMDTab extends Investissement {
      */
 
     public CMDTab(Workbook wb, JsonObject instruction) {
-        super(wb, instruction, "Investissement-CMD");
+        super(wb, instruction, TabName.CMD.toString());
     }
 
 

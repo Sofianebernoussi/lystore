@@ -67,7 +67,8 @@ public class CMDTab extends Investissement {
      */
     @Override
     public void getPrices(Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT oce.price, oce.amount, oce.tax_amount ,contract_type.code as code, program_action.id_program as id_program ,oce.id_operation " +
+        String query = "SELECT SUM((oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 ) as Total ," +
+                "contract_type.code as code, program_action.id_program as id_program ,oce.id_operation " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment oce  " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)   " +
@@ -79,6 +80,7 @@ public class CMDTab extends Investissement {
                 "INNER JOIN " + Lystore.lystoreSchema + ".program ON (program.id = program_action.id_program and program.section =  '" + Investissement + "')" +
                 "WHERE instruction.id = ?   AND structure_program_action.structure_type = '" + CMD + "'   " +
                 "AND oce.id_structure  IN (    SELECT id    FROM " + Lystore.lystoreSchema + ".specific_structures WHERE specific_structures.type = 'CMR') " +
+                "Group by  contract_type.code, program_action.id, oce.id_operation " +
                 "order by id_program,code,oce.id_operation";
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
@@ -88,9 +90,7 @@ public class CMDTab extends Investissement {
                 JsonArray commands = event.right().getValue();
                 for (int i = 0; i < commands.size(); i++) {
                     JsonObject command = commands.getJsonObject(i);
-                    float priceCommand = (Float.parseFloat(command.getString("price")) +
-                            Float.parseFloat(command.getString("price")) * Float.parseFloat(command.getString("tax_amount")) / 100) * command.getLong("amount");
-
+                    float priceCommand = (Float.parseFloat(command.getString("total")));
                     for (int y = 0; y < taby.size(); y++) {
                         if (command.getInteger("id_operation") == taby.getInteger(y)) {
                             priceTab.get(tabx.getInteger(command.getInteger("id_program").toString() + "-" + command.getString("code"))).set(y, priceTab.get(0).get(y) + priceCommand);

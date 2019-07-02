@@ -1,5 +1,6 @@
 package fr.openent.lystore.controllers;
 
+import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.impl.DefaultStructureService;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
@@ -20,7 +21,7 @@ public class StructureController extends ControllerHelper {
 
     public StructureController(){
         super();
-        this.structureService = new DefaultStructureService();
+        this.structureService = new DefaultStructureService( Lystore.lystoreSchema);
     }
 
     @Get("/structures")
@@ -28,6 +29,12 @@ public class StructureController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void getStructures(HttpServerRequest request){
         structureService.getStructures(arrayResponseHandler(request));
+    }
+    @Get("/structures/type")
+    @ApiDoc("Returns all structure's type")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void getStructureTypes(HttpServerRequest request){
+        structureService.getStructureTypes(arrayResponseHandler(request));
     }
 
 }

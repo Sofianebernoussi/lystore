@@ -64,7 +64,7 @@ public class OrderController extends ControllerHelper {
         EmailSender emailSender = emailFactory.getSender();
         this.orderService = new DefaultOrderService(Lystore.lystoreSchema, "order_client_equipment", emailSender);
         this.exportPDFService = new DefaultExportPDFService(eb, vertx, config);
-        this.structureService = new DefaultStructureService();
+        this.structureService = new DefaultStructureService(Lystore.lystoreSchema);
         this.supplierService = new DefaultSupplierService(Lystore.lystoreSchema, "supplier");
         this.contractService = new DefaultContractService(Lystore.lystoreSchema, "contract");
         this.agentService = new DefaultAgentService(Lystore.lystoreSchema, "agent");

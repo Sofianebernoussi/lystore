@@ -1,3 +1,4 @@
+import {_} from "entcore";
 import { Selectable, Mix, Selection } from 'entcore-toolkit';
 import http from 'axios';
 
@@ -38,6 +39,13 @@ export class Structures  extends Selection<Structure> {
     async sync (): Promise<void> {
         let {data} = await http.get(`/lystore/structures`);
         this.all = Mix.castArrayAs(Structure, data);
+    }
+    async getStructureType() : Promise<void> {
+        let {data} = await http.get(`/lystore/structures/type`);
+        this.all.map((structure)=>{
+            let type = _.findWhere(data, {id: structure.id});
+            structure.type = type ? type.type : 'LYC';
+        })
     }
 
     async syncUserStructures (): Promise<void> {

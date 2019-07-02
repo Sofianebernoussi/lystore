@@ -55,7 +55,7 @@ public class StructureGroupController extends ControllerHelper {
         super();
         this.structureGroupService = new DefaultStructureGroupService(Lystore.lystoreSchema, "structure_group");
         this.importCSVHelper = new ImportCSVHelper(vertx, this.eb);
-        this.structureService = new DefaultStructureService();
+        this.structureService = new DefaultStructureService(Lystore.lystoreSchema);
     }
 
     @Post("/structure/group/import")

@@ -368,6 +368,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.initOrders = async (status) => {
             $scope.structures = new Structures();
             await $scope.structures.sync();
+            await $scope.structures.getStructureType();
             await $scope.syncOrders(status);
             Utils.safeApply($scope);
         };

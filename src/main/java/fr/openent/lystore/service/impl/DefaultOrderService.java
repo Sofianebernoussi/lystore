@@ -32,7 +32,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         super(schema,table);
         this.purseService = new DefaultPurseService();
         this.emailSender = new EmailSendService(emailSender);
-        this.structureService = new DefaultStructureService();
+        this.structureService = new DefaultStructureService(Lystore.lystoreSchema);
     }
 
     @Override

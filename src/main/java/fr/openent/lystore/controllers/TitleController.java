@@ -42,7 +42,7 @@ public class TitleController extends ControllerHelper {
     public TitleController(Vertx vertx, EventBus eb) {
         super();
         titleService = new DefaultTitleService(Lystore.lystoreSchema, "title");
-        structureService = new DefaultStructureService();
+        structureService = new DefaultStructureService(Lystore.lystoreSchema);
         this.campaignService = new DefaultCampaignService(Lystore.lystoreSchema, "campaign");
         importCSVHelper = new ImportCSVHelper(vertx, eb);
     }

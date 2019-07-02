@@ -51,7 +51,7 @@ public class PurseController extends ControllerHelper {
     public PurseController(Vertx vertx) {
         super();
         this.importCSVHelper = new ImportCSVHelper(vertx, this.eb);
-        this.structureService = new DefaultStructureService();
+        this.structureService = new DefaultStructureService(Lystore.lystoreSchema);
         this.purseService = new DefaultPurseService();
         this.campaignService = new DefaultCampaignService(Lystore.lystoreSchema, "campaign");
     }

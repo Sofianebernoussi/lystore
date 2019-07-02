@@ -115,15 +115,19 @@ public class ExcelHelper {
         this.tabStringStyle.setDataFormat(format.getFormat("#,##0.00"));
 
         //LabelHeadStyle
+        Font labelHeadFont = this.wb.createFont();
+        labelHeadFont.setFontHeightInPoints((short) 12);
+        labelHeadFont.setFontName("Calibri");
+        labelHeadFont.setBold(true);
         this.labelHeadStyle.setWrapText(true);
         this.labelHeadStyle.setAlignment(HorizontalAlignment.LEFT);
         this.labelHeadStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        this.labelHeadStyle.setFont(headerFont);
+        this.labelHeadStyle.setFont(labelHeadFont);
 
         this.currencyStyle.setWrapText(true);
         this.currencyStyle.setAlignment(HorizontalAlignment.RIGHT);
         this.currencyStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        this.currencyStyle.setFont(headerFont);
+        this.currencyStyle.setFont(labelHeadFont);
         this.currencyStyle.setDataFormat(format.getFormat("#,##0.00 €"));
 
     }

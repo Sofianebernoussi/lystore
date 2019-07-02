@@ -26,17 +26,18 @@ public class RecapEPLETab extends TabHelper {
     private String orderComment = "Demande Commentaire";
     private String orderAmount = "Quantité Accordée";
     private String orderTotal = "Somme Montant Accordé";
-    boolean notFirstTab = false;
+    private boolean notFirstTab = false;
+    private boolean notFirstPart = false;
 
     private int program_id = -1, action_id = -1, contract_id = -1;
-    private int xlabel = 4;
-    private int yTotalLabel = 2;
+    private int xlabel = 0;
+    private int yTotalLabel = 3;
 
     private JsonArray programs, orders;
     private ArrayList<String> structuresId;
     private StructureService structureService;
     private int nbLine = 0;
-    String totalLabelInt = "A1+";
+    String totalLabelInt = "";
 
     public RecapEPLETab(Workbook workbook, JsonObject instruction) {
         super(workbook, instruction, TabName.EPLE.toString());
@@ -118,8 +119,10 @@ public class RecapEPLETab extends TabHelper {
             nbLine++;
 
         }
-        if (programs.size() > 0)
+        if (programs.size() > 0) {
             newTab(programs.getJsonObject(programs.size() - 1), true);
+            settingSumLabel();
+        }
     }
 
     private String newTab(JsonObject program, boolean isLast) {
@@ -128,14 +131,15 @@ public class RecapEPLETab extends TabHelper {
         String id_structure = "", zipCode, city, uai, nameEtab;
         CellRangeAddress merge;
         if (notFirstTab) {
-//            merge = new CellRangeAddress(xProgramLabel + 3, xProgramLabel + 4, 0, 1);
-//            sheet.addMergedRegion(merge);
-
-
+            merge = new CellRangeAddress(xProgramLabel + 3, xProgramLabel + 5, 0, 1);
+            sheet.addMergedRegion(merge);
+            merge = new CellRangeAddress(xProgramLabel + 4, xProgramLabel + 5, 2, 3);
+            sheet.addMergedRegion(merge);
             excel.insertHeader(sheet.createRow(xProgramLabel + 3), 2, excel.sumLabel);
             excel.setTotalX(xProgramLabel + 2 - nbLine, xProgramLabel + 2, 3, xProgramLabel + 3);
             totalLabelInt += excel.getCellReference(xProgramLabel + 3, 3) + " +";
             nbLine = 0;
+
 
         } else {
             notFirstTab = true;
@@ -147,9 +151,15 @@ public class RecapEPLETab extends TabHelper {
                 program_id = program.getInteger("program_id");
                 action_id = program.getInteger("action_id");
                 contract_id = program.getInteger("contract_type_id");
-                setLabelHead(program);
+                if (notFirstPart) { //adding sum
+                    settingSumLabel();
 
+
+                }
+                setLabelHead(program);
+                notFirstPart = true;
             }
+            //adding  new label
             id_structure = program.getString("id_structure");
             nameEtab = program.getString("nameEtab");
             uai = program.getString("uai");
@@ -171,19 +181,23 @@ public class RecapEPLETab extends TabHelper {
 
     }
 
+    private void settingSumLabel() {
+        totalLabelInt = totalLabelInt.substring(0, totalLabelInt.length() - 1);
+        excel.insertFormula(sheet.getRow(xlabel), yTotalLabel, totalLabelInt);
+        totalLabelInt = "";
+    }
+
     public void setLabelHead(JsonObject program) {
         xProgramLabel += 4;
-        totalLabelInt = totalLabelInt.substring(0, totalLabelInt.length() - 1);
-        excel.insertFormula(sheet.createRow(xlabel), yTotalLabel, totalLabelInt);
-        totalLabelInt = "";
+
 //        excel.insertLabelHead(sheet.createRow(xProgramLabel), 0, "cc");
         excel.insertLabelHead(sheet.createRow(xProgramLabel), yProgramLabel,
                 programLabel + program.getString("program_name") + " " + program.getString("program_label"));
-        excel.insertLabelHead(sheet.createRow(xProgramLabel + 1), yProgramLabel,
+        excel.insertLabelHead(sheet.createRow(xProgramLabel + 2), yProgramLabel,
                 actionLabel + program.getString("action_code") + " - " + program.getString("action_name"));
         excel.insertLabelHead(sheet.getRow(xProgramLabel), yProgramLabel + 1,
                 contractType + program.getString("contract_code") + " - " + program.getString("contract_name"));
-        excel.insertLabelHead(sheet.getRow(xProgramLabel), yProgramLabel + 2, totalLabel + (Float.parseFloat(program.getString("total"))));
+        excel.insertLabelHead(sheet.getRow(xProgramLabel), yProgramLabel + 2, totalLabel);
         xlabel = xProgramLabel;
         xProgramLabel += 2;
 

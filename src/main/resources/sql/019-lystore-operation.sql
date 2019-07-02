@@ -12,7 +12,6 @@ CREATE TABLE lystore.operation
     id bigserial,
     id_label bigint,
     status character varying(50),
-    date_cp date,
     id_instruction bigint,
     PRIMARY KEY (id),
     CONSTRAINT fk_id_label FOREIGN KEY (id_label)

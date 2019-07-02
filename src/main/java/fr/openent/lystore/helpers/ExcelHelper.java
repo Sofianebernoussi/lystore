@@ -14,6 +14,7 @@ public class ExcelHelper {
     private final CellStyle tabStringStyle;
     private final CellStyle totalStyle;
     private final CellStyle labelHeadStyle;
+    private final CellStyle currencyStyle;
 
 
     private DataFormat format;
@@ -27,7 +28,7 @@ public class ExcelHelper {
         this.labelStyle = wb.createCellStyle();
         this.tabNumeralStyle = wb.createCellStyle();
         this.tabStringStyle = wb.createCellStyle();
-
+        this.currencyStyle = wb.createCellStyle();
         this.totalStyle = wb.createCellStyle();
         this.labelHeadStyle = wb.createCellStyle();
 
@@ -118,6 +119,13 @@ public class ExcelHelper {
         this.labelHeadStyle.setAlignment(HorizontalAlignment.LEFT);
         this.labelHeadStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         this.labelHeadStyle.setFont(headerFont);
+
+        this.currencyStyle.setWrapText(true);
+        this.currencyStyle.setAlignment(HorizontalAlignment.RIGHT);
+        this.currencyStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.currencyStyle.setFont(headerFont);
+        this.currencyStyle.setDataFormat(format.getFormat("#,##0.00 €"));
+
     }
     public void setBold(Cell cell) {
         Font font = wb.createFont();
@@ -213,7 +221,7 @@ public class ExcelHelper {
     public void insertFormula(Row row, int cellColumn, String data) {
         Cell cell = row.createCell(cellColumn);
         cell.setCellFormula(data);
-        cell.setCellStyle(this.labelHeadStyle);
+        cell.setCellStyle(this.currencyStyle);
         sheet.autoSizeColumn(cellColumn);
     }
 

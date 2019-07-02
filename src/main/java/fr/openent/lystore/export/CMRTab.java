@@ -79,7 +79,7 @@ public class CMRTab extends Investissement {
                 "INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)  " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".program ON (program.id = program_action.id_program and program.section =  '" + Investissement + "')" +
                 "WHERE instruction.id = ?   AND structure_program_action.structure_type = '" + CMR + "'   " +
-                "AND oce.id_structure  IN (    SELECT id    FROM " + Lystore.lystoreSchema + ".specific_structures WHERE specific_structures.type = 'CMR') " +
+                "AND oce.id_structure  IN (    SELECT id    FROM " + Lystore.lystoreSchema + ".specific_structures WHERE specific_structures.type = '" + CMR + "') " +
                 "Group by  contract_type.code, program_action.id, oce.id_operation " +
                 "order by id_program,code,oce.id_operation";
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {

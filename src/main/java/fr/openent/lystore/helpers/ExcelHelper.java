@@ -10,19 +10,24 @@ public class ExcelHelper {
     private Sheet sheet;
     public final CellStyle headCellStyle;
     private final CellStyle labelStyle;
-    private final CellStyle tabStyle;
+    private final CellStyle tabNumeralStyle;
+    private final CellStyle tabStringStyle;
     private final CellStyle totalStyle;
     private final CellStyle labelHeadStyle;
 
+
     private DataFormat format;
     public static final String totalLabel = "Totaux";
+    public static final String sumLabel = "Somme";
 
     public ExcelHelper(Workbook wb, Sheet sheet) {
         this.wb = wb;
         this.sheet = sheet;
         this.headCellStyle = wb.createCellStyle();
         this.labelStyle = wb.createCellStyle();
-        this.tabStyle = wb.createCellStyle();
+        this.tabNumeralStyle = wb.createCellStyle();
+        this.tabStringStyle = wb.createCellStyle();
+
         this.totalStyle = wb.createCellStyle();
         this.labelHeadStyle = wb.createCellStyle();
 
@@ -87,15 +92,26 @@ public class ExcelHelper {
         tabFont.setFontHeightInPoints((short) 11);
         tabFont.setFontName("Calibri");
         tabFont.setBold(false);
-        this.tabStyle.setBorderLeft(BorderStyle.THIN);
-        this.tabStyle.setBorderRight(BorderStyle.THIN);
-        this.tabStyle.setBorderTop(BorderStyle.THIN);
-        this.tabStyle.setBorderBottom(BorderStyle.THIN);
-        this.tabStyle.setWrapText(true);
-        this.tabStyle.setAlignment(HorizontalAlignment.RIGHT);
-        this.tabStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        this.tabStyle.setFont(tabFont);
-        this.tabStyle.setDataFormat(format.getFormat("#,##0.00"));
+        this.tabNumeralStyle.setBorderLeft(BorderStyle.THIN);
+        this.tabNumeralStyle.setBorderRight(BorderStyle.THIN);
+        this.tabNumeralStyle.setBorderTop(BorderStyle.THIN);
+        this.tabNumeralStyle.setBorderBottom(BorderStyle.THIN);
+        this.tabNumeralStyle.setWrapText(true);
+        this.tabNumeralStyle.setAlignment(HorizontalAlignment.RIGHT);
+        this.tabNumeralStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.tabNumeralStyle.setFont(tabFont);
+        this.tabNumeralStyle.setDataFormat(format.getFormat("#,##0.00"));
+        //TabStyle
+
+        this.tabStringStyle.setBorderLeft(BorderStyle.THIN);
+        this.tabStringStyle.setBorderRight(BorderStyle.THIN);
+        this.tabStringStyle.setBorderTop(BorderStyle.THIN);
+        this.tabStringStyle.setBorderBottom(BorderStyle.THIN);
+        this.tabStringStyle.setWrapText(true);
+        this.tabStringStyle.setAlignment(HorizontalAlignment.LEFT);
+        this.tabStringStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.tabStringStyle.setFont(tabFont);
+        this.tabStringStyle.setDataFormat(format.getFormat("#,##0.00"));
 
         //LabelHeadStyle
         this.labelHeadStyle.setWrapText(true);
@@ -194,9 +210,15 @@ public class ExcelHelper {
         sheet.autoSizeColumn(cellColumn);
     }
 
+    public void insertFormula(Row row, int cellColumn, String data) {
+        Cell cell = row.createCell(cellColumn);
+        cell.setCellFormula(data);
+        cell.setCellStyle(this.labelHeadStyle);
+        sheet.autoSizeColumn(cellColumn);
+    }
 
     /**
-     * insert a cell in the tab
+     * insert a cell with float in the tab
      *
      * @param cellColumn
      * @param line
@@ -207,7 +229,37 @@ public class ExcelHelper {
         tab = sheet.getRow(line);
         Cell cell = tab.createCell(cellColumn);
         cell.setCellValue(data);
-        cell.setCellStyle(this.tabStyle);
+        cell.setCellStyle(this.tabNumeralStyle);
+    }
+
+    /**
+     * insert a cell in the tab
+     *
+     * @param cellColumn
+     * @param line
+     * @param data
+     */
+    public void insertCellTab(int cellColumn, int line, String data) {
+        Row tab;
+        tab = sheet.getRow(line);
+        Cell cell = tab.createCell(cellColumn);
+        cell.setCellValue(data);
+        cell.setCellStyle(this.tabStringStyle);
+    }
+
+    /**
+     * insert a cell with an int in the tab
+     *
+     * @param cellColumn
+     * @param line
+     * @param data
+     */
+    public void insertCellTabInt(int cellColumn, int line, int data) {
+        Row tab;
+        tab = sheet.getRow(line);
+        Cell cell = tab.createCell(cellColumn);
+        cell.setCellValue(data);
+        cell.setCellStyle(this.tabNumeralStyle);
     }
 
     /**
@@ -225,9 +277,35 @@ public class ExcelHelper {
             tab = sheet.getRow(line);
             for (int column = columnStart; column < columnEnd; column++) {
                 cell = tab.createCell(column);
-                cell.setCellStyle(this.tabStyle);
+                cell.setCellStyle(this.tabNumeralStyle);
             }
         }
+    }
+
+
+    public void setTotalY(int lineStart, int lineEnd, int column) {
+        Row tab, tabStart, tabEnd;
+        Cell cell, cellStartSum, cellEndSum;
+        tabStart = sheet.getRow(lineStart);
+        tabEnd = sheet.getRow(lineEnd - 1);
+
+
+    }
+
+    public void setTotalX(int lineStart, int lineEnd, int column, int lineInsert) {
+        Row tab, tabStart, tabEnd;
+        tabStart = sheet.getRow(lineStart);
+        tabEnd = sheet.getRow(lineEnd);
+        Cell cell, cellStartSum, cellEndSum;
+        tab = sheet.getRow(lineInsert);
+        cell = tab.createCell(column);
+        cell.setCellStyle(this.totalStyle);
+        cell.setCellValue("total");
+        cellStartSum = tabStart.getCell(column);
+        cellEndSum = tabEnd.getCell(column);
+        cell.setCellStyle(this.totalStyle);
+        cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
+
     }
 
     /**
@@ -278,5 +356,14 @@ public class ExcelHelper {
         cell.setCellStyle(this.totalStyle);
         cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
 
+    }
+
+
+    public String getCellReference(int line, int column) {
+        Row tab;
+        Cell cell;
+        tab = sheet.getRow(line);
+        cell = tab.getCell(column);
+        return new CellReference(cell).formatAsString();
     }
 }

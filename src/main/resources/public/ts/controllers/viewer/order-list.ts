@@ -23,6 +23,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             name:'lystore.by.equipment',
             value:PRIORITY_FIELD.ORDER
         }];
+
         $scope.exportCSV = () => {
             let idCampaign = $scope.ordersClient.all[0].id_campaign;
             let idStructure = $scope.ordersClient.all[0].id_structure;
@@ -180,7 +181,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
         };
 
         $scope.updateProject = async () => {
-            await $scope.projectToUpdate.update();
+            await $scope.projectToUpdate.update($scope.campaign.id);
             $scope.projectToUpdate.selected = false;
             delete $scope.projectToUpdate;
             $scope.display.lightbox.udpateProject = false;
@@ -188,7 +189,6 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             $scope.notifications.push(new Notification('lystore.project.update.success', 'confirm'));
             Utils.safeApply($scope);
         };
-
 
         $scope.alltheProjectsDeletable = (projects: Projects) => {
             let oneDeletable = true;
@@ -212,7 +212,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
 
         $scope.switchOrderClient = async (order: OrderClient, index: number, projectId: number, to: string) =>{
             let ordersJson = await $scope.getOrdersRanksSwitchedToJson( index, to);
-            await $scope.ordersClient.updateOrderRanks(ordersJson,order.id_structure);
+            await $scope.ordersClient.updateOrderRanks(ordersJson,order.id_structure, order.id_campaign);
             $scope.ordersClient.all = _.sortBy($scope.ordersClient.all, (order)=> order.rank != null ? order.rank : $scope.ordersClient.all.length );
             Utils.safeApply($scope);
         };

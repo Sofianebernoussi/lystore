@@ -50,7 +50,7 @@ export class Basket implements Selectable {
 
     async create () {
         try {
-            return await  http.post(`/lystore/basket`, this.toJson());
+            return await  http.post(`/lystore/basket/campaign/${this.id_campaign}`, this.toJson());
         } catch (e) {
             notify.error('lystore.basket.create.err');
         }
@@ -92,7 +92,7 @@ export class Basket implements Selectable {
 
     async delete () {
         try {
-            return await  http.delete(`/lystore/basket/${this.id}`);
+            return await  http.delete(`/lystore/basket/${this.id}/campaign/${this.id_campaign}`);
         } catch (e) {
             notify.error('lystore.basket.delete.err');
         }
@@ -151,14 +151,13 @@ export class Baskets extends Selection<Basket> {
             this.all = newlistBaskets.all;
 
             let data = {
-                id_campaign: idCampaign,
                 id_structure: Structure.id,
                 structure_name: Structure.name,
                 id_project: idProject,
                 baskets: baskets
             };
 
-            return await http.post(`/lystore/baskets/to/orders`, data);
+            return await http.post(`/lystore/baskets/to/orders/${idCampaign}`, data);
         } catch (e) {
             notify.error('lystore.order.create.err');
         }

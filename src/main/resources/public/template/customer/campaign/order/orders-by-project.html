@@ -4,7 +4,7 @@
     <div>
         <div class="row">
             <label>
-                <label class="checkbox vertical-spacing-four cell">
+                <label ng-if="campaign.accessible" class="checkbox vertical-spacing-four cell">
                     <input type="checkbox" ng-model="project.selected"
                            ng-checked="project.selected">
                     <span></span>
@@ -15,14 +15,14 @@
             </label>
         </div>
         <div class="cell priority-manager" ng-if="campaign.projectPriorityEnable()">
-            <div class="priority_carree UP cell row" tooltip="lystore.order.priority.up"
+            <div ng-if="campaign.accessible"  class="priority_carree UP cell row" tooltip="lystore.order.priority.up"
                  ng-show=" $index>0 && $index <= (ordersClient.projects.all.length - 1)"
                  ng-click="switchProjectClient($index, 'up') ">
             </div>
             <div class="priority_number cell">
                 [[$index + 1]]
             </div>
-            <div class="priority_carree DOWN cell row" tooltip="lystore.order.priority.down"
+            <div ng-if="campaign.accessible"  class="priority_carree DOWN cell row" tooltip="lystore.order.priority.down"
                  ng-show=" $index>=0 && $index < (ordersClient.projects.all.length - 1)"
                  ng-click="switchProjectClient($index, 'down')">
             </div>
@@ -31,12 +31,12 @@
             <article class="basket-item twelve cell" ng-repeat="orderClient in ordersClient.all track by $index"
                      ng-if="project.id == orderClient.project.id">
                 <div class="cell width-40">
-                    <label ng-show="orderClient.status === 'WAITING'" class="checkbox">
+                    <label ng-if="campaign.accessible" ng-show="orderClient.status === 'WAITING'" class="checkbox">
                         <input type="checkbox" ng-model="orderClient.selected"
                                ng-checked="orderClient.selected">
                         <span></span>
                     </label>
-                    <div class="cell priority-manager order vertical-spacing" ng-if="campaign.orderPriorityEnable()">
+                    <div class="cell priority-manager order vertical-spacing" ng-if="campaign.orderPriorityEnable() && campaign.priority_field === 'PROJECT'">
                         <div class="priority_number cell">
                             [[$index + 1]]
                         </div>

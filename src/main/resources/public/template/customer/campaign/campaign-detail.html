@@ -25,7 +25,7 @@
         <header class="horizontal-spacing"  ng-click="backHome()"  >
             <i class="home"></i>
         </header>
-        <header class="horizontal-spacing"  ng-click="openCatalog()"  >
+        <header  ng-if="campaign.accessible" class="horizontal-spacing"  ng-click="openCatalog()"  >
             <i18n>CATALOG</i18n>
         </header>
         <header class="horizontal-spacing" ng-click="openOrder()" >
@@ -35,7 +35,7 @@
                     [[campaign.nb_order]]
             </span>
         </header>
-        <header class="horizontal-spacing" ng-click="openBasket()">
+        <header  ng-if="campaign.accessible" class="horizontal-spacing" ng-click="openBasket()">
             <i18n>BASKET</i18n>
             <span class="notification-bull right-magnet" ng-if="campaign.nb_panier > 0">
                     [[campaign.nb_panier]]

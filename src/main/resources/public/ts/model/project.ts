@@ -93,9 +93,9 @@ export class Project implements Selectable {
         }
     }
 
-    async update() {
+    async update(idCampaign) {
         try {
-            return await  http.put(`/lystore/project/${this.id}`, this.toJson());
+            return await  http.put(`/lystore/project/${this.id}/campaign/${idCampaign}`, this.toJson());
         } catch (e) {
             notify.error('lystore.project.update.err');
         }

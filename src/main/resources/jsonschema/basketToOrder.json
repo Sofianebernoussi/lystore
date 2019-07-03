@@ -3,16 +3,12 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "id_campaign":{
-      "type": "number"
-    },
     "id_structure":{
       "type": "string"
     },
     "structure_name":{
       "type": "string"
     },
-
     "id_project": {
       "type": "number"
     },
@@ -21,7 +17,6 @@
     }
   },
   "required": [
-    "id_campaign",
     "id_structure",
     "structure_name",
     "id_project",

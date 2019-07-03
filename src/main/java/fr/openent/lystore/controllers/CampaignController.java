@@ -64,7 +64,7 @@ public class CampaignController extends ControllerHelper {
     public void campaign(HttpServerRequest request) {
         try {
             Integer id = Integer.parseInt(request.params().get("id"));
-        campaignService.getCampaign(id, defaultResponseHandler(request));
+            campaignService.getCampaign(id, defaultResponseHandler(request));
         } catch (ClassCastException e) {
             log.error(" An error occurred when casting campaign id", e);
         }
@@ -114,7 +114,7 @@ public class CampaignController extends ControllerHelper {
     @Put("/campaign/:idCampaign/projects/:idProject/preferences")
     @ApiDoc("Update an preference in project")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-   @ResourceFilter(AccesProjectPriority.class)
+    @ResourceFilter(AccessUpdateOrderOnClosedCampaigne.class)
     public void updatePriority(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
             @Override

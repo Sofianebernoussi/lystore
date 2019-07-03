@@ -20,9 +20,11 @@ export const Tabs = ng.directive('tabs', () => {
             $scope.selectMenu =(menu)=>{
                 let oldModel = $scope.ngModel;
                 $scope.ngModel = menu.value;
-                $scope.$apply();
-                if(oldModel != $scope.ngModel && $scope.ngChange)
+                if(oldModel != $scope.ngModel && $scope.ngChange){
+                    $scope.$apply();
                     $scope.ngChange();
+
+                }
             }
         }
     };

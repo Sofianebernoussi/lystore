@@ -5,6 +5,7 @@ import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AccesProjectRight;
+import fr.openent.lystore.security.AccessUpdateOrderOnClosedCampaigne;
 import fr.openent.lystore.service.ProjectService;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.rs.*;
@@ -84,7 +85,7 @@ public class ProjectController extends ControllerHelper {
     @Delete("/project/:id/:idCampaign/:idStructure")
     @ApiDoc("Delete a project")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(AccesProjectRight.class)
+    @ResourceFilter(AccessUpdateOrderOnClosedCampaigne.class)
     public void deleteProject(HttpServerRequest request) {
         try {
             final Integer id = Integer.parseInt(request.getParam("id"));
@@ -132,10 +133,10 @@ public class ProjectController extends ControllerHelper {
 
     }
 
-    @Put("/project/:id")
+    @Put("/project/:id/campaign/:idCampaign")
     @ApiDoc("Update a project")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(AccesProjectRight.class)
+    @ResourceFilter(AccessUpdateOrderOnClosedCampaigne.class)
     public void updateProject(HttpServerRequest request) {
         final Integer id = Integer.parseInt(request.getParam("id"));
         RequestUtils.bodyToJson(request, pathPrefix + "project", new Handler<JsonObject>() {

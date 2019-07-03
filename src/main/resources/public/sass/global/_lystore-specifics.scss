@@ -11,7 +11,7 @@ body.lystore {
   .heading-tabs {
     overflow-x: inherit;
   }
-  
+
   .mobile-navigation {
     display: none;
   }
@@ -311,10 +311,15 @@ body.lystore {
   }
 
   article.disabled {
-    cursor: initial;
+    background: rgba(0,0,0,0);
+    color: rgba(0, 0, 0, 0.4);
+  }
+  .image-disabled {
     opacity: 0.4 !important;
   }
-
+  .title-disabled{
+    opacity: 0.4 !important;
+  }
   h1.disabled {
     text-align: center;
     top: 50%;
@@ -889,9 +894,9 @@ body.lystore {
       }
     }
   }
-    .priority_carree{
-      height: 30px !important;
-    }
+  .priority_carree{
+    height: 30px !important;
+  }
   .priority_number{
     width: 25px;
     height: 30px;
@@ -925,5 +930,11 @@ body.lystore {
     .greyRow{
       background-color: transparent;
     }
+  }
+  .groupButtons{
+    padding-top: 60px;
+  }
+  .small-text-align{
+    margin: -2px 0px;
   }
 }

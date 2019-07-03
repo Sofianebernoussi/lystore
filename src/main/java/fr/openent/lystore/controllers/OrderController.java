@@ -6,6 +6,7 @@ import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AccessOrderCommentRight;
 import fr.openent.lystore.security.AccessOrderRight;
+import fr.openent.lystore.security.AccessUpdateOrderOnClosedCampaigne;
 import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.*;
 import fr.openent.lystore.service.impl.*;
@@ -84,10 +85,10 @@ public class OrderController extends ControllerHelper {
             log.error("An error occured when casting campaign id ",e);
         }
     }
-    @Put("/order/rank")
+    @Put("/order/rank/move")
     @ApiDoc("Update the rank of tow orders")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(AccessOrderRight.class)
+    @ResourceFilter(AccessUpdateOrderOnClosedCampaigne.class)
     public void updatePriority(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, campaign -> {
             if (!campaign.containsKey("orders")) {
@@ -212,10 +213,10 @@ public class OrderController extends ControllerHelper {
         return numbers;
     }
 
-    @Delete("/order/:idOrder/:idStructure")
+    @Delete("/order/:idOrder/:idStructure/:idCampaign")
     @ApiDoc("Delete a order item")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(AccessOrderRight.class)
+    @ResourceFilter(AccessUpdateOrderOnClosedCampaigne.class)
     public void deleteOrder(final HttpServerRequest request){
         try {
             final Integer idOrder = Integer.parseInt(request.params().get("idOrder"));

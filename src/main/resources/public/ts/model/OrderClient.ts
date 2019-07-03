@@ -73,7 +73,7 @@ export class OrderClient implements Selectable {
 
     async delete () {
         try {
-            return await http.delete(`/lystore/order/${this.id}/${this.id_structure}`);
+            return await http.delete(`/lystore/order/${this.id}/${this.id_structure}/${this.id_campaign}`);
         } catch (e) {
             notify.error('lystore.order.delete.err');
         }
@@ -230,12 +230,12 @@ export class OrdersClient extends Selection<OrderClient> {
         }
     }
 
-    async updateOrderRanks(tabIdsProjects: Array<object>, structureId:string){
+    async updateOrderRanks(tabIdsProjects: Array<object>, structureId:string, campaignId:number){
         try {
-            await  http.put(`/lystore/order/rank?idStructure=${structureId}`,
-                { orders: tabIdsProjects });
+            await  http.put(`/lystore/order/rank/move?idStructure=${structureId}&idCampaign=${campaignId}`,{ orders: tabIdsProjects });
         }catch (e) {
             notify.error('lystore.project.update.err');
+            throw e;
         }
     }
 

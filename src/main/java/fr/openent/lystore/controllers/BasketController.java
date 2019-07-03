@@ -4,10 +4,7 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
-import fr.openent.lystore.security.AccessOrderCommentRight;
-import fr.openent.lystore.security.AccessPriceProposalRight;
-import fr.openent.lystore.security.PersonnelRight;
-import fr.openent.lystore.security.PostBasketFileRight;
+import fr.openent.lystore.security.*;
 import fr.openent.lystore.service.BasketService;
 import fr.openent.lystore.service.impl.DefaultBasketService;
 import fr.wseduc.rs.*;
@@ -53,10 +50,10 @@ public class BasketController extends ControllerHelper {
         }
     }
 
-    @Post("/basket")
+    @Post("/basket/campaign/:idCampaign")
     @ApiDoc("Create a basket item")
     @SecuredAction(value =  "", type = ActionType.RESOURCE)
-    @ResourceFilter(PersonnelRight.class)
+    @ResourceFilter(AccessUpdateOrderOnClosedCampaigne.class)
     public void create(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "basket", new Handler<JsonObject>() {
             @Override
@@ -66,10 +63,10 @@ public class BasketController extends ControllerHelper {
         });
     }
 
-    @Delete("/basket/:idBasket")
+    @Delete("/basket/:idBasket/campaign/:idCampaign")
     @ApiDoc("Delete a basket item")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(PersonnelRight.class)
+    @ResourceFilter(AccessUpdateOrderOnClosedCampaigne.class)
     public void delete(HttpServerRequest request) {
         try {
             Integer idBasket = request.params().contains("idBasket")
@@ -153,42 +150,39 @@ public class BasketController extends ControllerHelper {
         });
     }
 
-    @Post("/baskets/to/orders")
+    @Post("/baskets/to/orders/:idCampaign")
     @ApiDoc("create an order liste from basket")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(PersonnelRight.class)
+    @ResourceFilter(AccessUpdateOrderOnClosedCampaigne.class)
     public void takeOrder(final HttpServerRequest  request){
-        RequestUtils.bodyToJson( request, pathPrefix + "basketToOrder", new Handler<JsonObject>() {
-            @Override
-            public void handle(JsonObject object) {
-                try {
-                    final Integer idCampaign = object.getInteger("id_campaign");
-                    final String idStructure = object.getString("id_structure");
-                    final String nameStructure = object.getString("structure_name");
-                    final Integer idProject = object.getInteger("id_project");
-                    JsonArray baskets = object.containsKey("baskets") ? object.getJsonArray("baskets") : new JsonArray();
-                    basketService.listebasketItemForOrder(idCampaign, idStructure, baskets,
-                            listBasket -> {
-                                if(listBasket.isRight() && listBasket.right().getValue().size() > 0){
-                                    basketService.takeOrder(request , listBasket.right().getValue(),
-                                            idCampaign, idStructure, nameStructure, idProject, baskets,
-                                            Logging.defaultCreateResponsesHandler(eb,
-                                                    request,
-                                                    Contexts.ORDER.toString(),
-                                                    Actions.CREATE.toString(),
-                                                    "id_order",
-                                                    listBasket.right().getValue()));
+        RequestUtils.bodyToJson( request, pathPrefix + "basketToOrder", object -> {
+            try {
+                final Integer idCampaign = Integer.parseInt(request.params().get("idCampaign"));
+                final String idStructure = object.getString("id_structure");
+                final String nameStructure = object.getString("structure_name");
+                final Integer idProject = object.getInteger("id_project");
+                JsonArray baskets = object.containsKey("baskets") ? object.getJsonArray("baskets") : new JsonArray();
+                basketService.listebasketItemForOrder(idCampaign, idStructure, baskets,
+                        listBasket -> {
+                            if(listBasket.isRight() && listBasket.right().getValue().size() > 0){
+                                basketService.takeOrder(request , listBasket.right().getValue(),
+                                        idCampaign, idStructure, nameStructure, idProject, baskets,
+                                        Logging.defaultCreateResponsesHandler(eb,
+                                                request,
+                                                Contexts.ORDER.toString(),
+                                                Actions.CREATE.toString(),
+                                                "id_order",
+                                                listBasket.right().getValue()));
 
-                                }else{
-                                    log.error("An error occurred when listing Baskets");
-                                    badRequest(request);
-                                }
-                            });
+                            }else{
+                                log.error("An error occurred when listing Baskets");
+                                badRequest(request);
+                            }
+                        });
 
-                } catch (ClassCastException e) {
-                    log.error("An error occurred when casting Basket information", e);
-                    renderError(request);
-                }
+            } catch (ClassCastException e) {
+                log.error("An error occurred when casting Basket information", e);
+                renderError(request);
             }
         });
     }

@@ -74,7 +74,7 @@ public abstract class TabHelper {
      *
      * @param programs
      */
-    protected void setPrograms(JsonArray programs) {
+    protected void setArray(JsonArray programs) {
     }
 
     /**

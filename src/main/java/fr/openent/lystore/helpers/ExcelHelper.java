@@ -288,8 +288,14 @@ public class ExcelHelper {
         for (int line = lineStart; line < lineEnd; line++) {
             tab = sheet.getRow(line);
             for (int column = columnStart; column < columnEnd; column++) {
-                cell = tab.createCell(column);
-                cell.setCellStyle(this.tabNumeralStyle);
+                try {
+                    cell = tab.getCell(column);
+                    cell.setCellStyle(this.tabNumeralStyle);
+                } catch (NullPointerException e) {
+                    cell = tab.createCell(column);
+                    cell.setCellStyle(this.tabNumeralStyle);
+                }
+
             }
         }
     }

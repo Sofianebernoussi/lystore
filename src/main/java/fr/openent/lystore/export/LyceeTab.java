@@ -56,7 +56,7 @@ public class LyceeTab extends Investissement {
                         }
                     }
                 }
-                setPrices();
+//                setPrices();
                 handler.handle(new Either.Right<>(commands));
             }
         }));
@@ -70,8 +70,10 @@ public class LyceeTab extends Investissement {
      */
     @Override
     public void getPrograms(Handler<Either<String, JsonArray>> handler) {
+
         String query = "WITH values AS (" +
-                "   SELECT distinct contract_type.code, contract_type.name, program_action.id_program  " +
+                "  SELECT SUM((oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 ) as Total ," +
+                " contract_type.code as code, program_action.id_program as id_program ,oce.id_operation , contract_type.name " +
                 "   FROM " + Lystore.lystoreSchema + ".order_client_equipment oce " +
                 "   INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id) " +
                 "   INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id) " +
@@ -84,13 +86,14 @@ public class LyceeTab extends Investissement {
                 "   AND oce.id_structure NOT IN ( " +
                 "   SELECT id " +
                 "   FROM " + Lystore.lystoreSchema + ".specific_structures " +
-                "   )" +
-                ") " +
+                "  )" +
+                " Group by  contract_type.code, contract_type.name , program_action.id, oce.id_operation order by id_program,code,oce.id_operation) " +
                 "SELECT program.*, array_to_json(array_agg(values)) as actions " +
                 "FROM " + Lystore.lystoreSchema + ".program " +
                 "INNER JOIN values ON (values.id_program = program.id) " +
                 "WHERE program.section =  '" + Investissement + "'" +
-                "GROUP BY program.id";
+                "GROUP BY program.id ";
+
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
@@ -107,4 +110,6 @@ public class LyceeTab extends Investissement {
             }
         }));
     }
+
+
 }

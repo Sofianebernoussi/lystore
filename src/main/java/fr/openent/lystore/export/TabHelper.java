@@ -43,14 +43,10 @@ public abstract class TabHelper {
     }
 
 
-    public void create(Handler<Either<String, Boolean>> handler) {
-    }
+    public abstract void create(Handler<Either<String, Boolean>> handler);
 
-    public void getPrograms(Handler<Either<String, JsonArray>> handler) {
-    }
+    public abstract void getPrograms(Handler<Either<String, JsonArray>> handler);
 
-    public void getPrices(Handler<Either<String, JsonArray>> handler) {
-    }
 
     /**
      * Init all the tab

@@ -7,12 +7,15 @@ import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.entcore.common.sql.Sql;
+import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 
 public abstract class Investissement extends TabHelper {
 
     JsonArray operations;
+    String query;
     public Investissement(Workbook wb, JsonObject instruction, String TabName) {
         super(wb, instruction, TabName);
 
@@ -33,13 +36,16 @@ public abstract class Investissement extends TabHelper {
 
             JsonArray programs = event.right().getValue();
             //Delete tab if empty
+
+            setArray(programs);
             if (programs.size() == 0) {
                 wb.removeSheetAt(wb.getSheetIndex(sheet));
                 handler.handle(new Either.Right<>(true));
                 return;
-            }
-            setArray(programs);
+            } else {
                 handler.handle(new Either.Right<>(true));
+
+            }
         });
     }
 
@@ -85,6 +91,24 @@ public abstract class Investissement extends TabHelper {
         excel.insertHeader(sheet.createRow(this.operationsRowNumber), cellLabelColumn, excel.totalLabel);
     }
 
+    @Override
+    public void getPrograms(Handler<Either<String, JsonArray>> handler) {
+
+        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
+            if (event.isLeft()) {
+                handler.handle(event.left());
+            } else {
+                JsonArray programs = event.right().getValue();
+                for (int i = 0; i < programs.size(); i++) {
+                    JsonObject program = programs.getJsonObject(i);
+                    program.put("actions", new JsonArray(program.getString("actions")));
+
+                }
+
+                handler.handle(new Either.Right<>(programs));
+            }
+        }));
+    }
     /**
      * Set the headers of tab for investissement
      *
@@ -135,11 +159,9 @@ public abstract class Investissement extends TabHelper {
             JsonObject action = actions.getJsonObject(j);
             if (!code.equals(action.getString("code"))) {
                 code = action.getString("code");
-
                 if (!tabx.containsKey(action.getInteger("id_program").toString() + "-" + action.getString("code"))) {
                     tabx.put(action.getInteger("id_program").toString() + "-" + action.getString("code"), posx);
                     posx++;
-                    System.out.println(posx);
                 }
 
                 excel.insertHeader(actionDescRow, cellColumn, action.getString("name"));

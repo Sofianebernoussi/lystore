@@ -61,6 +61,7 @@ public class Instruction {
             instruction = either.right().getValue();
             instruction.put("operations", new JsonArray(instruction.getString("operations")));
             String path = FileResolver.absolutePath("./public/template/excel/template.xlsx");
+
             try {
                 FileInputStream templateInputStream = new FileInputStream(path);
                 Workbook workbook = new XSSFWorkbook(templateInputStream);

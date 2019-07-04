@@ -19,6 +19,8 @@ public class RecapImputationBud extends TabHelper {
     public RecapImputationBud(Workbook workbook, JsonObject instruction) {
 
         super(workbook, instruction, TabName.IMPUTATION_BUDG.toString());
+        excel.setDefaultFont();
+        excel.setCPNumber(instruction.getString("cp_number"));
     }
 
     @Override

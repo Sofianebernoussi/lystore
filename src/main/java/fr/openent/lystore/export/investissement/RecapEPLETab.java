@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 public class RecapEPLETab extends TabHelper {
 
-    private int yProgramLabel = 4;
+    private int yProgramLabel = 0;
     private final int xProgramLabel = 0;
     private String programLabel = "Programme : ";
     private String totalLabel = "Montant : ";

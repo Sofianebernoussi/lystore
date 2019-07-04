@@ -37,7 +37,7 @@ public class RecapEPLETab extends TabHelper {
     private ArrayList<String> structuresId;
     private StructureService structureService;
     private int nbLine = 0;
-    String totalLabelInt = "";
+    private String totalLabelInt = "";
 
     public RecapEPLETab(Workbook workbook, JsonObject instruction) {
         super(workbook, instruction, TabName.EPLE.toString());

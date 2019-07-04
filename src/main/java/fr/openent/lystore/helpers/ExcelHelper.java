@@ -15,6 +15,7 @@ public class ExcelHelper {
     private final CellStyle totalStyle;
     private final CellStyle labelHeadStyle;
     private final CellStyle currencyStyle;
+    private final CellStyle tabCurrencyStyle;
 
 
     private DataFormat format;
@@ -28,6 +29,7 @@ public class ExcelHelper {
         this.labelStyle = wb.createCellStyle();
         this.tabNumeralStyle = wb.createCellStyle();
         this.tabStringStyle = wb.createCellStyle();
+        this.tabCurrencyStyle = wb.createCellStyle();
         this.currencyStyle = wb.createCellStyle();
         this.totalStyle = wb.createCellStyle();
         this.labelHeadStyle = wb.createCellStyle();
@@ -130,6 +132,15 @@ public class ExcelHelper {
         this.currencyStyle.setFont(labelHeadFont);
         this.currencyStyle.setDataFormat(format.getFormat("#,##0.00 €"));
 
+        this.tabCurrencyStyle.setWrapText(true);
+        this.tabCurrencyStyle.setAlignment(HorizontalAlignment.RIGHT);
+        this.tabCurrencyStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.tabCurrencyStyle.setBorderLeft(BorderStyle.THIN);
+        this.tabCurrencyStyle.setBorderRight(BorderStyle.THIN);
+        this.tabCurrencyStyle.setBorderTop(BorderStyle.THIN);
+        this.tabCurrencyStyle.setBorderBottom(BorderStyle.THIN);
+        this.tabCurrencyStyle.setFont(totalFont);
+        this.tabCurrencyStyle.setDataFormat(format.getFormat("#,##0.00 €"));
     }
     public void setBold(Cell cell) {
         Font font = wb.createFont();
@@ -244,6 +255,13 @@ public class ExcelHelper {
         cell.setCellStyle(this.tabNumeralStyle);
     }
 
+    public void insertCellTabFloatWithPrice(int cellColumn, int line, float data) {
+        Row tab;
+        tab = sheet.getRow(line);
+        Cell cell = tab.createCell(cellColumn);
+        cell.setCellValue(data);
+        cell.setCellStyle(this.tabCurrencyStyle);
+    }
     /**
      * insert a cell in the tab
      *
@@ -317,11 +335,11 @@ public class ExcelHelper {
         Cell cell, cellStartSum, cellEndSum;
         tab = sheet.getRow(lineInsert);
         cell = tab.createCell(column);
-        cell.setCellStyle(this.totalStyle);
+        cell.setCellStyle(this.tabCurrencyStyle);
         cell.setCellValue("total");
         cellStartSum = tabStart.getCell(column);
         cellEndSum = tabEnd.getCell(column);
-        cell.setCellStyle(this.totalStyle);
+        cell.setCellStyle(this.tabCurrencyStyle);
         cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
 
     }
@@ -346,7 +364,7 @@ public class ExcelHelper {
             cell = tab.createCell(columnEnd);
             cellStartSum = tab.getCell(columnStart);
             cellEndSum = tab.getCell(columnEnd - 1);
-            cell.setCellStyle(this.totalStyle);
+            cell.setCellStyle(this.tabCurrencyStyle);
             cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
 
 
@@ -356,14 +374,14 @@ public class ExcelHelper {
 
         for (int i = columnStart; i < columnEnd; i++) {
             cell = tab.createCell(i);
-            cell.setCellStyle(this.totalStyle);
+            cell.setCellStyle(this.tabCurrencyStyle);
             cell.setCellValue("total");
 
             cellStartSum = tabStart.getCell(i);
             cellEndSum = tabEnd.getCell(i);
 
 
-            cell.setCellStyle(this.totalStyle);
+            cell.setCellStyle(this.tabCurrencyStyle);
             cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
         }
         cellStartSum = tabStart.getCell(columnEnd);
@@ -371,7 +389,7 @@ public class ExcelHelper {
 
 
         cell = tab.createCell(columnEnd);
-        cell.setCellStyle(this.totalStyle);
+        cell.setCellStyle(this.tabCurrencyStyle);
         cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
 
     }
@@ -384,4 +402,6 @@ public class ExcelHelper {
         cell = tab.getCell(column);
         return new CellReference(cell).formatAsString();
     }
+
+
 }

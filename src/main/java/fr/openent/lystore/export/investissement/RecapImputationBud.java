@@ -6,6 +6,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
@@ -13,7 +14,7 @@ public class RecapImputationBud extends TabHelper {
     private JsonArray programs;
     private final int xTab = 0;
     private final int yTab = 7;
-    private int nbToMerge = 0;
+    private int nbToMerge = 1;
 
     public RecapImputationBud(Workbook workbook, JsonObject instruction) {
 
@@ -39,11 +40,11 @@ public class RecapImputationBud extends TabHelper {
         for (int i = 0; i < programs.size(); i++) {
             program = programs.getJsonObject(i);
             oldSection = insertSetion(program.getString("section"), oldSection, xTab, yTab + i);
-            excel.insertCellTab(xTab + 1, yTab + i, program.getInteger("chapter").toString());
-            excel.insertCellTab(xTab + 2, yTab + i, program.getInteger("functional_code").toString());
+            excel.insertCellTab(xTab + 1, yTab + i, program.getInteger("chapter").toString() + " - " + program.getString("chapter_label"));
+            excel.insertCellTab(xTab + 2, yTab + i, program.getInteger("functional_code").toString() + " - " + program.getString("code_label"));
             excel.insertCellTab(xTab + 3, yTab + i, program.getString("program_name"));
             excel.insertCellTab(xTab + 4, yTab + i, program.getString("program_label"));
-            excel.insertCellTab(xTab + 5, yTab + i, program.getString("action_code"));
+            excel.insertCellTabCenter(xTab + 5, yTab + i, program.getString("action_code"));
             excel.insertCellTab(xTab + 6, yTab + i, program.getString("action_name"));
             excel.insertCellTabFloatWithPrice(xTab + 7, yTab + i, Float.parseFloat(program.getString("total")));
 
@@ -52,14 +53,19 @@ public class RecapImputationBud extends TabHelper {
     }
 
     private String insertSetion(String section, String oldSection, int xTab, int y) {
-        if (!section.equals(oldSection) && y != yTab) {
-            excel.insertCellTab(xTab, y, section);
+        if (!section.equals(oldSection)) {
+            excel.insertHeader(sheet.getRow(y), xTab, section);
+            if (y - nbToMerge != y - 1) {
+//                excel.insertCellTab(xTab, y - nbToMerge, section);
+                CellRangeAddress merge = new CellRangeAddress(y - nbToMerge, y - 1, xTab, xTab);
+                sheet.addMergedRegion(merge);
+                nbToMerge = 1;
+            }
+
             oldSection = section;
-//            CellRangeAddress merge = new CellRangeAddress(y - nbToMerge, y, xTab, xTab);
-//            sheet.addMergedRegion(merge);
-            nbToMerge = 0;
+
         } else {
-            excel.insertCellTab(xTab, y, section);
+            excel.insertHeader(sheet.getRow(y), xTab, section);
 
             nbToMerge++;
         }
@@ -69,7 +75,7 @@ public class RecapImputationBud extends TabHelper {
     @Override
     public void getPrograms(Handler<Either<String, JsonArray>> handler) {
         query = "SELECT  program_action.action as action_code, program.section, program_action.description as action_name,program_action.id as action_id , program.name as program_name,program.id as program_id,  " +
-                "program.label as program_label, program.functional_code, program.chapter, " +
+                "program.label as program_label, program.functional_code, program.chapter,chapter.label as chapter_label, functional_code.label as code_label, " +
                 " SUM(CASE WHEN oce.price_proposal is not null THEN oce.price_proposal *  oce.amount ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 END) as Total   " +
                 "FROM lystore.order_client_equipment oce " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id)   " +
@@ -78,9 +84,11 @@ public class RecapImputationBud extends TabHelper {
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id) " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)   " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)  " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)  " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id) " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".chapter ON (chapter.code =  program.chapter) " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".functional_code ON (functional_code.code =  program.functional_code) " +
                 "WHERE instruction.id = ? " +
-                "group by program_action.id,program.id " +
+                "group by program_action.id,program.id,chapter_label,code_label " +
                 "order by section desc,program_id,action_id;";
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {

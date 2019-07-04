@@ -11,6 +11,7 @@ public class ExcelHelper {
     public final CellStyle headCellStyle;
     private final CellStyle labelStyle;
     private final CellStyle tabNumeralStyle;
+    private final CellStyle tabStringStyleCenter;
     private final CellStyle tabStringStyle;
     private final CellStyle totalStyle;
     private final CellStyle labelHeadStyle;
@@ -31,6 +32,7 @@ public class ExcelHelper {
         this.tabStringStyle = wb.createCellStyle();
         this.tabCurrencyStyle = wb.createCellStyle();
         this.currencyStyle = wb.createCellStyle();
+        this.tabStringStyleCenter = wb.createCellStyle();
         this.totalStyle = wb.createCellStyle();
         this.labelHeadStyle = wb.createCellStyle();
 
@@ -115,6 +117,16 @@ public class ExcelHelper {
         this.tabStringStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         this.tabStringStyle.setFont(tabFont);
         this.tabStringStyle.setDataFormat(format.getFormat("#,##0.00"));
+
+        this.tabStringStyleCenter.setBorderLeft(BorderStyle.THIN);
+        this.tabStringStyleCenter.setBorderRight(BorderStyle.THIN);
+        this.tabStringStyleCenter.setBorderTop(BorderStyle.THIN);
+        this.tabStringStyleCenter.setBorderBottom(BorderStyle.THIN);
+        this.tabStringStyleCenter.setWrapText(true);
+        this.tabStringStyleCenter.setAlignment(HorizontalAlignment.CENTER);
+        this.tabStringStyleCenter.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.tabStringStyleCenter.setFont(tabFont);
+        this.tabStringStyleCenter.setDataFormat(format.getFormat("#,##0.00"));
 
         //LabelHeadStyle
         Font labelHeadFont = this.wb.createFont();
@@ -292,6 +304,13 @@ public class ExcelHelper {
         cell.setCellStyle(this.tabNumeralStyle);
     }
 
+    public void insertCellTabCenter(int cellColumn, int line, String data) {
+        Row tab;
+        tab = sheet.getRow(line);
+        Cell cell = tab.createCell(cellColumn);
+        cell.setCellValue(data);
+        cell.setCellStyle(this.tabStringStyleCenter);
+    }
     /**
      * Set style for a tab
      *
@@ -316,16 +335,6 @@ public class ExcelHelper {
 
             }
         }
-    }
-
-
-    public void setTotalY(int lineStart, int lineEnd, int column) {
-        Row tab, tabStart, tabEnd;
-        Cell cell, cellStartSum, cellEndSum;
-        tabStart = sheet.getRow(lineStart);
-        tabEnd = sheet.getRow(lineEnd - 1);
-
-
     }
 
     public void setTotalX(int lineStart, int lineEnd, int column, int lineInsert) {

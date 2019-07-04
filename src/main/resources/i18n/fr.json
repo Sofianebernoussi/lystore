@@ -464,5 +464,6 @@
   "lystore.access.catalog": "Accéder au catalogue",
   "lystore.demands.waiting": "demandes en attente",
   "lystore.demand.waiting": "demande en attente",
-  "lystore.demand.empty": "Aucune demande sur cette campagne"
+  "lystore.demand.empty": "Aucune demande sur cette campagne",
+  "lystore.operation.form.empty": "Aucune opération disponible"
 }

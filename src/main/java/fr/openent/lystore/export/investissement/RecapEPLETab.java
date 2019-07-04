@@ -33,7 +33,7 @@ public class RecapEPLETab extends TabHelper {
     private int xlabel = 0;
     private int yTotalLabel = 3;
 
-    private JsonArray programs, orders;
+    private JsonArray programs;
     private ArrayList<String> structuresId;
     private StructureService structureService;
     private int nbLine = 0;
@@ -55,7 +55,6 @@ public class RecapEPLETab extends TabHelper {
                 return;
             }
             getAndSetDatas(handler);
-//            handler.handle(new Either.Right<>(true));
         });
     }
 
@@ -205,7 +204,7 @@ public class RecapEPLETab extends TabHelper {
 
     @Override
     public void getPrograms(Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT distinct contract_type.code as contract_code,  contract_type.name as contract_name, contract_type.id as contract_type_id," +
+        query = "SELECT distinct contract_type.code as contract_code,  contract_type.name as contract_name, contract_type.id as contract_type_id," +
                 "oce.id_structure, " +
                 "program_action.action as action_code, program_action.description as action_name,program_action.id as action_id , " +
                 "program.name as program_name,program.id as program_id, program.label as program_label," +

@@ -10,12 +10,9 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
-import java.util.ArrayList;
-
 public abstract class Investissement extends TabHelper {
 
     JsonArray operations;
-    String query;
     public Investissement(Workbook wb, JsonObject instruction, String TabName) {
         super(wb, instruction, TabName);
 
@@ -51,24 +48,6 @@ public abstract class Investissement extends TabHelper {
 
 
 
-    /**
-     * Init all the tab
-     *
-     * @param i                   xInit
-     * @param cellColumn          xMax
-     * @param j                   yInit
-     * @param operationsRowNumber yMax
-     */
-    @Override
-    protected void initTabValue(int i, int cellColumn, int j, int operationsRowNumber) {
-        for (int ii = 0; ii < cellColumn - i; ii++) {
-            priceTab.add(ii, new ArrayList<Float>());
-            for (int jj = 0; jj < operationsRowNumber - j; jj++) {
-                priceTab.get(ii).add(jj, 0.f);
-            }
-
-        }
-    }
 
     /**
      * Set labels of the tabs
@@ -144,7 +123,6 @@ public abstract class Investissement extends TabHelper {
             excel.fillTab(xTab, this.cellColumn, yTab, this.operationsRowNumber);
         }
         excel.setTotal(cellColumn, operationsRowNumber, xTab, yTab);
-        //addin total
         CellRangeAddress totalMerge = new CellRangeAddress(programRowNumber, programRowNumber + 2, cellColumn, cellColumn);
         sheet.addMergedRegion(totalMerge);
         excel.setRegionHeader(totalMerge, sheet);
@@ -192,19 +170,4 @@ public abstract class Investissement extends TabHelper {
         }
         return nbActions;
     }
-    /**
-     * Insert prices into the tab
-     */
-    @Override
-    protected void setPrices() {
-        for (int i = 0; i < priceTab.size(); i++) {
-            for (int j = 0; j < priceTab.get(i).size(); j++) {
-                if (priceTab.get(i).get(j) != 0.f)
-                    excel.insertCellTabFloat(i + xTab, j + yTab, priceTab.get(i).get(j));
-            }
-        }
-        excel.setTotal(cellColumn, operationsRowNumber, xTab, yTab);
-    }
-
-
 }

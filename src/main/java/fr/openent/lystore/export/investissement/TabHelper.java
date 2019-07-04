@@ -17,6 +17,7 @@ public abstract class TabHelper {
     protected static final String Investissement = "Investissement";
     protected static final String Fonctionnement = "Fonctionnement";
     protected Workbook wb;
+    protected String query;
     protected Sheet sheet;
     protected JsonObject instruction;
     protected ExcelHelper excel;
@@ -49,17 +50,6 @@ public abstract class TabHelper {
 
 
     /**
-     * Init all the tab
-     *
-     * @param i                   xInit
-     * @param cellColumn          xMax
-     * @param j                   yInit
-     * @param operationsRowNumber yMax
-     */
-    protected void initTabValue(int i, int cellColumn, int j, int operationsRowNumber) {
-    }
-
-    /**
      * Set labels of the tabs
      */
     protected void setLabels() {
@@ -72,12 +62,4 @@ public abstract class TabHelper {
      */
     protected void setArray(JsonArray programs) {
     }
-
-    /**
-     * Insert prices into the tab
-     */
-    protected void setPrices() {
-    }
-
-
 }

@@ -1,4 +1,4 @@
-package fr.openent.lystore.export;
+package fr.openent.lystore.export.investissement;
 
 import fr.openent.lystore.Lystore;
 import fr.wseduc.webutils.Either;

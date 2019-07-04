@@ -1,4 +1,4 @@
-package fr.openent.lystore.export;
+package fr.openent.lystore.export.investissement;
 
 import fr.openent.lystore.service.StructureService;
 import fr.openent.lystore.service.impl.DefaultStructureService;

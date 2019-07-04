@@ -179,7 +179,7 @@ export class OrdersClient extends Selection<OrderClient> {
                             : order.options = [];
                         order.priceTTCtotal = parseFloat((order.calculatePriceTTC(2, order.price) as number).toString()) * order.amount;
                         order.priceProposalTTCTotal = order.price_proposal !== null ?
-                            parseFloat((order.calculatePriceTTC(2, order.price_proposal) as number).toString()) * order.amount :
+                            parseFloat(order.price_proposal.toString()) * order.amount :
                             null;
                     }
                 });

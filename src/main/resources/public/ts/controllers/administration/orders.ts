@@ -328,6 +328,6 @@ export const orderController = ng.controller('orderController',
             ])
         };
         $scope.showPriceProposalOrNot = (order:OrderClient) => {
-            return order.priceTTCtotal = order.price_proposal !== null? order.priceProposalTTCTotal : order.priceTTCtotal;
+            return  order.price_proposal !== null? order.priceProposalTTCTotal : order.priceTTCtotal;
         };
     }]);

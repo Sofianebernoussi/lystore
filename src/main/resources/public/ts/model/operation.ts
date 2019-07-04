@@ -66,6 +66,7 @@ export class Operation implements Selectable {
         return {
             id_label : this.id_label,
             status : this.status,
+            id_instruction: this.id_instruction,
             date_cp: this.date_cp? Utils.formatDatePost(this.date_cp) : null,
         };
     }

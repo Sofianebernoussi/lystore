@@ -16,8 +16,8 @@ import java.util.ArrayList;
 
 public class RecapEPLETab extends TabHelper {
 
-    private int xProgramLabel = 4;
-    private final int yProgramLabel = 0;
+    private int yProgramLabel = 4;
+    private final int xProgramLabel = 0;
     private String programLabel = "Programme : ";
     private String totalLabel = "Montant : ";
     private String contractType = "Nature comptable : ";
@@ -109,12 +109,12 @@ public class RecapEPLETab extends TabHelper {
             if (!(id_structure.equals(program.getString("id_structure")))) {
                 id_structure = newTab(program, false);
             }
-            sheet.createRow(xProgramLabel + 3);
-            excel.insertCellTab(0, xProgramLabel + 3, program.getString("label"));
-            excel.insertCellTab(1, xProgramLabel + 3, program.getString("comment"));
-            excel.insertCellTabInt(2, xProgramLabel + 3, Integer.parseInt(program.getInteger("amount").toString()));
-            excel.insertCellTabFloat(3, xProgramLabel + 3, Float.parseFloat(program.getString("total")));
-            xProgramLabel++;
+            sheet.createRow(yProgramLabel + 3);
+            excel.insertCellTab(0, yProgramLabel + 3, program.getString("label"));
+            excel.insertCellTab(1, yProgramLabel + 3, program.getString("comment"));
+            excel.insertCellTabInt(2, yProgramLabel + 3, Integer.parseInt(program.getInteger("amount").toString()));
+            excel.insertCellTabFloat(3, yProgramLabel + 3, Float.parseFloat(program.getString("total")));
+            yProgramLabel++;
             nbLine++;
 
         }
@@ -130,13 +130,13 @@ public class RecapEPLETab extends TabHelper {
         String id_structure = "", zipCode, city, uai, nameEtab;
         CellRangeAddress merge;
         if (notFirstTab) {
-            merge = new CellRangeAddress(xProgramLabel + 3, xProgramLabel + 5, 0, 1);
+            merge = new CellRangeAddress(yProgramLabel + 3, yProgramLabel + 5, 0, 1);
             sheet.addMergedRegion(merge);
-            merge = new CellRangeAddress(xProgramLabel + 4, xProgramLabel + 5, 2, 3);
+            merge = new CellRangeAddress(yProgramLabel + 4, yProgramLabel + 5, 2, 3);
             sheet.addMergedRegion(merge);
-            excel.insertHeader(sheet.createRow(xProgramLabel + 3), 2, excel.sumLabel);
-            excel.setTotalX(xProgramLabel + 2 - nbLine, xProgramLabel + 2, 3, xProgramLabel + 3);
-            totalLabelInt += excel.getCellReference(xProgramLabel + 3, 3) + " +";
+            excel.insertHeader(sheet.createRow(yProgramLabel + 3), 2, excel.sumLabel);
+            excel.setTotalX(yProgramLabel + 2 - nbLine, yProgramLabel + 2, 3, yProgramLabel + 3);
+            totalLabelInt += excel.getCellReference(yProgramLabel + 3, 3) + " +";
             nbLine = 0;
 
 
@@ -144,7 +144,7 @@ public class RecapEPLETab extends TabHelper {
             notFirstTab = true;
         }
         if (!isLast) {
-            xProgramLabel += 3;
+            yProgramLabel += 3;
 
             if (program_id != program.getInteger("program_id") || action_id != program.getInteger("action_id") || contract_id != program.getInteger("contract_type_id")) {
                 program_id = program.getInteger("program_id");
@@ -164,15 +164,15 @@ public class RecapEPLETab extends TabHelper {
             uai = program.getString("uai");
             zipCode = program.getString("zipCode");
             city = program.getString("city");
-            excel.insertHeader(sheet.createRow(xProgramLabel + 3), 0, zipCode + " - " + city + " - " + nameEtab + " (" + uai + ")");
-            merge = new CellRangeAddress(xProgramLabel + 3, xProgramLabel + 3, 0, 3);
+            excel.insertHeader(sheet.createRow(yProgramLabel + 3), 0, zipCode + " - " + city + " - " + nameEtab + " (" + uai + ")");
+            merge = new CellRangeAddress(yProgramLabel + 3, yProgramLabel + 3, 0, 3);
             sheet.addMergedRegion(merge);
             excel.setRegionHeader(merge, sheet);
-            excel.insertHeader(sheet.createRow(xProgramLabel + 4), 0, orderLabel);
-            excel.insertHeader(sheet.getRow(xProgramLabel + 4), 1, orderComment);
-            excel.insertHeader(sheet.getRow(xProgramLabel + 4), 2, orderAmount);
-            excel.insertHeader(sheet.getRow(xProgramLabel + 4), 3, orderTotal);
-            xProgramLabel += 2;
+            excel.insertHeader(sheet.createRow(yProgramLabel + 4), 0, orderLabel);
+            excel.insertHeader(sheet.getRow(yProgramLabel + 4), 1, orderComment);
+            excel.insertHeader(sheet.getRow(yProgramLabel + 4), 2, orderAmount);
+            excel.insertHeader(sheet.getRow(yProgramLabel + 4), 3, orderTotal);
+            yProgramLabel += 2;
         } else {
 
         }
@@ -187,18 +187,18 @@ public class RecapEPLETab extends TabHelper {
     }
 
     public void setLabelHead(JsonObject program) {
-        xProgramLabel += 4;
+        yProgramLabel += 4;
 
-//        excel.insertLabelHead(sheet.createRow(xProgramLabel), 0, "cc");
-        excel.insertLabelHead(sheet.createRow(xProgramLabel), yProgramLabel,
+//        excel.insertLabelHead(sheet.createRow(yProgramLabel), 0, "cc");
+        excel.insertLabelHead(sheet.createRow(yProgramLabel), xProgramLabel,
                 programLabel + program.getString("program_name") + " " + program.getString("program_label"));
-        excel.insertLabelHead(sheet.createRow(xProgramLabel + 2), yProgramLabel,
+        excel.insertLabelHead(sheet.createRow(yProgramLabel + 2), xProgramLabel,
                 actionLabel + program.getString("action_code") + " - " + program.getString("action_name"));
-        excel.insertLabelHead(sheet.getRow(xProgramLabel), yProgramLabel + 1,
+        excel.insertLabelHead(sheet.getRow(yProgramLabel), xProgramLabel + 1,
                 contractType + program.getString("contract_code") + " - " + program.getString("contract_name"));
-        excel.insertLabelHead(sheet.getRow(xProgramLabel), yProgramLabel + 2, totalLabel);
-        xlabel = xProgramLabel;
-        xProgramLabel += 2;
+        excel.insertLabelHead(sheet.getRow(yProgramLabel), xProgramLabel + 2, totalLabel);
+        xlabel = yProgramLabel;
+        yProgramLabel += 2;
 
     }
 
@@ -209,7 +209,7 @@ public class RecapEPLETab extends TabHelper {
                 "program_action.action as action_code, program_action.description as action_name,program_action.id as action_id , " +
                 "program.name as program_name,program.id as program_id, program.label as program_label," +
                 "oce.id_structure,oce.amount as amount,oce.name as label,oce.comment as comment,oce.id,  " +
-                "SUM((oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 ) as Total " +
+                "SUM(CASE WHEN oce.price_proposal is not null THEN oce.price_proposal *  oce.amount ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 END) as Total  " +
                 "FROM lystore.order_client_equipment oce    " +
                 "INNER JOIN lystore.operation ON (oce.id_operation = operation.id)   " +
                 " INNER JOIN lystore.instruction ON (operation.id_instruction = instruction.id)  " +

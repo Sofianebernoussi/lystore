@@ -13,7 +13,7 @@ public class CMDTab extends Investissement {
     public CMDTab(Workbook wb, JsonObject instruction) {
         super(wb, instruction, TabName.CMD.toString());
         query = "WITH values AS (" +
-                "    SELECT SUM((oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 ) as Total , " +
+                "    SELECT SUM(CASE WHEN oce.price_proposal is not null THEN oce.price_proposal *  oce.amount ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 END) as Total , " +
                 "     contract_type.code as code, program_action.id_program as id_program ,oce.id_operation , contract_type.name " +
                 "   FROM " + Lystore.lystoreSchema + ".order_client_equipment oce " +
                 "   INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id) " +

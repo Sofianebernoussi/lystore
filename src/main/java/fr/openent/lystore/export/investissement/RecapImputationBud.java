@@ -13,6 +13,7 @@ public class RecapImputationBud extends TabHelper {
     private JsonArray programs;
     private final int xTab = 0;
     private final int yTab = 7;
+    private int nbToMerge = 0;
 
     public RecapImputationBud(Workbook workbook, JsonObject instruction) {
 
@@ -34,9 +35,10 @@ public class RecapImputationBud extends TabHelper {
     @Override
     protected void setArray(JsonArray programs) {
         JsonObject program;
+        String oldSection = "";
         for (int i = 0; i < programs.size(); i++) {
             program = programs.getJsonObject(i);
-            excel.insertCellTab(xTab, yTab + i, program.getString("section"));
+            oldSection = insertSetion(program.getString("section"), oldSection, xTab, yTab + i);
             excel.insertCellTab(xTab + 1, yTab + i, program.getInteger("chapter").toString());
             excel.insertCellTab(xTab + 2, yTab + i, program.getInteger("functional_code").toString());
             excel.insertCellTab(xTab + 3, yTab + i, program.getString("program_name"));
@@ -49,11 +51,26 @@ public class RecapImputationBud extends TabHelper {
         }
     }
 
+    private String insertSetion(String section, String oldSection, int xTab, int y) {
+        if (!section.equals(oldSection) && y != yTab) {
+            excel.insertCellTab(xTab, y, section);
+            oldSection = section;
+//            CellRangeAddress merge = new CellRangeAddress(y - nbToMerge, y, xTab, xTab);
+//            sheet.addMergedRegion(merge);
+            nbToMerge = 0;
+        } else {
+            excel.insertCellTab(xTab, y, section);
+
+            nbToMerge++;
+        }
+        return oldSection;
+    }
+
     @Override
     public void getPrograms(Handler<Either<String, JsonArray>> handler) {
         query = "SELECT  program_action.action as action_code, program.section, program_action.description as action_name,program_action.id as action_id , program.name as program_name,program.id as program_id,  " +
                 "program.label as program_label, program.functional_code, program.chapter, " +
-                " SUM((oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 ) as Total  " +
+                " SUM(CASE WHEN oce.price_proposal is not null THEN oce.price_proposal *  oce.amount ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 END) as Total   " +
                 "FROM lystore.order_client_equipment oce " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id)   " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)    " +

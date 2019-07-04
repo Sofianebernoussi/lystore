@@ -1,5 +1,6 @@
 package fr.openent.lystore.export.investissement;
 
+import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.StructureService;
 import fr.openent.lystore.service.impl.DefaultStructureService;
 import fr.wseduc.webutils.Either;
@@ -42,7 +43,7 @@ public class RecapEPLETab extends TabHelper {
     public RecapEPLETab(Workbook workbook, JsonObject instruction) {
         super(workbook, instruction, TabName.EPLE.toString());
         structuresId = new ArrayList<>();
-        structureService = new DefaultStructureService();
+        structureService = new DefaultStructureService(Lystore.lystoreSchema);
     }
 
     @Override

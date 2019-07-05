@@ -19,6 +19,10 @@ import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 
 public class InstructionController extends ControllerHelper {
@@ -98,6 +102,11 @@ public class InstructionController extends ControllerHelper {
     @Get("/instructions/:id/export")
     @ApiDoc("Export given instruction")
     public void exportInstruction(HttpServerRequest request) {
+        java.util.Date date = Calendar.getInstance().getTime();
+
+        // Display a date in day, month, year format
+        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        String today = formatter.format(date);
         new Instruction(Integer.parseInt(request.getParam("id")), config).export(event -> {
             if (event.isLeft()) {
                 renderError(request);
@@ -106,7 +115,7 @@ public class InstructionController extends ControllerHelper {
                 request.response()
                         .putHeader("Content-Type", "application/vnd.ms-excel")
                         .putHeader("Content-Length", file.length() + "")
-                        .putHeader("Content-Disposition", "attachment; filename=Récapitulatif_mesures_engagées.xlsx")
+                        .putHeader("Content-Disposition", "attachment; filename=Récapitulatif_mesures_engagées_" + today + ".xlsx")
                         .write(file);
             }
         });

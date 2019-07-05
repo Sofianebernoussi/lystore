@@ -1,8 +1,10 @@
-import { Mix, Selectable, Selection} from 'entcore-toolkit';
+import {Mix, Selectable, Selection} from 'entcore-toolkit';
 import {moment, notify} from 'entcore';
 import http from 'axios';
-import {label, Operation, Operations} from "./operation";
+import {Operation} from "./operation";
 import {Utils} from "./Utils";
+
+// import {window} from "../controllers/administration/orders";
 
 export class Instruction implements Selectable {
     id?:number;
@@ -58,6 +60,37 @@ export class Instruction implements Selectable {
             comment: this.comment,
         };
     }
+
+    s2ab(s) {
+        var buf = new ArrayBuffer(s.length);
+        var view = new Uint8Array(buf);
+        for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+        return buf;
+    }
+
+    async exportRME() {
+        window.location.href = `/lystore/instructions/${this.id}/export`;
+
+        // try {
+        //     let {data, status, headers} = await http.get(`/lystore/instructions/${this.id}/export`);
+        //     if (status === 200) {
+        //         var blob = new Blob([data]);
+        //         var objectUrl = URL.createObjectURL(blob);
+        //         var a = document.createElement("a");
+        //         a.href = objectUrl;
+        //         a.download = headers().filename;
+        //         a.click();
+        //         setTimeout(function () {
+        //             document.body.removeChild(a);
+        //             window.URL.revokeObjectURL(a.href);
+        //         }, 100);
+        //     }
+        // } catch (e) {
+        //     console.log(e)
+        //     notify.error('lystore.instruction.exportRME.err');
+        // }
+    }
+
 }
 
 export class Instructions extends Selection<Instruction>{

@@ -59,6 +59,10 @@ public class Instruction {
             }
 
             instruction = either.right().getValue();
+            if (!instruction.containsKey("operations")) {
+                handler.handle(new Either.Left<>("no operations"));
+                return;
+            }
             instruction.put("operations", new JsonArray(instruction.getString("operations")));
             String path = FileResolver.absolutePath("./public/template/excel/template.xlsx");
 

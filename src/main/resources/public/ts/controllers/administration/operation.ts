@@ -1,5 +1,5 @@
-import { ng, template, notify, moment, _ } from 'entcore';
-import {labels, Operation, OrderClient, Utils} from "../../model";
+import { ng, template, _ } from 'entcore';
+import { Operation, OrderClient, Utils} from "../../model";
 import {Mix} from 'entcore-toolkit';
 
 declare let window: any;
@@ -21,7 +21,6 @@ export const operationController = ng.controller('operationController',
         $scope.display = {
             lightbox : {
                 operation:false,
-                ordersListOfOperation:false,
             }
         };
 
@@ -111,13 +110,6 @@ export const operationController = ng.controller('operationController',
         };
         $scope.syncOrderByOperation = async (operation: Operation) =>{
             $scope.ordersClientByOperation = Mix.castArrayAs(OrderClient, await operation.getOrders());
-        };
-        $scope.openLightBoxOrdersList = async () => {
-            $scope.display.lightbox.ordersListOfOperation = true;
-            $scope.operation = $scope.operations.selected[0];
-            await $scope.syncOrderByOperation($scope.operation);
-            template.open('operation.lightbox', 'administrator/operation/operation-orders-list-lightbox');
-            Utils.safeApply($scope);
         };
         $scope.dropOrderOperation = async (order:OrderClient) => {
             await order.updateStatusOrder('WAITING');

@@ -1,4 +1,4 @@
-<h2><i18n>lystore.operation.order.management.title</i18n>[[operation.label.label]]</h2>
+<h2><i  class="left-open one cell color-orange size-icon-big" ng-click="redirectTo('/operation')"></i><i18n>lystore.operation.order.management.title</i18n>[[operation.label.label]]</h2>
 <article class="responsive-table">
     <table class="twelve">
         <thead>
@@ -51,12 +51,9 @@
             <td>[[formatDate(order.creation_date)]]</td>
             <td ><span ng-bind="order.price | currency"></span></td>
             <td class="one aligne-text-center" ng-click="dropOrderOperation(order)">
-                <i  class="trash"></i>
+                <i class="trash"></i>
             </td>
         </tr>
         </tbody>
     </table>
 </article>
-<div class="right-magnet vertical-spacing">
-    <input type="button" class="cancel" ng-click="cancelOperationForm()" i18n-value="ok"/>
-</div>

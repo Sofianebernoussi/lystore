@@ -248,7 +248,16 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('administrator-main', 'administrator/operation/operation-container');
                 template.open('operation-main', 'administrator/operation/manage-operation');
                 Utils.safeApply($scope);
-            }
+            },
+            operationOrders: async () =>{
+                template.close('administrator-main');
+                template.close('operation-main');
+                $scope.operation = $scope.operations.selected[0];
+                $scope.ordersClientByOperation = await Mix.castArrayAs(OrderClient, await $scope.operation.getOrders());
+                template.open('administrator-main', 'administrator/operation/operation-container');
+                template.open('operation-main', 'administrator/operation/operation-orders-list');
+                Utils.safeApply($scope);
+            },
         });
         $scope.initInstructions = async ()=>{
             await $scope.instructions.sync();

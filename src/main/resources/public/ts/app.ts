@@ -79,11 +79,14 @@ routes.define(($routeProvider) => {
             .when('/order/preview', {
                 action: 'previewOrder'
             })
-            .when('/order/operation',{
+            .when('/operation',{
                 action:'operation'
             })
-            .when('/order/instruction', {
+            .when('/instruction', {
                 action: 'instruction'
+            })
+            .when('/operation/order', {
+                action: 'operationOrders'
             });
     } else {
         $routeProvider

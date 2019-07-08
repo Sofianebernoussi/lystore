@@ -16,14 +16,14 @@ if (!hasProperty('odePassword')) {
 repositories {
   mavenLocal()
   maven {
-    url "https://maven.opendigitaleducation.com/nexus/content/groups/public"
+    url "https://maven.opendigitaleducation.com/nexus/content/groups/public/"
   }
   mavenCentral()
   maven {
     url "https://oss.sonatype.org/content/repositories/iovertx-3720/"
   }
   maven {
-    url "https://oss.sonatype.org/content/repositories/snapshots"
+    url "https://oss.sonatype.org/content/repositories/snapshots/"
   }
 }
 
@@ -56,6 +56,8 @@ dependencies {
   compileOnly "io.vertx:vertx-core:$vertxVersion"
   compile "org.entcore:common:$entCoreVersion"
   compile "com.opencsv:opencsv:$opencsvVersion"
+  compile "org.apache.poi:poi:$apachePoiVersion"
+  compile "org.apache.poi:poi-ooxml:$apachePoiVersion"
   testCompile "org.entcore:tests:$entCoreVersion"
   testCompile 'io.gatling.highcharts:gatling-charts-highcharts:2.2.2'
 }

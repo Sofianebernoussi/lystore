@@ -46,6 +46,6 @@ public class Lystore extends BaseServer {
         addController(new GradeController());
         addController(new ProjectController());
         addController(new OperationController());
-        addController(new InstructionController());
+        addController(new InstructionController(storage));
     }
 }

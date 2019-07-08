@@ -1,5 +1,5 @@
-import { ng, template, notify, moment, _ } from 'entcore';
-import {Exercises, Instruction, labels, Operation ,Operations , Utils} from "../../model";
+import {_, ng, template} from 'entcore';
+import {Instruction, Notification, Operation, Utils} from "../../model";
 
 
 declare let window: any;
@@ -155,4 +155,13 @@ export const instructionController = ng.controller('instructionController',
             $scope.cancelInstructionForm();
             Utils.safeApply($scope);
         };
+
+        $scope.exportRME = async (instruction) => {
+            $scope.instructions.selected[0].selected = false;
+            $scope.notifications.push(new Notification('lystore.export.notif', 'info'));
+            await  instruction.exportRME();
+
+            Utils.safeApply($scope);
+
+        }
     }]);

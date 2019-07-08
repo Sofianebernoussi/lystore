@@ -27,7 +27,7 @@ public class FonctionnementTab extends Investissement {
                 "SELECT program.*, array_to_json(array_agg(values)) as actions " +
                 "FROM " + Lystore.lystoreSchema + ".program " +
                 "INNER JOIN values ON (values.id_program = program.id) " +
-                "WHERE program.section = '" + Fonctionnement + "'" +
+                "WHERE program.section = '" + FONCTIONNEMENT + "'" +
                 "GROUP BY program.id";
 
     }

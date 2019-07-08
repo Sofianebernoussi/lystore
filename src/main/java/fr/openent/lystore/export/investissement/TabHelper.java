@@ -1,10 +1,13 @@
 package fr.openent.lystore.export.investissement;
 
 import fr.openent.lystore.helpers.ExcelHelper;
+import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -13,9 +16,9 @@ import java.util.ArrayList;
 public abstract class TabHelper {
     protected static final String CMD = "CMD";
     protected static final String CMR = "CMR";
-    protected static final String Lycee = "LYC";
-    protected static final String Investissement = "Investissement";
-    protected static final String Fonctionnement = "Fonctionnement";
+    protected static final String LYCEE = "LYC";
+    protected static final String INVESTISSEMENT = "Investissement";
+    protected static final String FONCTIONNEMENT = "Fonctionnement";
     protected Workbook wb;
     protected String query;
     protected Sheet sheet;
@@ -26,6 +29,8 @@ public abstract class TabHelper {
     final protected int xTab = 1;
     protected int cellColumn = 1;
     protected boolean isEmpty = false;
+    protected Logger log = LoggerFactory.getLogger(DefaultProjectService.class);
+
     /**
      * Format : H-code
      */

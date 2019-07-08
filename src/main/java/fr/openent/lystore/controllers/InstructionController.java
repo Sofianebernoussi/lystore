@@ -107,7 +107,7 @@ public class InstructionController extends ControllerHelper {
         // Display a date in day, month, year format
         DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         String today = formatter.format(date);
-        new Instruction(Integer.parseInt(request.getParam("id")), config).export(event -> {
+        new Instruction(Integer.parseInt(request.getParam("id"))).export(event -> {
             if (event.isLeft()) {
                 renderError(request);
             } else {

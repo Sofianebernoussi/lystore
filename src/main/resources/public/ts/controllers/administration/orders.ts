@@ -1,4 +1,4 @@
-import {_, model, ng, template, idiom as lang} from 'entcore';
+import {_, idiom as lang, model, ng, template} from 'entcore';
 import {Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD, Utils} from '../../model';
 import {Mix} from 'entcore-toolkit';
 
@@ -338,4 +338,10 @@ export const orderController = ng.controller('orderController',
             }
             return order.rank = lang.translate("lystore.order.not.prioritized");
         };
+
+        $scope.updateOrder = (order: OrderClient) => {
+            $scope.orderToUpdate = order;
+            $scope.redirectTo('/order/update');
+
+        }
     }]);

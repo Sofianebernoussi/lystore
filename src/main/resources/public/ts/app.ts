@@ -79,6 +79,9 @@ routes.define(($routeProvider) => {
             .when('/order/preview', {
                 action: 'previewOrder'
             })
+            .when('/order/update', {
+                action: 'updateOrder'
+            })
             .when('/operation',{
                 action:'operation'
             })

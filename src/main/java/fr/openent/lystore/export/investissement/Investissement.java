@@ -13,10 +13,9 @@ import org.entcore.common.sql.SqlResult;
 public abstract class Investissement extends TabHelper {
 
     JsonArray operations;
+    private String actionStr = "actions";
     public Investissement(Workbook wb, JsonObject instruction, String TabName) {
         super(wb, instruction, TabName);
-
-
     }
 
 
@@ -27,21 +26,18 @@ public abstract class Investissement extends TabHelper {
         setLabels();
         getPrograms(event -> {
             if (event.isLeft()) {
+                log.error("Failed to retrieve programs");
                 handler.handle(new Either.Left<>("Failed to retrieve programs"));
-                return;
-            }
-
-            JsonArray programs = event.right().getValue();
-            //Delete tab if empty
-
-            setArray(programs);
-            if (programs.size() == 0) {
-                wb.removeSheetAt(wb.getSheetIndex(sheet));
-                handler.handle(new Either.Right<>(true));
-                return;
             } else {
-                handler.handle(new Either.Right<>(true));
 
+                JsonArray programs = event.right().getValue();
+                //Delete tab if empty
+
+                setArray(programs);
+                if (programs.size() == 0) {
+                    wb.removeSheetAt(wb.getSheetIndex(sheet));
+                }
+                handler.handle(new Either.Right<>(true));
             }
         });
     }
@@ -80,7 +76,7 @@ public abstract class Investissement extends TabHelper {
                 JsonArray programs = event.right().getValue();
                 for (int i = 0; i < programs.size(); i++) {
                     JsonObject program = programs.getJsonObject(i);
-                    program.put("actions", new JsonArray(program.getString("actions")));
+                    program.put(actionStr, new JsonArray(program.getString(actionStr)));
 
                 }
 
@@ -108,7 +104,7 @@ public abstract class Investissement extends TabHelper {
         for (int i = 0; i < programs.size(); i++) {
             JsonObject program = programs.getJsonObject(i);
 
-            JsonArray actions = program.getJsonArray("actions", new JsonArray());
+            JsonArray actions = program.getJsonArray(actionStr, new JsonArray());
             if (actions.isEmpty()) continue;
             excel.insertHeader(programRow, cellColumn, program.getString("name"));
             numberActions = nbAction(actions);

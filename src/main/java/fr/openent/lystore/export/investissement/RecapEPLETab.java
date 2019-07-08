@@ -27,6 +27,7 @@ public class RecapEPLETab extends TabHelper {
     private String orderComment = "Demande Commentaire";
     private String orderAmount = "Quantité Accordée";
     private String orderTotal = "Somme Montant Accordé";
+    private String id_structureStr = "id_structure";
     private boolean notFirstTab = false;
     private boolean notFirstPart = false;
 
@@ -64,8 +65,8 @@ public class RecapEPLETab extends TabHelper {
         for (int i = 0; i < programs.size(); i++) {
             program = programs.getJsonObject(i);
             program.getString("comment");
-            if (!structuresId.contains(program.getString("id_structure")))
-                structuresId.add(structuresId.size(), program.getString("id_structure"));
+            if (!structuresId.contains(program.getString(id_structureStr)))
+                structuresId.add(structuresId.size(), program.getString(id_structureStr));
 
         }
         structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
@@ -88,7 +89,7 @@ public class RecapEPLETab extends TabHelper {
             program = programs.getJsonObject(i);
             for (int j = 0; j < structures.size(); j++) {
                 structure = structures.getJsonObject(j);
-                if (program.getString("id_structure").equals(structure.getString("id"))) {
+                if (program.getString(id_structureStr).equals(structure.getString("id"))) {
                     program.put("nameEtab", structure.getString("name"));
                     program.put("uai", structure.getString("uai"));
                     program.put("city", structure.getString("city"));
@@ -107,7 +108,7 @@ public class RecapEPLETab extends TabHelper {
         for (int i = 0; i < programs.size(); i++) {
             program = programs.getJsonObject(i);
 
-            if (!(id_structure.equals(program.getString("id_structure")))) {
+            if (!(id_structure.equals(program.getString(id_structureStr)))) {
                 id_structure = newTab(program, false);
             }
             sheet.createRow(yProgramLabel + 3);
@@ -160,7 +161,7 @@ public class RecapEPLETab extends TabHelper {
                 notFirstPart = true;
             }
             //adding  new label
-            id_structure = program.getString("id_structure");
+            id_structure = program.getString(id_structureStr);
             nameEtab = program.getString("nameEtab");
             uai = program.getString("uai");
             zipCode = program.getString("zipCode");
@@ -174,8 +175,6 @@ public class RecapEPLETab extends TabHelper {
             excel.insertHeader(sheet.getRow(yProgramLabel + 4), 2, orderAmount);
             excel.insertHeader(sheet.getRow(yProgramLabel + 4), 3, orderTotal);
             yProgramLabel += 2;
-        } else {
-
         }
         return id_structure;
 
@@ -190,7 +189,6 @@ public class RecapEPLETab extends TabHelper {
     public void setLabelHead(JsonObject program) {
         yProgramLabel += 4;
 
-//        excel.insertLabelHead(sheet.createRow(yProgramLabel), 0, "cc");
         excel.insertLabelHead(sheet.createRow(yProgramLabel), xProgramLabel,
                 programLabel + program.getString("program_name") + " " + program.getString("program_label"));
         excel.insertLabelHead(sheet.createRow(yProgramLabel + 2), xProgramLabel,

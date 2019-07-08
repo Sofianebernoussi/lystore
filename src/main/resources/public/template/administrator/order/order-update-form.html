@@ -1,0 +1,97 @@
+<div ng-controller="orderController" class="order-client-sent">
+    <h1>
+        <i18n>lystore.order.update</i18n>
+    </h1>
+    <form class="row">
+        <div>
+            <label class="two">
+                <i18n>lystore.structure.label</i18n>
+            </label>
+            <label>[[orderToUpdate.structure.label]]</label>
+        </div>
+        <div>
+            <label class="two">
+                <i18n>CAMPAIGN</i18n>
+            </label>
+            <label>[[orderToUpdate.campaign.name]]</label>
+        </div>
+        <div>
+            <label class="two">
+                <i18n>lystore.project</i18n>
+            </label>
+            <input disabled class="ten" type="text"/>
+        </div>
+        <div>
+            <label class="two">
+                <i18n>lystore.project.comment</i18n>
+            </label>
+            <input disabled class="ten" type="text"/>
+        </div>
+        <div>
+            <label>
+                <i18n>room</i18n>
+            </label>
+            <input disabled type="text"/>
+        </div>
+        <div>
+            <label>
+                <i18n>building</i18n>
+            </label>
+            <input disabled type="text"/>
+        </div>
+
+        <div>
+            <label>
+                <i18n>lystore.project.origin</i18n>
+            </label>
+            <input type="text"/>
+        </div>
+        <div ng-if="true">
+            <label>
+                <i18n>lystore.project.priority.order</i18n>
+            </label>
+            <input type="text"/>
+        </div>
+        <div ng-if="true">
+            <label c>
+                <i18n>lystore.project.priority.project</i18n>
+            </label>
+            <input type="text"/>
+        </div>
+
+        <div>
+            <label>
+                <i18n>lystore.amount</i18n>
+            </label>
+            <input type="text"/>
+        </div>
+        <div>
+            <label>
+                <i18n>EQUIPMENT</i18n>
+            </label>
+            <input type="text"/>
+        </div>
+        <div>
+            <label>
+                <i18n>quantity.full</i18n>
+            </label>
+            <input type="text"/>
+        </div>
+        <div>
+            <label>
+                <i18n>lystore.price</i18n>
+            </label>
+            <input type="text"/>
+        </div>
+        <div>
+            <label>
+                <i18n>comment</i18n>
+            </label>
+            <input type="text"/>
+        </div>
+
+
+        <input type="submit" class="button"/>
+        <input type="button" class="cancel" i18n-value="cancel"/>
+    </form>
+</div>

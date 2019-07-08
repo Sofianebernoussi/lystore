@@ -330,4 +330,10 @@ export const orderController = ng.controller('orderController',
         $scope.showPriceProposalOrNot = (order:OrderClient) => {
             return  order.price_proposal !== null? order.priceProposalTTCTotal : order.priceTTCtotal;
         };
+
+        $scope.updateOrder = (order: OrderClient) => {
+            $scope.orderToUpdate = order;
+            $scope.redirectTo('/order/update');
+
+        }
     }]);

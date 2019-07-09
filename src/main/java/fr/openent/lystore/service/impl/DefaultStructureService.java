@@ -25,7 +25,7 @@ public class DefaultStructureService extends SqlCrudService implements Structure
     @Override
     public void getStructures(Handler<Either<String, JsonArray>> handler) {
         String query = "MATCH (s:Structure) WHERE s.UAI IS NOT NULL "+
-                "RETURN s.id as id, s.name as name,s.city as city,s.UAI as uai, s.academy as academy";
+                "RETURN left(s.zipCode, 2) as department, s.id as id, s.name as name,s.city as city,s.UAI as uai, s.academy as academy";
         neo4j.execute(query, new JsonObject(), Neo4jResult.validResultHandler(handler));
     }
 

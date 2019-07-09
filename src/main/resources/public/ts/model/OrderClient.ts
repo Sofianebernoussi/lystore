@@ -47,6 +47,7 @@ export class OrderClient implements Selectable {
     price_proposal?: number;
     rank?:number;
     structure: Structure;
+    priceUnitedTTC: number;
     constructor() {
 
     }
@@ -159,6 +160,7 @@ export class OrdersClient extends Selection<OrderClient> {
                     order.structure = structures.length > 0 ? this.initStructure(order.id_structure, structures) : new Structure();
                     order.price = parseFloat(status === 'VALID' ? order.price.toString().replace(',', '.') : order.price.toString());
                     order.structure_groups = Utils.parsePostgreSQLJson(order.structure_groups);
+
                     if (status !== 'VALID') {
                         order.tax_amount = parseFloat(order.tax_amount.toString());
                         order.contract = Mix.castAs(Contract,  JSON.parse(order.contract.toString()));
@@ -178,6 +180,9 @@ export class OrdersClient extends Selection<OrderClient> {
                             order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
                             : order.options = [];
                         order.priceTTCtotal = parseFloat((order.calculatePriceTTC(2, order.price) as number).toString()) * order.amount;
+                        order.priceUnitedTTC = order.price_proposal ?
+                            parseFloat((order.calculatePriceTTC(2, order.price_proposal) as number).toString()):
+                            parseFloat((order.calculatePriceTTC(2, order.price) as number).toString());
                         order.priceProposalTTCTotal = order.price_proposal !== null ?
                             parseFloat(order.price_proposal.toString()) * order.amount :
                             null;

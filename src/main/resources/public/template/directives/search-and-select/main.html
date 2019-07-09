@@ -1,4 +1,6 @@
-<button class="search-and-select-button" ng-click="toggleVisibility()" ng-class="{'opened': show}" >[[ngModel.UAI + " - " + ngModel.name]]</button>
+<button class="search-and-select-button" ng-click="toggleVisibility()" ng-class="{'opened': show}">
+    [[ ngModel[param1] + "- " + ngModel[param2] ]]
+</button>
 <div class="search-and-select-panel " ng-class="{'hidden': !show}" ng-hide="!show">
     <div class="search-and-select-bar">
         <input ng-model="search.input" placeholder="[[lang.translate('search')]]"/>

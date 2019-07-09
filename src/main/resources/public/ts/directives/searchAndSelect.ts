@@ -1,4 +1,4 @@
-import {ng, idiom as lang, $} from "entcore";
+import {$, idiom as lang, ng} from "entcore";
 
 export const searchAndSelect = ng.directive('searchAndSelect', function() {
     return {
@@ -7,6 +7,8 @@ export const searchAndSelect = ng.directive('searchAndSelect', function() {
         scope: {
             options: '=',
             ngModel: '=',
+            param1: '=',
+            param2: '=',
             searchOn: '@',
             orderBy: '@',
             disable: '&',
@@ -38,15 +40,15 @@ export const searchAndSelect = ng.directive('searchAndSelect', function() {
             };
             $scope.fsearch = (item) => {
               if ($scope.search.input){
-                  return (item.name ?   (item.name.toLowerCase() ).includes($scope.search.input.toLowerCase()) : false)
-                      || (item.UAI ? ( item.UAI.toLowerCase()).includes($scope.search.input.toLowerCase()) : false)
+                  return (item[$scope.param2] ? (item[$scope.param2].toLowerCase()).includes($scope.search.input.toLowerCase()) : false)
+                      || (item[$scope.param1] ? (item[$scope.param1].toLowerCase()).includes($scope.search.input.toLowerCase()) : false)
               }else
                   return true
             };
 
             /* Item display */
             $scope.display = function(item) {
-                return item instanceof Object ? item.UAI + " - " + item.name : item
+                return item instanceof Object ? item[$scope.param1] + " - " + item[$scope.param2] : item
             };
             $scope.$watch(()=> $scope.ngModel, (newVal, oldVal)=>{
                 if(newVal!=oldVal){

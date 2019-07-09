@@ -9,13 +9,14 @@ export class Structure implements Selectable {
     city: string;
     academy: string;
     type:string;
-
+    department:number;
     selected: boolean;
 
-    constructor (name?: string, uai?: string, city?: string) {
+    constructor (name?: string, uai?: string, city?: string, department?: number) {
        if (name) this.name = name;
        if (uai) this.uai = uai;
        if (city) this.city = city;
+       if(department) this.department = department;
        this.selected = false;
     }
 

@@ -5,18 +5,43 @@ export const orderWaiting = [
         display:true,
     },
     {
-        name:'Academy',
-        fieldName:'structure.academy',
+        name:'Commune',
+        fieldName:'structure.city',
         display:true,
     },
     {
-        name:'lystore.structure.type',
-        fieldName:'structure.type',
+        name:'campaign',
+        fieldName:'campaign.name',
         display:true,
     },
     {
-        name:'contract',
-        fieldName:'contract.name',
+        name:'N° Prio',
+        fieldName:'rank',
+        display:true,
+    },
+    {
+        name:'EQUIPMENT',
+        fieldName:'name',
+        display:true,
+    },
+    {
+        name:'comment',
+        fieldName:'comment',
+        display:true,
+    },
+    {
+        name:'lystore.amount',
+        fieldName:'amount',
+        display:true,
+    },
+    {
+        name:'lystore.unit.price.ttc',
+        fieldName:'priceUnitedTTC',
+        display:true,
+    },
+    {
+        name:'lystore.price.TTC',
+        fieldName:'priceTTCtotal',
         display:true,
     },
     {
@@ -25,23 +50,23 @@ export const orderWaiting = [
         display:true,
     },
     {
+        name:'Academy',
+        fieldName:'structure.academy',
+        display:false,
+    },
+    {
+        name:'lystore.structure.type',
+        fieldName:'structure.type',
+        display:false,
+    },
+    {
+        name:'contract',
+        fieldName:'contract.name',
+        display:false,
+    },
+    {
         name:'lystore.project',
         fieldName:'project.title.name',
-        display:true,
-    },
-    {
-        name:'EQUIPMENT',
-        fieldName:'supplier.name',
-        display:false,
-    },
-    {
-        name:'lystore.amount',
-        fieldName:'amount',
-        display:false,
-    },
-    {
-        name:'date',
-        fieldName:'id',
         display:false,
     },
     {
@@ -50,23 +75,28 @@ export const orderWaiting = [
         display:false,
     },
     {
-        name:'lystore.campaigns',
-        fieldName:'campaign.name',
+        name:'date',
+        fieldName:'id',
         display:false,
     },
     {
-        name:'lystore.project.preference',
-        fieldName:'project.preference',
+        name:'lystore.room',
+        fieldName:'project.room',
         display:false,
     },
     {
-        name:'lystore.order.rank',
-        fieldName:'rank',
+        name:'building',
+        fieldName:'project.building',
         display:false,
     },
     {
-        name:'lystore.price.TTC',
-        fieldName:'priceTTCtotal',
-        display:true,
-    }
+        name:'lystore.project.comment',
+        fieldName:'project.description',
+        display:false,
+    },
+    {
+        name:'lystore.department',
+        fieldName:'structure.department',
+        display:false,
+    },
 ];

@@ -97,6 +97,7 @@
   "lystore.equipment.tags.multi-combo.title": "Choisissez un/des label(s)",
   "lystore.catalog": "Catalogue complet",
   "lystore.unit.price.ht": "Prix unitaire HT",
+  "lystore.unit.price.ttc": "Prix unitaire TTC",
   "lystore.amount": "Qte",
   "lystore.quantity": "Quantité",
   "lystore.required": "Obligatoire",
@@ -475,10 +476,11 @@
   "lystore.structure.label": "Etablissement",
   "lystore.project.comment": "Commentaire du projet",
   "lystore.project.origin": "Nature du projet",
-  "lystore.amount": "Montant",
-  "lystore.price": "Prix",
   "lystore.admin.order.update.err": "Erreur lors de la modification de la commande",
   "lystore.project.priority.order": "Priorité demande",
-  "lystore.project.priority.project": "Priorité project"
-
+  "lystore.project.priority.project": "Priorité project",
+  "lystore.order.priority": "N° Prio",
+  "lystore.no.comment": "Pas de commentaire",
+  "lystore.room": "Salle",
+  "lystore.department": "Département"
 }

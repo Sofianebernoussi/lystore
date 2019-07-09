@@ -1,8 +1,5 @@
-import {_, model, ng, template} from 'entcore';
-import {
-    ContractTypes, Notification, Operation, OrderClient, OrderRegion, OrdersClient, orderWaiting,
-    Utils
-} from '../../model';
+import {_, model, ng, template, idiom as lang} from 'entcore';
+import {ContractTypes,Notification, Operation, OrderClient, OrderRegion,OrdersClient, orderWaiting,PRIORITY_FIELD, Utils} from '../../model';
 import {Mix} from 'entcore-toolkit';
 import {Equipments} from "../../model/Equipment";
 
@@ -15,7 +12,7 @@ export const orderController = ng.controller('orderController',
         $scope.tableFields = orderWaiting;
         $scope.sort = {
             order : {
-                type: 'name',
+                type: 'name_structure',
                 reverse: false
             }
         };
@@ -388,4 +385,14 @@ export const orderController = ng.controller('orderController',
 
             return ($scope.orderToUpdate.amount * $scope.orderToUpdate.priceTTCtotal).toFixed(2);
         }
+        $scope.orderShow = (order:OrderClient) => {
+            if(order.rank !== undefined){
+                if(order.campaign.priority_field === PRIORITY_FIELD.ORDER && order.campaign.orderPriorityEnable()){
+                    return order.rank = order.rank + 1;
+                } else if (order.campaign.priority_field === PRIORITY_FIELD.PROJECT && order.project.preference !== null && order.campaign.projectPriorityEnable()){
+                    return order.rank = order.project.preference + 1;
+                }
+            }
+            return order.rank = lang.translate("lystore.order.not.prioritized");
+        };
     }]);

@@ -53,26 +53,25 @@
                     </label>
                 </td>
                 <td ng-hide="!tableFields[0].display">[[order.name_structure]]</td>
-                <td ng-hide="!tableFields[1].display">[[order.structure.academy]]</td>
-                <td ng-hide="!tableFields[2].display">[[order.structure.type]]</td>
-                <td ng-hide="!tableFields[3].display">
-                    [[order.contract.name]]</td>
-                <td ng-hide="!tableFields[4].display">
-                    [[order.contract_type.code]] - [[order.contract_type.name]]
-                </td>
-                <td ng-hide="!tableFields[5].display"> [[ order.project.title.name.toString() ]]</td>
-                <td ng-hide="!tableFields[6].display"> [[order.name]]</td>
-                <td ng-hide="!tableFields[7].display">[[order.amount ]]</td>
-                <td ng-hide="!tableFields[8].display">[[order.creation_date ]]</td>
-                <td ng-hide="!tableFields[9].display">[[getStructureGroupsList(order.structure_groups)]]</td>
-                <td ng-hide="!tableFields[10].display">[[order.campaign.name ]]</td>
-                <td ng-hide="!tableFields[11].display" >
-                    [[order.project.preference!= null && order.rank != undefined && order.campaign.projectPriorityEnable()
-                    ? order.project.preference + 1 : lang.translate('lystore.order.not.prioritized') ]]</td>
-                <td ng-hide="!tableFields[12].display" >
-                    [[order.rank != null && order.rank != undefined && order.campaign.orderPriorityEnable()
-                    ? order.rank + 1 :  lang.translate('lystore.order.not.prioritized') ]]</td>
-                <td ng-hide="!tableFields[13].display"><span ng-bind="showPriceProposalOrNot(order) | currency"></span></td>
+                <td ng-hide="!tableFields[1].display">[[order.structure.city]]</td>
+                <td ng-hide="!tableFields[2].display">[[order.campaign.name]]</td>
+                <td ng-hide="!tableFields[3].display">[[orderShow(order)]]</td>
+                <td ng-hide="!tableFields[4].display">[[order.name]]</td>
+                <td ng-hide="!tableFields[5].display">[[order.comment || '-']]</td>
+                <td ng-hide="!tableFields[6].display">[[order.amount]]</td>
+                <td ng-hide="!tableFields[7].display"><span ng-bind="order.priceUnitedTTC | currency"></span></td>
+                <td ng-hide="!tableFields[8].display"><span ng-bind="showPriceProposalOrNot(order) | currency"></span></td>
+                <td ng-hide="!tableFields[9].display">[[order.contract_type.name]]</td>
+                <td ng-hide="!tableFields[10].display">[[order.structure.academy]]</td>
+                <td ng-hide="!tableFields[11].display">[[order.structure.type]]</td>
+                <td ng-hide="!tableFields[12].display">[[order.contract.name]]</td>
+                <td ng-hide="!tableFields[13].display">[[order.project.title.name.toString() ]]</td>
+                <td ng-hide="!tableFields[14].display">[[getStructureGroupsList(order.structure_groups)]]</td>
+                <td ng-hide="!tableFields[15].display">[[order.creation_date]]</td>
+                <td ng-hide="!tableFields[16].display">[[order.project.room || '-']]</td>
+                <td ng-hide="!tableFields[17].display">[[order.project.building || '-']]</td>
+                <td ng-hide="!tableFields[18].display">[[order.project.description || '-']]</td>
+                <td ng-hide="!tableFields[19].display">[[order.structure.department]]</td>
             </tr>
             </tbody>
             <tfoot>

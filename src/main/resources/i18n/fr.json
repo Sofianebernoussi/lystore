@@ -480,6 +480,7 @@
   "lystore.structure.label": "Etablissement",
   "lystore.project.comment": "Commentaire du projet",
   "lystore.project.origin": "Nature du projet",
+  "lystore.admin.order.update.err": "Erreur lors de la modification de la commande",
   "lystore.project.priority.order": "Priorité demande",
   "lystore.project.priority.project": "Priorité project"
 

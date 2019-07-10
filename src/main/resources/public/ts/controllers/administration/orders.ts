@@ -1,12 +1,16 @@
 import {_, idiom as lang, model, ng, template} from 'entcore';
-import {Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD, Utils} from '../../model';
+import {
+    ContractTypes, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD,
+    Utils
+} from '../../model';
 import {Mix} from 'entcore-toolkit';
+import {Equipments} from "../../model/Equipment";
 
 
 declare let window: any;
 export const orderController = ng.controller('orderController',
     ['$scope',  ($scope) => {
-
+        ($scope.ordersClient.selected[0]) ? $scope.orderToUpdate = $scope.ordersClient.selected[0] : $scope.orderToUpdate;
         $scope.allOrdersSelected = false;
         $scope.tableFields = orderWaiting;
         $scope.sort = {
@@ -15,6 +19,10 @@ export const orderController = ng.controller('orderController',
                 reverse: false
             }
         };
+        $scope.equipments = new Equipments();
+        $scope.contractTypes = new ContractTypes();
+
+
         $scope.search = {
             filterWord : '',
             filterWords : []
@@ -30,6 +38,17 @@ export const orderController = ng.controller('orderController',
                 type: 'ORDER'
             }
         };
+        $scope.initDataUpdate = async () => {
+            await $scope.equipments.sync($scope.orderToUpdate.id_campaign, $scope.orderToUpdate.id_structure);
+            $scope.orderToUpdate.equipment = $scope.equipments.all.find((e) => {
+                return e.id === $scope.orderToUpdate.equipment_key;
+            });
+            Utils.safeApply($scope);
+        };
+        if ($scope.orderToUpdate && $scope.orderToUpdate.id_campaign)
+            $scope.initDataUpdate();
+
+
         $scope.switchAll = (model: boolean, collection) => {
             model ? collection.selectAll() : collection.deselectAll();
             Utils.safeApply($scope);
@@ -307,13 +326,16 @@ export const orderController = ng.controller('orderController',
             return field == 'totaux' ? totaux : price;
         };
         $scope.isOperationsIsEmpty = false;
+
         $scope.selectOperationForOrder = async () =>{
             await $scope.initOperation();
             $scope.isOperationsIsEmpty = !$scope.operations.all.some(operation => operation.status === 'true');
             template.open('validOrder.lightbox', 'administrator/order/order-select-operation');
             $scope.display.lightbox.validOrder = true;
         };
+
         $scope.isOperationSelected = false;
+
         $scope.operationSelected = async (operation:Operation) => {
             $scope.isOperationSelected = true;
             $scope.operation = operation;
@@ -343,5 +365,19 @@ export const orderController = ng.controller('orderController',
             $scope.orderToUpdate = order;
             $scope.redirectTo('/order/update');
 
+        };
+
+        $scope.cancelUpdate = () => {
+            if ($scope.ordersClient.selected[0])
+                $scope.ordersClient.selected[0].selected = false;
+            $scope.redirectTo('/order/waiting');
+        };
+        $scope.updateOrderConfirm = async () => {
+            await $scope.orderToUpdate.adminUpdate();
+            await $scope.selectOperationForOrder();
+        };
+        $scope.getTotal = () => {
+
+            return ($scope.orderToUpdate.amount * $scope.orderToUpdate.priceTTCtotal).toFixed(2);
         }
     }]);

@@ -85,7 +85,7 @@
             </tfoot>
         </table>
     </article>
-    <lightbox on-close="display.lightbox.validOrder = false;"
+    <lightbox on-close="display.lightbox.validOrder = false; cancelUpdate();"
               show="display.lightbox.validOrder">
         <container template="validOrder.lightbox"></container>
     </lightbox>

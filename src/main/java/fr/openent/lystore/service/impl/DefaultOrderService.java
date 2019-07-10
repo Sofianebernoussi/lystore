@@ -992,5 +992,10 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         values.add(orderStatus.getString("status"));
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
     }
+
+    @Override
+    public void updateAdminOrder(JsonObject order, Handler<Either<String, JsonObject>> handler) {
+        handler.handle(new Either.Right<>(order));
+    }
 }
 

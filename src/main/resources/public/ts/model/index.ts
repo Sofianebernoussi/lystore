@@ -24,5 +24,6 @@ export * from './title';
 export * from './grade';
 export * from './tableFields';
 export * from  './instruction';
+export * from './OrderRegion';
 export * from './tableFields';
 export * from './operation'

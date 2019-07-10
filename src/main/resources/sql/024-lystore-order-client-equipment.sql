@@ -24,6 +24,8 @@ CREATE TABLE lystore."order-region-equipment"
     rank numeric,
     id_project bigint,
     id_order_client_equipment bigint,
+    id_operation bigint,
+
     CONSTRAINT order_region_equipment_pkey PRIMARY KEY (id),
     CONSTRAINT fk_campaign_id FOREIGN KEY (id_campaigne)
         REFERENCES lystore.campaign (id) MATCH SIMPLE
@@ -38,6 +40,11 @@ CREATE TABLE lystore."order-region-equipment"
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
     CONSTRAINT fk_project_id FOREIGN KEY (id_project)
+        REFERENCES lystore.project (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+
+    CONSTRAINT fk_operation_id FOREIGN KEY (id_operation)
         REFERENCES lystore.project (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,

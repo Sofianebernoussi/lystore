@@ -477,6 +477,7 @@
   "lystore.project.origin": "Nature du projet",
   "lystore.amount": "Montant",
   "lystore.price": "Prix",
+  "lystore.admin.order.update.err": "Erreur lors de la modification de la commande",
   "lystore.project.priority.order": "Priorité demande",
   "lystore.project.priority.project": "Priorité project"
 

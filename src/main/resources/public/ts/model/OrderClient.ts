@@ -80,6 +80,7 @@ export class OrderClient implements Selectable {
     }
 
 
+
     downloadFile(file) {
         window.open(`/lystore/order/${this.id}/file/${file.id}`);
     }
@@ -88,6 +89,26 @@ export class OrderClient implements Selectable {
             await http.put(`/lystore/order/${this.id}`, {status: status});
         } catch (e) {
             notify.error('lystore.order.update.err');
+        }
+    }
+
+    private adminUpdateJson() {
+        return {
+            id: this.id,
+            amount: this.amount,
+            name: this.name,
+            price: this.price_proposal,
+            summary: this.summary,
+            description: this.description,
+        }
+    }
+
+    async adminUpdate() {
+        try {
+            http.put(`/lystore/admin/order/`, this.adminUpdateJson());
+        } catch (e) {
+            notify.error('lystore.admin.order.update.err');
+            throw e;
         }
     }
 }

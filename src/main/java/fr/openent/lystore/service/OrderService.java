@@ -189,4 +189,5 @@ public interface OrderService {
     void updateStatusOrder( Integer idOrder, JsonObject status, Handler<Either<String, JsonObject>> handler);
 
 
+    void updateAdminOrder(JsonObject order, Handler<Either<String, JsonObject>> handler);
 }

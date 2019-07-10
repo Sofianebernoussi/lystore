@@ -16,6 +16,7 @@ export const orderController = ng.controller('orderController',
                 reverse: false
             }
         };
+        $scope.isLinked = false
         $scope.equipments = new Equipments();
         $scope.contractTypes = new ContractTypes();
 
@@ -362,9 +363,15 @@ export const orderController = ng.controller('orderController',
             $scope.redirectTo('/order/waiting');
         };
         $scope.updateOrderConfirm = async () => {
-            await $scope.orderToUpdate.adminUpdate();
+            // await $scope.orderToUpdate.adminUpdate();
             await $scope.selectOperationForOrder();
         };
+
+        $scope.updateLinkedOrderConfirm = async () => {
+            // await $scope.orderToUpdate.adminUpdate();
+            console.log("salut")
+            $scope.cancelUpdate();
+        }
         $scope.getTotal = () => {
 
             return ($scope.orderToUpdate.amount * $scope.orderToUpdate.priceTTCtotal).toFixed(2);

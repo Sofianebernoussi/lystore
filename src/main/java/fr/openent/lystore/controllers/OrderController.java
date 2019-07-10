@@ -1153,4 +1153,18 @@ public class OrderController extends ControllerHelper {
                 idOrder.toString(),
                 statusEdit)));
     }
+
+    @Put("/admin/order/")
+    @ApiDoc("update an order when admin or manager")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void updateAdminOrder(final HttpServerRequest request) {
+        RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+            @Override
+            public void handle(JsonObject order) {
+                orderService.updateAdminOrder(order, defaultResponseHandler(request));
+            }
+
+        });
+    }
 }

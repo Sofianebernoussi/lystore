@@ -1,6 +1,6 @@
 import {_, idiom as lang, model, ng, template} from 'entcore';
 import {
-    ContractTypes, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD,
+    ContractTypes, Notification, Operation, OrderClient, OrderRegion, OrdersClient, orderWaiting, PRIORITY_FIELD,
     Utils
 } from '../../model';
 import {Mix} from 'entcore-toolkit';
@@ -9,7 +9,7 @@ import {Equipments} from "../../model/Equipment";
 
 declare let window: any;
 export const orderController = ng.controller('orderController',
-    ['$scope',  ($scope) => {
+    ['$scope', '$location', ($scope, $location) => {
         ($scope.ordersClient.selected[0]) ? $scope.orderToUpdate = $scope.ordersClient.selected[0] : $scope.orderToUpdate;
         $scope.allOrdersSelected = false;
         $scope.tableFields = orderWaiting;
@@ -19,7 +19,7 @@ export const orderController = ng.controller('orderController',
                 reverse: false
             }
         };
-        $scope.isLinked = false
+        $scope.isUpdating = $location.$$path.includes('/order/update');
         $scope.equipments = new Equipments();
         $scope.contractTypes = new ContractTypes();
 
@@ -340,13 +340,21 @@ export const orderController = ng.controller('orderController',
         $scope.operationSelected = async (operation:Operation) => {
             $scope.isOperationSelected = true;
             $scope.operation = operation;
-            let idsOrder = $scope.ordersClient.selected.map(order => order.id);
-            await $scope.ordersClient.addOperation(operation.id, idsOrder);
-            await $scope.validateOrders($scope.getSelectedOrders());
-            await Promise.all([
-                await $scope.syncOrders('WAITING'),
-                await $scope.initOperation()
-            ])
+            if ($scope.isUpdating) {
+                let orderRegion = new OrderRegion();
+                orderRegion.createFromOrderClient($scope.orderToUpdate);
+                orderRegion.id_operation = operation.id;
+                console.log(orderRegion)
+
+            } else {
+                let idsOrder = $scope.ordersClient.selected.map(order => order.id);
+                await $scope.ordersClient.addOperation(operation.id, idsOrder);
+                await $scope.validateOrders($scope.getSelectedOrders());
+                await Promise.all([
+                    await $scope.syncOrders('WAITING'),
+                    await $scope.initOperation()
+                ])
+            }
         };
         $scope.showPriceProposalOrNot = (order:OrderClient) => {
             return  order.price_proposal !== null? order.priceProposalTTCTotal : order.priceTTCtotal;
@@ -374,6 +382,7 @@ export const orderController = ng.controller('orderController',
             $scope.redirectTo('/order/waiting');
         };
         $scope.updateOrderConfirm = async () => {
+
             // await $scope.orderToUpdate.adminUpdate();
             await $scope.selectOperationForOrder();
         };

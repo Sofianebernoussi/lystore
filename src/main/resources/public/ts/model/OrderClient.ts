@@ -5,6 +5,7 @@ import http from 'axios';
 import {Project} from "./project";
 import {Title} from "./title";
 import {Grade} from "./grade";
+import {OrderRegion} from "./OrderRegion";
 
 export class OrderClient implements Selectable {
     id?: number;
@@ -94,24 +95,10 @@ export class OrderClient implements Selectable {
         }
     }
 
-    private adminUpdateJson() {
-        return {
-            id: this.id,
-            amount: this.amount,
-            name: this.name,
-            price: this.price_proposal,
-            summary: this.summary,
-            description: this.description,
-        }
-    }
+    toRegion() {
+        let orderRegion = new OrderRegion();
 
-    async adminUpdate() {
-        try {
-            http.put(`/lystore/admin/order/`, this.adminUpdateJson());
-        } catch (e) {
-            notify.error('lystore.admin.order.update.err');
-            throw e;
-        }
+        return
     }
 }
 export class OrdersClient extends Selection<OrderClient> {

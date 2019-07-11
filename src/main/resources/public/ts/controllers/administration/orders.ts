@@ -54,9 +54,7 @@ export const orderController = ng.controller('orderController',
         $scope.getSelectedOrders = () => $scope.displayedOrders.selected;
 
         $scope.getStructureGroupsList = (structureGroups: string[]): string => {
-            let list = '';
-            structureGroups.map((groupName) => list += `${groupName}, `);
-            return list.trim().slice(0, -1);
+            return structureGroups.join(', ');
         };
 
         $scope.addFilterWords = (filterWord) => {
@@ -298,7 +296,7 @@ export const orderController = ng.controller('orderController',
         $scope.countColSpan = (field:string):number =>{
             let totaux = $scope.isManager() ? 1 :0;
             let price = $scope.isManager() ? 1 : 0;
-            let amount_field  =7;
+            let amount_field  =6;
             for (let _i = 0; _i < $scope.tableFields.length; _i++) {
                 if(_i < amount_field && $scope.tableFields[_i].display){
                     totaux++;

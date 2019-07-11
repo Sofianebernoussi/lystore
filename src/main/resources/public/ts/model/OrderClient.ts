@@ -1,4 +1,4 @@
-import {_, model, moment, notify} from 'entcore';
+import {_, idiom as lang, model, moment, notify} from 'entcore';
 import {Mix, Selectable, Selection} from 'entcore-toolkit';
 import {Campaign, Contract, ContractType, Structure, Supplier, TechnicalSpec, Utils} from './index';
 import http from 'axios';
@@ -48,6 +48,7 @@ export class OrderClient implements Selectable {
     rank?:number;
     structure: Structure;
     priceUnitedTTC: number;
+    rankOrder: string;
     constructor() {
 
     }
@@ -184,8 +185,15 @@ export class OrdersClient extends Selection<OrderClient> {
                             parseFloat((order.calculatePriceTTC(2, order.price_proposal) as number).toString()):
                             parseFloat((order.calculatePriceTTC(2, order.price) as number).toString());
                         order.priceProposalTTCTotal = order.price_proposal !== null ?
-                            parseFloat(order.price_proposal.toString()) * order.amount :
+                            parseFloat((order.calculatePriceTTC(2, order.price_proposal) as number).toString()) * order.amount :
                             null;
+                        if( order.campaign.orderPriorityEnable()){
+                            order.rankOrder = (order.rank + 1).toString();
+                        } else if (order.campaign.projectPriorityEnable()){
+                            order.rankOrder = (order.project.preference + 1).toString();
+                        }else{
+                            order.rankOrder = lang.translate("lystore.order.not.prioritized");
+                        }
                     }
                 });
             }
@@ -261,9 +269,10 @@ export class OrdersClient extends Selection<OrderClient> {
     }
     calculTotalPriceTTC () {
         let total = 0;
-        this.all.map((order) => {
-            total += parseFloat((order.calculatePriceTTC() as number).toString()) * order.amount;
-        });
+        for ( let i = 0 ; i < this.all.length ; i++){
+            let order = this.all[i];
+            total += order.price_proposal !== null? order.priceProposalTTCTotal : order.priceTTCtotal;
+        }
         return total;
     }
 

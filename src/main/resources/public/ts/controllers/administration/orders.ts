@@ -327,16 +327,13 @@ export const orderController = ng.controller('orderController',
             return field == 'totaux' ? totaux : price;
         };
         $scope.isOperationsIsEmpty = false;
-
         $scope.selectOperationForOrder = async () =>{
             await $scope.initOperation();
             $scope.isOperationsIsEmpty = !$scope.operations.all.some(operation => operation.status === 'true');
             template.open('validOrder.lightbox', 'administrator/order/order-select-operation');
             $scope.display.lightbox.validOrder = true;
         };
-
         $scope.isOperationSelected = false;
-
         $scope.operationSelected = async (operation:Operation) => {
             $scope.isOperationSelected = true;
             $scope.operation = operation;

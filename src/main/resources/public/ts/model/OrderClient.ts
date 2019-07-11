@@ -82,7 +82,6 @@ export class OrderClient implements Selectable {
     }
 
 
-
     downloadFile(file) {
         window.open(`/lystore/order/${this.id}/file/${file.id}`);
     }
@@ -93,8 +92,6 @@ export class OrderClient implements Selectable {
             notify.error('lystore.order.update.err');
         }
     }
-
-
 }
 export class OrdersClient extends Selection<OrderClient> {
 

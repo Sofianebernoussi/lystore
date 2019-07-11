@@ -992,7 +992,5 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         values.add(orderStatus.getString("status"));
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
     }
-
-
 }
 

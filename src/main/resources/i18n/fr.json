@@ -482,5 +482,6 @@
   "lystore.order.priority": "N° Prio",
   "lystore.no.comment": "Pas de commentaire",
   "lystore.room": "Salle",
-  "lystore.department": "Département"
+  "lystore.department": "Département",
+  "lystore.project.comment": "Commentaire projet"
 }

@@ -1,5 +1,5 @@
 import http from "axios";
-import {notify} from "entcore";
+import {moment, notify} from "entcore";
 import {Project} from "./project";
 import {Campaign, Contract, ContractType, Structure, TechnicalSpec} from "./index";
 import {OrderClient} from "./OrderClient";
@@ -35,15 +35,31 @@ export class OrderRegion {
     rank?: number;
     structure: Structure;
     id_operation: number;
+    equipment_key: number;
 
     private toJson() {
         return {
-            id: this.id,
             amount: this.amount,
             name: this.name,
             price: this.price,
             summary: this.summary,
-            description: this.description,
+            description: (this.description) ? this.description : "",
+            id_order_client_equipment: this.id_orderClient,
+            image: this.image,
+            creation_date: moment(this.creation_date).format('L'),
+            status: this.status,
+            ...(this.number_validation && {number_validation: this.number_validation}),
+            technical_spec: this.technical_spec,
+            id_contract: this.id_contract,
+            files: this.files,
+            name_structure: this.name_structure,
+            id_campaign: this.id_campaign,
+            id_structure: this.id_structure,
+            id_project: this.id_project,
+            equipment_key: this.equipment_key,
+            comment: (this.comment) ? this.comment : "",
+            ...(this.rank && {rank: this.rank}),
+            id_operation: this.id_operation,
         }
     }
 
@@ -73,12 +89,12 @@ export class OrderRegion {
         this.id_project = order.id_project;
         this.comment = order.comment;
         this.price = order.price_proposal;
-        if (order.rank)
-            this.rank = order.rank;
+        // if (order.rank )
+        //     this.rank = order.rank;
         this.structure = order.structure;
     }
 
-    async adminUpdate() {
+    async set() {
         try {
             http.put(`/lystore/region/order/`, this.toJson());
         } catch (e) {

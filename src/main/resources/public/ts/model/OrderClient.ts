@@ -5,7 +5,6 @@ import http from 'axios';
 import {Project} from "./project";
 import {Title} from "./title";
 import {Grade} from "./grade";
-import {OrderRegion} from "./OrderRegion";
 
 export class OrderClient implements Selectable {
     id?: number;
@@ -94,11 +93,7 @@ export class OrderClient implements Selectable {
         }
     }
 
-    toRegion() {
-        let orderRegion = new OrderRegion();
 
-        return
-    }
 }
 export class OrdersClient extends Selection<OrderClient> {
 

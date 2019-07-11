@@ -8,14 +8,14 @@ CREATE TABLE lystore."order-region-equipment"
     owner_name character varying NOT NULL,
     owner_id character varying NOT NULL,
     name character varying(255) NOT NULL,
-    "summary " character varying(300) NOT NULL,
-    description text NOT NULL,
-    image character varying(100) NOT NULL,
-    technical_spec json NOT NULL,
+    summary character varying(300),
+    description text ,
+    image character varying(100) ,
+    technical_spec json ,
     status character varying(50),
     id_contract bigint,
     equipment_key bigint NOT NULL,
-    id_campaigne bigint,
+    id_campaign bigint,
     id_structure character,
     cause_status character varying(300),
     number_validation character varying(50),
@@ -27,7 +27,7 @@ CREATE TABLE lystore."order-region-equipment"
     id_operation bigint,
 
     CONSTRAINT order_region_equipment_pkey PRIMARY KEY (id),
-    CONSTRAINT fk_campaign_id FOREIGN KEY (id_campaigne)
+    CONSTRAINT fk_campaign_id FOREIGN KEY (id_campaign)
         REFERENCES lystore.campaign (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
@@ -55,5 +55,5 @@ CREATE TABLE lystore."order-region-equipment"
     CONSTRAINT status_values CHECK ((status::text = ANY (ARRAY['WAITING'::character varying::text, 'VALID'::character varying::text, 'WAITING_FOR_ACCEPTANCE'::character varying::text, 'REJECTED'::character varying::text, 'SENT'::character varying::text, 'DONE'::character varying::text]))) NOT VALID,
     CONSTRAINT "Check_price_positive" CHECK (price >= 0::numeric) NOT VALID,
     CONSTRAINT "Check_amount_positive" CHECK (amount::numeric >= 0::numeric) NOT VALID,
-    CONSTRAINT "Check_order_or_campaigne_structure" CHECK (id_order_client_equipment is not null or ( id_structure is not null  and id_campaigne is not null) ) NOT VALID
+    CONSTRAINT "Check_order_or_campaigne_structure" CHECK (id_order_client_equipment is not null or ( id_structure is not null  and id_campaign is not null) ) NOT VALID
 )

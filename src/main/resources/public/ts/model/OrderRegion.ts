@@ -89,8 +89,8 @@ export class OrderRegion {
         this.id_project = order.id_project;
         this.comment = order.comment;
         this.price = order.price_proposal;
-        // if (order.rank )
-        //     this.rank = order.rank;
+        if (order.rank )
+            this.rank = order.rank;
         this.structure = order.structure;
     }
 

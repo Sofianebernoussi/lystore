@@ -345,6 +345,7 @@ export const orderController = ng.controller('orderController',
                 orderRegion.createFromOrderClient($scope.orderToUpdate);
                 orderRegion.id_operation = operation.id;
                 orderRegion.equipment_key = $scope.orderToUpdate.equipment_key;
+                $scope.cancelUpdate();
                 await orderRegion.set();
             } else {
                 let idsOrder = $scope.ordersClient.selected.map(order => order.id);
@@ -383,12 +384,10 @@ export const orderController = ng.controller('orderController',
         };
         $scope.updateOrderConfirm = async () => {
 
-            // await $scope.orderToUpdate.adminUpdate();
             await $scope.selectOperationForOrder();
         };
 
         $scope.updateLinkedOrderConfirm = async () => {
-            // await $scope.orderToUpdate.adminUpdate();
             $scope.cancelUpdate();
         };
 

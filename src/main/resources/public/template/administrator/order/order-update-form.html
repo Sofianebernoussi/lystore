@@ -80,7 +80,9 @@
                 <i18n>lystore.price</i18n>
             </label>
             <input type="number" step="0.01"
-                   ng-init="(orderToUpdate.price_proposal) ? orderToUpdate.price_proposal =orderToUpdate.price_proposal : orderToUpdate.price_proposal =orderToUpdate.priceTTCtotal "
+                   ng-init="(orderToUpdate.price_proposal)
+                   ? orderToUpdate.price_proposal =orderToUpdate.price_proposal
+                   : orderToUpdate.price_proposal = orderToUpdate.priceTTCtotal "
                    ng-model="orderToUpdate.price_proposal "
             />
         </div>
@@ -116,10 +118,10 @@
         </lightbox>
 
 
-        <input type="button" ng-if="true" class="right-magnet button" ng-click="updateOrderConfirm()"
+        <input type="button" ng-if="isUpdating" class="right-magnet button" ng-click="updateOrderConfirm()"
                i18n-value="lystore.order.operation.select"/>
 
-        <input type="button" ng-if="true" class="right-magnet button" ng-click="updateLinkedOrderConfirm()"
+        <input type="button" ng-if="!isUpdating" class="right-magnet button" ng-click="updateLinkedOrderConfirm()"
                i18n-value="confirm"/>
 
         <input type="button" class="right-magnet cancel" ng-click="cancelUpdate()" i18n-value="cancel"/>

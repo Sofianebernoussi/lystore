@@ -344,8 +344,8 @@ export const orderController = ng.controller('orderController',
                 let orderRegion = new OrderRegion();
                 orderRegion.createFromOrderClient($scope.orderToUpdate);
                 orderRegion.id_operation = operation.id;
-                console.log(orderRegion)
-
+                orderRegion.equipment_key = $scope.orderToUpdate.equipment_key;
+                await orderRegion.set();
             } else {
                 let idsOrder = $scope.ordersClient.selected.map(order => order.id);
                 await $scope.ordersClient.addOperation(operation.id, idsOrder);
@@ -389,11 +389,22 @@ export const orderController = ng.controller('orderController',
 
         $scope.updateLinkedOrderConfirm = async () => {
             // await $scope.orderToUpdate.adminUpdate();
-            console.log("salut")
             $scope.cancelUpdate();
-        }
+        };
+
         $scope.getTotal = () => {
 
             return ($scope.orderToUpdate.amount * $scope.orderToUpdate.priceTTCtotal).toFixed(2);
-        }
+        };
+
+        $scope.orderShow = (order: OrderClient) => {
+            if (order.rank !== undefined) {
+                if (order.campaign.priority_field === PRIORITY_FIELD.ORDER && order.campaign.orderPriorityEnable()) {
+                    return order.rank = order.rank + 1;
+                } else if (order.campaign.priority_field === PRIORITY_FIELD.PROJECT && order.project.preference !== null && order.campaign.projectPriorityEnable()) {
+                    return order.rank = order.project.preference + 1;
+                }
+            }
+            return order.rank = lang.translate("lystore.order.not.prioritized");
+        };
     }]);

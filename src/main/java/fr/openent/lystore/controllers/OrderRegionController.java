@@ -14,6 +14,8 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
+import org.entcore.common.user.UserInfos;
+import org.entcore.common.user.UserUtils;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
 
@@ -28,19 +30,26 @@ public class OrderRegionController extends BaseController {
 
 
     public OrderRegionController() {
-        this.orderRegionService = new DefaultOrderRegionService();
+        this.orderRegionService = new DefaultOrderRegionService("equipment");
     }
 
 
     @Put("/region/order/")
-    @ApiDoc("update an order when admin or manager")
+    @ApiDoc("update or create an order when admin or manager")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void updateAdminOrder(final HttpServerRequest request) {
-        RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+
+        UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
             @Override
-            public void handle(JsonObject order) {
-                orderRegionService.updatOrderRegion(order, defaultResponseHandler(request));
+            public void handle(UserInfos event) {
+                RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+                    @Override
+                    public void handle(JsonObject order) {
+                        orderRegionService.createOrderRegion(order, event, defaultResponseHandler(request));
+
+                    }
+                });
             }
 
         });

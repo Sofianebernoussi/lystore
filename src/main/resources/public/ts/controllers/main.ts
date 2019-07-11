@@ -1,33 +1,8 @@
 import {_, Behaviours, idiom as lang, model, moment, ng, template} from 'entcore';
 import {
-    Agents,
-    Basket,
-    Baskets,
-    Campaign,
-    Campaigns,
-    Contracts,
-    ContractTypes,
-    Equipment,
-    Equipments,
-    Instructions,
-    EquipmentTypes,
-    labels,
-    Logs,
-    Notification,
-    Operations,
-    OrderClient,
-    OrdersClient,
-    PRIORITY_FIELD,
-    Programs,
-    StructureGroups,
-    Structures,
-    Supplier,
-    Suppliers,
-    Tags,
-    Taxes,
-    Titles,
-    Utils,
-    Exercises,
+    Agents, Basket, Baskets, Campaign, Campaigns, Contracts, ContractTypes, Equipment, Equipments, EquipmentTypes,
+    Exercises, Instructions, labels, Logs, Notification, Operations, OrderClient, OrdersClient, PRIORITY_FIELD,
+    Programs, StructureGroups, Structures, Supplier, Suppliers, Tags, Taxes, Titles, Utils,
 } from '../model';
 import {Mix} from "entcore-toolkit";
 
@@ -236,6 +211,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             previewOrder: async () => {
                 template.open('administrator-main', 'administrator/order/order-send-prepare');
                 template.open('sendOrder.preview', 'pdf/preview');
+            },
+            updateOrder: async () => {
+                template.open('administrator-main', 'administrator/order/order-update-form');
+                Utils.safeApply($scope);
+
             },
             instruction: async () =>{
                 await $scope.initInstructions();

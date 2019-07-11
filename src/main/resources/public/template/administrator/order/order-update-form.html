@@ -1,0 +1,129 @@
+<div ng-controller="orderController" class="order-client-sent">
+    <h1>
+        <i18n>lystore.order.update</i18n>
+    </h1>
+    <form>
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>lystore.structure.label</i18n>
+                :
+            </label>
+            <label class="six cell">[[orderToUpdate.structure.name]]</label>
+        </div>
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>CAMPAIGN</i18n>
+            </label>
+            <label class="six cell">[[orderToUpdate.campaign.name]]</label>
+        </div>
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>lystore.project</i18n>
+            </label>
+            <label class="six cell">[[orderToUpdate.project.title.name]]</label>
+        </div>
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>lystore.project.comment</i18n>
+            </label>
+            <label class="six cell">[[orderToUpdate.project.description]]</label>
+        </div>
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>room</i18n>
+            </label>
+            <label class="six cell">[[orderToUpdate.project.room]]</label>
+        </div>
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>building</i18n>
+            </label>
+            <label class="six cell">[[orderToUpdate.project.building]]</label>
+        </div>
+
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>lystore.project.origin</i18n>
+            </label>
+            <label class="six cell">[[orderToUpdate.project.grade.name]]</label>
+        </div>
+
+
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>lystore.amount</i18n>
+            </label>
+            <label class="six cell">[[getTotal()]] €</label>
+        </div>
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>EQUIPMENT</i18n>
+            </label>
+            <search-and-select class="six cell"
+                               options="equipments.all"
+                               param1="'contract_type_name'"
+                               param2="'name'"
+                               ng-model=" orderToUpdate.equipment"
+                               search-on="name" order-by="name"
+            >
+            </search-and-select>
+        </div>
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>quantity.full</i18n>
+            </label>
+            <input type="number" ng-model="orderToUpdate.amount"/>
+
+        </div>
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>lystore.price</i18n>
+            </label>
+            <input type="number" step="0.01"
+                   ng-init="(orderToUpdate.price_proposal)
+                   ? orderToUpdate.price_proposal =orderToUpdate.price_proposal
+                   : orderToUpdate.price_proposal = orderToUpdate.priceTTCtotal "
+                   ng-model="orderToUpdate.price_proposal "
+            />
+        </div>
+        <div ng-if="orderToUpdate.rank != null && orderToUpdate.rank != undefined && orderToUpdate.campaign.orderPriorityEnable()"
+             class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>lystore.project.priority.order</i18n>
+            </label>
+            <input ng-model="orderToUpdate.rank" type="number" min="1" step="1"/>
+
+        </div>
+        <div ng-if="orderToUpdate.project.preference!= null && orderToUpdate.rank != undefined && orderToUpdate.campaign.projectPriorityEnable()"
+             class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>lystore.project.priority.project</i18n>
+            </label>
+            <input ng-model="orderToUpdate.project.preference" type="number" min="1" step="1"/>
+        </div>
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>comment</i18n>
+            </label>
+            <textarea auto-height=""
+                      style="resize: none; height: 62px;" ng-model="orderToUpdate.comment"
+                      class="ng-pristine ng-valid ng-touched">
+
+            </textarea>
+        </div>
+
+        <lightbox on-close="display.lightbox.validOrder = false;cancelUpdate();"
+                  show="display.lightbox.validOrder">
+            <container template="validOrder.lightbox"></container>
+        </lightbox>
+
+
+        <input type="button" ng-if="isUpdating" class="right-magnet button" ng-click="updateOrderConfirm()"
+               i18n-value="lystore.order.operation.select"/>
+
+        <input type="button" ng-if="!isUpdating" class="right-magnet button" ng-click="updateLinkedOrderConfirm()"
+               i18n-value="confirm"/>
+
+        <input type="button" class="right-magnet cancel" ng-click="cancelUpdate()" i18n-value="cancel"/>
+    </form>
+</div>

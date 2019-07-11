@@ -284,6 +284,7 @@
   "name.project": "INTITULE_PROJET",
   "price.equipment": "PRIX_TTC",
   "quantity": "QTE",
+  "quantity.full": "Quantité",
   "VALID": "Commande validée",
   "WAITING": "Commande en attente de validation",
   "REJECTED": "Commande refusée",
@@ -366,6 +367,7 @@
   "building": "Bâtiment",
   "lystore.project.stage": "Étage",
   "lystore.project.priority": "Priorité",
+  "room": "Salle",
   "room.number": "N°salle(s)",
   "sites": "Site(s)",
   "room.site": "Site",
@@ -470,9 +472,15 @@
   "lystore.demand.waiting": "demande en attente",
   "lystore.demand.empty": "Aucune demande sur cette campagne",
   "lystore.operation.form.empty": "Aucune opération disponible",
+  "lystore.order.update": "Modifier une commande",
+  "lystore.structure.label": "Etablissement",
+  "lystore.project.origin": "Nature du projet",
+  "lystore.admin.order.update.err": "Erreur lors de la modification de la commande",
+  "lystore.project.priority.order": "Priorité demande",
   "lystore.order.priority": "N° Prio",
   "lystore.no.comment": "Pas de commentaire",
   "lystore.room": "Salle",
   "lystore.department": "Département",
-  "lystore.project.comment": "Commentaire projet"
+  "lystore.project.comment": "Commentaire projet",
+  "lystore.project.priority.project": "Priorité project"
 }

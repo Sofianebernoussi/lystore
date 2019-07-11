@@ -71,7 +71,8 @@
                 <td ng-if="tableFields[16].display">[[order.project.building || '-']]</td>
                 <td ng-if="tableFields[17].display">[[order.project.description || '-']]</td>
                 <td ng-if="tableFields[18].display">[[order.structure.department]]</td>
-                <td ng-if="tableFields[19].display"><span ng-bind="showPriceProposalOrNot(order) | currency"></span></td>
+                <td ng-if="tableFields[19].display"><span ng-bind="showPriceProposalOrNot(order) | currency"></span>
+                </td>
             </tr>
             </tbody>
             <tfoot>
@@ -80,7 +81,9 @@
                     <i18n>totals</i18n>
                 </td>
                 <td ng-if="tableFields[6].display">[[displayedOrders.calculTotalAmount() ]]</td>
-                <td ng-if="tableFields[19].display" colspan="[[countColSpan('price')]]" class="text-right"> [[displayedOrders.calculTotalPriceTTC() | currency]]</td>
+                <td ng-if="tableFields[19].display" colspan="[[countColSpan('price')]]" class="text-right">
+                    [[displayedOrders.calculTotalPriceTTC() | currency]]
+                </td>
             </tr>
             </tfoot>
         </table>
@@ -96,6 +99,10 @@
             <div class="row">
                 <button ng-click="validateOrders(getSelectedOrders())" ng-disabled="!isValidOrdersWaitingSelection()">
                     <i18n>Validate</i18n>
+                </button>
+                <button ng-click="updateOrder(ordersClient.selected[0])"
+                        ng-show=" ordersClient.selected.length ===  1">
+                    <i18n>modify</i18n>
                 </button>
                 <button ng-click="exportCSV()" >
                     <i18n>lystore.logs.csv.export</i18n>

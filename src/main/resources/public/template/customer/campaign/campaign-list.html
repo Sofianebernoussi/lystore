@@ -2,6 +2,8 @@
     <div class="row aligned" ng-if="structures.all.length > 1">
         <h4 class="right-magnet"><i18n>multi-structures.choice</i18n> :
             <search-and-select class="cell right-magnet horizontal-margin"
+                               param1="UAI"
+                               param2="name"
                                options="structures.all"
                                ng-model="current.structure"
                                search-on="name" order-by="name"

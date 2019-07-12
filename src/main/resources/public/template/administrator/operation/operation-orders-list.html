@@ -50,8 +50,9 @@
             <td>[[order.amount]]</td>
             <td>[[formatDate(order.creation_date)]]</td>
             <td ><span ng-bind="order.price | currency"></span></td>
-            <td class="one aligne-text-center" ng-click="dropOrderOperation(order)">
-                <i class="trash"></i>
+            <td class="two aligne-text-center">
+                <i class="edit" ng-click="insertOrderRegion(order)"></i>
+                <i class="trash" ng-click="dropOrderOperation(order)"></i>
             </td>
         </tr>
         </tbody>

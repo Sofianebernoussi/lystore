@@ -92,6 +92,46 @@ export class OrderClient implements Selectable {
             notify.error('lystore.order.update.err');
         }
     }
+
+    static formatSqlDataToModel(data: any) {
+        return {
+            action: data.action,
+            amount: data.amount,
+            cause_status: data.cause_status,
+            comment: data.comment,
+            creation_date: data.creation_date,
+            description: data.description,
+            equipment_key: data.equipment_key,
+            id: data.id,
+            id_campaign: data.id_campaign,
+            id_contract: data.id_contract,
+            id_operation: data.id_operation,
+            id_order: data.id_order,
+            id_project: data.id_project,
+            id_structure: data.id_structure,
+            image: data.image,
+            name: data.name,
+            number_validation: data.number_validation,
+            price: data.price,
+            price_proposal: data.price_proposal,
+            program: data.program,
+            rank: data.rank,
+            status: data.status,
+            summary: data.summary,
+            tax_amount: data.tax_amount
+        }
+            ;
+    }
+
+    async get() {
+        try {
+            let {data} = await http.get(`/lystore/order/${this.id}`);
+            Mix.extend(this, OrderClient.formatSqlDataToModel(data));
+
+        } catch (e) {
+            notify.error('lystore.order.get.err');
+        }
+    }
 }
 export class OrdersClient extends Selection<OrderClient> {
 

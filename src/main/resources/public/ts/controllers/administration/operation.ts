@@ -1,11 +1,11 @@
-import { ng, template, _ } from 'entcore';
-import { Operation, OrderClient, Utils} from "../../model";
+import {_, ng, template} from 'entcore';
+import {Operation, OrderClient, Utils} from "../../model";
 import {Mix} from 'entcore-toolkit';
 
 declare let window: any;
 
 export const operationController = ng.controller('operationController',
-    ['$scope', '$routeParams', ($scope, $routeParams) => {
+    ['$scope', ($scope) => {
 
         $scope.sort = {
             operation : {
@@ -131,4 +131,8 @@ export const operationController = ng.controller('operationController',
             return Utils.formatDate(date)
         };
 
+        $scope.insertOrderRegion = (order: OrderClient) => {
+            $scope.order = order;
+            $scope.redirectTo(`/order/operation/update/${order.id}`);
+        }
     }]);

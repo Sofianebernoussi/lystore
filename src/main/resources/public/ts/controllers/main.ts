@@ -213,6 +213,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('sendOrder.preview', 'pdf/preview');
             },
             updateOrder: async () => {
+                await $scope.initOrders('WAITING');
                 template.open('administrator-main', 'administrator/order/order-update-form');
                 Utils.safeApply($scope);
 

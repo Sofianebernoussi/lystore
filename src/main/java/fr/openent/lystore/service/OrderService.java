@@ -188,5 +188,11 @@ public interface OrderService {
      */
     void updateStatusOrder( Integer idOrder, JsonObject status, Handler<Either<String, JsonObject>> handler);
 
-
+    /**
+     * Get an order by id
+     *
+     * @param idOrder id of the order to get
+     * @param handler Function handler returning data
+     */
+    void getOrder(Integer idOrder, Handler<Either<String, JsonObject>> handler);
 }

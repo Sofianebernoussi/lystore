@@ -1,16 +1,16 @@
 import {_, idiom as lang, model, ng, template} from 'entcore';
+import {Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD, Utils} from '../../model';
 import {
     Campaign, ContractTypes, Notification, Operation, OrderClient, OrderRegion, OrdersClient, orderWaiting, PRIORITY_FIELD,
     Utils
 } from '../../model';
 import {Mix} from 'entcore-toolkit';
-import {Equipments} from "../../model/Equipment";
 
 
 declare let window: any;
 export const orderController = ng.controller('orderController',
-    ['$scope', '$location', ($scope, $location) => {
-        ($scope.ordersClient.selected[0]) ? $scope.orderToUpdate = $scope.ordersClient.selected[0] : $scope.orderToUpdate;
+    ['$scope', '$location', ($scope, $location,) => {
+        ($scope.ordersClient.selected[0]) ? $scope.orderToUpdate = $scope.ordersClient.selected[0] : $scope.orderToUpdate = new OrderClient();
         $scope.allOrdersSelected = false;
         $scope.tableFields = orderWaiting;
         $scope.sort = {
@@ -19,10 +19,6 @@ export const orderController = ng.controller('orderController',
                 reverse: false
             }
         };
-        $scope.isUpdating = $location.$$path.includes('/order/update');
-        $scope.equipments = new Equipments();
-        $scope.contractTypes = new ContractTypes();
-
 
         $scope.search = {
             filterWord : '',
@@ -39,17 +35,6 @@ export const orderController = ng.controller('orderController',
                 type: 'ORDER'
             }
         };
-        $scope.initDataUpdate = async () => {
-            await $scope.equipments.sync($scope.orderToUpdate.id_campaign, $scope.orderToUpdate.id_structure);
-            $scope.orderToUpdate.equipment = $scope.equipments.all.find((e) => {
-                return e.id === $scope.orderToUpdate.equipment_key;
-            });
-            Utils.safeApply($scope);
-        };
-        if ($scope.orderToUpdate && $scope.orderToUpdate.id_campaign)
-            $scope.initDataUpdate();
-
-
         $scope.switchAll = (model: boolean, collection) => {
             model ? collection.selectAll() : collection.deselectAll();
             Utils.safeApply($scope);
@@ -58,7 +43,6 @@ export const orderController = ng.controller('orderController',
             let totalPrice = $scope.calculatePriceOfEquipment(orderClient, false, roundNumber) * orderClient.amount;
             return totalPrice.toFixed(roundNumber);
         };
-
 
         $scope.addFilter = (filterWord: string, event?) => {
             if (event && (event.which === 13 || event.keyCode === 13 )) {
@@ -328,32 +312,25 @@ export const orderController = ng.controller('orderController',
             return field == 'totaux' ? totaux : price;
         };
         $scope.isOperationsIsEmpty = false;
+
         $scope.selectOperationForOrder = async () =>{
             await $scope.initOperation();
             $scope.isOperationsIsEmpty = !$scope.operations.all.some(operation => operation.status === 'true');
             template.open('validOrder.lightbox', 'administrator/order/order-select-operation');
             $scope.display.lightbox.validOrder = true;
         };
+
         $scope.isOperationSelected = false;
         $scope.operationSelected = async (operation:Operation) => {
             $scope.isOperationSelected = true;
             $scope.operation = operation;
-            if ($scope.isUpdating) {
-                let orderRegion = new OrderRegion();
-                orderRegion.createFromOrderClient($scope.orderToUpdate);
-                orderRegion.id_operation = operation.id;
-                orderRegion.equipment_key = $scope.orderToUpdate.equipment_key;
-                $scope.cancelUpdate();
-                await orderRegion.set();
-            } else {
-                let idsOrder = $scope.ordersClient.selected.map(order => order.id);
+            let idsOrder = $scope.ordersClient.selected.map(order => order.id);
                 await $scope.ordersClient.addOperation(operation.id, idsOrder);
                 await $scope.validateOrders($scope.getSelectedOrders());
                 await Promise.all([
                     await $scope.syncOrders('WAITING'),
                     await $scope.initOperation()
                 ])
-            }
         };
         $scope.showPriceProposalOrNot = (order:OrderClient) => {
             return  order.price_proposal !== null? order.priceProposalTTCTotal : order.priceTTCtotal;
@@ -369,22 +346,8 @@ export const orderController = ng.controller('orderController',
             return order.rank = lang.translate("lystore.order.not.prioritized");
         };
         $scope.updateOrder = (order: OrderClient) => {
-            $scope.orderToUpdate = order;
-            $scope.redirectTo('/order/update');
-        };
-        $scope.cancelUpdate = () => {
-            if ($scope.ordersClient.selected[0])
-                $scope.ordersClient.selected[0].selected = false;
-            $scope.redirectTo('/order/waiting');
-        };
-        $scope.updateOrderConfirm = async () => {
-            await $scope.selectOperationForOrder();
-        };
-        $scope.updateLinkedOrderConfirm = async () => {
-            $scope.cancelUpdate();
-        };
-        $scope.getTotal = () => {
-            return ($scope.orderToUpdate.amount * $scope.orderToUpdate.priceTTCtotal).toFixed(2);
+            $scope.redirectTo(`/order/update/${order.id}`);
+
         };
         $scope.selectCampagnAndInitFilter = (campaign: Campaign) =>{
             $scope.selectCampaignShow(campaign);

@@ -1,4 +1,4 @@
-<div ng-controller="orderController" class="order-client-sent">
+<div ng-controller="orderRegionController" class="order-client-sent">
     <h1>
         <i18n>lystore.order.update</i18n>
     </h1>
@@ -121,7 +121,8 @@
         <input type="button" ng-if="isUpdating" class="right-magnet button" ng-click="updateOrderConfirm()"
                i18n-value="lystore.order.operation.select"/>
 
-        <input type="button" ng-if="!isUpdating" class="right-magnet button" ng-click="updateLinkedOrderConfirm()"
+        <input type="button" ng-if="isUpdatingFromOrder" class="right-magnet button"
+               ng-click="updateLinkedOrderConfirm()"
                i18n-value="confirm"/>
 
         <input type="button" class="right-magnet cancel" ng-click="cancelUpdate()" i18n-value="cancel"/>

@@ -992,5 +992,17 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         values.add(orderStatus.getString("status"));
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
     }
+
+    @Override
+    public void getOrder(Integer idOrder, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT oec.* , array_to_json( array_agg( project.* )) as project , array_to_json ( array_agg ( campaign.*)) as campaign " +
+                "FROM " + Lystore.lystoreSchema + ".order_client_equipment oec " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".project on oec.id_project = project.id " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".campaign on oec.id_campaign =  campaign.id " +
+                "where oec.id = ? " +
+                "group by oec.id";
+
+        Sql.getInstance().prepared(query, new JsonArray().add(idOrder), SqlResult.validUniqueResultHandler(handler));
+    }
 }
 

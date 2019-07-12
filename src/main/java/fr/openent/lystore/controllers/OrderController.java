@@ -1153,4 +1153,17 @@ public class OrderController extends ControllerHelper {
                 idOrder.toString(),
                 statusEdit)));
     }
+
+    @Get("/order/:idOrder")
+    @ApiDoc("get an order")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void getOrder(HttpServerRequest request) {
+        try {
+            Integer orderId = Integer.parseInt(request.getParam("idOrder"));
+            orderService.getOrder(orderId, defaultResponseHandler(request));
+        } catch (ClassCastException e) {
+            log.error(" An error occurred when casting order id", e);
+        }
+
+    }
 }

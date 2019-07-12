@@ -187,11 +187,11 @@ export class OrdersClient extends Selection<OrderClient> {
                         order.priceProposalTTCTotal = order.price_proposal !== null ?
                             parseFloat((order.calculatePriceTTC(2, order.price_proposal) as number).toString()) * order.amount :
                             null;
-                        if (order.campaign.orderPriorityEnable()) {
+                        if( order.campaign.orderPriorityEnable()){
                             order.rankOrder = (order.rank + 1).toString();
-                        } else if (order.campaign.projectPriorityEnable()) {
+                        } else if (order.campaign.projectPriorityEnable()){
                             order.rankOrder = (order.project.preference + 1).toString();
-                        } else {
+                        }else{
                             order.rankOrder = lang.translate("lystore.order.not.prioritized");
                         }
                     }

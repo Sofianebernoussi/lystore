@@ -11,7 +11,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         template.open('main', 'main');
 
         $scope.display = {
-            equipment: false
+            equipment: false,
+            lightbox: {selectCampaign: false,}
         };
         $scope.structures = new Structures();
         $scope.current = {};
@@ -192,8 +193,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             orderWaiting: async () => {
-                $scope.initOrders('WAITING');
-                template.open('administrator-main', 'administrator/order/order-waiting');
+                await $scope.openLightSelectCampaign();
                 Utils.safeApply($scope);
             },
             orderSent: async () => {
@@ -243,11 +243,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             await $scope.instructions.sync();
         };
         $scope.initCampaignOrderView=()=>{
-          if( $scope.campaign.priority_enabled == true && $scope.campaign.priority_field == PRIORITY_FIELD.ORDER){
-              template.open('order-list', 'customer/campaign/order/orders-by-equipment');
-          } else {
-              template.open('order-list', 'customer/campaign/order/orders-by-project');
-          }
+            if( $scope.campaign.priority_enabled == true && $scope.campaign.priority_field == PRIORITY_FIELD.ORDER){
+                template.open('order-list', 'customer/campaign/order/orders-by-equipment');
+            } else {
+                template.open('order-list', 'customer/campaign/order/orders-by-project');
+            }
         };
         $scope.initOperation = async () =>{
             $scope.labelOperation = new labels();
@@ -367,6 +367,43 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             $scope.orderToSend.all = Mix.castArrayAs(OrderClient, orders);
             $scope.orderToSend.preview = await $scope.orderToSend.getPreviewData();
             $scope.orderToSend.preview.index = 0;
+        };
+        $scope.syncCampaignInputSelected = async () => {
+            $scope.campaignsForSelectInput = [];
+            let allCampaigns = new Campaign(lang.translate("lystore.campaign.order.all"), '');
+            allCampaigns.id = 0;
+            await $scope.campaigns.sync();
+            $scope.campaignsForSelectInput = [...$scope.campaigns.all];
+            $scope.campaignsForSelectInput.unshift(allCampaigns);
+
+        };
+        $scope.openLightSelectCampaign = async () => {
+            template.open('administrator-main');
+            await $scope.syncCampaignInputSelected();
+            template.open('selectCampaign', 'administrator/order/select-campaign');
+            $scope.display.lightbox.selectCampaign = true;
+            $scope.initOrders('WAITING');
+            Utils.safeApply($scope);
+        };
+        $scope.selectCampaignShow = async (campaign?: Campaign) => {
+            await $scope.syncCampaignInputSelected();
+            if(campaign){
+                $scope.campaign = campaign;
+                $scope.displayedOrders.all = $scope.ordersClient.all
+                    .filter( order => order.campaign.id === campaign.id || campaign.id === 0);
+                $scope.cancelSelectCampaign(false);
+            } else {
+                $scope.cancelSelectCampaign(true);
+            }
+        };
+        $scope.cancelSelectCampaign = (initOrder: boolean) => {
+            template.close('selectCampaign');
+            $scope.display.lightbox.selectCampaign = false;
+            if(initOrder) {
+                $scope.displayedOrders.all = $scope.ordersClient.all;
+            }
+            template.open('administrator-main', 'administrator/order/order-waiting');
+            Utils.safeApply($scope);
         };
 
         if ($scope.isManager() || $scope.isAdministrator()) {

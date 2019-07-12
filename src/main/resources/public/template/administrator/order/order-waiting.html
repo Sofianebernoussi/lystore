@@ -1,5 +1,16 @@
 <div ng-controller="orderController" class="order-client-validation">
-    <h1><i18n>lystore.orders.validations.waiting</i18n></h1>
+    <div class="row">
+        <h1 class="twelve-mobile six cell"><i18n>lystore.orders.validations.waiting</i18n></h1>
+        <div class="right-magnet">
+            <select
+                    ng-model="campaign"
+                    ng-options="campaignSelect as campaignSelect.name for campaignSelect in campaignsForSelectInput"
+                    ng-change="selectCampagnAndInitFilter(campaign)"
+            >
+                <option value="" disabled >[[campaign.name]]</option>
+            </select>
+        </div>
+    </div>
     <div class="row">
         <div class="cell twelve-mobile horizontal-spacing search-pagination four">
             <div class="row twelve vertical-spacing">
@@ -71,8 +82,7 @@
                 <td ng-if="tableFields[16].display">[[order.project.building || '-']]</td>
                 <td ng-if="tableFields[17].display">[[order.project.description || '-']]</td>
                 <td ng-if="tableFields[18].display">[[order.structure.department]]</td>
-                <td ng-if="tableFields[19].display"><span ng-bind="showPriceProposalOrNot(order) | currency"></span>
-                </td>
+                <td ng-if="tableFields[19].display"><span ng-bind="showPriceProposalOrNot(order) | currency"></span></td>
             </tr>
             </tbody>
             <tfoot>

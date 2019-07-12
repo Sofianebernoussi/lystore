@@ -1,6 +1,6 @@
 import {_, idiom as lang, model, ng, template} from 'entcore';
 import {
-    ContractTypes, Notification, Operation, OrderClient, OrderRegion, OrdersClient, orderWaiting, PRIORITY_FIELD,
+    Campaign, ContractTypes, Notification, Operation, OrderClient, OrderRegion, OrdersClient, orderWaiting, PRIORITY_FIELD,
     Utils
 } from '../../model';
 import {Mix} from 'entcore-toolkit';
@@ -101,7 +101,7 @@ export const orderController = ng.controller('orderController',
             return new RegExp(reg);
         }
 
-        $scope.filterDisplayedOrders = () => {
+        $scope.filterDisplayedOrders = async () => {
             let searchResult = [];
             let regex;
 
@@ -112,8 +112,9 @@ export const orderController = ng.controller('orderController',
                 return bool;
             };
             if($scope.search.filterWords.length > 0){
+                await $scope.selectCampaignShow($scope.campaign);
                 $scope.search.filterWords.map((searchTerm: string, index: number): void => {
-                    let searchItems: OrderClient[] = index === 0 ? $scope.ordersClient.all : searchResult;
+                    let searchItems: OrderClient[] = index === 0 ? $scope.displayedOrders.all : searchResult;
                     regex = generateRegexp([searchTerm]);
 
                     searchResult = _.filter(searchItems, (order: OrderClient) => {
@@ -147,7 +148,7 @@ export const orderController = ng.controller('orderController',
 
                 $scope.displayedOrders.all = searchResult;
             }else{
-                $scope.displayedOrders.all = $scope.ordersClient.all;
+                $scope.selectCampaignShow($scope.campaign);
             }
         };
 
@@ -367,40 +368,26 @@ export const orderController = ng.controller('orderController',
             }
             return order.rank = lang.translate("lystore.order.not.prioritized");
         };
-
         $scope.updateOrder = (order: OrderClient) => {
             $scope.orderToUpdate = order;
             $scope.redirectTo('/order/update');
-
         };
-
         $scope.cancelUpdate = () => {
             if ($scope.ordersClient.selected[0])
                 $scope.ordersClient.selected[0].selected = false;
             $scope.redirectTo('/order/waiting');
         };
         $scope.updateOrderConfirm = async () => {
-
             await $scope.selectOperationForOrder();
         };
-
         $scope.updateLinkedOrderConfirm = async () => {
             $scope.cancelUpdate();
         };
-
         $scope.getTotal = () => {
-
             return ($scope.orderToUpdate.amount * $scope.orderToUpdate.priceTTCtotal).toFixed(2);
         };
-
-        $scope.orderShow = (order: OrderClient) => {
-            if (order.rank !== undefined) {
-                if (order.campaign.priority_field === PRIORITY_FIELD.ORDER && order.campaign.orderPriorityEnable()) {
-                    return order.rank = order.rank + 1;
-                } else if (order.campaign.priority_field === PRIORITY_FIELD.PROJECT && order.project.preference !== null && order.campaign.projectPriorityEnable()) {
-                    return order.rank = order.project.preference + 1;
-                }
-            }
-            return order.rank = lang.translate("lystore.order.not.prioritized");
+        $scope.selectCampagnAndInitFilter = (campaign: Campaign) =>{
+            $scope.selectCampaignShow(campaign);
+            $scope.search.filterWords = [];
         };
     }]);

@@ -164,6 +164,10 @@ public class DefaultOperationService extends SqlCrudService implements Operation
         JsonArray params = new JsonArray()
                 .add(operationId);
 
+        String queryOrderRegion = "SELECT * " +
+                "FROM lystore.\"order-region-equipment\" AS ore " +
+                "WHERE ore.id_operation = ?";
+
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
                 handler.handle(event.left());
@@ -200,7 +204,29 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                     order.put("structure_uai", structure.getString("uai"));
                 }
 
-                handler.handle(new Either.Right<>(orders));
+                Sql.getInstance().prepared(queryOrderRegion, params, SqlResult.validResultHandler(eventRegion -> {
+                    if (eventRegion.isLeft()) {
+                        handler.handle(eventRegion.left());
+                        return;
+                    }
+
+                    JsonObject orderFinal, ordersRegionEdit;
+
+                    JsonArray orderRegions = eventRegion.right().getValue();
+                    for (int i = 0; i < orders.size(); i++) {
+                        orderFinal = orders.getJsonObject(i);
+                        JsonObject order_region_equipment = new JsonObject();
+                        for (int j = 0; j < orderRegions.size(); j++) {
+                            ordersRegionEdit = orderRegions.getJsonObject(j);
+                            if(orderFinal.getLong("id").equals(ordersRegionEdit.getLong("id_order_client_equipment"))){
+                                order_region_equipment.put("order_region", ordersRegionEdit);
+                            }
+                        }
+                        orderFinal.put("order_region_equipment", order_region_equipment.getJsonObject("order_region"));
+                    }
+
+                    handler.handle(new Either.Right<>(orders));
+                }));
             }));
         }));
     }

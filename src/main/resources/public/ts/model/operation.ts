@@ -1,9 +1,10 @@
 import { Mix, Selectable, Selection} from 'entcore-toolkit';
 import http from 'axios';
 import {notify, _, moment} from "entcore";
-import {Equipment} from "./Equipment";
 import {Utils} from "./Utils";
 import {Instruction} from "./instruction";
+import {OrderClient} from "./OrderClient";
+import {OrderRegion} from "./OrderRegion";
 
 
 
@@ -55,7 +56,16 @@ export class Operation implements Selectable {
     async getOrders() {
         try {
             const {data} = await http.get(`/lystore/operations/${this.id}/orders`);
-            return data;
+            let orders = Mix.castArrayAs(OrderClient, data);
+            orders = orders.map( order => {
+                order.isOrderRegionExist = false;
+                if(order.order_region_equipment !== null){
+                    order.order_region_equipment = Mix.castAs(OrderRegion, order.order_region_equipment);
+                    order.isOrderRegionExist = true;
+                }
+                return order
+            });
+            return orders;
         } catch (e) {
             notify.error("lystore.operation.orders.sync.err");
             throw e;

@@ -53,10 +53,15 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 "operation.* , " +
                 "to_json(i.*) AS instruction, " +
                 "to_json(label.*) as label, " +
-                "count(oce.*) as nbr_sub, " +
+                "count(oce.*) + (SELECT count(ore.*) FROM " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore WHERE ore.id_order_client_equipment is null ) as nbr_sub, " +
                 "array_to_json(array_agg(o.order_number)) as bc_number, " +
                 "array_to_json(array_agg(o.label_program)) as programs, " +
-                "SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) AS amount, " +
+
+//                "CASE " +
+//                "WHEN oce.price_proposal is NULL THEN (oce.price * oce.amount )*(1+(oce.tax_amount/100)) " +
+//                "ELSE  (oce.price_proposal * oce.amount ) " +
+//                "END AS amount, " +
+
                 "array_to_json(array_agg(c.name)) as contracts, " +
                 "array_to_json(array_agg(i.*)) AS instruction " +
                 "FROM  " + Lystore.lystoreSchema +".operation "+
@@ -145,21 +150,24 @@ public class DefaultOperationService extends SqlCrudService implements Operation
         String query = "SELECT " +
                 "oce.id, " +
                 "oce.creation_date, " +
-                "SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) AS price, " +
+                "CASE " +
+                "WHEN ore.id_order_client_equipment = oce.id THEN ( ore.price * ore.amount ) " +
+                "WHEN oce.price_proposal is NULL THEN (SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount )) " +
+                "ELSE ( oce.price_proposal * oce.amount ) " +
+                "END AS price_ttc_total, " +
                 "oce.amount, " +
                 "oce.name, " +
                 "oce.id_structure, " +
+                "oce.price AS price_client_without_ttc, " +
+                "oce.price_proposal AS price_proposal_with_ttc, " +
+                "ore.price AS price_region_with_ttc, " +
                 "contract.name as contract_name " +
-                "FROM  " + Lystore.lystoreSchema + ".order_client_equipment oce  " +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".contract ON oce.id_contract = contract.id  " +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id) " +
+                "FROM  " + Lystore.lystoreSchema + ".order_client_equipment oce " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".contract ON oce.id_contract = contract.id " +
+                "LEFT JOIN  " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id) " +
+                "LEFT JOIN  " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore ON (ore.id_order_client_equipment = oce.id) " +
                 "WHERE operation.id = ? " +
-                "GROUP BY ( " +
-                "oce.id, " +
-                "oce.price, " +
-                "oce.name,oce.id_structure, " +
-                "contract.name " +
-                ");";
+                "GROUP BY ( oce.id, oce.name, oce.id_structure, contract.name, ore.id );";
 
         JsonArray params = new JsonArray()
                 .add(operationId);

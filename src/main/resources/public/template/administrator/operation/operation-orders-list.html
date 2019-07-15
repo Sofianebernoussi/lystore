@@ -45,14 +45,14 @@
         <tbody>
         <tr
                 ng-repeat="order in ordersClientByOperation | orderBy:sort.order.type:sort.order.reverse"
-                ng-class="{ orderEditByRegion: order.order_region_equipment !== null }"
+                ng-class="{ orderEditByRegion: order.isOrderRegionExist }"
         >
             <td>[[order.structure_uai]] - [[order.structure_name]]</td>
             <td>[[order.contract_name]]</td>
             <td>[[order.name]]</td>
-            <td>[[order.amount]]</td>
-            <td>[[formatDate(order.creation_date)]]</td>
-            <td ><span ng-bind="order.price | currency"></span></td>
+            <td>[[order.isOrderRegionExist? order.order_region_equipment.amount : order.amount ]]</td>
+            <td>[[order.isOrderRegionExist? formatDate(order.order_region_equipment.creation_date) : formatDate(order.creation_date)]]</td>
+            <td><span ng-bind="order.price_ttc_total | currency"></span></td>
             <td class="one aligne-text-center" ng-click="dropOrderOperation(order)">
                 <i class="trash"></i>
             </td>

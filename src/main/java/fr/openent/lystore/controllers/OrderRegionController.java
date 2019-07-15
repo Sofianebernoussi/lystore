@@ -4,6 +4,7 @@ import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.OrderRegionService;
 import fr.openent.lystore.service.impl.DefaultOrderRegionService;
 import fr.wseduc.rs.ApiDoc;
+import fr.wseduc.rs.Post;
 import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -46,7 +47,7 @@ public class OrderRegionController extends BaseController {
                 RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
                     @Override
                     public void handle(JsonObject order) {
-                        orderRegionService.createOrderRegion(order, event, defaultResponseHandler(request));
+                        orderRegionService.setOrderRegion(order, event, defaultResponseHandler(request));
 
                     }
                 });
@@ -55,4 +56,22 @@ public class OrderRegionController extends BaseController {
         });
     }
 
+    @Post("/region/order/")
+    @ApiDoc("Create a region from scratch")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void createAdminOrder(final HttpServerRequest request) {
+        UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+            @Override
+            public void handle(UserInfos event) {
+                RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+                    @Override
+                    public void handle(JsonObject order) {
+                        orderRegionService.createOrderRegion(order, event, defaultResponseHandler(request));
+
+                    }
+                });
+            }
+        });
+    }
 }

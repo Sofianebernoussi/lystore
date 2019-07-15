@@ -1,5 +1,5 @@
 import {ng, template} from 'entcore';
-import {ContractTypes, Notification, Operation, OrderClient, OrderRegion} from "../../model";
+import {ContractTypes, Notification, Operation, OrderClient, OrderRegion, Utils} from "../../model";
 import {Equipments} from "../../model/Equipment";
 
 
@@ -19,6 +19,7 @@ export const orderRegionController = ng.controller('orderRegionController',
             $scope.orderToUpdate.equipment = $scope.equipments.all.find((e) => {
                 return e.id === $scope.orderToUpdate.equipment_key;
             });
+            Utils.safeApply($scope);
         };
 
 
@@ -42,13 +43,18 @@ export const orderRegionController = ng.controller('orderRegionController',
             $scope.isOperationSelected = true;
             $scope.operation = operation;
             if ($scope.isUpdating) {
+
                 let orderRegion = new OrderRegion();
                 orderRegion.createFromOrderClient($scope.orderToUpdate);
+
                 orderRegion.id_operation = operation.id;
                 orderRegion.equipment_key = $scope.orderToUpdate.equipment_key;
-                $scope.cancelUpdate();
+                await $scope.ordersClient.addOperation(operation.id, [$scope.orderToUpdate.id]);
                 await orderRegion.set();
                 $scope.notifications.push(new Notification('lystore.order.region.update', 'confirm'));
+                $scope.cancelUpdate();
+                Utils.safeApply($scope);
+
             }
         };
 

@@ -326,7 +326,7 @@ export const orderController = ng.controller('orderController',
             let idsOrder = $scope.ordersClient.selected.map(order => order.id);
                 await $scope.ordersClient.addOperation(operation.id, idsOrder);
             await $scope.inProgressOrders($scope.getSelectedOrders());
-                await Promise.all([
+            await Promise.all([
                     await $scope.syncOrders('WAITING'),
                     await $scope.initOperation()
                 ])

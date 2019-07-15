@@ -1,5 +1,5 @@
-import {ng, template} from 'entcore';
-import {ContractTypes, Notification, Operation, OrderClient, OrderRegion, Utils} from "../../model";
+import {ng, notify, template} from 'entcore';
+import {Notification, Operation, OrderClient, OrderRegion, Utils} from "../../model";
 import {Equipments} from "../../model/Equipment";
 
 
@@ -8,18 +8,20 @@ export const orderRegionController = ng.controller('orderRegionController',
     ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) => {
         $scope.orderToUpdate = new OrderClient();
         $scope.equipments = new Equipments();
-        $scope.contractTypes = new ContractTypes();
+        $scope.contract_type = "-";
         $scope.display = {
             lightbox: {
                 validOrder: false,
             }
         };
+
         $scope.initDataUpdate = async () => {
+
             await $scope.equipments.sync($scope.orderToUpdate.id_campaign, $scope.orderToUpdate.id_structure);
             $scope.orderToUpdate.equipment = $scope.equipments.all.find((e) => {
                 return e.id === $scope.orderToUpdate.equipment_key;
             });
-            Utils.safeApply($scope);
+            $scope.getContractType();
         };
 
 
@@ -28,14 +30,23 @@ export const orderRegionController = ng.controller('orderRegionController',
             $scope.ordersClient.all.forEach((o) => {
                 if (o.id == idOrder)
                     $scope.orderToUpdate = o;
-            })
+            });
+            ($scope.orderToUpdate.price_proposal)
+                ? $scope.orderToUpdate.price_proposal = parseFloat($scope.orderToUpdate.price_proposal)
+                : $scope.orderToUpdate.price_proposal = $scope.orderToUpdate.priceTTCtotal;
+            if (!$scope.orderToUpdate.project.room)
+                $scope.orderToUpdate.project.room = '-';
+            if (!$scope.orderToUpdate.project.building)
+                $scope.orderToUpdate.project.building = '-';
+
+
             $scope.initDataUpdate();
         }
         $scope.isUpdating = $location.$$path.includes('/order/update');
         $scope.isUpdatingFromOrder = $location.$$path.includes('/order/operation/update');
 
         $scope.getTotal = () => {
-            return ($scope.orderToUpdate.amount * $scope.orderToUpdate.priceTTCtotal).toFixed(2);
+            return ($scope.orderToUpdate.amount * $scope.orderToUpdate.price_proposal).toFixed(2);
         };
 
 
@@ -49,10 +60,14 @@ export const orderRegionController = ng.controller('orderRegionController',
 
                 orderRegion.id_operation = operation.id;
                 orderRegion.equipment_key = $scope.orderToUpdate.equipment_key;
-                await $scope.ordersClient.addOperation(operation.id, [$scope.orderToUpdate.id]);
-                await orderRegion.set();
-                $scope.notifications.push(new Notification('lystore.order.region.update', 'confirm'));
-                $scope.cancelUpdate();
+                let {status, data} = await orderRegion.set();
+                if (status === 200) {
+                    $scope.notifications.push(new Notification('lystore.order.region.update', 'confirm'));
+                    $scope.cancelUpdate();
+                }
+                else {
+                    notify.error('lystore.admin.order.update.err');
+                }
                 Utils.safeApply($scope);
 
             }
@@ -84,5 +99,30 @@ export const orderRegionController = ng.controller('orderRegionController',
             await orderRegion.set();
             $scope.notifications.push(new Notification('lystore.order.region.update', 'confirm'));
         };
+        $scope.isValidFormUpdate = () => {
+            return $scope.orderToUpdate.equipment_key
+                && $scope.orderToUpdate.price_proposal
+                && $scope.orderToUpdate.amount
+                && (($scope.orderToUpdate.campaign.orderPriorityEnable() && $scope.orderToUpdate.rank) || !$scope.orderToUpdate.campaign.orderPriorityEnable())
+        }
+
+        $scope.getContractType = () => {
+            let contract;
+            $scope.contracts.all.map(c => {
+                if (c.id === $scope.orderToUpdate.equipment.id_contract)
+                    contract = c
+            });
+            $scope.contractTypes.all.map(c => {
+                if (c.id === contract.id_contract_type) {
+                    $scope.contract_type = c.displayName
+                }
+            });
+            Utils.safeApply($scope);
+        }
+
+        $scope.cancelBasketDelete = () => {
+            $scope.display.lightbox.validOrder = false;
+            template.close('validOrder.lightbox');
+        }
     }
     ]);

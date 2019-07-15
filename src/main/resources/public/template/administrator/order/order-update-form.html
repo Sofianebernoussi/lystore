@@ -1,4 +1,4 @@
-<div ng-controller="orderRegionController" class="order-client-sent">
+<article ng-controller="orderRegionController" class=" order-client-sent">
     <h1>
         <i18n>lystore.order.update</i18n>
     </h1>
@@ -26,7 +26,11 @@
             <label class="four right-padding-form-field cell">
                 <i18n>lystore.project.comment</i18n>
             </label>
-            <label class="six cell">[[orderToUpdate.project.description]]</label>
+            <label ng-if="orderToUpdate.project.description"
+                   class="six cell comment">[[orderToUpdate.project.description]]</label>
+
+            <label ng-if="!orderToUpdate.project.description"
+                   class="six cell">-</label>
         </div>
         <div class="row vertical-spacing-four">
             <label class="four right-padding-form-field cell">
@@ -43,15 +47,15 @@
 
         <div class="row vertical-spacing-four">
             <label class="four right-padding-form-field cell">
-                <i18n>lystore.project.origin</i18n>
+                <i18n>lystore.contract.type.name</i18n>
             </label>
-            <label class="six cell">[[orderToUpdate.project.grade.name]]</label>
+            <label class="six cell">[[contract_type]]</label>
         </div>
 
 
         <div class="row vertical-spacing-four">
             <label class="four right-padding-form-field cell">
-                <i18n>lystore.amount</i18n>
+                <i18n>lystore.amountTTC</i18n>
             </label>
             <label class="six cell">[[getTotal()]] €</label>
         </div>
@@ -59,7 +63,9 @@
             <label class="four right-padding-form-field cell">
                 <i18n>EQUIPMENT</i18n>
             </label>
-            <search-and-select class="six cell"
+            <search-and-select
+                    ng-change="getContractType()"
+                    class="six cell"
                                options="equipments.all"
                                param1="'contract_type_name'"
                                param2="'name'"
@@ -77,12 +83,10 @@
         </div>
         <div class="row vertical-spacing-four">
             <label class="four right-padding-form-field cell">
-                <i18n>lystore.price</i18n>
+                <i18n>lystore.price.TTC</i18n>
             </label>
             <input type="number" step="0.01"
-                   ng-init="(orderToUpdate.price_proposal)
-                   ? orderToUpdate.price_proposal =orderToUpdate.price_proposal
-                   : orderToUpdate.price_proposal = orderToUpdate.priceTTCtotal "
+                   min="0"
                    ng-model="orderToUpdate.price_proposal "
             />
         </div>
@@ -94,13 +98,8 @@
             <input ng-model="orderToUpdate.rank" type="number" min="1" step="1"/>
 
         </div>
-        <div ng-if="orderToUpdate.project.preference!= null && orderToUpdate.rank != undefined && orderToUpdate.campaign.projectPriorityEnable()"
-             class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
-                <i18n>lystore.project.priority.project</i18n>
-            </label>
-            <input ng-model="orderToUpdate.project.preference" type="number" min="1" step="1"/>
-        </div>
+
+
         <div class="row vertical-spacing-four">
             <label class="four right-padding-form-field cell">
                 <i18n>comment</i18n>
@@ -112,19 +111,25 @@
             </textarea>
         </div>
 
-        <lightbox on-close="display.lightbox.validOrder = false;cancelUpdate();"
+        <lightbox on-close="display.lightbox.validOrder = false;"
                   show="display.lightbox.validOrder">
             <container template="validOrder.lightbox"></container>
         </lightbox>
+        <div class="row">
+            <div class="right-magnet">
+                <input type="button" class=" cancel" ng-click="cancelUpdate()"
+                       i18n-value="cancel"/>
 
+                <input type="button" ng-if="isUpdating" class=" button" ng-disabled="!isValidFormUpdate()"
+                       ng-click="updateOrderConfirm()"
+                       i18n-value="lystore.order.operation.select"/>
 
-        <input type="button" ng-if="isUpdating" class="right-magnet button" ng-click="updateOrderConfirm()"
-               i18n-value="lystore.order.operation.select"/>
+                <input type="button" ng-if="isUpdatingFromOrder" ng-disabled="!isValidFormUpdate()" class=" button"
+                       ng-click="updateLinkedOrderConfirm()"
+                       i18n-value="confirm"/>
 
-        <input type="button" ng-if="isUpdatingFromOrder" class="right-magnet button"
-               ng-click="updateLinkedOrderConfirm()"
-               i18n-value="confirm"/>
-
-        <input type="button" class="right-magnet cancel" ng-click="cancelUpdate()" i18n-value="cancel"/>
+            </div>
+        </div>
     </form>
-</div>
+
+</article>

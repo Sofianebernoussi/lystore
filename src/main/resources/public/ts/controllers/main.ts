@@ -245,8 +245,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             createRegionOrder: async () => {
-                await $scope.initOperation();
-                template.open('region-main', 'administrator/orderRegion/order-region-create-form');
+                await  $scope.campaigns.sync();
+                await  $scope.operations.sync();
+                await  $scope.structures.sync();
+
+                template.open('administrator-main', 'administrator/orderRegion/order-region-create-form');
                 Utils.safeApply($scope);
             }
         });

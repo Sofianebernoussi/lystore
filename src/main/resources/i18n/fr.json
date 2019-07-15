@@ -403,6 +403,7 @@
   "lystore.project":"Projet",
   "lystore.contract.type.name":"Nature du marché",
   "lystore.operations":"Operations",
+  "lystore.operation": "Operation",
   "lystore.operation.add":"Ajouter une operation",
   "lystore.operation.modify":"Modifier une operation",
   "label":"Libellé",
@@ -455,7 +456,7 @@
   "lysctore.instruction.text.delete.one.end": "  rapport. Ceci ne s'applique que sur des  rapports vides.",
   "lystore.instruction.title.delete.reject": "Suppression impossible",
   "lystore.instruction.text.delete.reject": "Cette opération n'est pas possible car une des  rapports sélectionnées n'est pas vide.",
-  "lystore.instruction.choose.operation":"Selectionnez une operation",
+  "lystore.instruction.choose.operation": "Sélectionnez une operation",
   "lystore.order.operation.select": "Affecter une operation",
   "lystore.order.operation.title": "Selectionner l'opération cible",
   "lystore.campaign.order.title": "Selectionner une campagne cible",
@@ -487,5 +488,8 @@
   "lystore.project.priority.project": "Priorité project",
   "lystore.order.region.update": "Votre commande a bien été enregistré",
   "lystore.order.get.err": "Erreur lors de la recuperation de la commande",
-  "lystore.order.region.create": "Générer une demande"
+  "lystore.order.region.create": "Générer une demande",
+  "lystore.placeholder.campaign": "sélectionner la campagne",
+  "lystore.placeholder.project": "sélectionner le projet",
+  "lystore.save": "Enregistrer"
 }

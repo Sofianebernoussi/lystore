@@ -1,0 +1,49 @@
+<div ng-controller="orderRegionController" class="order-client-sent">
+    <h1>
+        <i18n>lystore.order.update</i18n>
+    </h1>
+    <form>
+
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>CAMPAIGN</i18n>
+            </label>
+            <select ng-model="orderToUpdate.campaign"
+                    class="six cell"
+                    ng-options="campaign.id as campaign.name for campaign in campaigns.all">
+                <option value="-1" disabled selected>
+                    <i18n>lystore.placeholder.campaign</i18n>
+                </option>
+            </select>
+        </div>
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>lystore.project</i18n>
+            </label>
+            <select type="text" ng-model="orderToUpdate.project"
+                    class="six cell"
+                    ng-options="project.id as project.title.name for project in projects.all">
+                <option value="-1" disabled selected>
+                    <i18n>lystore.placeholder.project</i18n>
+                </option>
+            </select></div>
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>lystore.operation</i18n>
+            </label>
+            <select ng-model="orderToUpdate.operation"
+                    class="six cell"
+                    ng-options="operation.id as operation.label for operation in operations.all">
+                <option value="-1" disabled selected>
+                    <i18n>lystore.instruction.choose.operation</i18n>
+                </option>
+            </select></div>
+
+
+        <input type="button" ng-if="isUpdating" class="right-magnet button" ng-click="createOrder()"
+               i18n-value="lystore.order.operation.select"/>
+
+
+        <input type="button" class="right-magnet cancel" ng-click="cancelCreation()" i18n-value="cancel"/>
+    </form>
+</div>

@@ -53,14 +53,9 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 "operation.* , " +
                 "to_json(i.*) AS instruction, " +
                 "to_json(label.*) as label, " +
-                "count(oce.*) + (SELECT count(ore.*) FROM " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore WHERE ore.id_order_client_equipment is null ) as nbr_sub, " +
+                "count(oce.*) + (SELECT count(ore.*) as nbr_sub, " +
                 "array_to_json(array_agg(o.order_number)) as bc_number, " +
                 "array_to_json(array_agg(o.label_program)) as programs, " +
-
-//                "CASE " +
-//                "WHEN oce.price_proposal is NULL THEN (oce.price * oce.amount )*(1+(oce.tax_amount/100)) " +
-//                "ELSE  (oce.price_proposal * oce.amount ) " +
-//                "END AS amount, " +
 
                 "array_to_json(array_agg(c.name)) as contracts, " +
                 "array_to_json(array_agg(i.*)) AS instruction " +
@@ -70,6 +65,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 "LEFT JOIN " + Lystore.lystoreSchema +".order o on o.id = oce.id_order "+
                 "LEFT JOIN " + Lystore.lystoreSchema +".contract c on c.id = oce.id_contract " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".instruction i on i.id = operation.id_instruction "+
+                "LEFT JOIN  " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore ON (ore.id_order_client_equipment = oce.id) " +
                 getTextFilter(filters) +
                 "GROUP BY (operation.id, label.*, i.*)";
         sql.prepared(query, params, SqlResult.validResultHandler(handler) );
@@ -152,7 +148,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 "oce.creation_date, " +
                 "CASE " +
                 "WHEN ore.id_order_client_equipment = oce.id THEN ( ore.price * ore.amount ) " +
-                "WHEN oce.price_proposal is NULL THEN (SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount )) " +
+                "WHEN oce.price_proposal is NULL THEN (ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) " +
                 "ELSE ( oce.price_proposal * oce.amount ) " +
                 "END AS price_ttc_total, " +
                 "oce.amount, " +
@@ -175,6 +171,19 @@ public class DefaultOperationService extends SqlCrudService implements Operation
         String queryOrderRegion = "SELECT * " +
                 "FROM lystore.\"order-region-equipment\" AS ore " +
                 "WHERE ore.id_operation = ?";
+
+        String getTotal = "WITH value AS ( " +
+                "SELECT " +
+                "CASE  " +
+                "WHEN ore.price is not null THEN ( ore.price * ore.amount ) " +
+                "WHEN oce.price_proposal is not NULL THEN ( oce.price_proposal * oce.amount ) " +
+                "ELSE (ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) " +
+                "END AS price_total " +
+                "FROM lystore.\"order_client_equipment\" oce " +
+                "FULL JOIN lystore.\"order-region-equipment\" ore on oce.id = ore.id_order_client_equipment " +
+                "WHERE oce.id_operation = ? " +
+                ")  " +
+                "SELECT SUM(price_total) AS price_ttc_total FROM value";
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {

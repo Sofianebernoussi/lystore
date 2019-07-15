@@ -218,6 +218,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
 
             },
+            updateLinkedOrder: async () => {
+                await $scope.initOrders('IN PROGRESS');
+                template.open('administrator-main', 'administrator/order/order-update-form');
+                Utils.safeApply($scope);
+            },
             instruction: async () =>{
                 await $scope.initInstructions();
                 template.open('administrator-main', 'administrator/instruction/instruction-container');

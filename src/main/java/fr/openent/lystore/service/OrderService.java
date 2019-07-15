@@ -195,4 +195,6 @@ public interface OrderService {
      * @param handler Function handler returning data
      */
     void getOrder(Integer idOrder, Handler<Either<String, JsonObject>> handler);
+
+    void setInProgress(JsonArray ids, Handler<Either<String, JsonObject>> handler);
 }

@@ -325,11 +325,28 @@ export const orderController = ng.controller('orderController',
             $scope.operation = operation;
             let idsOrder = $scope.ordersClient.selected.map(order => order.id);
                 await $scope.ordersClient.addOperation(operation.id, idsOrder);
-                await $scope.validateOrders($scope.getSelectedOrders());
+            await $scope.inProgressOrders($scope.getSelectedOrders());
                 await Promise.all([
                     await $scope.syncOrders('WAITING'),
                     await $scope.initOperation()
                 ])
+        };
+
+        $scope.inProgressOrders = async (orders: OrderClient[]) => {
+            let ordersToValidat = new OrdersClient();
+            ordersToValidat.all = Mix.castArrayAs(OrderClient, orders);
+            let {status, data} = await ordersToValidat.updateStatus('IN PROGRESS');
+            if (status === 200) {
+                $scope.orderValidationData = {
+                    agents: _.uniq(data.agent),
+                    number_validation: data.number_validation,
+                    structures: _.uniq(_.pluck(ordersToValidat.all, 'name_structure'))
+                };
+                template.open('validOrder.lightbox', 'administrator/order/order-valid-confirmation');
+                $scope.display.lightbox.validOrder = true;
+            }
+            await $scope.syncOrders('WAITING');
+            Utils.safeApply($scope);
         };
         $scope.showPriceProposalOrNot = (order:OrderClient) => {
             return  order.price_proposal !== null? order.priceProposalTTCTotal : order.priceTTCtotal;

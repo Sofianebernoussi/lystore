@@ -275,8 +275,12 @@ export class OrdersClient extends Selection<OrderClient> {
 
     async updateStatus(status: string) {
         try {
+            let statusURL = status
+            if (status === "IN PROGRESS") {
+                statusURL = "inprogress";
+            }
             let config = status === 'SENT' ? {responseType: 'arraybuffer'} : {};
-            return  await  http.put(`/lystore/orders/${status.toLowerCase()}`, this.toJson(status), config);
+            return await  http.put(`/lystore/orders/${statusURL.toLowerCase()}`, this.toJson(status), config);
         } catch (e) {
             notify.error('lystore.order.update.err');
             throw e;

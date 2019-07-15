@@ -2,7 +2,6 @@ package fr.openent.lystore.service.impl;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.OperationService;
-
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
@@ -10,8 +9,8 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.neo4j.Neo4j;
 import org.entcore.common.neo4j.Neo4jResult;
 import org.entcore.common.service.impl.SqlCrudService;
-import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.Sql;
+import org.entcore.common.sql.SqlResult;
 
 import java.util.List;
 
@@ -148,7 +147,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 "SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) AS price, " +
                 "oce.amount, " +
                 "oce.name, " +
-                "oce.id_structure, " +
+                "oce.id_structure, oce.status, " +
                 "contract.name as contract_name " +
                 "FROM  " + Lystore.lystoreSchema + ".order_client_equipment oce  " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".contract ON oce.id_contract = contract.id  " +

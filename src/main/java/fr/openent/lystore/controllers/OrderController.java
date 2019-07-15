@@ -417,27 +417,41 @@ public class OrderController extends ControllerHelper {
         });
     }
 
+    @Put("/orders/inprogress")
+    @ApiDoc("send orders")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void setOrdersInProgress(final HttpServerRequest request) {
+        RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {
+            @Override
+            public void handle(final JsonObject orders) {
+                final JsonArray ids = orders.getJsonArray("ids");
+                orderService.setInProgress(ids, defaultResponseHandler(request));
+            }
+        });
+    }
+
     @Get("/orders/valid/export/:file")
     @ApiDoc("Export valid orders based on validation number and type file")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
-    public void csvExport (final HttpServerRequest request) {
+    public void csvExport(final HttpServerRequest request) {
         if (request.params().contains("number_validation")) {
             List<String> validationNumbers = request.params().getAll("number_validation");
             switch (request.params().get("file")) {
-                case "structure_list" : {
+                case "structure_list": {
                     exportStructuresList(request, validationNumbers);
                     break;
                 }
-                case "certificates" : {
+                case "certificates": {
                     exportDocuments(request, false, true, validationNumbers);
                     break;
                 }
-                case "order" : {
+                case "order": {
                     exportDocuments(request, true, false, validationNumbers);
                     break;
                 }
-                default : {
+                default: {
                     badRequest(request);
                 }
             }
@@ -446,7 +460,8 @@ public class OrderController extends ControllerHelper {
         }
     }
 
-    private void exportDocuments(final HttpServerRequest request, final Boolean printOrder, final Boolean printCertificates, final List<String> validationNumbers) {
+    private void exportDocuments(final HttpServerRequest request, final Boolean printOrder,
+                                 final Boolean printCertificates, final List<String> validationNumbers) {
         supplierService.getSupplierByValidationNumbers(new fr.wseduc.webutils.collections.JsonArray(validationNumbers), new Handler<Either<String, JsonObject>>() {
             @Override
             public void handle(Either<String, JsonObject> event) {
@@ -467,7 +482,7 @@ public class OrderController extends ControllerHelper {
                                                             .putHeader("Content-Type", "application/pdf; charset=utf-8")
                                                             .putHeader("Content-Disposition", "attachment; filename="
                                                                     + generateExportName(validationNumbers, "" +
-                                                                    (printOrder ? "BC": "") + (printCertificates ? "CSF" : "")) + ".pdf")
+                                                                    (printOrder ? "BC" : "") + (printCertificates ? "CSF" : "")) + ".pdf")
                                                             .end(pdf);
                                                 }
                                             }
@@ -545,7 +560,7 @@ public class OrderController extends ControllerHelper {
     @ApiDoc("Delete valid orders. Cancel validation. All orders are back to validation state")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
-    public void cancelValidOrder (HttpServerRequest request) {
+    public void cancelValidOrder(HttpServerRequest request) {
         if (request.params().contains("number_validation")) {
             List<String> numbers = request.params().getAll("number_validation");
             orderService.cancelValidation(new fr.wseduc.webutils.collections.JsonArray(numbers), defaultResponseHandler(request));
@@ -558,10 +573,10 @@ public class OrderController extends ControllerHelper {
     @ApiDoc("Update an order's comment")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AccessOrderCommentRight.class)
-    public void updateComment(final HttpServerRequest request){
-        RequestUtils.bodyToJson(request,  new Handler<JsonObject>(){
+    public void updateComment(final HttpServerRequest request) {
+        RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
             @Override
-            public void handle(JsonObject order){
+            public void handle(JsonObject order) {
                 if (!order.containsKey("comment")) {
                     badRequest(request);
                     return;
@@ -578,7 +593,6 @@ public class OrderController extends ControllerHelper {
     }
 
 
-
     private void renderValidOrdersCSVExport(HttpServerRequest request, JsonArray equipments) {
         StringBuilder export = new StringBuilder(UTF8_BOM).append(getValidOrdersCSVExportHeader(request));
         for (int i = 0; i < equipments.size(); i++) {
@@ -591,7 +605,7 @@ public class OrderController extends ControllerHelper {
                 .end(export.toString());
     }
 
-    private String getValidOrdersCSVExportline (JsonObject equipment) {
+    private String getValidOrdersCSVExportline(JsonObject equipment) {
         return equipment.getString("uai")
                 + ";"
                 + equipment.getString("structure_name")
@@ -615,10 +629,10 @@ public class OrderController extends ControllerHelper {
                 ";" +
                 I18n.getInstance().
                         translate("city", getHost(request), I18n.acceptLanguage(request)) +
-                ";"  +
+                ";" +
                 I18n.getInstance().
                         translate("phone", getHost(request), I18n.acceptLanguage(request)) +
-                ";"+
+                ";" +
                 I18n.getInstance().
                         translate("EQUIPMENT", getHost(request), I18n.acceptLanguage(request)) +
                 ";" +
@@ -626,7 +640,6 @@ public class OrderController extends ControllerHelper {
                         translate("lystore.amount", getHost(request), I18n.acceptLanguage(request)) +
                 "\n";
     }
-
 
 
     private void manageFileAndUpdateStatus(final HttpServerRequest request, final Buffer pdf,
@@ -673,7 +686,7 @@ public class OrderController extends ControllerHelper {
                 });
     }
 
-    private void logSendingOrder (JsonArray ids, final HttpServerRequest request) {
+    private void logSendingOrder(JsonArray ids, final HttpServerRequest request) {
         orderService.getOrderByValidatioNumber(ids, new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> event) {
@@ -683,7 +696,7 @@ public class OrderController extends ControllerHelper {
                     for (int i = 0; i < orders.size(); i++) {
                         order = orders.getJsonObject(i);
                         Logging.insert(eb, request, Contexts.ORDER.toString(), Actions.UPDATE.toString(),
-                               order.getInteger("id").toString(), order);
+                                order.getInteger("id").toString(), order);
                     }
                 }
             }
@@ -705,8 +718,8 @@ public class OrderController extends ControllerHelper {
         });
     }
 
-    private void retrieveStructures (final HttpServerRequest request, JsonArray ids,
-                                     final Handler<JsonObject> handler) {
+    private void retrieveStructures(final HttpServerRequest request, JsonArray ids,
+                                    final Handler<JsonObject> handler) {
         orderService.getStructuresId(ids, new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> event) {
@@ -739,7 +752,7 @@ public class OrderController extends ControllerHelper {
                                 for (int i = 0; i < structures.size(); i++) {
                                     structure = structures.getJsonObject(i);
                                     JsonObject structureObject = structureMapping.getJsonObject(structure.getString("id"));
-                                    structureObject.put(  "structureInfo", structure);
+                                    structureObject.put("structureInfo", structure);
                                 }
                                 handler.handle(structureMapping);
                             } else {
@@ -756,7 +769,8 @@ public class OrderController extends ControllerHelper {
         });
     }
 
-    private void retrieveOrderData (final HttpServerRequest request, JsonArray ids, final Handler<JsonObject> handler) {
+    private void retrieveOrderData(final HttpServerRequest request, JsonArray ids,
+                                   final Handler<JsonObject> handler) {
         orderService.getOrders(ids, null, true, false, new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> event) {
@@ -783,7 +797,7 @@ public class OrderController extends ControllerHelper {
 
     private static String getReadableNumber(Double number) {
         DecimalFormat instance = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.FRENCH);
-        DecimalFormatSymbols symbols = instance .getDecimalFormatSymbols();
+        DecimalFormatSymbols symbols = instance.getDecimalFormatSymbols();
         symbols.setCurrencySymbol("");
         instance.setDecimalFormatSymbols(symbols);
         return instance.format(number);
@@ -824,7 +838,7 @@ public class OrderController extends ControllerHelper {
         return sum;
     }
 
-    private static JsonArray formatOrders (JsonArray orders) {
+    private static JsonArray formatOrders(JsonArray orders) {
         JsonObject order;
         for (int i = 0; i < orders.size(); i++) {
             order = orders.getJsonObject(i);
@@ -848,7 +862,7 @@ public class OrderController extends ControllerHelper {
         return orders;
     }
 
-    private static Double getTotalPrice (Double price, Double amount) {
+    private static Double getTotalPrice(Double price, Double amount) {
         return price * amount;
     }
 
@@ -867,7 +881,7 @@ public class OrderController extends ControllerHelper {
     @ApiDoc("Get orders preview data")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
-    public void getOrdersPreviewData (final HttpServerRequest request) {
+    public void getOrdersPreviewData(final HttpServerRequest request) {
         MultiMap params = request.params();
         if (!params.contains("ids") && !params.contains("bc_number")
                 && !params.contains("engagement_number") && !params.contains("dateGeneration")
@@ -891,10 +905,10 @@ public class OrderController extends ControllerHelper {
         }
     }
 
-    private void getOrdersData (final HttpServerRequest request, final String nbrBc,
-                                final String nbrEngagement, final String dateGeneration,
-                                final Number supplierId, final JsonArray ids,
-                                final Handler<JsonObject> handler) {
+    private void getOrdersData(final HttpServerRequest request, final String nbrBc,
+                               final String nbrEngagement, final String dateGeneration,
+                               final Number supplierId, final JsonArray ids,
+                               final Handler<JsonObject> handler) {
         final JsonObject data = new JsonObject();
         retrieveManagementInfo(request, ids, supplierId, new Handler<JsonObject>() {
             @Override
@@ -1020,14 +1034,14 @@ public class OrderController extends ControllerHelper {
     @Put("/orders/done")
     @ApiDoc("Wind up orders ")
     @ResourceFilter(ManagerRight.class)
-    public void windUpOrders (final HttpServerRequest request){
+    public void windUpOrders(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {
             @Override
             public void handle(final JsonObject orders) {
                 try {
                     List<String> params = new ArrayList<>();
-                    for (Object id: orders.getJsonArray("ids") ) {
-                        params.add( id.toString());
+                    for (Object id : orders.getJsonArray("ids")) {
+                        params.add(id.toString());
                     }
                     List<Integer> ids = SqlQueryUtils.getIntegerIds(params);
                     orderService.windUpOrders(ids, Logging.defaultResponsesHandler(eb,
@@ -1050,17 +1064,17 @@ public class OrderController extends ControllerHelper {
     @ApiDoc("Export list of waiting orders as CSV")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AccessOrderRight.class)
-    public void exportCSVordersSelected (final HttpServerRequest request){
-        List<String> params =  request.params().getAll("id");
+    public void exportCSVordersSelected(final HttpServerRequest request) {
+        List<String> params = request.params().getAll("id");
         List<Integer> idsOrders = SqlQueryUtils.getIntegerIds(params);
-        if(!idsOrders.isEmpty()){
+        if (!idsOrders.isEmpty()) {
             orderService.getExportCsvOrdersAdmin(idsOrders, new Handler<Either<String, JsonArray>>() {
                 @Override
                 public void handle(Either<String, JsonArray> ordersWithIdStructure) {
-                    if(ordersWithIdStructure.isRight()) {
+                    if (ordersWithIdStructure.isRight()) {
                         final JsonArray orders = ordersWithIdStructure.right().getValue();
                         JsonArray idsStructures = new fr.wseduc.webutils.collections.JsonArray();
-                        for(int i = 0; i <orders.size();i++){
+                        for (int i = 0; i < orders.size(); i++) {
                             JsonObject order = orders.getJsonObject(i);
                             idsStructures.add(order.getString("idstructure"));
                         }
@@ -1081,25 +1095,26 @@ public class OrderController extends ControllerHelper {
                                             .putHeader("Content-Disposition", "attachment; filename=orders.csv")
                                             .end(generateExport(request, orders));
 
-                                }else{
+                                } else {
                                     log.error("An error occured when collecting StructureById");
                                     renderError(request);
                                 }
                             }
                         });
-                    }else{
+                    } else {
                         log.error("An error occurred when collecting ordersSqlwithIdStructure");
                         renderError(request);
                     }
                 }
             });
-        }else{
+        } else {
             badRequest(request);
         }
 
 
     }
-    private Map<String,String> retrieveUaiNameStructure(JsonArray structures) {
+
+    private Map<String, String> retrieveUaiNameStructure(JsonArray structures) {
         final Map<String, String> structureMap = new HashMap<String, String>();
 
         for (int i = 0; i < structures.size(); i++) {

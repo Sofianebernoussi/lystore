@@ -96,7 +96,7 @@ export class OrderRegion {
 
     async set() {
         try {
-            http.put(`/lystore/region/order/`, this.toJson());
+            return await http.put(`/lystore/region/order/`, this.toJson());
         } catch (e) {
             notify.error('lystore.admin.order.update.err');
             throw e;

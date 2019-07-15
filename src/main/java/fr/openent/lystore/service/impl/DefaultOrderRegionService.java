@@ -41,7 +41,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                         query += "?,";
                     }
                     query += " ?, ?, ?, ?, ?, ?, ?, ?,  ?, ?)";
-                    
+
                 } else {
                     query = "UPDATE " + Lystore.lystoreSchema + ".\"order-region-equipment\" " +
                             " set price = ?, amount = ?, creation_date = ? , owner_name = ? , owner_id = ?, name = ?, " +
@@ -59,7 +59,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                         .add(user.getUserId())
                         .add(order.getString("name"))
                         .add(order.getInteger("equipment_key"))
-                        .add("WAITING")
+                        .add("IN PROGRESS")
                         .add(order.getString("comment"));
                 if (order.containsKey("rank"))
                     params.add(order.getInteger("rank"));
@@ -70,6 +70,21 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
             }
         }));
 
+
+    }
+
+    @Override
+    public void linkOrderToOperation(Integer id_order_client_equipment, Integer id_operation, Handler<Either<String, JsonObject>> handler) {
+        JsonArray values = new JsonArray();
+        String query = " UPDATE " + Lystore.lystoreSchema + ".order_client_equipment " +
+                "SET  " +
+                "status = ? ,id_operation = ? " +
+                "WHERE id = ? ";
+
+        values.add("IN PROGRESS");
+        values.add(id_operation);
+        values.add(id_order_client_equipment);
+        sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
 
     }
 }

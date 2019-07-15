@@ -7,13 +7,13 @@ import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.BaseController;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.http.filter.ResourceFilter;
-import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
@@ -22,7 +22,6 @@ import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultRes
 public class OrderRegionController extends BaseController {
 
 
-    private Storage storage;
     private OrderRegionService orderRegionService;
 
 
@@ -31,6 +30,7 @@ public class OrderRegionController extends BaseController {
 
     public OrderRegionController() {
         this.orderRegionService = new DefaultOrderRegionService("equipment");
+
     }
 
 
@@ -46,7 +46,17 @@ public class OrderRegionController extends BaseController {
                 RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
                     @Override
                     public void handle(JsonObject order) {
-                        orderRegionService.createOrderRegion(order, event, defaultResponseHandler(request));
+                        orderRegionService.createOrderRegion(order, event, new Handler<Either<String, JsonObject>>() {
+                            @Override
+                            public void handle(Either<String, JsonObject> event) {
+                                try {
+                                    orderRegionService.linkOrderToOperation(order.getInteger("id_order_client_equipment"), order.getInteger("id_operation"), defaultResponseHandler(request));
+                                } catch (NullPointerException e) {
+                                    log.error("Error when getting id_operation and id_order_client_equipment");
+                                }
+
+                            }
+                        });
 
                     }
                 });

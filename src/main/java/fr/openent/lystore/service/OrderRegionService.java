@@ -7,4 +7,8 @@ import org.entcore.common.user.UserInfos;
 
 public interface OrderRegionService {
     void createOrderRegion(JsonObject order, UserInfos user, Handler<Either<String, JsonObject>> handler);
+
+    public void linkOrderToOperation(Integer id_order_client_equipment, Integer id_operation, Handler<Either<String, JsonObject>> handler);
+
+
 }

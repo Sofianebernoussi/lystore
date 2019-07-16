@@ -121,6 +121,13 @@ export class StructureGroups extends Selection<StructureGroup> {
         super([]);
     }
 
+    async syncByCampaign(idCampaign: number) {
+        let {data} = await http.get(`/lystore/structure/groups/campaign/${idCampaign}`);
+        this.all = Mix.castArrayAs(StructureGroup, data);
+        this.all.map((structureGroup) => {
+            structureGroup.structures = JSON.parse(structureGroup.structures.toString());
+        });
+    }
     async delete (structureGroups: StructureGroup[]): Promise<void> {
         try {
             let filter = '';

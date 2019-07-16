@@ -5,15 +5,15 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.StructureGroupService;
 import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.webutils.Either;
-import org.entcore.common.service.impl.SqlCrudService;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.entcore.common.service.impl.SqlCrudService;
+import org.entcore.common.sql.Sql;
+import org.entcore.common.sql.SqlResult;
 
 import java.util.List;
 
@@ -100,6 +100,21 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
                 handler.handle(SqlQueryUtils.getTransactionHandler(event,ids.get(0)));
             }
         });
+    }
+
+    @Override
+    public void listStructureGroupsByCampaign(Integer campaignId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT structure.id as id, name, description, array_to_json(array_agg(id_structure)) as structures " +
+                " FROM " + Lystore.lystoreSchema + ".structure_group  as structure " +
+                " INNER JOIN " + Lystore.lystoreSchema + ".rel_group_campaign" +
+                " on structure.id = rel_group_campaign.id_structure_group " +
+                " INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure" +
+                " on structure.id = rel_group_structure.id_structure_group " +
+                " WHERE rel_group_campaign.id_campaign = ?" +
+                " group by (structure.id, name , description ) ";
+        JsonArray params = new JsonArray().add(campaignId);
+
+        sql.prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
     /**

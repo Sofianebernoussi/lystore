@@ -1,80 +1,114 @@
 <div ng-controller="orderRegionController" class="order-client-sent">
     <h1>
-        <i18n>lystore.order.update</i18n>
+        <i18n>lystore.order.create</i18n>
     </h1>
-    <form>
+    <article>
+        <form>
 
-        <div class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
-                <i18n>CAMPAIGN</i18n>
-            </label>
-            <select ng-model="orderToCreate.campaign"
-                    class="six cell"
-                    ng-change="updateCampaign()"
-                    ng-options="campaign.id as campaign.name for campaign in campaigns.all">
-                <option value="" disabled selected>[[translate('lystore.placeholder.campaign')]]</option>
-            </select>
-        </div>
+            <div class="row vertical-spacing-four">
+                <label class="four right-padding-form-field cell">
+                    <i18n>CAMPAIGN</i18n>
+                </label>
+                <select ng-model="orderToCreate.campaign"
+                        class="six cell"
+                        ng-change="updateCampaign()"
+                        ng-options="campaign.id as campaign.name for campaign in campaigns.all">
+                    <option value="" disabled selected>[[translate('lystore.placeholder.campaign')]]</option>
+                </select>
+            </div>
 
-        <div ng-show="titles.all.length !== 0 " class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
-                <i18n>lystore.project</i18n>
-            </label>
-            <select type="text" ng-model="orderToCreate.project"
-                    class="six cell"
-                    ng-options="title.id as title.name for title in titles.all">
-                <option value="" disabled selected>[[translate('lystore.placeholder.project')]]</option>
-            </select></div>
-        <div class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
-                <i18n>lystore.operation</i18n>
-            </label>
-            <select ng-model="orderToCreate.operation"
-                    class="six cell"
-                    ng-options="operation.id as operation.label.label + ' - ' + operation.displayOperation()
+            <div ng-show="titles.all.length !== 0 " class="row vertical-spacing-four">
+                <label class="four right-padding-form-field cell">
+                    <i18n>lystore.project</i18n>
+                </label>
+                <select type="text" ng-model="orderToCreate.project"
+                        class="six cell"
+                        ng-options="title.id as title.name for title in titles.all">
+                    <option value="" disabled selected>[[translate('lystore.placeholder.project')]]</option>
+                </select></div>
+            <div class="row vertical-spacing-four">
+                <label class="four right-padding-form-field cell">
+                    <i18n>lystore.operation</i18n>
+                </label>
+                <select ng-model="orderToCreate.operation"
+                        class="six cell"
+                        ng-options="operation.id as operation.label.label + ' - ' + operation.displayOperation()
                       for operation in operations.all">
-                <option value="" disabled selected>[[translate('lystore.instruction.choose.operation')]]</option>
+                    <option value="" disabled selected>[[translate('lystore.instruction.choose.operation')]]</option>
 
-            </select></div>
-
-        <input type="button" ng-disabled="!validForm()" class="right-magnet button" ng-click=""
-               i18n-value="lystore.save"/>
-        <table class="twelve">
-            <thead>
-            <tr>
-                <td>
-                    [[translate('lystore.structure.label')]] / [[translate('lystore.structureGroup.management')]]
-                </td>
-                <td>
-                    [[translate('EQUIPMENT')]]
-                </td>
-                <td>
-                    [[translate('price')]]
-                </td>
-                <td>
-                    [[translate('quantity')]]
-                </td>
-                <td ng-if="orderToCreate.project.preference">
-                    [[translate('lystore.project.priority.order')]]
-                </td>
-                <td>
-                    [[translate('comment')]]
-                </td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="row in orderToCreate.row">
-                <td>1</td>
-            </tr>
-            </tbody>
-            <tfoot>
-
-            </tfoot>
-        </table>
-        <input type="button" ng-disabled="!orderToCreate.campaign" ng-click="addRow()"
-               i18n-value="add"/>
+                </select></div>
 
 
-        <!--<input type="button" class="right-magnet cancel" ng-click="cancelCreation()" i18n-value="cancel"/>-->
-    </form>
+            <input type="button" ng-disabled="!validForm()" class="right-magnet button" ng-click=""
+                   i18n-value="lystore.save"/>
+            <table class="twelve">
+                <thead>
+                <tr class="row">
+                    <td class="two">
+                        [[translate('lystore.structure.label')]] / [[translate('lystore.structureGroup.management')]]
+                    </td>
+                    <td class="two">
+                        [[translate('EQUIPMENT')]]
+                    </td>
+                    <td class="one">
+                        [[translate('price')]]
+                    </td>
+                    <td class="one">
+                        [[translate('quantity')]]
+                    </td>
+                    <td class="two" ng-if="orderToCreate.project.preference">
+                        [[translate('lystore.project.priority.order')]]
+                    </td>
+                    <td class="four">
+                        [[translate('comment')]]
+                    </td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="row" ng-repeat="row in orderToCreate.row">
+                    <td class="one ">
+                        <select ng-model="row.structure"
+                                ng-options="structure.id as structure.name for structure in structure_groups.all"
+                                ng-change="switchStructure(row.structure)">
+                            <option value="" disabled selected>[[translate('lystore.placeholder.structure')]]
+                            </option>
+
+                        </select>
+                    </td>
+                    <td class="two ">
+                        <select ng-disabled="!row.structure" ng-model="row.equipment"
+                                ng-options="equipment.id as equipment.name for equipment in equipments.all">
+                            <option value="" disabled selected>[[translate('lystore.placeholder.equipment')]]
+                            </option>
+
+                        </select>
+                    </td>
+                    <td class="one ">
+                        <input ng-disabled="!row.equipment" ng-model="row.price" type="number" min="0" step="any"/>
+                    </td>
+                    <td class="one ">
+                        <input ng-disabled="!row.equipment" ng-model="row.amount" type="number" min="0" step="1"/>
+                    </td>
+                    <td class="one ">
+                        <input ng-model="row.priority" type="number" min="0" step="1"/>
+                    </td>
+                    <td class="four">
+                        <input ng-model="row.comment" type="text"/>
+                    </td>
+                    <td class="two aligne-text-center">
+                        <i class="trash" ng-click="dropRow(row)"></i>
+                    </td>
+                </tr>
+                </tbody>
+                <tfoot>
+
+                </tfoot>
+            </table>
+            <input type="button" ng-disabled="!orderToCreate.campaign" ng-click="addRow()"
+                   i18n-value="add"/>
+
+
+            <!--<input type="button" class="right-magnet cancel" ng-click="cancelCreation()" i18n-value="cancel"/>-->
+        </form>
+    </article>
 </div>

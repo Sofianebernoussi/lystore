@@ -492,5 +492,8 @@
   "lystore.order.region.create": "Générer une demande",
   "lystore.placeholder.campaign": "Sélectionner la campagne",
   "lystore.placeholder.project": "Sélectionner le projet",
-  "lystore.save": "Enregistrer"
+  "lystore.placeholder.structure": "Sélectionner l'établissement",
+  "lystore.placeholder.equipment": "Sélectonner l'équipement",
+  "lystore.save": "Enregistrer",
+  "lystore.order.create": "Créer une demande"
 }

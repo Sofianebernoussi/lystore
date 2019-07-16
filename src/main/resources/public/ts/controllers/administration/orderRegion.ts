@@ -1,5 +1,5 @@
 import {idiom as lang, ng, notify, template} from 'entcore';
-import {Notification, Operation, OrderClient, OrderRegion, Titles, Utils} from "../../model";
+import {Notification, Operation, OrderClient, OrderRegion, StructureGroups, Titles, Utils} from "../../model";
 import {Equipments} from "../../model/Equipment";
 
 
@@ -9,6 +9,7 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.orderToUpdate = new OrderClient();
         $scope.orderToCreate = new OrderRegion();
         $scope.equipments = new Equipments();
+        $scope.structure_groups = new StructureGroups();
         $scope.titles = new Titles();
         $scope.contract_type = "-";
         $scope.display = {
@@ -19,7 +20,9 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.translate = (key: string) => lang.translate(key);
 
         $scope.updateCampaign = async () => {
+            console.log("updateCampaign")
             await $scope.titles.syncAdmin($scope.orderToCreate.campaign);
+            await $scope.structure_groups.syncByCampaign($scope.orderToCreate.campaign);
             Utils.safeApply($scope);
         };
 
@@ -144,12 +147,20 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.addRow = () => {
             if (!$scope.orderToCreate.row)
                 $scope.orderToCreate.row = [];
-            $scope.orderToCreate.row.push(1)
+            $scope.orderToCreate.row.push($scope.orderToCreate.row.length)
+            Utils.safeApply($scope)
 
         }
         $scope.cancelBasketDelete = () => {
             $scope.display.lightbox.validOrder = false;
             template.close('validOrder.lightbox');
+        }
+
+        $scope.switchStructure = async (structure) => {
+            console.log("cc")
+            await $scope.equipments.sync($scope.orderToCreate.campaign);
+            Utils.safeApply($scope);
+
         }
     }
     ]);

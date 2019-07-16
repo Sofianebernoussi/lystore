@@ -88,7 +88,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 .add(user.getUserId())
                 .add(order.getString("name"))
                 .add(order.getInteger("equipment_key"))
-                .add("WAITING")
+                .add("IN PROGRESS")
                 .add(order.getString("comment"))
                 .add(order.getInteger("id_campaign"))
                 .add(order.getString("id_structure"))

@@ -1,5 +1,5 @@
-import {ng, notify, template} from 'entcore';
-import {Notification, Operation, OrderClient, OrderRegion, Utils} from "../../model";
+import {idiom as lang, ng, notify, template} from 'entcore';
+import {Notification, Operation, OrderClient, OrderRegion, Titles, Utils} from "../../model";
 import {Equipments} from "../../model/Equipment";
 
 
@@ -7,14 +7,20 @@ declare let window: any;
 export const orderRegionController = ng.controller('orderRegionController',
     ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) => {
         $scope.orderToUpdate = new OrderClient();
+        $scope.orderToCreate = new OrderRegion();
         $scope.equipments = new Equipments();
+        $scope.titles = new Titles();
         $scope.contract_type = "-";
         $scope.display = {
             lightbox: {
                 validOrder: false,
             }
         };
+        $scope.translate = (key: string) => lang.translate(key);
 
+        $scope.updateCampaign = () => {
+            console.log($scope.structure);
+        }
         $scope.initDataUpdate = async () => {
 
             await $scope.equipments.sync($scope.orderToUpdate.id_campaign, $scope.orderToUpdate.id_structure);
@@ -104,8 +110,19 @@ export const orderRegionController = ng.controller('orderRegionController',
                 && $scope.orderToUpdate.price_proposal
                 && $scope.orderToUpdate.amount
                 && (($scope.orderToUpdate.campaign.orderPriorityEnable() && $scope.orderToUpdate.rank) || !$scope.orderToUpdate.campaign.orderPriorityEnable())
-        }
+        };
 
+        $scope.oneRow = () => {
+            return true
+        };
+
+        $scope.validForm = () => {
+            return $scope.orderToCreate.campaign
+                && $scope.orderToCreate.project
+                && $scope.orderToCreate.operation
+                && $scope.oneRow()
+                ;
+        };
         $scope.getContractType = () => {
             let contract;
             $scope.contracts.all.map(c => {
@@ -118,7 +135,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                 }
             });
             Utils.safeApply($scope);
-        }
+        };
 
         $scope.cancelBasketDelete = () => {
             $scope.display.lightbox.validOrder = false;

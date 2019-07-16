@@ -143,6 +143,7 @@
   "lystore.project.update.success": "Le projet a été mis à jour avec succès",
   "lystore.campaign.purse.import.skeleton": "Squelette d'import :",
   "lystore.structureGroups.management": "Regroupements",
+  "lystore.structureGroup.management": "Regroupement",
   "lystore.structureGroups.import.definition": "L'import des regroupements d'établissement s'effectue grâce à un fichier csv.",
   "lystore.equipments.import.definition": "L'import des équipements s'effectue grâce à un fichier csv.",
   "lystore.equipments.import.success": "Le BPU a été importé avec succès",
@@ -489,7 +490,7 @@
   "lystore.order.region.update": "Votre commande a bien été enregistré",
   "lystore.order.get.err": "Erreur lors de la recuperation de la commande",
   "lystore.order.region.create": "Générer une demande",
-  "lystore.placeholder.campaign": "sélectionner la campagne",
-  "lystore.placeholder.project": "sélectionner le projet",
+  "lystore.placeholder.campaign": "Sélectionner la campagne",
+  "lystore.placeholder.project": "Sélectionner le projet",
   "lystore.save": "Enregistrer"
 }

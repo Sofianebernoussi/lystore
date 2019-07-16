@@ -8,40 +8,68 @@
             <label class="four right-padding-form-field cell">
                 <i18n>CAMPAIGN</i18n>
             </label>
-            <select ng-model="orderToUpdate.campaign"
+            <select ng-model="orderToCreate.campaign"
                     class="six cell"
+                    ng-change="updateCampaign()"
                     ng-options="campaign.id as campaign.name for campaign in campaigns.all">
-                <option value="-1" disabled selected>
-                    <i18n>lystore.placeholder.campaign</i18n>
-                </option>
+                <option value="" disabled selected>[[translate('lystore.placeholder.campaign')]]</option>
             </select>
         </div>
-        <div class="row vertical-spacing-four">
+
+        <div ng-show="orderToCreate.campaign" class="row vertical-spacing-four">
             <label class="four right-padding-form-field cell">
                 <i18n>lystore.project</i18n>
             </label>
-            <select type="text" ng-model="orderToUpdate.project"
+            <select type="text" ng-model="orderToCreate.project"
                     class="six cell"
                     ng-options="project.id as project.title.name for project in projects.all">
-                <option value="-1" disabled selected>
-                    <i18n>lystore.placeholder.project</i18n>
-                </option>
+                <option value="" disabled selected>[[translate('lystore.instruction.choose.operation')]]</option>
             </select></div>
         <div class="row vertical-spacing-four">
             <label class="four right-padding-form-field cell">
                 <i18n>lystore.operation</i18n>
             </label>
-            <select ng-model="orderToUpdate.operation"
+            <select ng-model="orderToCreate.operation"
                     class="six cell"
-                    ng-options="operation.id as operation.label for operation in operations.all">
-                <option value="-1" disabled selected>
-                    <i18n>lystore.instruction.choose.operation</i18n>
-                </option>
+                    ng-options="operation.id as operation.label.label for operation in operations.all">
+                <option value="" disabled selected>[[translate('lystore.placeholder.campaign')]]</option>
+
             </select></div>
 
+        <input type="button" ng-disabled="!validForm()" class="right-magnet button" ng-click=""
+               i18n-value="lystore.save"/>
+        <table class="twelve">
+            <thead>
+            <tr>
+                <td>
+                    [[translate('lystore.structure.label')]] / [[translate('lystore.structureGroup.management')]]
+                </td>
+                <td>
+                    [[translate('EQUIPMENT')]]
+                </td>
+                <td>
+                    [[translate('price')]]
+                </td>
+                <td>
+                    [[translate('quantity')]]
+                </td>
+                <td ng-if="orderToCreate.project.preference">
+                    [[translate('lystore.project.priority.order')]]
+                </td>
+                <td>
+                    [[translate('comment')]]
+                </td>
+            </tr>
+            </thead>
+            <tbody>
 
-        <input type="button" ng-if="isUpdating" class="right-magnet button" ng-click="createOrder()"
-               i18n-value="lystore.order.operation.select"/>
+            </tbody>
+            <tfoot>
+
+            </tfoot>
+        </table>
+        <input type="button" ng-if="!orderToCreate.campaign" ng-click="addRow()"
+               i18n-value="add"/>
 
 
         <input type="button" class="right-magnet cancel" ng-click="cancelCreation()" i18n-value="cancel"/>

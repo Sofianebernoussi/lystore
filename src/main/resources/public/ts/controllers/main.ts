@@ -12,7 +12,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
         $scope.display = {
             equipment: false,
-            lightbox: {selectCampaign: false,}
+            lightbox: {lightBoxIsOpen: false,}
         };
         $scope.structures = new Structures();
         $scope.current = {};
@@ -193,6 +193,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             orderWaiting: async () => {
+                await $scope.syncCampaignInputSelected();
                 await $scope.openLightSelectCampaign();
                 Utils.safeApply($scope);
             },
@@ -378,35 +379,34 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         };
         $scope.syncCampaignInputSelected = async () => {
             $scope.campaignsForSelectInput = [];
-            let allCampaigns = new Campaign(lang.translate("lystore.campaign.order.all"), '');
-            allCampaigns.id = 0;
+            $scope.allCampaignsSelect = new Campaign(lang.translate("lystore.campaign.order.all"), '');
+            $scope.allCampaignsSelect.id = 0;
             await $scope.campaigns.sync();
             $scope.campaignsForSelectInput = [...$scope.campaigns.all];
-            $scope.campaignsForSelectInput.unshift(allCampaigns);
+            $scope.campaignsForSelectInput.unshift( $scope.allCampaignsSelect);
 
         };
         $scope.openLightSelectCampaign = async () => {
             template.open('administrator-main');
-            await $scope.syncCampaignInputSelected();
             template.open('selectCampaign', 'administrator/order/select-campaign');
-            $scope.display.lightbox.selectCampaign = true;
+            $scope.display.lightbox.lightBoxIsOpen = true;
             $scope.initOrders('WAITING');
             Utils.safeApply($scope);
         };
         $scope.selectCampaignShow = async (campaign?: Campaign) => {
-            await $scope.syncCampaignInputSelected();
             if(campaign){
                 $scope.campaign = campaign;
                 $scope.displayedOrders.all = $scope.ordersClient.all
                     .filter( order => order.campaign.id === campaign.id || campaign.id === 0);
                 $scope.cancelSelectCampaign(false);
             } else {
+                $scope.campaign = $scope.allCampaignsSelect;
                 $scope.cancelSelectCampaign(true);
             }
         };
         $scope.cancelSelectCampaign = (initOrder: boolean) => {
             template.close('selectCampaign');
-            $scope.display.lightbox.selectCampaign = false;
+            $scope.display.lightbox.lightBoxIsOpen = false;
             if(initOrder) {
                 $scope.displayedOrders.all = $scope.ordersClient.all;
             }

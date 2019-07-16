@@ -92,6 +92,20 @@ public class TitleController extends ControllerHelper {
         }
     }
 
+    @Get("/titles/campaigns/admin/:idCampaign")
+    @ApiDoc("Get list of the titles")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void getAdminTitles(HttpServerRequest request) {
+        try {
+            Integer campaignId = Integer.parseInt(request.getParam("idCampaign"));
+
+            titleService.getTitlesAdmin(campaignId, arrayResponseHandler(request));
+        } catch (NumberFormatException e) {
+            log.error("An error occurred when casting Campaign identifier");
+            badRequest(request);
+        }
+    }
+
     @Get("/titles/campaigns/:idCampaign/structures/:idStructure")
     @ApiDoc("Get titles list based on campaign identifier and structure identifier")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)

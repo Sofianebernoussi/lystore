@@ -16,14 +16,14 @@
             </select>
         </div>
 
-        <div ng-show="orderToCreate.campaign" class="row vertical-spacing-four">
+        <div ng-show="titles.all.length !== 0 " class="row vertical-spacing-four">
             <label class="four right-padding-form-field cell">
                 <i18n>lystore.project</i18n>
             </label>
             <select type="text" ng-model="orderToCreate.project"
                     class="six cell"
-                    ng-options="project.id as project.title.name for project in projects.all">
-                <option value="" disabled selected>[[translate('lystore.instruction.choose.operation')]]</option>
+                    ng-options="title.id as title.name for title in titles.all">
+                <option value="" disabled selected>[[translate('lystore.placeholder.project')]]</option>
             </select></div>
         <div class="row vertical-spacing-four">
             <label class="four right-padding-form-field cell">
@@ -31,8 +31,9 @@
             </label>
             <select ng-model="orderToCreate.operation"
                     class="six cell"
-                    ng-options="operation.id as operation.label.label for operation in operations.all">
-                <option value="" disabled selected>[[translate('lystore.placeholder.campaign')]]</option>
+                    ng-options="operation.id as operation.label.label + ' - ' + operation.displayOperation()
+                      for operation in operations.all">
+                <option value="" disabled selected>[[translate('lystore.instruction.choose.operation')]]</option>
 
             </select></div>
 
@@ -62,16 +63,18 @@
             </tr>
             </thead>
             <tbody>
-
+            <tr ng-repeat="row in orderToCreate.row">
+                <td>1</td>
+            </tr>
             </tbody>
             <tfoot>
 
             </tfoot>
         </table>
-        <input type="button" ng-if="!orderToCreate.campaign" ng-click="addRow()"
+        <input type="button" ng-disabled="!orderToCreate.campaign" ng-click="addRow()"
                i18n-value="add"/>
 
 
-        <input type="button" class="right-magnet cancel" ng-click="cancelCreation()" i18n-value="cancel"/>
+        <!--<input type="button" class="right-magnet cancel" ng-click="cancelCreation()" i18n-value="cancel"/>-->
     </form>
 </div>

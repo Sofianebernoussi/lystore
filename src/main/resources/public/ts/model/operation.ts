@@ -1,10 +1,8 @@
-import { Mix, Selectable, Selection} from 'entcore-toolkit';
+import {Mix, Selectable, Selection} from 'entcore-toolkit';
 import http from 'axios';
-import {notify, _, moment} from "entcore";
-import {Equipment} from "./Equipment";
+import {moment, notify} from "entcore";
 import {Utils} from "./Utils";
 import {Instruction} from "./instruction";
-
 
 
 export class Operation implements Selectable {
@@ -69,6 +67,10 @@ export class Operation implements Selectable {
             id_instruction: this.id_instruction,
             date_cp: this.date_cp? Utils.formatDatePost(this.date_cp) : null,
         };
+    }
+
+    displayOperation = () => {
+        return this.label.title + " - " + (this.date_cp && this.date_cp === null) ? "Pas de Date" : this.date_cp.toDateString();
     }
 
 }

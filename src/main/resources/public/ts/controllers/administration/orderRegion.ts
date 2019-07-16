@@ -18,9 +18,13 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
         $scope.translate = (key: string) => lang.translate(key);
 
-        $scope.updateCampaign = () => {
-            console.log($scope.structure);
-        }
+        $scope.updateCampaign = async () => {
+            await $scope.titles.syncAdmin($scope.orderToCreate.campaign);
+            Utils.safeApply($scope);
+        };
+
+
+
         $scope.initDataUpdate = async () => {
 
             await $scope.equipments.sync($scope.orderToUpdate.id_campaign, $scope.orderToUpdate.id_structure);
@@ -137,6 +141,12 @@ export const orderRegionController = ng.controller('orderRegionController',
             Utils.safeApply($scope);
         };
 
+        $scope.addRow = () => {
+            if (!$scope.orderToCreate.row)
+                $scope.orderToCreate.row = [];
+            $scope.orderToCreate.row.push(1)
+
+        }
         $scope.cancelBasketDelete = () => {
             $scope.display.lightbox.validOrder = false;
             template.close('validOrder.lightbox');

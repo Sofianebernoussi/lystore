@@ -3,6 +3,14 @@
     <table class="twelve">
         <thead>
         <tr>
+            <td workflow="lystore.manager" class="table-selector">
+                <label class="checkbox">
+                    <input type="checkbox"
+                           ng-change="switchAllOrders()"
+                           ng-model="allOrdersOperationSelected">
+                    <span></span>
+                </label>
+            </td>
             <td ng-click="sort.order.type = 'structure_uai';
                     sort.order.reverse = !sort.order.reverse">
                 <i18n>Structure</i18n>
@@ -44,6 +52,12 @@
         </thead>
         <tbody>
         <tr ng-repeat="order in ordersClientByOperation | orderBy:sort.order.type:sort.order.reverse">
+            <td workflow="lystore.manager" class="table-selector">
+                <label class="checkbox">
+                    <input type="checkbox" ng-model="order.selected">
+                    <span></span>
+                </label>
+            </td>
             <td>[[order.structure_uai]] - [[order.structure_name]]</td>
             <td>[[order.contract_name]]</td>
             <td>[[order.name]]</td>
@@ -58,3 +72,12 @@
         </tbody>
     </table>
 </article>
+<section class="toggle-buttons" ng-class="{ hide: !isOrderOperationSelected() }">
+    <div class="toggle">
+        <div class="row">
+            <button ng-click="selectOperationForOrder()">
+                <i18n>lystore.operation.order.move</i18n>
+            </button>
+        </div>
+    </div>
+</section>

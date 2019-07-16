@@ -486,5 +486,7 @@
   "lystore.campaign.order.all": "Afficher toutes les campagnes",
   "lystore.project.priority.project": "Priorité project",
   "lystore.order.region.update": "Votre commande a bien été enregistré",
-  "lystore.order.get.err": "Erreur lors de la recuperation de la commande"
+  "lystore.order.get.err": "Erreur lors de la recuperation de la commande",
+  "lystore.operation.order.move" : "Modifier l'opération affectée",
+  "lystore.operation.order.notLink": "non affectée"
 }

@@ -4,6 +4,7 @@ import {notify, _, moment} from "entcore";
 import {Equipment} from "./Equipment";
 import {Utils} from "./Utils";
 import {Instruction} from "./instruction";
+import {OrderClient} from "./OrderClient";
 
 
 
@@ -51,11 +52,10 @@ export class Operation implements Selectable {
         }
     }
 
-
     async getOrders() {
         try {
             const {data} = await http.get(`/lystore/operations/${this.id}/orders`);
-            return data;
+            return Mix.castArrayAs(OrderClient, data);
         } catch (e) {
             notify.error("lystore.operation.orders.sync.err");
             throw e;

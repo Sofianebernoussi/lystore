@@ -8,6 +8,8 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.SqlResult;
 import io.vertx.core.json.JsonObject;
@@ -20,6 +22,7 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
     public DefaultInstructionService(String schema, String table) {
         super(schema, table);
     }
+    private static final Logger LOGGER = LoggerFactory.getLogger (DefaultOrderService.class);
 
     public void getExercises (Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Lystore.lystoreSchema +".exercise";
@@ -89,14 +92,14 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                             JsonObject instruction = instructions.getJsonObject(i);
                             for (int j = 0; j < getAmountsDemands.size(); j++){
                                 JsonObject amountDemand = getAmountsDemands.getJsonObject(j);
-                                if(instruction.getInteger("id") == amountDemand.getInteger("id")){
+                                if(instruction.getInteger("id").equals(amountDemand.getInteger("id"))){
                                     instruction.put("amount", amountDemand.getString("amount"));
                                 }
                             }
                             JsonArray operations = new JsonArray();
                             for (int k = 0; k < getOperations.size(); k++){
                                 JsonObject operation = getOperations.getJsonObject(k);
-                                if(instruction.getInteger("id") == operation.getInteger("id_instruction")){
+                                if(instruction.getInteger("id").equals(operation.getInteger("id_instruction"))){
                                     operations.add(operation);
                                 }
                             }
@@ -113,7 +116,8 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                     handler.handle(new Either.Left<>("404"));
                 }
             } catch( Exception e){
-                System.out.println(e);
+                LOGGER.error("An error when you want get all instructions", e);
+                handler.handle(new Either.Left<>(""));
             }
         }));
     }
@@ -122,7 +126,21 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
         String queryOperation = "SELECT operation.*, " +
                 "to_json(label_operation.*) AS label, " +
                 "count(oce.*) AS nbr_sub, " +
-                "SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2)) AS amount " +
+                "( " +
+                "WITH value AS  " +
+                "( " +
+                "SELECT " +
+                "CASE   " +
+                "WHEN ore.price is not null THEN ( ore.price * ore.amount ) " +
+                "WHEN oce.price_proposal is not NULL THEN ( oce.price_proposal * oce.amount ) " +
+                "ELSE (ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) " +
+                "END AS price_total " +
+                "FROM  lystore.order_client_equipment oce " +
+                "FULL JOIN  lystore.\"order-region-equipment\" ore on oce.id = ore.id_order_client_equipment  " +
+                "WHERE oce.id_operation = operation.id  " +
+                ") " +
+                "SELECT SUM(price_total) AS amount FROM value " +
+                ")" +
                 "FROM " + Lystore.lystoreSchema +".operation " +
                 "INNER JOIN lystore.label_operation ON operation.id_label = label_operation.id " +
                 "LEFT JOIN " + Lystore.lystoreSchema +".order_client_equipment oce ON oce.id_operation = operation.id "+
@@ -134,14 +152,35 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
     }
 
     private void getAmountDemandOperation(JsonArray IdInstructions, Handler<Either<String, JsonArray>> handler) {
-        String queryAmount = "SELECT instruction.id, " +
-                "SUM(ROUND(oce.price + ((oce.price * oce.tax_amount) /100), 2)) AS amount " +
-                "FROM " + Lystore.lystoreSchema + ".instruction " +
-                "INNER JOIN " + Lystore.lystoreSchema +".operation ON (instruction.id = operation.id_instruction) " +
-                "INNER JOIN " + Lystore.lystoreSchema +".order_client_equipment oce ON (oce.id_operation = operation.id) " +
+        String queryAmount = "WITH valueFinal AS " +
+                "( " +
+                "SELECT " +
+                "instruction.id, " +
+                "operation.id AS operation_id,  " +
+                "( " +
+                "WITH value AS  " +
+                "( " +
+                "SELECT " +
+                "CASE   " +
+                "WHEN ore.price is not null THEN ( ore.price * ore.amount ) " +
+                "WHEN oce.price_proposal is not NULL THEN ( oce.price_proposal * oce.amount ) " +
+                "ELSE (ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) " +
+                "END AS price_total " +
+                "FROM   " + Lystore.lystoreSchema +".order_client_equipment oce " +
+                "FULL JOIN   " + Lystore.lystoreSchema +".\"order-region-equipment\" ore on oce.id = ore.id_order_client_equipment  " +
+                "WHERE oce.id_operation = operation.id  " +
+                ") " +
+                "SELECT SUM(price_total) AS amountTempo FROM value " +
+                ") " +
+                "FROM  " + Lystore.lystoreSchema +".instruction  " +
+                "INNER JOIN  " + Lystore.lystoreSchema +".operation ON (instruction.id = operation.id_instruction)  " +
+                "INNER JOIN  " + Lystore.lystoreSchema +".order_client_equipment oce ON (oce.id_operation = operation.id)  " +
                 "WHERE instruction.id IN " +
-                Sql.listPrepared(IdInstructions.getList()) +
-                " GROUP BY instruction.id";
+                Sql.listPrepared(IdInstructions.getList()) + "  " +
+                "GROUP BY (instruction.id, operation_id ) " +
+                ") " +
+                "SELECT valueFinal.id, SUM (amountTempo) AS amount FROM valueFinal " +
+                "GROUP BY (valueFinal.id)";
 
 
         Sql.getInstance().prepared(queryAmount, IdInstructions, SqlResult.validResultHandler(handler));

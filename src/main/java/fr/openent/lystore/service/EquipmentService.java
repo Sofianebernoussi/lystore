@@ -118,4 +118,6 @@ public interface EquipmentService {
      * @param handler     Function handler returning data
      */
     void getNumberPages(Integer idCampaign, String idStructure, List<String> filters, Handler<Either<String, JsonObject>> handler);
+
+    void listAllEquipments(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler);
 }

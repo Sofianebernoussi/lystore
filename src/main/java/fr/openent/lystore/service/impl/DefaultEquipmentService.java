@@ -127,6 +127,42 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         this.sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray().add(idEquipment), SqlResult.validResultHandler(handler));
     }
 
+    @Override
+    public void listAllEquipments(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT e.*,contract_type.name as contract_type_name, equipment_type.name as nametype, tax.value tax_amount, array_to_json(array_agg(DISTINCT opts)) as options, contract.name as contract_name, array_to_json(array_agg(DISTINCT  rel_equipment_tag.id_tag)) tags " +
+                "FROM " + Lystore.lystoreSchema + ".equipment e LEFT JOIN ( " +
+                "SELECT option.*, equipment.name, equipment.price, tax.value tax_amount " +
+                "FROM " + Lystore.lystoreSchema + ".equipment_option option " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".equipment ON (option.id_option = equipment.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".tax on tax.id = equipment.id_tax " +
+                ") opts ON opts.id_equipment = e.id " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".tax on tax.id = e.id_tax " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (e.id_contract = contract.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id) " +
+
+                "INNER JOIN " + Lystore.lystoreSchema + ".equipment_type on equipment_type.id = e.id_type " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".rel_equipment_tag ON (e.id = rel_equipment_tag.id_equipment) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_campaign ON (" +
+                "rel_group_campaign.id_tag = rel_equipment_tag.id_tag " +
+                "AND rel_group_campaign.id_campaign = ? " +
+                ((idStructure != null) ?
+                        " AND rel_group_campaign.id_structure_group IN (  " +
+                                " SELECT structure_group.id FROM  + " + Lystore.lystoreSchema + ".structure_group  " +
+                                " INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON rel_group_structure.id_structure_group = structure_group.id  " +
+                                " WHERE rel_group_structure.id_structure = ? )"
+                        : ""
+                ) + ")and e.catalog_enabled = true AND e.status != 'OUT_OF_STOCK' " +
+                "GROUP BY (e.id, tax.id , nametype, contract.name,contract_type.name )";
+
+        JsonArray values = new JsonArray().add(idCampaign);
+        if (idStructure != null)
+            values.add(idStructure);
+
+        sql.prepared(query, values, SqlResult.validResultHandler(handler));
+
+    }
+
+
     public void listEquipments(Integer idCampaign, String idStructure, Integer page, List<String> filters,
                                Handler<Either<String, JsonArray>> handler) {
         JsonArray values = new JsonArray().add(idCampaign).add(idStructure);
@@ -443,6 +479,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
             }
         });
     }
+
 
     private Integer calculPagesNumber(Integer count) {
         Integer pageCount = count / Lystore.PAGE_SIZE;

@@ -3,8 +3,7 @@
         <i18n>lystore.order.create</i18n>
     </h1>
     <article>
-        <form>
-
+        <form class="row">
             <div class="row vertical-spacing-four">
                 <label class="four right-padding-form-field cell">
                     <i18n>CAMPAIGN</i18n>
@@ -76,8 +75,11 @@
                         </select>
                     </td>
                     <td class="two ">
-                        <select ng-disabled="!row.structure" ng-model="row.equipment"
-                                ng-options="equipment.id as equipment.name for equipment in equipments.all">
+                        <select style="max-width: 300px;"
+                                ng-disabled="!row.structure" ng-model="row.equipment"
+                                class="disabled"
+                                ng-change="initEquipmentData(row)"
+                                ng-options="equipment as equipment.name for equipment in equipments.all">
                             <option value="" disabled selected>[[translate('lystore.placeholder.equipment')]]
                             </option>
 
@@ -86,13 +88,13 @@
                     <td class="one ">
                         <input ng-disabled="!row.equipment" ng-model="row.price" type="number" min="0" step="any"/>
                     </td>
-                    <td class="one ">
-                        <input ng-disabled="!row.equipment" ng-model="row.amount" type="number" min="0" step="1"/>
+                    <td class="two ">
+                        <input ng-disabled="!row.equipment" ng-model="row.amount" type="number" min="1" step="1"/>
                     </td>
-                    <td class="one ">
+                    <td class="one " ng-if="orderToCreate.project.preference">
                         <input ng-model="row.priority" type="number" min="0" step="1"/>
                     </td>
-                    <td class="four">
+                    <td class="three">
                         <input ng-model="row.comment" type="text"/>
                     </td>
                     <td class="two aligne-text-center">

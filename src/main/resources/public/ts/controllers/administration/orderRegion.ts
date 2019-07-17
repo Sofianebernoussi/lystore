@@ -160,9 +160,13 @@ export const orderRegionController = ng.controller('orderRegionController',
         }
 
         $scope.switchStructure = async (structure) => {
-            console.log("cc")
-            await $scope.equipments.sync($scope.orderToCreate.campaign);
+            await $scope.equipments.syncAll($scope.orderToCreate.campaign, undefined);
             Utils.safeApply($scope);
+
+        }
+        $scope.initEquipmentData = (row) => {
+            row.price = row.equipment.priceTTC;
+            row.amount = 1;
 
         }
     }

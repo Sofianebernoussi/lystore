@@ -947,6 +947,29 @@ body.lystore {
   margin-top: 0;
 }
 
-.house {
-  content: '\e82b';
+i.house {
+  @include fonticon();
+
+  &::before {
+    content: '\e82b';
+    height: 21px;
+  }
+}
+
+i.groups {
+  @include fonticon();
+
+  &::before {
+    content: '\e833';
+    height: 21px;
+  }
+}
+
+.input-in-row {
+  width: 100px;
+}
+
+select.disabled {
+  background-color: rgb(235, 235, 228);
+  opacity: 0.4 !important;
 }

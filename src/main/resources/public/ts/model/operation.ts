@@ -70,7 +70,7 @@ export class Operation implements Selectable {
     }
 
     displayOperation = () => {
-        return this.label.title + " - " + (this.date_cp && this.date_cp === null) ? "Pas de Date" : this.date_cp.toDateString();
+        return this.label.title + " - " + (this.date_cp && this.date_cp === null) ? "Pas de date de CP" : this.date_cp.toDateString();
     }
 
 }

@@ -3,8 +3,10 @@ import {moment, notify} from "entcore";
 import {Project} from "./project";
 import {Campaign, Contract, ContractType, Structure, TechnicalSpec} from "./index";
 import {OrderClient} from "./OrderClient";
+import {Selectable, Selection} from "entcore-toolkit";
 
-export class OrderRegion {
+export class OrderRegion implements Selectable {
+    selected: boolean;
 
     id?: number;
     amount: number;
@@ -44,7 +46,7 @@ export class OrderRegion {
             price: this.price,
             summary: this.summary,
             description: (this.description) ? this.description : "",
-            id_order_client_equipment: this.id_orderClient,
+            ...(this.id_orderClient && {id_order_client_equipment: this.id_orderClient}),
             image: this.image,
             creation_date: moment(this.creation_date).format('L'),
             status: this.status,
@@ -68,7 +70,7 @@ export class OrderRegion {
         this.id_orderClient = order.id;
         this.amount = order.amount;
         this.name = order.name;
-        this.summary = order.summary
+        this.summary = order.summary;
         this.description = order.description;
         this.image = order.image;
         this.creation_date = order.creation_date;
@@ -101,5 +103,20 @@ export class OrderRegion {
             notify.error('lystore.admin.order.update.err');
             throw e;
         }
+    }
+
+    async create() {
+        try {
+            return await http.post(`/lystore/region/order/`, this.toJson());
+        } catch (e) {
+            notify.error('lystore.order.create.err');
+            throw e;
+        }
+    }
+}
+
+export class OrdersRegion extends Selection<OrderRegion> {
+    constructor() {
+        super([]);
     }
 }

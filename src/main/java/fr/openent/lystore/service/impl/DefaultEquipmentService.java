@@ -147,7 +147,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 "AND rel_group_campaign.id_campaign = ? " +
                 ((idStructure != null) ?
                         " AND rel_group_campaign.id_structure_group IN (  " +
-                                " SELECT structure_group.id FROM  + " + Lystore.lystoreSchema + ".structure_group  " +
+                                " SELECT structure_group.id FROM  " + Lystore.lystoreSchema + ".structure_group  " +
                                 " INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON rel_group_structure.id_structure_group = structure_group.id  " +
                                 " WHERE rel_group_structure.id_structure = ? )"
                         : ""

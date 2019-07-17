@@ -38,7 +38,7 @@
                 </select></div>
 
 
-            <input type="button" ng-disabled="!validForm()" class="right-magnet button" ng-click=""
+            <input type="button" ng-disabled="!validForm()" class="right-magnet button" ng-click="createOrder()"
                    i18n-value="lystore.save"/>
             <table class="twelve">
                 <thead>
@@ -61,35 +61,57 @@
                     <td class="four">
                         [[translate('comment')]]
                     </td>
+                    <td class="one">
+                    </td>
                 </tr>
                 </thead>
                 <tbody>
-                <tr class="row" ng-repeat="row in orderToCreate.row">
-                    <td class="one ">
-                        <select ng-model="row.structure"
-                                ng-options="structure.id as structure.name for structure in structure_groups.all"
-                                ng-change="switchStructure(row.structure)">
-                            <option value="" disabled selected>[[translate('lystore.placeholder.structure')]]
-                            </option>
+                <tr class="row" ng-repeat="row in orderToCreate.rows track by $index">
 
-                        </select>
+                    <td class="one ">
+                        <div ng-if="display.struct" class="row ">
+                            <i class="house one" ng-click="swapTypeStruct(row)"></i>
+                            <select class="eleven"
+                                    style="max-width: 300px;"
+                                    ng-model="row.structure"
+                                    ng-options="structure.id as structure.name for structure in structuresToDisplay.all"
+                                    ng-change="switchStructure(row,row.structure)">
+                                <option value="" disabled selected>[[translate('lystore.placeholder.structure')]]
+                                </option>
+
+                            </select>
+                        </div>
+                        <div ng-if="!display.struct" class="row ">
+                            <i class="groups one" ng-click="swapTypeStruct(row)"></i>
+                            <select class="eleven"
+                                    style="max-width: 300px;"
+                                    ng-model="row.structure"
+                                    ng-options="structure.id as structure.name for structure in structure_groups.all"
+                                    ng-change="switchStructure(row)">
+                                <option value="" disabled selected>[[translate('lystore.placeholder.structureGroup')]]
+                                </option>
+
+                            </select>
+                        </div>
                     </td>
                     <td class="two ">
                         <select style="max-width: 300px;"
                                 ng-disabled="!row.structure" ng-model="row.equipment"
-                                class="disabled"
+                                ng-class="{disabled :!row.structure}"
                                 ng-change="initEquipmentData(row)"
-                                ng-options="equipment as equipment.name for equipment in equipments.all">
+                                ng-options="equipment as equipment.name for equipment in row.equipments.all">
                             <option value="" disabled selected>[[translate('lystore.placeholder.equipment')]]
                             </option>
 
                         </select>
                     </td>
                     <td class="one ">
-                        <input ng-disabled="!row.equipment" ng-model="row.price" type="number" min="0" step="any"/>
+                        <input ng-disabled="!row.equipment" class="input-in-row" ng-model="row.price" type="number"
+                               min="0" step="any"/>
                     </td>
                     <td class="two ">
-                        <input ng-disabled="!row.equipment" ng-model="row.amount" type="number" min="1" step="1"/>
+                        <input ng-disabled="!row.equipment" class="input-in-row" ng-model="row.amount" type="number"
+                               min="1" step="1"/>
                     </td>
                     <td class="one " ng-if="orderToCreate.project.preference">
                         <input ng-model="row.priority" type="number" min="0" step="1"/>
@@ -97,8 +119,11 @@
                     <td class="three">
                         <input ng-model="row.comment" type="text"/>
                     </td>
-                    <td class="two aligne-text-center">
-                        <i class="trash" ng-click="dropRow(row)"></i>
+                    <td class="one">
+                        <i class="plus" ng-click="duplicateRow($index)"></i>
+                    </td>
+                    <td class="one">
+                        <i class="trash" ng-click="dropRow($index)"></i>
                     </td>
                 </tr>
                 </tbody>

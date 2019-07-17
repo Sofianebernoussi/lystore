@@ -1,7 +1,7 @@
 import {idiom as lang, ng, notify, template} from 'entcore';
 import {
-    ContractTypes, Notification, Operation, OrderClient, OrderRegion, StructureGroups, Titles,
-    Utils
+    ContractTypes, Notification, Operation, OrderClient, OrderRegion, OrdersRegion, Structure, StructureGroups,
+    Structures, Titles, Utils
 } from "../../model";
 import {Equipments} from "../../model/Equipment";
 
@@ -14,18 +14,40 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.equipments = new Equipments();
         $scope.contractTypes = new ContractTypes();
         $scope.structure_groups = new StructureGroups();
+        $scope.structuresToDisplay = new Structures();
         $scope.titles = new Titles();
         $scope.display = {
             lightbox: {
                 validOrder: false,
-            }
+            },
+            struct: false
         };
         $scope.translate = (key: string) => lang.translate(key);
 
         $scope.updateCampaign = async () => {
-            console.log("updateCampaign")
+            $scope.orderToCreate.project = undefined;
             await $scope.titles.syncAdmin($scope.orderToCreate.campaign);
             await $scope.structure_groups.syncByCampaign($scope.orderToCreate.campaign);
+            let structures = new Structures();
+            $scope.structure_groups.all.map(structureGR => {
+                structureGR.structures.map(structureId => {
+                    let newStructure = new Structure();
+                    newStructure.id = structureId;
+                    newStructure = $scope.structures.all.find(s => s.id === newStructure.id);
+                    if (structures.all.indexOf(newStructure) === -1) // no duplicate data
+                        structures.push(newStructure);
+                })
+            });
+
+            $scope.structuresToDisplay = structures;
+
+            $scope.structuresToDisplay.all.sort((s, ss) => {
+                if (s.name < ss.name) return 1;
+                if (s.name > ss.name) return -1;
+                return 0;
+            });
+
+            $scope.orderToCreate.rows = [];
             Utils.safeApply($scope);
         };
 
@@ -123,7 +145,13 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
 
         $scope.oneRow = () => {
-            return true
+            let oneValidRow = false;
+            if ($scope.orderToCreate.rows)
+                $scope.orderToCreate.rows.map(r => {
+                    if (r.equipment && r.price && r.structure && r.amount)
+                        oneValidRow = true;
+                });
+            return oneValidRow;
         };
 
         $scope.validForm = () => {
@@ -148,26 +176,60 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
 
         $scope.addRow = () => {
-            if (!$scope.orderToCreate.row)
-                $scope.orderToCreate.row = [];
-            $scope.orderToCreate.row.push($scope.orderToCreate.row.length)
+            let row = {
+                equipment: undefined,
+                equipments: new Equipments(),
+                structure: undefined,
+                price: undefined,
+                amount: undefined,
+                comment: "",
+            };
+            if (!$scope.orderToCreate.rows)
+                $scope.orderToCreate.rows = [];
+            $scope.orderToCreate.rows.push(row);
             Utils.safeApply($scope)
 
-        }
+        };
+
+        $scope.dropRow = (index) => {
+            $scope.orderToCreate.rows.splice(index, 1);
+        };
+
+        $scope.duplicateRow = (index) => {
+            let row = JSON.parse(JSON.stringify($scope.orderToCreate.rows[index]));
+            row.equipments = new Equipments();
+
+            $scope.orderToCreate.rows[index].equipments.forEach(equipment => {
+                row.equipments.push(equipment);
+                if (row.equipment.id === equipment.id)
+                    row.equipment = equipment;
+
+            });
+            $scope.orderToCreate.rows.splice(index + 1, 0, row)
+        };
         $scope.cancelBasketDelete = () => {
             $scope.display.lightbox.validOrder = false;
             template.close('validOrder.lightbox');
-        }
+        };
 
-        $scope.switchStructure = async (structure) => {
-            await $scope.equipments.syncAll($scope.orderToCreate.campaign, undefined);
+        $scope.switchStructure = async (row, structure) => {
+            await row.equipments.syncAll($scope.orderToCreate.campaign, structure);
             Utils.safeApply($scope);
 
-        }
+        };
         $scope.initEquipmentData = (row) => {
             row.price = row.equipment.priceTTC;
             row.amount = 1;
 
+        }
+        $scope.swapTypeStruct = (row) => {
+            $scope.display.struct = !$scope.display.struct;
+            console.log($scope.structures);
+        }
+        $scope.createOrder = () => {
+            let ordersToCreate = new OrdersRegion()
+        
+            $scope.orderToCreate.create();
         }
     }
     ]);

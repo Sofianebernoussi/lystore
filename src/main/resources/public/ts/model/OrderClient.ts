@@ -222,10 +222,10 @@ export class OrdersClient extends Selection<OrderClient> {
                             : order.options = [];
                         order.priceTTCtotal = parseFloat((order.calculatePriceTTC(2, order.price) as number).toString()) * order.amount;
                         order.priceUnitedTTC = order.price_proposal ?
-                            parseFloat((order.calculatePriceTTC(2, order.price_proposal) as number).toString()):
+                            parseFloat(( order.price_proposal).toString()):
                             parseFloat((order.calculatePriceTTC(2, order.price) as number).toString());
                         order.priceProposalTTCTotal = order.price_proposal !== null ?
-                            parseFloat((order.calculatePriceTTC(2, order.price_proposal) as number).toString()) * order.amount :
+                            parseFloat(( order.price_proposal).toString()) * order.amount :
                             null;
                         if( order.campaign.orderPriorityEnable()){
                             order.rankOrder = (order.rank + 1).toString();
@@ -332,9 +332,17 @@ export class OrdersClient extends Selection<OrderClient> {
             throw e;
         }
     }
-    addOperation (idOperation:number, idsOrder: Array<number>) {
+    async addOperation (idOperation:number, idsOrder: Array<number>) {
         try{
-            http.put(`/lystore/orders/operation/${idOperation}`, idsOrder);
+            await http.put(`/lystore/orders/operation/${idOperation}`, idsOrder);
+        }catch (e){
+            notify.error('lystore.basket.update.err');
+            throw e;
+        }
+    }
+    async addOperationInProgress (idOperation:number, idsOrder: Array<number>) {
+        try{
+            await http.put(`/lystore/orders/operation/in-progress/${idOperation}`, idsOrder);
         }catch (e){
             notify.error('lystore.basket.update.err');
             throw e;

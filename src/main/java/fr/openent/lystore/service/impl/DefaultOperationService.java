@@ -68,7 +68,6 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 "count(oce.*) as nbr_sub, " +
                 "array_to_json(array_agg(o.order_number)) as bc_number, " +
                 "array_to_json(array_agg(o.label_program)) as programs, " +
-                "SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) AS amount, " +
                 "array_to_json(array_agg(c.name)) as contracts " +
                 "FROM  " + Lystore.lystoreSchema +".operation "+
                 "INNER JOIN " + Lystore.lystoreSchema +".label_operation label on label.id = operation.id_label "+

@@ -980,6 +980,22 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     }
 
     @Override
+    public void updateOperationInProgress(Integer idOperation, JsonArray idOrders, Handler<Either<String, JsonObject>> handler) {
+        String query = " UPDATE " + Lystore.lystoreSchema + ".order_client_equipment " +
+                " SET status = 'IN PROGRESS', " +
+                "id_operation = " +
+                idOperation +
+                " WHERE id IN " +
+                Sql.listPrepared(idOrders.getList()) +
+                " RETURNING id";
+        JsonArray values = new JsonArray();
+        for (int i = 0; i < idOrders.size(); i++) {
+            values.add(idOrders.getValue(i));
+        }
+        sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
+    }
+
+    @Override
     public void updateStatusOrder(Integer idOrder, JsonObject orderStatus, Handler<Either<String, JsonObject>> handler) {
         JsonArray values = new JsonArray();
         String query = " UPDATE " + Lystore.lystoreSchema + ".order_client_equipment " +

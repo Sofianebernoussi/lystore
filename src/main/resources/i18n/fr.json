@@ -464,7 +464,6 @@
   "lystore.order.update.err": "Erreur lors de la modification du status de la demandes",
   "lystore.operation.orders.sync.err": "Une erreur est survenue lors de la récupération de la liste des demandes",
   "lystore.operation.empty": "Aucune opération est créée ou est ouverte, pour les gérer cliquer ici",
-  "lystore.order.operation.selected": "Vous avez choisi l'operation : ",
   "close" : "Fermé",
   "lystore.amountTTC": "Montant (TTC)",
   "lystore.access.demand": "Accéder aux demandes",
@@ -488,5 +487,6 @@
   "lystore.order.region.update": "Votre commande a bien été enregistré",
   "lystore.order.get.err": "Erreur lors de la recuperation de la commande",
   "lystore.operation.order.move" : "Modifier l'opération affectée",
-  "lystore.operation.order.notLink": "non affectée"
+  "lystore.operation.order.notLink": "non affectée",
+  "lystore.order.operation.validated": "Vous venez d'affecter des demandes à l'opération : "
 }

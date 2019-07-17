@@ -1141,6 +1141,20 @@ public class OrderController extends ControllerHelper {
         });
     }
 
+    @Put("/orders/operation/in-progress/:idOperation")
+    @ApiDoc("update operation in orders with status in progress")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void updateOperationInProgress(final HttpServerRequest request) {
+        final Integer idOperation = Integer.parseInt(request.params().get("idOperation"));
+        RequestUtils.bodyToJsonArray(request, idOrders -> orderService.updateOperationInProgress(idOperation, idOrders, Logging.defaultResponseHandler(eb,
+                request,
+                Contexts.ORDER.toString(),
+                Actions.UPDATE.toString(),
+                idOperation.toString(),
+                new JsonObject().put("ids", idOrders))));
+    }
+
     @Put("/orders/operation/:idOperation")
     @ApiDoc("update operation in orders")
     @SecuredAction(value = "", type = ActionType.RESOURCE)

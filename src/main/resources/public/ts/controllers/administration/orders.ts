@@ -152,12 +152,10 @@ export const orderController = ng.controller('orderController',
                 template.open('validOrder.lightbox', 'administrator/order/order-valid-confirmation');
                 $scope.display.lightbox.validOrder = true;
             }
-            await $scope.syncOrders('WAITING');
+            $scope.getOrderWaitingFiltered($scope.campaign);
             Utils.safeApply($scope);
         };
         $scope.cancelBasketDelete = () => {
-            $scope.operation = undefined;
-            $scope.isOperationSelected = false;
             $scope.display.lightbox.validOrder = false;
             template.close('validOrder.lightbox');
             Utils.safeApply($scope);
@@ -319,17 +317,12 @@ export const orderController = ng.controller('orderController',
             $scope.display.lightbox.validOrder = true;
         };
 
-        $scope.isOperationSelected = false;
         $scope.operationSelected = async (operation:Operation) => {
-            $scope.isOperationSelected = true;
             $scope.operation = operation;
             let idsOrder = $scope.ordersClient.selected.map(order => order.id);
-                await $scope.ordersClient.addOperation(operation.id, idsOrder);
-            await $scope.inProgressOrders($scope.getSelectedOrders());
-            await Promise.all([
-                    await $scope.syncOrders('WAITING'),
-                    await $scope.initOperation()
-                ])
+            await $scope.ordersClient.addOperationInProgress(operation.id, idsOrder);
+            await $scope.getOrderWaitingFiltered($scope.campaign);
+            template.open('validOrder.lightbox', 'administrator/order/order-valid-add-operation');
         };
 
         $scope.inProgressOrders = async (orders: OrderClient[]) => {

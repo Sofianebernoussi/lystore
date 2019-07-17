@@ -5,7 +5,7 @@
             <select
                     ng-model="campaign"
                     ng-options="campaignSelect as campaignSelect.name for campaignSelect in campaignsForSelectInput"
-                    ng-change="selectCampagnAndInitFilter(campaign)"
+                    ng-change="selectCampaignAndInitFilter(campaign)"
             >
                 <option value="" disabled >[[campaign.name]]</option>
             </select>

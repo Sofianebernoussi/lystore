@@ -397,7 +397,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             $scope.initOrders('WAITING');
             Utils.safeApply($scope);
         };
-        $scope.selectCampaignShow = async (campaign?: Campaign) => {
+        $scope.selectCampaignShow = (campaign?: Campaign) => {
             if(campaign){
                 $scope.campaign = campaign;
                 $scope.displayedOrders.all = $scope.ordersClient.all
@@ -407,6 +407,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.campaign = $scope.allCampaignsSelect;
                 $scope.cancelSelectCampaign(true);
             }
+        };
+        $scope.getOrderWaitingFiltered = async (campaign:Campaign):Promise<void> =>{
+            await $scope.initOrders('WAITING');
+            $scope.selectCampaignShow(campaign);
         };
         $scope.cancelSelectCampaign = (initOrder: boolean) => {
             template.close('selectCampaign');

@@ -1,12 +1,13 @@
-import {_, ng, template} from 'entcore';
+import {_, ng, template, idiom as lang} from 'entcore';
 import {Operation, OrderClient, Utils} from "../../model";
 import {Mix} from 'entcore-toolkit';
 
 declare let window: any;
 
 export const operationController = ng.controller('operationController',
-    ['$scope', ($scope) => {
-
+    ['$scope',  '$routeParams',($scope, $routeParams) => {
+        $scope.lang = lang;
+        $scope.allOrdersOperationSelected = false;
         $scope.sort = {
             operation : {
                 type: 'name',
@@ -69,7 +70,6 @@ export const operationController = ng.controller('operationController',
 
         $scope.cancelOperationForm = async () =>{
             $scope.display.lightbox.operation = false;
-            $scope.display.lightbox.ordersListOfOperation = false;
             template.close('operation.lightbox');
             await $scope.initOperation();
             Utils.safeApply($scope);
@@ -109,7 +109,7 @@ export const operationController = ng.controller('operationController',
             }
         };
         $scope.syncOrderByOperation = async (operation: Operation) =>{
-            $scope.ordersClientByOperation = Mix.castArrayAs(OrderClient, await operation.getOrders());
+            $scope.ordersClientByOperation = await operation.getOrders();
         };
         $scope.dropOrderOperation = async (order:OrderClient) => {
             await order.updateStatusOrder('WAITING');
@@ -131,8 +131,35 @@ export const operationController = ng.controller('operationController',
             return Utils.formatDate(date)
         };
 
-        $scope.insertOrderRegion = (order: OrderClient) => {
+        $scope.insertOrderRegion = (order: OrderClient):void => {
             $scope.order = order;
             $scope.redirectTo(`/order/operation/update/${order.id}`);
-        }
+        };
+        $scope.switchAllOrders = ():void => {
+            $scope.allOrdersOperationSelected  =  !$scope.allOrdersOperationSelected;
+            if ( $scope.allOrdersOperationSelected) {
+                $scope.ordersClientByOperation.map(order => order.selected = true);
+            } else {
+                $scope.ordersClientByOperation.map(order => order.selected = false);
+            }
+            Utils.safeApply($scope);
+        };
+        $scope.isOrderOperationSelected = ():boolean => {
+            return $scope.ordersClientByOperation.some(order => order.selected)
+        };
+        $scope.selectOperationForOrder = async () =>{
+            await $scope.initOperation();
+            $scope.operations.all = $scope.operations.all.filter(operation => operation.id !== $scope.operation.id);
+            $scope.isOperationsIsEmpty = !$scope.operations.all.some(operation => operation.status === 'true');
+            template.open('operation.lightbox', 'administrator/order/order-select-operation');
+            $scope.display.lightbox.operation = true;
+        };
+        $scope.operationSelected = async (operation:Operation) => {
+            template.close('operation.lightbox');
+            let idsOrder = $scope.ordersClientByOperation.filter(order => order.selected).map(order => order.id);
+            await $scope.ordersClient.addOperation(operation.id, idsOrder);
+            $scope.ordersClientByOperation = await $scope.operation.getOrders();
+            $scope.display.lightbox.operation = false;
+            Utils.safeApply($scope);
+        };
     }]);

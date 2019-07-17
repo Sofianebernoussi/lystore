@@ -13,6 +13,5 @@ public interface OrderRegionService {
     public void linkOrderToOperation(Integer id_order_client_equipment, Integer id_operation, Handler<Either<String, JsonObject>> handler);
 
 
-    void setOrderRegion(JsonObject order, UserInfos user, Handler<Either<String, JsonObject>> handler);
 
 }

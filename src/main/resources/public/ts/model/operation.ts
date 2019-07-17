@@ -3,6 +3,7 @@ import http from 'axios';
 import {moment, notify} from "entcore";
 import {Utils} from "./Utils";
 import {Instruction} from "./instruction";
+import {OrderClient} from "./OrderClient";
 
 
 export class Operation implements Selectable {
@@ -49,11 +50,10 @@ export class Operation implements Selectable {
         }
     }
 
-
     async getOrders() {
         try {
             const {data} = await http.get(`/lystore/operations/${this.id}/orders`);
-            return data;
+            return Mix.castArrayAs(OrderClient, data);
         } catch (e) {
             notify.error("lystore.operation.orders.sync.err");
             throw e;
@@ -94,8 +94,8 @@ export class Operations extends Selection<Operation>{
                 operation.label.toString() !== 'null' && operation.label !== null ?
                     operation.label = Mix.castAs(label, JSON.parse(operation.label.toString()))
                     : operation.label = new label();
-                JSON.parse(operation.instruction.toString())[0] !== null ?
-                    operation.instruction =  JSON.parse(operation.instruction.toString())[0]
+                operation.instruction !== null ?
+                    operation.instruction =  JSON.parse(operation.instruction.toString())
                     : operation.instruction = null;
             })
         } catch(e){

@@ -7,7 +7,7 @@
             ng-if="operation.status == 'true'"
             ng-click="operationSelected(operation)">
             <i18n>lystore.instruction</i18n>&nbsp
-            [[operation.instruction? operation.instruction.cp_number  : ' non affectée ' ]] &nbsp - &nbsp
+            [[operation.instruction? operation.instruction.cp_number  : lang.translate("lystore.operation.order.notLink") ]] &nbsp - &nbsp
             [[operation.label.label]]
         </td>
     </tr>

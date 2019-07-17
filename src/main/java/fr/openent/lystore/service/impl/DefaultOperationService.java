@@ -49,6 +49,19 @@ public class DefaultOperationService extends SqlCrudService implements Operation
             }
         }
         String query =  "SELECT " +
+                "( " +
+                "WITH value AS ( " +
+                "SELECT  " +
+                "CASE  " +
+                "WHEN ore.price is not null THEN ( ore.price * ore.amount )  " +
+                "WHEN oce.price_proposal is not NULL THEN ( oce.price_proposal * oce.amount ) " +
+                "ELSE (ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount )  " +
+                "END AS price_total " +
+                "FROM  " + Lystore.lystoreSchema +".\"order_client_equipment\" oce " +
+                "FULL JOIN  " + Lystore.lystoreSchema +".\"order-region-equipment\" ore on oce.id = ore.id_order_client_equipment  " +
+                "WHERE oce.id_operation = operation.id) " +
+                "SELECT SUM(price_total) AS amount FROM value " +
+                ")," +
                 "operation.* , " +
                 "to_json(i.*) AS instruction, " +
                 "to_json(label.*) as label, " +
@@ -56,8 +69,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 "array_to_json(array_agg(o.order_number)) as bc_number, " +
                 "array_to_json(array_agg(o.label_program)) as programs, " +
                 "SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) AS amount, " +
-                "array_to_json(array_agg(c.name)) as contracts, " +
-                "array_to_json(array_agg(i.*)) AS instruction " +
+                "array_to_json(array_agg(c.name)) as contracts " +
                 "FROM  " + Lystore.lystoreSchema +".operation "+
                 "INNER JOIN " + Lystore.lystoreSchema +".label_operation label on label.id = operation.id_label "+
                 "LEFT JOIN " + Lystore.lystoreSchema +".order_client_equipment oce on oce.id_operation = operation.id "+

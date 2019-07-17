@@ -365,8 +365,8 @@ export const orderController = ng.controller('orderController',
             $scope.redirectTo(`/order/update/${order.id}`);
 
         };
-        $scope.selectCampagnAndInitFilter = (campaign: Campaign) =>{
-            $scope.selectCampaignShow(campaign);
+        $scope.selectCampaignAndInitFilter = async (campaign: Campaign) =>{
+            await $scope.selectCampaignShow(campaign);
             $scope.search.filterWords = [];
         };
     }]);

@@ -47,7 +47,17 @@ public class OrderRegionController extends BaseController {
                 RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
                     @Override
                     public void handle(JsonObject order) {
-                        orderRegionService.setOrderRegion(order, event, defaultResponseHandler(request));
+                        orderRegionService.setOrderRegion(order, event, new Handler<Either<String, JsonObject>>() {
+                            @Override
+                            public void handle(Either<String, JsonObject> event) {
+                                try {
+                                    orderRegionService.linkOrderToOperation(order.getInteger("id_order_client_equipment"), order.getInteger("id_operation"), defaultResponseHandler(request));
+                                } catch (NullPointerException e) {
+                                    log.error("Error when getting id_operation and id_order_client_equipment");
+                                }
+
+                            }
+                        });
 
                     }
                 });

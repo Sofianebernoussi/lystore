@@ -1,5 +1,8 @@
 import {idiom as lang, ng, notify, template} from 'entcore';
-import {Notification, Operation, OrderClient, OrderRegion, StructureGroups, Titles, Utils} from "../../model";
+import {
+    ContractTypes, Notification, Operation, OrderClient, OrderRegion, StructureGroups, Titles,
+    Utils
+} from "../../model";
 import {Equipments} from "../../model/Equipment";
 
 
@@ -9,9 +12,9 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.orderToUpdate = new OrderClient();
         $scope.orderToCreate = new OrderRegion();
         $scope.equipments = new Equipments();
+        $scope.contractTypes = new ContractTypes();
         $scope.structure_groups = new StructureGroups();
         $scope.titles = new Titles();
-        $scope.contract_type = "-";
         $scope.display = {
             lightbox: {
                 validOrder: false,

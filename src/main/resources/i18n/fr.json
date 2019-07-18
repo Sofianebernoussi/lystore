@@ -498,6 +498,7 @@
   "lystore.order.create": "Créer une demande",
   "lystore.operation.order.move": "Modifier l'opération affectée",
   "lystore.operation.order.notLink": "non affectée",
-  "lystore.placeholder.structureGroup": "Sélectionner le regroupement"
+  "lystore.placeholder.structureGroup": "Sélectionner le regroupement",
+  "lystore.order.region.create.message": "Les commandes ont bien été enregistré"
 
 }

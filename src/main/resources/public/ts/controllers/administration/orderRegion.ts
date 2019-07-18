@@ -233,7 +233,7 @@ export const orderRegionController = ng.controller('orderRegionController',
             Utils.safeApply($scope);
 
         };
-        $scope.createOrder = () => {
+        $scope.createOrder = async () => {
             let ordersToCreate = new OrdersRegion();
             $scope.orderToCreate.rows.map(row => {
                 if (checkRow(row)) {
@@ -280,7 +280,17 @@ export const orderRegionController = ng.controller('orderRegionController',
                 }
             });
             console.log(ordersToCreate);
-            ordersToCreate.create();
+            let {status, data} = await ordersToCreate.create();
+            if (status === 200) {
+                $scope.notifications.push(new Notification('lystore.order.region.create.message', 'confirm'));
+                $scope.orderToCreate = new OrderRegion();
+                $scope.titles = new Titles();
+            }
+            else {
+                notify.error('lystore.admin.order.update.err');
+            }
+            Utils.safeApply($scope);
+
             //$scope.orderToCreate.create();
         }
     }

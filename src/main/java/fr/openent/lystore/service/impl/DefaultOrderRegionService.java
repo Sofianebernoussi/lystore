@@ -32,7 +32,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 if (nb == 0) {
                     query = "INSERT INTO " + Lystore.lystoreSchema + ".\"order-region-equipment\" " +
                             "( price, amount, creation_date, owner_name, owner_id, name, " +
-                            "  equipment_key, cause_status,   comment,";
+                            "  equipment_key, status,   comment,";
                     if (order.containsKey("rank"))
                         query += " rank,";
 

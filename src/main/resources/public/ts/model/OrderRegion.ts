@@ -51,7 +51,7 @@ export class OrderRegion implements Selectable {
             description: (this.description) ? this.description : "",
             ...(this.id_orderClient && {id_order_client_equipment: this.id_orderClient}),
             image: this.image,
-            creation_date: moment(this.creation_date).format('L'),
+            creation_date: moment().format('YYYY-MM-DD'),
             status: this.status,
             ...(this.number_validation && {number_validation: this.number_validation}),
             ...(this.title_id && {title_id: this.title_id}),

@@ -143,6 +143,7 @@
   "lystore.project.update.success": "Le projet a été mis à jour avec succès",
   "lystore.campaign.purse.import.skeleton": "Squelette d'import :",
   "lystore.structureGroups.management": "Regroupements",
+  "lystore.structureGroup.management": "Regroupement",
   "lystore.structureGroups.import.definition": "L'import des regroupements d'établissement s'effectue grâce à un fichier csv.",
   "lystore.equipments.import.definition": "L'import des équipements s'effectue grâce à un fichier csv.",
   "lystore.equipments.import.success": "Le BPU a été importé avec succès",
@@ -403,6 +404,7 @@
   "lystore.project":"Projet",
   "lystore.contract.type.name":"Nature du marché",
   "lystore.operations":"Operations",
+  "lystore.operation": "Operation",
   "lystore.operation.add":"Ajouter une operation",
   "lystore.operation.modify":"Modifier une operation",
   "label":"Libellé",
@@ -455,7 +457,7 @@
   "lysctore.instruction.text.delete.one.end": "  rapport. Ceci ne s'applique que sur des  rapports vides.",
   "lystore.instruction.title.delete.reject": "Suppression impossible",
   "lystore.instruction.text.delete.reject": "Cette opération n'est pas possible car une des  rapports sélectionnées n'est pas vide.",
-  "lystore.instruction.choose.operation":"Selectionnez une operation",
+  "lystore.instruction.choose.operation": "Sélectionnez une operation",
   "lystore.order.operation.select": "Affecter une operation",
   "lystore.order.operation.title": "Selectionner l'opération cible",
   "lystore.campaign.order.title": "Selectionner une campagne cible",
@@ -488,5 +490,16 @@
   "lystore.order.get.err": "Erreur lors de la recuperation de la commande",
   "lystore.operation.order.move" : "Modifier l'opération affectée",
   "lystore.operation.order.notLink": "non affectée",
-  "lystore.order.operation.validated": "Vous venez d'affecter des demandes à l'opération : "
+  "lystore.order.operation.validated": "Vous venez d'affecter des demandes à l'opération : ",
+  "lystore.order.region.create": "Générer une demande",
+  "lystore.placeholder.campaign": "Sélectionner la campagne",
+  "lystore.placeholder.project": "Sélectionner le projet",
+  "lystore.placeholder.structure": "Sélectionner l'établissement",
+  "lystore.placeholder.equipment": "Sélectonner l'équipement",
+  "lystore.save": "Enregistrer",
+  "lystore.order.create": "Créer une demande",
+  "lystore.placeholder.structureGroup": "Sélectionner le regroupement",
+  "lystore.order.region.create.message": "Les commandes ont bien été enregistré",
+  "lystore.admin.order.create.err": "Erreur lors de la création de la commande"
+
 }

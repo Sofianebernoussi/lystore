@@ -45,6 +45,18 @@ public class DefaultTitleService extends SqlCrudService implements TitleService 
     }
 
     @Override
+    public void getTitlesAdmin(Integer idCampaign, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT distinct title.id, title.name " +
+                "FROM " + Lystore.lystoreSchema + ".title " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".rel_title_campaign_structure ON (title.id = rel_title_campaign_structure.id_title) " +
+                "WHERE rel_title_campaign_structure.id_campaign = ? ";
+
+        JsonArray params = new JsonArray()
+                .add(idCampaign);
+
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+    @Override
     public void importTitlesForCampaign(Integer idCampaign, JsonObject importMap, JsonObject newTitlesMap, Handler<Either<String, JsonObject>> handler) {
         JsonArray statements = new JsonArray();
         Set<String> importKeys = importMap.getMap().keySet();
@@ -139,4 +151,6 @@ public class DefaultTitleService extends SqlCrudService implements TitleService 
 
         Sql.getInstance().prepared(query, params, SqlResult.validRowsResultHandler(handler));
     }
+
+
 }

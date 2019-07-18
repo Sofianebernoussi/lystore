@@ -28,6 +28,7 @@ export class Equipment implements Selectable {
     id_type: number;
     eventer: Eventer;
     _loading: boolean;
+    priceTTC?: number;
 
     constructor (name?: string, price?: number) {
         this.eventer = new Eventer();
@@ -233,6 +234,35 @@ export class Equipments extends Selection<Equipment> {
             throw e;
         } finally {
             this.loading = false;
+        }
+    }
+
+    async syncAll(idCampaign: number, idStructure?: string) {
+        try {
+            const uri: string = idStructure
+                ? `/lystore/equipments/admin/${idCampaign}?idStructure=${idStructure}`
+                : `/lystore/equipments/admin/${idCampaign}`;
+            let {data} = await http.get(uri);
+            this.all = Mix.castArrayAs(Equipment, data);
+            this.all.map((equipment) => {
+                equipment.price = parseFloat(equipment.price.toString());
+                equipment.tax_amount = parseFloat(equipment.tax_amount.toString());
+                equipment.priceTTC = equipment.price + (equipment.price * equipment.tax_amount / 100);
+                if (idCampaign) {
+                    equipment.tags = equipment.tags !== null && equipment.tags.toString() !== '[null]' ? JSON.parse(equipment.tags.toString()) : [];
+                    equipment.options.toString() !== '[null]' && equipment.options !== null ?
+                        equipment.options = Mix.castArrayAs(EquipmentOption, JSON.parse(equipment.options.toString()))
+                        : equipment.options = [];
+                    equipment.technical_specs = equipment.technical_specs !== null
+                        ? Mix.castArrayAs(TechnicalSpec, Utils.parsePostgreSQLJson(equipment.technical_specs.toString()))
+                        : equipment.technical_specs;
+                }
+            });
+
+        } catch (e) {
+            notify.error('lystore.equipment.sync.err');
+            throw e;
+
         }
     }
 

@@ -4,6 +4,7 @@ import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.OrderRegionService;
 import fr.openent.lystore.service.impl.DefaultOrderRegionService;
 import fr.wseduc.rs.ApiDoc;
+import fr.wseduc.rs.Post;
 import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -46,17 +47,7 @@ public class OrderRegionController extends BaseController {
                 RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
                     @Override
                     public void handle(JsonObject order) {
-                        orderRegionService.createOrderRegion(order, event, new Handler<Either<String, JsonObject>>() {
-                            @Override
-                            public void handle(Either<String, JsonObject> event) {
-                                try {
-                                    orderRegionService.linkOrderToOperation(order.getInteger("id_order_client_equipment"), order.getInteger("id_operation"), defaultResponseHandler(request));
-                                } catch (NullPointerException e) {
-                                    log.error("Error when getting id_operation and id_order_client_equipment");
-                                }
-
-                            }
-                        });
+                        orderRegionService.setOrderRegion(order, event, defaultResponseHandler(request));
 
                     }
                 });
@@ -65,4 +56,21 @@ public class OrderRegionController extends BaseController {
         });
     }
 
+    @Post("/region/orders/")
+    @ApiDoc("Create orders from a region")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void createAdminOrder(final HttpServerRequest request) {
+        UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+            @Override
+            public void handle(UserInfos event) {
+                RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+                    @Override
+                    public void handle(JsonObject orders) {
+                        orderRegionService.createOrdersRegion(orders, event, defaultResponseHandler(request));
+                    }
+                });
+            }
+        });
+    }
 }

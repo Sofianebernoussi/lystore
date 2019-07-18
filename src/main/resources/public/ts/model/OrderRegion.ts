@@ -3,8 +3,11 @@ import {moment, notify} from "entcore";
 import {Project} from "./project";
 import {Campaign, Contract, ContractType, Structure, TechnicalSpec} from "./index";
 import {OrderClient} from "./OrderClient";
+import {Selectable, Selection} from "entcore-toolkit";
+import {Equipment} from "./Equipment";
 
-export class OrderRegion {
+export class OrderRegion implements Selectable {
+    selected: boolean;
 
     id?: number;
     amount: number;
@@ -36,20 +39,23 @@ export class OrderRegion {
     structure: Structure;
     id_operation: number;
     equipment_key: number;
+    title_id ?: number;
+    equipment?: Equipment;
 
-    private toJson() {
+    toJson() {
         return {
             amount: this.amount,
             name: this.name,
             price: this.price,
             summary: this.summary,
             description: (this.description) ? this.description : "",
-            id_order_client_equipment: this.id_orderClient,
+            ...(this.id_orderClient && {id_order_client_equipment: this.id_orderClient}),
             image: this.image,
-            creation_date: moment(this.creation_date).format('L'),
+            creation_date: moment().format('YYYY-MM-DD'),
             status: this.status,
             ...(this.number_validation && {number_validation: this.number_validation}),
-            technical_spec: this.technical_spec,
+            ...(this.title_id && {title_id: this.title_id}),
+
             id_contract: this.id_contract,
             files: this.files,
             name_structure: this.name_structure,
@@ -59,6 +65,7 @@ export class OrderRegion {
             equipment_key: this.equipment_key,
             comment: (this.comment) ? this.comment : "",
             ...(this.rank && {rank: this.rank}),
+            technical_specs: (this.technical_spec != null) ? this.technical_spec.map((spec: TechnicalSpec) => spec.toJson()) : [],
             id_operation: this.id_operation,
         }
     }
@@ -68,7 +75,7 @@ export class OrderRegion {
         this.id_orderClient = order.id;
         this.amount = order.amount;
         this.name = order.name;
-        this.summary = order.summary
+        this.summary = order.summary;
         this.description = order.description;
         this.image = order.image;
         this.creation_date = order.creation_date;
@@ -99,6 +106,34 @@ export class OrderRegion {
             return await http.put(`/lystore/region/order/`, this.toJson());
         } catch (e) {
             notify.error('lystore.admin.order.update.err');
+            throw e;
+        }
+    }
+
+    initDataFromEquipment() {
+        if (this.equipment) {
+            this.summary = this.equipment.name;
+            this.image = this.equipment.image;
+
+        }
+    }
+}
+
+export class OrdersRegion extends Selection<OrderRegion> {
+    constructor() {
+        super([]);
+    }
+
+    async create() {
+        let orders = [];
+        this.all.map(order => {
+            order.initDataFromEquipment();
+            orders.push(order.toJson());
+        });
+        try {
+            return await http.post(`/lystore/region/orders/`, {orders: orders});
+        } catch (e) {
+            notify.error('lystore.order.create.err');
             throw e;
         }
     }

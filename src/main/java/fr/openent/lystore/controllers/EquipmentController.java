@@ -112,6 +112,21 @@ public class EquipmentController extends ControllerHelper {
         }
     }
 
+    @Get("/equipments/admin/:idCampaign")
+    @ApiDoc("List equipments of campaign in database")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void listAllEquipmentFromCampaign(final HttpServerRequest request) {
+        try {
+            Integer idCampaign = Integer.parseInt(request.params().get("idCampaign"));
+            String idStructure = request.params().contains("idStructure")
+                    ? request.params().get("idStructure")
+                    : null;
+            equipmentService.listAllEquipments(idCampaign, idStructure, arrayResponseHandler(request));
+        } catch (ClassCastException e) {
+            log.error("An error occurred casting campaign id", e);
+        }
+    }
+
     @Post("/equipment")
     @ApiDoc("Create an equipment")
     @SecuredAction(value =  "", type = ActionType.RESOURCE)

@@ -33,6 +33,14 @@ export class Titles extends Selection<Title> {
         }
     }
 
+    async syncAdmin(idCampaign: number): Promise<void> {
+        {
+            const uri = `/lystore/titles/campaigns/admin/${idCampaign}`;
+            let titles = await http.get(uri);
+            this.all = Mix.castArrayAs(Title, titles.data);
+        }
+    }
+
     delete(idCampaign: number, idTitle: number, idStructure: string) {
         return http.delete(`/lystore/titles/${idTitle}/campaigns/${idCampaign}/structures/${idStructure}`);
     }

@@ -1,7 +1,7 @@
 import {idiom as lang, ng, notify, template} from 'entcore';
 import {
-    ContractTypes, Notification, Operation, OrderClient, OrderRegion, OrdersRegion, Structure, StructureGroups,
-    Structures, Titles, Utils
+    ContractTypes, Notification, Operation, OrderClient, OrderRegion, OrdersRegion, Structure, StructureGroup,
+    StructureGroups, Structures, Titles, Utils
 } from "../../model";
 import {Equipments} from "../../model/Equipment";
 
@@ -20,7 +20,6 @@ export const orderRegionController = ng.controller('orderRegionController',
             lightbox: {
                 validOrder: false,
             },
-            struct: false
         };
         $scope.translate = (key: string) => lang.translate(key);
 
@@ -144,11 +143,15 @@ export const orderRegionController = ng.controller('orderRegionController',
                 && (($scope.orderToUpdate.campaign.orderPriorityEnable() && $scope.orderToUpdate.rank) || !$scope.orderToUpdate.campaign.orderPriorityEnable())
         };
 
+        function checkRow(row) {
+            return row.equipment && row.price && row.structure && row.amount
+        }
+
         $scope.oneRow = () => {
             let oneValidRow = false;
             if ($scope.orderToCreate.rows)
                 $scope.orderToCreate.rows.map(r => {
-                    if (r.equipment && r.price && r.structure && r.amount)
+                    if (checkRow(r))
                         oneValidRow = true;
                 });
             return oneValidRow;
@@ -183,6 +186,9 @@ export const orderRegionController = ng.controller('orderRegionController',
                 price: undefined,
                 amount: undefined,
                 comment: "",
+                display: {
+                    struct: false
+                }
             };
             if (!$scope.orderToCreate.rows)
                 $scope.orderToCreate.rows = [];
@@ -213,7 +219,7 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
 
         $scope.switchStructure = async (row, structure) => {
-            await row.equipments.syncAll($scope.orderToCreate.campaign, structure);
+            await row.equipments.syncAll($scope.orderToCreate.campaign, (structure) ? structure.id : undefined);
             Utils.safeApply($scope);
 
         };
@@ -221,15 +227,57 @@ export const orderRegionController = ng.controller('orderRegionController',
             row.price = row.equipment.priceTTC;
             row.amount = 1;
 
-        }
+        };
         $scope.swapTypeStruct = (row) => {
-            $scope.display.struct = !$scope.display.struct;
-            console.log($scope.structures);
-        }
+            row.display.struct = !row.display.struct;
+            Utils.safeApply($scope);
+
+        };
         $scope.createOrder = () => {
-            let ordersToCreate = new OrdersRegion()
-        
-            $scope.orderToCreate.create();
+            let ordersToCreate = new OrdersRegion();
+            $scope.orderToCreate.rows.map(row => {
+                if (checkRow(row)) {
+                    if (row.structure instanceof StructureGroup) {
+                        row.structure.structures.map(s => {
+                            let orderRegionTemp = new OrderRegion();
+                            orderRegionTemp.id_campaign = $scope.orderToCreate.campaign;
+                            orderRegionTemp.id_structure = s;
+                            orderRegionTemp.title_id = $scope.orderToCreate.project;
+                            orderRegionTemp.id_operation = $scope.orderToCreate.operation;
+                            orderRegionTemp.equipment_key = row.equipment.id;
+                            orderRegionTemp.equipment = row.equipment;
+                            orderRegionTemp.comment = row.comment;
+                            orderRegionTemp.amount = row.amount;
+                            orderRegionTemp.price = row.price;
+                            orderRegionTemp.name = row.equipment.name;
+                            orderRegionTemp.technical_spec = row.equipment.technical_specs;
+                            orderRegionTemp.id_contract = row.equipment.id_contract;
+                            let struct = $scope.structures.all.find(struct => s.id === struct.id);
+                            (struct) ? orderRegionTemp.name_structure = struct.name : orderRegionTemp.name_structure = "";
+                            ordersToCreate.all.push(orderRegionTemp);
+                        })
+                    } else {
+                        let orderRegionTemp = new OrderRegion();
+                        orderRegionTemp.id_campaign = $scope.orderToCreate.campaign;
+                        orderRegionTemp.id_structure = row.structure.id;
+                        orderRegionTemp.title_id = $scope.orderToCreate.project;
+                        orderRegionTemp.equipment = row.equipment;
+                        orderRegionTemp.equipment_key = row.equipment.id;
+                        orderRegionTemp.id_operation = $scope.orderToCreate.operation;
+                        orderRegionTemp.comment = row.comment;
+                        orderRegionTemp.amount = row.amount;
+                        orderRegionTemp.price = row.price;
+                        orderRegionTemp.name = row.equipment.name;
+                        orderRegionTemp.technical_spec = row.equipment.technical_specs;
+                        orderRegionTemp.id_contract = row.equipment.id_contract;
+                        orderRegionTemp.name_structure = row.structure.name;
+                        ordersToCreate.all.push(orderRegionTemp);
+                    }
+                }
+            });
+            console.log(ordersToCreate);
+            ordersToCreate.create();
+            //$scope.orderToCreate.create();
         }
     }
     ]);

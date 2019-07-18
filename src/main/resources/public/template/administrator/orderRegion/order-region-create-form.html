@@ -69,24 +69,24 @@
                 <tr class="row" ng-repeat="row in orderToCreate.rows track by $index">
 
                     <td class="one ">
-                        <div ng-if="display.struct" class="row ">
+                        <div ng-if="row.display.struct" class="row ">
                             <i class="house one" ng-click="swapTypeStruct(row)"></i>
                             <select class="eleven"
                                     style="max-width: 300px;"
                                     ng-model="row.structure"
-                                    ng-options="structure.id as structure.name for structure in structuresToDisplay.all"
+                                    ng-options="structure as structure.name for structure in structuresToDisplay.all"
                                     ng-change="switchStructure(row,row.structure)">
                                 <option value="" disabled selected>[[translate('lystore.placeholder.structure')]]
                                 </option>
 
                             </select>
                         </div>
-                        <div ng-if="!display.struct" class="row ">
+                        <div ng-if="!row.display.struct" class="row ">
                             <i class="groups one" ng-click="swapTypeStruct(row)"></i>
                             <select class="eleven"
                                     style="max-width: 300px;"
                                     ng-model="row.structure"
-                                    ng-options="structure.id as structure.name for structure in structure_groups.all"
+                                    ng-options="structure as structure.name for structure in structure_groups.all"
                                     ng-change="switchStructure(row)">
                                 <option value="" disabled selected>[[translate('lystore.placeholder.structureGroup')]]
                                 </option>

@@ -4,6 +4,7 @@ import {Project} from "./project";
 import {Campaign, Contract, ContractType, Structure, TechnicalSpec} from "./index";
 import {OrderClient} from "./OrderClient";
 import {Selectable, Selection} from "entcore-toolkit";
+import {Equipment} from "./Equipment";
 
 export class OrderRegion implements Selectable {
     selected: boolean;
@@ -38,8 +39,10 @@ export class OrderRegion implements Selectable {
     structure: Structure;
     id_operation: number;
     equipment_key: number;
+    title_id ?: number;
+    equipment?: Equipment;
 
-    private toJson() {
+    toJson() {
         return {
             amount: this.amount,
             name: this.name,
@@ -51,7 +54,8 @@ export class OrderRegion implements Selectable {
             creation_date: moment(this.creation_date).format('L'),
             status: this.status,
             ...(this.number_validation && {number_validation: this.number_validation}),
-            technical_spec: this.technical_spec,
+            ...(this.title_id && {title_id: this.title_id}),
+
             id_contract: this.id_contract,
             files: this.files,
             name_structure: this.name_structure,
@@ -61,6 +65,7 @@ export class OrderRegion implements Selectable {
             equipment_key: this.equipment_key,
             comment: (this.comment) ? this.comment : "",
             ...(this.rank && {rank: this.rank}),
+            technical_specs: (this.technical_spec != null) ? this.technical_spec.map((spec: TechnicalSpec) => spec.toJson()) : [],
             id_operation: this.id_operation,
         }
     }
@@ -105,12 +110,11 @@ export class OrderRegion implements Selectable {
         }
     }
 
-    async create() {
-        try {
-            return await http.post(`/lystore/region/order/`, this.toJson());
-        } catch (e) {
-            notify.error('lystore.order.create.err');
-            throw e;
+    initDataFromEquipment() {
+        if (this.equipment) {
+            this.summary = this.equipment.name;
+            this.image = this.equipment.image;
+
         }
     }
 }
@@ -118,5 +122,19 @@ export class OrderRegion implements Selectable {
 export class OrdersRegion extends Selection<OrderRegion> {
     constructor() {
         super([]);
+    }
+
+    async create() {
+        let orders = [];
+        this.all.map(order => {
+            order.initDataFromEquipment();
+            orders.push(order.toJson());
+        });
+        try {
+            return await http.post(`/lystore/region/orders/`, {orders: orders});
+        } catch (e) {
+            notify.error('lystore.order.create.err');
+            throw e;
+        }
     }
 }

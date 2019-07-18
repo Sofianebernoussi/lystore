@@ -104,7 +104,7 @@ public class DefaultStructureGroupService extends SqlCrudService implements Stru
 
     @Override
     public void listStructureGroupsByCampaign(Integer campaignId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT structure.id as id, name, description, array_to_json(array_agg(id_structure)) as structures " +
+        String query = "SELECT structure.id as id, name, description, array_to_json(array_agg(DISTINCT id_structure)) as structures " +
                 " FROM " + Lystore.lystoreSchema + ".structure_group  as structure " +
                 " INNER JOIN " + Lystore.lystoreSchema + ".rel_group_campaign" +
                 " on structure.id = rel_group_campaign.id_structure_group " +

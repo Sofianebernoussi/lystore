@@ -11,7 +11,7 @@
                 <select ng-model="orderToCreate.campaign"
                         class="six cell"
                         ng-change="updateCampaign()"
-                        ng-options="campaign.id as campaign.name for campaign in campaigns.all">
+                        ng-options="campaign as campaign.name for campaign in campaigns.all">
                     <option value="" disabled selected>[[translate('lystore.placeholder.campaign')]]</option>
                 </select>
             </div>
@@ -55,7 +55,7 @@
                     <td class="one">
                         [[translate('quantity')]]
                     </td>
-                    <td class="two" ng-if="orderToCreate.project.preference">
+                    <td class="two" ng-if="orderToCreate.campaign.orderPriorityEnable()">
                         [[translate('lystore.project.priority.order')]]
                     </td>
                     <td class="four">
@@ -115,6 +115,10 @@
                     </td>
                     <td class="one " ng-if="orderToCreate.project.preference">
                         <input ng-model="row.priority" type="number" min="0" step="1"/>
+                    </td>
+                    <td class="two" ng-if="orderToCreate.campaign.orderPriorityEnable()">
+                        <input class="input-in-row" ng-init="row.rank = 1" ng-model="row.rank" type="number"
+                               min="1" step="1"/>
                     </td>
                     <td class="three">
                         <input ng-model="row.comment" type="text"/>

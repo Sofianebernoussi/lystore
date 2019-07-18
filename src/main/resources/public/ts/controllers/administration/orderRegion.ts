@@ -25,8 +25,8 @@ export const orderRegionController = ng.controller('orderRegionController',
 
         $scope.updateCampaign = async () => {
             $scope.orderToCreate.project = undefined;
-            await $scope.titles.syncAdmin($scope.orderToCreate.campaign);
-            await $scope.structure_groups.syncByCampaign($scope.orderToCreate.campaign);
+            await $scope.titles.syncAdmin($scope.orderToCreate.campaign.id);
+            await $scope.structure_groups.syncByCampaign($scope.orderToCreate.campaign.id);
             let structures = new Structures();
             $scope.structure_groups.all.map(structureGR => {
                 structureGR.structures.map(structureId => {
@@ -219,7 +219,7 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
 
         $scope.switchStructure = async (row, structure) => {
-            await row.equipments.syncAll($scope.orderToCreate.campaign, (structure) ? structure.id : undefined);
+            await row.equipments.syncAll($scope.orderToCreate.campaign.id, (structure) ? structure.id : undefined);
             Utils.safeApply($scope);
 
         };
@@ -240,7 +240,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                     if (row.structure instanceof StructureGroup) {
                         row.structure.structures.map(s => {
                             let orderRegionTemp = new OrderRegion();
-                            orderRegionTemp.id_campaign = $scope.orderToCreate.campaign;
+                            orderRegionTemp.id_campaign = $scope.orderToCreate.campaign.id;
                             orderRegionTemp.id_structure = s;
                             orderRegionTemp.title_id = $scope.orderToCreate.project;
                             orderRegionTemp.id_operation = $scope.orderToCreate.operation;
@@ -252,13 +252,15 @@ export const orderRegionController = ng.controller('orderRegionController',
                             orderRegionTemp.name = row.equipment.name;
                             orderRegionTemp.technical_spec = row.equipment.technical_specs;
                             orderRegionTemp.id_contract = row.equipment.id_contract;
+                            if (row.rank)
+                                orderRegionTemp.rank = row.rank;
                             let struct = $scope.structures.all.find(struct => s.id === struct.id);
                             (struct) ? orderRegionTemp.name_structure = struct.name : orderRegionTemp.name_structure = "";
                             ordersToCreate.all.push(orderRegionTemp);
                         })
                     } else {
                         let orderRegionTemp = new OrderRegion();
-                        orderRegionTemp.id_campaign = $scope.orderToCreate.campaign;
+                        orderRegionTemp.id_campaign = $scope.orderToCreate.campaign.id;
                         orderRegionTemp.id_structure = row.structure.id;
                         orderRegionTemp.title_id = $scope.orderToCreate.project;
                         orderRegionTemp.equipment = row.equipment;
@@ -271,6 +273,8 @@ export const orderRegionController = ng.controller('orderRegionController',
                         orderRegionTemp.technical_spec = row.equipment.technical_specs;
                         orderRegionTemp.id_contract = row.equipment.id_contract;
                         orderRegionTemp.name_structure = row.structure.name;
+                        if (row.rank)
+                            orderRegionTemp.rank = row.rank;
                         ordersToCreate.all.push(orderRegionTemp);
                     }
                 }

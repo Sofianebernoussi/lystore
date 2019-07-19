@@ -94,7 +94,7 @@ export class Operations extends Selection<Operation>{
                 operation.label.toString() !== 'null' && operation.label !== null ?
                     operation.label = Mix.castAs(label, JSON.parse(operation.label.toString()))
                     : operation.label = new label();
-                operation.instruction !== null ?
+                operation.instruction ?
                     operation.instruction =  JSON.parse(operation.instruction.toString())
                     : operation.instruction = null;
             })

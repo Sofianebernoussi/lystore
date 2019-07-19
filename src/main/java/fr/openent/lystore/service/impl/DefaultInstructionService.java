@@ -123,26 +123,31 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
     }
 
     private void getOperationsWithIdInstruction(JsonArray IdInstructions, Handler<Either<String, JsonArray>> handler) {
-        String queryOperation = "SELECT operation.*, " +
+        String queryOperation = "SELECT " +
+                "operation.*, " +
                 "to_json(label_operation.*) AS label, " +
                 "count(oce.*) AS nbr_sub, " +
                 "( " +
-                "WITH value AS  " +
+                "WITH value_operation AS  " +
                 "( " +
                 "SELECT " +
+                "( " +
+                "SELECT " +
+                "SUM(ROUND(oco.price + ((oco.price *  oco.tax_amount) /100), 2) * oco.amount ) AS price_total_option " +
+                "FROM " + Lystore.lystoreSchema +".order_client_options oco WHERE id_order_client_equipment = oce.id ), " +
                 "CASE   " +
                 "WHEN ore.price is not null THEN ( ore.price * ore.amount ) " +
                 "WHEN oce.price_proposal is not NULL THEN ( oce.price_proposal * oce.amount ) " +
                 "ELSE (ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) " +
-                "END AS price_total " +
-                "FROM  lystore.order_client_equipment oce " +
-                "FULL JOIN  lystore.\"order-region-equipment\" ore on oce.id = ore.id_order_client_equipment  " +
-                "WHERE oce.id_operation = operation.id  " +
+                "END AS price_total_operation " +
+                "FROM  " + Lystore.lystoreSchema +".order_client_equipment oce " +
+                "FULL JOIN  " + Lystore.lystoreSchema +".\"order-region-equipment\" ore on oce.id = ore.id_order_client_equipment  " +
+                "WHERE oce.id_operation = operation.id OR ore.id_operation = operation.id " +
                 ") " +
-                "SELECT SUM(price_total) AS amount FROM value " +
+                "SELECT (SUM(price_total_operation) + SUM(price_total_option)) AS amount FROM value_operation " +
                 ")" +
                 "FROM " + Lystore.lystoreSchema +".operation " +
-                "INNER JOIN lystore.label_operation ON operation.id_label = label_operation.id " +
+                "INNER JOIN " + Lystore.lystoreSchema +".label_operation ON operation.id_label = label_operation.id " +
                 "LEFT JOIN " + Lystore.lystoreSchema +".order_client_equipment oce ON oce.id_operation = operation.id "+
                 "WHERE id_instruction IN " +
                 Sql.listPrepared(IdInstructions.getList()) +
@@ -152,36 +157,45 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
     }
 
     private void getAmountDemandOperation(JsonArray IdInstructions, Handler<Either<String, JsonArray>> handler) {
-        String queryAmount = "WITH valueFinal AS " +
+        String queryAmount = "WITH value_instruction AS " +
                 "( " +
                 "SELECT " +
                 "instruction.id, " +
                 "operation.id AS operation_id,  " +
                 "( " +
-                "WITH value AS  " +
+                "WITH value_operation AS " +
                 "( " +
                 "SELECT " +
-                "CASE   " +
-                "WHEN ore.price is not null THEN ( ore.price * ore.amount ) " +
-                "WHEN oce.price_proposal is not NULL THEN ( oce.price_proposal * oce.amount ) " +
-                "ELSE (ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) " +
-                "END AS price_total " +
-                "FROM   " + Lystore.lystoreSchema +".order_client_equipment oce " +
-                "FULL JOIN   " + Lystore.lystoreSchema +".\"order-region-equipment\" ore on oce.id = ore.id_order_client_equipment  " +
-                "WHERE oce.id_operation = operation.id  " +
+                "( " +
+                "SELECT " +
+                "SUM(ROUND(oco.price + ((oco.price *  oco.tax_amount) /100), 2) * oco.amount ) AS price_total_option " +
+                "FROM " + Lystore.lystoreSchema +".order_client_options oco WHERE id_order_client_equipment = oce.id ), " +
+                "oce.id, " +
+                "ore.id, " +
+                "CASE " +
+                "WHEN ore.price is not null THEN SUM( ore.price * ore.amount ) " +
+                "WHEN oce.price_proposal is not NULL THEN SUM( oce.price_proposal * oce.amount) " +
+                "ELSE SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) " +
+                "END AS price_total_operation " +
+                "FROM " + Lystore.lystoreSchema +".order_client_equipment oce " +
+                "FULL JOIN " + Lystore.lystoreSchema +".\"order-region-equipment\" ore on oce.id = ore.id_order_client_equipment " +
+                "WHERE oce.id_operation = operation.id OR ore.id_operation = operation.id " +
+                "GROUP BY (oce.id, ore.id ) " +
                 ") " +
-                "SELECT SUM(price_total) AS amountTempo FROM value " +
+                "SELECT (SUM(price_total_operation) + SUM(price_total_option)) AS price_total_operation FROM value_operation " +
                 ") " +
-                "FROM  " + Lystore.lystoreSchema +".instruction  " +
-                "INNER JOIN  " + Lystore.lystoreSchema +".operation ON (instruction.id = operation.id_instruction)  " +
-                "INNER JOIN  " + Lystore.lystoreSchema +".order_client_equipment oce ON (oce.id_operation = operation.id)  " +
-                "WHERE instruction.id IN " +
-                Sql.listPrepared(IdInstructions.getList()) + "  " +
+                "FROM " + Lystore.lystoreSchema +".instruction  " +
+                "INNER JOIN " + Lystore.lystoreSchema +".operation ON (instruction.id = operation.id_instruction)  " +
+                "INNER JOIN " + Lystore.lystoreSchema +".order_client_equipment oce ON (oce.id_operation = operation.id)  " +
+                "WHERE instruction.id IN  " +
+                Sql.listPrepared(IdInstructions.getList()) + " " +
                 "GROUP BY (instruction.id, operation_id ) " +
                 ") " +
-                "SELECT valueFinal.id, SUM (amountTempo) AS amount FROM valueFinal " +
-                "GROUP BY (valueFinal.id)";
-
+                "SELECT  " +
+                "value_instruction.id,  " +
+                "SUM (price_total_operation) AS amount  " +
+                "FROM value_instruction " +
+                "GROUP BY (value_instruction.id)";
 
         Sql.getInstance().prepared(queryAmount, IdInstructions, SqlResult.validResultHandler(handler));
     }

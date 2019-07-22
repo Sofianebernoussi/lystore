@@ -206,6 +206,11 @@ export const orderRegionController = ng.controller('orderRegionController',
             let row = JSON.parse(JSON.stringify($scope.orderToCreate.rows[index]));
             row.equipments = new Equipments();
 
+            if (row.structure.structures) {
+                row.structure = $scope.structure_groups.all.find(struct => row.structure.id === struct.id);
+            } else {
+                row.structure = $scope.structures.all.find(struct => row.structure.id === struct.id);
+            }
             $scope.orderToCreate.rows[index].equipments.forEach(equipment => {
                 row.equipments.push(equipment);
                 if (row.equipment.id === equipment.id)
@@ -221,6 +226,7 @@ export const orderRegionController = ng.controller('orderRegionController',
 
         $scope.switchStructure = async (row, structure) => {
             await row.equipments.syncAll($scope.orderToCreate.campaign.id, (structure) ? structure.id : undefined);
+            row.equipment = undefined;
             Utils.safeApply($scope);
 
         };

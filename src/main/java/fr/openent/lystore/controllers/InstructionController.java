@@ -1,7 +1,7 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
-import fr.openent.lystore.export.investissement.Instruction;
+import fr.openent.lystore.export.Instruction;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
@@ -107,7 +107,7 @@ public class InstructionController extends ControllerHelper {
         // Display a date in day, month, year format
         DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         String today = formatter.format(date);
-        new Instruction(Integer.parseInt(request.getParam("id"))).export(event -> {
+        new Instruction(Integer.parseInt(request.getParam("id"))).exportInvestissement(event -> {
             if (event.isLeft()) {
                 renderError(request);
             } else {
@@ -116,6 +116,28 @@ public class InstructionController extends ControllerHelper {
                         .putHeader("Content-Type", "application/vnd.ms-excel")
                         .putHeader("Content-Length", file.length() + "")
                         .putHeader("Content-Disposition", "filename=Récapitulatif_mesures_engagées_" + today + ".xlsx")
+                        .write(file);
+            }
+        });
+    }
+
+    @Get("/instructions/:id/exportEquipmentRapport")
+    @ApiDoc("Export given instruction")
+    public void exportRapportEquipment(HttpServerRequest request) {
+        java.util.Date date = Calendar.getInstance().getTime();
+
+        // Display a date in day, month, year format
+        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        String today = formatter.format(date);
+        new Instruction(Integer.parseInt(request.getParam("id"))).exportEquipmentRapp(event -> {
+            if (event.isLeft()) {
+                renderError(request);
+            } else {
+                Buffer file = event.right().getValue();
+                request.response()
+                        .putHeader("Content-Type", "application/vnd.ms-excel")
+                        .putHeader("Content-Length", file.length() + "")
+                        .putHeader("Content-Disposition", "filename=" + today + "EQUIPEMENT_RAPPORT" + ".xlsx")
                         .write(file);
             }
         });

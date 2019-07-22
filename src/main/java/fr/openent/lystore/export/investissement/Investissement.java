@@ -1,5 +1,6 @@
 package fr.openent.lystore.export.investissement;
 
+import fr.openent.lystore.export.TabHelper;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;

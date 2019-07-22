@@ -1,4 +1,4 @@
-package fr.openent.lystore.export.investissement;
+package fr.openent.lystore.export;
 
 import fr.openent.lystore.helpers.ExcelHelper;
 import fr.openent.lystore.service.impl.DefaultProjectService;

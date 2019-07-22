@@ -1,6 +1,7 @@
 package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.equipmentRapp.RecapTab;
 import fr.openent.lystore.export.investissement.*;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
@@ -119,7 +120,7 @@ public class Instruction {
 
     }
 
-    public void exportEquipmentRapp(Handler<Either<String, Buffer>> handler) {
+    public void exportEquipmentRapp(Handler<Either<String, Buffer>> handler, String type) {
         if (this.id == null) {
             log.error("Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
@@ -139,24 +140,14 @@ public class Instruction {
                     handler.handle(new Either.Left<>("Error when getting operations"));
                 } else {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
-                    String path = FileResolver.absolutePath("public/template/excel/templateEquipmentRapp.xlsx");
 
-                    try {
-                        FileInputStream templateInputStream = new FileInputStream(path);
-                        Workbook workbook = new XSSFWorkbook(templateInputStream);
+                    Workbook workbook = new XSSFWorkbook();
                         List<Future> futures = new ArrayList<>();
-//                        Future<Boolean> lyceeFuture = Future.future();
-//                        Future<Boolean> CMRFuture = Future.future();
-//                        Future<Boolean> CMDfuture = Future.future();
-//                        Future<Boolean> Fonctionnementfuture = Future.future();
-//                        Future<Boolean> RecapEPLEfuture = Future.future();
-//                        Future<Boolean> RecapImputationBudfuture = Future.future();
-//                        futures.add(lyceeFuture);
-//                        futures.add(CMRFuture);
-//                        futures.add(CMDfuture);
-//                        futures.add(Fonctionnementfuture);
-//                        futures.add(RecapEPLEfuture);
-//                        futures.add(RecapImputationBudfuture);
+//                    Future<Boolean> ListForTextFuture = Future.future();
+                    Future<Boolean> RecapFuture = Future.future();
+//                    futures.add(ListForTextFuture);
+                    futures.add(RecapFuture);
+//
                         CompositeFuture.all(futures).setHandler(event -> {
                             if (event.succeeded()) {
                                 try {
@@ -174,10 +165,9 @@ public class Instruction {
                                 handler.handle(new Either.Left<>("Error when resolving futures"));
                             }
                         });
-                    } catch (IOException e) {
-                        log.error("Xlsx Failed to read template");
-                        handler.handle(new Either.Left<>("Xlsx Failed to read template"));
-                    }
+//                    new ListForTextTab(workbook, instruction).create(getHandler(ListForTextFuture));
+                    new RecapTab(workbook, instruction, type).create(getHandler(RecapFuture));
+
                 }
             }
         }));

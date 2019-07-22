@@ -38,12 +38,22 @@ public abstract class TabHelper {
     protected JsonArray taby;
     protected ArrayList<ArrayList<Float>> priceTab;
 
+    /**
+     * open the tab or create it if it doesn't exists
+     *
+     * @param wb
+     * @param instruction
+     * @param TabName
+     */
     public TabHelper(Workbook wb, JsonObject instruction, String TabName) {
         this.wb = wb;
         this.tabx = new JsonObject();
         this.taby = new JsonArray();
         this.instruction = instruction;
         this.sheet = wb.getSheet(TabName);
+        if (wb.getSheetIndex(this.sheet) == -1) {
+            this.sheet = wb.createSheet(TabName);
+        }
         this.excel = new ExcelHelper(wb, sheet);
         priceTab = new ArrayList<ArrayList<Float>>();
     }
@@ -51,7 +61,12 @@ public abstract class TabHelper {
 
     public abstract void create(Handler<Either<String, Boolean>> handler);
 
-    public abstract void getPrograms(Handler<Either<String, JsonArray>> handler);
+    /**
+     * retrieve datas to insert into the page
+     *
+     * @param handler
+     */
+    public abstract void getDatas(Handler<Either<String, JsonArray>> handler);
 
 
     /**

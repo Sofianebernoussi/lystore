@@ -146,8 +146,15 @@
                     ng-click="exportRME(instructions.selected[0])"
                     download
             >
-                <i18n>lystore.exportRME</i18n>
-            </button>
+                <i18n>lystore.exportEquipmentRapp</i18n>
+                <button
+                        ng-disabled="instructions.selected[0].operations.length === 0"
+                        ng-show="instructions.selected.length === 1"
+                        ng-click="exportRME(instructions.selected[0])"
+                        download
+                >
+                    <i18n>lystore.exportRME</i18n>
+                </button>
             <button
                     ng-click="openLightboxDeleteInstruction()"
             >

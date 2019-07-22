@@ -500,6 +500,7 @@
   "lystore.order.create": "Créer une demande",
   "lystore.placeholder.structureGroup": "Sélectionner le regroupement",
   "lystore.order.region.create.message": "Les commandes ont bien été enregistré",
-  "lystore.admin.order.create.err": "Erreur lors de la création de la commande"
+  "lystore.admin.order.create.err": "Erreur lors de la création de la commande",
+  "lystore.exportEquipmentRapp": "Export Equipement_Rapport"
 
 }

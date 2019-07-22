@@ -121,11 +121,11 @@ public class InstructionController extends ControllerHelper {
         });
     }
 
-    @Get("/instructions/:id/exportEquipmentRapport")
+    @Get("/instructions/export/equipment/rapport/:id/:type")
     @ApiDoc("Export given instruction")
     public void exportRapportEquipment(HttpServerRequest request) {
         java.util.Date date = Calendar.getInstance().getTime();
-
+        String type = request.getParam("type");
         // Display a date in day, month, year format
         DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         String today = formatter.format(date);
@@ -140,6 +140,6 @@ public class InstructionController extends ControllerHelper {
                         .putHeader("Content-Disposition", "filename=" + today + "EQUIPEMENT_RAPPORT" + ".xlsx")
                         .write(file);
             }
-        });
+        }, type);
     }
 }

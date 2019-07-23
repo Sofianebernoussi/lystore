@@ -31,7 +31,7 @@ public class RecapTab extends TabHelper {
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
-        setLabels();
+//        setLabels();
         getDatas(event -> {
             if (event.isLeft()) {
                 log.error("Failed to retrieve programs");
@@ -108,18 +108,25 @@ public class RecapTab extends TabHelper {
     }
 
     @Override
-    protected void setArray(JsonArray programs) {
-
+    protected void setArray(JsonArray datas) {
+        int cellLabelColumn = 0;
         int programRowNumber = 0;
-        if (programs.isEmpty()) {
+        if (datas.isEmpty()) {
             return;
         }
         Row programRow = sheet.createRow(programRowNumber);
         Row typeRow = sheet.createRow(programRowNumber + 1);
 
-        for (int i = 0; i < programs.size(); i++) {
-            JsonObject program = programs.getJsonObject(i);
-            String actionsStrToArray = program.getString(actionStr);
+        for (int i = 0; i < datas.size(); i++) {
+
+            JsonObject operation = datas.getJsonObject(i);
+            String actionsStrToArray = operation.getString(actionStr);
+
+            Row operationRow = sheet.createRow(this.operationsRowNumber);
+            excel.insertLabel(operationRow, cellLabelColumn, operation.getString("label"));
+
+            this.operationsRowNumber++;
+
             JsonArray actions = new JsonArray(actionsStrToArray);
             if (actions.isEmpty()) continue;
             for (int j = 0; j < actions.size(); j++) {
@@ -134,7 +141,7 @@ public class RecapTab extends TabHelper {
         excel.insertHeader(typeRow, cellColumn, ExcelHelper.totalLabel);
         excel.fillTab(xTab + 1, this.cellColumn, yTab + 2, this.operationsRowNumber);
 
-        for (int i = 0; i < programs.size(); i++) {
+        for (int i = 0; i < datas.size(); i++) {
             excel.setTotalY(yTab + 1, cellColumn - 1, programRowNumber + 2 + i, cellColumn);
         }
 

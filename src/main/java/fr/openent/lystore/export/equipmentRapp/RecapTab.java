@@ -89,7 +89,7 @@ public class RecapTab extends TabHelper {
                 "        INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)" +
                 "        INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)" +
                 "        WHERE instruction.id = ?" +
-                "     AND structure_program_action.structure_type =  'LYC'" +
+                "     AND structure_program_action.structure_type =  '" + this.type + "'" +
                 " Group by  program.name,contract_type.code, contract_type.name , program_action.id, oce.id_operation " +
                 " order by  program.name,id_program,code,oce.id_operation) " +
                 " SELECT label.label , array_to_json(array_agg(values)) as actions " +

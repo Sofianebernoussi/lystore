@@ -250,6 +250,7 @@ public class ExcelHelper {
         cell.setCellFormula(data);
         cell.setCellStyle(this.currencyStyle);
         sheet.autoSizeColumn(cellColumn);
+
     }
 
     /**
@@ -261,18 +262,32 @@ public class ExcelHelper {
      */
     public void insertCellTabFloat(int cellColumn, int line, float data) {
         Row tab;
-        tab = sheet.getRow(line);
-        Cell cell = tab.createCell(cellColumn);
-        cell.setCellValue(data);
-        cell.setCellStyle(this.tabNumeralStyle);
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.tabNumeralStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.tabNumeralStyle);
+        }
     }
 
     public void insertCellTabFloatWithPrice(int cellColumn, int line, float data) {
         Row tab;
-        tab = sheet.getRow(line);
-        Cell cell = tab.createCell(cellColumn);
-        cell.setCellValue(data);
-        cell.setCellStyle(this.tabCurrencyStyle);
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.tabCurrencyStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.tabCurrencyStyle);
+        }
     }
     /**
      * insert a cell in the tab
@@ -283,10 +298,18 @@ public class ExcelHelper {
      */
     public void insertCellTab(int cellColumn, int line, String data) {
         Row tab;
-        tab = sheet.getRow(line);
-        Cell cell = tab.createCell(cellColumn);
-        cell.setCellValue(data);
-        cell.setCellStyle(this.tabStringStyle);
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.tabStringStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.tabStringStyle);
+        }
+
     }
 
     /**
@@ -298,10 +321,18 @@ public class ExcelHelper {
      */
     public void insertCellTabInt(int cellColumn, int line, int data) {
         Row tab;
-        tab = sheet.getRow(line);
-        Cell cell = tab.createCell(cellColumn);
-        cell.setCellValue(data);
-        cell.setCellStyle(this.tabNumeralStyle);
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.tabNumeralStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.tabNumeralStyle);
+        }
+
     }
 
     public void insertCellTabCenter(int cellColumn, int line, String data) {
@@ -323,16 +354,29 @@ public class ExcelHelper {
         Row tab;
         Cell cell;
         for (int line = lineStart; line < lineEnd; line++) {
-            tab = sheet.getRow(line);
-            for (int column = columnStart; column < columnEnd; column++) {
-                try {
-                    cell = tab.getCell(column);
-                    cell.setCellStyle(this.tabNumeralStyle);
-                } catch (NullPointerException e) {
-                    cell = tab.createCell(column);
-                    cell.setCellStyle(this.tabNumeralStyle);
-                }
+            try {
+                tab = sheet.getRow(line);
 
+                for (int column = columnStart; column < columnEnd; column++) {
+                    try {
+                        cell = tab.getCell(column);
+                        cell.setCellStyle(this.tabNumeralStyle);
+                    } catch (NullPointerException e) {
+                        cell = tab.createCell(column);
+                        cell.setCellStyle(this.tabNumeralStyle);
+                    }
+                }
+            } catch (NullPointerException e) {
+                tab = sheet.createRow(line);
+                for (int column = columnStart; column < columnEnd; column++) {
+                    try {
+                        cell = tab.getCell(column);
+                        cell.setCellStyle(this.tabNumeralStyle);
+                    } catch (NullPointerException ee) {
+                        cell = tab.createCell(column);
+                        cell.setCellStyle(this.tabNumeralStyle);
+                    }
+                }
             }
         }
     }
@@ -349,6 +393,19 @@ public class ExcelHelper {
         cellStartSum = tabStart.getCell(column);
         cellEndSum = tabEnd.getCell(column);
         cell.setCellStyle(this.tabCurrencyStyle);
+        cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
+
+    }
+
+    public void setTotalY(int columnStart, int columnEnd, int line, int columnInsert) {
+        Row tab, tabStart, tabEnd;
+        tab = sheet.getRow(line);
+        Cell cell, cellStartSum, cellEndSum;
+        cell = tab.createCell(columnInsert);
+        cellStartSum = tab.getCell(columnStart);
+        cellEndSum = tab.getCell(columnEnd);
+        cell.setCellStyle(this.tabCurrencyStyle);
+        cell.setCellValue("total");
         cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
 
     }

@@ -9,7 +9,7 @@ export const instructionController = ng.controller('instructionController',
 
         $scope.sort = {
             instruction : {
-                type: 'name',
+                type: 'object',
                 reverse: false
             }
         };
@@ -41,6 +41,7 @@ export const instructionController = ng.controller('instructionController',
                 $scope.instruction.operations = [];
             } else if (action === 'edit'){
                 $scope.instruction = $scope.instructions.selected[0];
+                await $scope.instruction.getOperations($scope.instruction.id);
                 $scope.isOperationEdit = true;
                 $scope.operations.all = $scope.operations.all
                     .filter(operation => operation.id_instruction !== $scope.instruction.id);

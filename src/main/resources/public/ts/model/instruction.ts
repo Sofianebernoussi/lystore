@@ -1,8 +1,9 @@
 import {Mix, Selectable, Selection} from 'entcore-toolkit';
 import {moment, notify} from 'entcore';
 import http from 'axios';
-import {Operation} from "./operation";
+import {label, Operation} from "./operation";
 import {Utils} from "./Utils";
+import {OrderClient} from "./OrderClient";
 
 // import {window} from "../controllers/administration/orders";
 
@@ -61,6 +62,22 @@ export class Instruction implements Selectable {
         };
     }
 
+    async getOperations(idOperation) {
+        try {
+            const {data} = await http.get(`/lystore/instruction/${idOperation}/operations`);
+            this.operations = Mix.castArrayAs(Operation, data);
+            this.operations.forEach(operation => {
+                operation.label.toString() !== 'null' && operation.label !== null ?
+                    operation.label = Mix.castAs(label, JSON.parse(operation.label.toString()))
+                    : operation.label = new label();
+                    operation.status = operation.status? true : false;
+                });
+        } catch (e) {
+            notify.error("lystore.instruction.get.err");
+            throw e;
+        }
+    }
+
     s2ab(s) {
         var buf = new ArrayBuffer(s.length);
         var view = new Uint8Array(buf);
@@ -109,11 +126,6 @@ export class Instructions extends Selection<Instruction>{
             this.all.forEach(instructionGet => {
                 instructionGet.exercise = Mix.castAs(Exercise, JSON.parse(instructionGet.exercise.toString()));
                 instructionGet.date_cp = moment(instructionGet.date_cp);
-                instructionGet.operations
-                    .forEach(operation => {
-                        operation.label = JSON.parse(operation.label.toString());
-                        operation.status = operation.status? true : false;
-                    });
             })
         } catch (e) {
             notify.error('lystore.instruction.get.err');

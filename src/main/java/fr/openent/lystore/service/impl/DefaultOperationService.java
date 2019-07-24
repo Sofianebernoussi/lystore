@@ -3,6 +3,7 @@ package fr.openent.lystore.service.impl;
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.helpers.FutureHelper;
 import fr.openent.lystore.service.OperationService;
+import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -17,7 +18,10 @@ import org.entcore.common.sql.SqlResult;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static fr.openent.lystore.service.impl.SqlUtils.getAllPriceOperation;
 
 public class DefaultOperationService extends SqlCrudService implements OperationService {
 
@@ -39,7 +43,6 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 if (i > 0) {
                     filter += "AND ";
                 }
-
                 filter += "(LOWER(label.label) ~ LOWER(?) OR LOWER(o.order_number) ~ LOWER(?)) ";
             }
         }
@@ -54,26 +57,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
             }
         }
 
-        String queryOperation =  "SELECT " +
-                "( " +
-                "WITH value_operation AS  " +
-                "( " +
-                "SELECT " +
-                "( " +
-                "SELECT " +
-                "SUM(ROUND(oco.price + ((oco.price *  oco.tax_amount) /100), 2) * oco.amount ) AS price_total_option " +
-                "FROM " + Lystore.lystoreSchema +".order_client_options oco WHERE id_order_client_equipment = oce.id ), " +
-                "CASE  " +
-                "WHEN ore.price is not null THEN ( ore.price * ore.amount ) " +
-                "WHEN oce.price_proposal is not NULL THEN ( oce.price_proposal * oce.amount ) " +
-                "ELSE (ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) " +
-                "END AS price_total_operation " +
-                "FROM  " + Lystore.lystoreSchema +".order_client_equipment oce " +
-                "FULL JOIN  " + Lystore.lystoreSchema +".\"order-region-equipment\" ore on oce.id = ore.id_order_client_equipment  " +
-                "WHERE oce.id_operation = operation.id OR ore.id_operation = operation.id " +
-                ") " +
-                "SELECT (SUM(price_total_operation) + SUM(price_total_option)) AS amount FROM value_operation " +
-                ")," +
+        String queryOperation = "SELECT " +
                 "operation.* , " +
                 "to_json(label.*) as label, " +
                 "count(oce.*) as nbr_sub, " +
@@ -96,16 +80,13 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                         handler.handle(new Either.Right<>(operations));
                         return;
                     }
-                    JsonArray idsOperations = new JsonArray();
-                    for (int i = 0; i < operations.size(); i++) {
-                        JsonObject operation = operations.getJsonObject(i);
-                        idsOperations.add(operation.getInteger("id"));
-                    }
+                    JsonArray idsOperations = SqlQueryUtils.getArrayAllIdsResult(operations);
 
                     Future<JsonArray> getCountOrderInOperationFuture = Future.future();
                     Future<JsonArray> getInstructionForOperationFuture = Future.future();
+                    Future<JsonArray> getAllPriceOperationFuture = Future.future();
 
-                    CompositeFuture.all(getCountOrderInOperationFuture, getInstructionForOperationFuture).setHandler(asyncEvent -> {
+                    CompositeFuture.all(getCountOrderInOperationFuture, getInstructionForOperationFuture, getAllPriceOperationFuture).setHandler(asyncEvent -> {
                         if (asyncEvent.failed()) {
                             String message = "Failed to retrieve operation";
                             handler.handle(new Either.Left<>(message));
@@ -114,7 +95,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
 
                         JsonArray getOrderCount = getCountOrderInOperationFuture.result();
                         JsonArray getInstruction = getInstructionForOperationFuture.result();
-
+                        JsonArray getSumPriceOperation = getAllPriceOperationFuture.result();
                         JsonArray operationFinalSend = new JsonArray();
                         for (int i = 0; i < operations.size(); i++) {
                             JsonObject operation = operations.getJsonObject(i);
@@ -130,13 +111,21 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                                     operation.put("instruction", instruction.getString("instruction"));
                                 }
                             }
+                            for (int j = 0; j < getSumPriceOperation.size(); j++) {
+                                JsonObject sumPriceOperation = getSumPriceOperation.getJsonObject(j);
+                                if (operation.getInteger("id").equals(sumPriceOperation.getInteger("id"))) {
+                                    operation.put("amount", sumPriceOperation.getString("amount"));
+                                }
+                            }
                             operationFinalSend.add(operation);
                         }
                         handler.handle(new Either.Right<>(operationFinalSend));
                     });
 
-                    getCountOrderInOperation(idsOperations, FutureHelper.handlerJsonArray(getCountOrderInOperationFuture));
+                    SqlUtils.getCountOrderInOperation(idsOperations, FutureHelper.handlerJsonArray(getCountOrderInOperationFuture));
                     getInstructionForOperation(idsOperations, FutureHelper.handlerJsonArray(getInstructionForOperationFuture));
+                    getAllPriceOperation(idsOperations, FutureHelper.handlerJsonArray(getAllPriceOperationFuture));
+
 
                 } else {
                     handler.handle(new Either.Left<>("404"));
@@ -148,42 +137,6 @@ public class DefaultOperationService extends SqlCrudService implements Operation
         }));
     }
 
-    private void getCountOrderInOperation(JsonArray idsOperations, Handler<Either<String, JsonArray>> handler){
-        JsonArray idsOperationsMergeTwoArray = new JsonArray();
-        int NUMBER_COPY = 2;
-
-        for(int i = 0; i < NUMBER_COPY; i++) {
-            for(int j = 0;j<idsOperations.size();j++) {
-                idsOperationsMergeTwoArray.add(idsOperations.getInteger(j));
-            }
-        }
-
-        String queryGetTotalOperation = "SELECT " +
-                "id, " +
-                "SUM(nb_orders) AS nbr_sub " +
-                "FROM ( " +
-                "SELECT  " +
-                "oce.id_operation AS id, " +
-                "count(*)  AS nb_orders " +
-                "FROM  " + Lystore.lystoreSchema + ".order_client_equipment AS oce " +
-                "WHERE oce.id_operation IN " +
-                Sql.listPrepared(idsOperations.getList()) + " " +
-                "GROUP BY (oce.id_operation) " +
-                "UNION  " +
-                "SELECT " +
-                "ore.id_operation AS id,  " +
-                "count (*) AS nb_orders " +
-                "FROM  " + Lystore.lystoreSchema + ".\"order-region-equipment\" AS ore " +
-                "WHERE ore.id_operation IN " +
-                Sql.listPrepared(idsOperations.getList()) + " " +
-                "AND ore.id_order_client_equipment IS NULL " +
-                "GROUP BY (ore.id_operation) " +
-                ") " +
-                "AS operation  " +
-                "GROUP BY (operation.id)";
-
-        Sql.getInstance().prepared(queryGetTotalOperation, idsOperationsMergeTwoArray, SqlResult.validResultHandler(handler));
-    }
 
 
     private void getInstructionForOperation(JsonArray idsOperations, Handler<Either<String, JsonArray>> handler){

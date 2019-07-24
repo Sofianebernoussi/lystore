@@ -3,6 +3,7 @@ package fr.openent.lystore.service.impl;
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.helpers.FutureHelper;
 import fr.openent.lystore.service.InstructionService;
+import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -15,6 +16,7 @@ import org.entcore.common.sql.SqlResult;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DefaultInstructionService  extends SqlCrudService implements InstructionService {
@@ -68,49 +70,25 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                         handler.handle(new Either.Right<>(instructions));
                         return;
                     }
-                    JsonArray idsInstructions = new JsonArray();
-                    for (int i = 0; i < instructions.size(); i++) {
-                        JsonObject instruction = instructions.getJsonObject(i);
-                        idsInstructions.add(instruction.getInteger("id"));
-                    }
+                    JsonArray idsInstructions = SqlQueryUtils.getArrayAllIdsResult(instructions);
+                    Future<JsonArray> getSumOperationsFutur = Future.future();
 
-                    Future<JsonArray> operationsWithIdInstructionFuture = Future.future();
-                    Future<JsonArray> amountDemandOperationFuture = Future.future();
+                    List<Future> futursArray = new ArrayList<>();
+                    futursArray.add(getSumOperationsFutur);
 
-                    CompositeFuture.all(operationsWithIdInstructionFuture, amountDemandOperationFuture).setHandler(asyncEvent -> {
+                    CompositeFuture.join( futursArray ).setHandler(asyncEvent -> {
                         if (asyncEvent.failed()) {
                             String message = "Failed to retrieve instructions";
                             handler.handle(new Either.Left<>(message));
                             return;
                         }
 
-                        JsonArray getOperations = operationsWithIdInstructionFuture.result();
-                        JsonArray getAmountsDemands = amountDemandOperationFuture.result();
-
-                        JsonArray getInstructions = new JsonArray();
-                        for (int i = 0; i < instructions.size(); i++) {
-                            JsonObject instruction = instructions.getJsonObject(i);
-                            for (int j = 0; j < getAmountsDemands.size(); j++){
-                                JsonObject amountDemand = getAmountsDemands.getJsonObject(j);
-                                if(instruction.getInteger("id").equals(amountDemand.getInteger("id"))){
-                                    instruction.put("amount", amountDemand.getString("amount"));
-                                }
-                            }
-                            JsonArray operations = new JsonArray();
-                            for (int k = 0; k < getOperations.size(); k++){
-                                JsonObject operation = getOperations.getJsonObject(k);
-                                if(instruction.getInteger("id").equals(operation.getInteger("id_instruction"))){
-                                    operations.add(operation);
-                                }
-                            }
-                            instruction.put("operations", operations);
-                            getInstructions.add(instruction);
-                        }
-                        handler.handle(new Either.Right<>(getInstructions));
+                        JsonArray getSumOperations = getSumOperationsFutur.result();
+                        JsonArray instructionsResult =  SqlQueryUtils.addDataByIdJoin(instructions, getSumOperations,"amount");
+                        handler.handle(new Either.Right<>(instructionsResult));
                     });
 
-                    getOperationsWithIdInstruction(idsInstructions, FutureHelper.handlerJsonArray(operationsWithIdInstructionFuture));
-                    getAmountDemandOperation(idsInstructions, FutureHelper.handlerJsonArray(amountDemandOperationFuture));
+                    SqlUtils.getSumOperations(idsInstructions, FutureHelper.handlerJsonArray(getSumOperationsFutur));
 
                 } else {
                     handler.handle(new Either.Left<>("404"));
@@ -122,41 +100,76 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
         }));
     }
 
-    private void getOperationsWithIdInstruction(JsonArray IdInstructions, Handler<Either<String, JsonArray>> handler) {
+    public void getOperationOfInstruction(Integer IdInstruction, Handler<Either<String, JsonArray>> handler) {
+        JsonArray idInstructionParams = new JsonArray().add(IdInstruction);
+
         String queryOperation = "SELECT " +
                 "operation.*, " +
-                "to_json(label_operation.*) AS label, " +
-                "count(oce.*) AS nbr_sub, " +
-                "( " +
-                "WITH value_operation AS  " +
-                "( " +
-                "SELECT " +
-                "( " +
-                "SELECT " +
-                "SUM(ROUND(oco.price + ((oco.price *  oco.tax_amount) /100), 2) * oco.amount ) AS price_total_option " +
-                "FROM " + Lystore.lystoreSchema +".order_client_options oco WHERE id_order_client_equipment = oce.id ), " +
-                "CASE   " +
-                "WHEN ore.price is not null THEN ( ore.price * ore.amount ) " +
-                "WHEN oce.price_proposal is not NULL THEN ( oce.price_proposal * oce.amount ) " +
-                "ELSE (ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) " +
-                "END AS price_total_operation " +
-                "FROM  " + Lystore.lystoreSchema +".order_client_equipment oce " +
-                "FULL JOIN  " + Lystore.lystoreSchema +".\"order-region-equipment\" ore on oce.id = ore.id_order_client_equipment  " +
-                "WHERE oce.id_operation = operation.id OR ore.id_operation = operation.id " +
-                ") " +
-                "SELECT (SUM(price_total_operation) + SUM(price_total_option)) AS amount FROM value_operation " +
-                ")" +
+                "to_json(label_operation.*) AS label " +
                 "FROM " + Lystore.lystoreSchema +".operation " +
                 "INNER JOIN " + Lystore.lystoreSchema +".label_operation ON operation.id_label = label_operation.id " +
-                "LEFT JOIN " + Lystore.lystoreSchema +".order_client_equipment oce ON oce.id_operation = operation.id "+
-                "WHERE id_instruction IN " +
-                Sql.listPrepared(IdInstructions.getList()) +
-                " GROUP BY (operation.id, label_operation.id)";
+                "LEFT JOIN " + Lystore.lystoreSchema +".order_client_equipment oce ON oce.id_operation = operation.id " +
+                "WHERE id_instruction = ? " +
+                "GROUP BY (operation.id, label_operation.id)";
 
-        Sql.getInstance().prepared(queryOperation, IdInstructions, SqlResult.validResultHandler(handler));
+        sql.getInstance().prepared(queryOperation, idInstructionParams, SqlResult.validResultHandler(eventOperation -> {
+            try{
+                if (eventOperation.isRight()) {
+                    JsonArray operations = eventOperation.right().getValue();
+                    if (operations.size() == 0) {
+                        handler.handle(new Either.Right<>(operations));
+                        return;
+                    }
+                    JsonArray idsOperations = SqlQueryUtils.getArrayAllIdsResult(operations);
+
+                    Future<JsonArray> getCountOrderInOperationFuture = Future.future();
+                    Future<JsonArray> getAllPriceOperationFuture = Future.future();
+
+                    CompositeFuture.all( getCountOrderInOperationFuture, getAllPriceOperationFuture ).setHandler(asyncEvent -> {
+                        if (asyncEvent.failed()) {
+                            String message = "Failed to retrieve instructions";
+                            handler.handle(new Either.Left<>(message));
+                            return;
+                        }
+                        JsonArray operationsFinal = new JsonArray();
+                        JsonArray getNbrOrder = getCountOrderInOperationFuture.result();
+                        JsonArray getAmountsDemands = getAllPriceOperationFuture.result();
+
+                        for (int i = 0; i < operations.size(); i++) {
+                            JsonObject operation = operations.getJsonObject(i);
+                            for (int j = 0; j < getNbrOrder.size(); j++) {
+                                JsonObject countOrders = getNbrOrder.getJsonObject(j);
+                                if (operation.getInteger("id").equals(countOrders.getInteger("id"))) {
+                                    operation.put("nbr_sub", countOrders.getString("nbr_sub"));
+                                }
+                            }
+                            for (int j = 0; j < getAmountsDemands.size(); j++) {
+                                JsonObject amountDemand = getAmountsDemands.getJsonObject(j);
+                                if (operation.getInteger("id").equals(amountDemand.getInteger("id"))) {
+                                    operation.put("amount", amountDemand.getString("amount"));
+                                }
+                            }
+                            operationsFinal.add(operation);
+                        }
+                        handler.handle(new Either.Right<>(operationsFinal));
+                    });
+
+                    SqlUtils.getCountOrderInOperation(idsOperations,  FutureHelper.handlerJsonArray(getCountOrderInOperationFuture));
+                    SqlUtils.getAllPriceOperation(idsOperations,  FutureHelper.handlerJsonArray(getAllPriceOperationFuture));
+
+                }
+            } catch ( Exception e){
+                LOGGER.error("An error when you want get all instructions", e);
+                handler.handle(new Either.Left<>("404"));
+            }
+
+        }));
     }
 
     private void getAmountDemandOperation(JsonArray IdInstructions, Handler<Either<String, JsonArray>> handler) {
+
+
+
         String queryAmount = "WITH value_instruction AS " +
                 "( " +
                 "SELECT " +

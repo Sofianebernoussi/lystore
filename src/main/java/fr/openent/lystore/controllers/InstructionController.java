@@ -142,4 +142,11 @@ public class InstructionController extends ControllerHelper {
             }
         }, type);
     }
+
+    @Get("/instruction/:id/operations")
+    @ApiDoc("List all operation of instruction")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void getOperationOfInstruction(HttpServerRequest request) {
+        instructionService.getOperationOfInstruction(Integer.parseInt(request.getParam("id")), arrayResponseHandler(request));
+    }
 }

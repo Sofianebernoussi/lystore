@@ -18,4 +18,6 @@ public interface InstructionService {
     void updateInstruction(Integer id, JsonObject instruction, Handler<Either<String, JsonObject>> handler);
 
     void deleteInstruction(JsonArray instructionIds,  Handler<Either<String, JsonObject>> handler);
+
+    void getOperationOfInstruction(Integer IdInstruction,  Handler<Either<String, JsonArray>> handler);
 }

@@ -1,6 +1,8 @@
 package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.equipmentRapp.ComptaTab;
+import fr.openent.lystore.export.equipmentRapp.ListForTextTab;
 import fr.openent.lystore.export.equipmentRapp.RecapTab;
 import fr.openent.lystore.export.investissement.*;
 import fr.openent.lystore.service.impl.DefaultProjectService;
@@ -143,11 +145,14 @@ public class Instruction {
 
                     Workbook workbook = new XSSFWorkbook();
                         List<Future> futures = new ArrayList<>();
-//                    Future<Boolean> ListForTextFuture = Future.future();
+                    Future<Boolean> ListForTextFuture = Future.future();
                     Future<Boolean> RecapFuture = Future.future();
-//                    futures.add(ListForTextFuture);
+                    Future<Boolean> ComptaFuture = Future.future();
+
+                    futures.add(ListForTextFuture);
                     futures.add(RecapFuture);
-//
+                    futures.add(ComptaFuture);
+
                         CompositeFuture.all(futures).setHandler(event -> {
                             if (event.succeeded()) {
                                 try {
@@ -165,7 +170,8 @@ public class Instruction {
                                 handler.handle(new Either.Left<>("Error when resolving futures"));
                             }
                         });
-//                    new ListForTextTab(workbook, instruction).create(getHandler(ListForTextFuture));
+                    new ComptaTab(workbook, instruction, type).create(getHandler(ComptaFuture));
+                    new ListForTextTab(workbook, instruction, type).create(getHandler(ListForTextFuture));
                     new RecapTab(workbook, instruction, type).create(getHandler(RecapFuture));
 
                 }

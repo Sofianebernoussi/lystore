@@ -321,6 +321,25 @@ public class ExcelHelper {
         }
     }
 
+    public void insertHeader(int line, int cellColumn, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.headCellStyle);
+            sheet.autoSizeColumn(cellColumn);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.headCellStyle);
+            sheet.autoSizeColumn(cellColumn);
+        }
+
+
+    }
+
     public void insertCellTabFloatWithPrice(int cellColumn, int line, float data) {
         Row tab;
         try {

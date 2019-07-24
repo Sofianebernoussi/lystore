@@ -1,6 +1,7 @@
 package fr.openent.lystore.export.investissement;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.TabHelper;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
@@ -25,7 +26,7 @@ public class RecapImputationBud extends TabHelper {
 
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
-        getPrograms(event -> {
+        getDatas(event -> {
             if (event.isLeft()) {
                 handler.handle(new Either.Left<>("Failed to retrieve programs"));
                 return;
@@ -74,7 +75,7 @@ public class RecapImputationBud extends TabHelper {
     }
 
     @Override
-    public void getPrograms(Handler<Either<String, JsonArray>> handler) {
+    public void getDatas(Handler<Either<String, JsonArray>> handler) {
         query = "SELECT  program_action.action as action_code, program.section, program_action.description as action_name,program_action.id as action_id , program.name as program_name,program.id as program_id,  " +
                 "program.label as program_label, program.functional_code, program.chapter,chapter.label as chapter_label, functional_code.label as code_label, " +
                 " SUM(CASE WHEN oce.price_proposal is not null THEN oce.price_proposal *  oce.amount ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 END) as Total   " +

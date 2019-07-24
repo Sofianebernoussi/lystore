@@ -1,6 +1,10 @@
-package fr.openent.lystore.export.investissement;
+package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.equipmentRapp.ComptaTab;
+import fr.openent.lystore.export.equipmentRapp.ListForTextTab;
+import fr.openent.lystore.export.equipmentRapp.RecapTab;
+import fr.openent.lystore.export.investissement.*;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.data.FileResolver;
@@ -25,7 +29,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Instruction {
-
+    private final String operationsId = "WITH operations AS (" +
+            "SELECT operation.id, label_operation.label, operation.id_instruction " +
+            "FROM " + Lystore.lystoreSchema + ".operation " +
+            "INNER JOIN " + Lystore.lystoreSchema + ".label_operation ON (operation.id_label = label_operation.id) " +
+            "WHERE id_instruction = ? " +
+            ")" +
+            "SELECT instruction.*, array_to_json(array_agg(operations)) as operations " +
+            "FROM " + Lystore.lystoreSchema + ".instruction " +
+            "INNER JOIN operations ON (operations.id_instruction = instruction.id) " +
+            "WHERE instruction.id = ? " +
+            "GROUP BY instruction.id";
     private Integer id;
 
     private Logger log = LoggerFactory.getLogger(DefaultProjectService.class);
@@ -34,26 +48,14 @@ public class Instruction {
         this.id = instructionId;
     }
 
-    public void export(Handler<Either<String, Buffer>> handler) {
+    public void exportInvestissement(Handler<Either<String, Buffer>> handler) {
         if (this.id == null) {
             log.error("Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
 
-        String query = "WITH operations AS (" +
-                "SELECT operation.id, label_operation.label, operation.id_instruction " +
-                "FROM " + Lystore.lystoreSchema + ".operation " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".label_operation ON (operation.id_label = label_operation.id) " +
-                "WHERE id_instruction = ? " +
-                ")" +
-                "SELECT instruction.*, array_to_json(array_agg(operations)) as operations " +
-                "FROM " + Lystore.lystoreSchema + ".instruction " +
-                "INNER JOIN operations ON (operations.id_instruction = instruction.id) " +
-                "WHERE instruction.id = ? " +
-                "GROUP BY instruction.id";
 
-
-        Sql.getInstance().prepared(query, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
+        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
                 log.error("Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
@@ -66,7 +68,7 @@ public class Instruction {
                     handler.handle(new Either.Left<>("Error when getting operations"));
                 } else {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
-                    String path = FileResolver.absolutePath("./public/template/excel/template.xlsx");
+                    String path = FileResolver.absolutePath("public/template/excel/templateInvestissement.xlsx");
 
                     try {
                         FileInputStream templateInputStream = new FileInputStream(path);
@@ -120,6 +122,64 @@ public class Instruction {
 
     }
 
+    public void exportEquipmentRapp(Handler<Either<String, Buffer>> handler, String type) {
+        if (this.id == null) {
+            log.error("Instruction identifier is not nullable");
+            handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
+        }
+
+
+        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
+            if (either.isLeft()) {
+                log.error("Error when getting sql datas ");
+                handler.handle(new Either.Left<>("Error when getting sql datas "));
+            } else {
+
+                JsonObject instruction = either.right().getValue();
+                String operationStr = "operations";
+                if (!instruction.containsKey(operationStr)) {
+                    log.error("Error when getting operations");
+                    handler.handle(new Either.Left<>("Error when getting operations"));
+                } else {
+                    instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
+
+                    Workbook workbook = new XSSFWorkbook();
+                        List<Future> futures = new ArrayList<>();
+                    Future<Boolean> ListForTextFuture = Future.future();
+                    Future<Boolean> RecapFuture = Future.future();
+                    Future<Boolean> ComptaFuture = Future.future();
+
+                    futures.add(ListForTextFuture);
+                    futures.add(RecapFuture);
+                    futures.add(ComptaFuture);
+
+                        CompositeFuture.all(futures).setHandler(event -> {
+                            if (event.succeeded()) {
+                                try {
+                                    ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
+                                    workbook.write(fileOut);
+                                    Buffer buff = new BufferImpl();
+                                    buff.appendBytes(fileOut.toByteArray());
+                                    handler.handle(new Either.Right<>(buff));
+                                } catch (IOException e) {
+                                    log.error(e.getMessage());
+                                    handler.handle(new Either.Left<>(e.getMessage()));
+                                }
+                            } else {
+                                log.error("Error when resolving futures");
+                                handler.handle(new Either.Left<>("Error when resolving futures"));
+                            }
+                        });
+                    new ComptaTab(workbook, instruction, type).create(getHandler(ComptaFuture));
+                    new ListForTextTab(workbook, instruction, type).create(getHandler(ListForTextFuture));
+                    new RecapTab(workbook, instruction, type).create(getHandler(RecapFuture));
+
+                }
+            }
+        }));
+
+
+    }
     private Handler<Either<String, Boolean>> getHandler(Future<Boolean> future) {
         return event -> {
             if (event.isRight()) {

@@ -95,6 +95,10 @@
         </tbody>
     </table>
 </article>
+<lightbox show="display.lightbox.exportEquipment"
+          on-close="cancelexportEquipmentForm()">
+    <container template="export.equipment.lightbox"></container>
+</lightbox>
 
 <section class="toggle-buttons" ng-class="{ hide:instructions.selected.length === 0 }">
     <div class="toggle">
@@ -143,11 +147,18 @@
             <button
                     ng-disabled="instructions.selected[0].operations.length === 0"
                     ng-show="instructions.selected.length === 1"
-                    ng-click="exportRME(instructions.selected[0])"
+                    ng-click="openExportEquipmentRapp(instructions.selected[0])"
                     download
             >
-                <i18n>lystore.exportRME</i18n>
-            </button>
+                <i18n>lystore.exportEquipmentRapp</i18n>
+                <button
+                        ng-disabled="instructions.selected[0].operations.length === 0"
+                        ng-show="instructions.selected.length === 1"
+                        ng-click="exportRME(instructions.selected[0])"
+                        download
+                >
+                    <i18n>lystore.exportRME</i18n>
+                </button>
             <button
                     ng-click="openLightboxDeleteInstruction()"
             >

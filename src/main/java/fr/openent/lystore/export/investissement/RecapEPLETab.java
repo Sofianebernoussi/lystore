@@ -1,6 +1,7 @@
 package fr.openent.lystore.export.investissement;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.TabHelper;
 import fr.openent.lystore.service.StructureService;
 import fr.openent.lystore.service.impl.DefaultStructureService;
 import fr.wseduc.webutils.Either;
@@ -51,7 +52,7 @@ public class RecapEPLETab extends TabHelper {
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
         excel.setCPNumber(instruction.getString("cp_number"));
-        getPrograms(event -> {
+        getDatas(event -> {
             if (event.isLeft()) {
                 handler.handle(new Either.Left<>("Failed to retrieve programs"));
                 return;
@@ -202,7 +203,7 @@ public class RecapEPLETab extends TabHelper {
     }
 
     @Override
-    public void getPrograms(Handler<Either<String, JsonArray>> handler) {
+    public void getDatas(Handler<Either<String, JsonArray>> handler) {
         query = "SELECT distinct contract_type.code as contract_code,  contract_type.name as contract_name, contract_type.id as contract_type_id," +
                 "oce.id_structure, " +
                 "program_action.action as action_code, program_action.description as action_name,program_action.id as action_id , " +

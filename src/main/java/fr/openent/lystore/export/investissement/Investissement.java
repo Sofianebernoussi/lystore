@@ -1,5 +1,6 @@
 package fr.openent.lystore.export.investissement;
 
+import fr.openent.lystore.export.TabHelper;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
@@ -24,7 +25,7 @@ public abstract class Investissement extends TabHelper {
         excel.setDefaultFont();
         excel.setCPNumber(instruction.getString("cp_number"));
         setLabels();
-        getPrograms(event -> {
+        getDatas(event -> {
             if (event.isLeft()) {
                 log.error("Failed to retrieve programs");
                 handler.handle(new Either.Left<>("Failed to retrieve programs"));
@@ -67,7 +68,7 @@ public abstract class Investissement extends TabHelper {
     }
 
     @Override
-    public void getPrograms(Handler<Either<String, JsonArray>> handler) {
+    public void getDatas(Handler<Either<String, JsonArray>> handler) {
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {

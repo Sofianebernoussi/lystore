@@ -20,6 +20,7 @@ export const instructionController = ng.controller('instructionController',
         $scope.display = {
             lightbox : {
                 instruction:false,
+                exportEquipment: false,
             }
         };
         $scope.formatDate = (date) => {
@@ -163,6 +164,19 @@ export const instructionController = ng.controller('instructionController',
             await  instruction.exportRME();
 
             Utils.safeApply($scope);
+
+        }
+        $scope.openExportEquipmentRapp = (instruction) => {
+            $scope.display.lightbox.exportEquipment = true;
+            $scope.instructionToExport = instruction;
+            template.open('export.equipment.lightbox', 'administrator/instruction/export-equipment-rapport-lightbox');
+
+        }
+
+        $scope.selectTypeForExport = (type, instruction: Instruction) => {
+            $scope.display.lightbox.exportEquipment = false;
+            template.close('export.equipment.lightbox');
+            window.location.href = `/lystore/instructions/export/equipment/rapport/${instruction.id}/${type}`;
 
         }
     }]);

@@ -161,7 +161,7 @@ export const instructionController = ng.controller('instructionController',
         $scope.exportRME = async (instruction) => {
             $scope.instructions.selected[0].selected = false;
             $scope.notifications.push(new Notification('lystore.export.notif', 'info'));
-            await  instruction.exportRME();
+            window.location = `/lystore/instructions/${$scope.instructions.selected[0].id}/export`;
 
             Utils.safeApply($scope);
 
@@ -176,7 +176,7 @@ export const instructionController = ng.controller('instructionController',
         $scope.selectTypeForExport = (type, instruction: Instruction) => {
             $scope.display.lightbox.exportEquipment = false;
             template.close('export.equipment.lightbox');
-            window.location.href = `/lystore/instructions/export/equipment/rapport/${instruction.id}/${type}`;
+            window.location = `/lystore/instructions/export/equipment/rapport/${instruction.id}/${type}`;
 
         }
     }]);

@@ -161,7 +161,7 @@ export const instructionController = ng.controller('instructionController',
         $scope.exportRME = async (instruction) => {
             $scope.instructions.selected[0].selected = false;
             $scope.notifications.push(new Notification('lystore.export.notif', 'info'));
-            window.location = `/lystore/instructions/${$scope.instructions.selected[0].id}/export`;
+            window.location = `/lystore/instructions/${instruction.id}/export`;
 
             Utils.safeApply($scope);
 

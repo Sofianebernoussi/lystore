@@ -83,9 +83,6 @@ export class Instruction implements Selectable {
         for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
         return buf;
     }
-
-
-
 }
 
 export class Instructions extends Selection<Instruction>{

@@ -22,6 +22,7 @@ import org.entcore.common.storage.Storage;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 
@@ -149,4 +150,28 @@ public class InstructionController extends ControllerHelper {
     public void getOperationOfInstruction(HttpServerRequest request) {
         instructionService.getOperationOfInstruction(Integer.parseInt(request.getParam("id")), arrayResponseHandler(request));
     }
+
+
+    @Get("/instructions/export/subventions/rapport/:id")
+    @ApiDoc("Export given instruction")
+    public void exportRapportSubvention(HttpServerRequest request) {
+        Date date = Calendar.getInstance().getTime();
+        String type = request.getParam("type");
+        // Display a date in day, month, year format
+        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        String today = formatter.format(date);
+        new Instruction(Integer.parseInt(request.getParam("id"))).exportSubventionRapp(event -> {
+            if (event.isLeft()) {
+                renderError(request);
+            } else {
+                Buffer file = event.right().getValue();
+                request.response()
+                        .putHeader("Content-Type", "application/vnd.ms-excel")
+                        .putHeader("Content-Length", file.length() + "")
+                        .putHeader("Content-Disposition", "filename=" + today + "EQUIPEMENT_RAPPORT" + ".xlsx")
+                        .write(file);
+            }
+        }, type);
+    }
+
 }

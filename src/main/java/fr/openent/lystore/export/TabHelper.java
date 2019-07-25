@@ -10,10 +10,13 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.entcore.common.sql.Sql;
+import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 
 public abstract class TabHelper {
+    protected JsonArray datas;
     protected static final String CMD = "CMD";
     protected static final String CMR = "CMR";
     protected static final String LYCEE = "LYC";
@@ -81,5 +84,16 @@ public abstract class TabHelper {
      * @param programs
      */
     protected void setArray(JsonArray programs) {
+    }
+
+    protected void sqlHandler(Handler<Either<String, JsonArray>> handler) {
+        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
+            if (event.isLeft()) {
+                handler.handle(event.left());
+            } else {
+                datas = event.right().getValue();
+                handler.handle(new Either.Right<>(datas));
+            }
+        }));
     }
 }

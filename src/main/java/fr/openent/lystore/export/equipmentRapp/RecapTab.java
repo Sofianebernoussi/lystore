@@ -9,8 +9,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 public class RecapTab extends TabHelper {
     private JsonArray programs;
@@ -96,15 +94,8 @@ public class RecapTab extends TabHelper {
                 " from " + Lystore.lystoreSchema + ".label_operation as label " +
                 " INNER JOIN values  on (label.id = values.id_operation) " +
                 " Group by label.label ";
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
-            if (event.isLeft()) {
-                handler.handle(event.left());
-            } else {
-                programs = event.right().getValue();
-                handler.handle(new Either.Right<>(programs));
-            }
 
-        }));
+        sqlHandler(handler);
     }
 
     @Override

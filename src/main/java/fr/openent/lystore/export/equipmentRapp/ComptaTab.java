@@ -16,7 +16,6 @@ import org.entcore.common.sql.SqlResult;
 import java.util.ArrayList;
 
 public class ComptaTab extends TabHelper {
-    private JsonArray datas;
     private String type;
     private int yProgramLabel = 0;
     private StructureService structureService;
@@ -195,14 +194,6 @@ public class ComptaTab extends TabHelper {
                 "Group by label.label ";
 
 
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
-            if (event.isLeft()) {
-                handler.handle(event.left());
-            } else {
-                datas = event.right().getValue();
-                handler.handle(new Either.Right<>(datas));
-            }
-
-        }));
+       sqlHandler(handler);
     }
 }

@@ -57,10 +57,13 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
             }
         }
         String query =  "SELECT instruction.*, " +
-                "to_json(exercise.*) AS exercise " +
+                "to_json(exercise.*) AS exercise, " +
+                "array_to_json(array_agg( o.id )) AS operations " +
                 "FROM  " + Lystore.lystoreSchema +".instruction " +
                 "INNER JOIN " + Lystore.lystoreSchema +".exercise exercise ON exercise.id = instruction.id_exercise " +
-                getTextFilter(filters);
+                "LEFT JOIN " + Lystore.lystoreSchema +".operation o ON o.id_instruction = instruction.id " +
+                getTextFilter(filters) +
+                " GROUP BY (instruction.id, exercise.id);";
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(instructionsEither -> {
             try{

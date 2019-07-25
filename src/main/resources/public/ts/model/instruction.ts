@@ -101,6 +101,9 @@ export class Instructions extends Selection<Instruction>{
             this.all.forEach(instructionGet => {
                 instructionGet.exercise = Mix.castAs(Exercise, JSON.parse(instructionGet.exercise.toString()));
                 instructionGet.date_cp = moment(instructionGet.date_cp);
+                instructionGet.operations = JSON.parse(instructionGet.operations.toString())[0]?
+                    JSON.parse(instructionGet.operations.toString()):
+                    [];
             })
         } catch (e) {
             notify.error('lystore.instruction.get.err');

@@ -505,6 +505,7 @@
   "lystore.lycee": "Lycées",
   "lystore.cmr": "CMR",
   "lystore.cmd": "CMD",
-  "lystore.export.equipment.title": "Sélectionnez le type de strucuture dont vous souhaitez l'export"
+  "lystore.export.equipment.title": "Sélectionnez le type de strucuture dont vous souhaitez l'export",
+  "lystore.exportSubvention": "Export Subventions"
 
 }

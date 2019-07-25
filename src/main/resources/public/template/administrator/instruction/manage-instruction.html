@@ -159,6 +159,14 @@
                 >
                     <i18n>lystore.exportRME</i18n>
                 </button>
+                <button
+                        ng-disabled="instructions.selected[0].operations.length === 0"
+                        ng-show="instructions.selected.length === 1"
+                        ng-click="exportSubvention(instructions.selected[0])"
+                        download
+                >
+                    <i18n>lystore.exportSubvention</i18n>
+                </button>
             <button
                     ng-click="openLightboxDeleteInstruction()"
             >

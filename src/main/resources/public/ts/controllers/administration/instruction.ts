@@ -165,18 +165,24 @@ export const instructionController = ng.controller('instructionController',
 
             Utils.safeApply($scope);
 
-        }
+        };
         $scope.openExportEquipmentRapp = (instruction) => {
             $scope.display.lightbox.exportEquipment = true;
             $scope.instructionToExport = instruction;
             template.open('export.equipment.lightbox', 'administrator/instruction/export-equipment-rapport-lightbox');
 
-        }
+        };
 
         $scope.selectTypeForExport = (type, instruction: Instruction) => {
             $scope.display.lightbox.exportEquipment = false;
             template.close('export.equipment.lightbox');
             window.location = `/lystore/instructions/export/equipment/rapport/${instruction.id}/${type}`;
 
+        }
+        $scope.exportSubvention = async (instruction) => {
+            $scope.instructions.selected[0].selected = false;
+            $scope.notifications.push(new Notification('lystore.export.notif', 'info'));
+            window.location = `/lystore/instructions/export/subventions/rapport/${instruction.id}`;
+            Utils.safeApply($scope);
         }
     }]);

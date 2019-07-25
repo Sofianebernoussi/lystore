@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * Possibilité de rajouter un string en param pour changer query et nom onglet(appelé 3 fois dans instruciton)
  */
-public class RapportCMR extends TabHelper {
+public class RapportSubvention extends TabHelper {
     private int yProgramLabel = 2;
     private int initY = 2;
     private String orderLabel = "Libellé Demande";
@@ -24,20 +24,20 @@ public class RapportCMR extends TabHelper {
     private String orderAmount = "Quantité Accordée";
     private String orderTotal = "Somme Montant Accordé";
     private String id_structureStr = "id_structure";
-
-    private int program_id = -1, action_id = -1, contract_id = -1;
-    private int xlabel = 0;
+    private String type;
     private int xTotalLabel = 3;
-
     private ArrayList<String> structuresId;
     private StructureService structureService;
     private int nbLine = 0;
+    private String totalLabelInt = "";
 
-    public RapportCMR(Workbook workbook, JsonObject instruction) {
-        super(workbook, instruction, "ANNEXE RAPPORT - CMR");
+    public RapportSubvention(Workbook workbook, JsonObject instruction, String type) {
+        super(workbook, instruction, "ANNEXE RAPPORT - " + type);
         structuresId = new ArrayList<>();
         structureService = new DefaultStructureService(Lystore.lystoreSchema);
         excel.setDefaultFont();
+        this.type = type;
+
     }
 
     @Override
@@ -118,6 +118,16 @@ public class RapportCMR extends TabHelper {
         if (datas.size() > 0) {
             settingSumLabel();
         }
+        setFullTotal();
+
+    }
+
+    private void setFullTotal() {
+        totalLabelInt = totalLabelInt.substring(0, totalLabelInt.length() - 1);
+
+        excel.insertFormulaBlue(sheet.createRow(5), 0, totalLabelInt);
+        CellRangeAddress merge = new CellRangeAddress(5, 5, 0, 3);
+        sheet.addMergedRegion(merge);
     }
 
     private String newTab(JsonObject program, boolean isLast) {
@@ -150,6 +160,7 @@ public class RapportCMR extends TabHelper {
     private void settingSumLabel() {
         excel.insertLabel(yProgramLabel + 3, xTotalLabel - 1, excel.totalLabel);
         excel.setTotalX(initY + 2, yProgramLabel + 2, xTotalLabel, yProgramLabel + 3);
+        totalLabelInt += excel.getCellReference(yProgramLabel + 3, xTotalLabel) + " +";
     }
 
 
@@ -174,7 +185,7 @@ public class RapportCMR extends TabHelper {
                 "INNER JOIN lystore.structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)    " +
                 "INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id) " +
                 "INNER JOIN lystore.program ON (program_action.id_program = program.id)   " +
-                "WHERE instruction.id = ? AND structure_program_action.structure_type =  'CMR' " +
+                "WHERE instruction.id = ? AND structure_program_action.structure_type =  '" + type + "' " +
                 "group by oce.id,oce.id_structure,oce.name,oce.comment,oce.amount  " +
                 "order by label " +
                 ") SELECT values.*, SUM( " +
@@ -185,7 +196,7 @@ public class RapportCMR extends TabHelper {
                 ") as Total " +
                 "from values " +
                 "group by values.id_structure,values.id,values.label,values.comment,values.amount ,values.total_equipment,total_options " +
-                "order by label";
+                "order by  values.id_structure,label";
         sqlHandler(handler);
     }
 

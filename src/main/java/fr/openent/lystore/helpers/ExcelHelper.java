@@ -275,6 +275,14 @@ public class ExcelHelper {
 
     }
 
+    public void insertFormulaBlue(Row row, int cellColumn, String totalLabelInt) {
+        insertFormula(row, cellColumn, totalLabelInt);
+        Cell cell = row.createCell(cellColumn);
+        cell.setCellStyle(this.currencyStyle);
+        //TODO faiore style bleue
+
+    }
+
     /**
      * insert a cell with float in the tab
      *
@@ -446,26 +454,23 @@ public class ExcelHelper {
             try {
                 tab = sheet.getRow(line);
 
-                for (int column = columnStart; column < columnEnd; column++) {
-                    try {
-                        cell = tab.getCell(column);
-                        cell.setCellStyle(this.tabNumeralStyle);
-                    } catch (NullPointerException e) {
-                        cell = tab.createCell(column);
-                        cell.setCellStyle(this.tabNumeralStyle);
-                    }
-                }
+                setCell(columnStart, columnEnd, tab);
             } catch (NullPointerException e) {
                 tab = sheet.createRow(line);
-                for (int column = columnStart; column < columnEnd; column++) {
-                    try {
-                        cell = tab.getCell(column);
-                        cell.setCellStyle(this.tabNumeralStyle);
-                    } catch (NullPointerException ee) {
-                        cell = tab.createCell(column);
-                        cell.setCellStyle(this.tabNumeralStyle);
-                    }
-                }
+                setCell(columnStart, columnEnd, tab);
+            }
+        }
+    }
+
+    private void setCell(int columnStart, int columnEnd, Row tab) {
+        Cell cell;
+        for (int column = columnStart; column < columnEnd; column++) {
+            try {
+                cell = tab.getCell(column);
+                cell.setCellStyle(this.tabNumeralStyle);
+            } catch (NullPointerException ee) {
+                cell = tab.createCell(column);
+                cell.setCellStyle(this.tabNumeralStyle);
             }
         }
     }

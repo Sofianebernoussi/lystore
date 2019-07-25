@@ -5,7 +5,7 @@ import fr.openent.lystore.export.equipmentRapp.ComptaTab;
 import fr.openent.lystore.export.equipmentRapp.ListForTextTab;
 import fr.openent.lystore.export.equipmentRapp.RecapTab;
 import fr.openent.lystore.export.investissement.*;
-import fr.openent.lystore.export.subventionRapp.RapportCMR;
+import fr.openent.lystore.export.subventionRapp.RapportSubvention;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.data.FileResolver;
@@ -177,10 +177,17 @@ public class Instruction {
                         Workbook workbook = new XSSFWorkbook(templateInputStream);
                         List<Future> futures = new ArrayList<>();
                         Future<Boolean> RapportCMRFuture = Future.future();
+                        Future<Boolean> RapportCMDFuture = Future.future();
+                        Future<Boolean> RapportLYCFuture = Future.future();
+
                         futures.add(RapportCMRFuture);
+                        futures.add(RapportCMDFuture);
+                        futures.add(RapportLYCFuture);
 
                         handleBuff(handler, workbook, futures);
-                        new RapportCMR(workbook, instruction).create(getHandler(RapportCMRFuture));
+                        new RapportSubvention(workbook, instruction, TabHelper.CMR).create(getHandler(RapportCMRFuture));
+                        new RapportSubvention(workbook, instruction, TabHelper.CMD).create(getHandler(RapportCMDFuture));
+                        new RapportSubvention(workbook, instruction, TabHelper.LYCEE).create(getHandler(RapportLYCFuture));
 
                     } catch (IOException e) {
                         log.error("Xlsx Failed to read template");

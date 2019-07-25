@@ -18,6 +18,7 @@ public class ExcelHelper {
     private final CellStyle currencyStyle;
     private final CellStyle tabCurrencyStyle;
     private final CellStyle titleHeaderStyle;
+    private final CellStyle currencyBlueStyle;
 
 
 
@@ -36,7 +37,7 @@ public class ExcelHelper {
         this.currencyStyle = wb.createCellStyle();
         this.tabStringStyleCenter = wb.createCellStyle();
         this.totalStyle = wb.createCellStyle();
-
+        this.currencyBlueStyle = wb.createCellStyle();
         this.labelHeadStyle = wb.createCellStyle();
         this.titleHeaderStyle = wb.createCellStyle();
 
@@ -174,6 +175,18 @@ public class ExcelHelper {
         this.titleHeaderStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         this.titleHeaderStyle.setFont(titleHeadFont);
 
+        Font currencyBlueFont = this.wb.createFont();
+        currencyBlueFont.setFontHeightInPoints((short) 14);
+        currencyBlueFont.setFontName("Calibri");
+        currencyBlueFont.setBold(true);
+        currencyBlueFont.setColor(IndexedColors.LIGHT_BLUE.getIndex());
+        this.currencyBlueStyle.setWrapText(true);
+        this.currencyBlueStyle.setAlignment(HorizontalAlignment.CENTER);
+        this.currencyBlueStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.currencyBlueStyle.setFont(currencyBlueFont);
+        this.currencyBlueStyle.setDataFormat(format.getFormat("#,##0.00 €"));
+
+
     }
     public void setBold(Cell cell) {
         Font font = wb.createFont();
@@ -275,12 +288,11 @@ public class ExcelHelper {
 
     }
 
-    public void insertFormulaBlue(Row row, int cellColumn, String totalLabelInt) {
-        insertFormula(row, cellColumn, totalLabelInt);
+    public void insertFormulaBlue(Row row, int cellColumn, String data) {
         Cell cell = row.createCell(cellColumn);
-        cell.setCellStyle(this.currencyStyle);
-        //TODO faiore style bleue
-
+        cell.setCellFormula(data);
+        sheet.autoSizeColumn(cellColumn);
+        cell.setCellStyle(this.currencyBlueStyle);
     }
 
     /**

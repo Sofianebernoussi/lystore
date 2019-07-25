@@ -186,6 +186,7 @@ public class RapportSubvention extends TabHelper {
                 "INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id) " +
                 "INNER JOIN lystore.program ON (program_action.id_program = program.id)   " +
                 "WHERE instruction.id = ? AND structure_program_action.structure_type =  '" + type + "' " +
+                getStructureStatement() +
                 "group by oce.id,oce.id_structure,oce.name,oce.comment,oce.amount  " +
                 "order by label " +
                 ") SELECT values.*, SUM( " +
@@ -201,4 +202,17 @@ public class RapportSubvention extends TabHelper {
     }
 
 
+    public String getStructureStatement() {
+        if (type.equals("LYC")) {
+            return "   AND oce.id_structure NOT IN ( " +
+                    "   SELECT id " +
+                    "   FROM " + Lystore.lystoreSchema + ".specific_structures " +
+                    "  )";
+        } else {
+            return "   AND oce.id_structure IN ( " +
+                    "   SELECT id " +
+                    "   FROM " + Lystore.lystoreSchema + ".specific_structures " +
+                    "   WHERE type='" + type + "')";
+        }
+    }
 }

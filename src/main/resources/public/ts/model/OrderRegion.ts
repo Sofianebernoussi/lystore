@@ -1,9 +1,9 @@
 import http from "axios";
 import {moment, notify} from "entcore";
 import {Project} from "./project";
-import {Campaign, Contract, ContractType, Structure, TechnicalSpec} from "./index";
+import {Campaign, Contract, ContractType, OrderOptionClient, Structure, TechnicalSpec, Utils} from "./index";
 import {OrderClient} from "./OrderClient";
-import {Selectable, Selection} from "entcore-toolkit";
+import {Mix, Selectable, Selection} from "entcore-toolkit";
 import {Equipment} from "./Equipment";
 
 export class OrderRegion implements Selectable {
@@ -65,7 +65,15 @@ export class OrderRegion implements Selectable {
             equipment_key: this.equipment_key,
             comment: (this.comment) ? this.comment : "",
             ...(this.rank && {rank: this.rank}),
-            technical_specs: (this.technical_spec != null) ? this.technical_spec.map((spec: TechnicalSpec) => spec.toJson()) : [],
+            technical_specs: (this.technical_spec === null || this.technical_spec.length === 0) ?
+                []:
+                Utils.jsonParse(this.technical_spec.toString())
+                    .map((spec: TechnicalSpec) => {
+                        return {
+                            name: spec.name,
+                            value: spec.value
+                        }
+                    }),
             id_operation: this.id_operation,
         }
     }

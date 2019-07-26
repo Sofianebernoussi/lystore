@@ -95,6 +95,11 @@ export const orderWaiting = [
         display: false
     },
     {
+        name:'lystore.program',
+        fieldName:'program',
+        display: false
+    },
+    {
         name: 'lystore.amountTTC',
         fieldName: 'priceTTCtotal',
         display: true,

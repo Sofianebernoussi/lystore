@@ -55,9 +55,50 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                         event.body().getString("type"),
                         event.body().getString("userId"));
                 break;
+            case "exportRME":
+                exportRME(
+                        event.body().getInteger("id"),
+                        event.body().getString("userId"));
+                break;
             default:
                 logger.error("Invalid action in worker");
+                break;
+
         }
+    }
+
+
+    private String getDate() {
+        java.util.Date date = Calendar.getInstance().getTime();
+        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        return formatter.format(date);
+    }
+
+    private void exportRME(Integer instructionId, String userId) {
+        this.instruction = new Instruction(instructionId);
+
+        this.instruction.exportInvestissement(event -> {
+            if (event.isLeft()) {
+                logger.error("error when creating xlsx");
+            } else {
+                Buffer xlsx = event.right().getValue();
+                String fileName = "Récapitulatif_mesures_engagées_" + getDate() + ".xlsx";
+                saveBuffer(userId, xlsx, fileName);
+            }
+        });
+    }
+
+    private void saveBuffer(String userId, Buffer xlsx, String fileName) {
+        storage.writeBuffer(xlsx, "application/vnd.ms-excel", fileName, file -> {
+            if (!"ok".equals(file.getString("status"))) {
+                logger.error("An error occurred when inserting xlsx ");
+            } else {
+                logger.info("Xlsx insert in storage");
+                saveFile(file.getString("_id"),
+                        fileName,
+                        userId);
+            }
+        });
     }
 
     private void exportEquipment(int instructionId, String type, String userId) {
@@ -65,23 +106,11 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
 
         this.instruction.exportEquipmentRapp(event1 -> {
             if (event1.isLeft()) {
-                logger.error("error when creating csv");
+                logger.error("error when creating xlsx");
             } else {
-                java.util.Date date = Calendar.getInstance().getTime();
-                DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-                String today = formatter.format(date);
                 Buffer xlsx = event1.right().getValue();
-                String fileName = today + "_EQUIPEMENT_RAPPORT" + ".xlsx";
-                storage.writeBuffer(xlsx, "application/vnd.ms-excel", fileName, file -> {
-                    if (!"ok".equals(file.getString("status"))) {
-                        logger.error("An error occurred when inserting xlsx ");
-                    } else {
-                        logger.info("Xlsx insert in storage");
-                        saveFile(file.getString("_id"),
-                                fileName,
-                                userId);
-                    }
-                });
+                String fileName = getDate() + "_EQUIPEMENT_RAPPORT" + ".xlsx";
+                saveBuffer(userId, xlsx, fileName);
             }
         }, type);
     }

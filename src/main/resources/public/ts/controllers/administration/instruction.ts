@@ -173,10 +173,11 @@ export const instructionController = ng.controller('instructionController',
 
         }
 
-        $scope.selectTypeForExport = (type, instruction: Instruction) => {
+        $scope.selectTypeForExport = async (type, instruction: Instruction) => {
             $scope.display.lightbox.exportEquipment = false;
             template.close('export.equipment.lightbox');
-            window.location = `/lystore/instructions/export/equipment/rapport/${instruction.id}/${type}`;
+            await instruction.getExportEquipment(type);
+            // window.location = `/lystore/instructions/export/equipment/rapport/${instruction.id}/${type}`;
 
         }
     }]);

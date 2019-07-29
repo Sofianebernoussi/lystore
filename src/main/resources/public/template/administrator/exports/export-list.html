@@ -1,0 +1,30 @@
+<div class="row" ng-controller="exportCtrl">
+    <article class="responsive-table">
+        <table class="twelve">
+            <thead>
+            <tr>
+                <td>
+                    <i18n>
+                        lystore.nameFile
+                    </i18n>
+                </td>
+                <td>
+                    <i18n>
+                        lystore.creation.date
+                    </i18n>
+                </td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-click="getExport(export)" ng-repeat="export in exports.all">
+                <td>
+                    [[export.filename]]
+                </td>
+                <td>
+                    [[export.created]]
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </article>
+</div>

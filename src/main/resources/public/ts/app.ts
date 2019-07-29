@@ -96,6 +96,9 @@ routes.define(($routeProvider) => {
             })
             .when('/operation/order', {
                 action: 'operationOrders'
+            })
+            .when('/exports', {
+                action: 'exportList'
             });
     } else {
         $routeProvider

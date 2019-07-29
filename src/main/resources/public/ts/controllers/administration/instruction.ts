@@ -177,6 +177,8 @@ export const instructionController = ng.controller('instructionController',
             $scope.display.lightbox.exportEquipment = false;
             template.close('export.equipment.lightbox');
             await instruction.getExportEquipment(type);
+            $scope.notifications.push(new Notification('lystore.export.notif', 'info'));
+
             // window.location = `/lystore/instructions/export/equipment/rapport/${instruction.id}/${type}`;
 
         }

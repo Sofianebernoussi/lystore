@@ -1,6 +1,8 @@
 import {moment, ng} from "entcore";
 import {Export, Exports, Utils} from "../../model";
 
+declare let window: any;
+
 export const exportCtrl = ng.controller('exportCtrl', [
     '$scope', async ($scope) => {
 
@@ -17,7 +19,7 @@ export const exportCtrl = ng.controller('exportCtrl', [
         Utils.safeApply($scope);
 
         $scope.getExport = (exportTemp: Export) => {
-            exportTemp.getExport()
+            window.location = `lystore/export/${exportTemp.fileid}`;
         };
 
 

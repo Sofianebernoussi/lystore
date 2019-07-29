@@ -8,9 +8,6 @@ export class Export implements Selectable {
     fileid: string;
     ownerid: string;
 
-    async getExport() {
-        console.log(this.fileid)
-    }
 
 }
 

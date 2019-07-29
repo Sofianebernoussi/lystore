@@ -23,7 +23,7 @@ public class DefaultExportServiceService implements ExportService {
         String query = "SELECT filename,fileid,created " +
                 "FROM " + Lystore.lystoreSchema + ".export " +
                 "WHERE ownerid = ?" +
-                "order by created ASC";
+                "order by created  DESC";
         Sql.getInstance().prepared(query, new JsonArray().add(user.getUserId()), SqlResult.validResultHandler(handler));
 
     }

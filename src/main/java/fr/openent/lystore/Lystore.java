@@ -1,6 +1,8 @@
 package fr.openent.lystore;
 
 import fr.openent.lystore.controllers.*;
+import fr.openent.lystore.export.ExportWorker;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.http.BaseServer;
@@ -10,7 +12,8 @@ import org.entcore.common.storage.StorageFactory;
 public class Lystore extends BaseServer {
 
     public static String lystoreSchema;
-
+    public static JsonObject CONFIG;
+    public static Storage STORAGE;
     public static Integer PAGE_SIZE = 50;
 
     public static final String ADMINISTRATOR_RIGHT = "lystore.administrator";
@@ -22,6 +25,7 @@ public class Lystore extends BaseServer {
         lystoreSchema = config.getString("db-schema");
         EventBus eb = getEventBus(vertx);
         Storage storage = new StorageFactory(vertx, config).getStorage();
+        STORAGE = storage;
         JsonObject mail = config.getJsonObject("mail", new JsonObject());
 
         addController(new LystoreController());
@@ -48,5 +52,9 @@ public class Lystore extends BaseServer {
         addController(new OperationController());
         addController(new InstructionController(storage));
         addController(new OrderRegionController());
+        addController(new ExportController(storage));
+
+        CONFIG = config;
+        vertx.deployVerticle(ExportWorker.class, new DeploymentOptions().setConfig(config).setWorker(true));
     }
 }

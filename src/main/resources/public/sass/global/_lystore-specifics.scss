@@ -969,6 +969,14 @@ i.groups {
   width: 100px;
 }
 
+i.downloadButton {
+  @include fonticon();
+
+  &::before {
+    content: '\e83f';
+    height: 21px;
+  }
+}
 select.disabled {
   background-color: rgb(235, 235, 228);
   opacity: 0.4 !important;

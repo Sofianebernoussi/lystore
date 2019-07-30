@@ -1,7 +1,7 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
-import fr.openent.lystore.export.Instruction;
+import fr.openent.lystore.export.ExportWorker;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
@@ -12,17 +12,16 @@ import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
-import io.vertx.core.buffer.Buffer;
+import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
+import org.entcore.common.user.UserInfos;
+import org.entcore.common.user.UserUtils;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
+import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 
 public class InstructionController extends ControllerHelper {
@@ -102,45 +101,36 @@ public class InstructionController extends ControllerHelper {
     @Get("/instructions/:id/export")
     @ApiDoc("Export given instruction")
     public void exportInstruction(HttpServerRequest request) {
-        java.util.Date date = Calendar.getInstance().getTime();
-
-        // Display a date in day, month, year format
-        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-        String today = formatter.format(date);
-        new Instruction(Integer.parseInt(request.getParam("id"))).exportInvestissement(event -> {
-            if (event.isLeft()) {
-                renderError(request);
-            } else {
-                Buffer file = event.right().getValue();
-                request.response()
-                        .putHeader("Content-Type", "application/vnd.ms-excel")
-                        .putHeader("Content-Length", file.length() + "")
-                        .putHeader("Content-Disposition", "filename=Récapitulatif_mesures_engagées_" + today + ".xlsx")
-                        .write(file);
+        UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+            @Override
+            public void handle(UserInfos user) {
+                eb.send(ExportWorker.class.getSimpleName(),
+                        new JsonObject().put("action", "exportRME")
+                                .put("id", Integer.parseInt(request.getParam("id")))
+                                .put("userId", user.getUserId()),
+                        handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
             }
         });
+        request.response().setStatusCode(200).end("Import started");
     }
 
     @Get("/instructions/export/equipment/rapport/:id/:type")
     @ApiDoc("Export given instruction")
     public void exportRapportEquipment(HttpServerRequest request) {
-        java.util.Date date = Calendar.getInstance().getTime();
-        String type = request.getParam("type");
-        // Display a date in day, month, year format
-        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-        String today = formatter.format(date);
-        new Instruction(Integer.parseInt(request.getParam("id"))).exportEquipmentRapp(event -> {
-            if (event.isLeft()) {
-                renderError(request);
-            } else {
-                Buffer file = event.right().getValue();
-                request.response()
-                        .putHeader("Content-Type", "application/vnd.ms-excel")
-                        .putHeader("Content-Length", file.length() + "")
-                        .putHeader("Content-Disposition", "filename=" + today + "EQUIPEMENT_RAPPORT" + ".xlsx")
-                        .write(file);
+        UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+            @Override
+            public void handle(UserInfos user) {
+                String type = request.getParam("type");
+                // Display a date in day, month, year format
+                eb.send(ExportWorker.class.getSimpleName(),
+                        new JsonObject().put("action", "exportEQU")
+                                .put("id", Integer.parseInt(request.getParam("id")))
+                                .put("type", type)
+                                .put("userId", user.getUserId()),
+                        handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
             }
-        }, type);
+        });
+        request.response().setStatusCode(200).end("Import started");
     }
 
     @Get("/instruction/:id/operations")

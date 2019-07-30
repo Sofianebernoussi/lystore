@@ -1,0 +1,42 @@
+<div class="row" ng-controller="exportCtrl">
+    <h1>
+        <i18n>lystore.list.export.title</i18n>
+    </h1>
+    <article class="responsive-table">
+        <div>
+            <h2>
+                <i18n>lystore.list.export.text</i18n>
+            </h2>
+        </div>
+        <table class="twelve">
+            <thead>
+            <tr>
+                <td>
+                    <i18n>
+                        lystore.nameFile
+                    </i18n>
+                </td>
+                <td>
+                    <i18n>
+                        lystore.creation.date
+                    </i18n>
+                </td>
+                <td></td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-click="getExport(export)" ng-repeat="export in exports.all">
+                <td>
+                    [[export.filename]]
+                </td>
+                <td>
+                    [[export.created]]
+                </td>
+                <td>
+                    <i class="downloadButton"></i>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </article>
+</div>

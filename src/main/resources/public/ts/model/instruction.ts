@@ -85,7 +85,22 @@ export class Instruction implements Selectable {
     }
 
 
-
+    async getExportRME() {
+        try {
+            const {data} = await http.get(`/lystore/instructions/${this.id}/export`);
+            console.log(data)
+        } catch (e) {
+            notify.error("lystore.instruction.get.err")
+        }
+    }
+    async getExportEquipment(type: any) {
+        try {
+            const {data} = await http.get(`/lystore/instructions/export/equipment/rapport/${this.id}/${type}`);
+            console.log(data)
+        } catch (e) {
+            notify.error("lystore.instruction.get.err")
+        }
+    }
 }
 
 export class Instructions extends Selection<Instruction>{

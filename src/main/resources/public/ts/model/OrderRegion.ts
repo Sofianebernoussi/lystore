@@ -107,6 +107,7 @@ export class OrderRegion implements Selectable {
         if (order.rank )
             this.rank = order.rank;
         this.structure = order.structure;
+        this.id_operation = order.id_operation;
     }
 
     async set() {

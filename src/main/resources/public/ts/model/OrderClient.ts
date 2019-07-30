@@ -42,6 +42,7 @@ export class OrderClient implements Selectable {
     id_structure: string;
     id_supplier: string;
     id_project: number;
+    id_operation: number;
     selected: boolean;
     comment?: string;
     price_proposal?: number;

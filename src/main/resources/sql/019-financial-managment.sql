@@ -87,6 +87,20 @@ ADD COLUMN chapter bigint,
 ADD COLUMN functional_code bigint,
 ADD COLUMN label text;
 
+
+INSERT INTO lystore.program ( name, section, chapter, functional_code, label)
+Select  'HP222-008', 'Investissement', 902, 222, 'Équipement des lycées publics'
+WHERE NOT EXISTS (
+	SELECT 1 FROM  lystore.program WHERE name='HP222-008'
+);
+
+
+INSERT INTO lystore.program ( name, section, chapter, functional_code, label)
+SELECT  'HP224-013', 'Investissement', 902, 224, 'Équipement des cités mixtes départementales'
+WHERE NOT EXISTS (
+	SELECT 1 FROM  lystore.program WHERE name='HP224-013'
+);
+
 UPDATE lystore.program
 SET section = 'Investissement',
     chapter = 902,

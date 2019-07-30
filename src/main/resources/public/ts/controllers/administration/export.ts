@@ -20,6 +20,7 @@ export const exportCtrl = ng.controller('exportCtrl', [
 
         $scope.getExport = (exportTemp: Export) => {
             window.location = `lystore/export/${exportTemp.fileid}`;
+
         };
 
 

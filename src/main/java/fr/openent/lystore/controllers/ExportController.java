@@ -53,7 +53,7 @@ public class ExportController extends ControllerHelper {
                                 .putHeader("Content-type", "application/vnd.ms-excel; charset=utf-8")
                                 .putHeader("Content-Length", file.length() + "")
                                 .putHeader("Content-Disposition", "filename=" + event.right().getValue().getJsonObject(0).getString("filename"))
-                                .write(file));
+                                .end(file));
             }
         });
 

@@ -109,7 +109,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                 logger.error("error when creating xlsx");
             } else {
                 Buffer xlsx = event1.right().getValue();
-                String fileName = getDate() + "_EQUIPEMENT_RAPPORT" + ".xlsx";
+                String fileName = getDate() + "_EQUIPEMENT_RAPPORT_" + type + ".xlsx";
                 saveBuffer(userId, xlsx, fileName);
             }
         }, type);

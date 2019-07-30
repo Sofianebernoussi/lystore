@@ -2,12 +2,9 @@ package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
 import fr.wseduc.webutils.Either;
-import fr.wseduc.webutils.collections.PersistantBuffer;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
@@ -18,19 +15,11 @@ import org.vertx.java.busmods.BusModBase;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
 
 import static fr.openent.lystore.Lystore.CONFIG;
 import static fr.openent.lystore.Lystore.STORAGE;
 
 public class ExportWorker extends BusModBase implements Handler<Message<JsonObject>> {
-    private final Map<String, PersistantBuffer> buffers = new HashMap<>();
-    private final Map<String, MessageConsumer<byte[]>> consumers = new HashMap<>();
-    private JsonObject sftpGarConfig = null;
-    private JsonObject garRessourcesConfig = null;
-    private EventBus eb = null;
-    private JsonObject config;
     private Instruction instruction;
     private Storage storage;
 
@@ -39,10 +28,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
         super.start();
         vertx.eventBus().localConsumer(ExportWorker.class.getSimpleName(), this);
         this.config = CONFIG;
-        this.vertx = vertx;
         this.storage = STORAGE;
-        this.sftpGarConfig = config.getJsonObject("gar-sftp");
-        this.garRessourcesConfig = config.getJsonObject("gar-ressources");
     }
 
     @Override

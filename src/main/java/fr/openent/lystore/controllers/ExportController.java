@@ -1,6 +1,7 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.security.AccessExportDownload;
 import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import fr.wseduc.rs.ApiDoc;
@@ -12,6 +13,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
@@ -42,7 +44,8 @@ public class ExportController extends ControllerHelper {
 
     @Get("/export/:fileId")
     @ApiDoc("Returns all exports in database filtered by owner")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AccessExportDownload.class)
     public void getExercise(HttpServerRequest request) {
         String fileId = request.getParam("fileId");
         exportService.getXlsxName(fileId, new Handler<Either<String, JsonArray>>() {

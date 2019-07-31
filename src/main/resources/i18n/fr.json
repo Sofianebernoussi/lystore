@@ -213,7 +213,7 @@
   "lystore.exportRME": "Export RME",
   "lystore.instruction.exportRME.err": "Erreur lors de l'export RME",
   "lystore.confirmation.project.title": "Précisez votre projet",
-  "lystore.export.notif": "Votre fichier est en cours de création, une fois créer il sera disponible dans l'onglet 'Mes exports' . Cette opération peut prendre du temps",
+  "lystore.export.notif": "Votre fichier est en cours de création, une fois créée il sera disponible dans l'onglet 'Mes exports'. Cette opération peut prendre du temps",
   "multi-combo.deselectAll": "Tout déselectionner",
   "multi-combo.options": "Options",
   "multi-combo.searchPlaceholder": "Chercher",
@@ -504,10 +504,10 @@
   "lystore.lycee": "Lycées",
   "lystore.cmr": "CMR",
   "lystore.cmd": "CMD",
-  "lystore.export.equipment.title": "Sélectionnez le type de strucuture dont vous souhaitez l'export",
+  "lystore.export.equipment.title": "Sélectionner le type de strucuture dont vous souhaitez l'export",
   "lystore.nameFile": "Nom du fichier",
   "lystore.creation.date": "Date de création",
   "lystore.list.export.title": "Liste des fichiers créés",
-  "lystore.list.export.text": "Sélectionnez le fichier que vous souhaitez télécharger",
+  "lystore.list.export.text": "Sélectionner le fichier que vous souhaitez télécharger",
   "lystore.goTo.exports": "Mes exports"
 }

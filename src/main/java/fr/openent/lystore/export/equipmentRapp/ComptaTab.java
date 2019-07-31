@@ -139,7 +139,7 @@ public class ComptaTab extends TabHelper {
                 yProgramLabel++;
 
             }
-            setTotal(nbTotaux, initYProgramLabel);
+//            setTotal(nbTotaux, initYProgramLabel);
             yProgramLabel += 2;
         }
 
@@ -172,30 +172,58 @@ public class ComptaTab extends TabHelper {
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
-        query = " With values as (  " +
-                "   SELECT  SUM(   " +
-                "  CASE WHEN oce.price_proposal is not null  THEN oce.price_proposal *  oce.amount   ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 END " +
-                "   ) as Total, oce.id_structure, contract_type.code as code,oce.id_operation , program_action.id_program ,contract_type.name ,program.name        " +
-                "   FROM lystore.order_client_equipment oce     " +
-                "   INNER JOIN lystore.operation ON (oce.id_operation = operation.id)      " +
-                "   INNER JOIN lystore.label_operation as label ON (operation.id_label = label.id)      " +
-                "   INNER JOIN lystore.instruction ON (operation.id_instruction = instruction.id)      " +
-                "   INNER JOIN lystore.contract ON (oce.id_contract = contract.id)     " +
-                "   INNER JOIN lystore.contract_type ON (contract.id_contract_type = contract_type.id)       " +
-                "   INNER JOIN lystore.structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)     " +
-                "   INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id)      " +
+        query = "  With values as (   " +
+                "   (SELECT SUM( ore.price* ore.amount) as Total, " +
+                "   ore.id_structure,contract_type.code as code,ore.id_operation , program_action.id_program ,contract_type.name ,program.name          " +
+                "   FROM lystore.\"order-region-equipment\" ore       " +
+                "   INNER JOIN lystore.operation ON (ore.id_operation = operation.id)     " +
+                "   INNER JOIN lystore.campaign ON ore.id_campaign = campaign.id  " +
+                "   INNER JOIN lystore.label_operation as label ON (operation.id_label = label.id)    " +
+                "   INNER JOIN lystore.instruction ON (operation.id_instruction = instruction.id)        " +
+                "   INNER JOIN lystore.contract ON (ore.id_contract = contract.id)        " +
+                "   INNER JOIN lystore.contract_type ON (contract.id_contract_type = contract_type.id)           " +
+                "   INNER JOIN lystore.structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)        " +
+                "   INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id)     " +
                 "   INNER JOIN lystore.program ON (program_action.id_program = program.id)      " +
-                "   WHERE instruction.id = ?     AND structure_program_action.structure_type =  'LYC' " +
-                "   Group by  program.name,contract_type.code, contract_type.name , program_action.id, oce.id_operation,oce.id_structure  " +
+                "   WHERE instruction.id = ?  AND structure_program_action.structure_type =  'LYC'    " +
+                "   Group by  program.name,contract_type.code, contract_type.name , program_action.id, ore.id_operation,ore.id_structure     " +
+                "   order by  program.name,id_program,code,ore.id_operation  ) " +
+                "   UNION ( " +
+                "   SELECT " +
+                "   SUM(  CASE WHEN oce.price_proposal is not null  " +
+                "    THEN oce.price_proposal *  oce.amount " +
+                "    ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount + " +
+                "            (SELECT CASE WHEN  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL " +
+                "           THEN 0  " +
+                "           ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  " +
+                "           END " +
+                "           from lystore.order_client_options oco  " +
+                "           WHERE id_order_client_equipment = oce.id ) " +
+                "            )/100 END    " +
+                "   ) as Total, " +
+                "   oce.id_structure, contract_type.code as code,oce.id_operation , program_action.id_program ,contract_type.name ,program.name          " +
+                "   FROM lystore.order_client_equipment oce       " +
+                "   INNER JOIN lystore.operation ON (oce.id_operation = operation.id)    " +
+                "   INNER JOIN lystore.campaign ON oce.id_campaign = campaign.id  " +
+                "   INNER JOIN lystore.label_operation as label ON (operation.id_label = label.id)    " +
+                "   INNER JOIN lystore.instruction ON (operation.id_instruction = instruction.id)        " +
+                "   INNER JOIN lystore.contract ON (oce.id_contract = contract.id)        " +
+                "   INNER JOIN lystore.contract_type ON (contract.id_contract_type = contract_type.id)           " +
+                "   INNER JOIN lystore.structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)        " +
+                "   INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id)     " +
+                "   INNER JOIN lystore.program ON (program_action.id_program = program.id)      " +
+                "   WHERE instruction.id = ?     AND structure_program_action.structure_type =  'LYC'    " +
+                "   Group by  program.name,contract_type.code, contract_type.name , program_action.id, oce.id_operation,oce.id_structure     " +
                 "   order by  program.name,id_program,code,oce.id_operation " +
+                "   ) " +
                 " )   " +
-                "SELECT label.label , array_to_json(array_agg(values)) as actions  " +
-                "from lystore.label_operation as label   " +
-                "INNER JOIN values  on (label.id = values.id_operation) " +
-                "Group by label.label ";
+                " SELECT label.label , array_to_json(array_agg(values)) as actions   " +
+                " from lystore.label_operation as label    " +
+                " INNER JOIN values  on (label.id = values.id_operation)  " +
+                " Group by label.label  ";
 
 
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
+        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")).add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
                 handler.handle(event.left());
             } else {
@@ -206,3 +234,53 @@ public class ComptaTab extends TabHelper {
         }));
     }
 }
+/* query = "  With values as (   " +
+                "   (SELECT SUM( ore.price* ore.amount) as Total, " +
+                "   ore.id_structure, campaign.name as campaign ,contract_type.code as code,ore.id_operation , program_action.id_program ,contract_type.name ,program.name          " +
+                "   FROM lystore.\"order-region-equipment\" ore       " +
+                "   INNER JOIN lystore.operation ON (ore.id_operation = operation.id)     " +
+                "   INNER JOIN lystore.campaign ON ore.id_campaign = campaign.id  " +
+                "   INNER JOIN lystore.label_operation as label ON (operation.id_label = label.id)    " +
+                "   INNER JOIN lystore.instruction ON (operation.id_instruction = instruction.id)        " +
+                "   INNER JOIN lystore.contract ON (ore.id_contract = contract.id)        " +
+                "   INNER JOIN lystore.contract_type ON (contract.id_contract_type = contract_type.id)           " +
+                "   INNER JOIN lystore.structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)        " +
+                "   INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id)     " +
+                "   INNER JOIN lystore.program ON (program_action.id_program = program.id)      " +
+                "   WHERE instruction.id = ?  AND structure_program_action.structure_type =  'LYC'    " +
+                "   Group by  program.name,campaign,contract_type.code, contract_type.name , program_action.id, ore.id_operation,ore.id_structure     " +
+                "   order by  program.name,campaign,id_program,code,ore.id_operation  ) " +
+                "   UNION ( " +
+                "   SELECT " +
+                "   SUM(  CASE WHEN oce.price_proposal is not null  " +
+                "    THEN oce.price_proposal *  oce.amount " +
+                "    ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount + " +
+                "            (SELECT CASE WHEN  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL " +
+                "           THEN 0  " +
+                "           ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  " +
+                "           END " +
+                "           from lystore.order_client_options oco  " +
+                "           WHERE id_order_client_equipment = oce.id ) " +
+                "            )/100 END    " +
+                "   ) as Total, " +
+                "   oce.id_structure,  campaign.name as campaign , contract_type.code as code,oce.id_operation , program_action.id_program ,contract_type.name ,program.name          " +
+                "   FROM lystore.order_client_equipment oce       " +
+                "   INNER JOIN lystore.operation ON (oce.id_operation = operation.id)    " +
+                "   INNER JOIN lystore.campaign ON oce.id_campaign = campaign.id  " +
+                "   INNER JOIN lystore.label_operation as label ON (operation.id_label = label.id)    " +
+                "   INNER JOIN lystore.instruction ON (operation.id_instruction = instruction.id)        " +
+                "   INNER JOIN lystore.contract ON (oce.id_contract = contract.id)        " +
+                "   INNER JOIN lystore.contract_type ON (contract.id_contract_type = contract_type.id)           " +
+                "   INNER JOIN lystore.structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)        " +
+                "   INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id)     " +
+                "   INNER JOIN lystore.program ON (program_action.id_program = program.id)      " +
+                "   WHERE instruction.id = ?     AND structure_program_action.structure_type =  'LYC'    " +
+                "   Group by  program.name,campaign,contract_type.code, contract_type.name , program_action.id, oce.id_operation,oce.id_structure     " +
+                "   order by  program.name,campaign,id_program,code,oce.id_operation " +
+                "   ) " +
+                " )   " +
+                " SELECT label.label , array_to_json(array_agg(values)) as actions   " +
+                " from lystore.label_operation as label    " +
+                " INNER JOIN values  on (label.id = values.id_operation)  " +
+                " Group by label.label  ";*/
+

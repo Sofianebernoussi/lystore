@@ -57,7 +57,7 @@ public class RecapImputationBud extends TabHelper {
 
     private String insertSetion(String section, String oldSection, int xTab, int y) {
         if (!section.equals(oldSection)) {
-            excel.insertHeader(sheet.getRow(y), xTab, section);
+            excel.insertHeader(y, xTab, section);
             if (y - nbToMerge != y - 1) {
                 CellRangeAddress merge = new CellRangeAddress(y - nbToMerge, y - 1, xTab, xTab);
                 sheet.addMergedRegion(merge);
@@ -67,7 +67,7 @@ public class RecapImputationBud extends TabHelper {
             oldSection = section;
 
         } else {
-            excel.insertHeader(sheet.getRow(y), xTab, section);
+            excel.insertHeader(y, xTab, section);
 
             nbToMerge++;
         }
@@ -76,10 +76,24 @@ public class RecapImputationBud extends TabHelper {
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
-        query = "SELECT  program_action.action as action_code, program.section, program_action.description as action_name,program_action.id as action_id , program.name as program_name,program.id as program_id,  " +
+        query = "WITH results as(" +
+                "(SELECT  program_action.action as action_code, program.section, program_action.description as action_name,program_action.id as action_id , " +
+                "program.name as program_name,program.id as program_id,  " +
                 "program.label as program_label, program.functional_code, program.chapter,chapter.label as chapter_label, functional_code.label as code_label, " +
-                " SUM(CASE WHEN oce.price_proposal is not null THEN oce.price_proposal *  oce.amount ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 END) as Total   " +
-                "FROM lystore.order_client_equipment oce " +
+                " SUM(" +
+                " CASE WHEN oce.price_proposal is not null" +
+                " THEN oce.price_proposal *  oce.amount " +
+                " ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 + " +
+                " ( " +
+                "           SELECT CASE WHEN  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL " +
+                "           THEN 0  " +
+                "           ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  " +
+                "           END " +
+                "           from lystore.order_client_options oco  " +
+                "          WHERE id_order_client_equipment = oce.id  " +
+                " )  " +
+                " END) as Total   " +
+                "FROM " + Lystore.lystoreSchema + ".order_client_equipment oce " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id)   " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)    " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (oce.id_contract = contract.id)   " +
@@ -90,10 +104,33 @@ public class RecapImputationBud extends TabHelper {
                 "INNER JOIN  " + Lystore.lystoreSchema + ".chapter ON (chapter.code =  program.chapter) " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".functional_code ON (functional_code.code =  program.functional_code) " +
                 "WHERE instruction.id = ? " +
+                "AND oce.override_region = false " +
                 "group by program_action.id,program.id,chapter_label,code_label " +
-                "order by section desc,program_id,action_id;";
+                "order by section desc,program_id,action_id)" +
+                " UNION " +
+                "(SELECT  program_action.action as action_code, program.section, program_action.description as action_name,program_action.id as action_id , program.name as program_name," +
+                "program.id as program_id,  " +
+                "program.label as program_label, program.functional_code, program.chapter,chapter.label as chapter_label, functional_code.label as code_label, " +
+                " SUM(ore.price * ore.amount) as Total   " +
+                "FROM " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".operation ON (ore.id_operation = operation.id)   " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)    " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (ore.id_contract = contract.id)   " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)   " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)  " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id) " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".chapter ON (chapter.code =  program.chapter) " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".functional_code ON (functional_code.code =  program.functional_code) " +
+                "WHERE instruction.id = ? " +
+                "group by program_action.id,program.id,chapter_label,code_label " +
+                "order by section desc,program_id,action_id))" +
+                "SELECT results.* from results " +
+                "order by section desc,program_id,action_id " +
+                ";" +
+                "";
 
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
+        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")).add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
                 handler.handle(event.left());
             } else {

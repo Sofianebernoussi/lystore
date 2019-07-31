@@ -249,29 +249,17 @@ public class ExcelHelper {
         Cell cell = row.createCell(cellColumn);
         cell.setCellValue(data);
         cell.setCellStyle(this.labelStyle);
-        sheet.autoSizeColumn(cellColumn);
+//        sheet.autoSizeColumn(cellColumn);
     }
 
 
-    /**
-     * insert a cell with label  style out of an array
-     *
-     * @param row
-     * @param cellColumn
-     * @param data       data to insert
-     */
-    public void insertLabelHead(Row row, int cellColumn, String data) {
-        Cell cell = row.createCell(cellColumn);
-        cell.setCellValue(data);
-        cell.setCellStyle(this.labelHeadStyle);
-        sheet.autoSizeColumn(cellColumn);
-    }
+
 
     public void insertFormula(Row row, int cellColumn, String data) {
         Cell cell = row.createCell(cellColumn);
         cell.setCellFormula(data);
         cell.setCellStyle(this.currencyStyle);
-        sheet.autoSizeColumn(cellColumn);
+//        sheet.autoSizeColumn(cellColumn);
 
     }
 
@@ -311,13 +299,30 @@ public class ExcelHelper {
             Cell cell = tab.createCell(cellColumn);
             cell.setCellValue(data);
             cell.setCellStyle(this.labelStyle);
-            sheet.autoSizeColumn(cellColumn);
+//            sheet.autoSizeColumn(cellColumn);
         } catch (NullPointerException e) {
             tab = sheet.createRow(line);
             Cell cell = tab.createCell(cellColumn);
             cell.setCellValue(data);
             cell.setCellStyle(this.labelStyle);
-            sheet.autoSizeColumn(cellColumn);
+//            sheet.autoSizeColumn(cellColumn);
+        }
+    }
+
+    public void insertLabelHead(int line, int cellColumn, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.labelHeadStyle);
+//            sheet.autoSizeColumn(cellColumn);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.labelHeadStyle);
+//            sheet.autoSizeColumn(cellColumn);
         }
     }
 
@@ -328,13 +333,13 @@ public class ExcelHelper {
             Cell cell = tab.createCell(cellColumn);
             cell.setCellValue(data);
             cell.setCellStyle(this.headCellStyle);
-            sheet.autoSizeColumn(cellColumn);
+//            sheet.autoSizeColumn(cellColumn);
         } catch (NullPointerException e) {
             tab = sheet.createRow(line);
             Cell cell = tab.createCell(cellColumn);
             cell.setCellValue(data);
             cell.setCellStyle(this.headCellStyle);
-            sheet.autoSizeColumn(cellColumn);
+//            sheet.autoSizeColumn(cellColumn);
         }
 
 

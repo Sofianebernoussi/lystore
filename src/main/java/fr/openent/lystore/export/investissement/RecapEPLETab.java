@@ -68,7 +68,6 @@ public class RecapEPLETab extends TabHelper {
             program.getString("comment");
             if (!structuresId.contains(program.getString(id_structureStr)))
                 structuresId.add(structuresId.size(), program.getString(id_structureStr));
-
         }
         structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
@@ -81,6 +80,7 @@ public class RecapEPLETab extends TabHelper {
                 }
             }
         });
+
 
     }
 
@@ -123,7 +123,7 @@ public class RecapEPLETab extends TabHelper {
         }
         if (programs.size() > 0) {
             newTab(programs.getJsonObject(programs.size() - 1), true);
-            settingSumLabel();
+//            settingSumLabel();
         }
     }
 
@@ -137,9 +137,9 @@ public class RecapEPLETab extends TabHelper {
             sheet.addMergedRegion(merge);
             merge = new CellRangeAddress(yProgramLabel + 4, yProgramLabel + 5, 2, 3);
             sheet.addMergedRegion(merge);
-            excel.insertHeader(sheet.createRow(yProgramLabel + 3), 2, excel.sumLabel);
+            excel.insertHeader(yProgramLabel + 3, 2, excel.sumLabel);
             excel.setTotalX(yProgramLabel + 2 - nbLine, yProgramLabel + 2, 3, yProgramLabel + 3);
-            totalLabelInt += excel.getCellReference(yProgramLabel + 3, 3) + " +";
+            addTotalLabelInt(excel.getCellReference(yProgramLabel + 3, 3) + " +");
             nbLine = 0;
 
 
@@ -155,13 +155,11 @@ public class RecapEPLETab extends TabHelper {
                 contract_id = program.getInteger("contract_type_id");
                 if (notFirstPart) { //adding sum
                     settingSumLabel();
-
-
                 }
                 setLabelHead(program);
                 notFirstPart = true;
             }
-            //adding  new label
+//            //adding  new label
             id_structure = program.getString(id_structureStr);
             nameEtab = program.getString("nameEtab");
             uai = program.getString("uai");
@@ -181,6 +179,19 @@ public class RecapEPLETab extends TabHelper {
 
     }
 
+    private void addTotalLabelInt(String s) {
+        int limitFormulaSize = 8000;
+        String cellToAdd = excel.getCellReference(yProgramLabel + 3, 3) + " +";
+        cellToAdd = cellToAdd.replace("'Récap. EPLE'!", "");
+        if (totalLabelInt.length() + cellToAdd.length() < limitFormulaSize) {
+            totalLabelInt += cellToAdd;
+        } else {
+            totalLabelInt = totalLabelInt.substring(0, totalLabelInt.length() - 1);
+            excel.insertFormula(sheet.getRow(yProgramLabel + 3), 1589, totalLabelInt);
+            totalLabelInt = excel.getCellReference(yProgramLabel + 3, 1589) + " +" + cellToAdd;
+        }
+    }
+
     private void settingSumLabel() {
         totalLabelInt = totalLabelInt.substring(0, totalLabelInt.length() - 1);
         excel.insertFormula(sheet.getRow(xlabel), yTotalLabel, totalLabelInt);
@@ -190,13 +201,13 @@ public class RecapEPLETab extends TabHelper {
     public void setLabelHead(JsonObject program) {
         yProgramLabel += 4;
 
-        excel.insertLabelHead(sheet.createRow(yProgramLabel), xProgramLabel,
+        excel.insertLabelHead(yProgramLabel, xProgramLabel,
                 programLabel + program.getString("program_name") + " " + program.getString("program_label"));
-        excel.insertLabelHead(sheet.createRow(yProgramLabel + 2), xProgramLabel,
+        excel.insertLabelHead(yProgramLabel + 2, xProgramLabel,
                 actionLabel + program.getString("action_code") + " - " + program.getString("action_name"));
-        excel.insertLabelHead(sheet.getRow(yProgramLabel), xProgramLabel + 1,
+        excel.insertLabelHead(yProgramLabel, xProgramLabel + 1,
                 contractType + program.getString("contract_code") + " - " + program.getString("contract_name"));
-        excel.insertLabelHead(sheet.getRow(yProgramLabel), xProgramLabel + 2, totalLabel);
+        excel.insertLabelHead(yProgramLabel, xProgramLabel + 2, totalLabel);
         xlabel = yProgramLabel;
         yProgramLabel += 2;
 
@@ -204,26 +215,56 @@ public class RecapEPLETab extends TabHelper {
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
-        query = "SELECT distinct contract_type.code as contract_code,  contract_type.name as contract_name, contract_type.id as contract_type_id," +
-                "oce.id_structure, " +
-                "program_action.action as action_code, program_action.description as action_name,program_action.id as action_id , " +
-                "program.name as program_name,program.id as program_id, program.label as program_label," +
-                "oce.id_structure,oce.amount as amount,oce.name as label,oce.comment as comment,oce.id,  " +
-                "SUM(CASE WHEN oce.price_proposal is not null THEN oce.price_proposal *  oce.amount ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 END) as Total  " +
-                "FROM lystore.order_client_equipment oce    " +
-                "INNER JOIN lystore.operation ON (oce.id_operation = operation.id)   " +
-                " INNER JOIN lystore.instruction ON (operation.id_instruction = instruction.id)  " +
-                " INNER JOIN lystore.contract ON (oce.id_contract = contract.id)  " +
-                " INNER JOIN lystore.contract_type ON (contract.id_contract_type = contract_type.id)   " +
-                " INNER JOIN lystore.structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)   " +
-                " INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id)  " +
-                " INNER JOIN lystore.program ON (program_action.id_program = program.id) " +
-                " WHERE instruction.id = ? " +
+        query = "With values as ((SELECT distinct contract_type.code as contract_code, contract_type.name as contract_name, contract_type.id as contract_type_id, " +
+                "program_action.action as action_code, program_action.description as action_name,program_action.id as action_id , program.name as program_name,program.id as program_id, " +
+                "program.label as program_label,oce.id_structure,oce.amount as amount,oce.name as label,oce.comment as comment, " +
+                "SUM(CASE WHEN oce.price_proposal is not null " +
+                " THEN oce.price_proposal *  oce.amount " +
+                " ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 +  " +
+                "  " +
+                " ( " +
+                "           SELECT CASE WHEN  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL " +
+                "           THEN 0  " +
+                "           ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  " +
+                "           END " +
+                "           from lystore.order_client_options oco  " +
+                "           WHERE id_order_client_equipment = oce.id  " +
+                " ) " +
+                " END ) as Total  " +
+                "FROM lystore.order_client_equipment oce   " +
+                "INNER JOIN lystore.operation ON (oce.id_operation = operation.id)    " +
+                "INNER JOIN lystore.instruction ON (operation.id_instruction = instruction.id)  " +
+                "INNER JOIN lystore.contract ON (oce.id_contract = contract.id)  " +
+                "INNER JOIN lystore.contract_type ON (contract.id_contract_type = contract_type.id) " +
+                "INNER JOIN lystore.structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)   " +
+                "INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id)   " +
+                "INNER JOIN lystore.program ON (program_action.id_program = program.id)  " +
+                "WHERE instruction.id = ? AND " +
+                "oce.override_region = false " +
                 "group by oce.id,contract_type.id,contract_code, contract_name, program_action.id,program.id,oce.id_structure,oce.name,oce.comment,oce.amount " +
-                "order by program_name";
+                "order by program_name) " +
+                "UNION " +
+                "(SELECT distinct contract_type.code as contract_code, contract_type.name as contract_name, contract_type.id as contract_type_id, " +
+                "program_action.action as action_code, program_action.description as action_name,program_action.id as action_id , program.name as program_name,program.id as program_id, " +
+                "program.label as program_label,ore.id_structure,ore.amount as amount,ore.name as label,ore.comment as comment, " +
+                "SUM(ore.price * ore.amount) as Total  " +
+                "FROM lystore.\"order-region-equipment\" ore " +
+                "INNER JOIN lystore.operation ON (ore.id_operation = operation.id)    " +
+                "INNER JOIN lystore.instruction ON (operation.id_instruction = instruction.id)  " +
+                "INNER JOIN lystore.contract ON (ore.id_contract = contract.id)  " +
+                "INNER JOIN lystore.contract_type ON (contract.id_contract_type = contract_type.id) " +
+                "INNER JOIN lystore.structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)   " +
+                "INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id)   " +
+                "INNER JOIN lystore.program ON (program_action.id_program = program.id)  " +
+                "WHERE instruction.id = ?  " +
+                "group by ore.id,contract_type.id,contract_code, contract_name, program_action.id,program.id,ore.id_structure,ore.name,ore.comment,ore.amount " +
+                "order by program_name) " +
+                ") " +
+                "SELECT * from values  " +
+                "order by program_name,id_structure ";
 
 
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
+        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")).add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
                 handler.handle(event.left());
             } else {
@@ -234,3 +275,4 @@ public class RecapEPLETab extends TabHelper {
     }
 
 }
+

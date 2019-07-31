@@ -116,6 +116,8 @@ public class InstructionController extends ControllerHelper {
 
     @Get("/instructions/export/equipment/rapport/:id/:type")
     @ApiDoc("Export given instruction")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
     public void exportRapportEquipment(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
             @Override
@@ -135,7 +137,8 @@ public class InstructionController extends ControllerHelper {
 
     @Get("/instruction/:id/operations")
     @ApiDoc("List all operation of instruction")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
     public void getOperationOfInstruction(HttpServerRequest request) {
         instructionService.getOperationOfInstruction(Integer.parseInt(request.getParam("id")), arrayResponseHandler(request));
     }

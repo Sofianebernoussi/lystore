@@ -50,6 +50,7 @@ export class OrderClient implements Selectable {
     structure: Structure;
     priceUnitedTTC: number;
     rankOrder: string;
+    isOrderRegion: Boolean;
     constructor() {
 
     }
@@ -82,13 +83,13 @@ export class OrderClient implements Selectable {
         }
     }
 
-
     downloadFile(file) {
         window.open(`/lystore/order/${this.id}/file/${file.id}`);
     }
-    async updateStatusOrder(status: String){
+
+    async updateStatusOrder(status: String, id:number = this.id){
         try {
-            await http.put(`/lystore/order/${this.id}`, {status: status});
+            await http.put(`/lystore/order/${id}`, {status: status});
         } catch (e) {
             notify.error('lystore.order.update.err');
         }

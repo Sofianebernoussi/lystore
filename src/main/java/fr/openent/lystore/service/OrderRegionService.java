@@ -12,6 +12,6 @@ public interface OrderRegionService {
 
     public void linkOrderToOperation(Integer id_order_client_equipment, Integer id_operation, Handler<Either<String, JsonObject>> handler);
 
-
+    void deleteOrderRegion(int idOrderRegion, Handler<Either<String, JsonObject>> handler);
 
 }

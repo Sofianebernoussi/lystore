@@ -46,13 +46,16 @@ public final class SqlUtils {
     public static void getSumPriceOperation(Number idOperation, Handler<Either<String, JsonObject>> handler) {
         try {
             String query = "WITH value_operation AS  ( SELECT " +
-                    "( SELECT  " +
-                    "SUM(ROUND(oco.price + ((oco.price *  oco.tax_amount) /100), 2) * oco.amount ) AS price_total_option " +
-                    "FROM  " + Lystore.lystoreSchema + ".order_client_options oco " +
-                    "WHERE id_order_client_equipment = oce.id " +
+                    "( " +
+                    "   SELECT CASE " +
+                    "       WHEN ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2) IS NULL THEN 0 " +
+                    "       ELSE ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2) " +
+                    "       END AS price_total_option " +
+                    "   FROM " + Lystore.lystoreSchema + ".order_client_options oco " +
+                    "   WHERE id_order_client_equipment = oce.id " +
                     "), " +
-                    "CASE   " +
-                    "WHEN ore.price is not null THEN ( ore.price * ore.amount ) " +
+                    "CASE  " +
+                    "WHEN oce.override_region IS true THEN ( ore.price * ore.amount ) " +
                     "WHEN oce.price_proposal is not NULL THEN ( oce.price_proposal * oce.amount ) " +
                     "ELSE (ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) " +
                     "END AS price_total_operation " +

@@ -126,6 +126,15 @@ export class OrderRegion implements Selectable {
 
         }
     }
+
+    async delete(id){
+        try{
+            return await http.delete(`/lystore/region/${id}/order`);
+        } catch (e) {
+            notify.error('lystore.admin.order.update.err');
+            throw e;
+        }
+    }
 }
 
 export class OrdersRegion extends Selection<OrderRegion> {

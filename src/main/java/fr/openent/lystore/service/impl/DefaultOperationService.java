@@ -18,6 +18,7 @@ import org.entcore.common.sql.SqlResult;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -224,66 +225,89 @@ public class DefaultOperationService extends SqlCrudService implements Operation
 
     @Override
     public void getOperationOrders(Integer operationId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT " +
-                "oce.id, " +
-                "oce.creation_date, " +
-                "SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) AS price, " +
-                "oce.amount, " +
-                "oce.name, " +
-                "oce.id_structure, oce.status, " +
-                "contract.name as contract_name " +
-                "FROM  " + Lystore.lystoreSchema + ".order_client_equipment oce  " +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".contract ON oce.id_contract = contract.id  " +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id) " +
-                "WHERE operation.id = ? " +
-                "GROUP BY ( " +
-                "oce.id, " +
-                "oce.price, " +
-                "oce.name,oce.id_structure, " +
-                "contract.name " +
-                ");";
 
-        JsonArray params = new JsonArray()
-                .add(operationId);
+        Future<JsonArray> getOrderRegionByOperationFuture = Future.future();
+        Future<JsonArray> getOrderClientByOperationFuture = Future.future();
 
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(event -> {
-            if (event.isLeft()) {
-                handler.handle(event.left());
+        getOrderRegionByOperation(operationId, FutureHelper.handlerJsonArray(getOrderRegionByOperationFuture));
+        getOrderClientByOperation(operationId, FutureHelper.handlerJsonArray(getOrderClientByOperationFuture));
+
+        CompositeFuture.all( getOrderRegionByOperationFuture, getOrderClientByOperationFuture).setHandler(asyncEvent -> {
+            if (asyncEvent.failed()) {
+                String message = "Failed to retrieve order of operation";
+                handler.handle(new Either.Left<>(message));
                 return;
             }
 
-            JsonArray orders = event.right().getValue();
-            JsonArray structures = new JsonArray();
-            for (int i = 0; i < orders.size(); i++) {
-                structures.add(orders.getJsonObject(i).getString("id_structure"));
+            JsonArray ordersRegionsByOperation = getOrderRegionByOperationFuture.result();
+            JsonArray ordersClientsByOperation = getOrderClientByOperationFuture.result();
+
+            for (int i = 0 ; i<ordersClientsByOperation.size() ; i++){
+                ordersClientsByOperation.getJsonObject(i).put("isOrderRegion", false);
             }
 
-            String nQuery = "MATCH (s:Structure) WHERE s.id IN {structures} RETURN s.id as id, s.name as name, s.UAI as uai";
-            JsonObject nParams = new JsonObject()
-                    .put("structures", structures);
+            for (int i = 0 ; i<ordersRegionsByOperation.size() ; i++){
+                ordersClientsByOperation.add(ordersRegionsByOperation.getJsonObject(i).put("isOrderRegion", true));
+            }
 
-            Neo4j.getInstance().execute(nQuery, nParams, Neo4jResult.validResultHandler(nEvent -> {
-                if (nEvent.isLeft()) {
-                    handler.handle(nEvent.left());
-                    return;
-                }
+            handler.handle(new Either.Right<>(ordersClientsByOperation));
+        });
+    }
+    private void getOrderRegionByOperation(int idOperation, Handler<Either<String, JsonArray>> handler){
+        String queryGetOrderRegion = "" +
+                "SELECT ore.id, " +
+                "       ore.id_order_client_equipment, " +
+                "       ore.creation_date, " +
+                "       ore.amount, " +
+                "       ore.name, " +
+                "       ore.id_structure, " +
+                "       ore.status, " +
+                "     ROUND( ore.price * ore.amount, 2 ) AS price, " +
+                "       c.name AS contract_name " +
+                "FROM  " + Lystore.lystoreSchema +".\"order-region-equipment\" ore " +
+                "INNER JOIN  " + Lystore.lystoreSchema +".contract c ON ore.id_contract = c.id " +
+                "INNER JOIN  " + Lystore.lystoreSchema +".operation o ON (ore.id_operation = o.id) " +
+                "WHERE o.id = ? " +
+                "GROUP BY (ore.id, " +
+                "          ore.price, " +
+                "          ore.name, " +
+                "          ore.id_structure, " +
+                "          c.name);";
 
-                JsonArray structureList = nEvent.right().getValue();
-                JsonObject map = new JsonObject();
-                for (int i = 0; i < structureList.size(); i++) {
-                    map.put(structureList.getJsonObject(i).getString("id"), structureList.getJsonObject(i));
-                }
+        Sql.getInstance().prepared(queryGetOrderRegion, new JsonArray().add(idOperation), SqlResult.validResultHandler(handler));
+    }
+    private void getOrderClientByOperation(int idOperation, Handler<Either<String, JsonArray>> handler){
+        String queryGOrderClient = "" +
+                "SELECT oce.id,  " +
+                "       (  " +
+                "               (SELECT " +
+                "                  CASE " +
+                "                  WHEN ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL THEN 0 " +
+                "                  ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2) " +
+                "                  END " +
+                "               FROM " + Lystore.lystoreSchema +".order_client_options oco " +
+                "               WHERE id_order_client_equipment = oce.id) + " +
+                "                                                         (CASE  " +
+                "                                                             WHEN oce.price_proposal IS NOT NULL THEN (oce.price_proposal * oce.amount)  " +
+                "                                                             ELSE (ROUND(oce.price + ((oce.price * oce.tax_amount) /100), 2) * oce.amount)  " +
+                "                                                         END)) AS price,  " +
+                "       oce.creation_date,  " +
+                "       oce.amount,  " +
+                "       oce.name,  " +
+                "       oce.id_structure,  " +
+                "       oce.status,  " +
+                "       c.name AS contract_name  " +
+                "FROM   " + Lystore.lystoreSchema +".order_client_equipment oce  " +
+                "INNER JOIN   " + Lystore.lystoreSchema +".contract c ON oce.id_contract = c.id  " +
+                "INNER JOIN   " + Lystore.lystoreSchema +".operation o ON (oce.id_operation = o.id)  " +
+                "WHERE o.id = ? " +
+                "  AND oce.override_region IS FALSE  " +
+                "GROUP BY (oce.id,  " +
+                "          oce.price,  " +
+                "          oce.name,  " +
+                "          oce.id_structure,  " +
+                "          c.name);";
 
-                JsonObject order, structure;
-                for (int i = 0; i < orders.size(); i++) {
-                    order = orders.getJsonObject(i);
-                    structure = map.getJsonObject(order.getString("id_structure"));
-                    order.put("structure_name", structure.getString("name"));
-                    order.put("structure_uai", structure.getString("uai"));
-                }
-
-                handler.handle(new Either.Right<>(orders));
-            }));
-        }));
+        Sql.getInstance().prepared(queryGOrderClient, new JsonArray().add(idOperation), SqlResult.validResultHandler(handler));
     }
 }

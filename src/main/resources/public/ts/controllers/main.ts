@@ -221,7 +221,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
 
             },
-            updateLinkedOrder: async () => {
+            updateLinkedOrder: async (param) => {
+                //todo init Order (id = param)
                 await $scope.initOrders('IN PROGRESS');
                 template.open('administrator-main', 'administrator/order/order-update-form');
                 Utils.safeApply($scope);
@@ -245,8 +246,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                     $scope.redirectTo(`/operation`);
                     return
                 }
+                $scope.structures = new Structures();
+                await $scope.structures.sync();
                 $scope.operation = $scope.operations.selected[0];
-                $scope.ordersClientByOperation = await $scope.operation.getOrders();
+                $scope.ordersClientByOperation = await $scope.operation.getOrders($scope.structures.all);
                 template.open('administrator-main', 'administrator/operation/operation-container');
                 template.open('operation-main', 'administrator/operation/operation-orders-list');
                 Utils.safeApply($scope);

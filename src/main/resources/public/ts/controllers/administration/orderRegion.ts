@@ -1,4 +1,4 @@
-import {idiom as lang, ng, notify, template} from 'entcore';
+import {_, idiom as lang, ng, notify, template} from 'entcore';
 import {
     Notification, Operation, OrderClient, OrderRegion, OrdersRegion, Structure, StructureGroup, StructureGroups,
     Structures, Titles, Utils
@@ -53,7 +53,6 @@ export const orderRegionController = ng.controller('orderRegionController',
 
 
         $scope.initDataUpdate = async () => {
-
             await $scope.equipments.sync($scope.orderToUpdate.id_campaign, $scope.orderToUpdate.id_structure);
             $scope.orderToUpdate.equipment = $scope.equipments.all.find((e) => {
                 return e.id === $scope.orderToUpdate.equipment_key;
@@ -65,12 +64,12 @@ export const orderRegionController = ng.controller('orderRegionController',
         if ($routeParams.idOrder) {
             let idOrder = $routeParams.idOrder;
             $scope.ordersClient.all.forEach((o) => {
-                if (o.id == idOrder)
+                if (o.id.toString() === idOrder)
                     $scope.orderToUpdate = o;
             });
             ($scope.orderToUpdate.price_proposal)
                 ? $scope.orderToUpdate.price_proposal = parseFloat($scope.orderToUpdate.price_proposal)
-                : $scope.orderToUpdate.price_proposal = $scope.orderToUpdate.priceTTCtotal;
+                : $scope.orderToUpdate.price_proposal = ($scope.orderToUpdate.priceTTCtotal / $scope.orderToUpdate.amount);
             if (!$scope.orderToUpdate.project.room)
                 $scope.orderToUpdate.project.room = '-';
             if (!$scope.orderToUpdate.project.building)

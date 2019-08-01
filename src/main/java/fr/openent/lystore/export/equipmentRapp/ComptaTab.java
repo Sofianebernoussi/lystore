@@ -118,9 +118,20 @@ public class ComptaTab extends TabHelper {
 
                 JsonObject action = actions.getJsonObject(j);
                 if (!action.getString("campaign").equals(campaign)) {
+
+                    if (j != 0) {
+                        setTotal(nbTotaux, initYProgramLabel);
+                    }
+
                     campaign = action.getString("campaign");
-                    initYProgramLabel = setCampaign(campaign, initYProgramLabel);
                     yProgramLabel += 2;
+                    setCampaign(campaign, initYProgramLabel);
+                    initYProgramLabel = yProgramLabel;
+                    yProgramLabel += 2;
+
+                    columnTotal = 4;
+                    nbTotaux = 1;
+                    idPassed = new JsonObject();
                 }
                 if (!checkIdPassed(idPassed, action.getString("id_structure"))) {
                     columnTotal = 4;
@@ -153,12 +164,11 @@ public class ComptaTab extends TabHelper {
 
     }
 
-    private int setCampaign(String campaign, int y) {
+    private void setCampaign(String campaign, int y) {
         CellRangeAddress merge = new CellRangeAddress(y, y, 0, 6);
         sheet.addMergedRegion(merge);
         excel.setRegionHeader(merge, sheet);
         excel.insertYellowHeader(y, 0, campaign);
-        return y + 2;
     }
 
     private void setTitle(int currentY, JsonObject operation) {
@@ -169,7 +179,6 @@ public class ComptaTab extends TabHelper {
     }
 
     private void setTotal(int nbTotaux, int initYProgramLabel) {
-        System.out.println(nbTotaux);
         excel.fillTab(4, 4 + nbTotaux, initYProgramLabel + 1, yProgramLabel);
         excel.insertLabel(yProgramLabel, 3, excel.totalLabel);
         for (int nbTotal = 0; nbTotal < nbTotaux; nbTotal++) {
@@ -191,17 +200,17 @@ public class ComptaTab extends TabHelper {
         query = "  With values as (   " +
                 "   (SELECT SUM( ore.price* ore.amount) as Total, " +
                 "   ore.id_structure,campaign.name as campaign,contract_type.code as code,ore.id_operation , program_action.id_program ,contract_type.name ,program.name          " +
-                "   FROM lystore.\"order-region-equipment\" ore       " +
-                "   INNER JOIN lystore.operation ON (ore.id_operation = operation.id)     " +
-                "   INNER JOIN lystore.campaign ON ore.id_campaign = campaign.id  " +
-                "   INNER JOIN lystore.label_operation as label ON (operation.id_label = label.id)    " +
-                "   INNER JOIN lystore.instruction ON (operation.id_instruction = instruction.id)        " +
-                "   INNER JOIN lystore.contract ON (ore.id_contract = contract.id)        " +
-                "   INNER JOIN lystore.contract_type ON (contract.id_contract_type = contract_type.id)           " +
-                "   INNER JOIN lystore.structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)        " +
-                "   INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id)     " +
-                "   INNER JOIN lystore.program ON (program_action.id_program = program.id)      " +
-                "   WHERE instruction.id = ?  AND structure_program_action.structure_type =  'LYC'    " +
+                "   FROM " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore       " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".operation ON (ore.id_operation = operation.id)     " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".campaign ON ore.id_campaign = campaign.id  " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)    " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)        " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".contract ON (ore.id_contract = contract.id)        " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)           " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)        " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)     " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)      " +
+                "   WHERE instruction.id = ?  AND structure_program_action.structure_type =  '" + type + "'     " +
                 "   Group by  campaign,program.name,contract_type.code, contract_type.name , program_action.id, ore.id_operation,ore.id_structure     " +
                 "   order by  campaign,program.name,id_program,code,ore.id_operation  ) " +
                 "   UNION ( " +
@@ -213,28 +222,28 @@ public class ComptaTab extends TabHelper {
                 "           THEN 0  " +
                 "           ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  " +
                 "           END " +
-                "           from lystore.order_client_options oco  " +
+                "           from " + Lystore.lystoreSchema + ".order_client_options oco  " +
                 "           WHERE id_order_client_equipment = oce.id ) " +
                 "            )/100 END    " +
                 "   ) as Total, " +
                 "   oce.id_structure,campaign.name as campaign, contract_type.code as code,oce.id_operation , program_action.id_program ,contract_type.name ,program.name          " +
-                "   FROM lystore.order_client_equipment oce       " +
-                "   INNER JOIN lystore.operation ON (oce.id_operation = operation.id)    " +
-                "   INNER JOIN lystore.campaign ON oce.id_campaign = campaign.id  " +
-                "   INNER JOIN lystore.label_operation as label ON (operation.id_label = label.id)    " +
-                "   INNER JOIN lystore.instruction ON (operation.id_instruction = instruction.id)        " +
-                "   INNER JOIN lystore.contract ON (oce.id_contract = contract.id)        " +
-                "   INNER JOIN lystore.contract_type ON (contract.id_contract_type = contract_type.id)           " +
-                "   INNER JOIN lystore.structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)        " +
-                "   INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id)     " +
-                "   INNER JOIN lystore.program ON (program_action.id_program = program.id)      " +
-                "   WHERE instruction.id = ?     AND structure_program_action.structure_type =  'LYC'    " +
+                "   FROM " + Lystore.lystoreSchema + ".order_client_equipment oce       " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id)    " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".campaign ON oce.id_campaign = campaign.id  " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)    " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)        " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".contract ON (oce.id_contract = contract.id)        " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)           " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)        " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)     " +
+                "   INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)      " +
+                "   WHERE instruction.id = ?     AND structure_program_action.structure_type =  '" + type + "'    " +
                 "   Group by  campaign,program.name,contract_type.code, contract_type.name , program_action.id, oce.id_operation,oce.id_structure     " +
                 "   order by  campaign,program.name,id_program,code,oce.id_operation " +
                 "   ) " +
                 " )   " +
                 " SELECT label.label , array_to_json(array_agg(values)) as actions   " +
-                " from lystore.label_operation as label    " +
+                " from " + Lystore.lystoreSchema + ".label_operation as label    " +
                 " INNER JOIN values  on (label.id = values.id_operation)  " +
                 " Group by label.label  ";
 

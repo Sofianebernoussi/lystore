@@ -111,10 +111,17 @@ public class ComptaTab extends TabHelper {
             initYProgramLabel = yProgramLabel;
             yProgramLabel += 2;
             nbTotaux = 1;
+            String campaign = "";
             //Insert datas
 
             for (int j = 0; j < actions.size(); j++) {
+
                 JsonObject action = actions.getJsonObject(j);
+                if (!action.getString("campaign").equals(campaign)) {
+                    campaign = action.getString("campaign");
+                    initYProgramLabel = setCampaign(campaign, initYProgramLabel);
+                    yProgramLabel += 2;
+                }
                 if (!checkIdPassed(idPassed, action.getString("id_structure"))) {
                     columnTotal = 4;
                     idPassed.put(action.getString("id_structure"), true);
@@ -139,11 +146,19 @@ public class ComptaTab extends TabHelper {
                 yProgramLabel++;
 
             }
-//            setTotal(nbTotaux, initYProgramLabel);
+            setTotal(nbTotaux, initYProgramLabel);
             yProgramLabel += 2;
         }
 
 
+    }
+
+    private int setCampaign(String campaign, int y) {
+        CellRangeAddress merge = new CellRangeAddress(y, y, 0, 6);
+        sheet.addMergedRegion(merge);
+        excel.setRegionHeader(merge, sheet);
+        excel.insertYellowHeader(y, 0, campaign);
+        return y + 2;
     }
 
     private void setTitle(int currentY, JsonObject operation) {
@@ -154,11 +169,12 @@ public class ComptaTab extends TabHelper {
     }
 
     private void setTotal(int nbTotaux, int initYProgramLabel) {
+        System.out.println(nbTotaux);
+        excel.fillTab(4, 4 + nbTotaux, initYProgramLabel + 1, yProgramLabel);
         excel.insertLabel(yProgramLabel, 3, excel.totalLabel);
         for (int nbTotal = 0; nbTotal < nbTotaux; nbTotal++) {
-            excel.setTotalX(initYProgramLabel, yProgramLabel - 1, 4 + nbTotal, yProgramLabel);
+            excel.setTotalX(initYProgramLabel + 1, yProgramLabel - 1, 4 + nbTotal, yProgramLabel);
         }
-
         excel.insertHeader(initYProgramLabel + 1, 4 + nbTotaux, excel.totalLabel);
         for (int y = initYProgramLabel + 2; y <= yProgramLabel; y++) {
             excel.setTotalY(4, 4 + nbTotaux - 1, y, 4 + nbTotaux);
@@ -174,7 +190,7 @@ public class ComptaTab extends TabHelper {
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
         query = "  With values as (   " +
                 "   (SELECT SUM( ore.price* ore.amount) as Total, " +
-                "   ore.id_structure,contract_type.code as code,ore.id_operation , program_action.id_program ,contract_type.name ,program.name          " +
+                "   ore.id_structure,campaign.name as campaign,contract_type.code as code,ore.id_operation , program_action.id_program ,contract_type.name ,program.name          " +
                 "   FROM lystore.\"order-region-equipment\" ore       " +
                 "   INNER JOIN lystore.operation ON (ore.id_operation = operation.id)     " +
                 "   INNER JOIN lystore.campaign ON ore.id_campaign = campaign.id  " +
@@ -186,8 +202,8 @@ public class ComptaTab extends TabHelper {
                 "   INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id)     " +
                 "   INNER JOIN lystore.program ON (program_action.id_program = program.id)      " +
                 "   WHERE instruction.id = ?  AND structure_program_action.structure_type =  'LYC'    " +
-                "   Group by  program.name,contract_type.code, contract_type.name , program_action.id, ore.id_operation,ore.id_structure     " +
-                "   order by  program.name,id_program,code,ore.id_operation  ) " +
+                "   Group by  campaign,program.name,contract_type.code, contract_type.name , program_action.id, ore.id_operation,ore.id_structure     " +
+                "   order by  campaign,program.name,id_program,code,ore.id_operation  ) " +
                 "   UNION ( " +
                 "   SELECT " +
                 "   SUM(  CASE WHEN oce.price_proposal is not null  " +
@@ -201,7 +217,7 @@ public class ComptaTab extends TabHelper {
                 "           WHERE id_order_client_equipment = oce.id ) " +
                 "            )/100 END    " +
                 "   ) as Total, " +
-                "   oce.id_structure, contract_type.code as code,oce.id_operation , program_action.id_program ,contract_type.name ,program.name          " +
+                "   oce.id_structure,campaign.name as campaign, contract_type.code as code,oce.id_operation , program_action.id_program ,contract_type.name ,program.name          " +
                 "   FROM lystore.order_client_equipment oce       " +
                 "   INNER JOIN lystore.operation ON (oce.id_operation = operation.id)    " +
                 "   INNER JOIN lystore.campaign ON oce.id_campaign = campaign.id  " +
@@ -213,8 +229,8 @@ public class ComptaTab extends TabHelper {
                 "   INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id)     " +
                 "   INNER JOIN lystore.program ON (program_action.id_program = program.id)      " +
                 "   WHERE instruction.id = ?     AND structure_program_action.structure_type =  'LYC'    " +
-                "   Group by  program.name,contract_type.code, contract_type.name , program_action.id, oce.id_operation,oce.id_structure     " +
-                "   order by  program.name,id_program,code,oce.id_operation " +
+                "   Group by  campaign,program.name,contract_type.code, contract_type.name , program_action.id, oce.id_operation,oce.id_structure     " +
+                "   order by  campaign,program.name,id_program,code,oce.id_operation " +
                 "   ) " +
                 " )   " +
                 " SELECT label.label , array_to_json(array_agg(values)) as actions   " +
@@ -234,53 +250,4 @@ public class ComptaTab extends TabHelper {
         }));
     }
 }
-/* query = "  With values as (   " +
-                "   (SELECT SUM( ore.price* ore.amount) as Total, " +
-                "   ore.id_structure, campaign.name as campaign ,contract_type.code as code,ore.id_operation , program_action.id_program ,contract_type.name ,program.name          " +
-                "   FROM lystore.\"order-region-equipment\" ore       " +
-                "   INNER JOIN lystore.operation ON (ore.id_operation = operation.id)     " +
-                "   INNER JOIN lystore.campaign ON ore.id_campaign = campaign.id  " +
-                "   INNER JOIN lystore.label_operation as label ON (operation.id_label = label.id)    " +
-                "   INNER JOIN lystore.instruction ON (operation.id_instruction = instruction.id)        " +
-                "   INNER JOIN lystore.contract ON (ore.id_contract = contract.id)        " +
-                "   INNER JOIN lystore.contract_type ON (contract.id_contract_type = contract_type.id)           " +
-                "   INNER JOIN lystore.structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)        " +
-                "   INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id)     " +
-                "   INNER JOIN lystore.program ON (program_action.id_program = program.id)      " +
-                "   WHERE instruction.id = ?  AND structure_program_action.structure_type =  'LYC'    " +
-                "   Group by  program.name,campaign,contract_type.code, contract_type.name , program_action.id, ore.id_operation,ore.id_structure     " +
-                "   order by  program.name,campaign,id_program,code,ore.id_operation  ) " +
-                "   UNION ( " +
-                "   SELECT " +
-                "   SUM(  CASE WHEN oce.price_proposal is not null  " +
-                "    THEN oce.price_proposal *  oce.amount " +
-                "    ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount + " +
-                "            (SELECT CASE WHEN  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL " +
-                "           THEN 0  " +
-                "           ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  " +
-                "           END " +
-                "           from lystore.order_client_options oco  " +
-                "           WHERE id_order_client_equipment = oce.id ) " +
-                "            )/100 END    " +
-                "   ) as Total, " +
-                "   oce.id_structure,  campaign.name as campaign , contract_type.code as code,oce.id_operation , program_action.id_program ,contract_type.name ,program.name          " +
-                "   FROM lystore.order_client_equipment oce       " +
-                "   INNER JOIN lystore.operation ON (oce.id_operation = operation.id)    " +
-                "   INNER JOIN lystore.campaign ON oce.id_campaign = campaign.id  " +
-                "   INNER JOIN lystore.label_operation as label ON (operation.id_label = label.id)    " +
-                "   INNER JOIN lystore.instruction ON (operation.id_instruction = instruction.id)        " +
-                "   INNER JOIN lystore.contract ON (oce.id_contract = contract.id)        " +
-                "   INNER JOIN lystore.contract_type ON (contract.id_contract_type = contract_type.id)           " +
-                "   INNER JOIN lystore.structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)        " +
-                "   INNER JOIN lystore.program_action ON (structure_program_action.program_action_id = program_action.id)     " +
-                "   INNER JOIN lystore.program ON (program_action.id_program = program.id)      " +
-                "   WHERE instruction.id = ?     AND structure_program_action.structure_type =  'LYC'    " +
-                "   Group by  program.name,campaign,contract_type.code, contract_type.name , program_action.id, oce.id_operation,oce.id_structure     " +
-                "   order by  program.name,campaign,id_program,code,oce.id_operation " +
-                "   ) " +
-                " )   " +
-                " SELECT label.label , array_to_json(array_agg(values)) as actions   " +
-                " from lystore.label_operation as label    " +
-                " INNER JOIN values  on (label.id = values.id_operation)  " +
-                " Group by label.label  ";*/
 

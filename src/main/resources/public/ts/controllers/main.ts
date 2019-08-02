@@ -1,8 +1,34 @@
 import {_, Behaviours, idiom as lang, model, moment, ng, template} from 'entcore';
 import {
-    Agents, Basket, Baskets, Campaign, Campaigns, Contracts, ContractTypes, Equipment, Equipments, EquipmentTypes,
-    Exercises, Instructions, labels, Logs, Notification, Operations, OrderClient, OrdersClient, PRIORITY_FIELD,
-    Programs, StructureGroups, Structures, Supplier, Suppliers, Tags, Taxes, Titles, Utils,
+    Agents,
+    Basket,
+    Baskets,
+    Campaign,
+    Campaigns,
+    Contracts,
+    ContractTypes,
+    Equipment,
+    Equipments,
+    EquipmentTypes,
+    Exercises,
+    Instructions,
+    labels,
+    Logs,
+    Notification,
+    Operations,
+    OrderClient,
+    OrderRegion,
+    OrdersClient,
+    PRIORITY_FIELD,
+    Programs,
+    StructureGroups,
+    Structures,
+    Supplier,
+    Suppliers,
+    Tags,
+    Taxes,
+    Titles,
+    Utils,
 } from '../model';
 import {Mix} from "entcore-toolkit";
 
@@ -33,6 +59,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.logs = new Logs();
         $scope.baskets = new Baskets();
         $scope.ordersClient = new OrdersClient();
+        $scope.orderClient = new OrderClient();
+        $scope.orderRegion = new OrderRegion();
         $scope.displayedOrders = new OrdersClient();
         $scope.equipmentTypes = new EquipmentTypes();
         $scope.instructions = new Instructions();
@@ -221,7 +249,14 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
 
             },
-            updateLinkedOrder: async () => {
+            updateLinkedOrder: async (params) => {
+                let idOrder = parseInt(params.idOrder);
+                let region = params.region;
+                if(region === 'client'){
+                    $scope.orderToUpdate = await $scope.orderClient.getOneOrderClient(idOrder);
+                } else {
+                    $scope.orderToUpdate = await $scope.orderRegion.getOneOrderRegion(idOrder);
+                }
                 await $scope.initOrders('IN PROGRESS');
                 template.open('administrator-main', 'administrator/order/order-update-form');
                 Utils.safeApply($scope);
@@ -245,8 +280,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                     $scope.redirectTo(`/operation`);
                     return
                 }
+                $scope.structures = new Structures();
+                await $scope.structures.sync();
                 $scope.operation = $scope.operations.selected[0];
-                $scope.ordersClientByOperation = await $scope.operation.getOrders();
+                $scope.ordersClientByOperation = await $scope.operation.getOrders($scope.structures.all);
                 template.open('administrator-main', 'administrator/operation/operation-container');
                 template.open('operation-main', 'administrator/operation/operation-orders-list');
                 Utils.safeApply($scope);

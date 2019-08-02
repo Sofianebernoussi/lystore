@@ -112,7 +112,16 @@ export class OrderRegion implements Selectable {
 
     async set() {
         try {
-            return await http.put(`/lystore/region/order/`, this.toJson());
+            return await http.post(`/lystore/region/order/`, this.toJson());
+        } catch (e) {
+            notify.error('lystore.admin.order.update.err');
+            throw e;
+        }
+    }
+
+    async update(id){
+        try {
+            return await http.put(`/lystore/region/order/${id}`, this.toJson());
         } catch (e) {
             notify.error('lystore.admin.order.update.err');
             throw e;
@@ -124,6 +133,40 @@ export class OrderRegion implements Selectable {
             this.summary = this.equipment.name;
             this.image = this.equipment.image;
 
+        }
+    }
+
+    async delete(id){
+        try{
+            return await http.delete(`/lystore/region/${id}/order`);
+        } catch (e) {
+            notify.error('lystore.admin.order.update.err');
+            throw e;
+        }
+    }
+
+    async getOneOrderRegion(id){
+        try{
+            const {data} =  await http.get(`/lystore/orderRegion/${id}/order`);
+            const result = {
+                ...data,
+                project: data.project?Mix.castAs(Project, JSON.parse(data.project.toString())):null,
+                campaign: data.campaign?Mix.castAs(Campaign, JSON.parse(data.campaign)):null,
+                contract_type: data.contract_type?JSON.parse(data.contract_type):null,
+                contract: data.contract?JSON.parse(data.contract):null,
+                structure_groups: data.structure_groups?JSON.parse(data.structure_groups):null,
+                options: data.options?JSON.parse(data.options):null,
+                supplier: data.supplier?JSON.parse(data.supplier):null,
+                title: data.title?JSON.parse(data.title):null,
+                price : data.price?parseFloat(data.price):null,
+                amount : data.amount?parseInt(data.amount):null,
+                rank : data.rank?parseInt(data.rank.toString()) : null,
+                price_single_ttc : data.price_single_ttc?parseFloat(data.price_single_ttc):null,
+            };
+            return result
+        } catch (e) {
+            notify.error('lystore.admin.order.update.err');
+            throw e;
         }
     }
 }

@@ -1,5 +1,5 @@
 import {_, ng, template, idiom as lang} from 'entcore';
-import {Operation, OrderClient, Utils} from "../../model";
+import {Operation, OrderClient, OrderRegion, Utils} from "../../model";
 import {Mix} from 'entcore-toolkit';
 
 declare let window: any;
@@ -7,6 +7,7 @@ declare let window: any;
 export const operationController = ng.controller('operationController',
     ['$scope',  '$routeParams',($scope, $routeParams) => {
         $scope.lang = lang;
+        $scope.orderRegion = new OrderRegion();
         $scope.allOrdersOperationSelected = false;
         $scope.sort = {
             operation : {
@@ -111,8 +112,13 @@ export const operationController = ng.controller('operationController',
         $scope.syncOrderByOperation = async (operation: Operation) =>{
             $scope.ordersClientByOperation = await operation.getOrders();
         };
-        $scope.dropOrderOperation = async (order:OrderClient) => {
-            await order.updateStatusOrder('WAITING');
+        $scope.dropOrderOperation = async (order:any) => {
+            if(order.isOrderRegion){
+                $scope.orderRegion.delete(order.id);
+                await order.updateStatusOrder('WAITING', order.id_order_client_equipment);
+            } else {
+                await order.updateStatusOrder('WAITING');
+            }
             await Promise.all([
                 await $scope.syncOrderByOperation($scope.operation),
                 await $scope.initOperation(),
@@ -133,7 +139,8 @@ export const operationController = ng.controller('operationController',
 
         $scope.insertOrderRegion = (order: OrderClient):void => {
             $scope.order = order;
-            $scope.redirectTo(`/order/operation/update/${order.id}`);
+            let type = order.isOrderRegion? 'region' : 'client';
+            $scope.redirectTo(`/order/operation/update/${order.id}/${type}`);
         };
         $scope.switchAllOrders = ():void => {
             $scope.allOrdersOperationSelected  =  !$scope.allOrdersOperationSelected;

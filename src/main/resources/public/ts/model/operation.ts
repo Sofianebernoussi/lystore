@@ -4,6 +4,7 @@ import {moment, notify} from "entcore";
 import {Utils} from "./Utils";
 import {Instruction} from "./instruction";
 import {OrderClient} from "./OrderClient";
+import {Structure} from "./Structure";
 
 
 export class Operation implements Selectable {
@@ -50,10 +51,19 @@ export class Operation implements Selectable {
         }
     }
 
-    async getOrders() {
+    async getOrders( structures: Structure[] = []) {
         try {
             const {data} = await http.get(`/lystore/operations/${this.id}/orders`);
-            return Mix.castArrayAs(OrderClient, data);
+            let resultData = data;
+            if(structures.length > 0){
+                resultData = resultData.map(order => {
+                    return {
+                        ...order,
+                        structure : structures.filter(structureFilter => structureFilter.id === order.id_structure)[0],
+                    }
+                })
+            }
+            return Mix.castArrayAs(OrderClient, resultData);
         } catch (e) {
             notify.error("lystore.operation.orders.sync.err");
             throw e;

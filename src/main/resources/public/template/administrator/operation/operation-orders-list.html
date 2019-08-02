@@ -1,4 +1,4 @@
-<h2><i  class="left-open one cell color-orange size-icon-big" ng-click="redirectTo('/operation')"></i><i18n>lystore.operation.order.management.title</i18n>[[operation.label.label]]</h2>
+<h2 xmlns:orderEditByRegion="http://www.w3.org/1999/xhtml" xmlns:orderEditByRegion="http://www.w3.org/1999/xhtml"><i class="left-open one cell color-orange size-icon-big" ng-click="redirectTo('/operation')"></i><i18n>lystore.operation.order.management.title</i18n>[[operation.label.label]]</h2>
 <article class="responsive-table">
     <table class="twelve">
         <thead>
@@ -11,11 +11,11 @@
                     <span></span>
                 </label>
             </td>
-            <td ng-click="sort.order.type = 'structure_uai';
+            <td ng-click="sort.order.type = 'structure.uai';
                     sort.order.reverse = !sort.order.reverse">
                 <i18n>Structure</i18n>
-                <i class="up-open" ng-show="sort.order.type === 'structure_uai' && !sort.order.reverse"></i>
-                <i class="down-open" ng-show="sort.order.type === 'structure_uai' && sort.order.reverse"></i>
+                <i class="up-open" ng-show="sort.order.type === 'structure.uai' && !sort.order.reverse"></i>
+                <i class="down-open" ng-show="sort.order.type === 'structure.uai' && sort.order.reverse"></i>
             </td>
             <td ng-click="sort.order.type = 'contract_name';
                     sort.order.reverse = !sort.order.reverse">
@@ -51,14 +51,16 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="order in ordersClientByOperation | orderBy:sort.order.type:sort.order.reverse">
+        <tr ng-repeat="order in ordersClientByOperation | orderBy:sort.order.type:sort.order.reverse"
+            ng-class="{ orderEditByRegion: order.isOrderRegion }"
+        >
             <td workflow="lystore.manager" class="table-selector">
                 <label class="checkbox">
                     <input type="checkbox" ng-model="order.selected">
                     <span></span>
                 </label>
             </td>
-            <td>[[order.structure_uai]] - [[order.structure_name]]</td>
+            <td>[[order.structure.uai]] - [[order.structure.name]]</td>
             <td>[[order.contract_name]]</td>
             <td>[[order.name]]</td>
             <td>[[order.amount]]</td>

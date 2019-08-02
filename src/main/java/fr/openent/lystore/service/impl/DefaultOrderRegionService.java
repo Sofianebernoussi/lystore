@@ -23,109 +23,116 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultOrderRegionService.class);
     @Override
     public void setOrderRegion(JsonObject order, UserInfos user, Handler<Either<String, JsonObject>> handler) {
-        String checkQuery = "SELECT id AS id_order_region_equipment from " + Lystore.lystoreSchema + ".\"order-region-equipment\" where id_order_client_equipment = " + order.getInteger("id_order_client_equipment");
-        sql.raw(checkQuery, SqlResult.validUniqueResultHandler(new Handler<Either<String, JsonObject>>() {
-            @Override
-            public void handle(Either<String, JsonObject> event) {
-                String query;
-                if (!event.right().getValue().containsKey("id_order_region_equipment")) {
-                    query = "INSERT INTO " + Lystore.lystoreSchema + ".\"order-region-equipment\" " +
-                            "( price, amount, creation_date, owner_name, owner_id, name, " +
-                            "  equipment_key, status,   comment,";
-                    if (order.containsKey("rank")){
-                        query += " rank,";
-                    }
-                    if (order.containsKey("id_operation")) {
-                        query += " id_operation,";
-                    }
-                    query += "id_order_client_equipment) " +
-                            "VALUES (";
-                    if (order.containsKey("rank")) {
-                        query += "?,";
-                    }
-                    if (order.containsKey("id_operation")) {
-                        query += "?,";
-                    }
-                    query += " ?, ?, ?, ?, ?, ?, ?, ?,  ?, ?)";
+        String query = "";
+        JsonArray params = new JsonArray();
+        query = "" +
+                "INSERT INTO  " + Lystore.lystoreSchema + ".\"order-region-equipment\" AS ore " +
+                "(price, " +
+                "amount, " +
+                "creation_date, " +
+                "owner_name, " +
+                "owner_id, " +
+                "equipment_key, " +
+                "name, " +
+                "comment, " +
+                "id_order_client_equipment, ";
+        query += order.containsKey("rank") ? "rank, " : "";
+        query += order.containsKey("id_operation") ? "id_operation, " : "";
+        query += "status, " +
+                "id_campaign, " +
+                "id_structure, " +
+                "summary, " +
+                "description, " +
+                "image, " +
+                "technical_spec, " +
+                "id_contract, " +
+                "cause_status, " +
+                "number_validation, " +
+                "id_order, " +
+                "id_project) ";
 
-                } else {
-                    query = "UPDATE " + Lystore.lystoreSchema + ".\"order-region-equipment\" " +
-                            " set price = ?, amount = ?, modification_date = ? , owner_name = ? , owner_id = ?, name = ?, " +
-                            "  equipment_key = ?, cause_status = ? ,   comment = ?,";
-                    if (order.containsKey("rank"))
-                        query += " rank = ?, ";
-                    if (order.containsKey("id_operation")) {
-                        query += " id_operation = ?, ";
-                    }
-                    query += "id_order_client_equipment = ? " +
-                            "WHERE id = " +
-                            event.right().getValue().getInteger("id_order_region_equipment");
-                }
-                JsonArray params = new JsonArray()
-                        .add(order.getInteger("price"))
-                        .add(order.getInteger("amount"))
-                        .add(order.getString("creation_date"))
-                        .add(user.getUsername())
-                        .add(user.getUserId())
-                        .add(order.getString("name"))
-                        .add(order.getInteger("equipment_key"))
-                        .add("IN PROGRESS")
-                        .add(order.getString("comment"));
-                if (order.containsKey("rank")){
-                    params.add(order.getInteger("rank"));
-                }
-                if (order.containsKey("id_operation")){
-                    params.add(order.getInteger("id_operation"));
-                }
-                params.add(order.getInteger("id_order_client_equipment"));
+        query += "SELECT " +
+                "? ," +
+                "? ," +
+                "? ," +
+                "? ," +
+                "? ," +
+                "? ," +
+                "? ," +
+                "? ," +
+                "? ,";
+        query += order.containsKey("rank") ? "?, " : "";
+        query += order.containsKey("id_operation") ? "?, " : "";
+        query += " 'IN PROGRESS', " +
+                "       id_campaign, " +
+                "       id_structure, " +
+                "       summary, " +
+                "       description, " +
+                "       image, " +
+                "       technical_spec, " +
+                "       id_contract, " +
+                "       cause_status, " +
+                "       number_validation, " +
+                "       id_order, " +
+                "       id_project " +
+                "FROM  " + Lystore.lystoreSchema + ".order_client_equipment " +
+                "WHERE id = ?";
 
-                Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(eventNewOrderRegion -> {
-                    if (eventNewOrderRegion.isRight()) {
-                        String updateOrderRegion = "" +
-                                "UPDATE  " + Lystore.lystoreSchema +".\"order-region-equipment\" AS ore " +
-                                "SET id_campaign = oce.id_campaign, " +
-                                "    id_structure = oce.id_structure, " +
-                                "    name = oce.name, " +
-                                "    summary = oce.summary, " +
-                                "    description = oce.description, " +
-                                "    image = oce.image, " +
-                                "    technical_spec = oce.technical_spec, " +
-                                "    status = oce.status, " +
-                                "    id_contract = oce.id_contract, " +
-                                "    cause_status = oce.cause_status, " +
-                                "    number_validation = oce.number_validation, " +
-                                "    id_order = oce.id_order, " +
-                                "    id_project = oce.id_project " +
-                                "FROM " +
-                                "  (SELECT id, " +
-                                "          id_campaign, " +
-                                "          id_structure, " +
-                                "          name, " +
-                                "          summary, " +
-                                "          description, " +
-                                "          image, " +
-                                "          technical_spec, " +
-                                "          status, " +
-                                "          id_contract, " +
-                                "          cause_status, " +
-                                "          number_validation, " +
-                                "          id_order, " +
-                                "          id_project " +
-                                "   FROM  " + Lystore.lystoreSchema +".order_client_equipment " +
-                                "   WHERE id = ? ) AS oce " +
-                                "WHERE ore.id_order_client_equipment = oce.id";
+        params.add(order.getFloat("price"))
+                .add(order.getInteger("amount"))
+                .add(order.getString("creation_date"))
+                .add(user.getUsername())
+                .add(user.getUserId())
+                .add(order.getInteger("equipment_key"))
+                .add(order.getString("name"))
+                .add(order.getString("comment"))
+                .add(order.getInteger("id_order_client_equipment"));
+        if (order.containsKey("rank")) {
+            params.add(order.getInteger("rank"));
+        }
+        if (order.containsKey("id_operation")) {
+            params.add(order.getInteger("id_operation"));
+        }
+        params.add(order.getInteger("id_order_client_equipment"));
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
 
-                        JsonArray id_oce =  new JsonArray().add(order.getInteger("id_order_client_equipment"));
-                        Sql.getInstance().prepared(updateOrderRegion, id_oce, SqlResult.validUniqueResultHandler(handler));
-                    } else {
-                        LOGGER.error( eventNewOrderRegion.left());
-                        return;
-                    }
-                }));
-            }
-        }));
+    public void updateOrderRegion(JsonObject order, int idOrder, UserInfos user, Handler<Either<String, JsonObject>> handler) {
+        String query = "";
+        JsonArray params = new JsonArray();
+        query = "" +
+                "UPDATE " + Lystore.lystoreSchema + ".\"order-region-equipment\" " +
+                " SET " +
+                "price = ?, " +
+                "amount = ?, " +
+                "modification_date = ? , " +
+                "owner_name = ? , " +
+                "owner_id = ?, " +
+                "name = ?, " +
+                "equipment_key = ?, " +
+                "cause_status = 'IN PROGRESS', ";
 
+        query +=  order.containsKey("rank")?"rank = ?, ": "";
+        query +=  order.containsKey("id_operation")?"id_operation = ?, ": "";
+        query +=  "comment = ? " +
+                "WHERE id = ?";
 
+        params.add(order.getFloat("price"))
+                .add(order.getInteger("amount"))
+                .add(order.getString("creation_date"))
+                .add(user.getUsername())
+                .add(user.getUserId())
+                .add(order.getString("name"))
+                .add(order.getInteger("equipment_key"));
+        if (order.containsKey("rank")){
+            params.add(order.getInteger("rank"));
+        }
+        if (order.containsKey("id_operation")){
+            params.add(order.getInteger("id_operation"));
+        }
+        params.add(order.getString("comment"))
+                .add(idOrder);
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
@@ -246,6 +253,51 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 .put("values", params)
                 .put("action", "prepared");
     }
+    public void deleteOrderRegion(int idOrderRegion, Handler<Either<String, JsonObject>> handler){
+        String query = "" +
+                "DELETE FROM " +
+                Lystore.lystoreSchema +".\"order-region-equipment\" " +
+                "WHERE id = ? " +
+                "RETURNING id";
+        sql.prepared(query, new JsonArray().add(idOrderRegion), SqlResult.validRowsResultHandler(handler));
+    }
+    public void getOneOrderRegion(int idOrder, Handler<Either<String, JsonObject>> handler){
+        String query = "" +
+                "SELECT ore.*, " +
+                "     ROUND( ore.price, 2 ) AS price_single_ttc, " +
+                "       prj.id AS id_project, " +
+                "       prj.preference AS preference, " +
+                "       to_json(contract.*) contract, " +
+                "       to_json(ct.*) contract_type, " +
+                "       to_json(supplier.*) supplier, " +
+                "       to_json(campaign.*) campaign, " +
+                "       array_to_json(array_agg(DISTINCT structure_group.name)) AS structure_groups, " +
+                "       to_json(prj.*) AS project, " +
+                "       to_json(tt.*) AS title, " +
+                "       o.order_number " +
+                "FROM  " + Lystore.lystoreSchema + ".\"order-region-equipment\" AS ore " +
+                "LEFT JOIN  " + Lystore.lystoreSchema + ".contract ON ore.id_contract = contract.id " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ct ON ct.id = contract.id_contract_type " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".supplier ON contract.id_supplier = supplier.id " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".campaign ON ore.id_campaign = campaign.id " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".project AS prj ON ore.id_project = prj.id " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".title AS tt ON tt.id = prj.id_title " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".rel_group_campaign ON (ore.id_campaign = rel_group_campaign.id_campaign) " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".rel_group_structure ON (ore.id_structure = rel_group_structure.id_structure) " +
+                "LEFT OUTER JOIN  " + Lystore.lystoreSchema + ".order AS o ON (ore.id_order = o.id) " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".structure_group ON (rel_group_structure.id_structure_group = structure_group.id " +
+                "                                       AND rel_group_campaign.id_structure_group = structure_group.id) " +
+                "WHERE ore.status = 'IN PROGRESS' AND ore.id = ? " +
+                "GROUP BY (prj.preference, " +
+                "          prj.id, " +
+                "          ore.id, " +
+                "          contract.id, " +
+                "          ct.id, " +
+                "          supplier.id, " +
+                "          campaign.id, " +
+                "          tt.id, " +
+                "          o.order_number)";
 
-
+        Sql.getInstance().prepared(query, new JsonArray().add(idOrder), SqlResult.validUniqueResultHandler(handler));
+    }
 }

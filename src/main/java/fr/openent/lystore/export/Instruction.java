@@ -1,6 +1,7 @@
 package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.equipmentRapp.AnnexeDelibTab;
 import fr.openent.lystore.export.equipmentRapp.ComptaTab;
 import fr.openent.lystore.export.equipmentRapp.ListForTextTab;
 import fr.openent.lystore.export.equipmentRapp.RecapTab;
@@ -148,10 +149,12 @@ public class Instruction {
                     Future<Boolean> ListForTextFuture = Future.future();
                     Future<Boolean> RecapFuture = Future.future();
                     Future<Boolean> ComptaFuture = Future.future();
+                    Future<Boolean> AnnexeDelibFuture = Future.future();
 
                     futures.add(ListForTextFuture);
                     futures.add(RecapFuture);
                     futures.add(ComptaFuture);
+                    futures.add(AnnexeDelibFuture);
 
                         CompositeFuture.all(futures).setHandler(event -> {
                             if (event.succeeded()) {
@@ -173,7 +176,7 @@ public class Instruction {
                     new ComptaTab(workbook, instruction, type).create(getHandler(ComptaFuture));
                     new ListForTextTab(workbook, instruction, type).create(getHandler(ListForTextFuture));
                     new RecapTab(workbook, instruction, type).create(getHandler(RecapFuture));
-
+                    new AnnexeDelibTab(workbook, instruction).create(getHandler(AnnexeDelibFuture));
                 }
             }
         }));

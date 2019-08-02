@@ -129,6 +129,10 @@ public class ComptaTab extends TabHelper {
                     initYProgramLabel = yProgramLabel;
                     yProgramLabel += 2;
 
+                    if (arrayLength - 4 < columnTotal) {
+                        arrayLength += columnTotal;
+                    }
+
                     columnTotal = 4;
                     nbTotaux = 1;
                     idPassed = new JsonObject();
@@ -157,11 +161,14 @@ public class ComptaTab extends TabHelper {
                 yProgramLabel++;
 
             }
+            if (arrayLength - 4 < columnTotal) {
+                arrayLength += columnTotal;
+            }
             setTotal(nbTotaux, initYProgramLabel);
             yProgramLabel += 2;
         }
 
-
+        excel.autoSize(arrayLength);
     }
 
     private void setCampaign(String campaign, int y) {

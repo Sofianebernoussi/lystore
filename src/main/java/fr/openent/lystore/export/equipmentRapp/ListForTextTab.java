@@ -128,6 +128,9 @@ public class ListForTextTab extends TabHelper {
                     yProgramLabel += 2;
                     initYProgramLabel = yProgramLabel;
                     yProgramLabel += 2;
+                    if (arrayLength - 4 < columnTotal) {
+                        arrayLength += columnTotal;
+                    }
                     columnTotal = 4;
                     nbTotaux = 1;
                     idPassed = new JsonObject();
@@ -155,11 +158,13 @@ public class ListForTextTab extends TabHelper {
                 yProgramLabel++;
 
             }
+            if (arrayLength - 4 < columnTotal) {
+                arrayLength += columnTotal;
+            }
             setTotal(nbTotaux, initYProgramLabel);
             yProgramLabel += 2;
         }
-
-
+        excel.autoSize(arrayLength);
     }
 
     private void setOperation(String operation, int y) {

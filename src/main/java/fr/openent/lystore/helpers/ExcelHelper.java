@@ -640,4 +640,9 @@ public class ExcelHelper {
     }
 
 
+    public void autoSize(int arrayLength) {
+        for (int i = 0; i < arrayLength; i++) {
+            sheet.autoSizeColumn(i);
+        }
+    }
 }

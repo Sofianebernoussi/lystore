@@ -31,7 +31,6 @@ public class RecapTab extends TabHelper {
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
-//        setLabels();
         getDatas(event -> {
             if (event.isLeft()) {
                 log.error("Failed to retrieve programs");
@@ -74,12 +73,23 @@ public class RecapTab extends TabHelper {
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
         query = " With values as ( " +
-                " SELECT SUM( " +
+                "   with temps as(" +
+                "(SELECT SUM( " +
                 "  CASE WHEN oce.price_proposal is not null " +
                 " THEN oce.price_proposal *  oce.amount " +
-                "  ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 END\n" +
-                " ) as Total  , contract_type.code as code,oce.id_operation , program_action.id_program ,contract_type.name ,program.name" +
-                "        FROM lystore.order_client_equipment oce" +
+                "  ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 + " +
+                " ( " +
+                "           SELECT CASE WHEN  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL " +
+                "           THEN 0  " +
+                "           ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  " +
+                "           END " +
+                "           from lystore.order_client_options oco  " +
+                "          WHERE id_order_client_equipment = oce.id  " +
+                " )  " +
+                " END " +
+                " " +
+                " ) as Total  , contract_type.code as code,oce.id_operation , program_action.id_program ,contract_type.name as market ,program.name" +
+                "        FROM " + Lystore.lystoreSchema + ".order_client_equipment oce" +
                 "        INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id)" +
                 "        INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)" +
                 "        INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)" +
@@ -91,12 +101,31 @@ public class RecapTab extends TabHelper {
                 "        WHERE instruction.id = ?" +
                 "     AND structure_program_action.structure_type =  '" + this.type + "'" +
                 " Group by  program.name,contract_type.code, contract_type.name , program_action.id, oce.id_operation " +
-                " order by  program.name,id_program,code,oce.id_operation) " +
+                " order by  program.name,id_program,code,oce.id_operation)" +
+                "UNION" +
+                " (SELECT SUM( ore.amount *ore.price ) as Total  , contract_type.code as code,ore.id_operation , program_action.id_program ,contract_type.name as market ,program.name" +
+                "        FROM " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore" +
+                "        INNER JOIN " + Lystore.lystoreSchema + ".operation ON (ore.id_operation = operation.id)" +
+                "        INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)" +
+                "        INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)" +
+                "        INNER JOIN " + Lystore.lystoreSchema + ".contract ON (ore.id_contract = contract.id)" +
+                "        INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)" +
+                "        INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)" +
+                "        INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)" +
+                "        INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)" +
+                "        WHERE instruction.id = ?" +
+                "     AND structure_program_action.structure_type =  '" + this.type + "'" +
+                " Group by  program.name,contract_type.code, contract_type.name , program_action.id, ore.id_operation " +
+                " order by  program.name,id_program,code,ore.id_operation)" +
+                " ) " +
+                "   select temps.* from temps " +
+                "   order by  temps.name,temps.code,temps.id_operation" +
+                ") " +
                 " SELECT label.label , array_to_json(array_agg(values)) as actions " +
                 " from " + Lystore.lystoreSchema + ".label_operation as label " +
                 " INNER JOIN values  on (label.id = values.id_operation) " +
                 " Group by label.label ";
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
+        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")).add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
                 handler.handle(event.left());
             } else {

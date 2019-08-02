@@ -77,8 +77,6 @@ public class AnnexeDelibTab extends TabHelper {
     @Override
     protected void setArray(JsonArray datas) {
         setLabels();
-        int cellLabelColumn = 0;
-        int programRowNumber = 0;
         if (datas.isEmpty()) {
             return;
         }
@@ -101,11 +99,12 @@ public class AnnexeDelibTab extends TabHelper {
             }
 
         }
-//        for (int i = 0; i < programMarket.size(); i++) {
-        excel.setTotalY(4, 10, 6, 11);
-//        }
 
         excel.fillTab(0, arrayLength, 6, lineToInsert + 1);
+        for (int i = 6; i <= lineToInsert; i++) {
+            excel.setTotalY(4, 4 + programMarket.size() - 1, i, 4 + programMarket.size());
+        }
+
         for (int i = 0; i < programMarket.size(); i++) {
             excel.insertHeader(lineToInsert + 1, 3, excel.totalLabel);
             excel.setTotalX(6, lineToInsert, 4 + i, lineToInsert + 1);
@@ -123,8 +122,12 @@ public class AnnexeDelibTab extends TabHelper {
         ArrayList<String> programsActionList = new ArrayList<>();
         String previousProgram = "";
         excel.insertHeader(4, 1, "COMMUNE");
+        excel.insertHeader(5, 1, "");
+
         excel.insertHeader(4, 2, "LYCEE");
+        excel.insertHeader(5, 2, "");
         excel.insertHeader(4, 3, "UAI");
+        excel.insertHeader(5, 3, "");
 
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
@@ -156,6 +159,7 @@ public class AnnexeDelibTab extends TabHelper {
 
         arrayLength += programMarket.size();
         excel.insertHeader(4, 4 + programMarket.size(), excel.totalLabel);
+        excel.insertHeader(5, 4 + programMarket.size(), "");
 
     }
 

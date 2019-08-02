@@ -121,6 +121,11 @@ public class AnnexeDelibTab extends TabHelper {
     protected void setLabels() {
         ArrayList<String> programsActionList = new ArrayList<>();
         String previousProgram = "";
+        excel.insertHeader(1, 1, "ANNEXE A LA DELIBERATION");
+        CellRangeAddress merge = new CellRangeAddress(1, 2, 1, 4);
+        sheet.addMergedRegion(merge);
+        excel.setRegionHeader(merge, sheet);
+
         excel.insertHeader(4, 1, "COMMUNE");
         excel.insertHeader(5, 1, "");
 
@@ -144,7 +149,7 @@ public class AnnexeDelibTab extends TabHelper {
 
             //merge region if same program
             if (previousProgram.equals(segments[0])) {
-                CellRangeAddress merge = new CellRangeAddress(4, 4, 4 + programMarket.size() - 1, 4 + programMarket.size());
+                merge = new CellRangeAddress(4, 4, 4 + programMarket.size() - 1, 4 + programMarket.size());
                 sheet.addMergedRegion(merge);
                 excel.setRegionHeader(merge, sheet);
             } else {

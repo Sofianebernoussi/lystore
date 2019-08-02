@@ -98,8 +98,16 @@ public class RecapTab extends TabHelper {
                 "        INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)" +
                 "        INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)" +
                 "        INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)" +
-                "        WHERE instruction.id = ?" +
-                "     AND structure_program_action.structure_type =  '" + this.type + "'" +
+                "        WHERE instruction.id = ?"
+        ;
+        if (type.equals(CMR))
+            query += "    AND structure_program_action.structure_type =  '" + type + "'  " +
+                    " AND oce.id_structure IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + type + "' ) ";
+
+        else
+            query += "    AND structure_program_action.structure_type !=  '" + CMR + "'  " +
+                    " AND oce.id_structure NOT IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + CMR + "' ) ";
+        query +=
                 " Group by  program.name,contract_type.code, contract_type.name , program_action.id, oce.id_operation " +
                 " order by  program.name,id_program,code,oce.id_operation)" +
                 "UNION" +
@@ -113,8 +121,15 @@ public class RecapTab extends TabHelper {
                 "        INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)" +
                 "        INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)" +
                 "        INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)" +
-                "        WHERE instruction.id = ?" +
-                "     AND structure_program_action.structure_type =  '" + this.type + "'" +
+                        "        WHERE instruction.id = ?";
+        if (type.equals(CMR))
+            query += "    AND structure_program_action.structure_type =  '" + type + "'  " +
+                    " AND ore.id_structure IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + type + "' ) ";
+
+        else
+            query += "    AND structure_program_action.structure_type !=  '" + CMR + "'  " +
+                    " AND ore.id_structure NOT IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + CMR + "' ) ";
+        query +=
                 " Group by  program.name,contract_type.code, contract_type.name , program_action.id, ore.id_operation " +
                 " order by  program.name,id_program,code,ore.id_operation)" +
                 " ) " +

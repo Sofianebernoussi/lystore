@@ -214,7 +214,16 @@ public class ListForTextTab extends TabHelper {
                 "      INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)     " +
                 "      INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)       " +
                 "      INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)      " +
-                "      WHERE instruction.id = ?  AND structure_program_action.structure_type =  'LYC'       " +
+                "       WHERE instruction.id = ? ";
+
+        if (type.equals(CMR))
+            query += "    AND structure_program_action.structure_type =  '" + type + "'  " +
+                    " AND ore.id_structure IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + type + "' ) ";
+
+        else
+            query += "    AND structure_program_action.structure_type !=  '" + CMR + "'  " +
+                    " AND ore.id_structure NOT IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + CMR + "' ) ";
+        query +=
                 "      Group by  ore.id_operation,label.label ,program.name,contract_type.code, contract_type.name , program_action.id, ore.id_operation,campaign_id,ore.id_structure   " +
                 "      order by  ore.id_operation,label.label ,program.name,id_program,code,ore.id_operation  )    " +
                 "      UNION (  SELECT SUM(  CASE WHEN oce.price_proposal is not null      " +
@@ -237,8 +246,15 @@ public class ListForTextTab extends TabHelper {
                 "       INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)      " +
                 "       INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)  " +
                 "       INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)       " +
-                "       WHERE instruction.id = ? " +
-                "       AND structure_program_action.structure_type =  'LYC'      " +
+                        "       WHERE instruction.id = ? ";
+        if (type.equals(CMR))
+            query += "    AND structure_program_action.structure_type =  '" + type + "'  " +
+                    " AND oce.id_structure IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + type + "' ) ";
+
+        else
+            query += "    AND structure_program_action.structure_type !=  '" + CMR + "'  " +
+                    " AND oce.id_structure NOT IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + CMR + "' ) ";
+        query +=
                 "       Group by  oce.id_operation,label.label,program.name,contract_type.code, contract_type.name , program_action.id, campaign_id,oce.id_structure      " +
                 "       order by  oce.id_operation,label.label,program.name,id_program,code )   " +
                 "  )  SELECT * from unionValues " +

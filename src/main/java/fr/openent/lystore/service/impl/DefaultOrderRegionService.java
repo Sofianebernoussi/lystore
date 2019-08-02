@@ -76,7 +76,8 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 "       id_order, " +
                 "       id_project " +
                 "FROM  " + Lystore.lystoreSchema + ".order_client_equipment " +
-                "WHERE id = ?";
+                "WHERE id = ? " +
+                "RETURNING id;";
 
         params.add(order.getFloat("price"))
                 .add(order.getInteger("amount"))
@@ -115,7 +116,8 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
         query +=  order.containsKey("rank")?"rank = ?, ": "";
         query +=  order.containsKey("id_operation")?"id_operation = ?, ": "";
         query +=  "comment = ? " +
-                "WHERE id = ?";
+                "WHERE id = ? " +
+                "RETURNING id;";
 
         params.add(order.getFloat("price"))
                 .add(order.getInteger("amount"))
@@ -141,7 +143,8 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
         String query = " UPDATE " + Lystore.lystoreSchema + ".order_client_equipment " +
                 "SET  " +
                 "status = ? ,id_operation = ? " +
-                "WHERE id = ? ";
+                "WHERE id = ? " +
+                "RETURNING id;";
 
         values.add("IN PROGRESS");
         values.add(id_operation);
@@ -253,7 +256,8 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 .put("values", params)
                 .put("action", "prepared");
     }
-    public void deleteOrderRegion(int idOrderRegion, Handler<Either<String, JsonObject>> handler){
+    @Override
+    public void deleteOneOrderRegion(int idOrderRegion, Handler<Either<String, JsonObject>> handler){
         String query = "" +
                 "DELETE FROM " +
                 Lystore.lystoreSchema +".\"order-region-equipment\" " +
@@ -261,6 +265,8 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 "RETURNING id";
         sql.prepared(query, new JsonArray().add(idOrderRegion), SqlResult.validRowsResultHandler(handler));
     }
+
+    @Override
     public void getOneOrderRegion(int idOrder, Handler<Either<String, JsonObject>> handler){
         String query = "" +
                 "SELECT ore.*, " +

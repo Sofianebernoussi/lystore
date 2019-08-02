@@ -1,5 +1,5 @@
 import {_, ng, template, idiom as lang} from 'entcore';
-import {Operation, OrderClient, OrderRegion, Utils} from "../../model";
+import {Notification, Operation, OrderClient, OrderRegion, Utils} from "../../model";
 import {Mix} from 'entcore-toolkit';
 
 declare let window: any;
@@ -114,7 +114,7 @@ export const operationController = ng.controller('operationController',
         };
         $scope.dropOrderOperation = async (order:any) => {
             if(order.isOrderRegion){
-                $scope.orderRegion.delete(order.id);
+                await $scope.orderRegion.delete(order.id);
                 await order.updateStatusOrder('WAITING', order.id_order_client_equipment);
             } else {
                 await order.updateStatusOrder('WAITING');
@@ -123,6 +123,7 @@ export const operationController = ng.controller('operationController',
                 await $scope.syncOrderByOperation($scope.operation),
                 await $scope.initOperation(),
             ]);
+            $scope.notifications.push(new Notification('lystore.order.operation.delete', 'confirm'));
             Utils.safeApply($scope);
         };
         $scope.formatArrayToolTip = (tooltipsIn:string) => {

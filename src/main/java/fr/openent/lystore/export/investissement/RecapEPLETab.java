@@ -123,7 +123,7 @@ public class RecapEPLETab extends TabHelper {
         }
         if (programs.size() > 0) {
             newTab(programs.getJsonObject(programs.size() - 1), true);
-//            settingSumLabel();
+            settingSumLabel();
         }
     }
 

@@ -288,9 +288,9 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 "               FROM " + Lystore.lystoreSchema +".order_client_options oco " +
                 "               WHERE id_order_client_equipment = oce.id) + " +
                 "                                                         (CASE  " +
-                "                                                             WHEN oce.price_proposal IS NOT NULL THEN (oce.price_proposal * oce.amount)  " +
-                "                                                             ELSE (ROUND(oce.price + ((oce.price * oce.tax_amount) /100), 2) * oce.amount)  " +
-                "                                                         END)) AS price,  " +
+                "                                                             WHEN oce.price_proposal IS NOT NULL THEN (oce.price_proposal)  " +
+                "                                                             ELSE (ROUND(oce.price + ((oce.price * oce.tax_amount) /100), 2))  " +
+                "                                                         END))  * oce.amount AS price,  " +
                 "       oce.creation_date,  " +
                 "       oce.amount,  " +
                 "       oce.name,  " +
@@ -310,4 +310,5 @@ public class DefaultOperationService extends SqlCrudService implements Operation
 
         Sql.getInstance().prepared(queryGOrderClient, new JsonArray().add(idOperation), SqlResult.validResultHandler(handler));
     }
+
 }

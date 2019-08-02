@@ -139,7 +139,8 @@ export const operationController = ng.controller('operationController',
 
         $scope.insertOrderRegion = (order: OrderClient):void => {
             $scope.order = order;
-            $scope.redirectTo(`/order/operation/update/${order.id}`);
+            let type = order.isOrderRegion? 'region' : 'client';
+            $scope.redirectTo(`/order/operation/update/${order.id}/${type}`);
         };
         $scope.switchAllOrders = ():void => {
             $scope.allOrdersOperationSelected  =  !$scope.allOrdersOperationSelected;

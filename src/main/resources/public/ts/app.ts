@@ -82,7 +82,7 @@ routes.define(($routeProvider) => {
             .when('/order/update/:idOrder', {
                 action: 'updateOrder'
             })
-            .when('/order/operation/update/:idOrder', {
+            .when('/order/operation/update/:idOrder/:region', {
                 action: 'updateLinkedOrder'
             })
             .when('/order/region/create', {

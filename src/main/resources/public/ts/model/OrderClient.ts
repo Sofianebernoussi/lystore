@@ -134,6 +134,33 @@ export class OrderClient implements Selectable {
             notify.error('lystore.order.get.err');
         }
     }
+
+    async getOneOrderClient(id){
+        try{
+            const {data} = await http.get(`/lystore/orderClient/${id}/order`);
+            const result = {
+                ...data,
+                project: data.project?Mix.castAs(Project, JSON.parse(data.project.toString())):null,
+                campaign: data.campaign?Mix.castAs(Campaign, JSON.parse(data.campaign)):null,
+                contract_type: data.contract_type?JSON.parse(data.contract_type):null,
+                contract: data.contract?JSON.parse(data.contract):null,
+                structure_groups: data.structure_groups?JSON.parse(data.structure_groups):null,
+                options: data.options?JSON.parse(data.options):null,
+                supplier: data.supplier?JSON.parse(data.supplier):null,
+                title: data.title?JSON.parse(data.title):null,
+                price : data.price?parseFloat(data.price):null,
+                amount : data.amount?parseInt(data.amount):null,
+                price_proposal : data.price_proposal?parseFloat(data.price_proposal):null,
+                rank : data.rank?parseInt(data.rank.toString()) : null,
+                tax_amount : data.tax_amount?parseFloat(data.tax_amount):null,
+                price_single_ttc : data.price_single_ttc?parseFloat(data.price_single_ttc):null,
+            };
+            return result
+        } catch (e) {
+            notify.error('lystore.admin.order.get.err');
+            throw e;
+        }
+    }
 }
 export class OrdersClient extends Selection<OrderClient> {
 

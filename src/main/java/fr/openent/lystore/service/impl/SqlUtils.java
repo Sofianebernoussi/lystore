@@ -49,7 +49,7 @@ public final class SqlUtils {
                     "( " +
                     "   SELECT CASE " +
                     "       WHEN ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2) IS NULL THEN 0 " +
-                    "       ELSE ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2) " +
+                    "       ELSE ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  " +
                     "       END AS price_total_option " +
                     "   FROM " + Lystore.lystoreSchema + ".order_client_options oco " +
                     "   WHERE id_order_client_equipment = oce.id " +

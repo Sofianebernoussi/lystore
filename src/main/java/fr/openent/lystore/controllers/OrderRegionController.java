@@ -37,12 +37,11 @@ public class OrderRegionController extends BaseController {
     }
 
 
-    @Put("/region/order/")
-    @ApiDoc("update or create an order when admin or manager")
+    @Post("/region/order/")
+    @ApiDoc("Create an order with id order client when admin or manager")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
-    public void updateAdminOrder(final HttpServerRequest request) {
-
+    public void createWithOrderClientAdminOrder(final HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
             @Override
             public void handle(UserInfos event) {
@@ -50,6 +49,27 @@ public class OrderRegionController extends BaseController {
                     @Override
                     public void handle(JsonObject order) {
                         orderRegionService.setOrderRegion(order, event, defaultResponseHandler(request));
+
+                    }
+                });
+            }
+
+        });
+    }
+
+    @Put("/region/order/:id")
+    @ApiDoc("Update an order when admin or manager")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void updateAdminOrder(final HttpServerRequest request) {
+        Integer idOrder = Integer.parseInt(request.getParam("id"));
+        UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+            @Override
+            public void handle(UserInfos event) {
+                RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+                    @Override
+                    public void handle(JsonObject order) {
+                        orderRegionService.updateOrderRegion(order, idOrder, event, defaultResponseHandler(request));
 
                     }
                 });
@@ -83,5 +103,14 @@ public class OrderRegionController extends BaseController {
     public void deleteOrderRegion(HttpServerRequest request) {
         Integer idRegion = Integer.parseInt(request.getParam("id"));
         orderRegionService.deleteOrderRegion(idRegion, defaultResponseHandler(request));
+    }
+
+    @Get("/orderRegion/:id/order")
+    @ApiDoc("get order by id order region ")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void getOneOrder(HttpServerRequest request) {
+        Integer idOrder = Integer.parseInt(request.getParam("id"));
+        orderRegionService.getOneOrderRegion(idOrder, defaultResponseHandler(request));
     }
 }

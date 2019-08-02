@@ -1,15 +1,16 @@
 import {_, idiom as lang, ng, notify, template} from 'entcore';
 import {
     Notification, Operation, OrderClient, OrderRegion, OrdersRegion, Structure, StructureGroup, StructureGroups,
-    Structures, Titles, Utils
+    Structures, Title, Titles, Utils
 } from "../../model";
 import {Equipments} from "../../model/Equipment";
+import {Mix} from "entcore-toolkit";
 
 
 declare let window: any;
 export const orderRegionController = ng.controller('orderRegionController',
     ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) => {
-        $scope.orderToUpdate = new OrderClient();
+
         $scope.orderToCreate = new OrderRegion();
         $scope.equipments = new Equipments();
         $scope.structure_groups = new StructureGroups();
@@ -63,18 +64,15 @@ export const orderRegionController = ng.controller('orderRegionController',
 
         if ($routeParams.idOrder) {
             let idOrder = $routeParams.idOrder;
-            $scope.ordersClient.all.forEach((o) => {
-                if (o.id.toString() === idOrder)
-                    $scope.orderToUpdate = o;
-            });
-            ($scope.orderToUpdate.price_proposal)
-                ? $scope.orderToUpdate.price_proposal = parseFloat($scope.orderToUpdate.price_proposal)
-                : $scope.orderToUpdate.price_proposal = ($scope.orderToUpdate.priceTTCtotal / $scope.orderToUpdate.amount);
+            $scope.orderToUpdate.structure = $scope.structures.filter(structureFilter => structureFilter.id === $scope.orderToUpdate.id_structure)[0];
+            $scope.orderToUpdate.price_proposal = $scope.orderToUpdate.price_single_ttc;
+            if(  $scope.orderToUpdate.campaign.orderPriorityEnable()){
+                $scope.orderToUpdate.rank = $scope.orderToUpdate.rank + 1;
+            }
             if (!$scope.orderToUpdate.project.room)
                 $scope.orderToUpdate.project.room = '-';
             if (!$scope.orderToUpdate.project.building)
                 $scope.orderToUpdate.project.building = '-';
-
 
             $scope.initDataUpdate();
         }
@@ -133,7 +131,11 @@ export const orderRegionController = ng.controller('orderRegionController',
             orderRegion.createFromOrderClient($scope.orderToUpdate);
             orderRegion.equipment_key = $scope.orderToUpdate.equipment_key;
             $scope.redirectTo('/operation');
-            await orderRegion.set();
+            if($scope.orderToUpdate.id_order_client_equipment){
+                await orderRegion.update($scope.orderToUpdate.id);
+            } else {
+                await orderRegion.set();
+            }
             $scope.notifications.push(new Notification('lystore.order.region.update', 'confirm'));
         };
         $scope.isValidFormUpdate = () => {

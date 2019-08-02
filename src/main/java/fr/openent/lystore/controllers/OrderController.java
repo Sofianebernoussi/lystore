@@ -1195,4 +1195,13 @@ public class OrderController extends ControllerHelper {
         }
 
     }
+
+    @Get("/orderClient/:id/order")
+    @ApiDoc("get order by id order client ")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void getOneOrder(HttpServerRequest request) {
+        Integer idOrder = Integer.parseInt(request.getParam("id"));
+        orderService.getOneOrderClient(idOrder, defaultResponseHandler(request));
+    }
 }

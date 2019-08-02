@@ -1038,5 +1038,57 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
 
     }
+    public void getOneOrderClient(int idOrder, Handler<Either<String, JsonObject>> handler){
+        String query = "" +
+                "SELECT oce.*, " +
+                "       (  " +
+                "               (SELECT " +
+                "                  CASE " +
+                "                  WHEN ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL THEN 0 " +
+                "                  ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2) " +
+                "                  END " +
+                "               FROM " + Lystore.lystoreSchema +".order_client_options oco " +
+                "               WHERE id_order_client_equipment = oce.id) + " +
+                "                                                         (CASE  " +
+                "                                                             WHEN oce.price_proposal IS NOT NULL THEN (oce.price_proposal)  " +
+                "                                                             ELSE (ROUND(oce.price + ((oce.price * oce.tax_amount) /100), 2))  " +
+                "                                                         END)) AS price_single_ttc,  " +
+                "       prj.id AS id_project, " +
+                "       prj.preference AS preference, " +
+                "       to_json(contract.*) contract, " +
+                "       to_json(ct.*) contract_type, " +
+                "       to_json(supplier.*) supplier, " +
+                "       to_json(campaign.*) campaign, " +
+                "       array_to_json(array_agg(DISTINCT oco.*)) AS OPTIONS, " +
+                "       array_to_json(array_agg(DISTINCT structure_group.name)) AS structure_groups, " +
+                "       to_json(prj.*) AS project, " +
+                "       to_json(tt.*) AS title, " +
+                "       o.order_number " +
+                "FROM  " + Lystore.lystoreSchema + ".order_client_equipment oce " +
+                "LEFT JOIN  " + Lystore.lystoreSchema + ".order_client_options oco ON oco.id_order_client_equipment = oce.id " +
+                "LEFT JOIN  " + Lystore.lystoreSchema + ".contract ON oce.id_contract = contract.id " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ct ON ct.id = contract.id_contract_type " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".supplier ON contract.id_supplier = supplier.id " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".campaign ON oce.id_campaign = campaign.id " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".project AS prj ON oce.id_project = prj.id " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".title AS tt ON tt.id = prj.id_title " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".rel_group_campaign ON (oce.id_campaign = rel_group_campaign.id_campaign) " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".rel_group_structure ON (oce.id_structure = rel_group_structure.id_structure) " +
+                "LEFT OUTER JOIN  " + Lystore.lystoreSchema + ".order AS o ON (oce.id_order = o.id) " +
+                "INNER JOIN  " + Lystore.lystoreSchema + ".structure_group ON (rel_group_structure.id_structure_group = structure_group.id " +
+                "                                       AND rel_group_campaign.id_structure_group = structure_group.id) " +
+                "WHERE oce.status = 'IN PROGRESS' AND oce.id = ? " +
+                "GROUP BY (prj.preference, " +
+                "          prj.id, " +
+                "          oce.id, " +
+                "          contract.id, " +
+                "          ct.id, " +
+                "          supplier.id, " +
+                "          campaign.id, " +
+                "          tt.id, " +
+                "          o.order_number)";
+
+        Sql.getInstance().prepared(query, new JsonArray().add(idOrder), SqlResult.validUniqueResultHandler(handler));
+    }
 }
 

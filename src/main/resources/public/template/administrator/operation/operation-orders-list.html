@@ -67,7 +67,7 @@
             <td>[[formatDate(order.creation_date)]]</td>
             <td ><span ng-bind="order.price | currency"></span></td>
             <td class="two aligne-text-center">
-                <i ng-if="!order.isOrderRegion" class="edit" ng-click="insertOrderRegion(order)"></i>
+                <i class="edit" ng-click="insertOrderRegion(order)"></i>
                 <i class="trash" ng-click="dropOrderOperation(order)"></i>
             </td>
         </tr>

@@ -241,10 +241,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('administrator-main', 'administrator/order/order-send-prepare');
                 template.open('sendOrder.preview', 'pdf/preview');
             },
-            updateOrder: async () => {
+            updateOrder: async (params) => {
+                let idOrder = parseInt(params.idOrder);
+                $scope.orderToUpdate = await $scope.orderClient.getOneOrderClientWaiting(idOrder);
                 await $scope.contracts.sync();
                 await $scope.contractTypes.sync();
-                await $scope.initOrders('WAITING');
                 template.open('administrator-main', 'administrator/order/order-update-form');
                 Utils.safeApply($scope);
 
@@ -253,7 +254,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 let idOrder = parseInt(params.idOrder);
                 let region = params.region;
                 if(region === 'client'){
-                    $scope.orderToUpdate = await $scope.orderClient.getOneOrderClient(idOrder);
+                    $scope.orderToUpdate = await $scope.orderClient.getOneOrderClientProgress(idOrder);
                 } else {
                     $scope.orderToUpdate = await $scope.orderRegion.getOneOrderRegion(idOrder);
                 }

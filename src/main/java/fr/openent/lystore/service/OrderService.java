@@ -206,6 +206,6 @@ public interface OrderService {
 
     void setInProgress(JsonArray ids, Handler<Either<String, JsonObject>> handler);
 
-    void getOneOrderClient(int idOrderClient, Handler<Either<String, JsonObject>> handler);
+    void getOneOrderClient(int idOrderClient,String status,  Handler<Either<String, JsonObject>> handler);
 
 }

@@ -306,4 +306,19 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
 
         Sql.getInstance().prepared(query, new JsonArray().add(idOrder), SqlResult.validUniqueResultHandler(handler));
     }
+
+    @Override
+    public void updateOperation(Integer idOperation, JsonArray idsOrders, Handler<Either<String, JsonObject>> handler) {
+        String query = " UPDATE " + Lystore.lystoreSchema + ".\"order-region-equipment\" " +
+                " SET id_operation = " +
+                idOperation +
+                " WHERE id IN " +
+                Sql.listPrepared(idsOrders.getList()) +
+                " RETURNING id";
+        JsonArray values = new JsonArray();
+        for (int i = 0; i < idsOrders.size(); i++) {
+            values.add(idsOrders.getValue(i));
+        }
+        sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
+    }
 }

@@ -51,8 +51,6 @@ export const orderRegionController = ng.controller('orderRegionController',
             Utils.safeApply($scope);
         };
 
-
-
         $scope.initDataUpdate = async () => {
             await $scope.equipments.sync($scope.orderToUpdate.id_campaign, $scope.orderToUpdate.id_structure);
             $scope.orderToUpdate.equipment = $scope.equipments.all.find((e) => {
@@ -98,6 +96,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                 let {status, data} = await orderRegion.set();
                 if (status === 200) {
                     $scope.notifications.push(new Notification('lystore.order.region.update', 'confirm'));
+                    await $scope.ordersClient.addOperationInProgress(operation.id, [$routeParams.idOrder]);
                     $scope.cancelUpdate();
                 }
                 else {
@@ -239,8 +238,8 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.swapTypeStruct = (row) => {
             row.display.struct = !row.display.struct;
             Utils.safeApply($scope);
-
         };
+
         $scope.createOrder = async () => {
             let ordersToCreate = new OrdersRegion();
             $scope.orderToCreate.rows.map(row => {

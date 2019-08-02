@@ -1038,7 +1038,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
 
     }
-    public void getOneOrderClient(int idOrder, Handler<Either<String, JsonObject>> handler){
+    public void getOneOrderClient(int idOrder, String status, Handler<Either<String, JsonObject>> handler){
         String query = "" +
                 "SELECT oce.*, " +
                 "       (  " +
@@ -1077,7 +1077,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "LEFT OUTER JOIN  " + Lystore.lystoreSchema + ".order AS o ON (oce.id_order = o.id) " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".structure_group ON (rel_group_structure.id_structure_group = structure_group.id " +
                 "                                       AND rel_group_campaign.id_structure_group = structure_group.id) " +
-                "WHERE oce.status = 'IN PROGRESS' AND oce.id = ? " +
+                "WHERE oce.status = '" + status + "' AND oce.id = ? " +
                 "GROUP BY (prj.preference, " +
                 "          prj.id, " +
                 "          oce.id, " +

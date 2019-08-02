@@ -68,13 +68,18 @@ export class Utils {
         return  moment(date).format('YYYY-MM-DD');
     }
     static jsonParse ( jsonIn:String):any {
-        let result:String = jsonIn;
-        let loopSecurity = 0;
-        while (typeof result === "string"&& loopSecurity < 10){
-            result = JSON.parse(result.toString());
-            loopSecurity++;
+        try{
+            let result:String = jsonIn;
+            let loopSecurity = 0;
+            while (typeof result === "string"&& loopSecurity < 10){
+                result = JSON.parse(result.toString());
+                loopSecurity++;
+            }
+            if (loopSecurity > 10) throw "More ten loop";
+            return result
+        } catch (e) {
+            return jsonIn;
         }
-        if (loopSecurity > 10) throw "More ten loop";
-        return result
+
     }
 }

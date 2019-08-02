@@ -1196,12 +1196,21 @@ public class OrderController extends ControllerHelper {
 
     }
 
-    @Get("/orderClient/:id/order")
+    @Get("/orderClient/:id/order/progress")
     @ApiDoc("get order by id order client ")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
-    public void getOneOrder(HttpServerRequest request) {
+    public void getOneOrderProgress(HttpServerRequest request) {
         Integer idOrder = Integer.parseInt(request.getParam("id"));
-        orderService.getOneOrderClient(idOrder, defaultResponseHandler(request));
+        orderService.getOneOrderClient(idOrder,"IN PROGRESS" ,defaultResponseHandler(request));
+    }
+
+    @Get("/orderClient/:id/order/waiting")
+    @ApiDoc("get order by id order client ")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void getOneOrderWaiting(HttpServerRequest request) {
+        Integer idOrder = Integer.parseInt(request.getParam("id"));
+        orderService.getOneOrderClient(idOrder,"WAITING" ,defaultResponseHandler(request));
     }
 }

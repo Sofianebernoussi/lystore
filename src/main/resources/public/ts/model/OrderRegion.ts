@@ -67,8 +67,7 @@ export class OrderRegion implements Selectable {
             ...(this.rank && {rank: this.rank}),
             technical_specs: (this.technical_spec === null || this.technical_spec.length === 0) ?
                 []:
-                Utils.jsonParse(this.technical_spec.toString())
-                    .map((spec: TechnicalSpec) => {
+                this.technical_spec.map(spec => {
                         return {
                             name: spec.name,
                             value: spec.value
@@ -112,7 +111,7 @@ export class OrderRegion implements Selectable {
 
     async set() {
         try {
-            return await http.post(`/lystore/region/order/`, this.toJson());
+            return await http.post(`/lystore/region/order`, this.toJson());
         } catch (e) {
             notify.error('lystore.admin.order.update.err');
             throw e;
@@ -145,6 +144,8 @@ export class OrderRegion implements Selectable {
         }
     }
 
+
+
     async getOneOrderRegion(id){
         try{
             const {data} =  await http.get(`/lystore/orderRegion/${id}/order`);
@@ -162,6 +163,7 @@ export class OrderRegion implements Selectable {
                 amount : data.amount?parseInt(data.amount):null,
                 rank : data.rank?parseInt(data.rank.toString()) : null,
                 price_single_ttc : data.price_single_ttc?parseFloat(data.price_single_ttc):null,
+                technical_specs: data.technical_specs?JSON.parse(data.technical_specs):null,
             };
             return result
         } catch (e) {
@@ -186,6 +188,14 @@ export class OrdersRegion extends Selection<OrderRegion> {
             return await http.post(`/lystore/region/orders/`, {orders: orders});
         } catch (e) {
             notify.error('lystore.order.create.err');
+            throw e;
+        }
+    }
+    async updateOperation(idOperation:number, idsRegions: Array<number>){
+        try {
+            await http.put(`/lystore/order/region/${idOperation}/operation`, idsRegions);
+        } catch (e) {
+            notify.error('lystore.admin.order.update.err');
             throw e;
         }
     }

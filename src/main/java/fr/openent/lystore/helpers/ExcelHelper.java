@@ -20,6 +20,7 @@ public class ExcelHelper {
     private final CellStyle titleHeaderStyle;
     private final CellStyle yellowHeader;
     private final CellStyle underscoreHeader;
+    private final CellStyle yellowLabel;
 
 
     private DataFormat format;
@@ -38,6 +39,7 @@ public class ExcelHelper {
         this.tabStringStyleCenter = wb.createCellStyle();
         this.totalStyle = wb.createCellStyle();
         this.yellowHeader = wb.createCellStyle();
+        this.yellowLabel = wb.createCellStyle();
         this.underscoreHeader = wb.createCellStyle();
 
         this.labelHeadStyle = wb.createCellStyle();
@@ -198,6 +200,18 @@ public class ExcelHelper {
         this.underscoreHeader.setVerticalAlignment(VerticalAlignment.CENTER);
         this.underscoreHeader.setFont(titleHeadFont);
 
+        this.yellowLabel.setWrapText(true);
+        this.yellowLabel.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
+        this.yellowLabel.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        this.yellowLabel.setBorderLeft(BorderStyle.THIN);
+        this.yellowLabel.setBorderRight(BorderStyle.THIN);
+        this.yellowLabel.setBorderTop(BorderStyle.THIN);
+        this.yellowLabel.setBorderBottom(BorderStyle.THIN);
+        this.yellowLabel.setAlignment(HorizontalAlignment.CENTER);
+        this.yellowLabel.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.yellowLabel.setFont(labelHeadFont);
+
+
     }
     public void setBold(Cell cell) {
         Font font = wb.createFont();
@@ -239,6 +253,12 @@ public class ExcelHelper {
         this.setBold(cell);
     }
 
+    /**
+     * Adding borders to a merged region
+     *
+     * @param merge
+     * @param sheet
+     */
     public void setRegionHeader(CellRangeAddress merge, Sheet sheet) {
         RegionUtil.setBorderTop(BorderStyle.THIN, merge, sheet);
         RegionUtil.setBorderBottom(BorderStyle.THIN, merge, sheet);
@@ -276,7 +296,6 @@ public class ExcelHelper {
         Cell cell = row.createCell(cellColumn);
         cell.setCellValue(data);
         cell.setCellStyle(this.labelStyle);
-//        sheet.autoSizeColumn(cellColumn);
     }
 
 
@@ -286,8 +305,6 @@ public class ExcelHelper {
         Cell cell = row.createCell(cellColumn);
         cell.setCellFormula(data);
         cell.setCellStyle(this.currencyStyle);
-//        sheet.autoSizeColumn(cellColumn);
-
     }
 
     /**
@@ -326,13 +343,11 @@ public class ExcelHelper {
             Cell cell = tab.createCell(cellColumn);
             cell.setCellValue(data);
             cell.setCellStyle(this.labelStyle);
-//            sheet.autoSizeColumn(cellColumn);
         } catch (NullPointerException e) {
             tab = sheet.createRow(line);
             Cell cell = tab.createCell(cellColumn);
             cell.setCellValue(data);
             cell.setCellStyle(this.labelStyle);
-//            sheet.autoSizeColumn(cellColumn);
         }
     }
 
@@ -343,7 +358,6 @@ public class ExcelHelper {
             Cell cell = tab.createCell(cellColumn);
             cell.setCellValue(data);
             cell.setCellStyle(this.labelHeadStyle);
-//            sheet.autoSizeColumn(cellColumn);
         } catch (NullPointerException e) {
             tab = sheet.createRow(line);
             Cell cell = tab.createCell(cellColumn);
@@ -369,6 +383,13 @@ public class ExcelHelper {
 
     }
 
+    /**
+     * Insert a price in a array
+     *
+     * @param cellColumn
+     * @param line
+     * @param data
+     */
     public void insertCellTabFloatWithPrice(int cellColumn, int line, float data) {
         Row tab;
         try {
@@ -453,6 +474,27 @@ public class ExcelHelper {
     }
 
     /**
+     * insert a label with yellow background
+     *
+     * @param line
+     * @param cellColumn
+     * @param data
+     */
+    public void insertYellowLabel(int line, int cellColumn, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.yellowLabel);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.yellowLabel);
+        }
+    }
+    /**
      * insert a header with blue background
      *
      * @param line
@@ -475,6 +517,13 @@ public class ExcelHelper {
 
     }
 
+    /**
+     * insert a data in an array wich will be centered in the cell
+     *
+     * @param cellColumn
+     * @param line
+     * @param data
+     */
     public void insertCellTabCenter(int cellColumn, int line, String data) {
         Row tab;
         try {
@@ -492,7 +541,7 @@ public class ExcelHelper {
     }
 
     /**
-     * insetrt an header with an underscore
+     * insert an header with an underscore
      *
      * @param cellColumn
      * @param cellColumn
@@ -512,8 +561,9 @@ public class ExcelHelper {
             cell.setCellStyle(this.underscoreHeader);
         }
     }
+
     /**
-     * Set style for a tab
+     * Set style for a tab and init all non init cells of the tab
      *
      * @param columnStart
      * @param columnEnd
@@ -551,6 +601,14 @@ public class ExcelHelper {
         }
     }
 
+    /**
+     * set total of a column
+     *
+     * @param lineStart  start of the column
+     * @param lineEnd    end of the column
+     * @param column     number of the column
+     * @param lineInsert line where the total is insert
+     */
     public void setTotalX(int lineStart, int lineEnd, int column, int lineInsert) {
         Row tab, tabStart, tabEnd;
 
@@ -568,6 +626,14 @@ public class ExcelHelper {
 
     }
 
+    /**
+     * Set total of a line
+     *
+     * @param columnStart  start of the line
+     * @param columnEnd    end of the line
+     * @param line         number of the line to make total
+     * @param columnInsert column where to insert the total
+     */
     public void setTotalY(int columnStart, int columnEnd, int line, int columnInsert) {
         Row tab, tabStart, tabEnd;
         tab = sheet.getRow(line);
@@ -631,6 +697,13 @@ public class ExcelHelper {
     }
 
 
+    /**
+     * Get an excel address of a cell
+     *
+     * @param line
+     * @param column
+     * @return
+     */
     public String getCellReference(int line, int column) {
         Row tab;
         Cell cell;
@@ -640,9 +713,15 @@ public class ExcelHelper {
     }
 
 
+    /**
+     * autosize the number of  columns of the page
+     *
+     * @param arrayLength number of columns to autosize
+     */
     public void autoSize(int arrayLength) {
         for (int i = 0; i < arrayLength; i++) {
             sheet.autoSizeColumn(i);
         }
     }
+
 }

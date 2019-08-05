@@ -21,6 +21,10 @@
     background: $grey;
   }
 
+  &.PROGRESS{
+    background: $yellow;
+  }
+
   &.REJECTED{
     background: $red;
     >i:after{

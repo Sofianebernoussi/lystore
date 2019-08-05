@@ -213,7 +213,7 @@
   "lystore.exportRME": "Export RME",
   "lystore.instruction.exportRME.err": "Erreur lors de l'export RME",
   "lystore.confirmation.project.title": "Précisez votre projet",
-  "lystore.export.notif": "Votre fichier est en cours de création, une fois créée il sera disponible dans l'onglet 'Mes exports'. Cette opération peut prendre du temps",
+  "lystore.export.notif": "Votre fichier est en cours de création, une fois créé il sera disponible dans l'onglet 'Mes exports'. Cette opération peut prendre du temps",
   "multi-combo.deselectAll": "Tout déselectionner",
   "multi-combo.options": "Options",
   "multi-combo.searchPlaceholder": "Chercher",

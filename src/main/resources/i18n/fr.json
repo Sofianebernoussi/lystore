@@ -510,5 +510,6 @@
   "lystore.list.export.title": "Liste des fichiers créés",
   "lystore.list.export.text": "Sélectionnez le fichier que vous souhaitez télécharger",
   "lystore.goTo.exports": "Mes exports",
-  "lystore.order.operation.delete": "Demande retirée de cette opération"
+  "lystore.order.operation.delete": "Demande retirée de cette opération",
+  "lystore.type": "Type"
 }

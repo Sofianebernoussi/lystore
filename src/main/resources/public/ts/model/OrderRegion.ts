@@ -74,6 +74,7 @@ export class OrderRegion implements Selectable {
                         }
                     }),
             id_operation: this.id_operation,
+            rank: this.rank -1,
         }
     }
 
@@ -103,8 +104,7 @@ export class OrderRegion implements Selectable {
         this.id_project = order.id_project;
         this.comment = order.comment;
         this.price = order.price_proposal;
-        if (order.rank )
-            this.rank = order.rank;
+        this.rank = order.rank;
         this.structure = order.structure;
         this.id_operation = order.id_operation;
     }

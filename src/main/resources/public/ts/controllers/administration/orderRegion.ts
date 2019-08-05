@@ -65,7 +65,7 @@ export const orderRegionController = ng.controller('orderRegionController',
             $scope.orderToUpdate.structure = $scope.structures.filter(structureFilter => structureFilter.id === $scope.orderToUpdate.id_structure)[0];
             $scope.orderToUpdate.price_proposal = $scope.orderToUpdate.price_single_ttc;
             if(  $scope.orderToUpdate.campaign.orderPriorityEnable()){
-                $scope.orderToUpdate.rank = $scope.orderToUpdate.rank + 1;
+                $scope.orderToUpdate.rank = $scope.orderToUpdate.rank === null? null : $scope.orderToUpdate.rank + 1;
             }
             if (!$scope.orderToUpdate.project.room)
                 $scope.orderToUpdate.project.room = '-';
@@ -141,7 +141,11 @@ export const orderRegionController = ng.controller('orderRegionController',
             return $scope.orderToUpdate.equipment_key
                 && $scope.orderToUpdate.price_proposal
                 && $scope.orderToUpdate.amount
-                && (($scope.orderToUpdate.campaign.orderPriorityEnable() && $scope.orderToUpdate.rank) || !$scope.orderToUpdate.campaign.orderPriorityEnable())
+                && (($scope.orderToUpdate.campaign.orderPriorityEnable() &&
+                    ($scope.orderToUpdate.rank>0 &&
+                        $scope.orderToUpdate.rank<11  ||
+                        $scope.orderToUpdate.rank === null)) ||
+                    !$scope.orderToUpdate.campaign.orderPriorityEnable())
         };
 
         function checkRow(row) {
@@ -167,15 +171,17 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
         $scope.getContractType = () => {
             let contract;
-            $scope.contracts.all.map(c => {
-                if (c.id === $scope.orderToUpdate.equipment.id_contract)
-                    contract = c
-            });
-            $scope.contractTypes.all.map(c => {
-                if (c.id === contract.id_contract_type) {
-                    $scope.contract_type = c.displayName
-                }
-            });
+            if($scope.orderToUpdate.equipment){
+                $scope.contracts.all.map(c => {
+                    if (c.id === $scope.orderToUpdate.equipment.id_contract)
+                        contract = c
+                });
+                $scope.contractTypes.all.map(c => {
+                    if (c.id === contract.id_contract_type) {
+                        $scope.contract_type = c.displayName
+                    }
+                });
+            }
             Utils.safeApply($scope);
         };
 

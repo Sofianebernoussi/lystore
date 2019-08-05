@@ -35,8 +35,8 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 "equipment_key, " +
                 "name, " +
                 "comment, " +
-                "id_order_client_equipment, ";
-        query += order.containsKey("rank") ? "rank, " : "";
+                "id_order_client_equipment, " +
+                "rank, ";
         query += order.containsKey("id_operation") ? "id_operation, " : "";
         query += "status, " +
                 "id_campaign, " +
@@ -61,7 +61,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 "? ," +
                 "? ," +
                 "? ,";
-        query += order.containsKey("rank") ? "?, " : "";
+        query +=  order.getInteger("rank") != -1? "?, " : "NULL, ";
         query += order.containsKey("id_operation") ? "?, " : "";
         query += " 'IN PROGRESS', " +
                 "       id_campaign, " +
@@ -88,7 +88,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 .add(order.getString("name"))
                 .add(order.getString("comment"))
                 .add(order.getInteger("id_order_client_equipment"));
-        if (order.containsKey("rank")) {
+        if (order.getInteger("rank") != -1) {
             params.add(order.getInteger("rank"));
         }
         if (order.containsKey("id_operation")) {
@@ -112,8 +112,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 "name = ?, " +
                 "equipment_key = ?, " +
                 "cause_status = 'IN PROGRESS', ";
-
-        query +=  order.containsKey("rank")?"rank = ?, ": "";
+        query +=  order.getInteger("rank") != -1? "rank = ?,": "rank = NULL, ";
         query +=  order.containsKey("id_operation")?"id_operation = ?, ": "";
         query +=  "comment = ? " +
                 "WHERE id = ? " +
@@ -126,7 +125,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 .add(user.getUserId())
                 .add(order.getString("name"))
                 .add(order.getInteger("equipment_key"));
-        if (order.containsKey("rank")){
+        if (order.getInteger("rank") != -1){
             params.add(order.getInteger("rank"));
         }
         if (order.containsKey("id_operation")){

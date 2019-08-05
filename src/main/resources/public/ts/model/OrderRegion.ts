@@ -62,12 +62,12 @@ export class OrderRegion implements Selectable {
             id_campaign: this.id_campaign,
             id_structure: this.id_structure,
             id_project: this.id_project,
-            equipment_key: this.equipment.id,
+            equipment_key: this.equipment.id ,
             comment: (this.comment) ? this.comment : "",
             ...(this.rank && {rank: this.rank}),
-            technical_specs: (this.technical_spec === null || this.technical_spec.length === 0) ?
+            technical_specs: (Utils.parsePostgreSQLJson(this.technical_spec) === null || Utils.parsePostgreSQLJson(this.technical_spec).length === 0) ?
                 []:
-                this.technical_spec.map(spec => {
+                Utils.parsePostgreSQLJson(this.technical_spec).map(spec => {
                         return {
                             name: spec.name,
                             value: spec.value
@@ -164,7 +164,8 @@ export class OrderRegion implements Selectable {
                 amount : data.amount?parseInt(data.amount):null,
                 rank : data.rank?parseInt(data.rank.toString()) : null,
                 price_single_ttc : data.price_single_ttc?parseFloat(data.price_single_ttc):null,
-                technical_specs: data.technical_specs?JSON.parse(data.technical_specs):null,
+                technical_spec: data.technical_spec?Utils.parsePostgreSQLJson(this.technical_spec):null,
+                isOrderRegion: true,
             };
             return result
         } catch (e) {

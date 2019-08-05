@@ -130,7 +130,7 @@ export const orderRegionController = ng.controller('orderRegionController',
             orderRegion.createFromOrderClient($scope.orderToUpdate);
             orderRegion.equipment_key = $scope.orderToUpdate.equipment_key;
             $scope.redirectTo('/operation');
-            if($scope.orderToUpdate.id_order_client_equipment){
+            if($scope.orderToUpdate.isOrderRegion){
                 await orderRegion.update($scope.orderToUpdate.id);
             } else {
                 await orderRegion.set();
@@ -139,6 +139,7 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
         $scope.isValidFormUpdate = () => {
             return $scope.orderToUpdate.equipment_key
+                &&  $scope.orderToUpdate.equipment
                 && $scope.orderToUpdate.price_proposal
                 && $scope.orderToUpdate.amount
                 && (($scope.orderToUpdate.campaign.orderPriorityEnable() &&

@@ -155,7 +155,8 @@ export class OrderClient implements Selectable {
                 rank : data.rank?parseInt(data.rank.toString()) : null,
                 tax_amount : data.tax_amount?parseFloat(data.tax_amount):null,
                 price_single_ttc : data.price_single_ttc?parseFloat(data.price_single_ttc):null,
-                technical_specs: data.technical_specs?JSON.parse(data.technical_specs):null,
+                technical_spec: data.technical_spec?Utils.parsePostgreSQLJson(this.technical_spec):null,
+                isOrderRegion: false,
             };
             return result;
         } catch (e) {
@@ -183,7 +184,8 @@ export class OrderClient implements Selectable {
                 rank : data.rank?parseInt(data.rank.toString()) : null,
                 tax_amount : data.tax_amount?parseFloat(data.tax_amount):null,
                 price_single_ttc : data.price_single_ttc?parseFloat(data.price_single_ttc):null,
-                technical_specs: data.technical_specs?JSON.parse(data.technical_specs):null,
+                technical_spec: data.technical_spec?Utils.parsePostgreSQLJson(this.technical_spec):null,
+                isOrderRegion: false,
             };
             return result;
         } catch (e) {

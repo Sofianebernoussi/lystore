@@ -1,8 +1,4 @@
 import {moment} from "entcore";
-import {Mix} from "entcore-toolkit";
-import {Project} from "./project";
-import {Campaign} from "./Campaign";
-import {OrderClient} from "./OrderClient";
 
 export class Utils {
 

@@ -62,7 +62,7 @@ export class OrderRegion implements Selectable {
             id_campaign: this.id_campaign,
             id_structure: this.id_structure,
             id_project: this.id_project,
-            equipment_key: this.equipment_key,
+            equipment_key: this.equipment.id,
             comment: (this.comment) ? this.comment : "",
             ...(this.rank && {rank: this.rank}),
             technical_specs: (this.technical_spec === null || this.technical_spec.length === 0) ?
@@ -107,6 +107,7 @@ export class OrderRegion implements Selectable {
         this.rank = order.rank;
         this.structure = order.structure;
         this.id_operation = order.id_operation;
+        this.equipment = order.equipment;
     }
 
     async set() {

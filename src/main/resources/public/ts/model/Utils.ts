@@ -1,4 +1,8 @@
 import {moment} from "entcore";
+import {Mix} from "entcore-toolkit";
+import {Project} from "./project";
+import {Campaign} from "./Campaign";
+import {OrderClient} from "./OrderClient";
 
 export class Utils {
 
@@ -66,20 +70,5 @@ export class Utils {
     }
     static formatDatePost (date:Date) {
         return  moment(date).format('YYYY-MM-DD');
-    }
-    static jsonParse ( jsonIn:String):any {
-        try{
-            let result:String = jsonIn;
-            let loopSecurity = 0;
-            while (typeof result === "string"&& loopSecurity < 10){
-                result = JSON.parse(result.toString());
-                loopSecurity++;
-            }
-            if (loopSecurity > 10) throw "More ten loop";
-            return result
-        } catch (e) {
-            return jsonIn;
-        }
-
     }
 }

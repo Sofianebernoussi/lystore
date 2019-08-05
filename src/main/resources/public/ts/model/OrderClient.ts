@@ -51,6 +51,7 @@ export class OrderClient implements Selectable {
     priceUnitedTTC: number;
     rankOrder: string;
     isOrderRegion: Boolean;
+    equipment:any;
     constructor() {
 
     }
@@ -156,7 +157,7 @@ export class OrderClient implements Selectable {
                 price_single_ttc : data.price_single_ttc?parseFloat(data.price_single_ttc):null,
                 technical_specs: data.technical_specs?JSON.parse(data.technical_specs):null,
             };
-            return result
+            return result;
         } catch (e) {
             notify.error('lystore.admin.order.get.err');
             throw e;
@@ -184,7 +185,7 @@ export class OrderClient implements Selectable {
                 price_single_ttc : data.price_single_ttc?parseFloat(data.price_single_ttc):null,
                 technical_specs: data.technical_specs?JSON.parse(data.technical_specs):null,
             };
-            return result
+            return result;
         } catch (e) {
             notify.error('lystore.admin.order.get.err');
             throw e;

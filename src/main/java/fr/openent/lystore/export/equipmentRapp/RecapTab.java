@@ -2,15 +2,18 @@ package fr.openent.lystore.export.equipmentRapp;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.TabHelper;
-import fr.openent.lystore.helpers.ExcelHelper;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class RecapTab extends TabHelper {
     private JsonArray programs;
@@ -20,6 +23,8 @@ public class RecapTab extends TabHelper {
     protected int operationsRowNumber = 2;
     JsonArray operations;
     private String actionStr = "actions";
+    private JsonObject programLabel = new JsonObject();
+
 
     public RecapTab(Workbook workbook, JsonObject instruction, String type) {
         super(workbook, instruction, "RECAP - " + type);
@@ -39,6 +44,7 @@ public class RecapTab extends TabHelper {
 
                 JsonArray programs = event.right().getValue();
                 //Delete tab if empty
+                setLabels();
                 setArray(programs);
 
                 if (programs.size() == 0) {
@@ -50,26 +56,113 @@ public class RecapTab extends TabHelper {
         });
     }
 
-    /**
-     * Set labels of the tabs
-     */
+    //    /**
+//     * Set labels of the tabs
+//     */
     @Override
     protected void setLabels() {
         int cellLabelColumn = 0;
-
-        if (this.instruction.getJsonArray("operations").isEmpty()) {
+        int programRowNumber = 0;
+        String previousProgram = "";
+        int initProgramX = 0;
+        int endProgramX = 0;
+        cellColumn = 2;
+        ArrayList<String> programsActionList = new ArrayList<>();
+        if (programs.isEmpty()) {
             return;
         }
-        operations = this.instruction.getJsonArray("operations");
-        for (int i = 0; i < operations.size(); i++) {
-            JsonObject operation = operations.getJsonObject(i);
-            taby.add(operation.getInteger("id"));
+        for (int i = 0; i < programs.size(); i++) {
+
+            JsonObject operation = programs.getJsonObject(i);
+            String actionsStrToArray = operation.getString(actionStr);
+
             Row operationRow = sheet.createRow(this.operationsRowNumber);
-            excel.insertLabel(operationRow, cellLabelColumn, operation.getString("label"));
+            excel.insertLabel(operationRow, cellLabelColumn, operation.getLong("id").toString());
+            excel.insertLabel(operationRow, cellLabelColumn + 1, operation.getString("label"));
+
+
+            JsonArray actions = new JsonArray(actionsStrToArray);
+            if (actions.isEmpty()) continue;
+            for (int j = 0; j < actions.size(); j++) {
+                JsonObject action = actions.getJsonObject(j);
+                String program = action.getString("name");
+                String code = action.getString("code");
+                String key = program + " - " + code;
+                if (!programsActionList.contains(key))
+                    programsActionList.add(key);
+
+            }
+            Collections.sort(programsActionList);
+            for (int j = 0; j < programsActionList.size(); j++) {
+                String key = programsActionList.get(j);
+                //getting program and code separated
+                String segments[] = key.split(" - ");
+                String program = segments[0];
+                String code = segments[1];
+                if (!programLabel.containsKey(key)) {
+                    programLabel.put(key, programLabel.size());
+
+
+                    if (previousProgram.equals(program)) {
+                        endProgramX = cellColumn;
+                    } else {
+                        previousProgram = program;
+                        if (initProgramX < endProgramX) {
+                            CellRangeAddress merge = new CellRangeAddress(programRowNumber, programRowNumber, initProgramX, endProgramX);
+                            sheet.addMergedRegion(merge);
+                            excel.setRegionHeader(merge, sheet);
+                        }
+                        initProgramX = cellColumn;
+                        excel.insertHeader(programRowNumber, cellColumn, program);
+                    }
+                    excel.insertHeader(programRowNumber + 1, cellColumn, code);
+                    cellColumn++;
+                }
+            }
+
             this.operationsRowNumber++;
+        }
+        if (initProgramX < endProgramX) {
+            CellRangeAddress merge = new CellRangeAddress(programRowNumber, programRowNumber, initProgramX, endProgramX);
+            sheet.addMergedRegion(merge);
+            excel.setRegionHeader(merge, sheet);
         }
     }
 
+    @Override
+    protected void setArray(JsonArray datas) {
+
+
+        for (int i = 0; i < datas.size(); i++) {
+            JsonObject operation = programs.getJsonObject(i);
+
+            String actionsStrToArray = operation.getString(actionStr);
+            JsonArray actions = new JsonArray(actionsStrToArray);
+
+            for (int j = 0; j < actions.size(); j++) {
+                JsonObject action = actions.getJsonObject(j);
+                String key = action.getString("name") + " - " + action.getString("code");
+                excel.insertCellTabFloat(programLabel.getInteger(key) + 2,
+                        2 + i,
+                        action.getFloat("total"));
+            }
+        }
+
+        excel.fillTab(2, programLabel.size() + 2, 2, operationsRowNumber);
+        excel.insertHeader(operationsRowNumber, 1, excel.totalLabel);
+
+        for (int i = 0; i < programLabel.size(); i++) {
+            excel.setTotalX(2, operationsRowNumber - 1, i + 2, operationsRowNumber);
+        }
+
+        excel.insertHeader(1, programLabel.size() + 2, excel.totalLabel);
+
+        for (int i = 0; i <= datas.size(); i++) {
+            excel.setTotalY(2, programLabel.size() + 1, 2 + i, programLabel.size() + 2);
+        }
+
+        excel.autoSize(programLabel.size() + 3);
+    }
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
         query = " With values as ( " +
@@ -136,10 +229,11 @@ public class RecapTab extends TabHelper {
                 "   select temps.* from temps " +
                 "   order by  temps.name,temps.code,temps.id_operation" +
                 ") " +
-                " SELECT label.label , array_to_json(array_agg(values)) as actions " +
-                " from " + Lystore.lystoreSchema + ".label_operation as label " +
-                " INNER JOIN values  on (label.id = values.id_operation) " +
-                " Group by label.label ";
+                        " SELECT label.label,operation.id , array_to_json(array_agg(values)) as actions " +
+                        " from " + Lystore.lystoreSchema + ".operation as operation    " +
+                        " INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label on (operation.id_label = label.id)  " +
+                        " INNER JOIN values  on (operation.id = values.id_operation)  " +
+                        " Group by operation.id, label.label ";
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")).add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
                 handler.handle(event.left());
@@ -151,46 +245,6 @@ public class RecapTab extends TabHelper {
         }));
     }
 
-    @Override
-    protected void setArray(JsonArray datas) {
-        int cellLabelColumn = 0;
-        int programRowNumber = 0;
-        if (datas.isEmpty()) {
-            return;
-        }
-        Row programRow = sheet.createRow(programRowNumber);
-        Row typeRow = sheet.createRow(programRowNumber + 1);
 
-        for (int i = 0; i < datas.size(); i++) {
-
-            JsonObject operation = datas.getJsonObject(i);
-            String actionsStrToArray = operation.getString(actionStr);
-
-            Row operationRow = sheet.createRow(this.operationsRowNumber);
-            excel.insertLabel(operationRow, cellLabelColumn, operation.getString("label"));
-
-            this.operationsRowNumber++;
-
-            JsonArray actions = new JsonArray(actionsStrToArray);
-            if (actions.isEmpty()) continue;
-            for (int j = 0; j < actions.size(); j++) {
-                JsonObject action = actions.getJsonObject(j);
-                excel.insertHeader(programRow, cellColumn, action.getString("name"));
-                excel.insertHeader(typeRow, cellColumn, action.getString("code"));
-                excel.insertCellTabFloat(cellColumn, programRowNumber + 2 + i, action.getFloat("total"));
-                this.cellColumn++;
-            }
-
-        }
-        excel.insertHeader(typeRow, cellColumn, ExcelHelper.totalLabel);
-        excel.fillTab(xTab + 1, this.cellColumn, yTab + 2, this.operationsRowNumber);
-
-        for (int i = 0; i < datas.size(); i++) {
-            excel.setTotalY(yTab + 1, cellColumn - 1, programRowNumber + 2 + i, cellColumn);
-        }
-
-
-//        excel.insertHeader(sheet.getRow(programRowNumber), cellColumn, excel.totalLabel);
-    }
 }
 

@@ -93,7 +93,7 @@ public class RecapMarket extends TabHelper {
 
         excel.insertYellowLabel(8, programMarket.size() + 1, ExcelHelper.totalLabel);
 
-        for (int i = 0; i < datas.size(); i++) {
+        for (int i = 0; i <= datas.size(); i++) {
             excel.setTotalY(1, programMarket.size(), 9 + i, programMarket.size() + 1);
         }
 
@@ -108,7 +108,11 @@ public class RecapMarket extends TabHelper {
         ArrayList<String> programsActionList = new ArrayList<>();
         String previousProgram = "";
         String previousMarket = "";
-
+        CellRangeAddress merge;
+        int initProgramX = 0;
+        int endProgramX = 0;
+        int initMarketX = 0;
+        int endMarketX = 0;
         for (int i = 0; i < datas.size(); i++) {
 
             JsonObject operation = datas.getJsonObject(i);
@@ -136,29 +140,49 @@ public class RecapMarket extends TabHelper {
 
             //merge region if same program
             if (previousMarket.equals(segments[0])) { //if same market megred region instead
-                CellRangeAddress merge;
-                merge = new CellRangeAddress(operationsRowNumber - 3, operationsRowNumber - 3, 1 + programMarket.size() - 1, 1 + programMarket.size());
-                sheet.addMergedRegion(merge);
-                excel.setRegionHeader(merge, sheet);
+                endMarketX = 1 + programMarket.size();
                 if (previousProgram.equals(segments[1])) { // if same program adding merged instead
-                    merge = new CellRangeAddress(operationsRowNumber - 2, operationsRowNumber - 2, 4 + programMarket.size() - 1, 4 + programMarket.size());
-                    sheet.addMergedRegion(merge);
-                    excel.setRegionHeader(merge, sheet);
+                    endMarketX = 1 + programMarket.size();
+
                 } else {
+
                     previousProgram = segments[1];
+                    if (initProgramX < endProgramX) {
+                        merge = new CellRangeAddress(operationsRowNumber - 2, operationsRowNumber - 2, initProgramX, endProgramX);
+                        sheet.addMergedRegion(merge);
+                        excel.setRegionHeader(merge, sheet);
+                    }
+                    initProgramX = 3 + programMarket.size();
                     excel.insertYellowLabel(operationsRowNumber - 2, 1 + programMarket.size(), segments[1]);
                 }
             } else {
                 previousMarket = segments[0];
                 previousProgram = segments[1];
+                if (initMarketX < endMarketX) {
+                    merge = new CellRangeAddress(operationsRowNumber - 3, operationsRowNumber - 3, initMarketX, endMarketX);
+                    sheet.addMergedRegion(merge);
+                    excel.setRegionHeader(merge, sheet);
+                }
+                initMarketX = 1 + programMarket.size();
                 excel.insertYellowLabel(operationsRowNumber - 3, 1 + programMarket.size(), segments[0]);
                 excel.insertYellowLabel(operationsRowNumber - 2, 1 + programMarket.size(), segments[1]);
-
             }
             //always insert contract_type code
             excel.insertYellowLabel(operationsRowNumber - 1, 1 + programMarket.size(), segments[2]);
 
             programMarket.put(progM, i);
+        }
+
+        //merge last region if there is one
+        if (initProgramX < endProgramX) {
+            merge = new CellRangeAddress(operationsRowNumber - 2, operationsRowNumber - 2, initProgramX, endProgramX);
+            sheet.addMergedRegion(merge);
+            excel.setRegionHeader(merge, sheet);
+        }
+        if (initMarketX < endMarketX) {
+            merge = new CellRangeAddress(operationsRowNumber - 3, operationsRowNumber - 3, initMarketX, endMarketX);
+            sheet.addMergedRegion(merge);
+            excel.setRegionHeader(merge, sheet);
         }
 
         arrayLength += programMarket.size();

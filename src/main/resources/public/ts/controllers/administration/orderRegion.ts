@@ -142,8 +142,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                 &&  $scope.orderToUpdate.equipment
                 && $scope.orderToUpdate.price_proposal
                 && $scope.orderToUpdate.amount
-                && (($scope.orderToUpdate.campaign.orderPriorityEnable() &&
-                    ($scope.orderToUpdate.rank>0 &&
+                && ((($scope.orderToUpdate.rank>0 &&
                         $scope.orderToUpdate.rank<11  ||
                         $scope.orderToUpdate.rank === null)) ||
                     !$scope.orderToUpdate.campaign.orderPriorityEnable())
@@ -168,7 +167,10 @@ export const orderRegionController = ng.controller('orderRegionController',
                 && $scope.orderToCreate.project
                 && $scope.orderToCreate.operation
                 && $scope.oneRow()
-                ;
+                && ($scope.orderToCreate.rows.every( row => (row.rank>0 &&
+                    row.rank<11  ||
+                    row.rank === null))
+                || !$scope.orderToCreate.campaign.orderPriorityEnable());
         };
         $scope.getContractType = () => {
             let contract;
@@ -266,8 +268,11 @@ export const orderRegionController = ng.controller('orderRegionController',
                             orderRegionTemp.name = row.equipment.name;
                             orderRegionTemp.technical_spec = row.equipment.technical_specs;
                             orderRegionTemp.id_contract = row.equipment.id_contract;
-                            if (row.rank)
+                            if (!row.rank){
+                                orderRegionTemp.rank = 0;
+                            } else {
                                 orderRegionTemp.rank = row.rank;
+                            }
                             let struct = $scope.structures.all.find(struct => s.id === struct.id);
                             (struct) ? orderRegionTemp.name_structure = struct.name : orderRegionTemp.name_structure = "";
                             ordersToCreate.all.push(orderRegionTemp);
@@ -287,8 +292,11 @@ export const orderRegionController = ng.controller('orderRegionController',
                         orderRegionTemp.technical_spec = row.equipment.technical_specs;
                         orderRegionTemp.id_contract = row.equipment.id_contract;
                         orderRegionTemp.name_structure = row.structure.name;
-                        if (row.rank)
+                        if (!row.rank){
+                            orderRegionTemp.rank = 0;
+                        } else {
                             orderRegionTemp.rank = row.rank;
+                        }
                         ordersToCreate.all.push(orderRegionTemp);
                     }
                 }

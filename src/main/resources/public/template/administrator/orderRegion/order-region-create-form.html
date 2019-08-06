@@ -118,7 +118,7 @@
                     </td>
                     <td class="two" ng-if="orderToCreate.campaign.orderPriorityEnable()">
                         <input class="input-in-row" ng-init="row.rank = 1" ng-model="row.rank" type="number"
-                               min="1" step="1"/>
+                               min="1" step="1" max="10"/>
                     </td>
                     <td class="three">
                         <input ng-model="row.comment" type="text"/>

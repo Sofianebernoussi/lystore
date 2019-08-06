@@ -100,8 +100,8 @@ public class OrderRegionController extends BaseController {
                                 request,
                                 Contexts.ORDERREGION.toString(),
                                 Actions.CREATE.toString(),
-                                null,
-                                new JsonObject().put("orderRegion", orderRegion))));
+                                orderRegion.toString(),
+                                new JsonObject().put("orders", orders))));
                     }
                 });
             }

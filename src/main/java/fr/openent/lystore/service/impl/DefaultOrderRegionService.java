@@ -5,6 +5,7 @@ import fr.openent.lystore.service.OrderRegionService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.eventbus.impl.MessageImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -193,17 +194,17 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
         queryOrderRegionEquipment = new StringBuilder()
                 .append(" INSERT INTO lystore.\"order-region-equipment\" ");
 
-        if (order.containsKey("rank")) {
+        if (order.getInteger("rank") != -1) {
             queryOrderRegionEquipment.append(" ( price, amount, creation_date,  owner_name, owner_id, name, summary, description, image," +
                     " technical_spec, status, id_contract, equipment_key, id_campaign, id_structure," +
                     " comment,  id_project,  id_operation, rank) ")
-                    .append("  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) ; ");
+                    .append("  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) RETURNING id ; ");
 
         } else {
             queryOrderRegionEquipment.append(" ( price, amount, creation_date,  owner_name, owner_id, name, summary, description, image," +
                     " technical_spec, status, id_contract, equipment_key, id_campaign, id_structure," +
                     " comment,  id_project,  id_operation) ")
-                    .append("  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) ; ");
+                    .append("  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) RETURNING id ; ");
         }
 
 
@@ -225,9 +226,8 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 .add(order.getString("id_structure"))
                 .add(order.getString("comment"))
                 .add(id_project)
-                .add(order.getInteger("id_operation"))
-        ;
-        if (order.containsKey("rank")) {
+                .add(order.getInteger("id_operation"));
+        if (order.getInteger("rank") != -1){
             params.add(order.getInteger("rank"));
         }
 
@@ -245,7 +245,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
         queryProjectEquipment = new StringBuilder()
                 .append(" INSERT INTO lystore.project ")
                 .append(" ( id, id_title ) VALUES ")
-                .append(" (?, ?); ");
+                .append(" (?, ?)  RETURNING id ; ");
         params = new fr.wseduc.webutils.collections.JsonArray();
 
         params.add(id).add(id_title);

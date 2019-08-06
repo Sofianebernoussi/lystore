@@ -98,8 +98,8 @@ public class ComptaTab extends TabHelper {
     @Override
     protected void setLabels() {
         int initYProgramLabel = 2;
-        int nbTotaux = 1;
         for (int i = 0; i < datas.size(); i++) {
+            JsonObject programLabel = new JsonObject();
             //creating label
             int columnTotal = 4;
             JsonObject operation = datas.getJsonObject(i);
@@ -110,33 +110,38 @@ public class ComptaTab extends TabHelper {
             JsonObject idPassed = new JsonObject();
             initYProgramLabel = yProgramLabel;
             yProgramLabel += 2;
-            nbTotaux = 1;
             String campaign = "";
-            //Insert datas
-
+//            //Insert datas
+//
             for (int j = 0; j < actions.size(); j++) {
-
                 JsonObject action = actions.getJsonObject(j);
                 if (!action.getString("campaign").equals(campaign)) {
-
                     if (j != 0) {
-                        setTotal(nbTotaux, initYProgramLabel);
+                        setTotal(programLabel.size() + 4, initYProgramLabel);
                     }
-
                     campaign = action.getString("campaign");
                     yProgramLabel += 2;
-                    setCampaign(campaign, initYProgramLabel);
+                    setCampaign(campaign, yProgramLabel);
+                    yProgramLabel += 2;
                     initYProgramLabel = yProgramLabel;
                     yProgramLabel += 2;
-
                     if (arrayLength - 4 < columnTotal) {
                         arrayLength += columnTotal;
                     }
-
                     columnTotal = 4;
-                    nbTotaux = 1;
                     idPassed = new JsonObject();
+                    programLabel = new JsonObject();
                 }
+
+                if (!programLabel.containsKey(action.getString("program") + " - " + action.getString("code"))) {
+                    programLabel.put(action.getString("program") + " - " + action.getString("code"), programLabel.size());
+                    excel.insertHeader(initYProgramLabel, 4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code"))
+                            , action.getString("program"));
+                    excel.insertHeader(initYProgramLabel + 1, 4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code"))
+                            , action.getString("code"));
+                }
+
+
                 if (!checkIdPassed(idPassed, action.getString("id_structure"))) {
                     columnTotal = 4;
                     idPassed.put(action.getString("id_structure"), true);
@@ -144,16 +149,13 @@ public class ComptaTab extends TabHelper {
                     excel.insertLabel(yProgramLabel, 1, action.getString("city"));
                     excel.insertLabel(yProgramLabel, 2, action.getString("nameEtab"));
                     excel.insertLabel(yProgramLabel, 3, action.getString("uai"));
-                    excel.insertHeader(initYProgramLabel, columnTotal, action.getString("name"));
-                    excel.insertHeader(initYProgramLabel + 1, columnTotal, action.getString("code"));
-                    excel.insertCellTabFloat(columnTotal, yProgramLabel, action.getFloat("total"));
-                } else {
 
-                    excel.insertHeader(initYProgramLabel, columnTotal, action.getString("name"));
-                    excel.insertHeader(initYProgramLabel + 1, columnTotal, action.getString("code"));
+                    excel.insertCellTabFloat(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")),
+                            yProgramLabel, action.getFloat("total"));
+                } else {
                     yProgramLabel--;
-                    nbTotaux++;
-                    excel.insertCellTabFloat(columnTotal, yProgramLabel, action.getFloat("total"));
+                    excel.insertCellTabFloat(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")), yProgramLabel
+                            , action.getFloat("total"));
                 }
 
                 columnTotal++;
@@ -164,10 +166,9 @@ public class ComptaTab extends TabHelper {
             if (arrayLength - 4 < columnTotal) {
                 arrayLength += columnTotal;
             }
-            setTotal(nbTotaux, initYProgramLabel);
+            setTotal(programLabel.size() + 4, initYProgramLabel);
             yProgramLabel += 2;
         }
-
         excel.autoSize(arrayLength);
     }
 
@@ -186,16 +187,15 @@ public class ComptaTab extends TabHelper {
     }
 
     private void setTotal(int nbTotaux, int initYProgramLabel) {
-        excel.fillTab(4, 4 + nbTotaux, initYProgramLabel + 1, yProgramLabel);
-        excel.insertLabel(yProgramLabel, 3, excel.totalLabel);
-        for (int nbTotal = 0; nbTotal < nbTotaux; nbTotal++) {
-            excel.setTotalX(initYProgramLabel + 1, yProgramLabel - 1, 4 + nbTotal, yProgramLabel);
+        excel.fillTab(4, nbTotaux, initYProgramLabel + 2, yProgramLabel);
+        excel.insertHeader(yProgramLabel, 3, excel.totalLabel);
+        for (int nbTotal = 4; nbTotal < nbTotaux; nbTotal++) {
+            excel.setTotalX(initYProgramLabel + 1, yProgramLabel - 1, nbTotal, yProgramLabel);
         }
-        excel.insertHeader(initYProgramLabel + 1, 4 + nbTotaux, excel.totalLabel);
+        excel.insertHeader(initYProgramLabel + 1, nbTotaux, excel.totalLabel);
         for (int y = initYProgramLabel + 2; y <= yProgramLabel; y++) {
-            excel.setTotalY(4, 4 + nbTotaux - 1, y, 4 + nbTotaux);
+            excel.setTotalY(4, nbTotaux - 1, y, nbTotaux);
         }
-
     }
 
     private boolean checkIdPassed(JsonObject idPassed, String id) {
@@ -206,7 +206,7 @@ public class ComptaTab extends TabHelper {
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
         query = "  With values as (   " +
                 "   (SELECT SUM( ore.price* ore.amount) as Total, " +
-                "   ore.id_structure,campaign.name as campaign,contract_type.code as code,ore.id_operation , program_action.id_program ,contract_type.name ,program.name          " +
+                "   ore.id_structure,campaign.name as campaign,contract_type.code as code,ore.id_operation , program_action.id_program ,contract_type.name ,program.name as program         " +
                 "   FROM " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore       " +
                 "   INNER JOIN " + Lystore.lystoreSchema + ".operation ON (ore.id_operation = operation.id)     " +
                 "   INNER JOIN " + Lystore.lystoreSchema + ".campaign ON ore.id_campaign = campaign.id  " +
@@ -225,35 +225,35 @@ public class ComptaTab extends TabHelper {
         else
             query += "    AND structure_program_action.structure_type !=  '" + CMR + "'  " +
                     " AND ore.id_structure NOT IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + CMR + "' ) ";
+
         query +=
                 "   Group by  campaign,program.name,contract_type.code, contract_type.name , program_action.id, ore.id_operation,ore.id_structure     " +
-                "   order by  campaign,program.name,id_program,code,ore.id_operation  ) " +
-                "   UNION ( " +
-                "   SELECT " +
-                "   SUM(  CASE WHEN oce.price_proposal is not null  " +
-                "    THEN oce.price_proposal *  oce.amount " +
-                "    ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount + " +
-                "            (SELECT CASE WHEN  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL " +
-                "           THEN 0  " +
-                "           ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  " +
-                "           END " +
-                "           from " + Lystore.lystoreSchema + ".order_client_options oco  " +
-                "           WHERE id_order_client_equipment = oce.id ) " +
-                "            )/100 END    " +
-                "   ) as Total, " +
-                "   oce.id_structure,campaign.name as campaign, contract_type.code as code,oce.id_operation , program_action.id_program ,contract_type.name ,program.name          " +
-                "   FROM " + Lystore.lystoreSchema + ".order_client_equipment oce       " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id)    " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".campaign ON oce.id_campaign = campaign.id  " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)    " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)        " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".contract ON (oce.id_contract = contract.id)        " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)           " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)        " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)     " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)      " +
-                        "   WHERE instruction.id = ?   "
-        ;
+                        "   order by  campaign,program.name,id_program,code,ore.id_operation  ) " +
+                        "   UNION ( " +
+                        "   SELECT " +
+                        "   SUM(  CASE WHEN oce.price_proposal is not null  " +
+                        "    THEN oce.price_proposal *  oce.amount " +
+                        "    ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount + " +
+                        "            (SELECT CASE WHEN  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL " +
+                        "           THEN 0  " +
+                        "           ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  " +
+                        "           END " +
+                        "           from " + Lystore.lystoreSchema + ".order_client_options oco  " +
+                        "           WHERE id_order_client_equipment = oce.id ) " +
+                        "            )/100 END    " +
+                        "   ) as Total, " +
+                        "   oce.id_structure,campaign.name as campaign, contract_type.code as code,oce.id_operation , program_action.id_program ,contract_type.name ,program.name  as program" +
+                        "   FROM " + Lystore.lystoreSchema + ".order_client_equipment oce       " +
+                        "   INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id)    " +
+                        "   INNER JOIN " + Lystore.lystoreSchema + ".campaign ON oce.id_campaign = campaign.id  " +
+                        "   INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)    " +
+                        "   INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)        " +
+                        "   INNER JOIN " + Lystore.lystoreSchema + ".contract ON (oce.id_contract = contract.id)        " +
+                        "   INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)           " +
+                        "   INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)        " +
+                        "   INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)     " +
+                        "   INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)      " +
+                        "   WHERE instruction.id = ?  ";
         if (type.equals(CMR))
             query += "    AND structure_program_action.structure_type =  '" + type + "'  " +
                     " AND oce.id_structure IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + type + "' ) ";
@@ -261,15 +261,17 @@ public class ComptaTab extends TabHelper {
         else
             query += "    AND structure_program_action.structure_type !=  '" + CMR + "'  " +
                     " AND oce.id_structure NOT IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + CMR + "' ) ";
+
         query +=
                 "   Group by  campaign,program.name,contract_type.code, contract_type.name , program_action.id, oce.id_operation,oce.id_structure     " +
-                "   order by  campaign,program.name,id_program,code,oce.id_operation " +
-                "   ) " +
-                " )   " +
-                " SELECT label.label , array_to_json(array_agg(values)) as actions   " +
-                " from " + Lystore.lystoreSchema + ".label_operation as label    " +
-                " INNER JOIN values  on (label.id = values.id_operation)  " +
-                " Group by label.label  ";
+                        "   order by  campaign,program.name,id_program,code,oce.id_operation " +
+                        "   ) " +
+                        " )   " +
+                        " SELECT label.label , array_to_json(array_agg(values)) as actions   " +
+                        " from " + Lystore.lystoreSchema + ".operation as operation    " +
+                        " INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label on (operation.id_label = label.id)  " +
+                        " INNER JOIN values  on (operation.id = values.id_operation)  " +
+                        " Group by label.label  ";
 
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")).add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {

@@ -99,8 +99,8 @@ public class ListForTextTab extends TabHelper {
     @Override
     protected void setLabels() {
         int initYProgramLabel = 2;
-        int nbTotaux = 1;
         for (int i = 0; i < datas.size(); i++) {
+            JsonObject programLabel = new JsonObject();
             //creating label
             int columnTotal = 4;
             JsonObject campaign = datas.getJsonObject(i);
@@ -111,16 +111,14 @@ public class ListForTextTab extends TabHelper {
             JsonObject idPassed = new JsonObject();
             initYProgramLabel = yProgramLabel;
             yProgramLabel += 2;
-            nbTotaux = 1;
             String operation = "";
 //            //Insert datas
 //
             for (int j = 0; j < actions.size(); j++) {
-
                 JsonObject action = actions.getJsonObject(j);
                 if (!action.getString("operation").equals(operation)) {
                     if (j != 0) {
-                        setTotal(nbTotaux, initYProgramLabel);
+                        setTotal(programLabel.size() + 4, initYProgramLabel);
                     }
                     operation = action.getString("operation");
                     yProgramLabel += 2;
@@ -132,9 +130,18 @@ public class ListForTextTab extends TabHelper {
                         arrayLength += columnTotal;
                     }
                     columnTotal = 4;
-                    nbTotaux = 1;
                     idPassed = new JsonObject();
+                    programLabel = new JsonObject();
                 }
+                if (!programLabel.containsKey(action.getString("program") + " - " + action.getString("code"))) {
+                    programLabel.put(action.getString("program") + " - " + action.getString("code"), programLabel.size());
+                    excel.insertHeader(initYProgramLabel, 4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code"))
+                            , action.getString("program"));
+                    excel.insertHeader(initYProgramLabel + 1, 4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code"))
+                            , action.getString("code"));
+                }
+
+
                 if (!checkIdPassed(idPassed, action.getString("id_structure"))) {
                     columnTotal = 4;
                     idPassed.put(action.getString("id_structure"), true);
@@ -142,15 +149,13 @@ public class ListForTextTab extends TabHelper {
                     excel.insertLabel(yProgramLabel, 1, action.getString("city"));
                     excel.insertLabel(yProgramLabel, 2, action.getString("nameEtab"));
                     excel.insertLabel(yProgramLabel, 3, action.getString("uai"));
-                    excel.insertHeader(initYProgramLabel, columnTotal, action.getString("name"));
-                    excel.insertHeader(initYProgramLabel + 1, columnTotal, action.getString("code"));
-                    excel.insertCellTabFloat(columnTotal, yProgramLabel, action.getFloat("total"));
+
+                    excel.insertCellTabFloat(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")),
+                            yProgramLabel, action.getFloat("total"));
                 } else {
-                    excel.insertHeader(initYProgramLabel, columnTotal, action.getString("name"));
-                    excel.insertHeader(initYProgramLabel + 1, columnTotal, action.getString("code"));
                     yProgramLabel--;
-                    nbTotaux++;
-                    excel.insertCellTabFloat(columnTotal, yProgramLabel, action.getFloat("total"));
+                    excel.insertCellTabFloat(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")), yProgramLabel
+                            , action.getFloat("total"));
                 }
 
                 columnTotal++;
@@ -161,7 +166,7 @@ public class ListForTextTab extends TabHelper {
             if (arrayLength - 4 < columnTotal) {
                 arrayLength += columnTotal;
             }
-            setTotal(nbTotaux, initYProgramLabel);
+            setTotal(programLabel.size() + 4, initYProgramLabel);
             yProgramLabel += 2;
         }
         excel.autoSize(arrayLength);
@@ -182,14 +187,14 @@ public class ListForTextTab extends TabHelper {
     }
 
     private void setTotal(int nbTotaux, int initYProgramLabel) {
-        excel.fillTab(4, 4 + nbTotaux, initYProgramLabel + 1, yProgramLabel);
+        excel.fillTab(4, nbTotaux, initYProgramLabel + 2, yProgramLabel);
         excel.insertHeader(yProgramLabel, 3, excel.totalLabel);
-        for (int nbTotal = 0; nbTotal < nbTotaux; nbTotal++) {
-            excel.setTotalX(initYProgramLabel + 1, yProgramLabel - 1, 4 + nbTotal, yProgramLabel);
+        for (int nbTotal = 4; nbTotal < nbTotaux; nbTotal++) {
+            excel.setTotalX(initYProgramLabel + 1, yProgramLabel - 1, nbTotal, yProgramLabel);
         }
-        excel.insertHeader(initYProgramLabel + 1, 4 + nbTotaux, excel.totalLabel);
+        excel.insertHeader(initYProgramLabel + 1, nbTotaux, excel.totalLabel);
         for (int y = initYProgramLabel + 2; y <= yProgramLabel; y++) {
-            excel.setTotalY(4, 4 + nbTotaux - 1, y, 4 + nbTotaux);
+            excel.setTotalY(4, nbTotaux - 1, y, nbTotaux);
         }
     }
 

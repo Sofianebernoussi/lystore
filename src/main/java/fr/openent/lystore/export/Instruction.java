@@ -1,7 +1,10 @@
 package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
-import fr.openent.lystore.export.equipmentRapp.*;
+import fr.openent.lystore.export.equipmentRapp.ComptaTab;
+import fr.openent.lystore.export.equipmentRapp.ListForTextTab;
+import fr.openent.lystore.export.equipmentRapp.RecapMarket;
+import fr.openent.lystore.export.equipmentRapp.RecapTab;
 import fr.openent.lystore.export.investissement.*;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
@@ -147,14 +150,14 @@ public class Instruction {
                     Future<Boolean> RecapFuture = Future.future();
                     Future<Boolean> ComptaFuture = Future.future();
                     Future<Boolean> AnnexeDelibFuture = Future.future();
-                    Future<Boolean> RecapMarket = Future.future();
+                    Future<Boolean> RecapMarketFuture = Future.future();
 
 
                     futures.add(ListForTextFuture);
                     futures.add(RecapFuture);
                     futures.add(ComptaFuture);
-                    futures.add(AnnexeDelibFuture);
-                    futures.add(RecapMarket);
+//                    futures.add(AnnexeDelibFuture);
+                    futures.add(RecapMarketFuture);
 
                         CompositeFuture.all(futures).setHandler(event -> {
                             if (event.succeeded()) {
@@ -176,8 +179,8 @@ public class Instruction {
                     new ComptaTab(workbook, instruction, type).create(getHandler(ComptaFuture));
                     new ListForTextTab(workbook, instruction, type).create(getHandler(ListForTextFuture));
                     new RecapTab(workbook, instruction, type).create(getHandler(RecapFuture));
-                    new AnnexeDelibTab(workbook, instruction).create(getHandler(AnnexeDelibFuture));
-                    new RecapMarket(workbook, instruction, type).create(getHandler(RecapMarket));
+//                    new AnnexeDelibTab(workbook, instruction).create(getHandler(AnnexeDelibFuture));
+                    new RecapMarket(workbook, instruction, type).create(getHandler(RecapMarketFuture));
                 }
             }
         }));

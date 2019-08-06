@@ -185,7 +185,7 @@ public class RecapMarket extends TabHelper {
                 "  INNER JOIN   " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id) " +
                 "  INNER JOIN   " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)     " +
                 "  INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)  " +
-                "  WHERE instruction.id = ?   AND structure_program_action.structure_type =  '" + type + "'   AND oce.override_region = false ";
+                "  WHERE instruction.id = ?    AND oce.override_region = false ";
         if (type.equals(CMR))
             query += "    AND structure_program_action.structure_type =  '" + type + "'  " +
                     " AND oce.id_structure IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + type + "' ) ";
@@ -222,10 +222,12 @@ public class RecapMarket extends TabHelper {
                         " select * from tempValues  " +
                         " order by market,id_program,code,id_operation " +
                         ") " +
-                        "SELECT program.*, array_to_json(array_agg(values)) as actions  " +
-                        "FROM  " + Lystore.lystoreSchema + ".program " +
-                        "INNER JOIN values ON (values.id_program = program.id)  " +
-                        "GROUP BY program.id ";
+                        "SELECT  label.label, array_to_json(array_agg(values)) as actions  " +
+                        " from " + Lystore.lystoreSchema + ".operation as operation    " +
+                        " INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label on (operation.id_label = label.id)  " +
+                        " INNER JOIN values  on (operation.id = values.id_operation)  " +
+                        " Group by label.label  ";
+
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")).add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {

@@ -112,9 +112,9 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 "equipment_key = ?, " +
                 "cause_status = 'IN PROGRESS', ";
 
-        query +=  order.containsKey("rank")?"rank = ?, ": "";
-        query +=  order.containsKey("id_operation")?"id_operation = ?, ": "";
-        query +=  "comment = ? " +
+        query += order.containsKey("rank") ? "rank = ?, " : "";
+        query += order.containsKey("id_operation") ? "id_operation = ?, " : "";
+        query += "comment = ? " +
                 "WHERE id = ?";
 
         params.add(order.getFloat("price"))
@@ -124,10 +124,10 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 .add(user.getUserId())
                 .add(order.getString("name"))
                 .add(order.getInteger("equipment_key"));
-        if (order.containsKey("rank")){
+        if (order.containsKey("rank")) {
             params.add(order.getInteger("rank"));
         }
-        if (order.containsKey("id_operation")){
+        if (order.containsKey("id_operation")) {
             params.add(order.getInteger("id_operation"));
         }
         params.add(order.getString("comment"))
@@ -253,15 +253,17 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 .put("values", params)
                 .put("action", "prepared");
     }
-    public void deleteOrderRegion(int idOrderRegion, Handler<Either<String, JsonObject>> handler){
+
+    public void deleteOrderRegion(int idOrderRegion, Handler<Either<String, JsonObject>> handler) {
         String query = "" +
                 "DELETE FROM " +
-                Lystore.lystoreSchema +".\"order-region-equipment\" " +
+                Lystore.lystoreSchema + ".\"order-region-equipment\" " +
                 "WHERE id = ? " +
                 "RETURNING id";
         sql.prepared(query, new JsonArray().add(idOrderRegion), SqlResult.validRowsResultHandler(handler));
     }
-    public void getOneOrderRegion(int idOrder, Handler<Either<String, JsonObject>> handler){
+
+    public void getOneOrderRegion(int idOrder, Handler<Either<String, JsonObject>> handler) {
         String query = "" +
                 "SELECT ore.*, " +
                 "     ROUND( ore.price, 2 ) AS price_single_ttc, " +

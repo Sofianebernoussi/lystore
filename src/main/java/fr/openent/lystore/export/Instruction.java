@@ -1,10 +1,7 @@
 package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
-import fr.openent.lystore.export.equipmentRapp.ComptaTab;
-import fr.openent.lystore.export.equipmentRapp.ListForTextTab;
-import fr.openent.lystore.export.equipmentRapp.RecapMarket;
-import fr.openent.lystore.export.equipmentRapp.RecapTab;
+import fr.openent.lystore.export.equipmentRapp.*;
 import fr.openent.lystore.export.investissement.*;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
@@ -156,7 +153,7 @@ public class Instruction {
                     futures.add(ListForTextFuture);
                     futures.add(RecapFuture);
                     futures.add(ComptaFuture);
-//                    futures.add(AnnexeDelibFuture);
+                    futures.add(AnnexeDelibFuture);
                     futures.add(RecapMarketFuture);
 
                         CompositeFuture.all(futures).setHandler(event -> {
@@ -179,7 +176,7 @@ public class Instruction {
                     new ComptaTab(workbook, instruction, type).create(getHandler(ComptaFuture));
                     new ListForTextTab(workbook, instruction, type).create(getHandler(ListForTextFuture));
                     new RecapTab(workbook, instruction, type).create(getHandler(RecapFuture));
-//                    new AnnexeDelibTab(workbook, instruction).create(getHandler(AnnexeDelibFuture));
+                    new AnnexeDelibTab(workbook, instruction, type).create(getHandler(AnnexeDelibFuture));
                     new RecapMarket(workbook, instruction, type).create(getHandler(RecapMarketFuture));
                 }
             }

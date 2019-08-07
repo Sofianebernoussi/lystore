@@ -9,12 +9,10 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class AnnexeDelibTab extends TabHelper {
     private JsonArray datas;
@@ -29,9 +27,11 @@ public class AnnexeDelibTab extends TabHelper {
      * @param wb
      * @param instruction
      */
-    public AnnexeDelibTab(Workbook wb, JsonObject instruction) {
+    public AnnexeDelibTab(Workbook wb, JsonObject instruction, String type) {
         super(wb, instruction, "ANNEXE DELIB");
         structureService = new DefaultStructureService(Lystore.lystoreSchema);
+        this.type = type;
+
         programMarket = new JsonObject();
     }
 
@@ -45,7 +45,7 @@ public class AnnexeDelibTab extends TabHelper {
             } else {
 
                 JsonArray programs = event.right().getValue();
-                initDatas(handler);
+//                initDatas(handler);
                 //Delete tab if empty
                 if (programs.size() == 0) {
                     wb.removeSheetAt(wb.getSheetIndex(sheet));
@@ -67,7 +67,6 @@ public class AnnexeDelibTab extends TabHelper {
                 if (repStructures.isRight()) {
                     JsonArray structures = repStructures.right().getValue();
                     setStructures(structures);
-                    setArray(datas);
                     handler.handle(new Either.Right<>(true));
                 }
             }
@@ -76,41 +75,8 @@ public class AnnexeDelibTab extends TabHelper {
 
     @Override
     protected void setArray(JsonArray datas) {
-        setLabels();
-        if (datas.isEmpty()) {
-            return;
-        }
-        int lineToInsert = 5;
-        JsonObject idPassed = new JsonObject();
 
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject action = datas.getJsonObject(i);
-            int columnToInsert = programMarket.getInteger(action.getString("program") + " - " + action.getString("code"));
-            if (!checkIdPassed(idPassed, action.getString("id_structure"))) {
-                idPassed.put(action.getString("id_structure"), 1);
-                lineToInsert++;
-                excel.insertCellTab(0, lineToInsert, action.getString("zipCode"));
-                excel.insertCellTab(1, lineToInsert, action.getString("city"));
-                excel.insertCellTab(2, lineToInsert, action.getString("nameEtab"));
-                excel.insertCellTab(3, lineToInsert, action.getString("uai"));
-                excel.insertCellTabFloat(columnToInsert + 4, lineToInsert, Float.parseFloat(action.getString("total")));
-            } else {
-                excel.insertCellTabFloat(columnToInsert + 4, lineToInsert, Float.parseFloat(action.getString("total")));
-            }
-
-        }
-
-        excel.fillTab(0, arrayLength, 6, lineToInsert + 1);
-        for (int i = 6; i <= lineToInsert; i++) {
-            excel.setTotalY(4, 4 + programMarket.size() - 1, i, 4 + programMarket.size());
-        }
-
-        for (int i = 0; i < programMarket.size(); i++) {
-            excel.insertHeader(lineToInsert + 1, 3, excel.totalLabel);
-            excel.setTotalX(6, lineToInsert, 4 + i, lineToInsert + 1);
-
-        }
-        excel.autoSize(arrayLength + 1);
+//        excel.autoSize(arrayLength + 1);
     }
 
     private boolean checkIdPassed(JsonObject idPassed, String id) {
@@ -119,52 +85,7 @@ public class AnnexeDelibTab extends TabHelper {
 
     @Override
     protected void setLabels() {
-        ArrayList<String> programsActionList = new ArrayList<>();
-        String previousProgram = "";
-        excel.insertHeader(1, 1, "ANNEXE A LA DELIBERATION");
-        CellRangeAddress merge = new CellRangeAddress(1, 2, 1, 4);
-        sheet.addMergedRegion(merge);
-        excel.setRegionHeader(merge, sheet);
 
-        excel.insertHeader(4, 1, "COMMUNE");
-        excel.insertHeader(5, 1, "");
-
-        excel.insertHeader(4, 2, "LYCEE");
-        excel.insertHeader(5, 2, "");
-        excel.insertHeader(4, 3, "UAI");
-        excel.insertHeader(5, 3, "");
-
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            String programMarketStr = data.getString("program") + " - " + data.getString("code");
-            if (!programsActionList.contains(programMarketStr))
-                programsActionList.add(programMarketStr);
-        }
-        Collections.sort(programsActionList);
-        // Getting merged region
-        for (int i = 0; i < programsActionList.size(); i++) {
-            String progM = programsActionList.get(i);
-            //getting program and code separated
-            String segments[] = progM.split(" - ");
-
-            //merge region if same program
-            if (previousProgram.equals(segments[0])) {
-                merge = new CellRangeAddress(4, 4, 4 + programMarket.size() - 1, 4 + programMarket.size());
-                sheet.addMergedRegion(merge);
-                excel.setRegionHeader(merge, sheet);
-            } else {
-                previousProgram = segments[0];
-                excel.insertHeader(4, 4 + programMarket.size(), segments[0]);
-            }
-            excel.insertHeader(5, 4 + programMarket.size(), segments[1]);
-
-            programMarket.put(progM, i);
-
-        }
-
-        arrayLength += programMarket.size();
-        excel.insertHeader(4, 4 + programMarket.size(), excel.totalLabel);
-        excel.insertHeader(5, 4 + programMarket.size(), "");
 
     }
 
@@ -179,7 +100,11 @@ public class AnnexeDelibTab extends TabHelper {
                     action.put("nameEtab", structure.getString("name"));
                     action.put("uai", structure.getString("uai"));
                     action.put("city", structure.getString("city"));
-                    action.put("zipCode", structure.getString("zipCode"));
+                    try {
+                        action.put("zipCode", structure.getString("zipCode"));
+                    } catch (ClassCastException e) {
+                        action.put("zipCode", structure.getInteger("zipCode").toString());
+                    }
                 }
             }
         }
@@ -188,48 +113,72 @@ public class AnnexeDelibTab extends TabHelper {
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
-        query = "   With values as (" +
-                "(SELECT SUM( ore.price* ore.amount) as Total," +
-                "ore.id_structure,contract_type.code as code,ore.id_operation , program_action.id_program ,contract_type.name as market ,program.name as program     " +
-                "FROM " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore        " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".operation ON (ore.id_operation = operation.id)     " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id) " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)        " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (ore.id_contract = contract.id)      " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)    " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)    " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)     " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)" +
-                "WHERE instruction.id = ?  " +
-                "Group by  program.name,contract_type.code, contract_type.name , program_action.id, ore.id_operation,ore.id_structure     " +
-                "order by  program.name,id_program,code,ore.id_operation  )  " +
-                "UNION " +
-                "(    SELECT    SUM(  CASE WHEN oce.price_proposal is not null    " +
-                "THEN oce.price_proposal *  oce.amount    " +
-                "ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount +       " +
-                "(SELECT CASE WHEN  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL        " +
-                "THEN 0             ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)       " +
-                "END            from " + Lystore.lystoreSchema + ".order_client_options oco             WHERE id_order_client_equipment = oce.id )     " +
-                ")/100 END       ) " +
-                "as Total,    oce.id_structure,contract_type.code as code,oce.id_operation , program_action.id_program ,contract_type.name as market,program.name   as program       " +
-                "FROM " + Lystore.lystoreSchema + ".order_client_equipment oce      " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id)    " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)   " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)   " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (oce.id_contract = contract.id)       " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)  " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)  " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)    " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)        " +
-                "WHERE instruction.id = ?    " +
-                "Group by  program.name,contract_type.code, contract_type.name , program_action.id, oce.id_operation,oce.id_structure  " +
-                "order by  program.name,id_program,code,oce.id_operation    )" +
-                "  )" +
-                "  SELECT values.*    " +
-                " from values  " +
-                " order by id_structure,program  " +
-                "   ";
+        query = "    With values as (  " +
+                "      With unionValues as ( " +
+                "      (SELECT DISTINCT ore.id,SUM( ore.price* ore.amount) as Total,  " +
+                "      ore.id_structure,campaign.id as campaign_id,contract_type.code as code,ore.id_operation,label.label as operation , " +
+                "      program_action.id_program ,contract_type.name ,program.name as program   " +
+                "      FROM " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore     " +
+                "      INNER JOIN " + Lystore.lystoreSchema + ".operation ON (ore.id_operation = operation.id)       " +
+                "      INNER JOIN " + Lystore.lystoreSchema + ".campaign ON ore.id_campaign = campaign.id  " +
+                "      INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)   " +
+                "      INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)          " +
+                "      INNER JOIN " + Lystore.lystoreSchema + ".contract ON (ore.id_contract = contract.id)        " +
+                "      INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)    " +
+                "      INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)     " +
+                "      INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)       " +
+                "      INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)      " +
+                "       WHERE instruction.id = ? ";
 
+        if (type.equals(CMR))
+            query += "    AND structure_program_action.structure_type =  '" + type + "'  " +
+                    " AND ore.id_structure IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + type + "' ) ";
+
+        else
+            query += "    AND structure_program_action.structure_type !=  '" + CMR + "'  " +
+                    " AND ore.id_structure NOT IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + CMR + "' ) ";
+        query +=
+                "      Group by  ore.id_operation,label.label ,program.name,contract_type.code, contract_type.name , program_action.id, ore.id_operation,campaign_id,ore.id_structure  ,ore.id " +
+                        "      order by  ore.id_operation,label.label ,program.name,id_program,code,ore.id_operation  )    " +
+                        "      UNION (  SELECT DISTINCT oce.id, SUM(  CASE WHEN oce.price_proposal is not null      " +
+                        "            THEN oce.price_proposal *  oce.amount   " +
+                        "            ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount +   " +
+                        "                    (SELECT CASE WHEN  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL   " +
+                        "                    THEN 0             ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)      " +
+                        "                    END            from " + Lystore.lystoreSchema + ".order_client_options oco             WHERE id_order_client_equipment = oce.id )    " +
+                        "                    )/100 END      " +
+                        "            ) as Total, " +
+                        "      oce.id_structure,campaign.id as campaign_id, contract_type.code as code,oce.id_operation,label.label as operation, program_action.id_program ,contract_type.name  " +
+                        "       ,program.name as program " +
+                        "      FROM " + Lystore.lystoreSchema + ".order_client_equipment oce      " +
+                        "       INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id)    " +
+                        "       INNER JOIN " + Lystore.lystoreSchema + ".campaign ON oce.id_campaign = campaign.id    " +
+                        "       INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)    " +
+                        "       INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)       " +
+                        "       INNER JOIN " + Lystore.lystoreSchema + ".contract ON (oce.id_contract = contract.id)     " +
+                        "       INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)  " +
+                        "       INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)      " +
+                        "       INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)  " +
+                        "       INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)       " +
+                        "       WHERE instruction.id = ? ";
+        if (type.equals(CMR))
+            query += "    AND structure_program_action.structure_type =  '" + type + "'  " +
+                    " AND oce.id_structure IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + type + "' ) ";
+
+        else
+            query += "    AND structure_program_action.structure_type !=  '" + CMR + "'  " +
+                    " OR oce.id_structure  IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + CMR + "' ) ";
+        query +=
+                "       Group by  oce.id_operation,label.label,program.name,contract_type.code, contract_type.name , program_action.id, campaign_id,oce.id_structure,oce.id      " +
+                        "       order by  oce.id_operation,label.label,program.name,id_program,code )   " +
+                        "  )  SELECT * from unionValues " +
+                        " order by  operation,program,id_program,code,id_operation " +
+                        "      ) " +
+                        "SELECT campaign.name as campaign , array_to_json(array_agg(values))as actions   " +
+                        "from " + Lystore.lystoreSchema + ".campaign as campaign " +
+                        "INNER JOIN values  on (campaign.id = values.campaign_id)  " +
+                        "Group by campaign.name " +
+                        "   ";
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")).add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {

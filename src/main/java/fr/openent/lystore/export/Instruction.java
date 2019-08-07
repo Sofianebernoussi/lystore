@@ -148,14 +148,13 @@ public class Instruction {
                     Future<Boolean> ComptaFuture = Future.future();
                     Future<Boolean> AnnexeDelibFuture = Future.future();
                     Future<Boolean> RecapMarketFuture = Future.future();
-
-
+                    Future<Boolean> VerifBudgetFuture = Future.future();
                     futures.add(ListForTextFuture);
                     futures.add(RecapFuture);
                     futures.add(ComptaFuture);
                     futures.add(AnnexeDelibFuture);
                     futures.add(RecapMarketFuture);
-
+                    futures.add(VerifBudgetFuture);
                         CompositeFuture.all(futures).setHandler(event -> {
                             if (event.succeeded()) {
                                 try {
@@ -178,6 +177,7 @@ public class Instruction {
                     new RecapTab(workbook, instruction, type).create(getHandler(RecapFuture));
                     new AnnexeDelibTab(workbook, instruction, type).create(getHandler(AnnexeDelibFuture));
                     new RecapMarket(workbook, instruction, type).create(getHandler(RecapMarketFuture));
+                    new VerifBudgetTab(workbook, instruction, type).create(getHandler(VerifBudgetFuture));
                 }
             }
         }));

@@ -31,6 +31,6 @@ public class VerifBudgetTab extends TabHelper {
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
-
+        query = "";
     }
 }

@@ -136,7 +136,7 @@ export class OrderClient implements Selectable {
         }
     }
 
-    async getOneOrderClientProgress(id){
+    async getOneOrderClientProgress(id, withParent:Boolean = false){
         try{
             const {data} = await http.get(`/lystore/orderClient/${id}/order/progress`);
             const result = {
@@ -158,6 +158,20 @@ export class OrderClient implements Selectable {
                 technical_spec: data.technical_spec?Utils.parsePostgreSQLJson(this.technical_spec):null,
                 isOrderRegion: false,
             };
+            if(withParent) {
+                result.order_client_equipment_parent = result?
+                    Mix.castAs(OrderClient, result):
+                    null;
+                result.order_client_equipment_parent.price_united = result.price_single_ttc;
+                if (result.order_client_equipment_parent.price_proposal) {
+                    result.order_client_equipment_parent.price_total = result.order_client_equipment_parent.price_proposal *
+                        result.order_client_equipment_parent.amount;
+                } else {
+                    result.order_client_equipment_parent.price_total =  result.order_client_equipment_parent
+                            .calculatePriceTTC(2, result.order_client_equipment_parent.price) *
+                        result.order_client_equipment_parent.amount;
+                }
+            }
             return result;
         } catch (e) {
             notify.error('lystore.admin.order.get.err');

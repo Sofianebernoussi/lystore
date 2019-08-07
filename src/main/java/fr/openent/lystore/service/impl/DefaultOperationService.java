@@ -283,6 +283,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 "               (SELECT " +
                 "                  CASE " +
                 "                  WHEN ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL THEN 0 " +
+                "                  WHEN oce.price_proposal IS NOT NULL THEN 0 " +
                 "                  ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2) " +
                 "                  END " +
                 "               FROM " + Lystore.lystoreSchema +".order_client_options oco " +

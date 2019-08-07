@@ -254,7 +254,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 let idOrder = parseInt(params.idOrder);
                 let region = params.region;
                 if(region === 'client'){
-                    $scope.orderToUpdate = await $scope.orderClient.getOneOrderClientProgress(idOrder);
+                    $scope.orderToUpdate = await $scope.orderClient.getOneOrderClientProgress(idOrder, true);
                 } else {
                     $scope.orderToUpdate = await $scope.orderRegion.getOneOrderRegion(idOrder);
                 }

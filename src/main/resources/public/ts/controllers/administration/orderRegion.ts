@@ -59,7 +59,6 @@ export const orderRegionController = ng.controller('orderRegionController',
             $scope.getContractType();
         };
 
-
         if ($routeParams.idOrder) {
             let idOrder = $routeParams.idOrder;
             $scope.orderToUpdate.structure = $scope.structures.filter(structureFilter => structureFilter.id === $scope.orderToUpdate.id_structure)[0];
@@ -71,16 +70,10 @@ export const orderRegionController = ng.controller('orderRegionController',
                 $scope.orderToUpdate.project.room = '-';
             if (!$scope.orderToUpdate.project.building)
                 $scope.orderToUpdate.project.building = '-';
-
             $scope.initDataUpdate();
         }
         $scope.isUpdating = $location.$$path.includes('/order/update');
         $scope.isUpdatingFromOrder = $location.$$path.includes('/order/operation/update');
-
-        $scope.getTotal = () => {
-            return ($scope.orderToUpdate.amount * $scope.orderToUpdate.price_proposal).toFixed(2);
-        };
-
 
         $scope.operationSelected = async (operation: Operation) => {
             $scope.isOperationSelected = true;
@@ -143,8 +136,8 @@ export const orderRegionController = ng.controller('orderRegionController',
                 && $scope.orderToUpdate.price_proposal
                 && $scope.orderToUpdate.amount
                 && ((($scope.orderToUpdate.rank>0 &&
-                        $scope.orderToUpdate.rank<11  ||
-                        $scope.orderToUpdate.rank === null)) ||
+                    $scope.orderToUpdate.rank<11  ||
+                    $scope.orderToUpdate.rank === null)) ||
                     !$scope.orderToUpdate.campaign.orderPriorityEnable())
         };
 
@@ -170,7 +163,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                 && ($scope.orderToCreate.rows.every( row => (row.rank>0 &&
                     row.rank<11  ||
                     row.rank === null))
-                || !$scope.orderToCreate.campaign.orderPriorityEnable());
+                    || !$scope.orderToCreate.campaign.orderPriorityEnable());
         };
         $scope.getContractType = () => {
             let contract;

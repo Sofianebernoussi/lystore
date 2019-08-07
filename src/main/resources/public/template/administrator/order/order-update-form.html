@@ -4,26 +4,26 @@
     </h1>
     <form>
         <div class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
+            <label class="two right-padding-form-field cell">
                 <i18n>lystore.structure.label</i18n>
                 :
             </label>
             <label class="six cell">[[orderToUpdate.structure.name]]</label>
         </div>
         <div class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
+            <label class="two right-padding-form-field cell">
                 <i18n>CAMPAIGN</i18n>
             </label>
             <label class="six cell">[[orderToUpdate.campaign.name]]</label>
         </div>
         <div class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
+            <label class="two right-padding-form-field cell">
                 <i18n>lystore.project</i18n>
             </label>
             <label class="six cell">[[orderToUpdate.title.name]]</label>
         </div>
         <div class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
+            <label class="two right-padding-form-field cell">
                 <i18n>lystore.project.comment</i18n>
             </label>
             <label ng-if="orderToUpdate.project.description"
@@ -33,81 +33,150 @@
                    class="six cell">-</label>
         </div>
         <div class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
+            <label class="two right-padding-form-field cell">
                 <i18n>room</i18n>
             </label>
             <label class="six cell">[[orderToUpdate.project.room]]</label>
         </div>
         <div class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
+            <label class="two right-padding-form-field cell">
                 <i18n>building</i18n>
             </label>
             <label class="six cell">[[orderToUpdate.project.building]]</label>
         </div>
 
         <div class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
+            <label class="two right-padding-form-field cell">
                 <i18n>lystore.contract.type.name</i18n>
             </label>
             <label class="six cell">[[contract_type]]</label>
         </div>
 
-
         <div class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
+            <label class="two right-padding-form-field cell">
                 <i18n>lystore.amountTTC</i18n>
             </label>
-            <label class="six cell">[[getTotal()]] €</label>
+            <span
+                    class="four cell horizontal-margin"
+                   ng-if="orderToUpdate.order_client_equipment_parent"
+            >
+                [[orderToUpdate.order_client_equipment_parent.price_total]] €
+            </span>
+            <label
+                   class="cell horizontal-margin"
+                   ng-class="{'two': orderToUpdate.order_client_equipment_parent, 'six': !orderToUpdate.order_client_equipment_parent}"
+            >
+                [[orderToUpdate.price_proposal * orderToUpdate.amount]] €
+            </label>
         </div>
+
         <div class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
+            <label class="two right-padding-form-field cell">
                 <i18n>EQUIPMENT</i18n>
             </label>
+            <span
+                    class="four cell horizontal-margin"
+                    ng-if="orderToUpdate.order_client_equipment_parent"
+            >
+                [[orderToUpdate.contract_type.name]]&nbsp
+                -&nbsp
+                [[orderToUpdate.order_client_equipment_parent.equipment.name]]
+            </span>
             <search-and-select
                     ng-change="getContractType()"
-                    class="six cell"
-                               options="equipments.all"
-                               param1="'contract_type_name'"
-                               param2="'name'"
-                               ng-model=" orderToUpdate.equipment"
-                               search-on="name" order-by="name"
+                    class="four cell"
+                    options="equipments.all"
+                    param1="'contract_type_name'"
+                    param2="'name'"
+                    ng-model=" orderToUpdate.equipment"
+                    search-on="name"
+                    order-by="name"
+                    class="cell horizontal-margin"
+                    ng-class="{'four': orderToUpdate.order_client_equipment_parent, 'six': !orderToUpdate.order_client_equipment_parent}"
             >
             </search-and-select>
         </div>
+
         <div class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
+            <label class="two right-padding-form-field cell">
                 <i18n>quantity.full</i18n>
             </label>
-            <input min="0" type="number" ng-model="orderToUpdate.amount"/>
+            <span
+                    class="four cell horizontal-margin"
+                    ng-if="orderToUpdate.order_client_equipment_parent"
+            >
+                [[orderToUpdate.order_client_equipment_parent.amount]]
+            </span>
+            <input
+                    min="0"
+                    type="number"
+                    ng-model="orderToUpdate.amount"
+                    class="cell horizontal-margin"
+                    ng-class="{'two': orderToUpdate.order_client_equipment_parent}"
+            />
 
         </div>
+
         <div class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
+            <label class="two right-padding-form-field cell">
                 <i18n>lystore.price.TTC</i18n>
             </label>
-            <input type="number" step="0.01"
+            <span
+                    class="four cell horizontal-margin"
+                    ng-if="orderToUpdate.order_client_equipment_parent"
+            >
+                [[orderToUpdate.order_client_equipment_parent.price_united]] €
+            </span>
+            <input type="number"
+                   step="0.01"
                    min="0"
                    ng-model="orderToUpdate.price_proposal "
+                   class="cell horizontal-margin"
+                   ng-class="{'two': orderToUpdate.order_client_equipment_parent}"
             />
         </div>
 
 
         <div ng-if="orderToUpdate.campaign.orderPriorityEnable()"
              class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
+            <label class="two right-padding-form-field cell">
                 <i18n>lystore.project.priority.order</i18n>
             </label>
-            <input ng-model="orderToUpdate.rank" type="number" min="1" step="1" max="10"/>
+            <span
+                    class="four cell horizontal-margin"
+                    ng-if="orderToUpdate.order_client_equipment_parent"
+            >
+                [[orderToUpdate.order_client_equipment_parent.rank]]
+            </span>
+            <input
+                    ng-model="orderToUpdate.rank"
+                    type="number"
+                    min="1"
+                    step="1"
+                    max="10"
+                    class="cell horizontal-margin"
+                    ng-class="{'two': orderToUpdate.order_client_equipment_parent}"
+            />
         </div>
 
-
         <div class="row vertical-spacing-four">
-            <label class="four right-padding-form-field cell">
+            <label class="two right-padding-form-field cell">
                 <i18n>comment</i18n>
             </label>
+            <textarea readonly
+                      auto-height=""
+                      style="resize: none; height: 62px;"
+                      ng-model="orderToUpdate.order_client_equipment_parent.comment"
+                      class="ng-pristine ng-valid ng-touched four cell horizontal-margin"
+                      ng-if="orderToUpdate.order_client_equipment_parent"
+            >
+            </textarea>
             <textarea auto-height=""
-                      style="resize: none; height: 62px;" ng-model="orderToUpdate.comment"
-                      class="ng-pristine ng-valid ng-touched">
+                      style="resize: none; height: 62px;"
+                      ng-model="orderToUpdate.comment"
+                      class="ng-pristine ng-valid ng-touched cell horizontal-margin"
+                      ng-class="{'four': orderToUpdate.order_client_equipment_parent}">
+            >
             </textarea>
         </div>
 
@@ -131,5 +200,4 @@
             </div>
         </div>
     </form>
-
 </article>

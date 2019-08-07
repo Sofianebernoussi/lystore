@@ -1,6 +1,6 @@
 import {_, idiom as lang, model, moment, notify} from 'entcore';
 import {Mix, Selectable, Selection} from 'entcore-toolkit';
-import {Campaign, Contract, ContractType, Structure, Supplier, TechnicalSpec, Utils} from './index';
+import {Campaign, Contract, ContractType, Equipment, Structure, Supplier, TechnicalSpec, Utils} from './index';
 import http from 'axios';
 import {Project} from "./project";
 import {Title} from "./title";
@@ -165,7 +165,7 @@ export class OrderClient implements Selectable {
         }
     }
 
-    async getOneOrderClientWaiting(id){
+    async getOneOrderClientWaiting(id:Number, withParent:Boolean = false){
         try{
             const {data} = await http.get(`/lystore/orderClient/${id}/order/waiting`);
             const result = {
@@ -175,7 +175,9 @@ export class OrderClient implements Selectable {
                 contract_type: data.contract_type?JSON.parse(data.contract_type):null,
                 contract: data.contract?JSON.parse(data.contract):null,
                 structure_groups: data.structure_groups?JSON.parse(data.structure_groups):null,
-                options: data.options?JSON.parse(data.options):null,
+                options: data.options.toString() !== '[null]' && data.options !== null ?
+                    Mix.castArrayAs(OrderOptionClient, JSON.parse(data.options_client_parent.toString())) :
+                    [],
                 supplier: data.supplier?JSON.parse(data.supplier):null,
                 title: data.title?JSON.parse(data.title):null,
                 price : data.price?parseFloat(data.price):null,
@@ -187,7 +189,21 @@ export class OrderClient implements Selectable {
                 technical_spec: data.technical_spec?Utils.parsePostgreSQLJson(this.technical_spec):null,
                 isOrderRegion: false,
             };
-            return result;
+            if(withParent) {
+                result.order_client_equipment_parent = result?
+                    Mix.castAs(OrderClient, result):
+                    null;
+                result.order_client_equipment_parent.price_united = result.price_single_ttc;
+                if (result.order_client_equipment_parent.price_proposal) {
+                    result.order_client_equipment_parent.price_total = result.order_client_equipment_parent.price_proposal *
+                        result.order_client_equipment_parent.amount;
+                } else {
+                    result.order_client_equipment_parent.price_total =  result.order_client_equipment_parent
+                            .calculatePriceTTC(2, result.order_client_equipment_parent.price) *
+                        result.order_client_equipment_parent.amount;
+                }
+            }
+            return  Mix.castAs(OrderClient, result);
         } catch (e) {
             notify.error('lystore.admin.order.get.err');
             throw e;

@@ -243,7 +243,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
             updateOrder: async (params) => {
                 let idOrder = parseInt(params.idOrder);
-                $scope.orderToUpdate = await $scope.orderClient.getOneOrderClientWaiting(idOrder);
+                $scope.orderToUpdate = await $scope.orderClient.getOneOrderClientWaiting(idOrder, true);
                 await $scope.contracts.sync();
                 await $scope.contractTypes.sync();
                 template.open('administrator-main', 'administrator/order/order-update-form');

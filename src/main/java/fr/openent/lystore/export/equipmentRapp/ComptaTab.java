@@ -223,8 +223,8 @@ public class ComptaTab extends TabHelper {
                     " AND ore.id_structure IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + type + "' ) ";
 
         else
-            query += "    AND structure_program_action.structure_type !=  '" + CMR + "'  " +
-                    " OR  ore.id_structure NOT IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + CMR + "' ) ";
+            query += "    AND (structure_program_action.structure_type !=  '" + CMR + "'  " +
+                    " OR  ore.id_structure NOT IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + CMR + "' ) )";
 
         query +=
                 "   Group by  campaign,program.name,contract_type.code, contract_type.name , program_action.id, ore.id_operation,ore.id_structure     " +
@@ -259,8 +259,8 @@ public class ComptaTab extends TabHelper {
                     " AND oce.id_structure IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + type + "' ) ";
 
         else
-            query += "    AND structure_program_action.structure_type !=  '" + CMR + "'  " +
-                    " OR oce.id_structure NOT IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + CMR + "' ) ";
+            query += "    AND( structure_program_action.structure_type !=  '" + CMR + "'  " +
+                    " OR oce.id_structure NOT IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + CMR + "' )) ";
 
         query +=
                 "   Group by  campaign,program.name,contract_type.code, contract_type.name , program_action.id, oce.id_operation,oce.id_structure     " +

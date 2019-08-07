@@ -45,42 +45,68 @@ public final class SqlUtils {
      */
     public static void getSumPriceOperation(Number idOperation, Handler<Either<String, JsonObject>> handler) {
         try {
-            String query = "WITH value_operation AS  ( SELECT " +
-                    "( " +
-                    "   SELECT CASE " +
-                    "       WHEN ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2) IS NULL THEN 0 " +
-                    "       ELSE ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  " +
-                    "       END AS price_total_option " +
-                    "   FROM " + Lystore.lystoreSchema + ".order_client_options oco " +
-                    "   WHERE id_order_client_equipment = oce.id " +
-                    "), " +
-                    "CASE  " +
-                    "WHEN oce.override_region IS true THEN ( ore.price * ore.amount ) " +
-                    "WHEN oce.price_proposal is not NULL THEN ( oce.price_proposal * oce.amount ) " +
-                    "ELSE (ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) " +
-                    "END AS price_total_operation " +
-                    "FROM   " + Lystore.lystoreSchema + ".order_client_equipment oce " +
-                    "FULL JOIN   " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore on oce.id = ore.id_order_client_equipment   " +
-                    "WHERE oce.id_operation = ? OR ore.id_operation =  ? " +
-                    " ) " +
-                    " SELECT (SUM(price_total_operation) + SUM(price_total_option)) AS total_price_operations " +
-                    " FROM value_operation";
+            Future<JsonObject> getTotalOrderClientFuture = Future.future();
+            Future<JsonObject> getTotalOrderRegionFuture = Future.future();
 
-            JsonArray params = new JsonArray()
-                    .add(idOperation)
-                    .add(idOperation);
-
-            Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(event -> {
+            CompositeFuture.all(getTotalOrderClientFuture, getTotalOrderRegionFuture).setHandler(asyncEvent -> {
+                if (asyncEvent.failed()) {
+                    String message = "Failed to retrieve operation";
+                    handler.handle(new Either.Left<>(message));
+                    return;
+                }
                 JsonObject result = new JsonObject();
-                String resultTotalOperation = event.right().getValue().getValue("total_price_operations") != null ?
-                        (String) event.right().getValue().getValue("total_price_operations") : String.valueOf(0.0);
+                Float totalPriceClient, totalPriceRegion;
+                String resultTotalOperation;
 
-                result.put("id", idOperation).put("amount", resultTotalOperation);
-                handler.handle(new Either.Right<>(result));
-            }));
+
+                JsonObject getTotalClient = getTotalOrderClientFuture.result();
+                JsonObject getTotalRegion = getTotalOrderRegionFuture.result();
+
+                totalPriceClient = Float.parseFloat(getTotalClient.getString("price_total_orders_clients") != null? getTotalClient.getString("price_total_orders_clients"):"0.0");
+                totalPriceRegion = Float.parseFloat(getTotalRegion.getString("price_total_orders_regions") != null? getTotalRegion.getString("price_total_orders_regions"):"0.0");
+
+                resultTotalOperation = String.valueOf(totalPriceClient + totalPriceRegion);
+
+                handler.handle(new Either.Right<>(result.put("id", idOperation).put("amount", resultTotalOperation)));
+            });
+
+            getTotalOrderClient(idOperation, FutureHelper.handlerJsonObject(getTotalOrderClientFuture));
+            getTotalOrderRegion(idOperation, FutureHelper.handlerJsonObject(getTotalOrderRegionFuture));
+
         } catch (Exception e) {
             LOGGER.error("Error in SqlUtils ->", e);
         }
+    }
+
+    private static void getTotalOrderClient(Number idOperation, Handler<Either<String, JsonObject>> handler){
+        String queryGetTotalOperationClient = " " +
+                "SELECT (ROUND(SUM((  " +
+                "                     (SELECT CASE  " +
+                "                   WHEN oce.override_region IS true THEN 0  " +
+                "                                 WHEN oce.price_proposal IS NOT NULL THEN 0  " +
+                "                                 WHEN SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount) IS NULL THEN 0  " +
+                "                                 ELSE SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount)  " +
+                "                             END  " +
+                "                      FROM   " + Lystore.lystoreSchema + ".order_client_options oco  " +
+                "                      WHERE id_order_client_equipment = oce.id) + (CASE  " +
+                "                                         WHEN oce.override_region IS true THEN 0  " +
+                "                                                                       WHEN oce.price_proposal IS NOT NULL THEN (oce.price_proposal)  " +
+                "                                                                       ELSE (ROUND(oce.price + ((oce.price * oce.tax_amount) /100), 2))  " +
+                "                                                                   END)) * oce.amount), 2)) AS price_total_orders_clients  " +
+                "FROM   " + Lystore.lystoreSchema + ".order_client_equipment oce  " +
+                "WHERE oce.id_operation = ? " +
+                "  ";
+
+        Sql.getInstance().prepared(queryGetTotalOperationClient, new JsonArray().add(idOperation), SqlResult.validUniqueResultHandler(handler));
+    }
+
+    private static void getTotalOrderRegion(Number idOperation, Handler<Either<String, JsonObject>> handler){
+        String queryGetTotalOperationRegion = " " +
+                "SELECT (ROUND(SUM(ore.price * ore.amount), 2)) AS price_total_orders_regions " +
+                "FROM " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore " +
+                "WHERE ore.id_operation = ? ";
+
+        Sql.getInstance().prepared(queryGetTotalOperationRegion, new JsonArray().add(idOperation), SqlResult.validUniqueResultHandler(handler));
     }
 
     /**
@@ -137,6 +163,7 @@ public final class SqlUtils {
                     "FROM  " + Lystore.lystoreSchema + ".order_client_equipment AS oce " +
                     "WHERE oce.id_operation IN " +
                     Sql.listPrepared(idsOperations.getList()) + " " +
+                    "AND oce.override_region = false " +
                     "GROUP BY (oce.id_operation) " +
                     "UNION  " +
                     "SELECT " +
@@ -145,7 +172,6 @@ public final class SqlUtils {
                     "FROM  " + Lystore.lystoreSchema + ".\"order-region-equipment\" AS ore " +
                     "WHERE ore.id_operation IN " +
                     Sql.listPrepared(idsOperations.getList()) + " " +
-                    "AND ore.id_order_client_equipment IS NULL " +
                     "GROUP BY (ore.id_operation) " +
                     ") " +
                     "AS operation " +

@@ -163,6 +163,7 @@ public final class SqlUtils {
                     "FROM  " + Lystore.lystoreSchema + ".order_client_equipment AS oce " +
                     "WHERE oce.id_operation IN " +
                     Sql.listPrepared(idsOperations.getList()) + " " +
+                    "AND oce.status = 'IN PROGRESS' " +
                     "AND oce.override_region = false " +
                     "GROUP BY (oce.id_operation) " +
                     "UNION  " +

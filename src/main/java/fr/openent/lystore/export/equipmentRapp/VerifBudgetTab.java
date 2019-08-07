@@ -13,6 +13,9 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class VerifBudgetTab extends TabHelper {
     JsonArray operations;
@@ -93,6 +96,7 @@ public class VerifBudgetTab extends TabHelper {
 
             }
         }
+        excel.autoSize(7);
     }
 
     private void insertNewProgramCode(String actualProgramCode, JsonObject data) {
@@ -113,13 +117,118 @@ public class VerifBudgetTab extends TabHelper {
 
     private void insertArrays(JsonObject data) {
         JsonArray values = data.getJsonArray("actionsJO");
+        values = sortByCity(values);
+        String previousZip = "", previousCity = "";
 
         for (int i = 0; i < values.size(); i++) {
+            String currentCity = "";
+            String currentZip = "";
             JsonObject value = values.getJsonObject(i);
-            System.out.println(value);
-            excel.insertLabel(currentY, 1, values.getJsonObject(i).getString("nameEtab"));
+            if (value.containsKey("zipCode"))
+                currentZip = value.getString("zipCode").substring(0, 2);//get number of departement
+            if (value.containsKey("city")) {
+                currentCity = value.getString("city");
+            }
+            if (currentZip.equals(previousZip)) {
+            } else {
+                previousCity = "";
+                currentY += 2;
+                excel.insertLabel(currentY, 2, currentZip);
+                previousZip = currentZip;
+                currentY += 2;
+            }
+            if (previousCity.equals(currentCity)) {
+            } else {
+                currentY += 2;
+                excel.insertLabel(currentY, 2, currentCity);
+                previousCity = currentCity;
+                currentY += 2;
+            }
+            if (value.containsKey("uai")) {
+                excel.insertLabel(currentY, 0, value.getString("uai"));
+            } else
+                excel.insertLabel(currentY, 0, "");
+            excel.insertLabel(currentY, 1, "R");
+            excel.insertLabel(currentY, 2, "REG : " + value.getString("name_equipment"));
+            excel.insertLabel(currentY, 3, value.getInteger("amount").toString());
+            try {
+                excel.insertLabel(currentY, 4, "M : " + value.getString("total"));
+            } catch (ClassCastException e) {
+                excel.insertLabel(currentY, 4, "M : " + value.getInteger("total").toString());
+            }
             currentY++;
+
+            excel.insertLabel(currentY, 0, "OPE  : " + value.getInteger("id_operation").toString());
+            excel.insertLabel(currentY, 1, " ");
+            excel.insertLabel(currentY, 2, "LYC : " + value.getString("name_equipment"));
+            excel.insertLabel(currentY, 3, "Ref : " + value.getInteger("key").toString());
+            if (value.getBoolean("region")) {
+                excel.insertLabel(currentY, 4, "N° dem : " + " - " + value.getInteger("id").toString());
+
+            } else {
+                excel.insertLabel(currentY, 4, "N° dem : " + value.getInteger("id").toString());
+
+            }
+            currentY++;
+
         }
+    }
+
+    private JsonArray sortByCity(JsonArray values) {
+        JsonArray sortedJsonArray = new JsonArray();
+
+        List<JsonObject> jsonValues = new ArrayList<JsonObject>();
+        for (int i = 0; i < values.size(); i++) {
+            jsonValues.add(values.getJsonObject(i));
+        }
+
+        Collections.sort(jsonValues, new Comparator<JsonObject>() {
+            private static final String KEY_NAME = "zipCode";
+
+            @Override
+            public int compare(JsonObject a, JsonObject b) {
+                String valA = "";
+                String valB = "";
+                String cityA = "";
+                String cityB = "";
+                String nameA = "";
+                String nameB = "";
+                try {
+                    if (a.containsKey(KEY_NAME)) {
+                        valA = a.getString(KEY_NAME);
+                    }
+                    if (b.containsKey(KEY_NAME)) {
+                        valB = b.getString(KEY_NAME);
+                    }
+                } catch (NullPointerException e) {
+                    log.error("error when sorting structures during export");
+                }
+                if (valA.compareTo(valB) == 0) {
+                    if (a.containsKey("city")) {
+                        cityA = a.getString("city");
+                    }
+                    if (b.containsKey("city")) {
+                        cityB = b.getString("city");
+                    }
+                    if (cityA.compareTo(cityB) == 0) {
+                        if (a.containsKey("nameEtab")) {
+                            nameA = a.getString("nameEtab");
+                        }
+                        if (b.containsKey("nameEtab")) {
+                            nameB = b.getString("nameEtab");
+                        }
+                        return nameA.compareTo(nameB);
+                    }
+                    return cityA.compareTo(cityB);
+                }
+                return valA.compareTo(valB);
+            }
+        });
+
+        for (int i = 0; i < values.size(); i++) {
+            sortedJsonArray.add(jsonValues.get(i));
+        }
+        return sortedJsonArray;
     }
 
     private void setStructures(JsonArray structures) {
@@ -143,6 +252,7 @@ public class VerifBudgetTab extends TabHelper {
             data.put("actionsJO", actions);
         }
     }
+
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
         query = "    With values as (        With unionValues as (       ( " +

@@ -68,11 +68,11 @@ export class OrderRegion implements Selectable {
             technical_specs: (Utils.parsePostgreSQLJson(this.technical_spec) === null || Utils.parsePostgreSQLJson(this.technical_spec).length === 0) ?
                 []:
                 Utils.parsePostgreSQLJson(this.technical_spec).map(spec => {
-                        return {
-                            name: spec.name,
-                            value: spec.value
-                        }
-                    }),
+                    return {
+                        name: spec.name,
+                        value: spec.value
+                    }
+                }),
             id_operation: this.id_operation,
             rank: this.rank -1,
         }
@@ -150,7 +150,7 @@ export class OrderRegion implements Selectable {
     async getOneOrderRegion(id){
         try{
             const {data} =  await http.get(`/lystore/orderRegion/${id}/order`);
-            const result = {
+            let result = {
                 ...data,
                 project: data.project?Mix.castAs(Project, JSON.parse(data.project.toString())):null,
                 campaign: data.campaign?Mix.castAs(Campaign, JSON.parse(data.campaign)):null,
@@ -165,9 +165,33 @@ export class OrderRegion implements Selectable {
                 rank : data.rank?parseInt(data.rank.toString()) : null,
                 price_single_ttc : data.price_single_ttc?parseFloat(data.price_single_ttc):null,
                 technical_spec: data.technical_spec?Utils.parsePostgreSQLJson(this.technical_spec):null,
+                order_client_equipment_parent: data.order_client_equipment_parent?
+                    Mix.castAs(OrderClient, JSON.parse(data.order_client_equipment_parent.toString())):
+                    null,
                 isOrderRegion: true,
             };
-            return result
+            if(result.order_client_equipment_parent) {
+                result.order_client_equipment_parent.options = data.options_client_parent.toString() !== '[null]' && data.options_client_parent !== null?
+                    Mix.castArrayAs(OrderOptionClient, JSON.parse(data.options_client_parent.toString())) :
+                    [];
+                result.order_client_equipment_parent.equipment = data.equipment_order_client_parent ?
+                    Mix.castAs(Equipment, JSON.parse(data.equipment_order_client_parent)) :
+                    null;
+
+                result.order_client_equipment_parent.price_united = result.order_client_equipment_parent.price_proposal ?
+                    result.order_client_equipment_parent.price_proposal :
+                    result.order_client_equipment_parent
+                        .calculatePriceTTC(2, result.order_client_equipment_parent.price);
+                if (result.order_client_equipment_parent.price_proposal) {
+                    result.order_client_equipment_parent.price_total = result.order_client_equipment_parent.price_proposal *
+                        result.order_client_equipment_parent.amount;
+                } else {
+                    result.order_client_equipment_parent.price_total =  result.order_client_equipment_parent
+                            .calculatePriceTTC(2, result.order_client_equipment_parent.price) *
+                        result.order_client_equipment_parent.amount;
+                }
+            }
+            return  Mix.castAs(OrderRegion, result);
         } catch (e) {
             notify.error('lystore.admin.order.update.err');
             throw e;

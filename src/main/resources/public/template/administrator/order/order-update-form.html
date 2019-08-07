@@ -90,13 +90,14 @@
                    ng-model="orderToUpdate.price_proposal "
             />
         </div>
-        <div ng-if="orderToUpdate.rank != null && orderToUpdate.rank != undefined && orderToUpdate.campaign.orderPriorityEnable()"
+
+
+        <div ng-if="orderToUpdate.campaign.orderPriorityEnable()"
              class="row vertical-spacing-four">
             <label class="four right-padding-form-field cell">
                 <i18n>lystore.project.priority.order</i18n>
             </label>
-            <input ng-model="orderToUpdate.rank" type="number" min="1" step="1"/>
-
+            <input ng-model="orderToUpdate.rank" type="number" min="1" step="1" max="10"/>
         </div>
 
 
@@ -107,7 +108,6 @@
             <textarea auto-height=""
                       style="resize: none; height: 62px;" ng-model="orderToUpdate.comment"
                       class="ng-pristine ng-valid ng-touched">
-
             </textarea>
         </div>
 

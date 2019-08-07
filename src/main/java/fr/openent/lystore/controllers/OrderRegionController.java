@@ -37,7 +37,7 @@ public class OrderRegionController extends BaseController {
     }
 
 
-    @Post("/region/order/")
+    @Post("/region/order")
     @ApiDoc("Create an order with id order client when admin or manager")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
@@ -48,8 +48,12 @@ public class OrderRegionController extends BaseController {
                 RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
                     @Override
                     public void handle(JsonObject order) {
-                        orderRegionService.setOrderRegion(order, event, defaultResponseHandler(request));
-
+                        RequestUtils.bodyToJson(request, orderRegion ->  orderRegionService.setOrderRegion(order, event, Logging.defaultResponseHandler(eb,
+                                request,
+                                Contexts.ORDERREGION.toString(),
+                                Actions.CREATE.toString(),
+                                null,
+                                orderRegion)));
                     }
                 });
             }
@@ -69,12 +73,15 @@ public class OrderRegionController extends BaseController {
                 RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
                     @Override
                     public void handle(JsonObject order) {
-                        orderRegionService.updateOrderRegion(order, idOrder, event, defaultResponseHandler(request));
-
+                        RequestUtils.bodyToJson(request, orderRegion ->  orderRegionService.updateOrderRegion(order, idOrder, event, Logging.defaultResponseHandler(eb,
+                                request,
+                                Contexts.ORDERREGION.toString(),
+                                Actions.UPDATE.toString(),
+                                idOrder.toString(),
+                                new JsonObject().put("orderRegion", orderRegion))));
                     }
                 });
             }
-
         });
     }
 
@@ -89,7 +96,12 @@ public class OrderRegionController extends BaseController {
                 RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
                     @Override
                     public void handle(JsonObject orders) {
-                        orderRegionService.createOrdersRegion(orders, event, defaultResponseHandler(request));
+                        RequestUtils.bodyToJson(request, orderRegion ->  orderRegionService.createOrdersRegion(orders, event, Logging.defaultResponseHandler(eb,
+                                request,
+                                Contexts.ORDERREGION.toString(),
+                                Actions.CREATE.toString(),
+                                orderRegion.toString(),
+                                new JsonObject().put("orders", orders))));
                     }
                 });
             }
@@ -100,9 +112,14 @@ public class OrderRegionController extends BaseController {
     @ApiDoc("delete order by id order region ")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
-    public void deleteOrderRegion(HttpServerRequest request) {
+    public void deleteOrderRegion(final HttpServerRequest request) {
         Integer idRegion = Integer.parseInt(request.getParam("id"));
-        orderRegionService.deleteOrderRegion(idRegion, defaultResponseHandler(request));
+        orderRegionService.deleteOneOrderRegion(idRegion, Logging.defaultResponseHandler(eb,
+                request,
+                Contexts.ORDERREGION.toString(),
+                Actions.DELETE.toString(),
+                idRegion.toString(),
+                new JsonObject().put("idRegion", idRegion)));
     }
 
     @Get("/orderRegion/:id/order")
@@ -112,5 +129,19 @@ public class OrderRegionController extends BaseController {
     public void getOneOrder(HttpServerRequest request) {
         Integer idOrder = Integer.parseInt(request.getParam("id"));
         orderRegionService.getOneOrderRegion(idOrder, defaultResponseHandler(request));
+    }
+
+    @Put("/order/region/:idOperation/operation")
+    @ApiDoc("update operation in orders region")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void updateOperation(final HttpServerRequest request) {
+        final Integer idOperation = Integer.parseInt(request.params().get("idOperation"));
+        RequestUtils.bodyToJsonArray(request, idsOrders -> orderRegionService.updateOperation(idOperation, idsOrders, Logging.defaultResponseHandler(eb,
+                request,
+                Contexts.ORDER.toString(),
+                Actions.UPDATE.toString(),
+                idOperation.toString(),
+                new JsonObject().put("ids", idsOrders))));
     }
 }

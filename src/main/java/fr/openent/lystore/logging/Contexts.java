@@ -14,6 +14,7 @@ public enum Contexts {
     GRADE("GRADE"),
     PROJECT("PROJECT"),
     ORDER ("ORDER"),
+    ORDERREGION ("ORDERREGION"),
     OPERATION("OPERATION"),
     INSTRUCTION("INSTRUCTION");
 

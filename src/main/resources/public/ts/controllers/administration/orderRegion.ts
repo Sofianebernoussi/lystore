@@ -51,8 +51,6 @@ export const orderRegionController = ng.controller('orderRegionController',
             Utils.safeApply($scope);
         };
 
-
-
         $scope.initDataUpdate = async () => {
             await $scope.equipments.sync($scope.orderToUpdate.id_campaign, $scope.orderToUpdate.id_structure);
             $scope.orderToUpdate.equipment = $scope.equipments.all.find((e) => {
@@ -67,7 +65,7 @@ export const orderRegionController = ng.controller('orderRegionController',
             $scope.orderToUpdate.structure = $scope.structures.filter(structureFilter => structureFilter.id === $scope.orderToUpdate.id_structure)[0];
             $scope.orderToUpdate.price_proposal = $scope.orderToUpdate.price_single_ttc;
             if(  $scope.orderToUpdate.campaign.orderPriorityEnable()){
-                $scope.orderToUpdate.rank = $scope.orderToUpdate.rank + 1;
+                $scope.orderToUpdate.rank = $scope.orderToUpdate.rank === null? null : $scope.orderToUpdate.rank + 1;
             }
             if (!$scope.orderToUpdate.project.room)
                 $scope.orderToUpdate.project.room = '-';
@@ -98,6 +96,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                 let {status, data} = await orderRegion.set();
                 if (status === 200) {
                     $scope.notifications.push(new Notification('lystore.order.region.update', 'confirm'));
+                    await $scope.ordersClient.addOperationInProgress(operation.id, [$routeParams.idOrder]);
                     $scope.cancelUpdate();
                 }
                 else {
@@ -131,7 +130,7 @@ export const orderRegionController = ng.controller('orderRegionController',
             orderRegion.createFromOrderClient($scope.orderToUpdate);
             orderRegion.equipment_key = $scope.orderToUpdate.equipment_key;
             $scope.redirectTo('/operation');
-            if($scope.orderToUpdate.id_order_client_equipment){
+            if($scope.orderToUpdate.isOrderRegion){
                 await orderRegion.update($scope.orderToUpdate.id);
             } else {
                 await orderRegion.set();
@@ -140,9 +139,13 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
         $scope.isValidFormUpdate = () => {
             return $scope.orderToUpdate.equipment_key
+                &&  $scope.orderToUpdate.equipment
                 && $scope.orderToUpdate.price_proposal
                 && $scope.orderToUpdate.amount
-                && (($scope.orderToUpdate.campaign.orderPriorityEnable() && $scope.orderToUpdate.rank) || !$scope.orderToUpdate.campaign.orderPriorityEnable())
+                && ((($scope.orderToUpdate.rank>0 &&
+                        $scope.orderToUpdate.rank<11  ||
+                        $scope.orderToUpdate.rank === null)) ||
+                    !$scope.orderToUpdate.campaign.orderPriorityEnable())
         };
 
         function checkRow(row) {
@@ -164,19 +167,24 @@ export const orderRegionController = ng.controller('orderRegionController',
                 && $scope.orderToCreate.project
                 && $scope.orderToCreate.operation
                 && $scope.oneRow()
-                ;
+                && ($scope.orderToCreate.rows.every( row => (row.rank>0 &&
+                    row.rank<11  ||
+                    row.rank === null))
+                || !$scope.orderToCreate.campaign.orderPriorityEnable());
         };
         $scope.getContractType = () => {
             let contract;
-            $scope.contracts.all.map(c => {
-                if (c.id === $scope.orderToUpdate.equipment.id_contract)
-                    contract = c
-            });
-            $scope.contractTypes.all.map(c => {
-                if (c.id === contract.id_contract_type) {
-                    $scope.contract_type = c.displayName
-                }
-            });
+            if($scope.orderToUpdate.equipment){
+                $scope.contracts.all.map(c => {
+                    if (c.id === $scope.orderToUpdate.equipment.id_contract)
+                        contract = c
+                });
+                $scope.contractTypes.all.map(c => {
+                    if (c.id === contract.id_contract_type) {
+                        $scope.contract_type = c.displayName
+                    }
+                });
+            }
             Utils.safeApply($scope);
         };
 
@@ -239,8 +247,8 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.swapTypeStruct = (row) => {
             row.display.struct = !row.display.struct;
             Utils.safeApply($scope);
-
         };
+
         $scope.createOrder = async () => {
             let ordersToCreate = new OrdersRegion();
             $scope.orderToCreate.rows.map(row => {
@@ -260,8 +268,11 @@ export const orderRegionController = ng.controller('orderRegionController',
                             orderRegionTemp.name = row.equipment.name;
                             orderRegionTemp.technical_spec = row.equipment.technical_specs;
                             orderRegionTemp.id_contract = row.equipment.id_contract;
-                            if (row.rank)
+                            if (!row.rank){
+                                orderRegionTemp.rank = 0;
+                            } else {
                                 orderRegionTemp.rank = row.rank;
+                            }
                             let struct = $scope.structures.all.find(struct => s.id === struct.id);
                             (struct) ? orderRegionTemp.name_structure = struct.name : orderRegionTemp.name_structure = "";
                             ordersToCreate.all.push(orderRegionTemp);
@@ -281,8 +292,11 @@ export const orderRegionController = ng.controller('orderRegionController',
                         orderRegionTemp.technical_spec = row.equipment.technical_specs;
                         orderRegionTemp.id_contract = row.equipment.id_contract;
                         orderRegionTemp.name_structure = row.structure.name;
-                        if (row.rank)
+                        if (!row.rank){
+                            orderRegionTemp.rank = 0;
+                        } else {
                             orderRegionTemp.rank = row.rank;
+                        }
                         ordersToCreate.all.push(orderRegionTemp);
                     }
                 }

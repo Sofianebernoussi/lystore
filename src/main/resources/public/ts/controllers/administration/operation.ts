@@ -1,5 +1,5 @@
 import {_, ng, template, idiom as lang} from 'entcore';
-import {Operation, OrderClient, OrderRegion, Utils} from "../../model";
+import {Notification, Operation, OrderClient, OrderRegion, OrdersRegion, Utils} from "../../model";
 import {Mix} from 'entcore-toolkit';
 
 declare let window: any;
@@ -8,6 +8,7 @@ export const operationController = ng.controller('operationController',
     ['$scope',  '$routeParams',($scope, $routeParams) => {
         $scope.lang = lang;
         $scope.orderRegion = new OrderRegion();
+        $scope.ordersRegion = new OrdersRegion();
         $scope.allOrdersOperationSelected = false;
         $scope.sort = {
             operation : {
@@ -114,8 +115,10 @@ export const operationController = ng.controller('operationController',
         };
         $scope.dropOrderOperation = async (order:any) => {
             if(order.isOrderRegion){
-                $scope.orderRegion.delete(order.id);
-                await order.updateStatusOrder('WAITING', order.id_order_client_equipment);
+                await $scope.orderRegion.delete(order.id);
+                if(order.id_order_client_equipment){
+                    await order.updateStatusOrder('WAITING', order.id_order_client_equipment);
+                }
             } else {
                 await order.updateStatusOrder('WAITING');
             }
@@ -123,6 +126,7 @@ export const operationController = ng.controller('operationController',
                 await $scope.syncOrderByOperation($scope.operation),
                 await $scope.initOperation(),
             ]);
+            $scope.notifications.push(new Notification('lystore.order.operation.delete', 'confirm'));
             Utils.safeApply($scope);
         };
         $scope.formatArrayToolTip = (tooltipsIn:string) => {
@@ -163,8 +167,14 @@ export const operationController = ng.controller('operationController',
         };
         $scope.operationSelected = async (operation:Operation) => {
             template.close('operation.lightbox');
-            let idsOrder = $scope.ordersClientByOperation.filter(order => order.selected).map(order => order.id);
-            await $scope.ordersClient.addOperation(operation.id, idsOrder);
+            let idsOrdersClient = $scope.ordersClientByOperation.filter(order => order.selected && !order.isOrderRegion).map(order => order.id);
+            let idsOrdersRegion = $scope.ordersClientByOperation.filter(order => order.selected && order.isOrderRegion).map(order => order.id);
+            if(idsOrdersClient.length !== 0){
+                await $scope.ordersClient.addOperation(operation.id, idsOrdersClient);
+            }
+            if(idsOrdersRegion.length !== 0){
+                await $scope.ordersRegion.updateOperation(operation.id, idsOrdersRegion);
+            }
             $scope.ordersClientByOperation = await $scope.operation.getOrders();
             $scope.display.lightbox.operation = false;
             Utils.safeApply($scope);

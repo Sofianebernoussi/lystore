@@ -62,19 +62,19 @@ export class OrderRegion implements Selectable {
             id_campaign: this.id_campaign,
             id_structure: this.id_structure,
             id_project: this.id_project,
-            equipment_key: this.equipment_key,
+            equipment_key: this.equipment.id ,
             comment: (this.comment) ? this.comment : "",
             ...(this.rank && {rank: this.rank}),
-            technical_specs: (this.technical_spec === null || this.technical_spec.length === 0) ?
+            technical_specs: (Utils.parsePostgreSQLJson(this.technical_spec) === null || Utils.parsePostgreSQLJson(this.technical_spec).length === 0) ?
                 []:
-                Utils.jsonParse(this.technical_spec.toString())
-                    .map((spec: TechnicalSpec) => {
+                Utils.parsePostgreSQLJson(this.technical_spec).map(spec => {
                         return {
                             name: spec.name,
                             value: spec.value
                         }
                     }),
             id_operation: this.id_operation,
+            rank: this.rank -1,
         }
     }
 
@@ -104,15 +104,15 @@ export class OrderRegion implements Selectable {
         this.id_project = order.id_project;
         this.comment = order.comment;
         this.price = order.price_proposal;
-        if (order.rank )
-            this.rank = order.rank;
+        this.rank = order.rank;
         this.structure = order.structure;
         this.id_operation = order.id_operation;
+        this.equipment = order.equipment;
     }
 
     async set() {
         try {
-            return await http.post(`/lystore/region/order/`, this.toJson());
+            return await http.post(`/lystore/region/order`, this.toJson());
         } catch (e) {
             notify.error('lystore.admin.order.update.err');
             throw e;
@@ -145,6 +145,8 @@ export class OrderRegion implements Selectable {
         }
     }
 
+
+
     async getOneOrderRegion(id){
         try{
             const {data} =  await http.get(`/lystore/orderRegion/${id}/order`);
@@ -162,6 +164,8 @@ export class OrderRegion implements Selectable {
                 amount : data.amount?parseInt(data.amount):null,
                 rank : data.rank?parseInt(data.rank.toString()) : null,
                 price_single_ttc : data.price_single_ttc?parseFloat(data.price_single_ttc):null,
+                technical_spec: data.technical_spec?Utils.parsePostgreSQLJson(this.technical_spec):null,
+                isOrderRegion: true,
             };
             return result
         } catch (e) {
@@ -186,6 +190,14 @@ export class OrdersRegion extends Selection<OrderRegion> {
             return await http.post(`/lystore/region/orders/`, {orders: orders});
         } catch (e) {
             notify.error('lystore.order.create.err');
+            throw e;
+        }
+    }
+    async updateOperation(idOperation:number, idsRegions: Array<number>){
+        try {
+            await http.put(`/lystore/order/region/${idOperation}/operation`, idsRegions);
+        } catch (e) {
+            notify.error('lystore.admin.order.update.err');
             throw e;
         }
     }

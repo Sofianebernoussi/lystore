@@ -484,7 +484,7 @@
   "lystore.department": "Département",
   "lystore.project.comment": "Commentaire projet",
   "lystore.campaign.order.all": "Afficher toutes les campagnes",
-  "lystore.project.priority.project": "Priorité project",
+  "lystore.project.priority.project": "Priorité projet",
   "lystore.order.region.update": "Votre commande a bien été enregistré",
   "lystore.order.get.err": "Erreur lors de la recuperation de la commande",
   "lystore.operation.order.move" : "Modifier l'opération affectée",
@@ -504,12 +504,13 @@
   "lystore.lycee": "Lycées",
   "lystore.cmr": "CMR",
   "lystore.cmd": "CMD",
-  "lystore.export.equipment.title": "Sélectionnez le type de strucuture dont vous souhaitez l'export",
+  "lystore.export.equipment.title": "Sélectionnez le type d'établissement dont' vous souhaitez l'export",
   "lystore.nameFile": "Nom du fichier",
   "lystore.creation.date": "Date de création",
   "lystore.list.export.title": "Liste des fichiers créés",
   "lystore.list.export.text": "Sélectionnez le fichier que vous souhaitez télécharger",
   "lystore.goTo.exports": "Mes exports",
   "lystore.order.operation.delete": "Demande retirée de cette opération",
-  "lystore.type": "Type"
+  "lystore.type": "Type",
+  "lystore.admin.order.get.err" : "Une erreur est survenue lors de la récupération d'une demande"
 }

@@ -176,7 +176,7 @@ export class OrderClient implements Selectable {
                 contract: data.contract?JSON.parse(data.contract):null,
                 structure_groups: data.structure_groups?JSON.parse(data.structure_groups):null,
                 options: data.options.toString() !== '[null]' && data.options !== null ?
-                    Mix.castArrayAs(OrderOptionClient, JSON.parse(data.options_client_parent.toString())) :
+                    Mix.castArrayAs(OrderOptionClient, JSON.parse(data.options.toString())) :
                     [],
                 supplier: data.supplier?JSON.parse(data.supplier):null,
                 title: data.title?JSON.parse(data.title):null,

@@ -38,31 +38,12 @@ export const orderRegionController = ng.controller('orderRegionController',
                         structures.push(newStructure);
                 })
             });
-
             $scope.structuresToDisplay = structures;
-
             $scope.structuresToDisplay.all.sort((s, ss) => {
                 if (s.name < ss.name) return 1;
                 if (s.name > ss.name) return -1;
                 return 0;
             });
-
-            $scope.orderToCreate.rows = [];
-            Utils.safeApply($scope);
-        };
-
-        $scope.initDataUpdate = async () => {
-            await $scope.equipments.sync($scope.orderToUpdate.id_campaign, $scope.orderToUpdate.id_structure);
-            $scope.orderToUpdate.equipment = $scope.equipments.all.find((e) => {
-                return e.id === $scope.orderToUpdate.equipment_key;
-            });
-            $scope.getContractType();
-        };
-
-        if ($routeParams.idOrder) {
-            let idOrder = $routeParams.idOrder;
-            $scope.orderToUpdate.structure = $scope.structures.filter(structureFilter => structureFilter.id === $scope.orderToUpdate.id_structure)[0];
-            $scope.orderToUpdate.price_proposal = $scope.orderToUpdate.price_single_ttc;
             if(  $scope.orderToUpdate.campaign.orderPriorityEnable()){
                 $scope.orderToUpdate.rank = $scope.orderToUpdate.rank === null? null : $scope.orderToUpdate.rank + 1;
             }
@@ -70,6 +51,22 @@ export const orderRegionController = ng.controller('orderRegionController',
                 $scope.orderToUpdate.project.room = '-';
             if (!$scope.orderToUpdate.project.building)
                 $scope.orderToUpdate.project.building = '-';
+            $scope.orderToCreate.rows = [];
+            $scope.orderToUpdate.equipment = $scope.equipments.all.find((e) => {
+                return e.id === $scope.orderToUpdate.equipment_key;
+            });
+            Utils.safeApply($scope);
+        };
+
+        $scope.initDataUpdate = async () => {
+            await $scope.equipments.sync($scope.orderToUpdate.id_campaign, $scope.orderToUpdate.id_structure);
+            $scope.getContractType();
+        };
+
+        if ($routeParams.idOrder) {
+            let idOrder = $routeParams.idOrder;
+            $scope.orderToUpdate.structure = $scope.structures.filter(structureFilter => structureFilter.id === $scope.orderToUpdate.id_structure)[0];
+            $scope.orderToUpdate.price_proposal = $scope.orderToUpdate.price_single_ttc;
             $scope.initDataUpdate();
         }
         $scope.isUpdating = $location.$$path.includes('/order/update');

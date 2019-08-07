@@ -300,7 +300,8 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 "FROM   " + Lystore.lystoreSchema +".order_client_equipment oce  " +
                 "INNER JOIN   " + Lystore.lystoreSchema +".contract c ON oce.id_contract = c.id  " +
                 "INNER JOIN   " + Lystore.lystoreSchema +".operation o ON (oce.id_operation = o.id)  " +
-                "WHERE o.id = ? " +
+                "WHERE oce.status = 'IN PROGRESS' " +
+                "  AND o.id = ? " +
                 "  AND oce.override_region IS FALSE  " +
                 "GROUP BY (oce.id,  " +
                 "          oce.price,  " +

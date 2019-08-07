@@ -256,7 +256,7 @@ public class AnnexeDelibTab extends TabHelper {
                         "  SELECT values.*    " +
                         " from values  " +
                         " order by id_structure,program  " +
-                        "   ";
+                        " ;  ";
 
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")).add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {

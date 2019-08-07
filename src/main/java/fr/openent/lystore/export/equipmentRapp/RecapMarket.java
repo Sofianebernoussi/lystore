@@ -250,7 +250,7 @@ public class RecapMarket extends TabHelper {
                         " from " + Lystore.lystoreSchema + ".operation as operation    " +
                         " INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label on (operation.id_label = label.id)  " +
                         " INNER JOIN values  on (operation.id = values.id_operation)  " +
-                        " Group by label.label  ";
+                        " Group by label.label  ;";
 
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")).add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {

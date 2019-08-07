@@ -269,7 +269,7 @@ public class ListForTextTab extends TabHelper {
                 "from " + Lystore.lystoreSchema + ".campaign as campaign " +
                 "INNER JOIN values  on (campaign.id = values.campaign_id)  " +
                 "Group by campaign.name " +
-                "   ";
+                        "  ; ";
 
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")).add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {

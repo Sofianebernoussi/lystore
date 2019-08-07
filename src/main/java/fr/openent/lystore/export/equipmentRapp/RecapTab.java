@@ -233,7 +233,7 @@ public class RecapTab extends TabHelper {
                         " from " + Lystore.lystoreSchema + ".operation as operation    " +
                         " INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label on (operation.id_label = label.id)  " +
                         " INNER JOIN values  on (operation.id = values.id_operation)  " +
-                        " Group by operation.id, label.label ";
+                        " Group by operation.id, label.label ;";
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")).add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
                 handler.handle(event.left());

@@ -21,7 +21,8 @@ public class ExcelHelper {
     private final CellStyle yellowHeader;
     private final CellStyle underscoreHeader;
     private final CellStyle yellowLabel;
-
+    private final CellStyle blackTitleHeaderStyle;
+    private final CellStyle blueTitleHeaderStyle;
 
     private DataFormat format;
     public static final String totalLabel = "Totaux";
@@ -41,9 +42,10 @@ public class ExcelHelper {
         this.yellowHeader = wb.createCellStyle();
         this.yellowLabel = wb.createCellStyle();
         this.underscoreHeader = wb.createCellStyle();
-
+        this.blackTitleHeaderStyle = wb.createCellStyle();
         this.labelHeadStyle = wb.createCellStyle();
         this.titleHeaderStyle = wb.createCellStyle();
+        this.blueTitleHeaderStyle = wb.createCellStyle();
 
         format = wb.createDataFormat();
         format.getFormat("#.#");
@@ -178,6 +180,30 @@ public class ExcelHelper {
         this.titleHeaderStyle.setAlignment(HorizontalAlignment.LEFT);
         this.titleHeaderStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         this.titleHeaderStyle.setFont(titleHeadFont);
+
+        this.blackTitleHeaderStyle.setWrapText(true);
+        this.blackTitleHeaderStyle.setBorderLeft(BorderStyle.THIN);
+        this.blackTitleHeaderStyle.setBorderRight(BorderStyle.THIN);
+        this.blackTitleHeaderStyle.setBorderTop(BorderStyle.THIN);
+        this.blackTitleHeaderStyle.setBorderBottom(BorderStyle.THIN);
+        this.blackTitleHeaderStyle.setAlignment(HorizontalAlignment.CENTER);
+        this.blackTitleHeaderStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.blackTitleHeaderStyle.setFont(titleHeadFont);
+
+        Font blueTitleHeadFont = this.wb.createFont();
+        blueTitleHeadFont.setFontHeightInPoints((short) 14);
+        blueTitleHeadFont.setFontName("Calibri");
+        blueTitleHeadFont.setBold(true);
+        blueTitleHeadFont.setColor(IndexedColors.LIGHT_BLUE.getIndex());
+        this.blueTitleHeaderStyle.setWrapText(true);
+        this.blueTitleHeaderStyle.setBorderLeft(BorderStyle.THIN);
+        this.blueTitleHeaderStyle.setBorderRight(BorderStyle.THIN);
+        this.blueTitleHeaderStyle.setBorderTop(BorderStyle.THIN);
+        this.blueTitleHeaderStyle.setBorderBottom(BorderStyle.THIN);
+        this.blueTitleHeaderStyle.setAlignment(HorizontalAlignment.CENTER);
+        this.blueTitleHeaderStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.blueTitleHeaderStyle.setFont(blueTitleHeadFont);
+
 
         //init LabelStyle
         this.yellowHeader.setWrapText(true);
@@ -513,6 +539,52 @@ public class ExcelHelper {
             Cell cell = tab.createCell(cellColumn);
             cell.setCellValue(data);
             cell.setCellStyle(this.titleHeaderStyle);
+        }
+
+    }
+
+    /**
+     * insert a header with black police
+     *
+     * @param line
+     * @param cellColumn
+     * @param data
+     */
+    public void insertBlackTitleHeader(int cellColumn, int line, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blackTitleHeaderStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blackTitleHeaderStyle);
+        }
+
+    }
+
+    /**
+     * insert a header with blue police
+     *
+     * @param line
+     * @param cellColumn
+     * @param data
+     */
+    public void insertBlueTitleHeader(int cellColumn, int line, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blueTitleHeaderStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blueTitleHeaderStyle);
         }
 
     }

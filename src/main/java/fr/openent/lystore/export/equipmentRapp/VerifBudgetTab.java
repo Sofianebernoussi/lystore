@@ -106,17 +106,28 @@ public class VerifBudgetTab extends TabHelper {
         CellRangeAddress merge = new CellRangeAddress(currentY, currentY, 1, 4);
         sheet.addMergedRegion(merge);
         excel.setRegionHeader(merge, sheet);
-        currentY += 2;
+        currentY += 1;
         insertNewMarket(data);
 
     }
 
     private void insertNewMarket(JsonObject data) {
+        currentY += 1;
+
         String market = data.getString("market");
+        String totalMarket;
+        try {
+            totalMarket = String.format("%.2f", Float.parseFloat(data.getString("totalmarket")));
+        } catch (ClassCastException e) {
+            totalMarket = data.getInteger("totalmarket").toString();
+        }
         excel.insertBlueTitleHeader(1, currentY, market);
         CellRangeAddress merge = new CellRangeAddress(currentY, currentY, 1, 4);
         sheet.addMergedRegion(merge);
         excel.setRegionHeader(merge, sheet);
+        currentY++;
+        excel.insertBlueTitleHeader(1, currentY, totalMarket);
+
         currentY += 2;
 
         insertArrays(data);
@@ -156,7 +167,12 @@ public class VerifBudgetTab extends TabHelper {
             } else
                 excel.insertLabel(currentY, 0, "");
             excel.insertLabel(currentY, 1, "R");
-            excel.insertLabel(currentY, 2, "REG : " + value.getString("name_equipment"));
+            if (value.containsKey("old_name")) {
+                excel.insertLabel(currentY, 2, "REG : " + value.getString("old_name"));
+                System.out.println("ui");
+            } else {
+                excel.insertLabel(currentY, 2, "REG : " + value.getString("name_equipment"));
+            }
             excel.insertLabel(currentY, 3, value.getInteger("amount").toString());
             try {
                 excel.insertLabel(currentY, 4, "M : " + value.getString("total"));

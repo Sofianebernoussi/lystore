@@ -226,8 +226,11 @@ public class RecapTab extends TabHelper {
                 " Group by  program.name,contract_type.code, contract_type.name , program_action.id, ore.id_operation " +
                 " order by  program.name,id_program,code,ore.id_operation)" +
                 " ) " +
-                "   select temps.* from temps " +
-                "   order by  temps.name,temps.code,temps.id_operation" +
+                        "   SELECT SUM(temps.total) as total,name,code,id_operation,market " +
+                        "   FROM temps " +
+                        "   GROUP by name,code,id_operation,market " +
+                        "   ORDER by  temps.name,temps.code,temps.id_operation " +
+                        " " +
                 ") " +
                         " SELECT label.label,operation.id , array_to_json(array_agg(values)) as actions " +
                         " from " + Lystore.lystoreSchema + ".operation as operation    " +

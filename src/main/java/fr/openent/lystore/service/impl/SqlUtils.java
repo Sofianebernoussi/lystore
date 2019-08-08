@@ -158,29 +158,27 @@ public final class SqlUtils {
         try {
             JsonArray idsOperationsMergeTwoArray = SqlQueryUtils.multiplyArray(2, idsOperations);
             String status = "IN PROGRESS";
-            String queryGetTotalOperation = "SELECT " +
-                    "id, " +
-                    "SUM(nb_orders) AS nbr_sub " +
-                    "FROM ( " +
-                    "SELECT  " +
-                    "oce.id_operation AS id, " +
-                    "count(*)  AS nb_orders " +
-                    "FROM  " + Lystore.lystoreSchema + ".order_client_equipment AS oce " +
-                    "WHERE oce.id_operation IN " +
+            String queryGetTotalOperation = "" +
+                    "SELECT id,  " +
+                    "       SUM(nb_orders) AS nbr_sub  " +
+                    "FROM  " +
+                    "  (SELECT oce.id_operation AS id,  " +
+                    "   oce.id AS c,  " +
+                    "          count(*) AS nb_orders  " +
+                    "   FROM    " + Lystore.lystoreSchema + ".order_client_equipment AS oce  " +
+                    "   WHERE oce.id_operation IN " +
                     Sql.listPrepared(idsOperations.getList()) + " " +
-                    "AND oce.status = '" + status + "' " +
-                    "AND oce.override_region = false " +
-                    "GROUP BY (oce.id_operation) " +
-                    "UNION  " +
-                    "SELECT " +
-                    "ore.id_operation AS id,  " +
-                    "count (*) AS nb_orders " +
-                    "FROM  " + Lystore.lystoreSchema + ".\"order-region-equipment\" AS ore " +
-                    "WHERE ore.id_operation IN " +
+                    "     AND oce.status = '" + status + "'  " +
+                    "     AND oce.override_region = FALSE  " +
+                    "   GROUP BY (oce.id_operation, c)  " +
+                    "   UNION  " +
+                    "   SELECT ore.id_operation AS id,  " +
+                    "   ore.id AS r,  " +
+                    "                COUNT (*) AS nb_orders  " +
+                    "   FROM    " + Lystore.lystoreSchema + ".\"order-region-equipment\" AS ore  " +
+                    "   WHERE ore.id_operation IN " +
                     Sql.listPrepared(idsOperations.getList()) + " " +
-                    "GROUP BY (ore.id_operation) " +
-                    ") " +
-                    "AS operation " +
+                    "   GROUP BY (ore.id_operation, r)) AS OPERATION  " +
                     "GROUP BY (operation.id)";
 
             Sql.getInstance().prepared(queryGetTotalOperation, idsOperationsMergeTwoArray, SqlResult.validResultHandler(handler));

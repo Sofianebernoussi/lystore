@@ -2,44 +2,46 @@
     <h1>
         <i18n>lystore.order.create</i18n>
     </h1>
-    <article class="responsive-table">
-        <form class="row">
-            <div class="row vertical-spacing-four">
-                <label class="four right-padding-form-field cell">
-                    <i18n>CAMPAIGN</i18n>
-                </label>
-                <select ng-model="orderToCreate.campaign"
-                        class="six cell"
-                        ng-change="updateCampaign()"
-                        ng-options="campaign as campaign.name for campaign in campaigns.all">
-                    <option value="" disabled selected>[[translate('lystore.placeholder.campaign')]]</option>
-                </select>
-            </div>
+    <form class="row">
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>CAMPAIGN</i18n>
+            </label>
+            <select ng-model="orderToCreate.campaign"
+                    class="six cell"
+                    ng-change="updateCampaign()"
+                    ng-options="campaign as campaign.name for campaign in campaigns.all">
+                <option value="" disabled selected>[[translate('lystore.placeholder.campaign')]]</option>
+            </select>
+        </div>
 
-            <div ng-show="titles.all.length !== 0 " class="row vertical-spacing-four">
-                <label class="four right-padding-form-field cell">
-                    <i18n>lystore.project</i18n>
-                </label>
-                <select type="text" ng-model="orderToCreate.project"
-                        class="six cell"
-                        ng-options="title.id as title.name for title in titles.all">
-                    <option value="" disabled selected>[[translate('lystore.placeholder.project')]]</option>
-                </select></div>
-            <div class="row vertical-spacing-four">
-                <label class="four right-padding-form-field cell">
-                    <i18n>lystore.operation</i18n>
-                </label>
-                <select ng-model="orderToCreate.operation"
-                        class="six cell"
-                        ng-options="operation.id as operation.label.label + ' - ' + operation.displayOperation()
+        <div ng-show="titles.all.length !== 0 " class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>lystore.project</i18n>
+            </label>
+            <select type="text" ng-model="orderToCreate.project"
+                    class="six cell"
+                    ng-options="title.id as title.name for title in titles.all">
+                <option value="" disabled selected>[[translate('lystore.placeholder.project')]]</option>
+            </select></div>
+        <div class="row vertical-spacing-four">
+            <label class="four right-padding-form-field cell">
+                <i18n>lystore.operation</i18n>
+            </label>
+            <select ng-model="orderToCreate.operation"
+                    class="six cell"
+                    ng-options="operation.id as operation.label.label + ' - ' + operation.displayOperation()
                       for operation in operations.all">
-                    <option value="" disabled selected>[[translate('lystore.instruction.choose.operation')]]</option>
+                <option value="" disabled selected>[[translate('lystore.instruction.choose.operation')]]</option>
 
-                </select></div>
+            </select>
+        </div>
 
-
+        <div class="row vertical-spacing-four">
             <input type="button" ng-disabled="!validForm()" class="right-magnet button" ng-click="createOrder()"
                    i18n-value="lystore.save"/>
+        </div>
+        <article class="responsive-table">
             <table class="twelve">
                 <thead>
                 <tr class="row">
@@ -135,11 +137,11 @@
 
                 </tfoot>
             </table>
-            <input type="button" ng-disabled="!orderToCreate.campaign" ng-click="addRow()"
-                   i18n-value="add"/>
+        </article>
+        <input type="button" ng-disabled="!orderToCreate.campaign" ng-click="addRow()"
+               i18n-value="add"/>
 
 
-            <!--<input type="button" class="right-magnet cancel" ng-click="cancelCreation()" i18n-value="cancel"/>-->
-        </form>
-    </article>
+        <!--<input type="button" class="right-magnet cancel" ng-click="cancelCreation()" i18n-value="cancel"/>-->
+    </form>
 </div>

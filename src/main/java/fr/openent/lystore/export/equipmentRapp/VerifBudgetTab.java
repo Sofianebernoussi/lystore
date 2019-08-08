@@ -9,6 +9,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
@@ -102,6 +103,9 @@ public class VerifBudgetTab extends TabHelper {
     private void insertNewProgramCode(String actualProgramCode, JsonObject data) {
         currentY += 2;
         excel.insertBlackTitleHeader(1, currentY, actualProgramCode);
+        CellRangeAddress merge = new CellRangeAddress(currentY, currentY, 1, 4);
+        sheet.addMergedRegion(merge);
+        excel.setRegionHeader(merge, sheet);
         currentY += 2;
         insertNewMarket(data);
 
@@ -110,6 +114,9 @@ public class VerifBudgetTab extends TabHelper {
     private void insertNewMarket(JsonObject data) {
         String market = data.getString("market");
         excel.insertBlueTitleHeader(1, currentY, market);
+        CellRangeAddress merge = new CellRangeAddress(currentY, currentY, 1, 4);
+        sheet.addMergedRegion(merge);
+        excel.setRegionHeader(merge, sheet);
         currentY += 2;
 
         insertArrays(data);

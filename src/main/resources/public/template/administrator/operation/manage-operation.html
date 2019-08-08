@@ -92,7 +92,7 @@
             </td>
             <td >[[operation.label.label]]</td>
             <td ><span ng-bind="operation.amount | currency"></span></td>
-            <td >[[operation.nbr_sub]]</td>
+            <td >[[operation.nbr_sub || 0]]</td>
             <td >[[operation.bc_numbers || '-']]</td>
             <td >[[formatDate(operation.date_cp)]]</td>
             <td tooltip=[[formatArrayToolTip(operation.contracts)]] >

@@ -13,6 +13,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,8 +21,9 @@ import java.util.List;
 
 public class VerifBudgetTab extends TabHelper {
     JsonArray operations;
-    private int currentY = 0;
+    private int currentY = 0, programY = 0;
     private JsonArray datas;
+    private Double programTotal = 0.d;
     JsonObject programMarket;
     private StructureService structureService;
     private String type;
@@ -91,22 +93,40 @@ public class VerifBudgetTab extends TabHelper {
             if (actualProgramCode.equals(previousProgramCode)) {
                 insertNewMarket(data);
             } else {
-                insertNewProgramCode(actualProgramCode, data);
+                if (i != 0) {
+                    insertProgramPrice();
+                }
 
+                insertNewProgramCode(actualProgramCode, data);
                 previousProgramCode = actualProgramCode;
 
             }
         }
+        insertProgramPrice();
         excel.autoSize(7);
+    }
+
+    private void insertProgramPrice() {
+
+
+        DecimalFormat df = new DecimalFormat("#");
+        df.setMaximumFractionDigits(2);
+
+        excel.insertBlackTitleHeader(0, programY, "TOTAL ENVELOPPE / NATURE : " + (df.format(programTotal)) + " EUROS");
+        CellRangeAddress merge = new CellRangeAddress(programY, programY, 0, 4);
+        sheet.addMergedRegion(merge);
+        excel.setRegionHeader(merge, sheet);
     }
 
     private void insertNewProgramCode(String actualProgramCode, JsonObject data) {
         currentY += 2;
-        excel.insertBlackTitleHeader(1, currentY, actualProgramCode);
-        CellRangeAddress merge = new CellRangeAddress(currentY, currentY, 1, 4);
+        programY = currentY + 1;
+        programTotal = 0.d;
+        excel.insertBlackTitleHeader(0, currentY, "ENVELOPPE/NATURE :" + actualProgramCode);
+        CellRangeAddress merge = new CellRangeAddress(currentY, currentY, 0, 4);
         sheet.addMergedRegion(merge);
         excel.setRegionHeader(merge, sheet);
-        currentY += 1;
+        currentY += 2;
         insertNewMarket(data);
 
     }
@@ -121,13 +141,17 @@ public class VerifBudgetTab extends TabHelper {
         } catch (ClassCastException e) {
             totalMarket = data.getInteger("totalmarket").toString();
         }
-        excel.insertBlueTitleHeader(1, currentY, market);
-        CellRangeAddress merge = new CellRangeAddress(currentY, currentY, 1, 4);
+
+        programTotal += Double.parseDouble(totalMarket);
+        excel.insertBlueTitleHeader(0, currentY, market);
+        CellRangeAddress merge = new CellRangeAddress(currentY, currentY, 0, 4);
         sheet.addMergedRegion(merge);
         excel.setRegionHeader(merge, sheet);
         currentY++;
-        excel.insertBlueTitleHeader(1, currentY, totalMarket);
-
+        excel.insertBlueTitleHeader(0, currentY, "Pour un sous total de : " + totalMarket + " EUROS");
+        merge = new CellRangeAddress(currentY, currentY, 0, 4);
+        sheet.addMergedRegion(merge);
+        excel.setRegionHeader(merge, sheet);
         currentY += 2;
 
         insertArrays(data);
@@ -137,7 +161,7 @@ public class VerifBudgetTab extends TabHelper {
         JsonArray values = data.getJsonArray("actionsJO");
         values = sortByCity(values);
         String previousZip = "", previousCity = "";
-
+        CellRangeAddress merge;
         for (int i = 0; i < values.size(); i++) {
             String currentCity = "";
             String currentZip = "";
@@ -151,14 +175,22 @@ public class VerifBudgetTab extends TabHelper {
             } else {
                 previousCity = "";
                 currentY += 2;
-                excel.insertLabel(currentY, 2, currentZip);
+                excel.insertBlackTitleHeader(0, currentY, currentZip);
+                merge = new CellRangeAddress(currentY, currentY, 0, 4);
+                sheet.addMergedRegion(merge);
+                excel.setRegionHeader(merge, sheet);
+
                 previousZip = currentZip;
                 currentY += 2;
             }
             if (previousCity.equals(currentCity)) {
             } else {
                 currentY += 2;
-                excel.insertLabel(currentY, 2, currentCity);
+                excel.insertBlackTitleHeader(0, currentY, currentCity);
+                merge = new CellRangeAddress(currentY, currentY, 0, 4);
+                sheet.addMergedRegion(merge);
+                excel.setRegionHeader(merge, sheet);
+
                 previousCity = currentCity;
                 currentY += 2;
             }
@@ -167,13 +199,16 @@ public class VerifBudgetTab extends TabHelper {
             } else
                 excel.insertLabel(currentY, 0, "");
             excel.insertLabel(currentY, 1, "R");
-            if (value.containsKey("old_name")) {
-                excel.insertLabel(currentY, 2, "REG : " + value.getString("old_name"));
-                System.out.println("ui");
-            } else {
+            try {
+                if (!value.getString("old_name").equals("null")) {
+                    excel.insertLabel(currentY, 2, "REG : " + value.getString("old_name"));
+                } else {
+                    excel.insertLabel(currentY, 2, "REG : " + value.getString("name_equipment"));
+                }
+            } catch (NullPointerException e) {
                 excel.insertLabel(currentY, 2, "REG : " + value.getString("name_equipment"));
             }
-            excel.insertLabel(currentY, 3, value.getInteger("amount").toString());
+            excel.insertCellTabStringRight(2, currentY, value.getInteger("amount").toString());
             try {
                 excel.insertLabel(currentY, 4, "M : " + value.getString("total"));
             } catch (ClassCastException e) {

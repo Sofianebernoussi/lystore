@@ -23,6 +23,7 @@ public class ExcelHelper {
     private final CellStyle yellowLabel;
     private final CellStyle blackTitleHeaderStyle;
     private final CellStyle blueTitleHeaderStyle;
+    private final CellStyle tabStringStyleRight;
 
     private DataFormat format;
     public static final String totalLabel = "Totaux";
@@ -46,6 +47,7 @@ public class ExcelHelper {
         this.labelHeadStyle = wb.createCellStyle();
         this.titleHeaderStyle = wb.createCellStyle();
         this.blueTitleHeaderStyle = wb.createCellStyle();
+        this.tabStringStyleRight = wb.createCellStyle();
 
         format = wb.createDataFormat();
         format.getFormat("#.#");
@@ -139,6 +141,17 @@ public class ExcelHelper {
         this.tabStringStyleCenter.setFont(tabFont);
         this.tabStringStyleCenter.setDataFormat(format.getFormat("#,##0.00"));
 
+
+        this.tabStringStyleRight.setBorderLeft(BorderStyle.THIN);
+        this.tabStringStyleRight.setBorderRight(BorderStyle.THIN);
+        this.tabStringStyleRight.setBorderTop(BorderStyle.THIN);
+        this.tabStringStyleRight.setBorderBottom(BorderStyle.THIN);
+        this.tabStringStyleRight.setWrapText(true);
+        this.tabStringStyleRight.setAlignment(HorizontalAlignment.RIGHT);
+        this.tabStringStyleRight.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.tabStringStyleRight.setFont(tabFont);
+        this.tabStringStyleRight.setDataFormat(format.getFormat("#,##0.00"));
+
         //LabelHeadStyle
         Font labelHeadFont = this.wb.createFont();
         labelHeadFont.setFontHeightInPoints((short) 12);
@@ -194,7 +207,7 @@ public class ExcelHelper {
         blueTitleHeadFont.setFontHeightInPoints((short) 14);
         blueTitleHeadFont.setFontName("Calibri");
         blueTitleHeadFont.setBold(true);
-        blueTitleHeadFont.setColor(IndexedColors.LIGHT_BLUE.getIndex());
+        blueTitleHeadFont.setColor(IndexedColors.BLUE.getIndex());
         this.blueTitleHeaderStyle.setWrapText(true);
         this.blueTitleHeaderStyle.setBorderLeft(BorderStyle.THIN);
         this.blueTitleHeaderStyle.setBorderRight(BorderStyle.THIN);
@@ -352,6 +365,21 @@ public class ExcelHelper {
             Cell cell = tab.createCell(cellColumn);
             cell.setCellValue(data);
             cell.setCellStyle(this.tabNumeralStyle);
+        }
+    }
+
+    public void insertCellTabStringRight(int cellColumn, int line, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.tabStringStyleRight);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.tabStringStyleRight);
         }
     }
 

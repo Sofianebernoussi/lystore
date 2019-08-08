@@ -263,7 +263,14 @@ public class VerifBudgetTab extends TabHelper {
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
         query = "    With values as (        With unionValues as (       ( " +
-                "         SELECT DISTINCT ore.id,SUM( ore.price* ore.amount) as Total, " +
+                "         SELECT DISTINCT ore.id,SUM( ore.price* ore.amount) as Total," +
+                "         (SELECT CASE WHEN ore.id_order_client_equipment is not null " +
+                "        THEN  oce.name " +
+                "        ELSE '' " +
+                "        END " +
+                "        FROM lystore.order_client_equipment oce " +
+                "        where oce.id = ore.id_order_client_equipment " +
+                "        ) as old_name, " +
                 "           ore.id_structure,ore.id_operation as id_operation,label.label as operation , " +
                 "           ore.equipment_key as key,ore.name as name_equipment, true as region, " +
                 "           program_action.id_program, ore.amount ,contract.id as market_id " +
@@ -287,8 +294,17 @@ public class VerifBudgetTab extends TabHelper {
                 "           Group by  ore.id_operation,ore.id_structure  ,ore.id, contract.id ,label.label  ,program_action.id_program    " +
                         "           order by  ore.id_operation )           " +
                         "            UNION " +
-                        "            (  SELECT DISTINCT oce.id, SUM(  CASE WHEN oce.price_proposal is not null                  THEN oce.price_proposal *  oce.amount               ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount +                       (SELECT CASE WHEN  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL                       THEN 0             ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)                          END       " +
-                        "           from  " + Lystore.lystoreSchema + ".order_client_options oco             WHERE id_order_client_equipment = oce.id )                        )/100 END                  ) as Total,      " +
+                        "            (  SELECT DISTINCT oce.id, SUM(  CASE WHEN oce.price_proposal is not null        " +
+                        "                                       THEN oce.price_proposal *  oce.amount        " +
+                        "                                       ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount +  " +
+                        "                   (SELECT CASE WHEN  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL         " +
+                        "                   THEN 0          " +
+                        "                   ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)      " +
+                        "                   END       " +
+                        "                   from  " + Lystore.lystoreSchema + ".order_client_options oco       " +
+                        "                   WHERE id_order_client_equipment = oce.id )    " +
+                        "                    )/100 END                " +
+                        "  ) as Total,     oce.name as old_name ,    " +
                         "            oce.id_structure,oce.id_operation as id_operation,label.label as operation , " +
                         "           oce.equipment_key as key,oce.name as name_equipment, false as region, " +
                         "           program_action.id_program, oce.amount ,contract.id as market_id " +
@@ -314,7 +330,8 @@ public class VerifBudgetTab extends TabHelper {
                         "            order by  oce.id_operation )    " +
                         "            )  SELECT * from unionValues  order by   id_operation,id_structure " +
                         "    ) " +
-                        "SELECT contract.name as market, contract_type.code,program.name as program  , array_to_json(array_agg(values))as actions    " +
+                        "SELECT contract.name as market, contract_type.code,program.name as program  , array_to_json(array_agg(values))as actions " +
+                        ", SUM (values.total) as totalMarket     " +
                         "from  " + Lystore.lystoreSchema + ".contract " +
                         "INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)        " +
                         "INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)    " +

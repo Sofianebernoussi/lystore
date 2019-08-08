@@ -79,6 +79,7 @@ public final class SqlUtils {
     }
 
     private static void getTotalOrderClient(Number idOperation, Handler<Either<String, JsonObject>> handler){
+        String status = "IN PROGRESS";
         String queryGetTotalOperationClient = " " +
                 "SELECT (ROUND(SUM((  " +
                 "                     (SELECT CASE  " +
@@ -95,16 +96,19 @@ public final class SqlUtils {
                 "                                                                   END)) * oce.amount), 2)) AS price_total_orders_clients  " +
                 "FROM   " + Lystore.lystoreSchema + ".order_client_equipment oce  " +
                 "WHERE oce.id_operation = ? " +
+                "AND oce.status = '" + status + "' " +
                 "  ";
 
         Sql.getInstance().prepared(queryGetTotalOperationClient, new JsonArray().add(idOperation), SqlResult.validUniqueResultHandler(handler));
     }
 
     private static void getTotalOrderRegion(Number idOperation, Handler<Either<String, JsonObject>> handler){
+        String status = "IN PROGRESS";
         String queryGetTotalOperationRegion = " " +
                 "SELECT (ROUND(SUM(ore.price * ore.amount), 2)) AS price_total_orders_regions " +
                 "FROM " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore " +
-                "WHERE ore.id_operation = ? ";
+                "WHERE ore.id_operation = ? " +
+                "AND ore.status = '" + status + "' ;";
 
         Sql.getInstance().prepared(queryGetTotalOperationRegion, new JsonArray().add(idOperation), SqlResult.validUniqueResultHandler(handler));
     }
@@ -153,6 +157,7 @@ public final class SqlUtils {
     public static void getCountOrderInOperation(JsonArray idsOperations, Handler<Either<String, JsonArray>> handler) {
         try {
             JsonArray idsOperationsMergeTwoArray = SqlQueryUtils.multiplyArray(2, idsOperations);
+            String status = "IN PROGRESS";
             String queryGetTotalOperation = "SELECT " +
                     "id, " +
                     "SUM(nb_orders) AS nbr_sub " +
@@ -163,7 +168,7 @@ public final class SqlUtils {
                     "FROM  " + Lystore.lystoreSchema + ".order_client_equipment AS oce " +
                     "WHERE oce.id_operation IN " +
                     Sql.listPrepared(idsOperations.getList()) + " " +
-                    "AND oce.status = 'IN PROGRESS' " +
+                    "AND oce.status = '" + status + "' " +
                     "AND oce.override_region = false " +
                     "GROUP BY (oce.id_operation) " +
                     "UNION  " +

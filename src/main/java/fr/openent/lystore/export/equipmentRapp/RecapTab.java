@@ -74,10 +74,11 @@ public class RecapTab extends TabHelper {
 
             JsonObject operation = programs.getJsonObject(i);
             String actionsStrToArray = operation.getString(actionStr);
+            String labelOperation = operation.getString("label");
 
             Row operationRow = sheet.createRow(this.operationsRowNumber);
             excel.insertLabel(operationRow, cellLabelColumn, operation.getLong("id").toString());
-            excel.insertLabel(operationRow, cellLabelColumn + 1, operation.getString("label"));
+            excel.insertLabel(operationRow, cellLabelColumn + 1, labelOperation);
 
 
             JsonArray actions = new JsonArray(actionsStrToArray);
@@ -118,8 +119,9 @@ public class RecapTab extends TabHelper {
                     cellColumn++;
                 }
             }
+            operationsRowNumber++;
 
-            this.operationsRowNumber++;
+
         }
         if (initProgramX < endProgramX) {
             CellRangeAddress merge = new CellRangeAddress(programRowNumber, programRowNumber, initProgramX, endProgramX);
@@ -209,12 +211,12 @@ public class RecapTab extends TabHelper {
                 "        Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program , orders.id_order_client_equipment   " +
                 "        order by  orders.id_operation  " +
                 "           )  " +
-                "  SELECT values.market,values.id_operation as id, values.operation, values.code,values.program  ,  " +
+                "  SELECT values.id_operation as id, values.operation as label,  " +
                 "  array_to_json(array_agg(values))as actions, SUM (values.total) as totalMarket     " +
                 "  from  values " +
                 "   " +
-                "  Group by market,code,program ,values.id_operation, values.operation" +
-                "   Order by program,code ;";
+                "  Group by values.id_operation, values.operation " +
+                "   Order by values.operation ;";
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
                 handler.handle(event.left());

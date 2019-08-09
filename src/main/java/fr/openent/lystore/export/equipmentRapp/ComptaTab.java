@@ -110,7 +110,10 @@ public class ComptaTab extends TabHelper {
             JsonObject idPassed = new JsonObject();
             initYProgramLabel = yProgramLabel;
             yProgramLabel += 2;
-            String campaign = "";
+            String campaign = "", key = "", oldkey = "";
+
+            Float oldTotal = 0.f;
+
 //            //Insert datas
 //
             for (int j = 0; j < actions.size(); j++) {
@@ -133,11 +136,12 @@ public class ComptaTab extends TabHelper {
                     programLabel = new JsonObject();
                 }
 
-                if (!programLabel.containsKey(action.getString("program") + " - " + action.getString("code"))) {
-                    programLabel.put(action.getString("program") + " - " + action.getString("code"), programLabel.size());
-                    excel.insertHeader(initYProgramLabel, 4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code"))
+                key = action.getString("program") + " - " + action.getString("code");
+                if (!programLabel.containsKey(key)) {
+                    programLabel.put(key, programLabel.size());
+                    excel.insertHeader(initYProgramLabel, 4 + programLabel.getInteger(key)
                             , action.getString("program"));
-                    excel.insertHeader(initYProgramLabel + 1, 4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code"))
+                    excel.insertHeader(initYProgramLabel + 1, 4 + programLabel.getInteger(key)
                             , action.getString("code"));
                 }
 
@@ -149,17 +153,25 @@ public class ComptaTab extends TabHelper {
                     excel.insertLabel(yProgramLabel, 1, action.getString("city"));
                     excel.insertLabel(yProgramLabel, 2, action.getString("nameEtab"));
                     excel.insertLabel(yProgramLabel, 3, action.getString("uai"));
-
-                    excel.insertCellTabFloat(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")),
-                            yProgramLabel, action.getFloat("total"));
+                    if (!oldkey.equals(key)) {
+                        oldTotal = 0.f;
+                    }
+                    oldkey = key;
+                    oldTotal += action.getFloat("total");
+                    excel.insertCellTabFloat(4 + programLabel.getInteger(key),
+                            yProgramLabel, oldTotal);
                 } else {
                     yProgramLabel--;
+                    if (!oldkey.equals(key)) {
+                        oldTotal = 0.f;
+                    }
+                    oldkey = key;
+                    oldTotal += action.getFloat("total");
                     excel.insertCellTabFloat(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")), yProgramLabel
-                            , action.getFloat("total"));
+                            , oldTotal);
                 }
 
                 columnTotal++;
-
                 yProgramLabel++;
 
             }
@@ -204,77 +216,85 @@ public class ComptaTab extends TabHelper {
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
-        query = "  With values as (   " +
-                "   (SELECT SUM( ore.price* ore.amount) as Total, " +
-                "   ore.id_structure,campaign.name as campaign,contract_type.code as code,ore.id_operation , program_action.id_program ,contract_type.name ,program.name as program         " +
-                "   FROM " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore       " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".operation ON (ore.id_operation = operation.id)     " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".campaign ON ore.id_campaign = campaign.id  " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)    " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)        " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".contract ON (ore.id_contract = contract.id)        " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)           " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)        " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)     " +
-                "   INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)      " +
-                "   WHERE instruction.id = ? ";
+        query = "       With values as  (             " +
+                "     SELECT  orders.id ,orders.\"price TTC\",  " +
+                "             ROUND((( SELECT CASE          " +
+                "            WHEN orders.price_proposal IS NOT NULL THEN 0     " +
+                "            WHEN orders.override_region IS NULL THEN 0 " +
+                "            WHEN SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount) IS NULL THEN 0         " +
+                "            ELSE SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount)         " +
+                "            END           " +
+                "             FROM   " + Lystore.lystoreSchema + ".order_client_options oco  " +
+                "              where oco.id_order_client_equipment = orders.id " +
+                "             ) + orders.\"price TTC\" " +
+                "              ) * orders.amount   ,2 ) " +
+                "             as Total, contract.name as market, contract_type.code as code, campaign.name as campaign,   " +
+                "             program.name as program,         CASE WHEN orders.id_order_client_equipment is not null  " +
+                "             THEN  (select oce.name FROM " + Lystore.lystoreSchema + ".order_client_equipment oce    " +
+                "              where oce.id = orders.id_order_client_equipment limit 1)     " +
+                "             ELSE ''      " +
+                "             END as old_name,     " +
+                "             orders.id_structure,orders.id_operation as id_operation, label.label as operation ,     " +
+                "             orders.equipment_key as key, orders.name as name_equipment, true as region,    " +
+                "             program_action.id_program, orders.amount ,contract.id as market_id,       " +
+                "             case when specific_structures.type is null      " +
+                "             then '" + LYCEE + "'          " +
+                "             ELSE specific_structures.type     " +
+                "             END as cite_mixte     " +
+                "             FROM (      " +
+                "             (select ore.id,  ore.price as \"price TTC\",  ore.amount,  ore.creation_date,  ore.modification_date,  ore.name,  ore.summary, " +
+                "             ore.description,  ore.image,    ore.status,  ore.id_contract,  ore.equipment_key,  ore.id_campaign,  ore.id_structure, " +
+                "             ore.cause_status,  ore.number_validation,  ore.id_order,  ore.comment,  ore.rank as \"prio\", null as price_proposal,  " +
+                "             ore.id_project,  ore.id_order_client_equipment, null as program, null as action,  ore.id_operation , " +
+                "             null as override_region          from " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore )      " +
+                "             union      " +
+                "             (select oce.id," +
+                "             CASE WHEN price_proposal is null then  price + (price*tax_amount/100)  else price_proposal end as \"price TTC\", " +
+                "             amount, creation_date, null as modification_date, name,  " +
+                "             summary, description, image,  status, id_contract, equipment_key, id_campaign, id_structure, cause_status, number_validation, " +
+                "             id_order, comment, rank as \"prio\", price_proposal, id_project, null as id_order_client_equipment,  program, action,  " +
+                "             id_operation, override_region           from " + Lystore.lystoreSchema + ".order_client_equipment  oce) " +
+                "             ) as orders       " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (orders.id_operation = operation.id)               " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)      " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)    " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id)                  " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)      " +
+                "             INNER JOIN " + Lystore.lystoreSchema + ".campaign ON orders.id_campaign = campaign.id  " +
+                "             LEFT JOIN " + Lystore.lystoreSchema + ".specific_structures ON orders.id_structure = specific_structures.id    " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         ";
         if (type.equals(CMR))
-            query += "    AND structure_program_action.structure_type =  '" + type + "'  " +
-                    " AND ore.id_structure IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + type + "' ) ";
-
-        else
-            query += "    AND (structure_program_action.structure_type !=  '" + CMR + "'  " +
-                    " OR  ore.id_structure NOT IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + CMR + "' ) )";
+            query +=
+                    "   AND (spa.structure_type = '" + CMR + "' AND specific_structures.type ='" + CMR + "')  ";
+        else {
+            query +=
+                    "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "')  " +
+                            "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    ";
+        }
 
         query +=
-                "   Group by  campaign,program.name,contract_type.code, contract_type.name , program_action.id, ore.id_operation,ore.id_structure     " +
-                        "   order by  campaign,program.name,id_program,code,ore.id_operation  ) " +
-                        "   UNION ( " +
-                        "   SELECT " +
-                        "   SUM(  CASE WHEN oce.price_proposal is not null  " +
-                        "    THEN oce.price_proposal *  oce.amount " +
-                        "    ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount + " +
-                        "            (SELECT CASE WHEN  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL " +
-                        "           THEN 0  " +
-                        "           ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  " +
-                        "           END " +
-                        "           from " + Lystore.lystoreSchema + ".order_client_options oco  " +
-                        "           WHERE id_order_client_equipment = oce.id ) " +
-                        "            )/100 END    " +
-                        "   ) as Total, " +
-                        "   oce.id_structure,campaign.name as campaign, contract_type.code as code,oce.id_operation , program_action.id_program ,contract_type.name ,program.name  as program" +
-                        "   FROM " + Lystore.lystoreSchema + ".order_client_equipment oce       " +
-                        "   INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id)    " +
-                        "   INNER JOIN " + Lystore.lystoreSchema + ".campaign ON oce.id_campaign = campaign.id  " +
-                        "   INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)    " +
-                        "   INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)        " +
-                        "   INNER JOIN " + Lystore.lystoreSchema + ".contract ON (oce.id_contract = contract.id)        " +
-                        "   INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)           " +
-                        "   INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)        " +
-                        "   INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)     " +
-                        "   INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id)      " +
-                        "   WHERE instruction.id = ?  AND oce.override_region = false ";
+                "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
+                        "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
+                        "     WHERE instruction.id = ?   ";
+
+
         if (type.equals(CMR))
-            query += "    AND structure_program_action.structure_type =  '" + type + "'  " +
-                    " AND oce.id_structure IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + type + "' ) ";
-
-        else
-            query += "    AND( structure_program_action.structure_type !=  '" + CMR + "'  " +
-                    " OR oce.id_structure NOT IN (    SELECT id    FROM lystore.specific_structures    WHERE type='" + CMR + "' )) ";
-
+            query += "  AND specific_structures.type =  '" + CMR + "'   ";
+        else {
+            query += "  AND specific_structures.type !=  '" + CMR + "'   " +
+                    "  OR specific_structures.type is null   ";
+        }
         query +=
-                "   Group by  campaign,program.name,contract_type.code, contract_type.name , program_action.id, oce.id_operation,oce.id_structure     " +
-                        "   order by  campaign,program.name,id_program,code,oce.id_operation " +
-                        "   ) " +
-                        " )   " +
-                        " SELECT label.label , array_to_json(array_agg(values)) as actions   " +
-                        " from " + Lystore.lystoreSchema + ".operation as operation    " +
-                        " INNER JOIN " + Lystore.lystoreSchema + ".label_operation as label on (operation.id_label = label.id)  " +
-                        " INNER JOIN values  on (operation.id = values.id_operation)  " +
-                        " Group by label.label ; ";
+                "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
+                        "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
+                        "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region ,campaign" +
+                        "             order by  orders.id_operation,program,code ,orders.id_structure    )        " +
+                        " SELECT values.operation as label , array_to_json(array_agg(values)) as actions   " +
+                        " from values  " +
+                        " Group by label ; ";
 
 
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")).add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
+        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
                 handler.handle(event.left());
             } else {

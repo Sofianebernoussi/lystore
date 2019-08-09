@@ -310,7 +310,6 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 "          tt.id, " +
                 "          oce.id, " +
                 "          ce.id, " +
-                "          order_opts.id, " +
                 "          o.order_number)";
 
         Sql.getInstance().prepared(query, new JsonArray().add(idOrder), SqlResult.validUniqueResultHandler(handler));

@@ -49,7 +49,7 @@ export class OrderClient implements Selectable {
     rank?:number;
     structure: Structure;
     priceUnitedTTC: number;
-    rankOrder: string;
+    rankOrder: Number;
     isOrderRegion: Boolean;
     equipment:any;
     constructor() {
@@ -336,9 +336,9 @@ export class OrdersClient extends Selection<OrderClient> {
                             parseFloat(( order.price_proposal).toString()) * order.amount :
                             null;
                         if( order.campaign.orderPriorityEnable()){
-                            order.rankOrder = (order.rank + 1).toString();
+                            order.rankOrder = order.rank + 1;
                         } else if (order.campaign.projectPriorityEnable()){
-                            order.rankOrder = (order.project.preference + 1).toString();
+                            order.rankOrder = order.project.preference + 1;
                         }else{
                             order.rankOrder = lang.translate("lystore.order.not.prioritized");
                         }

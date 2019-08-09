@@ -146,17 +146,24 @@ export class OrderClient implements Selectable {
                 contract_type: data.contract_type?JSON.parse(data.contract_type):null,
                 contract: data.contract?JSON.parse(data.contract):null,
                 structure_groups: data.structure_groups?JSON.parse(data.structure_groups):null,
-                options: data.options?JSON.parse(data.options):null,
+                options: data.options.toString() !== '[null]' && data.options !== null ?
+                    Mix.castArrayAs(OrderOptionClient, JSON.parse(data.options.toString())) :
+                    [],
                 supplier: data.supplier?JSON.parse(data.supplier):null,
                 title: data.title?JSON.parse(data.title):null,
                 price : data.price?parseFloat(data.price):null,
                 amount : data.amount?parseInt(data.amount):null,
                 price_proposal : data.price_proposal?parseFloat(data.price_proposal):null,
-                rank : data.rank?parseInt(data.rank.toString()) : null,
+                rank : data.rank?parseInt(data.rank.toString())+1 : null,
                 tax_amount : data.tax_amount?parseFloat(data.tax_amount):null,
                 price_single_ttc : data.price_single_ttc?parseFloat(data.price_single_ttc):null,
                 technical_spec: data.technical_spec?Utils.parsePostgreSQLJson(this.technical_spec):null,
                 isOrderRegion: false,
+            };
+            result.equipment = {
+                name : result.name,
+                contract_type_name : result.contract_type.name,
+                id_contract : result.id_contract,
             };
             if(withParent) {
                 result.order_client_equipment_parent = result?
@@ -171,6 +178,8 @@ export class OrderClient implements Selectable {
                             .calculatePriceTTC(2, result.order_client_equipment_parent.price) *
                         result.order_client_equipment_parent.amount;
                 }
+                result.order_client_equipment_parent.contract_type = {name:''};
+                result.order_client_equipment_parent.contract_type.name = result.equipment.contract_type_name;
             }
             return result;
         } catch (e) {
@@ -197,11 +206,16 @@ export class OrderClient implements Selectable {
                 price : data.price?parseFloat(data.price):null,
                 amount : data.amount?parseInt(data.amount):null,
                 price_proposal : data.price_proposal?parseFloat(data.price_proposal):null,
-                rank : data.rank?parseInt(data.rank.toString()) : null,
+                rank : data.rank?parseInt(data.rank.toString())+1 : null,
                 tax_amount : data.tax_amount?parseFloat(data.tax_amount):null,
                 price_single_ttc : data.price_single_ttc?parseFloat(data.price_single_ttc):null,
                 technical_spec: data.technical_spec?Utils.parsePostgreSQLJson(this.technical_spec):null,
                 isOrderRegion: false,
+            };
+            result.equipment = {
+                name : result.name,
+                contract_type_name : result.contract_type.name,
+                id_contract : result.id_contract,
             };
             if(withParent) {
                 result.order_client_equipment_parent = result?
@@ -209,13 +223,16 @@ export class OrderClient implements Selectable {
                     null;
                 result.order_client_equipment_parent.price_united = result.price_single_ttc;
                 if (result.order_client_equipment_parent.price_proposal) {
-                    result.order_client_equipment_parent.price_total = result.order_client_equipment_parent.price_proposal *
-                        result.order_client_equipment_parent.amount;
+                    result.order_client_equipment_parent.price_total = Math
+                        .round(result.order_client_equipment_parent.price_proposal *
+                            result.order_client_equipment_parent.amount * 100) / 100
                 } else {
                     result.order_client_equipment_parent.price_total =  result.order_client_equipment_parent
                             .calculatePriceTTC(2, result.order_client_equipment_parent.price) *
                         result.order_client_equipment_parent.amount;
                 }
+                result.order_client_equipment_parent.contract_type = {name:''};
+                result.order_client_equipment_parent.contract_type.name = result.equipment.contract_type_name;
             }
             return  Mix.castAs(OrderClient, result);
         } catch (e) {

@@ -45,7 +45,7 @@ export class OrderRegion implements Selectable {
     toJson() {
         return {
             amount: this.amount,
-            name: this.name,
+            name: this.equipment.name,
             price: this.price,
             summary: this.summary,
             description: (this.description) ? this.description : "",
@@ -62,7 +62,7 @@ export class OrderRegion implements Selectable {
             id_campaign: this.id_campaign,
             id_structure: this.id_structure,
             id_project: this.id_project,
-            equipment_key: this.equipment.id ,
+            equipment_key: this.equipment.id? this.equipment.id : this.equipment_key,
             comment: (this.comment) ? this.comment : "",
             ...(this.rank && {rank: this.rank}),
             technical_specs: (Utils.parsePostgreSQLJson(this.technical_spec) === null || Utils.parsePostgreSQLJson(this.technical_spec).length === 0) ?
@@ -157,18 +157,22 @@ export class OrderRegion implements Selectable {
                 contract_type: data.contract_type?JSON.parse(data.contract_type):null,
                 contract: data.contract?JSON.parse(data.contract):null,
                 structure_groups: data.structure_groups?JSON.parse(data.structure_groups):null,
-                options: data.options?JSON.parse(data.options):null,
                 supplier: data.supplier?JSON.parse(data.supplier):null,
                 title: data.title?JSON.parse(data.title):null,
                 price : data.price?parseFloat(data.price):null,
                 amount : data.amount?parseInt(data.amount):null,
-                rank : data.rank?parseInt(data.rank.toString()) : null,
+                rank : data.rank?parseInt(data.rank.toString()) +1 : null,
                 price_single_ttc : data.price_single_ttc?parseFloat(data.price_single_ttc):null,
                 technical_spec: data.technical_spec?Utils.parsePostgreSQLJson(this.technical_spec):null,
                 order_client_equipment_parent: data.order_client_equipment_parent?
                     Mix.castAs(OrderClient, JSON.parse(data.order_client_equipment_parent.toString())):
                     null,
                 isOrderRegion: true,
+            };
+            result.equipment = {
+                name : result.name,
+                contract_type_name : result.contract_type.name,
+                id_contract : result.id_contract,
             };
             if(result.order_client_equipment_parent) {
                 result.order_client_equipment_parent.options = data.options_client_parent.toString() !== '[null]' && data.options_client_parent !== null?
@@ -183,13 +187,19 @@ export class OrderRegion implements Selectable {
                     result.order_client_equipment_parent
                         .calculatePriceTTC(2, result.order_client_equipment_parent.price);
                 if (result.order_client_equipment_parent.price_proposal) {
-                    result.order_client_equipment_parent.price_total = result.order_client_equipment_parent.price_proposal *
-                        result.order_client_equipment_parent.amount;
+                    result.order_client_equipment_parent.price_total = Math
+                        .round(result.order_client_equipment_parent.price_proposal *
+                            result.order_client_equipment_parent.amount * 100) / 100
                 } else {
                     result.order_client_equipment_parent.price_total =  result.order_client_equipment_parent
                             .calculatePriceTTC(2, result.order_client_equipment_parent.price) *
                         result.order_client_equipment_parent.amount;
                 }
+                result.order_client_equipment_parent.rank = result.order_client_equipment_parent.rank?
+                    parseInt(result.order_client_equipment_parent.rank.toString()) +1 :
+                    null;
+                result.order_client_equipment_parent.contract_type = {name:''};
+                result.order_client_equipment_parent.contract_type.name = result.equipment.contract_type_name;
             }
             return  Mix.castAs(OrderRegion, result);
         } catch (e) {

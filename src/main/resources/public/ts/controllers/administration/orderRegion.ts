@@ -44,22 +44,16 @@ export const orderRegionController = ng.controller('orderRegionController',
                 if (s.name > ss.name) return -1;
                 return 0;
             });
-            if(  $scope.orderToUpdate.campaign.orderPriorityEnable()){
-                $scope.orderToUpdate.rank = $scope.orderToUpdate.rank === null? null : $scope.orderToUpdate.rank + 1;
-            }
-            if (!$scope.orderToUpdate.project.room)
-                $scope.orderToUpdate.project.room = '-';
-            if (!$scope.orderToUpdate.project.building)
-                $scope.orderToUpdate.project.building = '-';
-            $scope.orderToCreate.rows = [];
-            $scope.orderToUpdate.equipment = $scope.equipments.all.find((e) => {
-                return e.id === $scope.orderToUpdate.equipment_key;
-            });
             Utils.safeApply($scope);
         };
 
         $scope.initDataUpdate = async () => {
             await $scope.equipments.sync($scope.orderToUpdate.id_campaign, $scope.orderToUpdate.id_structure);
+            if (!$scope.orderToUpdate.project.room)
+                $scope.orderToUpdate.project.room = '-';
+            if (!$scope.orderToUpdate.project.building)
+                $scope.orderToUpdate.project.building = '-';
+            $scope.orderToCreate.rows = [];
             $scope.getContractType();
         };
 
@@ -163,15 +157,15 @@ export const orderRegionController = ng.controller('orderRegionController',
                     || !$scope.orderToCreate.campaign.orderPriorityEnable());
         };
         $scope.getContractType = () => {
-            let contract;
+            let newContract;
             if($scope.orderToUpdate.equipment){
-                $scope.contracts.all.map(c => {
-                    if (c.id === $scope.orderToUpdate.equipment.id_contract)
-                        contract = c
+                $scope.contracts.all.map(contract => {
+                    if (contract.id === $scope.orderToUpdate.equipment.id_contract)
+                        newContract = contract
                 });
-                $scope.contractTypes.all.map(c => {
-                    if (c.id === contract.id_contract_type) {
-                        $scope.contract_type = c.displayName
+                $scope.contractTypes.all.map(contract => {
+                    if (contract.id === newContract.id_contract_type) {
+                        $scope.contract_type = contract.displayName
                     }
                 });
             }

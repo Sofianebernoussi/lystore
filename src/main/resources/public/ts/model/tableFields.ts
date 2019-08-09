@@ -5,6 +5,11 @@ export const orderWaiting = [
         display: true
     },
     {
+        name:'lystore.type',
+        fieldName:'structure.type_etab',
+        display: false
+    },
+    {
         name:'Commune',
         fieldName:'structure.city',
         display: true

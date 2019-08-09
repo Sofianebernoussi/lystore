@@ -112,35 +112,35 @@
             <button
                     ng-disabled="true"
                     ng-click=""
-                    ng-show="instructions.selected.length === 1"
+                    ng-show="false"
             >
                 <i18n>lystore.close</i18n>
             </button>
             <button
                     ng-disabled="true"
                     ng-click=""
-                    ng-show="instructions.selected.length === 1"
+                    ng-show="false"
             >
                 <i18n>lystore.logs.csv.export</i18n>
             </button>
             <button
                     ng-disabled="true"
                     ng-click=""
-                    ng-show="instructions.selected.length === 1"
+                    ng-show="false"
             >
                 <i18n>lystore.export.airDelib</i18n>
-            </button
-            ><button
+            </button>
+            <button
                 ng-disabled="true"
                 ng-click=""
-                ng-show="instructions.selected.length === 1"
+                ng-show="false"
         >
             <i18n>lystore.export.airIris</i18n>
         </button>
             <button
                     ng-disabled="true"
                     ng-click=""
-                    ng-show="instructions.selected.length === 1"
+                    ng-show="false"
             >
                 <i18n>lystore.list.equipment</i18n>
             </button>
@@ -151,14 +151,15 @@
                     download
             >
                 <i18n>lystore.exportEquipmentRapp</i18n>
-                <button
-                        ng-disabled="instructions.selected[0].operations.length === 0"
-                        ng-show="instructions.selected.length === 1"
-                        ng-click="exportRME(instructions.selected[0])"
-                        download
-                >
-                    <i18n>lystore.exportRME</i18n>
-                </button>
+            </button>
+            <button
+                    ng-disabled="instructions.selected[0].operations.length === 0"
+                    ng-show="instructions.selected.length === 1"
+                    ng-click="exportRME(instructions.selected[0])"
+                    download
+            >
+                <i18n>lystore.exportRME</i18n>
+            </button>
             <button
                     ng-click="openLightboxDeleteInstruction()"
             >

@@ -49,7 +49,7 @@
             <label class="two right-padding-form-field cell">
                 <i18n>lystore.contract.type.name</i18n>
             </label>
-            <label class="six cell">[[contract_type]]</label>
+            <label class="six cell">[[orderToUpdate.order_client_equipment_parent.contract_type.name]]</label>
         </div>
 
         <div class="row vertical-spacing-four">
@@ -78,9 +78,9 @@
                     class="four cell horizontal-margin"
                     ng-if="orderToUpdate.order_client_equipment_parent"
             >
-                [[orderToUpdate.contract_type.name]]&nbsp
+                [[orderToUpdate.order_client_equipment_parent.contract_type.name]]&nbsp
                 -&nbsp
-                [[orderToUpdate.order_client_equipment_parent.equipment.name]]
+                [[orderToUpdate.order_client_equipment_parent.name]]
             </span>
             <search-and-select
                     ng-change="getContractType()"
@@ -88,7 +88,7 @@
                     options="equipments.all"
                     param1="'contract_type_name'"
                     param2="'name'"
-                    ng-model=" orderToUpdate.equipment"
+                    ng-model="orderToUpdate.equipment"
                     search-on="name"
                     order-by="name"
                     class="cell horizontal-margin"

@@ -473,7 +473,7 @@
   "lystore.demand.waiting": "demande en attente",
   "lystore.demand.empty": "Aucune demande sur cette campagne",
   "lystore.operation.form.empty": "Aucune opération disponible",
-  "lystore.order.update": "Modifier une commande",
+  "lystore.order.update": "Modifier une demande",
   "lystore.structure.label": "Établissement",
   "lystore.project.origin": "Nature du projet",
   "lystore.admin.order.update.err": "Erreur lors de la modification de la commande",
@@ -484,7 +484,7 @@
   "lystore.department": "Département",
   "lystore.project.comment": "Commentaire projet",
   "lystore.campaign.order.all": "Afficher toutes les campagnes",
-  "lystore.project.priority.project": "Priorité project",
+  "lystore.project.priority.project": "Priorité projet",
   "lystore.order.region.update": "Votre commande a bien été enregistré",
   "lystore.order.get.err": "Erreur lors de la recuperation de la commande",
   "lystore.operation.order.move" : "Modifier l'opération affectée",
@@ -504,12 +504,13 @@
   "lystore.lycee": "Lycées",
   "lystore.cmr": "CMR",
   "lystore.cmd": "CMD",
-  "lystore.export.equipment.title": "Sélectionner le type de strucuture dont vous souhaitez l'export",
+  "lystore.export.equipment.title": "Sélectionner le type d'établissement dont' vous souhaitez l'export",
   "lystore.nameFile": "Nom du fichier",
   "lystore.creation.date": "Date de création",
   "lystore.list.export.title": "Liste des fichiers créés",
   "lystore.list.export.text": "Sélectionner le fichier que vous souhaitez télécharger",
   "lystore.goTo.exports": "Mes exports",
   "lystore.order.operation.delete": "Demande retirée de cette opération",
-  "lystore.type": "Type"
+  "lystore.admin.order.get.err" : "Une erreur est survenue lors de la récupération d'une demande",
+  "IN PROGRESS" : "En progression"
 }

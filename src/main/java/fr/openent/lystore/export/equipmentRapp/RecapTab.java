@@ -140,13 +140,20 @@ public class RecapTab extends TabHelper {
 
             String actionsStrToArray = operation.getString(actionStr);
             JsonArray actions = new JsonArray(actionsStrToArray);
-
+            String old_key = "";
+            Float oldTotal = 0.f;
             for (int j = 0; j < actions.size(); j++) {
+
                 JsonObject action = actions.getJsonObject(j);
                 String key = action.getString("program") + " - " + action.getString("code");
+                if (!old_key.equals(key)) {
+                    oldTotal = 0.f;
+                }
+                old_key = key;
+                oldTotal += action.getFloat("total");
                 excel.insertCellTabFloat(programLabel.getInteger(key) + 2,
                         2 + i,
-                        action.getFloat("total"));
+                        oldTotal);
             }
         }
 
@@ -238,11 +245,12 @@ public class RecapTab extends TabHelper {
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                         "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                         "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region " +
-                        "             order by  orders.id_operation             " +
+                        "             order by  program,code,orders.id_operation             " +
                         "  )    SELECT values.id_operation as id, values.operation as label,    array_to_json(array_agg(values))as actions, SUM (values.total) as totalMarket       " +
                         "  from  values      " +
                         "  Group by values.id_operation, values.operation   " +
                         "  Order by values.operation ;";
+
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
                 handler.handle(event.left());

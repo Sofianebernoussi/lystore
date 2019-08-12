@@ -260,7 +260,7 @@ public class ComptaTab extends TabHelper {
                 "             ) as orders       " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (orders.id_operation = operation.id)               " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)      " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)    " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id  AND instruction.id = ?)    " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id)                  " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)      " +
                 "             INNER JOIN " + Lystore.lystoreSchema + ".campaign ON orders.id_campaign = campaign.id  " +
@@ -278,13 +278,13 @@ public class ComptaTab extends TabHelper {
         query +=
                 "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
                         "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
-                        "     WHERE instruction.id = ?   ";
+                        "     WHERE  ";
 
 
         if (type.equals(CMR))
-            query += "  AND specific_structures.type =  '" + CMR + "'   ";
+            query += "   specific_structures.type =  '" + CMR + "'   ";
         else {
-            query += "  AND specific_structures.type !=  '" + CMR + "'   " +
+            query += "   specific_structures.type !=  '" + CMR + "'   " +
                     "  OR specific_structures.type is null   ";
         }
         query +=

@@ -513,5 +513,5 @@
   "lystore.order.operation.delete": "Demande retirée de cette opération",
   "lystore.admin.order.get.err": "Une erreur est survenue lors de la récupération d'une demande",
   "IN PROGRESS": "En progression",
-  "lystore.type" : "Type"
+  "lystore.type": "Type"
 }

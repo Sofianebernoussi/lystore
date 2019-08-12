@@ -2,11 +2,11 @@ package fr.openent.lystore.export.equipmentRapp;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.TabHelper;
+import fr.openent.lystore.helpers.ExcelHelper;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.entcore.common.sql.Sql;
@@ -15,23 +15,24 @@ import org.entcore.common.sql.SqlResult;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class RecapTab extends TabHelper {
-    private JsonArray programs;
-    String type = "";
-    final protected int yTab = 0;
-    final protected int xTab = 0;
-    protected int operationsRowNumber = 2;
+public class RecapMarket extends TabHelper {
     JsonArray operations;
-    private String actionStr = "actions";
-    private JsonObject programLabel = new JsonObject();
+    private JsonArray datas;
+    JsonObject programMarket;
+    private String type;
 
-
-    public RecapTab(Workbook workbook, JsonObject instruction, String type) {
-        super(workbook, instruction, "RECAP - " + type);
+    /**
+     * open the tab or create it if it doesn't exists
+     *
+     * @param wb
+     * @param instruction
+     * @param type
+     */
+    public RecapMarket(Workbook wb, JsonObject instruction, String type) {
+        super(wb, instruction, "Récapitulatif par marché ");
         this.type = type;
-        excel.setDefaultFont();
+        this.programMarket = new JsonObject();
     }
-
 
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
@@ -43,10 +44,9 @@ public class RecapTab extends TabHelper {
             } else {
 
                 JsonArray programs = event.right().getValue();
-                //Delete tab if empty
-                setLabels();
                 setArray(programs);
 
+                //DElete tab if empty
                 if (programs.size() == 0) {
                     wb.removeSheetAt(wb.getSheetIndex(sheet));
 
@@ -56,133 +56,145 @@ public class RecapTab extends TabHelper {
         });
     }
 
-    //    /**
-//     * Set labels of the tabs
-//     */
-    @Override
-    protected void setLabels() {
-        int cellLabelColumn = 0;
-        int programRowNumber = 0;
-        String previousProgram = "";
-        int initProgramX = 0;
-        int endProgramX = 0;
-        cellColumn = 2;
-        ArrayList<String> programsActionList = new ArrayList<>();
-        if (programs.isEmpty()) {
-            return;
-        }
-        for (int i = 0; i < programs.size(); i++) {
-
-            JsonObject operation = programs.getJsonObject(i);
-            String actionsStrToArray = operation.getString(actionStr);
-            String labelOperation = operation.getString("label");
-
-            Row operationRow = sheet.createRow(this.operationsRowNumber);
-            excel.insertLabel(operationRow, cellLabelColumn, operation.getLong("id").toString());
-            excel.insertLabel(operationRow, cellLabelColumn + 1, labelOperation);
-
-
-            JsonArray actions = new JsonArray(actionsStrToArray);
-            if (actions.isEmpty()) continue;
-
-            for (int j = 0; j < actions.size(); j++) {
-                JsonObject action = actions.getJsonObject(j);
-                String program = action.getString("program");
-                String code = action.getString("code");
-                String key = program + " - " + code;
-                if (!programsActionList.contains(key))
-                    programsActionList.add(key);
-
-            }
-            Collections.sort(programsActionList);
-
-
-            operationsRowNumber++;
-        }
-
-        for (int j = 0; j < programsActionList.size(); j++) {
-            String key = programsActionList.get(j);
-            //getting program and code separated
-            String segments[] = key.split(" - ");
-            String program = segments[0];
-            String code = segments[1];
-            if (!programLabel.containsKey(key)) {
-                programLabel.put(key, programLabel.size());
-            }
-
-            if (previousProgram.equals(program)) {
-                endProgramX = cellColumn;
-            } else {
-                previousProgram = program;
-                if (initProgramX < endProgramX) {
-                    CellRangeAddress merge = new CellRangeAddress(programRowNumber, programRowNumber, initProgramX, endProgramX);
-                    sheet.addMergedRegion(merge);
-                    excel.setRegionHeader(merge, sheet);
-                }
-                initProgramX = cellColumn;
-                excel.insertHeader(programRowNumber, cellColumn, program);
-            }
-            excel.insertHeader(programRowNumber + 1, cellColumn, code);
-            cellColumn++;
-
-        }
-        if (initProgramX < endProgramX) {
-            CellRangeAddress merge = new CellRangeAddress(programRowNumber, programRowNumber, initProgramX, endProgramX);
-            sheet.addMergedRegion(merge);
-            excel.setRegionHeader(merge, sheet);
-        }
-    }
 
     @Override
     protected void setArray(JsonArray datas) {
 
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject operation = programs.getJsonObject(i);
+        setLabels();
 
-            String actionsStrToArray = operation.getString(actionStr);
-            JsonArray actions = new JsonArray(actionsStrToArray);
-            String old_key = "";
+        for (int i = 0; i < datas.size(); i++) {//operations
+
+            JsonObject operation = datas.getJsonObject(i);
+            String actionsStrToArray = operation.getString("actions");
+
+            excel.insertLabel(operationsRowNumber, 0, operation.getString("label"));
+
+            this.operationsRowNumber++;
+
             Float oldTotal = 0.f;
+            String oldkey = "";
 
-            JsonObject oldTotals = new JsonObject();
-
-            for (int j = 0; j < actions.size(); j++) {
-
+            JsonArray actions = new JsonArray(actionsStrToArray);
+            if (actions.isEmpty()) continue;
+            for (int j = 0; j < actions.size(); j++) { // datas of the array
                 JsonObject action = actions.getJsonObject(j);
-                String key = action.getString("program") + " - " + action.getString("code");
-                if (!oldTotals.containsKey(key)) {
-                    oldTotals.put(key, action.getFloat("total"));
-                } else {
-                    oldTotals.put(key, action.getFloat("total") + oldTotals.getFloat(key));
+                //get the key to insert the data
+                String key = action.getString("market") + " - " + action.getString("program") + " - " + action.getString("code");
+                if (programMarket.containsKey(key)) {
+                    if (!oldkey.equals(key)) {
+                        oldTotal = 0.f;
+                    }
+                    oldkey = key;
+                    oldTotal += action.getFloat("total");
+                    excel.insertCellTabFloat(1 + programMarket.getInteger(key), i + 9, oldTotal);
                 }
-
-
-//                if (!old_key.equals(key)) {
-//                    oldTotal = 0.f;
-//                }
-//                old_key = key;
-//                oldTotal += action.getFloat("total");
-                excel.insertCellTabFloat(programLabel.getInteger(key) + 2,
-                        2 + i,
-                        oldTotals.getFloat(key));
             }
         }
+        //Setting total
+        excel.insertYellowLabel(operationsRowNumber, 0, ExcelHelper.totalLabel);
+        excel.fillTab(1, programMarket.size() + 1, 9, 9 + datas.size()); // init all empty tab cells
 
-        excel.fillTab(2, programLabel.size() + 2, 2, operationsRowNumber);
-        excel.insertHeader(operationsRowNumber, 1, excel.totalLabel);
-
-        for (int i = 0; i < programLabel.size(); i++) {
-            excel.setTotalX(2, operationsRowNumber - 1, i + 2, operationsRowNumber);
+        for (int i = 1; i < programMarket.size() + 1; i++) {
+            excel.setTotalX(9, operationsRowNumber - 1, i, operationsRowNumber);
         }
 
-        excel.insertHeader(1, programLabel.size() + 2, excel.totalLabel);
+        excel.insertYellowLabel(8, programMarket.size() + 1, ExcelHelper.totalLabel);
 
         for (int i = 0; i <= datas.size(); i++) {
-            excel.setTotalY(2, programLabel.size() + 1, 2 + i, programLabel.size() + 2);
+            excel.setTotalY(1, programMarket.size(), 9 + i, programMarket.size() + 1);
         }
 
-        excel.autoSize(programLabel.size() + 3);
+        excel.autoSize(arrayLength + 1); // size all the colmuns wich contains datas to display
+
     }
+
+    @Override
+    protected void setLabels() {
+
+
+        ArrayList<String> programsActionList = new ArrayList<>();
+        String previousProgram = "";
+        String previousMarket = "";
+        CellRangeAddress merge;
+        int initProgramX = 0;
+        int endProgramX = 0;
+        int initMarketX = 0;
+        int endMarketX = 0;
+        for (int i = 0; i < datas.size(); i++) {
+
+            JsonObject operation = datas.getJsonObject(i);
+
+
+            String actionStr = operation.getString("actions");
+            JsonArray actions = new JsonArray(actionStr);
+            if (actions.isEmpty()) continue;
+            for (int j = 0; j < actions.size(); j++) {
+                JsonObject action = actions.getJsonObject(j);
+                //preparing keys
+                String programMarketStr = action.getString("market") + " - " + action.getString("program") + " - " + action.getString("code");
+                if (!programsActionList.contains(programMarketStr))//inserting the key filter
+                    programsActionList.add(programMarketStr);
+            }
+            // Sorted array
+            Collections.sort(programsActionList);
+
+
+        }
+        for (int i = 0; i < programsActionList.size(); i++) {
+            String progM = programsActionList.get(i);
+            //getting program and code separated
+            String segments[] = progM.split(" - ");
+
+            //merge region if same program
+            if (previousMarket.equals(segments[0])) { //if same market megred region instead
+                endMarketX = 1 + programMarket.size();
+                if (previousProgram.equals(segments[1])) { // if same program adding merged instead
+                    endMarketX = 1 + programMarket.size();
+
+                } else {
+
+                    previousProgram = segments[1];
+                    if (initProgramX < endProgramX) {
+                        merge = new CellRangeAddress(operationsRowNumber - 2, operationsRowNumber - 2, initProgramX, endProgramX);
+                        sheet.addMergedRegion(merge);
+                        excel.setRegionHeader(merge, sheet);
+                    }
+                    initProgramX = 3 + programMarket.size();
+                    excel.insertYellowLabel(operationsRowNumber - 2, 1 + programMarket.size(), segments[1]);
+                }
+            } else {
+                previousMarket = segments[0];
+                previousProgram = segments[1];
+                if (initMarketX < endMarketX) {
+                    merge = new CellRangeAddress(operationsRowNumber - 3, operationsRowNumber - 3, initMarketX, endMarketX);
+                    sheet.addMergedRegion(merge);
+                    excel.setRegionHeader(merge, sheet);
+                }
+                initMarketX = 1 + programMarket.size();
+                excel.insertYellowLabel(operationsRowNumber - 3, 1 + programMarket.size(), segments[0]);
+                excel.insertYellowLabel(operationsRowNumber - 2, 1 + programMarket.size(), segments[1]);
+            }
+            //always insert contract_type code
+            excel.insertYellowLabel(operationsRowNumber - 1, 1 + programMarket.size(), segments[2]);
+
+            programMarket.put(progM, i);
+        }
+
+        //merge last region if there is one
+        if (initProgramX < endProgramX) {
+            merge = new CellRangeAddress(operationsRowNumber - 2, operationsRowNumber - 2, initProgramX, endProgramX);
+            sheet.addMergedRegion(merge);
+            excel.setRegionHeader(merge, sheet);
+        }
+        if (initMarketX < endMarketX) {
+            merge = new CellRangeAddress(operationsRowNumber - 3, operationsRowNumber - 3, initMarketX, endMarketX);
+            sheet.addMergedRegion(merge);
+            excel.setRegionHeader(merge, sheet);
+        }
+
+        arrayLength += programMarket.size();
+    }
+
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
         query = "       With values as  (             " +
@@ -256,23 +268,20 @@ public class RecapTab extends TabHelper {
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                         "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                         "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region " +
-                        "             order by  program,code   " +
-                        "  )    SELECT values.id_operation as id, values.operation as label,    array_to_json(array_agg(values))as actions, SUM (values.total) as totalMarket       " +
-                        "  from  values      " +
-                        "  Group by values.id_operation, values.operation   " +
-                        "  Order by values.operation ;";
+                        "             order by market, program,code,orders.id_operation     )        " +
+                        "SELECT  values.operation as label, array_to_json(array_agg(values)) as actions  " +
+                        "FROM values" +
+
+                        " Group by label  ;";
+
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
                 handler.handle(event.left());
             } else {
-                programs = event.right().getValue();
-                handler.handle(new Either.Right<>(programs));
+                datas = event.right().getValue();
+                handler.handle(new Either.Right<>(datas));
             }
-
         }));
     }
-
-
 }
-

@@ -30,6 +30,8 @@ public abstract class TabHelper {
     protected int cellColumn = 1;
     protected boolean isEmpty = false;
     protected Logger log = LoggerFactory.getLogger(DefaultProjectService.class);
+    protected int arrayLength = 4;
+
 
     /**
      * Format : H-code

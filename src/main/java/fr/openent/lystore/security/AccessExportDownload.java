@@ -18,7 +18,7 @@ public class AccessExportDownload implements ResourcesProvider {
         String id, query;
 
         id = request.getParam("fileId");
-        query = "SELECT count(*) FROM lystore.export WHERE fileid = ? AND ownerid = ?";
+        query = "SELECT 1 FROM lystore.export WHERE fileid = ? AND ownerid = ?";
 
 
         if (id != null) {

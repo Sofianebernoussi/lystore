@@ -175,10 +175,11 @@ export const instructionController = ng.controller('instructionController',
 
         $scope.selectTypeForExport = async (type, instruction: Instruction) => {
             $scope.display.lightbox.exportEquipment = false;
+
             template.close('export.equipment.lightbox');
             $scope.notifications.push(new Notification('lystore.export.notif', 'info'));
             await instruction.getExportEquipment(type);
-
-
+            $scope.instructions.selected[0].selected = false;
+            Utils.safeApply($scope);
         }
     }]);

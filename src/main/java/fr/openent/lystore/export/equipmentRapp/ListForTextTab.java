@@ -148,13 +148,17 @@ public class ListForTextTab extends TabHelper {
                 if (!checkIdPassed(idPassed, action.getString("id_structure"))) {
                     columnTotal = 4;
                     idPassed.put(action.getString("id_structure"), true);
-                    excel.insertLabel(yProgramLabel, 0, action.getString("zipCode"));
+                    try {
+                        excel.insertLabel(yProgramLabel, 0, action.getString("zipCode").substring(0, 2));
+
+                    } catch (NullPointerException e) {
+                        excel.insertLabel(yProgramLabel, 0, action.getString("zipCode"));
+                    }
                     excel.insertLabel(yProgramLabel, 1, action.getString("city"));
                     excel.insertLabel(yProgramLabel, 2, action.getString("nameEtab"));
                     excel.insertLabel(yProgramLabel, 3, action.getString("uai"));
-                    if (!oldkey.equals(key)) {
-                        oldTotal = 0.f;
-                    }
+
+                    oldTotal = 0.f;
                     oldkey = key;
                     oldTotal += action.getFloat("total");
                     excel.insertCellTabFloat(4 + programLabel.getInteger(key),

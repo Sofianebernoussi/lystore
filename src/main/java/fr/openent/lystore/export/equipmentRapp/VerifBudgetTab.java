@@ -132,7 +132,7 @@ public class VerifBudgetTab extends TabHelper {
     }
 
     private void insertNewMarket(JsonObject data) {
-        currentY += 1;
+        currentY += 2;
 
         String market = data.getString("market");
         String totalMarket;
@@ -199,26 +199,27 @@ public class VerifBudgetTab extends TabHelper {
             } else
                 excel.insertLabel(currentY, 0, "");
             excel.insertLabel(currentY, 1, "R");
-            try {
-                if (!value.getString("old_name").equals("null")) {
-                    excel.insertLabel(currentY, 2, "REG : " + value.getString("old_name"));
-                } else {
-                    excel.insertLabel(currentY, 2, "REG : " + value.getString("name_equipment"));
-                }
-            } catch (NullPointerException e) {
-                excel.insertLabel(currentY, 2, "REG : " + value.getString("name_equipment"));
-            }
-            excel.insertCellTabStringRight(2, currentY, value.getInteger("amount").toString());
+            excel.insertLabel(currentY, 2, "REG : " + value.getString("name_equipment"));
+            excel.insertCellTabStringRight(3, currentY, value.getInteger("amount").toString());
             try {
                 excel.insertLabel(currentY, 4, "M : " + value.getString("total"));
             } catch (ClassCastException e) {
                 excel.insertLabel(currentY, 4, "M : " + value.getInteger("total").toString());
             }
+
             currentY++;
 
             excel.insertLabel(currentY, 0, "OPE  : " + value.getInteger("id_operation").toString());
             excel.insertLabel(currentY, 1, " ");
-            excel.insertLabel(currentY, 2, "LYC : " + value.getString("name_equipment"));
+            try {
+                if (!value.getString("old_name").equals("null")) {
+                    excel.insertLabel(currentY, 2, "LYC : " + value.getString("old_name"));
+                } else {
+                    excel.insertLabel(currentY, 2, "LYC : " + value.getString("name_equipment"));
+                }
+            } catch (NullPointerException e) {
+                excel.insertLabel(currentY, 2, "LYC : " + value.getString("name_equipment"));
+            }
             excel.insertLabel(currentY, 3, "Ref : " + value.getInteger("key").toString());
             if (value.getBoolean("region")) {
                 excel.insertLabel(currentY, 4, "N° dem : " + " - " + value.getInteger("id").toString());
@@ -329,7 +330,7 @@ public class VerifBudgetTab extends TabHelper {
                 "             program.name as program,         CASE WHEN orders.id_order_client_equipment is not null  " +
                 "             THEN  (select oce.name FROM " + Lystore.lystoreSchema + ".order_client_equipment oce    " +
                 "              where oce.id = orders.id_order_client_equipment limit 1)     " +
-                "             ELSE ''      " +
+                "             ELSE orders.name      " +
                 "             END as old_name,     " +
                 "             orders.id_structure,orders.id_operation as id_operation, label.label as operation ,     " +
                 "             orders.equipment_key as key, orders.name as name_equipment, true as region,    " +

@@ -71,6 +71,8 @@ public class RecapMarket extends TabHelper {
 
             this.operationsRowNumber++;
 
+            Float oldTotal = 0.f;
+            String oldkey = "";
 
             JsonArray actions = new JsonArray(actionsStrToArray);
             if (actions.isEmpty()) continue;
@@ -79,7 +81,12 @@ public class RecapMarket extends TabHelper {
                 //get the key to insert the data
                 String key = action.getString("market") + " - " + action.getString("program") + " - " + action.getString("code");
                 if (programMarket.containsKey(key)) {
-                    excel.insertCellTabFloat(1 + programMarket.getInteger(key), i + 9, action.getFloat("total"));
+                    if (!oldkey.equals(key)) {
+                        oldTotal = 0.f;
+                    }
+                    oldkey = key;
+                    oldTotal += action.getFloat("total");
+                    excel.insertCellTabFloat(1 + programMarket.getInteger(key), i + 9, oldTotal);
                 }
             }
         }
@@ -261,7 +268,7 @@ public class RecapMarket extends TabHelper {
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                         "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                         "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region " +
-                        "             order by  program,code,orders.id_operation     )        " +
+                        "             order by market, program,code,orders.id_operation     )        " +
                         "SELECT  values.operation as label, array_to_json(array_agg(values)) as actions  " +
                         "FROM values" +
 

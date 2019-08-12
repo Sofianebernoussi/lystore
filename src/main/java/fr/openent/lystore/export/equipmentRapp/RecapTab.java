@@ -84,6 +84,7 @@ public class RecapTab extends TabHelper {
 
             JsonArray actions = new JsonArray(actionsStrToArray);
             if (actions.isEmpty()) continue;
+
             for (int j = 0; j < actions.size(); j++) {
                 JsonObject action = actions.getJsonObject(j);
                 String program = action.getString("program");
@@ -94,34 +95,35 @@ public class RecapTab extends TabHelper {
 
             }
             Collections.sort(programsActionList);
-            for (int j = 0; j < programsActionList.size(); j++) {
-                String key = programsActionList.get(j);
-                //getting program and code separated
-                String segments[] = key.split(" - ");
-                String program = segments[0];
-                String code = segments[1];
-                if (!programLabel.containsKey(key)) {
-                    programLabel.put(key, programLabel.size());
 
 
-                    if (previousProgram.equals(program)) {
-                        endProgramX = cellColumn;
-                    } else {
-                        previousProgram = program;
-                        if (initProgramX < endProgramX) {
-                            CellRangeAddress merge = new CellRangeAddress(programRowNumber, programRowNumber, initProgramX, endProgramX);
-                            sheet.addMergedRegion(merge);
-                            excel.setRegionHeader(merge, sheet);
-                        }
-                        initProgramX = cellColumn;
-                        excel.insertHeader(programRowNumber, cellColumn, program);
-                    }
-                    excel.insertHeader(programRowNumber + 1, cellColumn, code);
-                    cellColumn++;
-                }
-            }
             operationsRowNumber++;
+        }
 
+        for (int j = 0; j < programsActionList.size(); j++) {
+            String key = programsActionList.get(j);
+            //getting program and code separated
+            String segments[] = key.split(" - ");
+            String program = segments[0];
+            String code = segments[1];
+            if (!programLabel.containsKey(key)) {
+                programLabel.put(key, programLabel.size());
+            }
+
+            if (previousProgram.equals(program)) {
+                endProgramX = cellColumn;
+            } else {
+                previousProgram = program;
+                if (initProgramX < endProgramX) {
+                    CellRangeAddress merge = new CellRangeAddress(programRowNumber, programRowNumber, initProgramX, endProgramX);
+                    sheet.addMergedRegion(merge);
+                    excel.setRegionHeader(merge, sheet);
+                }
+                initProgramX = cellColumn;
+                excel.insertHeader(programRowNumber, cellColumn, program);
+            }
+            excel.insertHeader(programRowNumber + 1, cellColumn, code);
+            cellColumn++;
 
         }
         if (initProgramX < endProgramX) {
@@ -134,7 +136,6 @@ public class RecapTab extends TabHelper {
     @Override
     protected void setArray(JsonArray datas) {
 
-
         for (int i = 0; i < datas.size(); i++) {
             JsonObject operation = programs.getJsonObject(i);
 
@@ -142,18 +143,28 @@ public class RecapTab extends TabHelper {
             JsonArray actions = new JsonArray(actionsStrToArray);
             String old_key = "";
             Float oldTotal = 0.f;
+
+            JsonObject oldTotals = new JsonObject();
+
             for (int j = 0; j < actions.size(); j++) {
 
                 JsonObject action = actions.getJsonObject(j);
                 String key = action.getString("program") + " - " + action.getString("code");
-                if (!old_key.equals(key)) {
-                    oldTotal = 0.f;
+                if (!oldTotals.containsKey(key)) {
+                    oldTotals.put(key, action.getFloat("total"));
+                } else {
+                    oldTotals.put(key, action.getFloat("total") + oldTotals.getFloat(key));
                 }
-                old_key = key;
-                oldTotal += action.getFloat("total");
+
+
+//                if (!old_key.equals(key)) {
+//                    oldTotal = 0.f;
+//                }
+//                old_key = key;
+//                oldTotal += action.getFloat("total");
                 excel.insertCellTabFloat(programLabel.getInteger(key) + 2,
                         2 + i,
-                        oldTotal);
+                        oldTotals.getFloat(key));
             }
         }
 
@@ -245,7 +256,7 @@ public class RecapTab extends TabHelper {
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                         "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                         "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region " +
-                        "             order by  program,code,orders.id_operation             " +
+                        "             order by  program,code   " +
                         "  )    SELECT values.id_operation as id, values.operation as label,    array_to_json(array_agg(values))as actions, SUM (values.total) as totalMarket       " +
                         "  from  values      " +
                         "  Group by values.id_operation, values.operation   " +

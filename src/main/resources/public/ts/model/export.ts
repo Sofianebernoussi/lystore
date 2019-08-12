@@ -9,6 +9,14 @@ export class Export implements Selectable {
     ownerid: string;
 
 
+    async delete() {
+        try {
+            await http.delete(`/lystore/export/${this.fileid}`);
+        } catch (e) {
+            notify.error('lystore.export.delete.err')
+        }
+
+    }
 }
 
 export class Exports extends Selection<Export> {

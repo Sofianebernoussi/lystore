@@ -165,13 +165,13 @@ export const instructionController = ng.controller('instructionController',
 
             Utils.safeApply($scope);
 
-        }
+        };
         $scope.openExportEquipmentRapp = (instruction) => {
             $scope.display.lightbox.exportEquipment = true;
             $scope.instructionToExport = instruction;
             template.open('export.equipment.lightbox', 'administrator/instruction/export-equipment-rapport-lightbox');
 
-        }
+        };
 
         $scope.selectTypeForExport = async (type, instruction: Instruction) => {
             $scope.display.lightbox.exportEquipment = false;

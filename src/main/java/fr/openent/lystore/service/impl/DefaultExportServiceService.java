@@ -6,6 +6,7 @@ import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.storage.Storage;
@@ -41,5 +42,27 @@ public class DefaultExportServiceService implements ExportService {
                 "FROM " + Lystore.lystoreSchema + ".export " +
                 "WHERE fileId = ?";
         Sql.getInstance().prepared(query, new JsonArray().add(fileId), SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void deleteExport(String fileId, Handler<JsonObject> handler) {
+        deleteExportSql(fileId, new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(Either<String, JsonArray> event) {
+                if (event.isLeft()) {
+                    handler.handle(new JsonObject().put("error", "Error when deleting in SQL"));
+                } else {
+                    storage.removeFile(fileId, handler);
+                }
+            }
+        });
+    }
+
+    private void deleteExportSql(String fileId, Handler<Either<String, JsonArray>> handler) {
+        String query = "DELETE " +
+                "FROM " + Lystore.lystoreSchema + ".export " +
+                "WHERE fileId = ?";
+        Sql.getInstance().prepared(query, new JsonArray().add(fileId), SqlResult.validResultHandler(handler));
+
     }
 }

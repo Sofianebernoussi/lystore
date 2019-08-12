@@ -513,5 +513,10 @@
   "lystore.order.operation.delete": "Demande retirée de cette opération",
   "lystore.admin.order.get.err": "Une erreur est survenue lors de la récupération d'une demande",
   "IN PROGRESS": "En progression",
-  "lystore.type": "Type"
+  "lystore.type": "Type",
+  "delete.export.question": "Voulez vous supprimer l'export suivant ?",
+  "delete.export.label": "Nom du fichier",
+  "lystore.delete.notif": "Votre fichier a bien été supprimé",
+  "export.delete.lightbox.title": "Suppresion d'un export",
+  "lystore.export.delete.err": "Erreur lors de la suppression d'un export"
 }

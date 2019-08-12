@@ -504,7 +504,7 @@
   "lystore.lycee": "Lycées",
   "lystore.cmr": "CMR",
   "lystore.cmd": "CMD",
-  "lystore.export.equipment.title": "Sélectionner le type d'établissement dont' vous souhaitez l'export",
+  "lystore.export.equipment.title": "Sélectionner le type d'établissement dont vous souhaitez l'export",
   "lystore.nameFile": "Nom du fichier",
   "lystore.creation.date": "Date de création",
   "lystore.list.export.title": "Liste des fichiers créés",
@@ -512,5 +512,6 @@
   "lystore.goTo.exports": "Mes exports",
   "lystore.order.operation.delete": "Demande retirée de cette opération",
   "lystore.admin.order.get.err": "Une erreur est survenue lors de la récupération d'une demande",
-  "IN PROGRESS": "En progression"
+  "IN PROGRESS": "En progression",
+  "lystore.type" : "Type"
 }

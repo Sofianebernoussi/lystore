@@ -66,7 +66,7 @@
                    class="cell horizontal-margin"
                    ng-class="{'two': orderToUpdate.order_client_equipment_parent, 'six': !orderToUpdate.order_client_equipment_parent}"
             >
-                [[orderToUpdate.price_proposal * orderToUpdate.amount]] €
+                <span ng-bind="orderToUpdate.price_proposal * orderToUpdate.amount | currency"></span>
             </label>
         </div>
 

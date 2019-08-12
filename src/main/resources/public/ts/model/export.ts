@@ -9,6 +9,9 @@ export class Export implements Selectable {
     ownerid: string;
 
 
+    delete() {
+
+    }
 }
 
 export class Exports extends Selection<Export> {

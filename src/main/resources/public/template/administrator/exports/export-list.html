@@ -22,6 +22,7 @@
                     </i18n>
                 </td>
                 <td></td>
+                <td></td>
             </tr>
             </thead>
             <tbody>
@@ -35,8 +36,16 @@
                 <td>
                     <i class="downloadButton"></i>
                 </td>
+                <td ng-click="$event.stopPropagation();confirmDelete(export)">
+                    <i class="trash"></i>
+                </td>
             </tr>
             </tbody>
         </table>
     </article>
+    <lightbox show="display.delete"
+    >
+        <container template="export.delete.lightbox"></container>
+    </lightbox>
 </div>
+

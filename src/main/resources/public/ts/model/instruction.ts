@@ -88,7 +88,6 @@ export class Instruction implements Selectable {
     async getExportRME() {
         try {
             const {data} = await http.get(`/lystore/instructions/${this.id}/export`);
-            console.log(data)
         } catch (e) {
             notify.error("lystore.instruction.get.err")
         }
@@ -96,7 +95,14 @@ export class Instruction implements Selectable {
     async getExportEquipment(type: any) {
         try {
             const {data} = await http.get(`/lystore/instructions/export/equipment/rapport/${this.id}/${type}`);
-            console.log(data)
+        } catch (e) {
+            notify.error("lystore.instruction.get.err")
+        }
+    }
+
+    async exportNotificationCP() {
+        try {
+            const {data} = await http.get(`/lystore/instructions/export/notification/equpment/${this.id}`);
         } catch (e) {
             notify.error("lystore.instruction.get.err")
         }

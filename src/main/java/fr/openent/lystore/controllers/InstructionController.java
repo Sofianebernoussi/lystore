@@ -142,4 +142,13 @@ public class InstructionController extends ControllerHelper {
     public void getOperationOfInstruction(HttpServerRequest request) {
         instructionService.getOperationOfInstruction(Integer.parseInt(request.getParam("id")), arrayResponseHandler(request));
     }
+
+    @Get("/instructions/export/notification/equpment/:id")
+    @ApiDoc("export given instruction")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void exportNotificationEquipment(HttpServerRequest request) {
+
+    }
+
 }

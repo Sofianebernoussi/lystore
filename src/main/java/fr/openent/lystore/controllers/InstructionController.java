@@ -148,7 +148,17 @@ public class InstructionController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void exportNotificationEquipment(HttpServerRequest request) {
-
+        UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+            @Override
+            public void handle(UserInfos user) {
+                eb.send(ExportWorker.class.getSimpleName(),
+                        new JsonObject().put("action", "exportNotificationCP")
+                                .put("id", Integer.parseInt(request.getParam("id")))
+                                .put("userId", user.getUserId()),
+                        handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
+            }
+        });
+        request.response().setStatusCode(200).end("Import started");
     }
 
 }

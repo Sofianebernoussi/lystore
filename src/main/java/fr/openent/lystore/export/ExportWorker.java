@@ -46,11 +46,27 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                         event.body().getInteger("id"),
                         event.body().getString("userId"));
                 break;
+            case "exportNotificationCP":
+                exportNotificationCp(event.body().getInteger("id"),
+                        event.body().getString("userId"));
+                break;
             default:
                 logger.error("Invalid action in worker");
                 break;
 
         }
+    }
+
+    private void exportNotificationCp(Integer id, String userId) {
+        this.instruction.exportNotficationCp(event1 -> {
+            if (event1.isLeft()) {
+                logger.error("error when creating xlsx");
+            } else {
+                Buffer xlsx = event1.right().getValue();
+                String fileName = getDate() + "_Notification_Equipement_CP" + ".xlsx";
+                saveBuffer(userId, xlsx, fileName);
+            }
+        });
     }
 
 

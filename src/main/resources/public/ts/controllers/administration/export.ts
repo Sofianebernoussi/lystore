@@ -15,11 +15,12 @@ export const exportCtrl = ng.controller('exportCtrl', [
         $scope.getFormatedDate = (date) => {
             return moment(date).format("DD/MM/YYYY HH:mm:ss");
         };
-        $scope.exports.all.map(exportT => {
-            exportT.created = $scope.getFormatedDate(exportT.created)
-        });
-        Utils.safeApply($scope);
-
+        $scope.updateDate = () => {
+            $scope.exports.all.map(exportT => {
+                exportT.created = $scope.getFormatedDate(exportT.created)
+            });
+            Utils.safeApply($scope);
+        };
         $scope.getExport = (exportTemp: Export) => {
             window.location = `lystore/export/${exportTemp.fileid}`;
 
@@ -45,7 +46,9 @@ export const exportCtrl = ng.controller('exportCtrl', [
             template.close('export.delete.lightbox');
             $scope.notifications.push(new Notification('lystore.delete.notif', 'confirm'));
             $scope.exportToDelete = new Export();
-            Utils.safeApply($scope);
-        }
+            await $scope.exports.getExports();
+            $scope.updateDate()
+        };
+        $scope.updateDate();
     }
 ]);

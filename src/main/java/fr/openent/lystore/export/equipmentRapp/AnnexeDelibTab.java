@@ -279,7 +279,7 @@ public class AnnexeDelibTab extends TabHelper {
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                         "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                         "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region ,campaign" +
-                        "             order by  orders.id_operation,program,code ,orders.id_structure    )        " +
+                        "             order by orders.id_structure    )        " +
                         "  SELECT values.*    " +
                         " from values  " +
                         " order by id_structure,program  " +

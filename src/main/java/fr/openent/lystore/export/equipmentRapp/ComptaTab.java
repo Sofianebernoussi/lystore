@@ -291,7 +291,7 @@ public class ComptaTab extends TabHelper {
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                         "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                         "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region ,campaign" +
-                        "             order by  orders.id_operation,program,code ,orders.id_structure    )        " +
+                        "             order by  campaign,program,code ,orders.id_structure    )        " +
                         " SELECT values.operation as label , array_to_json(array_agg(values)) as actions   " +
                         " from values  " +
                         " Group by label ; ";

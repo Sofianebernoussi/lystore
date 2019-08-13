@@ -77,12 +77,12 @@ public class ExportController extends ControllerHelper {
             @Override
             public void handle(JsonObject event) {
                 if (event.getString("status").equals("ok")) {
-                    Logging.defaultResponseHandler(eb,
+                    exportService.deleteExportSql(fileId, Logging.defaultResponseHandler(eb,
                             request,
                             Contexts.EXPORT.toString(),
                             Actions.DELETE.toString(),
-                            null,
-                            new JsonObject().put("id", fileId));
+                            fileId,
+                            new JsonObject().put("id", fileId)));
                 } else {
                     badRequest(request);
                     log.error("Erreur deleting file in storage");

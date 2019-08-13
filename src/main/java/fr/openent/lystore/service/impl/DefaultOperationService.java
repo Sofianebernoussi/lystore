@@ -22,8 +22,6 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-import static fr.openent.lystore.service.impl.SqlUtils.getAllPriceOperation;
-
 public class DefaultOperationService extends SqlCrudService implements OperationService {
 
     public DefaultOperationService(String schema, String table) {
@@ -124,7 +122,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
 
                     SqlUtils.getCountOrderInOperation(idsOperations, FutureHelper.handlerJsonArray(getCountOrderInOperationFuture));
                     getInstructionForOperation(idsOperations, FutureHelper.handlerJsonArray(getInstructionForOperationFuture));
-                    getAllPriceOperation(idsOperations, FutureHelper.handlerJsonArray(getAllPriceOperationFuture));
+                    SqlUtils.getAllPriceOperation(idsOperations, FutureHelper.handlerJsonArray(getAllPriceOperationFuture));
 
 
                 } else {

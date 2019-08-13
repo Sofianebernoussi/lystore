@@ -57,7 +57,9 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
         }
     }
 
-    private void exportNotificationCp(Integer id, String userId) {
+    private void exportNotificationCp(Integer instructionId, String userId) {
+        this.instruction = new Instruction(instructionId);
+
         this.instruction.exportNotficationCp(event1 -> {
             if (event1.isLeft()) {
                 logger.error("error when creating xlsx");

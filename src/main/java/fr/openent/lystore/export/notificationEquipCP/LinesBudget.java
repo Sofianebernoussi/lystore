@@ -14,6 +14,8 @@ public class LinesBudget extends TabHelper {
 
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
+        excel.setCPNumber(instruction.getString("cp_number"));
+
         handler.handle(new Either.Right<>(true));
     }
 

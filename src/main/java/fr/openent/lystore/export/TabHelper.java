@@ -31,6 +31,7 @@ public abstract class TabHelper {
     protected boolean isEmpty = false;
     protected Logger log = LoggerFactory.getLogger(DefaultProjectService.class);
     protected int arrayLength = 4;
+    protected JsonArray datas;
 
 
     /**

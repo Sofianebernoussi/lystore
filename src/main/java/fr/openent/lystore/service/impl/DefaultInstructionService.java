@@ -106,14 +106,25 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
     public void getOperationOfInstruction(Integer IdInstruction, Handler<Either<String, JsonArray>> handler) {
         JsonArray idInstructionParams = new JsonArray().add(IdInstruction);
 
-        String queryOperation = "SELECT " +
-                "operation.*, " +
-                "to_json(label_operation.*) AS label " +
-                "FROM " + Lystore.lystoreSchema +".operation " +
-                "INNER JOIN " + Lystore.lystoreSchema +".label_operation ON operation.id_label = label_operation.id " +
-                "LEFT JOIN " + Lystore.lystoreSchema +".order_client_equipment oce ON oce.id_operation = operation.id " +
+        String queryOperation = "" +
+                "SELECT operation.*,  " +
+                "       array_to_json(array_agg(ct.name)) AS order_contract_type,  " +
+                "       to_json(label.*) AS label  " +
+                "FROM " + Lystore.lystoreSchema +".operation  " +
+                "INNER JOIN " + Lystore.lystoreSchema +".label_operation label ON label.id = operation.id_label  " +
+                "LEFT JOIN " + Lystore.lystoreSchema +".order_client_equipment oce ON oce.id_operation = operation.id  " +
+                "AND oce.override_region IS FALSE  " +
+                "AND oce.status = 'IN PROGRESS'  " +
+                "LEFT JOIN " + Lystore.lystoreSchema +".\"order-region-equipment\" ore ON ore.id_operation = operation.id  " +
+                "LEFT JOIN " + Lystore.lystoreSchema +".order o_client ON o_client.id = oce.id_order  " +
+                "LEFT JOIN " + Lystore.lystoreSchema +".order o_region ON o_region.id = ore.id_order  " +
+                "LEFT JOIN " + Lystore.lystoreSchema +".contract c_client ON c_client.id = oce.id_contract  " +
+                "LEFT JOIN " + Lystore.lystoreSchema +".contract c_region ON c_region.id = ore.id_contract  " +
+                "LEFT JOIN " + Lystore.lystoreSchema +".contract_type ct ON ct.id = c_client.id_contract_type  " +
+                "OR ct.id = c_region.id_contract_type  " +
                 "WHERE id_instruction = ? " +
-                "GROUP BY (operation.id, label_operation.id)";
+                "GROUP BY (operation.id,  " +
+                "          label.*)";
 
         sql.getInstance().prepared(queryOperation, idInstructionParams, SqlResult.validResultHandler(eventOperation -> {
             try{

@@ -56,19 +56,23 @@ public class DefaultOperationService extends SqlCrudService implements Operation
             }
         }
 
-        String queryOperation = "SELECT " +
-                "operation.* , " +
-                "to_json(label.*) as label, " +
-                "array_to_json(array_agg(o.order_number)) as bc_number, " +
-                "array_to_json(array_agg(o.label_program)) as programs, " +
-                "array_to_json(array_agg(c.name)) as contracts " +
-                "FROM  " + Lystore.lystoreSchema +".operation "+
-                "INNER JOIN " + Lystore.lystoreSchema +".label_operation label on label.id = operation.id_label "+
-                "LEFT JOIN " + Lystore.lystoreSchema +".order_client_equipment oce on oce.id_operation = operation.id "+
-                "LEFT JOIN " + Lystore.lystoreSchema +".order o on o.id = oce.id_order "+
-                "LEFT JOIN " + Lystore.lystoreSchema +".contract c on c.id = oce.id_contract " +
-                getTextFilter(filters) +
-                " GROUP BY (operation.id, label.*)";
+        String queryOperation = "" +
+                "SELECT operation.*,  " +
+                "       to_json(label.*) AS label,  " +
+                "       array_to_json(array_agg( o_client.order_number) || array_agg(o_region.order_number)) AS bc_number,  " +
+                "       array_to_json(array_agg(DISTINCT oce.program) || array_agg(DISTINCT ore.program)) AS programs,  " +
+                "       array_to_json(array_agg(DISTINCT c_client.name) || array_agg(DISTINCT c_region.name)) AS contracts  " +
+                "FROM    " + Lystore.lystoreSchema +".operation  " +
+                "INNER JOIN    " + Lystore.lystoreSchema +".label_operation label ON label.id = operation.id_label  " +
+                "LEFT JOIN    " + Lystore.lystoreSchema +".order_client_equipment oce ON oce.id_operation = operation.id AND oce.override_region IS false AND oce.status = 'IN PROGRESS'  " +
+                "LEFT JOIN    " + Lystore.lystoreSchema +".\"order-region-equipment\" ore ON ore.id_operation = operation.id  " +
+                "LEFT JOIN    " + Lystore.lystoreSchema +".order o_client ON o_client.id = oce.id_order  " +
+                "LEFT JOIN    " + Lystore.lystoreSchema +".order o_region ON o_region.id = ore.id_order  " +
+                "LEFT JOIN    " + Lystore.lystoreSchema +".contract c_client ON c_client.id = oce.id_contract   " +
+                "LEFT JOIN    " + Lystore.lystoreSchema +".contract c_region ON  c_region.id = ore.id_contract  " +
+                getTextFilter(filters) + " " +
+                "GROUP BY (operation.id,  " +
+                "          label.*)";
 
         Sql.getInstance().prepared(queryOperation, params, SqlResult.validResultHandler(operationsEither -> {
             try {
@@ -100,7 +104,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                             for (int j = 0; j < getOrderCount.size(); j++) {
                                 JsonObject countOrders = getOrderCount.getJsonObject(j);
                                 if (operation.getInteger("id").equals(countOrders.getInteger("id"))) {
-                                    operation.put("nbr_sub", countOrders.getString("nbr_sub"));
+                                    operation.put("nb_orders", countOrders.getString("nb_orders"));
                                 }
                             }
                             for (int k = 0; k < getInstruction.size(); k++) {

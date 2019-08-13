@@ -19,7 +19,7 @@ import java.util.Collections;
 public class LinesBudget extends TabHelper {
     private StructureService structureService;
     private ArrayList<Integer> codes = new ArrayList<>();
-    private int lineNumber = 3;
+    private int lineNumber = 2;
     public LinesBudget(Workbook workbook, JsonObject instruction) {
         super(workbook, instruction, "Lignes Budgetaires");
         structureService = new DefaultStructureService(Lystore.lystoreSchema);
@@ -96,18 +96,33 @@ public class LinesBudget extends TabHelper {
 
     @Override
     protected void setArray(JsonArray datas) {
+        String previousOperation = "";
         for (int i = 0; i < datas.size(); i++) {
+            Float totalToInsert = 0.f;
+            String previousStructure = "";
             JsonObject operationData = datas.getJsonObject(i);
             JsonArray orders = operationData.getJsonArray("actionsJO");
 
+            excel.insertLabel(lineNumber, 1, operationData.getString("label"));
+
             for (int j = 0; j < orders.size(); j++) {
                 JsonObject order = orders.getJsonObject(j);
-                excel.insertLabel(lineNumber, 2, order.getString("uai"));
-                excel.insertLabel(lineNumber, 3, order.getString("type"));
-                excel.insertLabel(lineNumber, 4, order.getString("nameEtab"));
+                String currentStructure = order.getString("id_structure");
+                if (!previousStructure.equals(currentStructure)) {
+                    lineNumber++;
+                    totalToInsert = 0.f;
+                    previousStructure = currentStructure;
+                    excel.insertLabel(lineNumber, 2, order.getString("uai"));
+                    excel.insertLabel(lineNumber, 3, order.getString("type"));
+                    excel.insertLabel(lineNumber, 4, order.getString("nameEtab"));
 
-                lineNumber++;
+                }
+                totalToInsert += order.getFloat("total");
+                excel.insertCellTabFloat(
+                        5 + codes.indexOf(Integer.parseInt(order.getString("code"))), lineNumber, totalToInsert);
             }
+            lineNumber += 3;
+
         }
     }
 
@@ -187,7 +202,7 @@ public class LinesBudget extends TabHelper {
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                 "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                 "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region ,campaign " +
-                " order by orders.id_structure    )        " +
+                " order by orders.id_structure,code   )        " +
                 " SELECT values.operation as label , array_to_json(array_agg(values)) as actions   " +
                 " from values  " +
                 " Group by label ; ";

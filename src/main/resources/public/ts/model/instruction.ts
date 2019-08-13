@@ -69,8 +69,9 @@ export class Instruction implements Selectable {
                 operation.label.toString() !== 'null' && operation.label !== null ?
                     operation.label = Mix.castAs(label, JSON.parse(operation.label.toString()))
                     : operation.label = new label();
-                    operation.status = operation.status? true : false;
-                });
+                operation.status = operation.status? true : false;
+                operation.nbOrberSub = JSON.parse(operation.order_contract_type.toString()).filter(contract => contract === "Subventions").length
+            });
         } catch (e) {
             notify.error("lystore.instruction.get.err");
             throw e;

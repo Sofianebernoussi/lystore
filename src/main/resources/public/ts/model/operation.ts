@@ -5,6 +5,7 @@ import {Utils} from "./Utils";
 import {Instruction} from "./instruction";
 import {OrderClient} from "./OrderClient";
 import {Structure} from "./Structure";
+import {Contract} from "./Contract";
 
 
 export class Operation implements Selectable {
@@ -22,6 +23,8 @@ export class Operation implements Selectable {
     id_instruction: number;
     instruction: Instruction;
     date_cp: Date;
+    nbOrberSub: Number;
+    order_contract_type : Array<any>;
     constructor(){
 
     }

@@ -60,7 +60,7 @@
                     class="four cell horizontal-margin"
                    ng-if="orderToUpdate.order_client_equipment_parent"
             >
-                [[orderToUpdate.order_client_equipment_parent.price_total]] €
+                <span ng-bind="orderToUpdate.order_client_equipment_parent.price_total | currency"></span>
             </span>
             <label
                    class="cell horizontal-margin"
@@ -125,7 +125,7 @@
                     class="four cell horizontal-margin"
                     ng-if="orderToUpdate.order_client_equipment_parent"
             >
-                [[orderToUpdate.order_client_equipment_parent.price_united]] €
+                <span ng-bind="orderToUpdate.order_client_equipment_parent.price_united | currency"></span>
             </span>
             <input type="number"
                    step="0.01"

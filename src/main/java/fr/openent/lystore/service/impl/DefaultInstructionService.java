@@ -154,7 +154,7 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                             for (int j = 0; j < getNbrOrder.size(); j++) {
                                 JsonObject countOrders = getNbrOrder.getJsonObject(j);
                                 if (operation.getInteger("id").equals(countOrders.getInteger("id"))) {
-                                    operation.put("nbr_sub", countOrders.getString("nbr_sub"));
+                                    operation.put("nb_orders", countOrders.getString("nb_orders"));
                                 }
                             }
                             for (int j = 0; j < getAmountsDemands.size(); j++) {

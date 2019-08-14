@@ -29,7 +29,12 @@ export const operationController = ng.controller('operationController',
 
         $scope.getFirstElement = jsonArray => {
             let arrayLookFor = JSON.parse(jsonArray);
-            return arrayLookFor[0] !== null ? arrayLookFor[0] : "-" ;
+            for(let i = 0 ; i<arrayLookFor.length ; i++){
+                if(arrayLookFor[i] !== null){
+                    return arrayLookFor[i];
+                }
+            }
+            return "-" ;
         };
 
         $scope.switchAll = (model: boolean, collection) => {
@@ -100,7 +105,7 @@ export const operationController = ng.controller('operationController',
             Utils.safeApply($scope);
         };
         $scope.deleteOperations = async () => {
-            if($scope.operations.selected.some(operation => operation.nbr_sub !== 0 )){
+            if($scope.operations.selected.some(operation => operation.nb_orders !== 0 )){
                 template.open('operation.lightbox', 'administrator/operation/operation-delete-reject-lightbox');
             } else {
                 await $scope.operations.delete();
@@ -131,9 +136,10 @@ export const operationController = ng.controller('operationController',
         };
         $scope.formatArrayToolTip = (tooltipsIn:string) => {
             let tooltips = JSON.parse(tooltipsIn);
-            if(tooltips.some(tooltip => tooltip === null) || (tooltips.length === 1 && tooltips[0] === null)){
+            if(tooltips.length === 0 ){
                 return ""
             } else {
+                tooltips = tooltips.filter( el => el !== null);
                 return _.uniq(tooltips).join(" - ");
             }
         };

@@ -17,7 +17,7 @@ export class Operation implements Selectable {
     bc_numbers:Array<any> ;
     programs : Array<any> ;
     contracts: Array<any> ;
-    nbr_sub: number;
+    nb_orders: number;
     amount: number;
     selected:boolean;
     id_instruction: number;
@@ -110,7 +110,7 @@ export class Operations extends Selection<Operation>{
                 operation.instruction ?
                     operation.instruction =  JSON.parse(operation.instruction.toString())
                     : operation.instruction = null;
-                operation.nbr_sub = operation.nbr_sub || 0;
+                operation.nb_orders = operation.nb_orders || 0;
             })
         } catch(e){
             notify.error('lystore.operation.sync.err');

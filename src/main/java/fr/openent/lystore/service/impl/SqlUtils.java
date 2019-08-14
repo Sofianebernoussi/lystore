@@ -152,7 +152,7 @@ public final class SqlUtils {
      * Returns an array to object with a count to order affect to operation without order edit by region and with new region order
      *
      * @param idsOperations JsonArray
-     * @param handler       Function handler json array ex [{"id":45,"nbr_sub":"5"},{"id":46,"nbr_sub":"1"},{"id":47,"nbr_sub":"3"}]
+     * @param handler       Function handler json array ex [{"id":45,"nb_orders":"5"},{"id":46,"nb_orders":"1"},{"id":47,"nb_orders":"3"}]
      */
     public static void getCountOrderInOperation(JsonArray idsOperations, Handler<Either<String, JsonArray>> handler) {
         try {
@@ -160,7 +160,7 @@ public final class SqlUtils {
             String status = "IN PROGRESS";
             String queryGetTotalOperation = "" +
                     "SELECT id,  " +
-                    "       SUM(nb_orders) AS nbr_sub  " +
+                    "       SUM(nb_orders) AS nb_orders  " +
                     "FROM  " +
                     "  (SELECT oce.id_operation AS id,  " +
                     "   oce.id AS c,  " +

@@ -16,7 +16,8 @@ public enum Contexts {
     ORDER ("ORDER"),
     ORDERREGION ("ORDERREGION"),
     OPERATION("OPERATION"),
-    INSTRUCTION("INSTRUCTION");
+    INSTRUCTION("INSTRUCTION"),
+    EXPORT("EXPORT");
 
     private final String contextName;
 

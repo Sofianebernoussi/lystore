@@ -19,7 +19,8 @@ import java.util.Collections;
 public class LinesBudget extends TabHelper {
     private StructureService structureService;
     private ArrayList<Integer> codes = new ArrayList<>();
-    private int lineNumber = 2;
+    private int arraylength = 5;
+    private int lineNumber = 1;
     public LinesBudget(Workbook workbook, JsonObject instruction) {
         super(workbook, instruction, "Lignes Budgetaires");
         structureService = new DefaultStructureService(Lystore.lystoreSchema);
@@ -28,7 +29,7 @@ public class LinesBudget extends TabHelper {
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
-        excel.setCPNumber(instruction.getString("cp_number"));
+        excel.setCPNumber(instruction.getString("cp_number"), 1, 1);
         getDatas(event -> {
             if (event.isLeft()) {
                 log.error("Failed to retrieve datas");
@@ -97,33 +98,56 @@ public class LinesBudget extends TabHelper {
     @Override
     protected void setArray(JsonArray datas) {
         String previousOperation = "";
+        int initLineNumber;
+
         for (int i = 0; i < datas.size(); i++) {
             Float totalToInsert = 0.f;
             String previousStructure = "";
             JsonObject operationData = datas.getJsonObject(i);
             JsonArray orders = operationData.getJsonArray("actionsJO");
-
-            excel.insertLabel(lineNumber, 1, operationData.getString("label"));
+            String labelOperation = operationData.getString("label");
+            boolean operationAdded = false;
+            initLineNumber = lineNumber;
+            int nbTotaux = 0;
 
             for (int j = 0; j < orders.size(); j++) {
+
                 JsonObject order = orders.getJsonObject(j);
                 String currentStructure = order.getString("id_structure");
                 if (!previousStructure.equals(currentStructure)) {
+                    nbTotaux++;
                     lineNumber++;
+                    if (!operationAdded) {
+                        excel.insertWhiteOnBlueTab(lineNumber, 1, labelOperation);
+                        operationAdded = true;
+                    }
                     totalToInsert = 0.f;
                     previousStructure = currentStructure;
-                    excel.insertLabel(lineNumber, 2, order.getString("uai"));
-                    excel.insertLabel(lineNumber, 3, order.getString("type"));
-                    excel.insertLabel(lineNumber, 4, order.getString("nameEtab"));
+                    excel.insertWhiteOnBlueTab(lineNumber, 2, order.getString("uai"));
+                    excel.insertWhiteOnBlueTab(lineNumber, 3, order.getString("type"));
+                    excel.insertWhiteOnBlueTab(lineNumber, 4, order.getString("nameEtab"));
 
                 }
                 totalToInsert += order.getFloat("total");
-                excel.insertCellTabFloat(
-                        5 + codes.indexOf(Integer.parseInt(order.getString("code"))), lineNumber, totalToInsert);
+                excel.insertFloatYellow(lineNumber,
+                        5 + codes.indexOf(Integer.parseInt(order.getString("code"))), totalToInsert);
             }
-            lineNumber += 3;
+            //insert Total
+            excel.fillTabWithStyle(1, 4, initLineNumber + 1, lineNumber + 1, excel.whiteOnBlueLabel);
+            excel.fillTabWithStyle(5, arraylength, initLineNumber + 1, lineNumber + 1, excel.floatOnYellowStyle);
+
+            lineNumber++;
+            excel.insertHeader(lineNumber, 1, excel.totalLabel + " : " + labelOperation);
+            for (int nbTotal = 0; nbTotal < codes.size(); nbTotal++) {
+                excel.setTotalX(initLineNumber + 1, lineNumber - 1, 5 + nbTotal, lineNumber);
+            }
+            for (int nbTotal = 0; nbTotal <= nbTotaux; nbTotal++) {
+                excel.setTotalY(5, arraylength - 1, initLineNumber + 1 + nbTotal, arraylength);
+            }
+            lineNumber++;
 
         }
+        excel.autoSize(arrayLength + 1);
     }
 
     protected void setLabels() {
@@ -143,6 +167,7 @@ public class LinesBudget extends TabHelper {
         for (int i = 0; i < codes.size(); i++) {
             excel.insertLabel(1, 5 + i, codes.get(i).toString());
         }
+        arraylength += codes.size();
     }
 
 
@@ -188,7 +213,7 @@ public class LinesBudget extends TabHelper {
                 "             id_order, comment, rank as \"prio\", price_proposal, id_project, null as id_order_client_equipment,  program, action,  " +
                 "             id_operation, override_region           from " + Lystore.lystoreSchema + ".order_client_equipment  oce) " +
                 "             ) as orders       " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (orders.id_operation = operation.id)               " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (orders.id_operation = operation.id   and (orders.override_region != true OR orders.override_region is NULL))               " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)      " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)    " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id)                  " +

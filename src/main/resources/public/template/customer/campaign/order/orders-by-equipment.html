@@ -31,7 +31,10 @@
                 <div class="eleven centered">
                     <h3>[[orderClient.name]]</h3>
                     <p ng-bind-html="orderClient.summary"></p>
-                    <div class="project">Project: [[ orderClient.project.title['name'] ]]</div>
+                    <div class="project">
+                        <i18n>lystore.output.project</i18n>
+                        [[ orderClient.project.title['name'] ]]
+                    </div>
                     <a ng-init="display.ordersClientOption[$index] = false"
                        ng-click="displayEquipmentOption($index)"
                        ng-show="orderClient.options.length > 0">

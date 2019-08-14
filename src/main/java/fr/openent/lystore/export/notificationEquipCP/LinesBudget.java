@@ -132,7 +132,8 @@ public class LinesBudget extends TabHelper {
 
                 }
                 if (!previousCode.equals(code)) {
-//                    totalToInsert = 0.f;
+                    previousCode = code;
+                    totalToInsert = 0.f;
                 }
                 totalToInsert += order.getFloat("total");
                 excel.insertFloatYellow(lineNumber,
@@ -179,7 +180,6 @@ public class LinesBudget extends TabHelper {
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
-
         query = "       With values as  (             " +
                 "     SELECT  orders.id ,orders.\"price TTC\",  " +
                 "             ROUND((( SELECT CASE          " +
@@ -192,7 +192,7 @@ public class LinesBudget extends TabHelper {
                 "              where oco.id_order_client_equipment = orders.id " +
                 "             ) + orders.\"price TTC\" " +
                 "              ) * orders.amount   ,2 ) " +
-                "             as Total, contract.name as market, contract_type.code as code, campaign.name as campaign,   " +
+                "             as Total, contract.name as market, contract_type.code as code,    " +
                 "             program.name as program,         CASE WHEN orders.id_order_client_equipment is not null  " +
                 "             THEN  (select oce.name FROM " + Lystore.lystoreSchema + ".order_client_equipment oce    " +
                 "              where oce.id = orders.id_order_client_equipment limit 1)     " +
@@ -221,22 +221,30 @@ public class LinesBudget extends TabHelper {
                 "             ) as orders       " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (orders.id_operation = operation.id   and (orders.override_region != true OR orders.override_region is NULL))               " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)      " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)    " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id)                  " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id  AND instruction.id = ?)    " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id )                  " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)      " +
-                "             INNER JOIN " + Lystore.lystoreSchema + ".campaign ON orders.id_campaign = campaign.id  " +
                 "             LEFT JOIN " + Lystore.lystoreSchema + ".specific_structures ON orders.id_structure = specific_structures.id    " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         ";
+        query +=
+                "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
+                        "  OR (spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
+                        "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    ";
+        query +=
                 "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
-                "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
-                "     WHERE instruction.id = ?   " +
+                        "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           ";
+
+
+        query +=
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
-                "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
-                "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region ,campaign " +
-                " order by orders.id_structure,code   )        " +
-                " SELECT values.operation as label , array_to_json(array_agg(values)) as actions   " +
-                " from values  " +
-                " Group by label ; ";
+                        "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
+                        "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region " +
+                        "             order by id_operation, id_structure,program,code   " +
+                        "  )    SELECT values.id_operation as id, values.operation as label,    array_to_json(array_agg(values))as actions, SUM (values.total) as totalMarket       " +
+                        "  from  values      " +
+                        "  Group by values.id_operation, values.operation   " +
+                        "  Order by values.operation ;";
+
 
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {

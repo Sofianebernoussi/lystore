@@ -775,7 +775,7 @@ public class ExcelHelper {
                 for (int column = columnStart; column < columnEnd; column++) {
                     try {
                         cell = tab.getCell(column);
-//                        cell.setCellStyle(this.tabNumeralStyle);
+                        cell.setCellStyle(this.tabNumeralStyle);
                     } catch (NullPointerException e) {
                         cell = tab.createCell(column);
                         cell.setCellStyle(this.tabNumeralStyle);

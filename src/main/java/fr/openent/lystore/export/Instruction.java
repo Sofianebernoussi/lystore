@@ -4,6 +4,7 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.equipmentRapp.*;
 import fr.openent.lystore.export.investissement.*;
 import fr.openent.lystore.export.notificationEquipCP.LinesBudget;
+import fr.openent.lystore.export.notificationEquipCP.RecapMarketGestion;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.data.FileResolver;
@@ -85,24 +86,8 @@ public class Instruction {
                         futures.add(Fonctionnementfuture);
                         futures.add(RecapEPLEfuture);
                         futures.add(RecapImputationBudfuture);
-                        CompositeFuture.all(futures).setHandler(event -> {
-                            if (event.succeeded()) {
-                                try {
-                                    ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
-                                    workbook.write(fileOut);
-                                    Buffer buff = new BufferImpl();
-                                    buff.appendBytes(fileOut.toByteArray());
-                                    handler.handle(new Either.Right<>(buff));
-                                } catch (IOException e) {
-                                    log.error(e.getMessage());
-                                    handler.handle(new Either.Left<>(e.getMessage()));
 
-                                }
-                            } else {
-                                log.error("Error when resolving futures");
-                                handler.handle(new Either.Left<>("Error when resolving futures"));
-                            }
-                        });
+                        futureHandler(handler, workbook, futures);
 
                         new LyceeTab(workbook, instruction).create(getHandler(lyceeFuture));
                         new CMRTab(workbook, instruction).create(getHandler(CMRFuture));
@@ -156,23 +141,9 @@ public class Instruction {
                     futures.add(AnnexeDelibFuture);
                     futures.add(RecapMarketFuture);
                     futures.add(VerifBudgetFuture);
-                    CompositeFuture.all(futures).setHandler(event -> {
-                        if (event.succeeded()) {
-                            try {
-                                ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
-                                workbook.write(fileOut);
-                                Buffer buff = new BufferImpl();
-                                buff.appendBytes(fileOut.toByteArray());
-                                handler.handle(new Either.Right<>(buff));
-                            } catch (IOException e) {
-                                log.error(e.getMessage());
-                                handler.handle(new Either.Left<>(e.getMessage()));
-                            }
-                        } else {
-                            log.error("Error when resolving futures");
-                            handler.handle(new Either.Left<>("Error when resolving futures"));
-                        }
-                    });
+
+                    futureHandler(handler, workbook, futures);
+
                     new ComptaTab(workbook, instruction, type).create(getHandler(ComptaFuture));
                     new ListForTextTab(workbook, instruction, type).create(getHandler(ListForTextFuture));
                     new RecapTab(workbook, instruction, type).create(getHandler(RecapFuture));
@@ -210,31 +181,38 @@ public class Instruction {
                     Workbook workbook = new XSSFWorkbook();
                     List<Future> futures = new ArrayList<>();
                     Future<Boolean> LinesBudgetFuture = Future.future();
+                    Future<Boolean> RecapMarketGestionFuture = Future.future();
 
                     futures.add(LinesBudgetFuture);
-                    CompositeFuture.all(futures).setHandler(event -> {
-                        if (event.succeeded()) {
-                            try {
-                                ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
-                                workbook.write(fileOut);
-                                Buffer buff = new BufferImpl();
-                                buff.appendBytes(fileOut.toByteArray());
-                                handler.handle(new Either.Right<>(buff));
-                            } catch (IOException e) {
-                                log.error(e.getMessage());
-                                handler.handle(new Either.Left<>(e.getMessage()));
-                            }
-                        } else {
-                            log.error("Error when resolving futures");
-                            handler.handle(new Either.Left<>("Error when resolving futures"));
-                        }
-                    });
+                    futureHandler(handler, workbook, futures);
 
+                    new RecapMarketGestion(workbook, instruction).create(getHandler(RecapMarketGestionFuture));
                     new LinesBudget(workbook, instruction).create(getHandler(LinesBudgetFuture));
                 }
             }
         }));
     }
+
+    private void futureHandler(Handler<Either<String, Buffer>> handler, Workbook workbook, List<Future> futures) {
+        CompositeFuture.all(futures).setHandler(event -> {
+            if (event.succeeded()) {
+                try {
+                    ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
+                    workbook.write(fileOut);
+                    Buffer buff = new BufferImpl();
+                    buff.appendBytes(fileOut.toByteArray());
+                    handler.handle(new Either.Right<>(buff));
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                    handler.handle(new Either.Left<>(e.getMessage()));
+                }
+            } else {
+                log.error("Error when resolving futures");
+                handler.handle(new Either.Left<>("Error when resolving futures"));
+            }
+        });
+    }
+
     private Handler<Either<String, Boolean>> getHandler(Future<Boolean> future) {
         return event -> {
             if (event.isRight()) {

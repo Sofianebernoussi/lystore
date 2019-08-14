@@ -1,6 +1,9 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.logging.Actions;
+import fr.openent.lystore.logging.Contexts;
+import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AccessExportDownload;
 import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultExportServiceService;
@@ -74,7 +77,12 @@ public class ExportController extends ControllerHelper {
             @Override
             public void handle(JsonObject event) {
                 if (event.getString("status").equals("ok")) {
-                    request.response().setStatusCode(200).end();
+                    exportService.deleteExportSql(fileId, Logging.defaultResponseHandler(eb,
+                            request,
+                            Contexts.EXPORT.toString(),
+                            Actions.DELETE.toString(),
+                            fileId,
+                            new JsonObject().put("id", fileId)));
                 } else {
                     badRequest(request);
                     log.error("Erreur deleting file in storage");

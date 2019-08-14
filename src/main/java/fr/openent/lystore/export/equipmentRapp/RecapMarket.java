@@ -236,10 +236,10 @@ public class RecapMarket extends TabHelper {
                 "             id_order, comment, rank as \"prio\", price_proposal, id_project, null as id_order_client_equipment,  program, action,  " +
                 "             id_operation, override_region           from " + Lystore.lystoreSchema + ".order_client_equipment  oce) " +
                 "             ) as orders       " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (orders.id_operation = operation.id)               " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (orders.id_operation = operation.id  and (orders.override_region != true OR orders.override_region is NULL))   " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)      " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)    " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id)                  " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id  AND instruction.id = ?)    " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id )                  " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)      " +
                 "             LEFT JOIN " + Lystore.lystoreSchema + ".specific_structures ON orders.id_structure = specific_structures.id    " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         ";
@@ -255,13 +255,13 @@ public class RecapMarket extends TabHelper {
         query +=
                 "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
                         "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
-                        "     WHERE instruction.id = ?   ";
+                        "     WHERE   ";
 
 
         if (type.equals(CMR))
-            query += "  AND specific_structures.type =  '" + CMR + "'   ";
+            query += "   specific_structures.type =  '" + CMR + "'   ";
         else {
-            query += "  AND specific_structures.type !=  '" + CMR + "'   " +
+            query += "   specific_structures.type !=  '" + CMR + "'   " +
                     "  OR specific_structures.type is null   ";
         }
         query +=

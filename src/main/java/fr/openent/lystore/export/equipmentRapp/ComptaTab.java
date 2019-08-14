@@ -258,10 +258,10 @@ public class ComptaTab extends TabHelper {
                 "             id_order, comment, rank as \"prio\", price_proposal, id_project, null as id_order_client_equipment,  program, action,  " +
                 "             id_operation, override_region           from " + Lystore.lystoreSchema + ".order_client_equipment  oce) " +
                 "             ) as orders       " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (orders.id_operation = operation.id)               " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (orders.id_operation = operation.id   and (orders.override_region != true OR orders.override_region is NULL))               " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)      " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)    " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id)                  " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id  AND instruction.id = ?)    " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id )                  " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)      " +
                 "             INNER JOIN " + Lystore.lystoreSchema + ".campaign ON orders.id_campaign = campaign.id  " +
                 "             LEFT JOIN " + Lystore.lystoreSchema + ".specific_structures ON orders.id_structure = specific_structures.id    " +
@@ -278,20 +278,20 @@ public class ComptaTab extends TabHelper {
         query +=
                 "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
                         "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
-                        "     WHERE instruction.id = ?   ";
+                        "     WHERE  ";
 
 
         if (type.equals(CMR))
-            query += "  AND specific_structures.type =  '" + CMR + "'   ";
+            query += "   specific_structures.type =  '" + CMR + "'   ";
         else {
-            query += "  AND specific_structures.type !=  '" + CMR + "'   " +
+            query += "   specific_structures.type !=  '" + CMR + "'   " +
                     "  OR specific_structures.type is null   ";
         }
         query +=
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                         "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                         "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region ,campaign" +
-                        "             order by  orders.id_operation,program,code ,orders.id_structure    )        " +
+                        "             order by  campaign,program,code ,orders.id_structure    )        " +
                         " SELECT values.operation as label , array_to_json(array_agg(values)) as actions   " +
                         " from values  " +
                         " Group by label ; ";

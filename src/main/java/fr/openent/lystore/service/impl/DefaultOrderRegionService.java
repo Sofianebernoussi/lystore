@@ -155,6 +155,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
 
     @Override
     public void createOrdersRegion(JsonObject orders, UserInfos user, Handler<Either<String, JsonObject>> handler) {
+        /*
         JsonArray ordersArray = orders.getJsonArray("orders");
 
         Integer id_title = ordersArray.getJsonObject(0).getInteger("title_id");
@@ -186,6 +187,8 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
 
             }
         }));
+
+         */
     }
 
     private JsonObject getOrderRegionCreationStatement(Number id_project, JsonObject order, UserInfos user) {
@@ -238,22 +241,18 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
 
     }
 
-    private JsonObject getProjectCreationStatement(Number id, Integer id_title) {
-        StringBuilder queryProjectEquipment;
+    public void createProject( Integer id_title, Handler<Either<String, JsonObject>> handler) {
         JsonArray params;
 
-        queryProjectEquipment = new StringBuilder()
-                .append(" INSERT INTO lystore.project ")
-                .append(" ( id, id_title ) VALUES ")
-                .append(" (?, ?)  RETURNING id ; ");
+        String queryProjectEquipment = "" +
+                "INSERT INTO lystore.project " +
+                "( id_title ) VALUES " +
+                "( ? )  RETURNING id ;";
         params = new fr.wseduc.webutils.collections.JsonArray();
 
-        params.add(id).add(id_title);
+        params.add(id_title);
 
-        return new JsonObject()
-                .put("statement", queryProjectEquipment.toString())
-                .put("values", params)
-                .put("action", "prepared");
+        Sql.getInstance().prepared(queryProjectEquipment, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override

@@ -6,14 +6,17 @@ import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.OrderRegionService;
 import fr.openent.lystore.service.impl.DefaultOrderRegionService;
+import fr.openent.lystore.service.impl.DefaultOrderService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.Either;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import fr.wseduc.webutils.http.BaseController;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserInfos;
@@ -27,6 +30,7 @@ public class OrderRegionController extends BaseController {
 
     private OrderRegionService orderRegionService;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger (DefaultOrderService.class);
 
     public static final String UTF8_BOM = "\uFEFF";
 
@@ -90,23 +94,41 @@ public class OrderRegionController extends BaseController {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void createAdminOrder(final HttpServerRequest request) {
-        UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-            @Override
-            public void handle(UserInfos event) {
-                RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
-                    @Override
-                    public void handle(JsonObject orders) {
-                        RequestUtils.bodyToJson(request, orderRegion ->  orderRegionService.createOrdersRegion(orders, event, Logging.defaultResponseHandler(eb,
-                                request,
-                                Contexts.ORDERREGION.toString(),
-                                Actions.CREATE.toString(),
-                                orderRegion.toString(),
-                                new JsonObject().put("orders", orders))));
-                    }
-                });
-            }
+        try{
+        UserUtils.getUserInfos(eb, request, user -> {
+            RequestUtils.bodyToJson(request, orders -> {
+                //todo make project with id tile in order
+                if (!orders.isEmpty()) {
+                    JsonArray ordersList = orders.getJsonArray("orders");
+                    Integer id_title = ordersList.getJsonObject(0).getInteger("title_id");
+                    orderRegionService.createProject(id_title, idProject -> {
+                        //todo get id of project created
+                        if(idProject.isRight()){
+                            Integer idProjectRight = idProject.right().getValue().getInteger("id");
+                            //todo async create log project
+                            Logging.insert(eb,
+                                    request,
+                                    Contexts.PROJECT.toString(),
+                                    Actions.CREATE.toString(),
+                                    idProjectRight.toString(),
+                                    new JsonObject().put("id", idProjectRight).put("id_title", id_title));
+                            //todo async create multi orders with loop and create log order
+                            //todo loop orderList with request createOrdersRegion and request when exist
+
+                            // todo send response
+                            request.response().setStatusCode(204).end();
+
+                        } else {
+                            LOGGER.error("An error when you want get id after create project ");
+                        }
+                    });
+                }
+            });
         });
-    }
+        } catch( Exception e){
+            LOGGER.error("An error when you want create order region and project", e);
+        }
+    };
 
     @Delete("/region/:id/order")
     @ApiDoc("delete order by id order region ")

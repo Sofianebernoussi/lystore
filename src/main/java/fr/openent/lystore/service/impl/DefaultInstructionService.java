@@ -153,9 +153,8 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                             for (int j = 0 ; j<getContractRegion.size() ; j++){
                                 JsonObject contractTypeRegion = getContractRegion.getJsonObject(j);
                                 if (contractTypeClient.getInteger("id").equals(contractTypeRegion.getInteger("id"))) {
-                                    JsonArray temp = new JsonArray();
-                                    temp.add(contractTypeRegion.getValue("order_region_type_contract"))
-                                            .add(contractTypeClient.getValue("order_client_type_contract"));
+                                    JsonArray temp;
+                                    temp = SqlQueryUtils.mergeArraysInOne(new JsonArray(contractTypeRegion.getString("order_region_type_contract")), new JsonArray(contractTypeClient.getString("order_client_type_contract")));
                                     mergeContractByIdOperation.put("id", contractTypeClient.getInteger("id"))
                                             .put("order_contract_type", temp);
                                 }

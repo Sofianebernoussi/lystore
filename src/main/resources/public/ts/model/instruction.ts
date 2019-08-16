@@ -71,12 +71,7 @@ export class Instruction implements Selectable {
                     : operation.label = new label();
                 operation.status = operation.status? true : false;
                 if(operation.order_contract_type){
-                    let contractNameParseJson = operation.order_contract_type.map(contractName => JSON.parse(contractName));
-                    let result = [];
-                    for(let i = 0 ; i<contractNameParseJson.length ; i++){
-                        result.push(...contractNameParseJson[i]);
-                    }
-                    operation.nbOrberSub = result.filter(contract => contract === "Subventions").length
+                    operation.nbOrberSub = operation.order_contract_type.filter(contract => contract === "Subventions").length
                 } else {
                     operation.nbOrberSub = 0;
                 }

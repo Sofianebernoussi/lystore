@@ -5,6 +5,8 @@ import fr.openent.lystore.export.equipmentRapp.*;
 import fr.openent.lystore.export.investissement.*;
 import fr.openent.lystore.export.notificationEquipCP.LinesBudget;
 import fr.openent.lystore.export.notificationEquipCP.RecapMarketGestion;
+import fr.openent.lystore.export.subventionEquipment.CmrMarchés;
+import fr.openent.lystore.export.subventionEquipment.PublicsMarchés;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.data.FileResolver;
@@ -21,6 +23,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
+import fr.openent.lystore.export.subventionEquipment.CmrSubventions;
+import fr.openent.lystore.export.subventionEquipment.PublicsSubventions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -150,6 +154,50 @@ public class Instruction {
                     new AnnexeDelibTab(workbook, instruction, type).create(getHandler(AnnexeDelibFuture));
                     new RecapMarket(workbook, instruction, type).create(getHandler(RecapMarketFuture));
                     new VerifBudgetTab(workbook, instruction, type).create(getHandler(VerifBudgetFuture));
+                }
+            }
+        }));
+
+
+    }
+
+    public void exportSubvention(Handler<Either<String, Buffer>> handler) {
+        if (this.id == null) {
+            log.error("Instruction identifier is not nullable");
+            handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
+        }
+        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(eitherInstruction -> {
+            if (eitherInstruction.isLeft()) {
+                log.error("Error when getting sql datas for subvention");
+                handler.handle(new Either.Left<>("Error when getting sql datas for subvention"));
+            } else {
+
+               JsonObject instruction = eitherInstruction.right().getValue();
+                String operationStr = "operations";
+                if (!instruction.containsKey(operationStr)) {
+                    log.error("Error when getting operations");
+                    handler.handle(new Either.Left<>("Error when getting operations"));
+                } else {
+                    instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
+
+                    Workbook workbook = new XSSFWorkbook();
+                    List<Future> futures = new ArrayList<>();
+                    Future<Boolean> CmrSubventions = Future.future();
+                    Future<Boolean> PublicsSubventions = Future.future();
+                    Future<Boolean> CmrMarchés = Future.future();
+                    Future<Boolean> PublicsMarchés = Future.future();
+
+                    futures.add(CmrSubventions);
+                    futures.add(PublicsSubventions);
+                    futures.add(CmrMarchés);
+                    futures.add(PublicsMarchés);
+
+                    futureHandler(handler, workbook, futures);
+
+                    new CmrSubventions(workbook, instruction).create(getHandler(CmrSubventions));
+                    new PublicsSubventions(workbook, instruction).create(getHandler(PublicsSubventions));
+                    new CmrMarchés(workbook, instruction).create(getHandler(CmrMarchés));
+                    new PublicsMarchés(workbook, instruction).create(getHandler(PublicsMarchés));
                 }
             }
         }));

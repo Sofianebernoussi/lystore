@@ -184,6 +184,8 @@ public class Instruction {
                     Future<Boolean> RecapMarketGestionFuture = Future.future();
 
                     futures.add(LinesBudgetFuture);
+                    futures.add(RecapMarketGestionFuture);
+
                     futureHandler(handler, workbook, futures);
 
                     new RecapMarketGestion(workbook, instruction).create(getHandler(RecapMarketGestionFuture));

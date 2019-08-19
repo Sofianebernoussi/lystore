@@ -9,6 +9,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
@@ -65,24 +66,38 @@ public class RecapMarketGestion extends TabHelper {
                 if (repStructures.isRight()) {
                     JsonArray structures = repStructures.right().getValue();
                     setStructures(structures);
-                    writeArray();
+                    writeArray(handler);
 //                    setLabels();
 //                    setArray(datas);
-                    handler.handle(new Either.Right<>(true));
                 }
             }
         });
     }
 
-    private void writeArray() {
+    private void writeArray(Handler<Either<String, Boolean>> handler) {
         for (int i = 0; i < datas.size(); i++) {
             JsonObject market = datas.getJsonObject(i);
             setLabel(market.getString("market"));
+            JsonArray orders = market.getJsonArray("actionsJO");
+            for (int j = 0; j < orders.size(); j++) {
+                JsonObject order = orders.getJsonObject(j);
+                excel.insertLabel(lineNumber, 1, order.getString("nameEtab"));
+                excel.insertLabel(lineNumber, 2, order.getString("name_equipment"));
+                excel.insertLabel(lineNumber, 4, order.getString("campaign"));
+                lineNumber++;
+            }
+
         }
+
+        handler.handle(new Either.Right<>(true));
+
     }
 
     private void setLabel(String market) {
         excel.insertLabel(lineNumber, 0, market);
+        CellRangeAddress merge = new CellRangeAddress(lineNumber, lineNumber, 0, 6);
+        sheet.addMergedRegion(merge);
+        excel.setRegionHeader(merge, sheet);
         lineNumber += 2;
 
     }
@@ -133,7 +148,7 @@ public class RecapMarketGestion extends TabHelper {
                 "             END as old_name,     " +
                 "             orders.id_structure,orders.id_operation as id_operation, label.label as operation ,     " +
                 "             orders.equipment_key as key, orders.name as name_equipment, true as region,    " +
-                "             program_action.id_program, orders.amount ,contract.id as market_id,       " +
+                "             program_action.id_program, orders.amount ,contract.id as market_id,   campaign.name as campaign    " +
                 "             case when specific_structures.type is null      " +
                 "             then '" + LYCEE + "'          " +
                 "             ELSE specific_structures.type     " +
@@ -155,9 +170,9 @@ public class RecapMarketGestion extends TabHelper {
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (orders.id_operation = operation.id   and (orders.override_region != true OR orders.override_region is NULL))               " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)      " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id  AND instruction.id = ?)    " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id )                  " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)      " +
-                "             INNER JOIN " + Lystore.lystoreSchema + ".campaign ON orders.id_campaign = campaign.id  " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id)                  " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id )      " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".campaign ON orders.id_campaign = campaign.id  " +
                 "             LEFT JOIN " + Lystore.lystoreSchema + ".specific_structures ON orders.id_structure = specific_structures.id    " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         " +
                 "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
@@ -170,7 +185,7 @@ public class RecapMarketGestion extends TabHelper {
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                 "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                 "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region " +
-                "             order by id_operation, id_structure,program,code   " +
+                "             order by market_id, id_structure,program,code   " +
                 "  )    SELECT  values.market as market,    array_to_json(array_agg(values))as actions, SUM (values.total) as totalMarket       " +
                 "  from  values      " +
                 "  Group by values.market   " +

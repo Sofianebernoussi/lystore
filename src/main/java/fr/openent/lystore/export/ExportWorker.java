@@ -50,6 +50,10 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                 exportNotificationCp(event.body().getInteger("id"),
                         event.body().getString("userId"));
                 break;
+            case "exportSubvention":
+                exportSubvention(event.body().getInteger("id"),
+                        event.body().getString("userId"));
+                break;
             default:
                 logger.error("Invalid action in worker");
                 break;
@@ -71,6 +75,18 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
         });
     }
 
+    private void exportSubvention(Integer instructionId, String userId) {
+        this.instruction = new Instruction(instructionId);
+        this.instruction.exportSubvention( file -> {
+            if (file.isLeft()) {
+                logger.error("error when creating xlsx");
+            } else {
+                Buffer xlsx = file.right().getValue();
+                String fileName = getDate() + "_subvention_equipement" + ".xlsx";
+                saveBuffer(userId, xlsx, fileName);
+            }
+        });
+    }
 
     private String getDate() {
         java.util.Date date = Calendar.getInstance().getTime();

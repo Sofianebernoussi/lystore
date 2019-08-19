@@ -161,4 +161,18 @@ public class InstructionController extends ControllerHelper {
         request.response().setStatusCode(200).end("Import started");
     }
 
+    @Get("/instructions/export/subvention/equipment/:id")
+    @ApiDoc("export subvention excel with id instruction")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void exportSubventionEquipment(HttpServerRequest request) {
+        UserUtils.getUserInfos(eb, request, user -> {
+            eb.send(ExportWorker.class.getSimpleName(),
+                    new JsonObject().put("action", "exportSubvention")
+                            .put("id", Integer.parseInt(request.getParam("id")))
+                            .put("userId", user.getUserId()),
+                    handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
+            request.response().setStatusCode(201).end();
+        });
+    };
 }

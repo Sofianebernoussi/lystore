@@ -11,7 +11,7 @@ public interface OrderRegionService {
 
     void updateOrderRegion(JsonObject order,int idOrder, UserInfos user, Handler<Either<String, JsonObject>> handler);
 
-    void createOrdersRegion(JsonObject order, UserInfos event, Handler<Either<String, JsonObject>> handler);
+    void createOrdersRegion(JsonObject order, UserInfos event, Number id_project, Handler<Either<String, JsonObject>> handler);
 
     void deleteOneOrderRegion(int idOrderRegion, Handler<Either<String, JsonObject>> handler);
 

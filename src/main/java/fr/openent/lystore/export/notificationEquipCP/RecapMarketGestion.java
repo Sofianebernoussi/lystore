@@ -13,9 +13,26 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class RecapMarketGestion extends TabHelper {
+    private static final String DPT = "DPT";
+    private static final String RNE_lYC = "RNE + NOM DU LYCEE ET COMMUNE";
+    private static final String ADDR = "ADRESSE DU LYCEE";
+    private static final String CPDATE = "DATE DE CP";
+    private static final String MARKET_CP = "NOM DU MARCHE ET N° DE CP";
+    private static final String OP_DDE_NUMBER = "N°DE L'OPERATION + N° DE LA DDE ";
+    private static final String CAMPAIGN = "CAMPAGNE";
+    private static final String AMOUNT = "QUANTITE";
+    private static final String TOTAL_PRICE = "PRIX TOTAL TTC";
+    private static final String EQUIPMENT_NAME = "NOM DE L'EQUIPEMENT";
+    private static final String TYPE = "TYPE";
+    private static final String MARKET_NUMBER = "N° DE MARCHE";
+    private static final String REGION_COMMENT = "COMMENTAIRE DE LA DEMANDE REGION";
+    private static final String CIVILITY = "M. Mme Le Proviseur-e";
     /**
      * open the tab or create it if it doesn't exists
      *
@@ -23,7 +40,7 @@ public class RecapMarketGestion extends TabHelper {
      * @param instruction
      */
 
-    private int lineNumber = 1;
+    private int lineNumber = 0;
 
     public RecapMarketGestion(Workbook wb, JsonObject instruction) {
         super(wb, instruction, "RECAP MARCHES GESTIONNAIRE");
@@ -75,27 +92,72 @@ public class RecapMarketGestion extends TabHelper {
     }
 
     private void writeArray(Handler<Either<String, Boolean>> handler) {
+        SimpleDateFormat formatterDate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        SimpleDateFormat formatterDateExcel = new SimpleDateFormat("dd/MM/yyyy");
+        Date orderDate = null;
+        try {
+            orderDate = formatterDate.parse(instruction.getString("date_cp"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         for (int i = 0; i < datas.size(); i++) {
+            lineNumber++;
+
             JsonObject market = datas.getJsonObject(i);
             setLabel(market.getString("market"));
             JsonArray orders = market.getJsonArray("actionsJO");
+            insertHeaders();
             for (int j = 0; j < orders.size(); j++) {
                 JsonObject order = orders.getJsonObject(j);
-                excel.insertLabel(lineNumber, 1, order.getString("nameEtab"));
-                excel.insertLabel(lineNumber, 2, order.getString("name_equipment"));
-                excel.insertLabel(lineNumber, 4, order.getString("campaign"));
+
+                excel.insertLabel(lineNumber, 0, order.getString("zipCode").substring(0, 2));
+                excel.insertLabel(lineNumber, 1, order.getString("uai") + "\n" + order.getString("nameEtab") + "\n" + order.getString("city"));
+
+                excel.insertLabel(lineNumber, 2, CIVILITY + "\n" + order.getString("address"));
+                excel.insertLabel(lineNumber, 3, formatterDateExcel.format(orderDate));
+                excel.insertLabel(lineNumber, 4, order.getString("market") + " \nCP " + instruction.getString("cp_number"));
+                excel.insertLabel(lineNumber, 5,
+                        "OPE : " + order.getString("operation") + "\n DDE : " + order.getInteger("id").toString());
+                excel.insertLabel(lineNumber, 6, order.getString("campaign"));
+                excel.insertLabel(lineNumber, 7, order.getInteger("amount").toString());
+                excel.insertLabel(lineNumber, 8, order.getDouble("total").toString());
+                excel.insertLabel(lineNumber, 9, order.getString("name_equipment"));
+                excel.insertLabel(lineNumber, 10, order.getString("cite_mixte"));
+                excel.insertLabel(lineNumber, 11, order.getString("market"));
+                excel.insertLabel(lineNumber, 12, order.getString("comment"));
                 lineNumber++;
             }
 
         }
-
+        excel.autoSize(13);
         handler.handle(new Either.Right<>(true));
 
     }
 
+    private void insertHeaders() {
+
+
+        excel.insertHeader(lineNumber, 0, DPT);
+        excel.insertHeader(lineNumber, 1, RNE_lYC);
+
+        excel.insertHeader(lineNumber, 2, ADDR);
+        excel.insertHeader(lineNumber, 3, CPDATE);
+        excel.insertHeader(lineNumber, 4, MARKET_CP);
+        excel.insertHeader(lineNumber, 5, OP_DDE_NUMBER);
+        excel.insertHeader(lineNumber, 6, CAMPAIGN);
+        excel.insertHeader(lineNumber, 7, AMOUNT);
+        excel.insertHeader(lineNumber, 8, TOTAL_PRICE);
+        excel.insertHeader(lineNumber, 9, EQUIPMENT_NAME);
+        excel.insertHeader(lineNumber, 10, TYPE);
+        excel.insertHeader(lineNumber, 11, MARKET_NUMBER);
+        excel.insertHeader(lineNumber, 12, REGION_COMMENT);
+        lineNumber++;
+    }
+
     private void setLabel(String market) {
         excel.insertLabel(lineNumber, 0, market);
-        CellRangeAddress merge = new CellRangeAddress(lineNumber, lineNumber, 0, 6);
+        CellRangeAddress merge = new CellRangeAddress(lineNumber, lineNumber, 0, 12);
         sheet.addMergedRegion(merge);
         excel.setRegionHeader(merge, sheet);
         lineNumber += 2;
@@ -147,8 +209,8 @@ public class RecapMarketGestion extends TabHelper {
                 "             ELSE ''      " +
                 "             END as old_name,     " +
                 "             orders.id_structure,orders.id_operation as id_operation, label.label as operation ,     " +
-                "             orders.equipment_key as key, orders.name as name_equipment, true as region,    " +
-                "             program_action.id_program, orders.amount ,contract.id as market_id,   campaign.name as campaign    " +
+                "             orders.equipment_key as key, orders.name as name_equipment, true as region,  orders.id as id,  " +
+                "             program_action.id_program, orders.amount ,contract.id as market_id,   campaign.name as campaign, orders.comment,    " +
                 "             case when specific_structures.type is null      " +
                 "             then '" + LYCEE + "'          " +
                 "             ELSE specific_structures.type     " +
@@ -184,8 +246,8 @@ public class RecapMarketGestion extends TabHelper {
 
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                 "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
-                "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region " +
-                "             order by market_id, id_structure,program,code   " +
+                "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id" +
+                "             order by campaign,market_id, id_structure,program,code  " +
                 "  )    SELECT  values.market as market,    array_to_json(array_agg(values))as actions, SUM (values.total) as totalMarket       " +
                 "  from  values      " +
                 "  Group by values.market   " +

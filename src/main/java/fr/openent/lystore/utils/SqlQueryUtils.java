@@ -110,4 +110,22 @@ public final class SqlQueryUtils {
         }
         return result;
     }
+
+    /**
+     * Returns an array merge
+     *
+     * @param arrayList multi JsonArrays
+     * @return result JsonArray ex '[1,2,3] and [4,5,6] and more to [1,2,3,4,5,6]'
+     */
+    public static JsonArray mergeArraysInOne (JsonArray... arrayList){
+        JsonArray result = new JsonArray();
+        for(JsonArray arrayIn : arrayList){
+            for (int i = 0; i < arrayIn.size(); i++) {
+                if(arrayIn.getValue(i) != null) {
+                    result.add(arrayIn.getValue(i));
+                }
+            }
+        }
+        return result;
+    }
 }

@@ -11,6 +11,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.lang3.ArrayUtils;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.SqlResult;
 import io.vertx.core.json.JsonObject;
@@ -106,14 +107,14 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
     public void getOperationOfInstruction(Integer IdInstruction, Handler<Either<String, JsonArray>> handler) {
         JsonArray idInstructionParams = new JsonArray().add(IdInstruction);
 
-        String queryOperation = "SELECT " +
-                "operation.*, " +
-                "to_json(label_operation.*) AS label " +
-                "FROM " + Lystore.lystoreSchema +".operation " +
-                "INNER JOIN " + Lystore.lystoreSchema +".label_operation ON operation.id_label = label_operation.id " +
-                "LEFT JOIN " + Lystore.lystoreSchema +".order_client_equipment oce ON oce.id_operation = operation.id " +
+        String queryOperation = "" +
+                "SELECT operation.*,  " +
+                "       to_json(label.*) AS label  " +
+                "FROM " + Lystore.lystoreSchema +".operation  " +
+                "INNER JOIN " + Lystore.lystoreSchema +".label_operation label ON label.id = operation.id_label  " +
                 "WHERE id_instruction = ? " +
-                "GROUP BY (operation.id, label_operation.id)";
+                "GROUP BY (operation.id,  " +
+                "          label.*)";
 
         sql.getInstance().prepared(queryOperation, idInstructionParams, SqlResult.validResultHandler(eventOperation -> {
             try{
@@ -127,16 +128,39 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
 
                     Future<JsonArray> getCountOrderInOperationFuture = Future.future();
                     Future<JsonArray> getAllPriceOperationFuture = Future.future();
+                    Future<JsonArray> getContractTypeOfOrderClientFuture = Future.future();
+                    Future<JsonArray> getContractTypeOfOrderRegionFuture = Future.future();
 
-                    CompositeFuture.all( getCountOrderInOperationFuture, getAllPriceOperationFuture ).setHandler(asyncEvent -> {
+
+                    CompositeFuture.all( getCountOrderInOperationFuture, getAllPriceOperationFuture, getContractTypeOfOrderClientFuture, getContractTypeOfOrderRegionFuture ).setHandler(asyncEvent -> {
                         if (asyncEvent.failed()) {
                             String message = "Failed to retrieve instructions";
                             handler.handle(new Either.Left<>(message));
                             return;
                         }
+
                         JsonArray operationsFinal = new JsonArray();
                         JsonArray getNbrOrder = getCountOrderInOperationFuture.result();
                         JsonArray getAmountsDemands = getAllPriceOperationFuture.result();
+                        JsonArray getContractClient = getContractTypeOfOrderClientFuture.result();
+                        JsonArray getContractRegion = getContractTypeOfOrderRegionFuture.result();
+
+                        JsonObject mergeContractByIdOperation = new JsonObject();
+                        JsonArray resultOfMerge = new JsonArray();
+
+                        for (int i = 0 ; i<getContractClient.size() ; i++){
+                            JsonObject contractTypeClient = getContractClient.getJsonObject(i);
+                            for (int j = 0 ; j<getContractRegion.size() ; j++){
+                                JsonObject contractTypeRegion = getContractRegion.getJsonObject(j);
+                                if (contractTypeClient.getInteger("id").equals(contractTypeRegion.getInteger("id"))) {
+                                    JsonArray temp;
+                                    temp = SqlQueryUtils.mergeArraysInOne(new JsonArray(contractTypeRegion.getString("order_region_type_contract")), new JsonArray(contractTypeClient.getString("order_client_type_contract")));
+                                    mergeContractByIdOperation.put("id", contractTypeClient.getInteger("id"))
+                                            .put("order_contract_type", temp);
+                                }
+                            }
+                            resultOfMerge.add(mergeContractByIdOperation);
+                        }
 
                         for (int i = 0; i < operations.size(); i++) {
                             JsonObject operation = operations.getJsonObject(i);
@@ -152,6 +176,13 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                                     operation.put("amount", amountDemand.getString("amount"));
                                 }
                             }
+                            for (int k = 0; k < resultOfMerge.size(); k++) {
+                                JsonObject contractArray = resultOfMerge.getJsonObject(k);
+                                if (operation.getInteger("id").equals(contractArray.getInteger("id"))) {
+                                    operation.put("order_contract_type", contractArray.getJsonArray("order_contract_type"));
+                                }
+                            }
+
                             operationsFinal.add(operation);
                         }
                         handler.handle(new Either.Right<>(operationsFinal));
@@ -159,6 +190,9 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
 
                     SqlUtils.getCountOrderInOperation(idsOperations,  FutureHelper.handlerJsonArray(getCountOrderInOperationFuture));
                     SqlUtils.getAllPriceOperation(idsOperations,  FutureHelper.handlerJsonArray(getAllPriceOperationFuture));
+                    getContractTypeOfOrderClient(idsOperations,  FutureHelper.handlerJsonArray(getContractTypeOfOrderClientFuture));
+                    getContractTypeOfOrderRegion(idsOperations,  FutureHelper.handlerJsonArray(getContractTypeOfOrderRegionFuture));
+
 
                 }
             } catch ( Exception e){
@@ -169,51 +203,38 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
         }));
     }
 
-    private void getAmountDemandOperation(JsonArray IdInstructions, Handler<Either<String, JsonArray>> handler) {
+    private void getContractTypeOfOrderClient (JsonArray idsOperations, Handler<Either<String, JsonArray>> handler ){
+        String queryGetContractClient = "" +
+                "SELECT o.id,  " +
+                "       array_to_json(array_agg(ct.name)) AS order_client_type_contract  " +
+                "FROM  " + Lystore.lystoreSchema +".operation o  " +
+                "LEFT JOIN  " + Lystore.lystoreSchema +".order_client_equipment oce ON oce.id_operation = o.id  " +
+                "AND oce.override_region IS FALSE  " +
+                "AND oce.status = 'IN PROGRESS'  " +
+                "LEFT JOIN  " + Lystore.lystoreSchema +".order o_client ON o_client.id = oce.id_order  " +
+                "LEFT JOIN  " + Lystore.lystoreSchema +".contract c_client ON c_client.id = oce.id_contract  " +
+                "LEFT JOIN  " + Lystore.lystoreSchema +".contract_type ct ON ct.id = c_client.id_contract_type  " +
+                "WHERE o.id IN " +
+                Sql.listPrepared(idsOperations.getList()) + " " +
+                "GROUP BY (o.id) ";
 
+        Sql.getInstance().prepared(queryGetContractClient, idsOperations, SqlResult.validResultHandler(handler));
+    }
 
+    private void getContractTypeOfOrderRegion (JsonArray idsOperations, Handler<Either<String, JsonArray>> handler ){
+        String queryGetContractRegion = "" +
+                "SELECT o.id,  " +
+                "       array_to_json(array_agg(ct.name)) AS order_region_type_contract  " +
+                "FROM  " + Lystore.lystoreSchema +".operation o  " +
+                "LEFT JOIN  " + Lystore.lystoreSchema +".\"order-region-equipment\" ore ON ore.id_operation = o.id  " +
+                "LEFT JOIN  " + Lystore.lystoreSchema +".order o_region ON o_region.id = ore.id_order  " +
+                "LEFT JOIN  " + Lystore.lystoreSchema +".contract c_region ON c_region.id = ore.id_contract  " +
+                "LEFT JOIN  " + Lystore.lystoreSchema +".contract_type ct ON ct.id = c_region.id_contract_type  " +
+                "WHERE o.id IN " +
+                Sql.listPrepared(idsOperations.getList()) + " " +
+                "GROUP BY (o.id)";
 
-        String queryAmount = "WITH value_instruction AS " +
-                "( " +
-                "SELECT " +
-                "instruction.id, " +
-                "operation.id AS operation_id,  " +
-                "( " +
-                "WITH value_operation AS " +
-                "( " +
-                "SELECT " +
-                "( " +
-                "SELECT " +
-                "SUM(ROUND(oco.price + ((oco.price *  oco.tax_amount) /100), 2) * oco.amount ) AS price_total_option " +
-                "FROM " + Lystore.lystoreSchema +".order_client_options oco WHERE id_order_client_equipment = oce.id ), " +
-                "oce.id, " +
-                "ore.id, " +
-                "CASE " +
-                "WHEN ore.price is not null THEN SUM( ore.price * ore.amount ) " +
-                "WHEN oce.price_proposal is not NULL THEN SUM( oce.price_proposal * oce.amount) " +
-                "ELSE SUM(ROUND(oce.price + ((oce.price *  oce.tax_amount) /100), 2) * oce.amount ) " +
-                "END AS price_total_operation " +
-                "FROM " + Lystore.lystoreSchema +".order_client_equipment oce " +
-                "FULL JOIN " + Lystore.lystoreSchema +".\"order-region-equipment\" ore on oce.id = ore.id_order_client_equipment " +
-                "WHERE oce.id_operation = operation.id OR ore.id_operation = operation.id " +
-                "GROUP BY (oce.id, ore.id ) " +
-                ") " +
-                "SELECT (SUM(price_total_operation) + SUM(price_total_option)) AS price_total_operation FROM value_operation " +
-                ") " +
-                "FROM " + Lystore.lystoreSchema +".instruction  " +
-                "INNER JOIN " + Lystore.lystoreSchema +".operation ON (instruction.id = operation.id_instruction)  " +
-                "INNER JOIN " + Lystore.lystoreSchema +".order_client_equipment oce ON (oce.id_operation = operation.id)  " +
-                "WHERE instruction.id IN  " +
-                Sql.listPrepared(IdInstructions.getList()) + " " +
-                "GROUP BY (instruction.id, operation_id ) " +
-                ") " +
-                "SELECT  " +
-                "value_instruction.id,  " +
-                "SUM (price_total_operation) AS amount  " +
-                "FROM value_instruction " +
-                "GROUP BY (value_instruction.id)";
-
-        Sql.getInstance().prepared(queryAmount, IdInstructions, SqlResult.validResultHandler(handler));
+        Sql.getInstance().prepared(queryGetContractRegion, idsOperations, SqlResult.validResultHandler(handler));
     }
 
     public void create(JsonObject instruction, Handler<Either<String, JsonObject>> handler){

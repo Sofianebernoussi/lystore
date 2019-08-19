@@ -286,7 +286,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                 }
             });
             let {status, data} = await ordersToCreate.create();
-            if (status === 200) {
+            if (status === 201) {
                 $scope.notifications.push(new Notification('lystore.order.region.create.message', 'confirm'));
                 $scope.orderToCreate = new OrderRegion();
                 $scope.titles = new Titles();

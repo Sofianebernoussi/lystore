@@ -11,7 +11,7 @@ public interface OrderRegionService {
 
     void updateOrderRegion(JsonObject order,int idOrder, UserInfos user, Handler<Either<String, JsonObject>> handler);
 
-    void createOrdersRegion(JsonObject order, UserInfos event, Handler<Either<String, JsonObject>> handler);
+    void createOrdersRegion(JsonObject order, UserInfos event, Number id_project, Handler<Either<String, JsonObject>> handler);
 
     void deleteOneOrderRegion(int idOrderRegion, Handler<Either<String, JsonObject>> handler);
 
@@ -20,5 +20,7 @@ public interface OrderRegionService {
     void updateOperation(Integer id, JsonArray orders, Handler<Either<String, JsonObject>> handler);
 
     public void linkOrderToOperation(Integer id_order_client_equipment, Integer id_operation, Handler<Either<String, JsonObject>> handler);
+
+    void createProject (Integer idProject,  Handler<Either<String, JsonObject>> handler);
 
 }

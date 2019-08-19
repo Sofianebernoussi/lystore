@@ -95,38 +95,49 @@ public class OrderRegionController extends BaseController {
     @ResourceFilter(ManagerRight.class)
     public void createAdminOrder(final HttpServerRequest request) {
         try{
-        UserUtils.getUserInfos(eb, request, user -> {
-            RequestUtils.bodyToJson(request, orders -> {
-                //todo make project with id tile in order
-                if (!orders.isEmpty()) {
-                    JsonArray ordersList = orders.getJsonArray("orders");
-                    Integer id_title = ordersList.getJsonObject(0).getInteger("title_id");
-                    orderRegionService.createProject(id_title, idProject -> {
-                        //todo get id of project created
-                        if(idProject.isRight()){
-                            Integer idProjectRight = idProject.right().getValue().getInteger("id");
-                            //todo async create log project
-                            Logging.insert(eb,
-                                    request,
-                                    Contexts.PROJECT.toString(),
-                                    Actions.CREATE.toString(),
-                                    idProjectRight.toString(),
-                                    new JsonObject().put("id", idProjectRight).put("id_title", id_title));
-                            //todo async create multi orders with loop and create log order
-                            //todo loop orderList with request createOrdersRegion and request when exist
-
-                            // todo send response
-                            request.response().setStatusCode(204).end();
-
-                        } else {
-                            LOGGER.error("An error when you want get id after create project ");
-                        }
-                    });
-                }
+            UserUtils.getUserInfos(eb, request, user -> {
+                RequestUtils.bodyToJson(request, orders -> {
+                    if (!orders.isEmpty()) {
+                        JsonArray ordersList = orders.getJsonArray("orders");
+                        Integer id_title = ordersList.getJsonObject(0).getInteger("title_id");
+                        orderRegionService.createProject(id_title, idProject -> {
+                            if(idProject.isRight()){
+                                Integer idProjectRight = idProject.right().getValue().getInteger("id");
+                                Logging.insert(eb,
+                                        request,
+                                        Contexts.PROJECT.toString(),
+                                        Actions.CREATE.toString(),
+                                        idProjectRight.toString(),
+                                        new JsonObject().put("id", idProjectRight).put("id_title", id_title));
+                                for(int i = 0 ; i<ordersList.size() ; i++){
+                                    JsonObject newOrder = ordersList.getJsonObject(i);
+                                    orderRegionService.createOrdersRegion(newOrder, user, idProjectRight, orderCreated -> {
+                                        if(orderCreated.isRight()){
+                                            Number idReturning = orderCreated.right().getValue().getInteger("id");
+                                            Logging.insert(eb,
+                                                    request,
+                                                    Contexts.ORDERREGION.toString(),
+                                                    Actions.CREATE.toString(),
+                                                    idReturning.toString(),
+                                                    new JsonObject().put("order region", newOrder));
+                                        } else {
+                                            LOGGER.error("An error when you want get id after create order region " + orderCreated.left());
+                                            request.response().setStatusCode(400).end();
+                                        }
+                                    });
+                                }
+                                request.response().setStatusCode(201).end();
+                            } else {
+                                LOGGER.error("An error when you want get id after create project " + idProject.left());
+                                request.response().setStatusCode(400).end();
+                            }
+                        });
+                    }
+                });
             });
-        });
         } catch( Exception e){
             LOGGER.error("An error when you want create order region and project", e);
+            request.response().setStatusCode(400).end();
         }
     };
 

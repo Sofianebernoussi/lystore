@@ -26,6 +26,27 @@ public class NotifcationCpHelper extends TabHelper {
 
     }
 
+    // doing \n when the str is too long
+    protected String formatStrToCell(String str) {
+        try {
+            String[] words = str.split(" ");
+            String resultStr = "";
+            if (words.length <= 5) {
+                return str;
+            } else {
+                for (int i = 0; i < words.length; i++) {
+                    resultStr += words[i] + " ";
+                    if (i % 5 == 0 && i != 0) {
+                        resultStr += "\n";
+                    }
+                }
+            }
+            return resultStr;
+        } catch (NullPointerException e) {
+            return str;
+        }
+    }
+
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
 

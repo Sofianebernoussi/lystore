@@ -15,9 +15,6 @@ import org.entcore.common.sql.SqlResult;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 public class VerifBudgetTab extends TabHelper {
     JsonArray operations;
@@ -233,62 +230,6 @@ public class VerifBudgetTab extends TabHelper {
         }
     }
 
-    private JsonArray sortByCity(JsonArray values) {
-        JsonArray sortedJsonArray = new JsonArray();
-
-        List<JsonObject> jsonValues = new ArrayList<JsonObject>();
-        for (int i = 0; i < values.size(); i++) {
-            jsonValues.add(values.getJsonObject(i));
-        }
-
-        Collections.sort(jsonValues, new Comparator<JsonObject>() {
-            private static final String KEY_NAME = "zipCode";
-
-            @Override
-            public int compare(JsonObject a, JsonObject b) {
-                String valA = "";
-                String valB = "";
-                String cityA = "";
-                String cityB = "";
-                String nameA = "";
-                String nameB = "";
-                try {
-                    if (a.containsKey(KEY_NAME)) {
-                        valA = a.getString(KEY_NAME);
-                    }
-                    if (b.containsKey(KEY_NAME)) {
-                        valB = b.getString(KEY_NAME);
-                    }
-                } catch (NullPointerException e) {
-                    log.error("error when sorting structures during export");
-                }
-                if (valA.compareTo(valB) == 0) {
-                    if (a.containsKey("city")) {
-                        cityA = a.getString("city");
-                    }
-                    if (b.containsKey("city")) {
-                        cityB = b.getString("city");
-                    }
-                    if (cityA.compareTo(cityB) == 0) {
-                        if (a.containsKey("nameEtab")) {
-                            nameA = a.getString("nameEtab");
-                        }
-                        if (b.containsKey("nameEtab")) {
-                            nameB = b.getString("nameEtab");
-                        }
-                        return nameA.compareTo(nameB);
-                    }
-                    return cityA.compareTo(cityB);
-                }
-                return valA.compareTo(valB);
-            }
-        });
-
-        for (int i = 0; i < values.size(); i++) {
-            sortedJsonArray.add(jsonValues.get(i));
-        }
-        return sortedJsonArray;
-    }
 
     private void setStructures(JsonArray structures) {
         JsonObject program, structure;

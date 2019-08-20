@@ -1,5 +1,7 @@
 package fr.openent.lystore.helpers;
 
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
@@ -26,6 +28,9 @@ public class ExcelHelper {
     public final CellStyle tabStringStyleRight;
     public final CellStyle floatOnYellowStyle;
     public final CellStyle whiteOnBlueLabel;
+    public final CellStyle blackOnGreenHeaderStyle;
+
+    protected Logger log = LoggerFactory.getLogger(ExcelHelper.class);
 
     private DataFormat format;
     public static final String totalLabel = "Total";
@@ -51,6 +56,7 @@ public class ExcelHelper {
         this.blueTitleHeaderStyle = wb.createCellStyle();
         this.tabStringStyleRight = wb.createCellStyle();
         this.floatOnYellowStyle = wb.createCellStyle();
+        this.blackOnGreenHeaderStyle = wb.createCellStyle();
         this.whiteOnBlueLabel = wb.createCellStyle();
 
         format = wb.createDataFormat();
@@ -283,6 +289,23 @@ public class ExcelHelper {
         this.whiteOnBlueLabel.setVerticalAlignment(VerticalAlignment.CENTER);
         this.whiteOnBlueLabel.setFont(whiteTabFont);
 
+
+        Font blackOnGreenHeaderFont = this.wb.createFont();
+        blackOnGreenHeaderFont.setFontHeightInPoints((short) 18);
+        blackOnGreenHeaderFont.setFontName("Calibri");
+        blackOnGreenHeaderFont.setBold(true);
+        this.blackOnGreenHeaderStyle.setWrapText(true);
+        this.blackOnGreenHeaderStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
+        this.blackOnGreenHeaderStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        this.blackOnGreenHeaderStyle.setBorderLeft(BorderStyle.THIN);
+        this.blackOnGreenHeaderStyle.setBorderRight(BorderStyle.THIN);
+        this.blackOnGreenHeaderStyle.setBorderTop(BorderStyle.THIN);
+        this.blackOnGreenHeaderStyle.setBorderBottom(BorderStyle.THIN);
+        this.blackOnGreenHeaderStyle.setAlignment(HorizontalAlignment.CENTER);
+        this.blackOnGreenHeaderStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.blackOnGreenHeaderStyle.setFont(blackOnGreenHeaderFont);
+
+
     }
     public void setBold(Cell cell) {
         Font font = wb.createFont();
@@ -491,6 +514,22 @@ public class ExcelHelper {
 
     }
 
+    public void insertBlackOnGreenHeader(int line, int cellColumn, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blackOnGreenHeaderStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blackOnGreenHeaderStyle);
+        }
+
+
+    }
     public void insertFloatYellow(int line, int cellColumn, Float data) {
         Row tab;
         try {
@@ -846,20 +885,7 @@ public class ExcelHelper {
      * @param lineInsert line where the total is insert
      */
     public void setTotalX(int lineStart, int lineEnd, int column, int lineInsert) {
-        Row tab, tabStart, tabEnd;
-
-        tabStart = sheet.getRow(lineStart);
-        tabEnd = sheet.getRow(lineEnd);
-        Cell cell, cellStartSum, cellEndSum;
-        tab = sheet.getRow(lineInsert);
-        cell = tab.createCell(column);
-        cell.setCellStyle(this.tabCurrencyStyle);
-        cell.setCellValue("total");
-        cellStartSum = tabStart.getCell(column);
-        cellEndSum = tabEnd.getCell(column);
-        cell.setCellStyle(this.tabCurrencyStyle);
-        cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
-
+        setTotalX(lineStart, lineEnd, column, lineInsert, column);
     }
 
     /**
@@ -871,16 +897,7 @@ public class ExcelHelper {
      * @param columnInsert column where to insert the total
      */
     public void setTotalY(int columnStart, int columnEnd, int line, int columnInsert) {
-        Row tab, tabStart, tabEnd;
-        tab = sheet.getRow(line);
-        Cell cell, cellStartSum, cellEndSum;
-        cell = tab.createCell(columnInsert);
-        cellStartSum = tab.getCell(columnStart);
-        cellEndSum = tab.getCell(columnEnd);
-        cell.setCellStyle(this.tabCurrencyStyle);
-        cell.setCellValue("total");
-        cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
-
+        setTotalY(columnStart, columnEnd, line, columnInsert, line);
     }
 
 
@@ -960,4 +977,67 @@ public class ExcelHelper {
         }
     }
 
+
+    /**
+     * set total of a column
+     *
+     * @param lineStart    start of the column
+     * @param lineEnd      end of the column
+     * @param column       number of the column
+     * @param lineInsert   line where the total is insert
+     * @param columnInsert column where the total will be insert
+     */
+    public void setTotalX(int lineStart, int lineEnd, int column, int lineInsert, int columnInsert) {
+        try {
+            Row tab, tabStart, tabEnd;
+            tabStart = sheet.getRow(lineStart);
+            tabEnd = sheet.getRow(lineEnd);
+            Cell cell, cellStartSum, cellEndSum;
+            try {
+                tab = sheet.getRow(lineInsert);
+                cell = tab.createCell(columnInsert);
+            } catch (NullPointerException e) {
+                tab = sheet.createRow(lineInsert);
+                cell = tab.createCell(column);
+            }
+            cell.setCellStyle(this.tabCurrencyStyle);
+            cell.setCellValue("total");
+            cellStartSum = tabStart.getCell(column);
+            cellEndSum = tabEnd.getCell(column);
+            cell.setCellStyle(this.tabCurrencyStyle);
+            cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
+        } catch (NullPointerException e) {
+            log.error("Trying to sum a non init cell , init cells before calling this function");
+        }
+    }
+
+    /**
+     * Set total of a line
+     *
+     * @param columnStart  start of the line
+     * @param columnEnd    end of the line
+     * @param line         number of the line to make total of
+     * @param columnInsert column where to insert the total
+     * @param lineInsert   line where to insert the total
+     */
+    public void setTotalY(int columnStart, int columnEnd, int line, int columnInsert, int lineInsert) {
+        try {
+            Row tab, tabInsert;
+            tab = sheet.getRow(line);
+            try {
+                tabInsert = sheet.getRow(lineInsert);
+            } catch (NullPointerException e) {
+                tabInsert = sheet.createRow(lineInsert);
+            }
+            Cell cell, cellStartSum, cellEndSum;
+            cell = tabInsert.createCell(columnInsert);
+            cellStartSum = tab.getCell(columnStart);
+            cellEndSum = tab.getCell(columnEnd);
+            cell.setCellStyle(this.tabCurrencyStyle);
+            cell.setCellValue("total");
+            cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
+        } catch (NullPointerException e) {
+            log.error("Trying to sum a non init cell , init cells before calling this function");
+        }
+    }
 }

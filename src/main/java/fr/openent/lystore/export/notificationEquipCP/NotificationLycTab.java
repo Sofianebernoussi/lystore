@@ -8,39 +8,34 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
-public class RecapMarketGestion extends NotifcationCpHelper {
-    private static final String DPT = "DPT";
-    private static final String RNE_lYC = "RNE + NOM DU LYCEE ET COMMUNE";
-    private static final String ADDR = "ADRESSE DU LYCEE";
-    private static final String CPDATE = "DATE DE CP";
-    private static final String MARKET_CP = "NOM DU MARCHE ET N° DE CP";
-    private static final String OP_DDE_NUMBER = "N°DE L'OPERATION + N° DE LA DDE ";
-    private static final String CAMPAIGN = "CAMPAGNE";
-    private static final String AMOUNT = "QUANTITE";
-    private static final String TOTAL_PRICE = "PRIX TOTAL TTC";
-    private static final String EQUIPMENT_NAME = "NOM DE L'EQUIPEMENT";
-    private static final String TYPE = "TYPE";
-    private static final String MARKET_NUMBER = "N° DE MARCHE";
-    private static final String REGION_COMMENT = "COMMENTAIRE DE LA DEMANDE REGION";
-    private static final String CIVILITY = "M. Mme Le Proviseur-e";
+public class NotificationLycTab extends NotifcationCpHelper {
+    private int lineNumber = 0;
+    private final String DESTINATION = "Destination";
+    private final String MARKET_CODE = "Code marché Région";
+    private final String REGION_LABEL = "Libellé Région";
+    private final String DATE = "DATE N° RAPPORT";
+    private final String NUMBER_ORDER = "N° de demande";
+    private final String AMOUNT = "Qté";
+    final String Subvention = "236";
+    private final String SubventionLabel = "GESTION DIRECTE\n" +
+            "Les matériels seront fournis au lycée par l'intermédiaire des marchés publics Région.";
+    private final String NotSubventionLabel = "SUBVENTIONS\n" +
+            "Ce document constitue une information et sert également de notification comptable.";
+
     /**
      * open the tab or create it if it doesn't exists
      *
      * @param wb
      * @param instruction
      */
-
-    private int lineNumber = 0;
-
-    public RecapMarketGestion(Workbook wb, JsonObject instruction) {
-        super(wb, instruction, "RECAP MARCHES GESTIONNAIRE");
+    public NotificationLycTab(Workbook wb, JsonObject instruction) {
+        super(wb, instruction, "NOTIFICATION POUR LES LYCEES");
     }
 
     @Override
@@ -84,156 +79,96 @@ public class RecapMarketGestion extends NotifcationCpHelper {
                 }
             }
         });
+
+        datas = sortByCity(datas);
     }
 
     private void writeArray(Handler<Either<String, Boolean>> handler) {
-        SimpleDateFormat formatterDate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        SimpleDateFormat formatterDateExcel = new SimpleDateFormat("dd/MM/yyyy");
-        Date orderDate = null;
-        try {
-            orderDate = formatterDate.parse(instruction.getString("date_cp"));
-        } catch (ParseException e) {
-            log.error("Incorrect date format");
-        }
-
         for (int i = 0; i < datas.size(); i++) {
-            lineNumber++;
-
-            JsonObject market = datas.getJsonObject(i);
-            setLabel(market.getString("market"));
-            JsonArray orders = market.getJsonArray("actionsJO");
-
-
-            orders = sortByCity(orders);
-            String previousCampaign = "";
-            String previousZip = orders.getJsonObject(0).getString("zipCode").substring(0, 2);//check if orders > 0
+            lineNumber += 2;
+            excel.insertLabel(lineNumber, 0, datas.getJsonObject(i).getString("city"));
+            excel.insertLabel(lineNumber, 2, datas.getJsonObject(i).getString("nameEtab"));
+            excel.insertLabel(lineNumber, 4, datas.getJsonObject(i).getString("uai"));
+            lineNumber += 2;
+            JsonObject structure = datas.getJsonObject(i);
+            JsonArray orders = structure.getJsonArray("actionsJO");
+            orders = sortByType(orders);
+            String previousMarket = "";
             String previousCode = "";
-            String zip = "";
-            int startLine = lineNumber;
             for (int j = 0; j < orders.size(); j++) {
-                String address;
                 JsonObject order = orders.getJsonObject(j);
-                try {
-                    address = order.getString("address").replace(",", ",\n");
-                } catch (NullPointerException e) {
-                    address = order.getString("address");
-                }
-
-                zip = order.getString("zipCode").substring(0, 2);
+                String market = order.getString("market");
                 String code = order.getString("code");
-                String campaign = order.getString("campaign");
 
-
-                if (!previousCampaign.equals(campaign)) {
-                    if (j != 0) {
-                        excel.insertHeader(lineNumber, 0, previousZip);
-                        previousZip = zip;
-                        excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
-                        lineNumber++;
-                        startLine = lineNumber;
-
-                    }
-                    lineNumber++;
-                    excel.insertUnderscoreHeader(0, lineNumber, campaign);
-                    mergeCurrentLine(true);
-                    previousCampaign = campaign;
-                    previousCode = "";
-
-                    lineNumber += 2;
+                if (code.equals(Subvention)) {
+                    excel.insertLabel(lineNumber, 0, SubventionLabel);
+                } else {
+                    excel.insertLabel(lineNumber, 0, NotSubventionLabel);
                 }
-
-                if (!previousCode.equals(code)) {
-                    lineNumber++;
-                    previousCode = code;
-                    excel.insertHeader(lineNumber, 0, code);
-                    mergeCurrentLine(false);
-                    lineNumber++;
-                    insertHeaders();
-                    startLine = lineNumber;
-
-                }
-
-                if (!previousZip.equals(zip)) {
-                    excel.insertHeader(lineNumber, 0, previousZip);
-                    previousZip = zip;
-                    excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
-                    lineNumber++;
-                    startLine = lineNumber;
-
-
-                }
-
-                excel.insertCellTabCenter(0, lineNumber, zip);
-                excel.insertCellTabCenter(1, lineNumber, order.getString("uai") + "\n" + order.getString("nameEtab") + "\n" + order.getString("city"));
-
-                excel.insertCellTabCenter(2, lineNumber, CIVILITY + "\n" + address + "\n TEL: " + order.getString("phone"));
-                excel.insertCellTabCenter(3, lineNumber, formatterDateExcel.format(orderDate));
-                excel.insertCellTabCenter(4, lineNumber, order.getString("market") + " \nCP " + instruction.getString("cp_number"));
-                excel.insertCellTabCenter(5, lineNumber,
-                        "OPE : " + order.getString("operation") + "\nDDE : -" + order.getInteger("id").toString());
-                excel.insertCellTabCenter(6, lineNumber, formatStrToCell(campaign));
-                excel.insertCellTabCenter(7, lineNumber, formatStrToCell(order.getInteger("amount").toString()));
-                excel.insertCellTabFloat(8, lineNumber, order.getFloat("total"));
-                excel.insertCellTabCenter(9, lineNumber, formatStrToCell(order.getString("name_equipment")));
-                excel.insertCellTabCenter(10, lineNumber, order.getString("cite_mixte"));
-                excel.insertCellTabCenter(11, lineNumber, formatStrToCell(order.getString("market")));
-                excel.insertCellTabCenter(12, lineNumber, formatStrToCell(order.getString("comment")));
                 lineNumber++;
-            }
-            excel.insertHeader(lineNumber, 0, zip);
-            excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
-            lineNumber++;
+                setLabels();
 
+            }
         }
-        excel.autoSize(13);
+
+        excel.autoSize(8);
         handler.handle(new Either.Right<>(true));
 
     }
 
 
-    private void mergeCurrentLine(boolean underscore) {
-        if (underscore) {
-            CellRangeAddress merge = new CellRangeAddress(lineNumber, lineNumber, 0, 1);
-            sheet.addMergedRegion(merge);
-            excel.setRegionUnderscoreHeader(merge, sheet);
-        } else {
-            CellRangeAddress merge = new CellRangeAddress(lineNumber, lineNumber, 0, 1);
-            sheet.addMergedRegion(merge);
-            excel.setRegionHeader(merge, sheet);
+    private JsonArray sortByType(JsonArray orders) {
+        JsonArray sortedJsonArray = new JsonArray();
+
+        List<JsonObject> jsonValues = new ArrayList<JsonObject>();
+        for (int i = 0; i < orders.size(); i++) {
+            jsonValues.add(orders.getJsonObject(i));
         }
 
+        Collections.sort(jsonValues, new Comparator<JsonObject>() {
+            private static final String KEY_NAME = "code";
+
+            @Override
+            public int compare(JsonObject a, JsonObject b) {
+                String valA = "";
+                String valB = "";
+                try {
+                    if (a.containsKey(KEY_NAME)) {
+                        valA = a.getString(KEY_NAME);
+                    }
+                    if (b.containsKey(KEY_NAME)) {
+                        valB = b.getString(KEY_NAME);
+                    }
+                } catch (NullPointerException e) {
+                    log.error("error when sorting orders NotificationLycTab during export");
+                }
+
+                if (valA.equals(Subvention) && !valB.equals(valA)) {
+                    return -6000000;
+                } else if (valB.equals(Subvention) && !valB.equals(valA)) {
+                    return 6000000;
+                } else {
+                    return valA.compareTo(valB);
+                }
+            }
+        });
+
+        for (int i = 0; i < orders.size(); i++) {
+            sortedJsonArray.add(jsonValues.get(i));
+        }
+        return sortedJsonArray;
     }
 
-
-    private void insertHeaders() {
-
-
-        excel.insertHeader(lineNumber, 0, DPT);
-        excel.insertHeader(lineNumber, 1, RNE_lYC);
-
-        excel.insertHeader(lineNumber, 2, ADDR);
-        excel.insertHeader(lineNumber, 3, CPDATE);
-        excel.insertHeader(lineNumber, 4, MARKET_CP);
-        excel.insertHeader(lineNumber, 5, OP_DDE_NUMBER);
-        excel.insertHeader(lineNumber, 6, CAMPAIGN);
-        excel.insertHeader(lineNumber, 7, AMOUNT);
-        excel.insertHeader(lineNumber, 8, TOTAL_PRICE);
-        excel.insertHeader(lineNumber, 9, EQUIPMENT_NAME);
-        excel.insertHeader(lineNumber, 10, TYPE);
-        excel.insertHeader(lineNumber, 11, MARKET_NUMBER);
-        excel.insertHeader(lineNumber, 12, REGION_COMMENT);
+    @Override
+    protected void setLabels() {
+        excel.insertLabel(lineNumber, 0, DESTINATION);
+        excel.insertLabel(lineNumber, 1, MARKET_CODE);
+        excel.insertLabel(lineNumber, 2, REGION_LABEL);
+        excel.insertLabel(lineNumber, 3, DATE);
+        excel.insertLabel(lineNumber, 4, NUMBER_ORDER);
+        excel.insertLabel(lineNumber, 5, AMOUNT);
         lineNumber++;
     }
-
-    private void setLabel(String market) {
-        excel.insertBlackOnGreenHeader(lineNumber, 0, market);
-        CellRangeAddress merge = new CellRangeAddress(lineNumber, lineNumber, 0, 12);
-        sheet.addMergedRegion(merge);
-        excel.setRegionHeader(merge, sheet);
-        lineNumber += 2;
-
-    }
-
 
     private void setStructures(JsonArray structures) {
         JsonObject program, structure;
@@ -241,18 +176,14 @@ public class RecapMarketGestion extends NotifcationCpHelper {
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
             actions = new JsonArray(data.getString("actions"));
-            for (int k = 0; k < actions.size(); k++) {
-                JsonObject action = actions.getJsonObject(k);
-                for (int j = 0; j < structures.size(); j++) {
-                    structure = structures.getJsonObject(j);
-                    if (action.getString("id_structure").equals(structure.getString("id"))) {
-                        action.put("nameEtab", structure.getString("name"));
-                        action.put("uai", structure.getString("uai"));
-                        action.put("city", structure.getString("city"));
-                        action.put("address", structure.getString("address"));
-                        action.put("zipCode", structure.getString("zipCode"));
-                        action.put("phone", structure.getString("phone"));
-                    }
+            for (int j = 0; j < structures.size(); j++) {
+                structure = structures.getJsonObject(j);
+                if (data.getString("id_structure").equals(structure.getString("id"))) {
+                    data.put("nameEtab", structure.getString("name"));
+                    data.put("uai", structure.getString("uai"));
+                    data.put("city", structure.getString("city"));
+                    data.put("type", structure.getString("type"));
+                    data.put("zipCode", structure.getString("zipCode"));
                 }
             }
             data.put("actionsJO", actions);
@@ -318,11 +249,11 @@ public class RecapMarketGestion extends NotifcationCpHelper {
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                 "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                 "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id" +
-                "             order by campaign,code,market_id, id_structure,program,code  " +
-                "  )    SELECT  values.market as market,    array_to_json(array_agg(values))as actions, SUM (values.total) as totalMarket       " +
+                "             order by code,campaign, id_structure,program,code  " +
+                "  )    SELECT  values.id_structure as id_structure,    array_to_json(array_agg(values))as actions  " +
                 "  from  values      " +
-                "  Group by values.market   " +
-                "  Order by values.market   ;";
+                "  Group by values.id_structure   " +
+                "  Order by values.id_structure   ;";
 
         sqlHandler(handler);
     }

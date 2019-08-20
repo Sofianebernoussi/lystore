@@ -180,6 +180,13 @@ export const instructionController = ng.controller('instructionController',
             Utils.safeApply($scope);
         };
 
+        $scope.exportPublipostage = async (instruction) => {
+            $scope.notifications.push(new Notification('lystore.export.notif', 'info'));
+            await instruction.exportPublipostage();
+            $scope.instructions.selected[0].selected = false;
+            Utils.safeApply($scope);
+        };
+
         $scope.selectTypeForExport = async (type, instruction: Instruction) => {
             $scope.display.lightbox.exportEquipment = false;
 

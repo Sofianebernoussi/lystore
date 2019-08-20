@@ -49,6 +49,9 @@ body.lystore {
         background-color: #f6f6f6;
         color: #bfbfbf !important;
       }
+      tr.errorRow{
+        color: $red;
+      }
     }
   }
 

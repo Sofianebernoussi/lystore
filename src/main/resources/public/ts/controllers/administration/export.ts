@@ -1,5 +1,5 @@
 import {moment, ng, template} from "entcore";
-import {Export, Exports, Notification, Utils} from "../../model";
+import {Export, Exports, Notification, Utils, STATUS} from "../../model";
 
 declare let window: any;
 
@@ -9,6 +9,7 @@ export const exportCtrl = ng.controller('exportCtrl', [
             delete: false
         };
         $scope.exports = new Exports([]);
+        $scope.STATUS = STATUS;
         await $scope.exports.getExports();
 
 
@@ -22,14 +23,15 @@ export const exportCtrl = ng.controller('exportCtrl', [
             Utils.safeApply($scope);
         };
         $scope.getExport = (exportTemp: Export) => {
-            window.location = `lystore/export/${exportTemp.fileid}`;
-
+            if(exportTemp.status === STATUS.SUCCESS){
+                window.location = `lystore/export/${exportTemp.fileid}`;
+            }
         };
 
-        $scope.confirmDelete = (exportToDelete: Export) => {
-            $scope.display.delete = true;
-            $scope.exportToDelete = exportToDelete;
-            template.open('export.delete.lightbox', 'administrator/exports/export-lightbox-delete');
+        $scope.confirmDelete = () => {
+                $scope.display.delete = true;
+                $scope.exportsToDelete = $scope.exports.all.filter(exportFiltered => exportFiltered.selected && exportFiltered.status !== STATUS.WAITING);
+                template.open('export.delete.lightbox', 'administrator/exports/export-lightbox-delete');
         };
 
         $scope.cancelExportLightbox = () => {
@@ -40,15 +42,28 @@ export const exportCtrl = ng.controller('exportCtrl', [
 
         };
 
-        $scope.deleteExport = async (exportToDelete: Export) => {
-            await exportToDelete.delete();
+        $scope.deleteExport = async () => {
+            await $scope.exports.delete( $scope.exportsToDelete.map(exportMap => exportMap.id));
+            $scope.isAllExportSelected = false;
             $scope.display.delete = false;
             template.close('export.delete.lightbox');
             $scope.notifications.push(new Notification('lystore.delete.notif', 'confirm'));
-            $scope.exportToDelete = new Export();
+            $scope.exportToDelete = [];
             await $scope.exports.getExports();
             $scope.updateDate()
         };
+
+        $scope.isAllExportSelected = false;
+        $scope.switchAllExports = () => {
+            $scope.isAllExportSelected  =  !$scope.isAllExportSelected;
+            if ( $scope.isAllExportSelected) {
+                $scope.exports.all.map(exportSelected => exportSelected.selected = true)
+            } else {
+                $scope.exports.all.map(exportSelected => exportSelected.selected = false)
+            }
+            Utils.safeApply($scope);
+        };
+
         $scope.updateDate();
     }
 ]);

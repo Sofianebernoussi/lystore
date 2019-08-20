@@ -154,7 +154,7 @@
             </button>
 
 
-
+            </button>
             <button
                     ng-disabled="instructions.selected[0].operations.length === 0"
                     ng-show="instructions.selected.length === 1"
@@ -162,6 +162,7 @@
                     download
             >
                 <i18n>lystore.exportNotificationCP</i18n>
+
             </button>
             <button
                     ng-disabled="instructions.selected[0].operations.length === 0"
@@ -174,10 +175,10 @@
             </button>
             <button
                     ng-disabled="instructions.selected[0].operations.length === 0"
-                    ng-click="exportSubvention(instructions.selected[0])"
+                    ng-show="instructions.selected.length === 1"
+                    ng-click="exportPublipostage(instructions.selected[0])"
             >
-
-                <i18n>lystore.export.subvention</i18n>
+                <i18n>lystore.export.publipostage</i18n>
             </button>
             <button
                     ng-click="openLightboxDeleteInstruction()"

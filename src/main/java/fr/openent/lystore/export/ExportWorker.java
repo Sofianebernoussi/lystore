@@ -50,8 +50,8 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                 exportNotificationCp(event.body().getInteger("id"),
                         event.body().getString("userId"));
                 break;
-            case "exportSubvention":
-                exportSubvention(event.body().getInteger("id"),
+            case "exportPublipostage":
+                exportPublipostage(event.body().getInteger("id"),
                         event.body().getString("userId"));
                 break;
             default:
@@ -75,14 +75,15 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
         });
     }
 
-    private void exportSubvention(Integer instructionId, String userId) {
+    private void exportPublipostage(Integer instructionId, String userId) {
         this.instruction = new Instruction(instructionId);
-        this.instruction.exportSubvention( file -> {
-            if (file.isLeft()) {
+
+        this.instruction.exportPublipostage( file  -> {
+            if (file .isLeft()) {
                 logger.error("error when creating xlsx");
             } else {
-                Buffer xlsx = file.right().getValue();
-                String fileName = getDate() + "_subvention_equipement" + ".xlsx";
+                Buffer xlsx = file .right().getValue();
+                String fileName = getDate() + "_Liste_Etablissements_Publipostage_Notification" + ".xlsx";
                 saveBuffer(userId, xlsx, fileName);
             }
         });

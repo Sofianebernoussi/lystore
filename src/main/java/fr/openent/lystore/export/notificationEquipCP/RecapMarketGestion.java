@@ -81,8 +81,6 @@ public class RecapMarketGestion extends NotifcationCpHelper {
                     JsonArray structures = repStructures.right().getValue();
                     setStructures(structures);
                     writeArray(handler);
-//                    setLabels();
-//                    setArray(datas);
                 }
             }
         });
@@ -95,7 +93,7 @@ public class RecapMarketGestion extends NotifcationCpHelper {
         try {
             orderDate = formatterDate.parse(instruction.getString("date_cp"));
         } catch (ParseException e) {
-           log.error("Incorrect date format");
+            log.error("Incorrect date format");
         }
 
         for (int i = 0; i < datas.size(); i++) {
@@ -105,11 +103,13 @@ public class RecapMarketGestion extends NotifcationCpHelper {
             setLabel(market.getString("market"));
             JsonArray orders = market.getJsonArray("actionsJO");
 
+
+            orders = sortByCity(orders);
             String previousCampaign = "";
-            String previousZip = orders.getJsonObject(0).getString("zipCode");//check if orders > 0
+            String previousZip = orders.getJsonObject(0).getString("zipCode").substring(0, 2);//check if orders > 0
             String previousCode = "";
             String zip = "";
-            orders = sortByCity(orders);
+            int startLine = lineNumber;
             for (int j = 0; j < orders.size(); j++) {
                 String address;
                 JsonObject order = orders.getJsonObject(j);
@@ -122,17 +122,23 @@ public class RecapMarketGestion extends NotifcationCpHelper {
                 zip = order.getString("zipCode").substring(0, 2);
                 String code = order.getString("code");
                 String campaign = order.getString("campaign");
+
+
                 if (!previousCampaign.equals(campaign)) {
-                    lineNumber++;
-                    excel.insertLabel(lineNumber, 0, campaign);
-                    mergeCurrentLine();
-                    previousCampaign = campaign;
-                    previousCode = "";
                     if (j != 0) {
                         excel.insertHeader(lineNumber, 0, previousZip);
                         previousZip = zip;
+                        excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
                         lineNumber++;
+                        startLine = lineNumber;
+
                     }
+                    lineNumber++;
+                    excel.insertUnderscoreHeader(0, lineNumber, campaign);
+                    mergeCurrentLine(true);
+                    previousCampaign = campaign;
+                    previousCode = "";
+
                     lineNumber += 2;
                 }
 
@@ -140,38 +146,42 @@ public class RecapMarketGestion extends NotifcationCpHelper {
                     lineNumber++;
                     previousCode = code;
                     excel.insertHeader(lineNumber, 0, code);
-                    mergeCurrentLine();
+                    mergeCurrentLine(false);
                     lineNumber++;
                     insertHeaders();
+                    startLine = lineNumber;
+
                 }
 
                 if (!previousZip.equals(zip)) {
                     excel.insertHeader(lineNumber, 0, previousZip);
                     previousZip = zip;
-
+                    excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
                     lineNumber++;
+                    startLine = lineNumber;
 
 
                 }
 
-                excel.insertLabel(lineNumber, 0, order.getString("zipCode").substring(0, 2));
-                excel.insertLabel(lineNumber, 1, order.getString("uai") + "\n" + order.getString("nameEtab") + "\n" + order.getString("city"));
+                excel.insertCellTabCenter(0, lineNumber, zip);
+                excel.insertCellTabCenter(1, lineNumber, order.getString("uai") + "\n" + order.getString("nameEtab") + "\n" + order.getString("city"));
 
-                excel.insertLabel(lineNumber, 2, CIVILITY + "\n" + address);
-                excel.insertLabel(lineNumber, 3, formatterDateExcel.format(orderDate));
-                excel.insertLabel(lineNumber, 4, order.getString("market") + " \nCP " + instruction.getString("cp_number"));
-                excel.insertLabel(lineNumber, 5,
-                        "OPE : " + order.getString("operation") + "\nDDE : " + order.getInteger("id").toString());
-                excel.insertLabel(lineNumber, 6, formatStrToCell(campaign));
-                excel.insertLabel(lineNumber, 7, formatStrToCell(order.getInteger("amount").toString()));
-                excel.insertLabel(lineNumber, 8, order.getDouble("total").toString());
-                excel.insertLabel(lineNumber, 9, formatStrToCell(order.getString("name_equipment")));
-                excel.insertLabel(lineNumber, 10, order.getString("cite_mixte"));
-                excel.insertLabel(lineNumber, 11, formatStrToCell(order.getString("market")));
-                excel.insertLabel(lineNumber, 12, formatStrToCell(order.getString("comment")));
+                excel.insertCellTabCenter(2, lineNumber, CIVILITY + "\n" + address);
+                excel.insertCellTabCenter(3, lineNumber, formatterDateExcel.format(orderDate));
+                excel.insertCellTabCenter(4, lineNumber, order.getString("market") + " \nCP " + instruction.getString("cp_number"));
+                excel.insertCellTabCenter(5, lineNumber,
+                        "OPE : " + order.getString("operation") + "\nDDE : -" + order.getInteger("id").toString());
+                excel.insertCellTabCenter(6, lineNumber, formatStrToCell(campaign));
+                excel.insertCellTabCenter(7, lineNumber, formatStrToCell(order.getInteger("amount").toString()));
+                excel.insertCellTabFloat(8, lineNumber, order.getFloat("total"));
+                excel.insertCellTabCenter(9, lineNumber, formatStrToCell(order.getString("name_equipment")));
+                excel.insertCellTabCenter(10, lineNumber, order.getString("cite_mixte"));
+                excel.insertCellTabCenter(11, lineNumber, formatStrToCell(order.getString("market")));
+                excel.insertCellTabCenter(12, lineNumber, formatStrToCell(order.getString("comment")));
                 lineNumber++;
             }
             excel.insertHeader(lineNumber, 0, zip);
+            excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
             lineNumber++;
 
         }
@@ -181,10 +191,17 @@ public class RecapMarketGestion extends NotifcationCpHelper {
     }
 
 
-    private void mergeCurrentLine() {
-        CellRangeAddress merge = new CellRangeAddress(lineNumber, lineNumber, 0, 1);
-        sheet.addMergedRegion(merge);
-        excel.setRegionHeader(merge, sheet);
+    private void mergeCurrentLine(boolean underscore) {
+        if (underscore) {
+            CellRangeAddress merge = new CellRangeAddress(lineNumber, lineNumber, 0, 1);
+            sheet.addMergedRegion(merge);
+            excel.setRegionUnderscoreHeader(merge, sheet);
+        } else {
+            CellRangeAddress merge = new CellRangeAddress(lineNumber, lineNumber, 0, 1);
+            sheet.addMergedRegion(merge);
+            excel.setRegionHeader(merge, sheet);
+        }
+
     }
 
     // doing \n when the str is too long
@@ -229,7 +246,7 @@ public class RecapMarketGestion extends NotifcationCpHelper {
     }
 
     private void setLabel(String market) {
-        excel.insertLabel(lineNumber, 0, market);
+        excel.insertBlackOnGreenHeader(lineNumber, 0, market);
         CellRangeAddress merge = new CellRangeAddress(lineNumber, lineNumber, 0, 12);
         sheet.addMergedRegion(merge);
         excel.setRegionHeader(merge, sheet);

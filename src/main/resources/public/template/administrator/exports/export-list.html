@@ -11,6 +11,15 @@
         <table class="twelve">
             <thead>
             <tr>
+                <td workflow="lystore.manager" class="table-selector">
+                    <label class="checkbox">
+                        <input type="checkbox"
+                               ng-show="exports.all.length > 0"
+                               ng-change="switchAllExports()"
+                               ng-model="allExportsSelected">
+                        <span></span>
+                    </label>
+                </td>
                 <td>
                     <i18n>
                         lystore.nameFile
@@ -22,27 +31,49 @@
                     </i18n>
                 </td>
                 <td></td>
-                <td></td>
             </tr>
             </thead>
             <tbody>
-            <tr ng-click="getExport(export)" ng-repeat="export in exports.all">
+            <tr
+                    ng-repeat="export in exports.all"
+                    class=[[export.classStatus]]
+            >
+                <td workflow="lystore.manager" class="table-selector" >
+                    <label class="checkbox">
+                        <input type="checkbox" ng-model="export.selected">
+                        <span></span>
+                    </label>
+                </td>
                 <td>
                     [[export.filename]]
                 </td>
                 <td>
                     [[export.created]]
                 </td>
-                <td>
+                <td
+                        ng-click="getExport(export)"
+                        ng-show="export.status === STATUS.SUCCESS"
+                >
                     <i class="downloadButton"></i>
                 </td>
-                <td ng-click="$event.stopPropagation();confirmDelete(export)">
-                    <i class="trash"></i>
-                </td>
+                <td ng-show="!(export.status === STATUS.SUCCESS)">&nbsp;</td>
             </tr>
             </tbody>
         </table>
     </article>
+
+    <section class="toggle-buttons" ng-class="{ hide:exports.selected.length === 0 }">
+        <div class="toggle">
+            <div class="row">
+                <button
+                        ng-click="confirmDelete()"
+                >
+                    <i18n>delete</i18n>
+                </button>
+            </div>
+        </div>
+    </section>
+
     <lightbox show="display.delete"
     >
         <container template="export.delete.lightbox"></container>

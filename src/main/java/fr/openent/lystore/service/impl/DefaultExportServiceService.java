@@ -21,7 +21,13 @@ public class DefaultExportServiceService implements ExportService {
 
     @Override
     public void getExports(Handler<Either<String, JsonArray>> handler, UserInfos user) {
-        String query = "SELECT filename,fileid,created " +
+        String query = "" +
+                "SELECT " +
+                "id, " +
+                "status, " +
+                "filename," +
+                "fileid," +
+                "created " +
                 "FROM " + Lystore.lystoreSchema + ".export " +
                 "WHERE ownerid = ?" +
                 "order by created  DESC";

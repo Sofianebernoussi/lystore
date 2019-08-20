@@ -3,11 +3,11 @@ package fr.openent.lystore.service.impl;
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.StructureService;
 import fr.wseduc.webutils.Either;
-import org.entcore.common.neo4j.Neo4j;
-import org.entcore.common.neo4j.Neo4jResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.entcore.common.neo4j.Neo4j;
+import org.entcore.common.neo4j.Neo4jResult;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.SqlResult;
 
@@ -46,7 +46,7 @@ public class DefaultStructureService extends SqlCrudService implements Structure
     public void getStructureById(JsonArray ids, Handler<Either<String, JsonArray>> handler) {
         String query = "MATCH (s:Structure) WHERE s.id IN {ids} return s.id as id, s.UAI as uai," +
                 " s.name as name, s.phone as phone, s.address + ' ,' + s.zipCode +' ' + s.city as address,  " +
-                "s.zipCode  as zipCode, s.city as city ";
+                "s.zipCode  as zipCode, s.city as city, s.type as type ";
 
         Neo4j.getInstance().execute(query,
                 new JsonObject().put("ids", ids),

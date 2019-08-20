@@ -3,6 +3,9 @@ package fr.openent.lystore.export;
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.equipmentRapp.*;
 import fr.openent.lystore.export.investissement.*;
+import fr.openent.lystore.export.notificationEquipCP.LinesBudget;
+import fr.openent.lystore.export.notificationEquipCP.RecapMarketGestion;
+import fr.openent.lystore.export.publipostage.Publipostage;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.data.FileResolver;
@@ -84,24 +87,8 @@ public class Instruction {
                         futures.add(Fonctionnementfuture);
                         futures.add(RecapEPLEfuture);
                         futures.add(RecapImputationBudfuture);
-                        CompositeFuture.all(futures).setHandler(event -> {
-                            if (event.succeeded()) {
-                                try {
-                                    ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
-                                    workbook.write(fileOut);
-                                    Buffer buff = new BufferImpl();
-                                    buff.appendBytes(fileOut.toByteArray());
-                                    handler.handle(new Either.Right<>(buff));
-                                } catch (IOException e) {
-                                    log.error(e.getMessage());
-                                    handler.handle(new Either.Left<>(e.getMessage()));
 
-                                }
-                            } else {
-                                log.error("Error when resolving futures");
-                                handler.handle(new Either.Left<>("Error when resolving futures"));
-                            }
-                        });
+                        futureHandler(handler, workbook, futures);
 
                         new LyceeTab(workbook, instruction).create(getHandler(lyceeFuture));
                         new CMRTab(workbook, instruction).create(getHandler(CMRFuture));
@@ -142,7 +129,7 @@ public class Instruction {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
 
                     Workbook workbook = new XSSFWorkbook();
-                        List<Future> futures = new ArrayList<>();
+                    List<Future> futures = new ArrayList<>();
                     Future<Boolean> ListForTextFuture = Future.future();
                     Future<Boolean> RecapFuture = Future.future();
                     Future<Boolean> ComptaFuture = Future.future();
@@ -155,23 +142,9 @@ public class Instruction {
                     futures.add(AnnexeDelibFuture);
                     futures.add(RecapMarketFuture);
                     futures.add(VerifBudgetFuture);
-                        CompositeFuture.all(futures).setHandler(event -> {
-                            if (event.succeeded()) {
-                                try {
-                                    ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
-                                    workbook.write(fileOut);
-                                    Buffer buff = new BufferImpl();
-                                    buff.appendBytes(fileOut.toByteArray());
-                                    handler.handle(new Either.Right<>(buff));
-                                } catch (IOException e) {
-                                    log.error(e.getMessage());
-                                    handler.handle(new Either.Left<>(e.getMessage()));
-                                }
-                            } else {
-                                log.error("Error when resolving futures");
-                                handler.handle(new Either.Left<>("Error when resolving futures"));
-                            }
-                        });
+
+                    futureHandler(handler, workbook, futures);
+
                     new ComptaTab(workbook, instruction, type).create(getHandler(ComptaFuture));
                     new ListForTextTab(workbook, instruction, type).create(getHandler(ListForTextFuture));
                     new RecapTab(workbook, instruction, type).create(getHandler(RecapFuture));
@@ -184,6 +157,97 @@ public class Instruction {
 
 
     }
+
+    public void exportPublipostage(Handler<Either<String, Buffer>> handler) {
+        if (this.id == null) {
+            log.error("Instruction identifier is not nullable");
+            handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
+        }
+        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler( eitherInstruction -> {
+            if (eitherInstruction.isLeft()) {
+                log.error("Error when getting sql datas ");
+                handler.handle(new Either.Left<>("Error when getting sql datas "));
+            } else {
+                JsonObject instruction = eitherInstruction.right().getValue();
+                String operationStr = "operations";
+                if (!instruction.containsKey(operationStr)) {
+                    log.error("Error when getting operations");
+                    handler.handle(new Either.Left<>("Error when getting operations"));
+                } else {
+                    instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
+
+                    Workbook workbook = new XSSFWorkbook();
+                    List<Future> futures = new ArrayList<>();
+                    Future<Boolean> PublipostageFuture = Future.future();
+
+                    futures.add(PublipostageFuture);
+
+                    futureHandler(handler, workbook, futures);
+
+                    new Publipostage(workbook, instruction).create(getHandler(PublipostageFuture));
+                }
+            }
+        }));
+    }
+
+    public void exportNotficationCp(Handler<Either<String, Buffer>> handler) {
+        if (this.id == null) {
+            log.error("Instruction identifier is not nullable");
+            handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
+        }
+
+
+        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
+            if (either.isLeft()) {
+                log.error("Error when getting sql datas ");
+                handler.handle(new Either.Left<>("Error when getting sql datas "));
+            } else {
+
+                JsonObject instruction = either.right().getValue();
+                String operationStr = "operations";
+                if (!instruction.containsKey(operationStr)) {
+                    log.error("Error when getting operations");
+                    handler.handle(new Either.Left<>("Error when getting operations"));
+                } else {
+                    instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
+
+                    Workbook workbook = new XSSFWorkbook();
+                    List<Future> futures = new ArrayList<>();
+                    Future<Boolean> LinesBudgetFuture = Future.future();
+                    Future<Boolean> RecapMarketGestionFuture = Future.future();
+
+                    futures.add(LinesBudgetFuture);
+                    futures.add(RecapMarketGestionFuture);
+
+                    futureHandler(handler, workbook, futures);
+
+                    new RecapMarketGestion(workbook, instruction).create(getHandler(RecapMarketGestionFuture));
+                    new LinesBudget(workbook, instruction).create(getHandler(LinesBudgetFuture));
+                }
+            }
+        }));
+    }
+
+    private void futureHandler(Handler<Either<String, Buffer>> handler, Workbook workbook, List<Future> futures) {
+        CompositeFuture.all(futures).setHandler(event -> {
+            if (event.succeeded()) {
+                try {
+                    ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
+                    workbook.write(fileOut);
+                    Buffer buff = new BufferImpl();
+                    buff.appendBytes(fileOut.toByteArray());
+                    handler.handle(new Either.Right<>(buff));
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                    handler.handle(new Either.Left<>(e.getMessage()));
+                }
+            } else {
+                log.error("Error when resolving futures");
+                handler.handle(new Either.Left<>("Error when resolving futures"));
+            }
+        });
+    }
+
     private Handler<Either<String, Boolean>> getHandler(Future<Boolean> future) {
         return event -> {
             if (event.isRight()) {

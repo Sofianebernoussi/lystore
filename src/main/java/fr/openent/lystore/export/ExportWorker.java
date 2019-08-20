@@ -46,6 +46,14 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                         event.body().getInteger("id"),
                         event.body().getString("userId"));
                 break;
+            case "exportNotificationCP":
+                exportNotificationCp(event.body().getInteger("id"),
+                        event.body().getString("userId"));
+                break;
+            case "exportPublipostage":
+                exportPublipostage(event.body().getInteger("id"),
+                        event.body().getString("userId"));
+                break;
             default:
                 logger.error("Invalid action in worker");
                 break;
@@ -53,6 +61,33 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
         }
     }
 
+    private void exportNotificationCp(Integer instructionId, String userId) {
+        this.instruction = new Instruction(instructionId);
+
+        this.instruction.exportNotficationCp(event1 -> {
+            if (event1.isLeft()) {
+                logger.error("error when creating xlsx");
+            } else {
+                Buffer xlsx = event1.right().getValue();
+                String fileName = getDate() + "_Notification_Equipement_CP" + ".xlsx";
+                saveBuffer(userId, xlsx, fileName);
+            }
+        });
+    }
+
+    private void exportPublipostage(Integer instructionId, String userId) {
+        this.instruction = new Instruction(instructionId);
+
+        this.instruction.exportPublipostage( file  -> {
+            if (file .isLeft()) {
+                logger.error("error when creating xlsx");
+            } else {
+                Buffer xlsx = file .right().getValue();
+                String fileName = getDate() + "_Liste_Etablissements_Publipostage_Notification" + ".xlsx";
+                saveBuffer(userId, xlsx, fileName);
+            }
+        });
+    }
 
     private String getDate() {
         java.util.Date date = Calendar.getInstance().getTime();

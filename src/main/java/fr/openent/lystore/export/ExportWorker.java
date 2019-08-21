@@ -34,36 +34,29 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
     @Override
     public void handle(Message<JsonObject> event) {
         final String action = event.body().getString("action", "");
-        String fileNamIn = "";
-        if(event.body().containsKey("type")){
-            fileNamIn = getDate() + event.body().getString("titleFile") + event.body().getString("type") + ".xlsx";
-        } else {
-            fileNamIn = getDate() + event.body().getString("titleFile") + ".xlsx";
-        }
         switch (action) {
             case "exportEQU":
                 exportEquipment(
                         event.body().getInteger("id"),
                         event.body().getString("type"),
-                        fileNamIn,
                         event.body().getString("userId"));
                 break;
             case "exportRME":
                 exportRME(
                         event.body().getInteger("id"),
-                        fileNamIn,
                         event.body().getString("userId"));
                 break;
             case "exportNotificationCP":
                 exportNotificationCp(event.body().getInteger("id"),
-                        fileNamIn,
                         event.body().getString("userId"));
                 break;
             case "exportPublipostage":
                 exportPublipostage(event.body().getInteger("id"),
-                        fileNamIn,
                         event.body().getString("userId"));
                 break;
+            case "exportSubvention":
+                exportSubvention(event.body().getInteger("id"),
+                        event.body().getString("userId"));
             default:
                 logger.error("Invalid action in worker");
                 break;
@@ -71,7 +64,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
         }
     }
 
-    private void exportNotificationCp(Integer instructionId, String titleFile, String userId) {
+    private void exportNotificationCp(Integer instructionId, String userId) {
         this.instruction = new Instruction(instructionId);
 
         this.instruction.exportNotficationCp(event1 -> {
@@ -79,20 +72,35 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                 logger.error("error when creating xlsx");
             } else {
                 Buffer xlsx = event1.right().getValue();
-                saveBuffer(userId, xlsx, titleFile);
+                String fileName = getDate() + "_Notification_Equipement_CP" + ".xlsx";
+                saveBuffer(userId, xlsx, fileName);
             }
         });
     }
 
-    private void exportPublipostage(Integer instructionId, String titleFile, String userId) {
+    private void exportSubvention(Integer instructionId, String userId) {
         this.instruction = new Instruction(instructionId);
-
-        this.instruction.exportPublipostage( file  -> {
-            if (file .isLeft()) {
+        this.instruction.exportSubvention( file -> {
+            if (file.isLeft()) {
                 logger.error("error when creating xlsx");
             } else {
-                Buffer xlsx = file .right().getValue();
-                saveBuffer(userId, xlsx, titleFile);
+                Buffer xlsx = file.right().getValue();
+                String fileName = getDate() + "_subvention_equipement" + ".xlsx";
+                saveBuffer(userId, xlsx, fileName);
+            }
+        });
+    }
+
+    private void exportPublipostage(Integer instructionId, String userId) {
+        this.instruction = new Instruction(instructionId);
+
+        this.instruction.exportPublipostage(file -> {
+            if (file.isLeft()) {
+                logger.error("error when creating xlsx");
+            } else {
+                Buffer xlsx = file.right().getValue();
+                String fileName = getDate() + "_Liste_Etablissements_Publipostage_Notification" + ".xlsx";
+                saveBuffer(userId, xlsx, fileName);
             }
         });
     }
@@ -103,7 +111,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
         return formatter.format(date);
     }
 
-    private void exportRME(Integer instructionId, String titleFile, String userId) {
+    private void exportRME(Integer instructionId, String userId) {
         this.instruction = new Instruction(instructionId);
 
         this.instruction.exportInvestissement(event -> {
@@ -111,7 +119,8 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                 logger.error("error when creating xlsx");
             } else {
                 Buffer xlsx = event.right().getValue();
-                saveBuffer(userId, xlsx, titleFile);
+                String fileName = "Récapitulatif_mesures_engagées_" + getDate() + ".xlsx";
+                saveBuffer(userId, xlsx, fileName);
             }
         });
     }
@@ -129,14 +138,16 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
         });
     }
 
-    private void exportEquipment(int instructionId, String type, String titleFile, String userId) {
+    private void exportEquipment(int instructionId, String type, String userId) {
         this.instruction = new Instruction(instructionId);
+
         this.instruction.exportEquipmentRapp(event1 -> {
             if (event1.isLeft()) {
                 logger.error("error when creating xlsx");
             } else {
                 Buffer xlsx = event1.right().getValue();
-                saveBuffer(userId, xlsx, titleFile);
+                String fileName = getDate() + "_EQUIPEMENT_RAPPORT_" + type + ".xlsx";
+                saveBuffer(userId, xlsx, fileName);
             }
         }, type);
     }

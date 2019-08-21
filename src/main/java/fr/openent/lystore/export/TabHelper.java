@@ -12,6 +12,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.entcore.common.sql.Sql;
+import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -178,5 +180,18 @@ public abstract class TabHelper {
             return str;
         }
     }
+
+    public void sqlHandler(Handler<Either<String, JsonArray>> handler) {
+        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
+            if (event.isLeft()) {
+                handler.handle(event.left());
+            } else {
+                datas = event.right().getValue();
+                handler.handle(new Either.Right<>(datas));
+            }
+        }));
+
+    }
+
 
 }

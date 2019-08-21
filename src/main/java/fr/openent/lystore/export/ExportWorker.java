@@ -57,6 +57,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
             case "exportSubvention":
                 exportSubvention(event.body().getInteger("id"),
                         event.body().getString("userId"));
+                break;
             default:
                 logger.error("Invalid action in worker");
                 break;

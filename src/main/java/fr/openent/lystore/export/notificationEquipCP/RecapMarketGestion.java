@@ -1,7 +1,6 @@
 package fr.openent.lystore.export.notificationEquipCP;
 
 import fr.openent.lystore.Lystore;
-import fr.openent.lystore.export.TabHelper;
 import fr.openent.lystore.service.StructureService;
 import fr.openent.lystore.service.impl.DefaultStructureService;
 import fr.wseduc.webutils.Either;
@@ -10,15 +9,13 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class RecapMarketGestion extends TabHelper {
+public class RecapMarketGestion extends NotifcationCpHelper {
     private static final String DPT = "DPT";
     private static final String RNE_lYC = "RNE + NOM DU LYCEE ET COMMUNE";
     private static final String ADDR = "ADRESSE DU LYCEE";
@@ -83,9 +80,11 @@ public class RecapMarketGestion extends TabHelper {
                 if (repStructures.isRight()) {
                     JsonArray structures = repStructures.right().getValue();
                     setStructures(structures);
-                    writeArray(handler);
-//                    setLabels();
-//                    setArray(datas);
+                    if (datas.isEmpty()) {
+                        handler.handle(new Either.Left<>("No data in database"));
+                    } else {
+                        writeArray(handler);
+                    }
                 }
             }
         });
@@ -98,7 +97,7 @@ public class RecapMarketGestion extends TabHelper {
         try {
             orderDate = formatterDate.parse(instruction.getString("date_cp"));
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("Incorrect date format");
         }
 
         for (int i = 0; i < datas.size(); i++) {
@@ -107,33 +106,108 @@ public class RecapMarketGestion extends TabHelper {
             JsonObject market = datas.getJsonObject(i);
             setLabel(market.getString("market"));
             JsonArray orders = market.getJsonArray("actionsJO");
-            insertHeaders();
+
+
+            orders = sortByCity(orders);
+            String previousCampaign = "";
+            String previousZip = orders.getJsonObject(0).getString("zipCode").substring(0, 2);//check if orders > 0
+            String previousCode = "";
+            String zip = "";
+            int startLine = lineNumber;
             for (int j = 0; j < orders.size(); j++) {
+                String address;
                 JsonObject order = orders.getJsonObject(j);
+                try {
+                    address = order.getString("address").replace(",", ",\n");
+                } catch (NullPointerException e) {
+                    address = order.getString("address");
+                }
 
-                excel.insertLabel(lineNumber, 0, order.getString("zipCode").substring(0, 2));
-                excel.insertLabel(lineNumber, 1, order.getString("uai") + "\n" + order.getString("nameEtab") + "\n" + order.getString("city"));
+                zip = order.getString("zipCode").substring(0, 2);
+                String code = order.getString("code");
+                String campaign = order.getString("campaign");
 
-                excel.insertLabel(lineNumber, 2, CIVILITY + "\n" + order.getString("address"));
-                excel.insertLabel(lineNumber, 3, formatterDateExcel.format(orderDate));
-                excel.insertLabel(lineNumber, 4, order.getString("market") + " \nCP " + instruction.getString("cp_number"));
-                excel.insertLabel(lineNumber, 5,
-                        "OPE : " + order.getString("operation") + "\n DDE : " + order.getInteger("id").toString());
-                excel.insertLabel(lineNumber, 6, order.getString("campaign"));
-                excel.insertLabel(lineNumber, 7, order.getInteger("amount").toString());
-                excel.insertLabel(lineNumber, 8, order.getDouble("total").toString());
-                excel.insertLabel(lineNumber, 9, order.getString("name_equipment"));
-                excel.insertLabel(lineNumber, 10, order.getString("cite_mixte"));
-                excel.insertLabel(lineNumber, 11, order.getString("market"));
-                excel.insertLabel(lineNumber, 12, order.getString("comment"));
+
+                if (!previousCampaign.equals(campaign)) {
+                    if (j != 0) {
+                        excel.insertHeader(lineNumber, 0, previousZip);
+                        previousZip = zip;
+                        excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
+                        lineNumber++;
+                        startLine = lineNumber;
+
+                    }
+                    lineNumber++;
+                    excel.insertUnderscoreHeader(0, lineNumber, campaign);
+                    mergeCurrentLine(true);
+                    previousCampaign = campaign;
+                    previousCode = "";
+
+                    lineNumber += 2;
+                }
+
+                if (!previousCode.equals(code)) {
+                    lineNumber++;
+                    previousCode = code;
+                    excel.insertHeader(lineNumber, 0, code);
+                    mergeCurrentLine(false);
+                    lineNumber++;
+                    insertHeaders();
+                    startLine = lineNumber;
+
+                }
+
+                if (!previousZip.equals(zip)) {
+                    excel.insertHeader(lineNumber, 0, previousZip);
+                    previousZip = zip;
+                    excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
+                    lineNumber++;
+                    startLine = lineNumber;
+
+
+                }
+
+                excel.insertCellTabCenter(0, lineNumber, zip);
+                excel.insertCellTabCenter(1, lineNumber, order.getString("uai") + "\n" + order.getString("nameEtab") + "\n" + order.getString("city"));
+
+                excel.insertCellTabCenter(2, lineNumber, CIVILITY + "\n" + address + "\n TEL: " + order.getString("phone"));
+                excel.insertCellTabCenterBold(3, lineNumber, formatterDateExcel.format(orderDate));
+                excel.insertCellTabCenter(4, lineNumber, order.getString("market") + " \nCP " + instruction.getString("cp_number"));
+                excel.insertCellTabCenter(5, lineNumber,
+                        "OPE : " + order.getString("operation") + "\nDDE : -" + order.getInteger("id").toString());
+                excel.insertCellTabCenter(6, lineNumber, formatStrToCell(campaign, 5));
+                excel.insertCellTabCenter(7, lineNumber, formatStrToCell(order.getInteger("amount").toString(), 5));
+                excel.insertCellTabFloat(8, lineNumber, order.getFloat("total"));
+                excel.insertCellTabCenter(9, lineNumber, formatStrToCell(order.getString("name_equipment"), 5));
+                excel.insertCellTabCenter(10, lineNumber, order.getString("cite_mixte"));
+                excel.insertCellTabCenter(11, lineNumber, formatStrToCell(order.getString("market"), 5));
+                excel.insertCellTabCenter(12, lineNumber, formatStrToCell(order.getString("comment"), 5));
                 lineNumber++;
             }
+            excel.insertHeader(lineNumber, 0, zip);
+            excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
+            lineNumber++;
 
         }
         excel.autoSize(13);
         handler.handle(new Either.Right<>(true));
 
     }
+
+
+    private void mergeCurrentLine(boolean underscore) {
+        if (underscore) {
+            CellRangeAddress merge = new CellRangeAddress(lineNumber, lineNumber, 0, 1);
+            sheet.addMergedRegion(merge);
+            excel.setRegionUnderscoreHeader(merge, sheet);
+        } else {
+            CellRangeAddress merge = new CellRangeAddress(lineNumber, lineNumber, 0, 1);
+            sheet.addMergedRegion(merge);
+            excel.setRegionHeader(merge, sheet);
+        }
+
+    }
+
 
     private void insertHeaders() {
 
@@ -156,10 +230,8 @@ public class RecapMarketGestion extends TabHelper {
     }
 
     private void setLabel(String market) {
-        excel.insertLabel(lineNumber, 0, market);
-        CellRangeAddress merge = new CellRangeAddress(lineNumber, lineNumber, 0, 12);
-        sheet.addMergedRegion(merge);
-        excel.setRegionHeader(merge, sheet);
+        excel.insertBlackOnGreenHeader(lineNumber, 0, market);
+        sizeMergeRegion(lineNumber, 0, 12);
         lineNumber += 2;
 
     }
@@ -181,6 +253,7 @@ public class RecapMarketGestion extends TabHelper {
                         action.put("city", structure.getString("city"));
                         action.put("address", structure.getString("address"));
                         action.put("zipCode", structure.getString("zipCode"));
+                        action.put("phone", structure.getString("phone"));
                     }
                 }
             }
@@ -238,7 +311,7 @@ public class RecapMarketGestion extends TabHelper {
                 "             LEFT JOIN " + Lystore.lystoreSchema + ".specific_structures ON orders.id_structure = specific_structures.id    " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         " +
                 "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
-                "  OR (spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
+                "  OR (spa.structure_type = '" + CMR + "' AND specific_structures.type ='" + CMR + "') " +
                 "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    " +
                 "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
                 "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
@@ -247,20 +320,12 @@ public class RecapMarketGestion extends TabHelper {
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                 "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                 "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id" +
-                "             order by campaign,market_id, id_structure,program,code  " +
+                "             order by campaign,code,market_id, id_structure,program,code  " +
                 "  )    SELECT  values.market as market,    array_to_json(array_agg(values))as actions, SUM (values.total) as totalMarket       " +
                 "  from  values      " +
                 "  Group by values.market   " +
                 "  Order by values.market   ;";
 
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
-            if (event.isLeft()) {
-                handler.handle(event.left());
-            } else {
-                datas = event.right().getValue();
-                handler.handle(new Either.Right<>(datas));
-            }
-
-        }));
+        sqlHandler(handler);
     }
 }

@@ -1,7 +1,6 @@
 package fr.openent.lystore.export.notificationEquipCP;
 
 import fr.openent.lystore.Lystore;
-import fr.openent.lystore.export.TabHelper;
 import fr.openent.lystore.service.StructureService;
 import fr.openent.lystore.service.impl.DefaultStructureService;
 import fr.wseduc.webutils.Either;
@@ -9,14 +8,12 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 
-public class LinesBudget extends TabHelper {
+public class LinesBudget extends NotifcationCpHelper {
     private StructureService structureService;
     private ArrayList<Integer> codes = new ArrayList<>();
     private int arraylength = 5;
@@ -228,7 +225,7 @@ public class LinesBudget extends TabHelper {
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         ";
         query +=
                 "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
-                        "  OR (spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
+                        "  OR (spa.structure_type = '" + CMR + "' AND specific_structures.type ='" + CMR + "') " +
                         "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    ";
         query +=
                 "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
@@ -246,15 +243,6 @@ public class LinesBudget extends TabHelper {
                         "  Order by values.operation ;";
 
 
-
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
-            if (event.isLeft()) {
-                handler.handle(event.left());
-            } else {
-                datas = event.right().getValue();
-                handler.handle(new Either.Right<>(datas));
-            }
-
-        }));
+        sqlHandler(handler);
     }
 }

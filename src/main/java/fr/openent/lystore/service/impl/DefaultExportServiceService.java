@@ -50,18 +50,22 @@ public class DefaultExportServiceService implements ExportService {
         Sql.getInstance().prepared(query, new JsonArray().add(fileId), SqlResult.validResultHandler(handler));
     }
 
-    @Override
-    public void deleteExport(String fileId, Handler<JsonObject> handler) {
-                    storage.removeFile(fileId, handler);
+    public void deleteExport(JsonArray filesIds, Handler<JsonObject> handler) {
+                    storage.removeFiles(filesIds, handler);
     }
 
-    @Override
-    public void deleteExportSql(String fileId, Handler<Either<String, JsonObject>> handler) {
+    public void deleteExportSql(JsonArray idsExports, Handler<Either<String, JsonObject>> handler) {
+        JsonArray values = new JsonArray();
+        for (int i = 0; i < idsExports.size(); i++) {
+            values.add(idsExports.getValue(i));
+        }
+
         String query = "DELETE " +
                 "FROM " + Lystore.lystoreSchema + ".export " +
-                "WHERE fileId = ? " +
+                "WHERE id IN " +
+                Sql.listPrepared(idsExports.getList()) + " " +
                 "RETURNING fileId ";
-        Sql.getInstance().prepared(query, new JsonArray().add(fileId), SqlResult.validRowsResultHandler(handler));
+        Sql.getInstance().prepared(query, values, SqlResult.validRowsResultHandler(handler));
 
     }
 }

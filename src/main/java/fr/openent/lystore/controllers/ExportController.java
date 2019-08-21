@@ -5,6 +5,7 @@ import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.AccessExportDownload;
+import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import fr.wseduc.rs.ApiDoc;
@@ -13,6 +14,7 @@ import fr.wseduc.rs.Get;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
@@ -22,6 +24,8 @@ import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
+
+import java.awt.*;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 
@@ -67,28 +71,24 @@ public class ExportController extends ControllerHelper {
 
     }
 
-    @Delete("/export/:fileId")
-    @ApiDoc("Returns all exports in database filtered by owner")
+    @Delete("/exports")
+    @ApiDoc("Delete all exports and files")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(AccessExportDownload.class)
-    public void deleteExport(HttpServerRequest request) {
-        String fileId = request.getParam("fileId");
-        exportService.deleteExport(fileId, new Handler<JsonObject>() {
-            @Override
-            public void handle(JsonObject event) {
+    @ResourceFilter(ManagerRight.class)
+    public void deleteExportExcel(HttpServerRequest request) {
+        RequestUtils.bodyToJson( request, idsExports -> exportService.deleteExport( idsExports.getJsonArray("idsFiles"), event -> {
                 if (event.getString("status").equals("ok")) {
-                    exportService.deleteExportSql(fileId, Logging.defaultResponseHandler(eb,
+                    exportService.deleteExportSql( idsExports.getJsonArray("idsExport"), Logging.defaultResponseHandler(eb,
                             request,
                             Contexts.EXPORT.toString(),
                             Actions.DELETE.toString(),
-                            fileId,
-                            new JsonObject().put("id", fileId)));
+                            idsExports.toString(),
+                            new JsonObject().put("ids", idsExports)));
                 } else {
                     badRequest(request);
                     log.error("Erreur deleting file in storage");
                     log.error(event.getString("message"));
                 }
-            }
-        });
+        }));
     }
 }

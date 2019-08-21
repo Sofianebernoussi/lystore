@@ -29,9 +29,9 @@ export const exportCtrl = ng.controller('exportCtrl', [
         };
 
         $scope.confirmDelete = () => {
-                $scope.display.delete = true;
-                $scope.exportsToDelete = $scope.exports.all.filter(exportFiltered => exportFiltered.selected && exportFiltered.status !== STATUS.WAITING);
-                template.open('export.delete.lightbox', 'administrator/exports/export-lightbox-delete');
+            $scope.display.delete = true;
+            $scope.exportsToDelete = $scope.exports.all.filter(exportFiltered => exportFiltered.selected && exportFiltered.status !== STATUS.WAITING);
+            template.open('export.delete.lightbox', 'administrator/exports/export-lightbox-delete');
         };
 
         $scope.cancelExportLightbox = () => {
@@ -42,8 +42,11 @@ export const exportCtrl = ng.controller('exportCtrl', [
 
         };
 
-        $scope.deleteExport = async () => {
-            await $scope.exports.delete( $scope.exportsToDelete.map(exportMap => exportMap.id));
+        $scope.deleteExport = async ():Promise<void> => {
+            await $scope.exports.delete( $scope.exportsToDelete
+                    .map(exportMap => exportMap.id),
+                $scope.exportsToDelete
+                    .map(exportMap => exportMap.fileid));
             $scope.isAllExportSelected = false;
             $scope.display.delete = false;
             template.close('export.delete.lightbox');
@@ -54,7 +57,7 @@ export const exportCtrl = ng.controller('exportCtrl', [
         };
 
         $scope.isAllExportSelected = false;
-        $scope.switchAllExports = () => {
+        $scope.switchAllExports = ():void => {
             $scope.isAllExportSelected  =  !$scope.isAllExportSelected;
             if ( $scope.isAllExportSelected) {
                 $scope.exports.all.map(exportSelected => exportSelected.selected = true)
@@ -62,6 +65,10 @@ export const exportCtrl = ng.controller('exportCtrl', [
                 $scope.exports.all.map(exportSelected => exportSelected.selected = false)
             }
             Utils.safeApply($scope);
+        };
+
+        $scope.controlDeleteExport = ():Boolean => {
+            return $scope.exports.selected.some(exportSome => exportSome.status === STATUS.WAITING)
         };
 
         $scope.updateDate();

@@ -54,7 +54,7 @@
                         ng-click="getExport(export)"
                         ng-show="export.status === STATUS.SUCCESS"
                 >
-                    <i class="downloadButton"></i>
+                    <i class="downloadButton icon-medium-size"></i>
                 </td>
                 <td ng-show="!(export.status === STATUS.SUCCESS)">&nbsp;</td>
             </tr>
@@ -67,6 +67,7 @@
             <div class="row">
                 <button
                         ng-click="confirmDelete()"
+                        ng-disabled="controlDeleteExport()"
                 >
                     <i18n>delete</i18n>
                 </button>

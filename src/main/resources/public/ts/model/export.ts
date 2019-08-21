@@ -39,10 +39,13 @@ export class Exports extends Selection<Export> {
         }
     }
 
-    async delete(idsExports) {
+    async delete(idsExports: Array<number>, idsFiles: Array<number>):Promise<void> {
         try {
-            console.log(idsExports)
-            //await http.delete('/lystore/exports', { data: idsExports });
+            const bodySend = {
+                idsExport: idsExports,
+                idsFiles: idsFiles,
+            };
+            await http.delete('/lystore/exports', { data: bodySend });
         } catch (e) {
             throw notify.error('lystore.export.delete.err');
         }

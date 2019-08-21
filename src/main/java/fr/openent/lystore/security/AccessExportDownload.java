@@ -21,7 +21,8 @@ public class AccessExportDownload implements ResourcesProvider {
         query = "SELECT 1 FROM lystore.export WHERE fileid = ? AND ownerid = ?";
 
 
-        if (id != null) {
+        if (id != null &&  WorkflowActionUtils.hasRight(userInfos, WorkflowActions.MANAGER_RIGHT.toString())
+                || WorkflowActionUtils.hasRight(userInfos, WorkflowActions.ADMINISTRATOR_RIGHT.toString())){
             JsonArray params = new JsonArray();
             params.add(id);
             params.add(userInfos.getUserId());
@@ -38,9 +39,7 @@ public class AccessExportDownload implements ResourcesProvider {
                     }
                 }
             }));
-        } else
-
-        {
+        } else {
             request.response().setStatusCode(400).end();
         }
     }

@@ -2,20 +2,13 @@ package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.ExportService;
-import fr.wseduc.webutils.Either;
+import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 import org.entcore.common.storage.Storage;
 import org.vertx.java.busmods.BusModBase;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 import static fr.openent.lystore.Lystore.CONFIG;
 import static fr.openent.lystore.Lystore.STORAGE;
@@ -23,7 +16,8 @@ import static fr.openent.lystore.Lystore.STORAGE;
 public class ExportWorker extends BusModBase implements Handler<Message<JsonObject>> {
     private Instruction instruction;
     private Storage storage;
-    private ExportService exportService;
+    private ExportService exportService = new DefaultExportServiceService(Lystore.lystoreSchema, "export", storage);
+    private Number idNewFile;
 
     @Override
     public void start() {
@@ -37,6 +31,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
     public void handle(Message<JsonObject> event) {
         final String action = event.body().getString("action", "");
         String fileNamIn = event.body().getString("titleFile");
+        idNewFile =  event.body().getInteger("idFile");
         switch (action) {
             case "exportEQU":
                 exportEquipment(
@@ -114,7 +109,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
             } else {
                 logger.info("Xlsx insert in storage");
                 //todo id get
-                saveFile(file.getString("_id"), 12);
+                saveFile(file.getString("_id"), idNewFile);
             }
         });
     }

@@ -8,10 +8,15 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public abstract class TabHelper {
     protected static final String CMD = "CMD";
@@ -85,4 +90,93 @@ public abstract class TabHelper {
      */
     protected void setArray(JsonArray programs) {
     }
+
+    protected JsonArray sortByCity(JsonArray values) {
+        JsonArray sortedJsonArray = new JsonArray();
+
+        List<JsonObject> jsonValues = new ArrayList<JsonObject>();
+        for (int i = 0; i < values.size(); i++) {
+            jsonValues.add(values.getJsonObject(i));
+        }
+
+        Collections.sort(jsonValues, new Comparator<JsonObject>() {
+            private static final String KEY_NAME = "zipCode";
+
+            @Override
+            public int compare(JsonObject a, JsonObject b) {
+                String valA = "";
+                String valB = "";
+                String cityA = "";
+                String cityB = "";
+                String nameA = "";
+                String nameB = "";
+                try {
+                    if (a.containsKey(KEY_NAME)) {
+                        valA = a.getString(KEY_NAME);
+                    }
+                    if (b.containsKey(KEY_NAME)) {
+                        valB = b.getString(KEY_NAME);
+                    }
+                } catch (NullPointerException e) {
+                    log.error("error when sorting structures during export");
+                }
+                if (valA.compareTo(valB) == 0) {
+                    if (a.containsKey("city")) {
+                        cityA = a.getString("city");
+                    }
+                    if (b.containsKey("city")) {
+                        cityB = b.getString("city");
+                    }
+                    if (cityA.compareTo(cityB) == 0) {
+                        if (a.containsKey("nameEtab")) {
+                            nameA = a.getString("nameEtab");
+                        }
+                        if (b.containsKey("nameEtab")) {
+                            nameB = b.getString("nameEtab");
+                        }
+                        return nameA.compareTo(nameB);
+                    }
+                    return cityA.compareTo(cityB);
+                }
+                return valA.compareTo(valB);
+            }
+        });
+
+        for (int i = 0; i < values.size(); i++) {
+            sortedJsonArray.add(jsonValues.get(i));
+        }
+        return sortedJsonArray;
+    }
+
+    protected void sizeMergeRegion(int line, int columnStart, int columnEnd) {
+        CellRangeAddress merge = new CellRangeAddress(line, line, columnStart, columnEnd);
+        sheet.addMergedRegion(merge);
+        excel.setRegionHeader(merge, sheet);
+        short height = 1000;
+        Row row = sheet.getRow(line);
+        row.setHeight(height);
+
+    }
+
+    // doing \n when the str is too long
+    protected String formatStrToCell(String str, int nbWords) {
+        try {
+            String[] words = str.split(" ");
+            String resultStr = "";
+            if (words.length <= nbWords) {
+                return str;
+            } else {
+                for (int i = 0; i < words.length; i++) {
+                    resultStr += words[i] + " ";
+                    if (i % nbWords == 0 && i != 0) {
+                        resultStr += "\n";
+                    }
+                }
+            }
+            return resultStr;
+        } catch (NullPointerException e) {
+            return str;
+        }
+    }
+
 }

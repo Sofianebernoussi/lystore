@@ -4,9 +4,11 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.equipmentRapp.*;
 import fr.openent.lystore.export.investissement.*;
 import fr.openent.lystore.export.notificationEquipCP.LinesBudget;
+import fr.openent.lystore.export.notificationEquipCP.NotificationLycTab;
 import fr.openent.lystore.export.notificationEquipCP.RecapMarketGestion;
 import fr.openent.lystore.export.subventionEquipment.CmrMarchés;
 import fr.openent.lystore.export.subventionEquipment.PublicsMarchés;
+import fr.openent.lystore.export.publipostage.Publipostage;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.data.FileResolver;
@@ -205,6 +207,38 @@ public class Instruction {
 
     }
 
+    public void exportPublipostage(Handler<Either<String, Buffer>> handler) {
+        if (this.id == null) {
+            log.error("Instruction identifier is not nullable");
+            handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
+        }
+        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler( eitherInstruction -> {
+            if (eitherInstruction.isLeft()) {
+                log.error("Error when getting sql datas ");
+                handler.handle(new Either.Left<>("Error when getting sql datas "));
+            } else {
+                JsonObject instruction = eitherInstruction.right().getValue();
+                String operationStr = "operations";
+                if (!instruction.containsKey(operationStr)) {
+                    log.error("Error when getting operations");
+                    handler.handle(new Either.Left<>("Error when getting operations"));
+                } else {
+                    instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
+
+                    Workbook workbook = new XSSFWorkbook();
+                    List<Future> futures = new ArrayList<>();
+                    Future<Boolean> PublipostageFuture = Future.future();
+
+                    futures.add(PublipostageFuture);
+
+                    futureHandler(handler, workbook, futures);
+
+                    new Publipostage(workbook, instruction).create(getHandler(PublipostageFuture));
+                }
+            }
+        }));
+    }
+
     public void exportNotficationCp(Handler<Either<String, Buffer>> handler) {
         if (this.id == null) {
             log.error("Instruction identifier is not nullable");
@@ -230,14 +264,17 @@ public class Instruction {
                     List<Future> futures = new ArrayList<>();
                     Future<Boolean> LinesBudgetFuture = Future.future();
                     Future<Boolean> RecapMarketGestionFuture = Future.future();
+                    Future<Boolean> NotifcationLyceeFuture = Future.future();
 
                     futures.add(LinesBudgetFuture);
                     futures.add(RecapMarketGestionFuture);
+                    futures.add(NotifcationLyceeFuture);
 
                     futureHandler(handler, workbook, futures);
-
+                    new NotificationLycTab(workbook, instruction).create(getHandler(NotifcationLyceeFuture));
                     new RecapMarketGestion(workbook, instruction).create(getHandler(RecapMarketGestionFuture));
                     new LinesBudget(workbook, instruction).create(getHandler(LinesBudgetFuture));
+
                 }
             }
         }));

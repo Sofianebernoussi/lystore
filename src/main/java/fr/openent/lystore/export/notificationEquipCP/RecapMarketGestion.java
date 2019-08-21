@@ -311,7 +311,7 @@ public class RecapMarketGestion extends NotifcationCpHelper {
                 "             LEFT JOIN " + Lystore.lystoreSchema + ".specific_structures ON orders.id_structure = specific_structures.id    " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         " +
                 "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
-                "  OR (spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
+                "  OR (spa.structure_type = '" + CMR + "' AND specific_structures.type ='" + CMR + "') " +
                 "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    " +
                 "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
                 "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +

@@ -1,6 +1,7 @@
 package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.service.ExportService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -22,6 +23,7 @@ import static fr.openent.lystore.Lystore.STORAGE;
 public class ExportWorker extends BusModBase implements Handler<Message<JsonObject>> {
     private Instruction instruction;
     private Storage storage;
+    private ExportService exportService;
 
     @Override
     public void start() {
@@ -40,6 +42,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
         } else {
             fileNamIn = getDate() + event.body().getString("titleFile") + ".xlsx";
         }
+
         switch (action) {
             case "exportEQU":
                 exportEquipment(
@@ -122,9 +125,11 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                 logger.error("An error occurred when inserting xlsx ");
             } else {
                 logger.info("Xlsx insert in storage");
-                saveFile(file.getString("_id"),
-                        fileName,
-                        userId);
+                exportService.createWhenStart(fileName, userId, exportCreating -> {
+                    if(exportCreating.isLeft()){
+                        logger.error("error when create export" + exportCreating.left());
+                    }
+                });
             }
         });
     }

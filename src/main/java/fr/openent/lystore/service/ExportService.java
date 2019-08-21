@@ -18,6 +18,8 @@ public interface ExportService {
 
     void deleteExportSql(JsonArray idsExports, Handler<Either<String, JsonObject>> handler);
 
+    void createWhenStart(String nameFile, String userId, Handler<Either<String, JsonObject>> handler);
+
     void updateWhenError(Number idExport, Handler<Either<String, JsonObject>> handler);
 
     void updateWhenSuccess(Number idExport, Handler<Either<String, JsonObject>> handler);

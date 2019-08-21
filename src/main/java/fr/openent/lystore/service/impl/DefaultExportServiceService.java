@@ -75,23 +75,24 @@ public class DefaultExportServiceService implements ExportService {
         Sql.getInstance().prepared(query, values, SqlResult.validRowsResultHandler(handler));
 
     }
-    public void createWhenStart (String nameFile, UserInfos user, Handler<Either<String, JsonObject>> handler){
+    public void createWhenStart (String nameFile, String userId, Handler<Either<String, JsonObject>> handler){
+        try{
         String query = "" +
                 "INSERT INTO " +
                 Lystore.lystoreSchema + ".export(  " +
                 "filename," +
-                "created, " +
                  "ownerid) " +
                 "VALUES (" +
                 "?, " +
-                "?, " +
                 "?)" +
                 "RETURNING id ;";
-        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+        JsonArray params = new JsonArray()
                 .add(nameFile)
-                .add("")
-                .add(user);
+                .add(userId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+        } catch (Exception error){
+            logger.error("error when create export" + error);
+        }
     }
 
     public void updateWhenError (Number idExport, Handler<Either<String, JsonObject>> handler){

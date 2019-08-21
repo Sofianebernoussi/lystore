@@ -5,6 +5,7 @@ import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.service.ExportService;
+import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
@@ -23,6 +24,7 @@ import java.util.Calendar;
 import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 
 public class ExcelHelper {
+    private static DefaultExportServiceService exportService;
     private Workbook wb;
     private Sheet sheet;
     public final CellStyle headCellStyle;
@@ -1197,6 +1199,24 @@ public class ExcelHelper {
         return getDate() + nameFile + type + ".xlsx";
     }
 
+    public static void catchError (ExportService exportService, Number idFile, Exception errorCatch){
+        exportService.updateWhenError(idFile, makeError ->{
+            if(makeError.isLeft()){
+                log.error("Error for create file export excel " + makeError.left() + errorCatch);
+            }
+        });
+        log.error("Error for create file export excel " + errorCatch);
+    }
+
+    public static void catchError (ExportService exportService, Number idFile, String errorCatch){
+        exportService.updateWhenError(idFile, makeError ->{
+            if(makeError.isLeft()){
+                log.error("Error for create file export excel " + makeError.left() + errorCatch);
+            }
+        });
+        log.error("Error for create file export excel " + errorCatch);
+    }
+
     private static String getDate() {
         java.util.Date date = Calendar.getInstance().getTime();
         DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
@@ -1217,23 +1237,26 @@ public class ExcelHelper {
             exportService.createWhenStart(titleFile, user.getUserId(), newExport -> {
                 if(newExport.isRight()){
                     Number idFile = newExport.right().getValue().getInteger("id");
-                    infoFile.put("action", action)
-                            .put("id", Integer.parseInt(request.getParam("id")))
-                            .put("titleFile", titleFile)
-                            .put("idFile", idFile)
-                            .put("userId", user.getUserId());
+                    try{
+                        infoFile.put("action", action)
+                                .put("id", Integer.parseInt(request.getParam("id")))
+                                .put("titleFile", titleFile)
+                                .put("idFile", idFile)
+                                .put("userId", user.getUserId());
 
-                    eb.send(ExportWorker.class.getSimpleName(),
-                            infoFile,
-                            handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
-
-                    Logging.insert(eb,
-                            request,
-                            Contexts.EXPORT.toString(),
-                            Actions.CREATE.toString(),
-                            idFile.toString(),
-                            new JsonObject().put("ids", idFile).put("fileName", titleFile));
-                    request.response().setStatusCode(201).end("Import started " + idFile);
+                        eb.send(ExportWorker.class.getSimpleName(),
+                                infoFile,
+                                handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
+                        Logging.insert(eb,
+                                request,
+                                Contexts.EXPORT.toString(),
+                                Actions.CREATE.toString(),
+                                idFile.toString(),
+                                new JsonObject().put("ids", idFile).put("fileName", titleFile));
+                        request.response().setStatusCode(201).end("Import started " + idFile);
+                    } catch (Exception error) {
+                        catchError(exportService, idFile, error );
+                    }
                 } else {
                     log.error("Fail to insert file in SQL " + newExport.left());
                 }

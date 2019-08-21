@@ -7,6 +7,8 @@ import fr.openent.lystore.export.notificationEquipCP.LinesBudget;
 import fr.openent.lystore.export.notificationEquipCP.NotificationLycTab;
 import fr.openent.lystore.export.notificationEquipCP.RecapMarketGestion;
 import fr.openent.lystore.export.publipostage.Publipostage;
+import fr.openent.lystore.helpers.ExcelHelper;
+import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.data.FileResolver;
@@ -43,16 +45,19 @@ public class Instruction {
             "WHERE instruction.id = ? " +
             "GROUP BY instruction.id";
     private Integer id;
-
+    private Number idFile;
+    private ExportService exportService;
     private Logger log = LoggerFactory.getLogger(DefaultProjectService.class);
 
-    public Instruction(Integer instructionId) {
+    public Instruction(ExportService exportService, Number idFile, Integer instructionId) {
+        this.idFile = idFile;
+        this.exportService = exportService;
         this.id = instructionId;
     }
 
     public void exportInvestissement(Handler<Either<String, Buffer>> handler) {
         if (this.id == null) {
-            log.error("Instruction identifier is not nullable");
+            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
 
@@ -161,7 +166,7 @@ public class Instruction {
 
     public void exportPublipostage(Handler<Either<String, Buffer>> handler) {
         if (this.id == null) {
-            log.error("Instruction identifier is not nullable");
+            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
         Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler( eitherInstruction -> {

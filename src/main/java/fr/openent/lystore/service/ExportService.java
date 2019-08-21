@@ -22,5 +22,5 @@ public interface ExportService {
 
     void updateWhenError(Number idExport, Handler<Either<String, JsonObject>> handler);
 
-    void updateWhenSuccess(Number idExport, Handler<Either<String, JsonObject>> handler);
+    void updateWhenSuccess(String fileId, Number idExport, Handler<Either<String, JsonObject>> handler);
 }

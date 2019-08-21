@@ -1,6 +1,7 @@
 package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.service.ExportService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -22,6 +23,7 @@ import static fr.openent.lystore.Lystore.STORAGE;
 public class ExportWorker extends BusModBase implements Handler<Message<JsonObject>> {
     private Instruction instruction;
     private Storage storage;
+    private ExportService exportService;
 
     @Override
     public void start() {
@@ -34,28 +36,29 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
     @Override
     public void handle(Message<JsonObject> event) {
         final String action = event.body().getString("action", "");
+        String fileNamIn = event.body().getString("titleFile");
         switch (action) {
             case "exportEQU":
                 exportEquipment(
                         event.body().getInteger("id"),
                         event.body().getString("type"),
+                        fileNamIn,
                         event.body().getString("userId"));
                 break;
             case "exportRME":
                 exportRME(
                         event.body().getInteger("id"),
+                        fileNamIn,
                         event.body().getString("userId"));
                 break;
             case "exportNotificationCP":
                 exportNotificationCp(event.body().getInteger("id"),
+                        fileNamIn,
                         event.body().getString("userId"));
                 break;
             case "exportPublipostage":
                 exportPublipostage(event.body().getInteger("id"),
-                        event.body().getString("userId"));
-                break;
-            case "exportSubvention":
-                exportSubvention(event.body().getInteger("id"),
+                        fileNamIn,
                         event.body().getString("userId"));
                 break;
             default:
@@ -65,7 +68,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
         }
     }
 
-    private void exportNotificationCp(Integer instructionId, String userId) {
+    private void exportNotificationCp(Integer instructionId, String titleFile, String userId) {
         this.instruction = new Instruction(instructionId);
 
         this.instruction.exportNotficationCp(event1 -> {
@@ -73,46 +76,25 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                 logger.error("error when creating xlsx");
             } else {
                 Buffer xlsx = event1.right().getValue();
-                String fileName = getDate() + "_Notification_Equipement_CP" + ".xlsx";
-                saveBuffer(userId, xlsx, fileName);
+                saveBuffer(userId, xlsx, titleFile);
             }
         });
     }
 
-    private void exportSubvention(Integer instructionId, String userId) {
-        this.instruction = new Instruction(instructionId);
-        this.instruction.exportSubvention( file -> {
-            if (file.isLeft()) {
-                logger.error("error when creating xlsx");
-            } else {
-                Buffer xlsx = file.right().getValue();
-                String fileName = getDate() + "_subvention_equipement" + ".xlsx";
-                saveBuffer(userId, xlsx, fileName);
-            }
-        });
-    }
-
-    private void exportPublipostage(Integer instructionId, String userId) {
+    private void exportPublipostage(Integer instructionId, String titleFile, String userId) {
         this.instruction = new Instruction(instructionId);
 
-        this.instruction.exportPublipostage(file -> {
-            if (file.isLeft()) {
+        this.instruction.exportPublipostage( file  -> {
+            if (file .isLeft()) {
                 logger.error("error when creating xlsx");
             } else {
-                Buffer xlsx = file.right().getValue();
-                String fileName = getDate() + "_Liste_Etablissements_Publipostage_Notification" + ".xlsx";
-                saveBuffer(userId, xlsx, fileName);
+                Buffer xlsx = file .right().getValue();
+                saveBuffer(userId, xlsx, titleFile);
             }
         });
     }
 
-    private String getDate() {
-        java.util.Date date = Calendar.getInstance().getTime();
-        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-        return formatter.format(date);
-    }
-
-    private void exportRME(Integer instructionId, String userId) {
+    private void exportRME(Integer instructionId, String titleFile, String userId) {
         this.instruction = new Instruction(instructionId);
 
         this.instruction.exportInvestissement(event -> {
@@ -120,8 +102,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                 logger.error("error when creating xlsx");
             } else {
                 Buffer xlsx = event.right().getValue();
-                String fileName = "Récapitulatif_mesures_engagées_" + getDate() + ".xlsx";
-                saveBuffer(userId, xlsx, fileName);
+                saveBuffer(userId, xlsx, titleFile);
             }
         });
     }
@@ -132,42 +113,29 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                 logger.error("An error occurred when inserting xlsx ");
             } else {
                 logger.info("Xlsx insert in storage");
-                saveFile(file.getString("_id"),
-                        fileName,
-                        userId);
+                //todo id get
+                saveFile(file.getString("_id"), 12);
             }
         });
     }
 
-    private void exportEquipment(int instructionId, String type, String userId) {
+    private void exportEquipment(int instructionId, String type, String titleFile, String userId) {
         this.instruction = new Instruction(instructionId);
-
         this.instruction.exportEquipmentRapp(event1 -> {
             if (event1.isLeft()) {
                 logger.error("error when creating xlsx");
             } else {
                 Buffer xlsx = event1.right().getValue();
-                String fileName = getDate() + "_EQUIPEMENT_RAPPORT_" + type + ".xlsx";
-                saveBuffer(userId, xlsx, fileName);
+                saveBuffer(userId, xlsx, titleFile);
             }
         }, type);
     }
 
-    private void saveFile(String fileId, String filename, String userId) {
-        String query = "INSERT into " + Lystore.lystoreSchema + ".export (fileid, filename, ownerid) " +
-                "VALUES (?, ?, ?) ;";
-        JsonArray params = new JsonArray().add(fileId)
-                .add(filename)
-                .add(userId);
-
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> event) {
-                if (event.isLeft()) {
-                    logger.error("Fail to insert file in SQL");
-                }
+    private void saveFile(String fileId, Number idExport) {
+        exportService.updateWhenSuccess(fileId, idExport, updateExport ->{
+            if (updateExport.isLeft()) {
+                logger.error("Fail to insert file in SQL");
             }
-        }));
-
+        });
     }
 }

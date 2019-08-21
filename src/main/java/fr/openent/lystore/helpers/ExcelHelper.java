@@ -7,6 +7,10 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.RegionUtil;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 public class ExcelHelper {
     private Workbook wb;
     private Sheet sheet;
@@ -75,7 +79,7 @@ public class ExcelHelper {
 
     }
 
-    
+
     /**
      * Init all the stles of the sheet
      */
@@ -1174,5 +1178,17 @@ public class ExcelHelper {
         }
     }
 
+    public static String makeTheNameExcelExport(String nameFile){
+        return getDate() + nameFile + ".xlsx";
+    }
 
+    public static String makeTheNameExcelExport(String nameFile, String type) {
+        return getDate() + nameFile + type + ".xlsx";
+    }
+
+    private static String getDate() {
+        java.util.Date date = Calendar.getInstance().getTime();
+        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        return formatter.format(date);
+    }
 }

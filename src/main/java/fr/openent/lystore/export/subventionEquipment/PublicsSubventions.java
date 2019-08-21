@@ -9,8 +9,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 
@@ -28,7 +26,6 @@ public class PublicsSubventions extends TabHelper {
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
-        excel.setCPNumber(instruction.getString("cp_number"), 1, 1);
         getDatas(event -> {
             if (event.isLeft()) {
                 log.error("Failed to retrieve datas");
@@ -45,6 +42,7 @@ public class PublicsSubventions extends TabHelper {
         });
     }
 
+
     private void initDatas(Handler<Either<String, Boolean>> handler) {
         ArrayList structuresId = new ArrayList<>();
         for (int i = 0; i < datas.size(); i++) {
@@ -56,41 +54,58 @@ public class PublicsSubventions extends TabHelper {
 
             }
         }
+        StructureService structureService = new DefaultStructureService(Lystore.lystoreSchema);
         structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
                 if (repStructures.isRight()) {
                     JsonArray structures = repStructures.right().getValue();
                     setStructures(structures);
-                    setLabels();
-                    setArray(datas);
-                    handler.handle(new Either.Right<>(true));
+                    if (datas.isEmpty()) {
+                        handler.handle(new Either.Left<>("No data in database"));
+                    } else {
+                        writeArray(handler);
+                    }
                 }
             }
+
+
         });
+
+        datas = sortByCity(datas);
     }
+
+    private void writeArray(Handler<Either<String, Boolean>> handler) {
+        for (int i = 0; i < datas.size(); i++) {
+            JsonObject structureDatas = datas.getJsonObject(i);
+            String structString = structureDatas.getString("nameEtab");
+            excel.insertLabel(lineNumber, 0, structString);
+            lineNumber++;
+        }
+        handler.handle(new Either.Right<>(true));
+    }
+
+
     private void setStructures(JsonArray structures) {
-        JsonObject  structure;
+        JsonObject program, structure;
         JsonArray actions;
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
             actions = new JsonArray(data.getString("actions"));
-            for (int k = 0; k < actions.size(); k++) {
-                JsonObject action = actions.getJsonObject(k);
-                for (int j = 0; j < structures.size(); j++) {
-                    structure = structures.getJsonObject(j);
-                    if (action.getString("id_structure").equals(structure.getString("id"))) {
-                        action.put("nameEtab", structure.getString("name"));
-                        action.put("uai", structure.getString("uai"));
-                        action.put("city", structure.getString("city"));
-                        action.put("type", structure.getString("type"));
-                        action.put("zipCode", structure.getString("zipCode"));
-                    }
+            for (int j = 0; j < structures.size(); j++) {
+                structure = structures.getJsonObject(j);
+                if (data.getString("id_structure").equals(structure.getString("id"))) {
+                    data.put("nameEtab", structure.getString("name"));
+                    data.put("uai", structure.getString("uai"));
+                    data.put("city", structure.getString("city"));
+                    data.put("type", structure.getString("type"));
+                    data.put("zipCode", structure.getString("zipCode"));
                 }
             }
             data.put("actionsJO", actions);
         }
     }
+
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
@@ -113,20 +128,21 @@ public class PublicsSubventions extends TabHelper {
                 "             ELSE ''      " +
                 "             END as old_name,     " +
                 "             orders.id_structure,orders.id_operation as id_operation, label.label as operation ,     " +
-                "             orders.equipment_key as key, orders.name as name_equipment, true as region,    " +
-                "             program_action.id_program, orders.amount ,contract.id as market_id,       " +
+                "             orders.equipment_key as key, orders.name as name_equipment, true as region,  orders.id as id,  " +
+                "             program_action.id_program, orders.amount ,contract.id as market_id,   campaign.name as campaign, orders.comment, project.room, orders.isregion, " +
+                "             project.stair,project.building,    " +
                 "             case when specific_structures.type is null      " +
                 "             then '" + LYCEE + "'          " +
                 "             ELSE specific_structures.type     " +
                 "             END as cite_mixte     " +
                 "             FROM (      " +
-                "             (select ore.id,  ore.price as \"price TTC\",  ore.amount,  ore.creation_date,  ore.modification_date,  ore.name,  ore.summary, " +
+                "             (select ore.id,  true as isregion, ore.price as \"price TTC\",  ore.amount,  ore.creation_date,  ore.modification_date,  ore.name,  ore.summary, " +
                 "             ore.description,  ore.image,    ore.status,  ore.id_contract,  ore.equipment_key,  ore.id_campaign,  ore.id_structure, " +
                 "             ore.cause_status,  ore.number_validation,  ore.id_order,  ore.comment,  ore.rank as \"prio\", null as price_proposal,  " +
-                "             ore.id_project,  ore.id_order_client_equipment, null as program, null as action,  ore.id_operation , " +
+                "             ore.id_project,  ore.id_order_client_equipment, null as program, null as action,  ore.id_operation ," +
                 "             null as override_region          from " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore )      " +
-                "             union      " +
-                "             (select oce.id," +
+                "             UNION      " +
+                "             (select oce.id ,  false as isregion," +
                 "             CASE WHEN price_proposal is null then  price + (price*tax_amount/100)  else price_proposal end as \"price TTC\", " +
                 "             amount, creation_date, null as modification_date, name,  " +
                 "             summary, description, image,  status, id_contract, equipment_key, id_campaign, id_structure, cause_status, number_validation, " +
@@ -136,39 +152,31 @@ public class PublicsSubventions extends TabHelper {
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (orders.id_operation = operation.id   and (orders.override_region != true OR orders.override_region is NULL))               " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)      " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id  AND instruction.id = ?)    " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id )                  " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)      " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id)                  " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id )      " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".campaign ON orders.id_campaign = campaign.id  " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".project ON orders.id_project = project.id  " +
                 "             LEFT JOIN " + Lystore.lystoreSchema + ".specific_structures ON orders.id_structure = specific_structures.id    " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         ";
-        query +=
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         " +
                 "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
-                        "  OR (spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
-                        "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    ";
-        query +=
+                "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    " +
                 "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
-                        "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           ";
+                "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
 
 
-        query +=
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
-                        "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
-                        "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region " +
-                        "             order by id_operation, id_structure,program,code   " +
-                        "  )    SELECT values.id_operation as id, values.operation as label,    array_to_json(array_agg(values))as actions, SUM (values.total) as totalMarket       " +
-                        "  from  values      " +
-                        "  Group by values.id_operation, values.operation   " +
-                        "  Order by values.operation ;";
+                "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
+                "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id," +
+                "               orders.isregion, " +
+                "              project.room,project.stair, project.building " +
+                "             order by code,campaign,market_id, id_structure,program,code " +
+                "  )    SELECT  values.id_structure as id_structure,    array_to_json(array_agg(values))as actions  " +
+                "  from  values      " +
+                "  Group by values.id_structure   " +
+                "  Order by values.id_structure   ;";
 
 
+        sqlHandler(handler);
 
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
-            if (event.isLeft()) {
-                handler.handle(event.left());
-            } else {
-                datas = event.right().getValue();
-                handler.handle(new Either.Right<>(datas));
-            }
-
-        }));
     }
 }

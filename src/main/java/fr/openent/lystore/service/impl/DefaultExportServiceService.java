@@ -1,19 +1,27 @@
 package fr.openent.lystore.service.impl;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.logging.Actions;
+import fr.openent.lystore.logging.Contexts;
+import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.service.ExportService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
+import io.vertx.core.logging.Logger;
 
 public class DefaultExportServiceService implements ExportService {
     Storage storage;
+    private Logger logger = LoggerFactory.getLogger(DefaultProjectService.class);
+    private EventBus eb;
 
     public DefaultExportServiceService(String lystoreSchema, String instruction, Storage storage) {
         this.storage = storage;
@@ -32,7 +40,6 @@ public class DefaultExportServiceService implements ExportService {
                 "WHERE ownerid = ?" +
                 "order by created  DESC";
         Sql.getInstance().prepared(query, new JsonArray().add(user.getUserId()), SqlResult.validResultHandler(handler));
-
     }
 
 
@@ -51,7 +58,7 @@ public class DefaultExportServiceService implements ExportService {
     }
 
     public void deleteExport(JsonArray filesIds, Handler<JsonObject> handler) {
-                    storage.removeFiles(filesIds, handler);
+        storage.removeFiles(filesIds, handler);
     }
 
     public void deleteExportSql(JsonArray idsExports, Handler<Either<String, JsonObject>> handler) {
@@ -64,8 +71,54 @@ public class DefaultExportServiceService implements ExportService {
                 "FROM " + Lystore.lystoreSchema + ".export " +
                 "WHERE id IN " +
                 Sql.listPrepared(idsExports.getList()) + " " +
-                "RETURNING fileId ";
+                "RETURNING id ";
         Sql.getInstance().prepared(query, values, SqlResult.validRowsResultHandler(handler));
 
+    }
+    public void createWhenStart (String nameFile, UserInfos user, Handler<Either<String, JsonObject>> handler){
+        String query = "" +
+                "INSERT INTO " +
+                Lystore.lystoreSchema + ".export(  " +
+                "filename," +
+                "created, " +
+                 "ownerid) " +
+                "VALUES (" +
+                "?, " +
+                "?, " +
+                "?)" +
+                "RETURNING id ;";
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                .add(nameFile)
+                .add("")
+                .add(user);
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    public void updateWhenError (Number idExport, Handler<Either<String, JsonObject>> handler){
+        try{
+            String query = "" +
+                    "UPDATE " +
+                    Lystore.lystoreSchema + ".export  " +
+                    "SET " +
+                    "status = 'ERROR'  " +
+                    "WHERE id = ? ";
+            Sql.getInstance().prepared(query, new JsonArray().add(idExport), SqlResult.validUniqueResultHandler(handler));
+        } catch (Exception error){
+            logger.error("error when update ERROR in export" + error);
+        }
+    }
+
+    public void updateWhenSuccess (Number idExport, Handler<Either<String, JsonObject>> handler){
+        try{
+            String query = "" +
+                    "UPDATE " +
+                    Lystore.lystoreSchema + ".export  " +
+                    "SET " +
+                    "status = 'SUCCESS'  " +
+                    "WHERE id = ? ";
+            Sql.getInstance().prepared(query, new JsonArray().add(idExport), SqlResult.validUniqueResultHandler(handler));
+        } catch (Exception error){
+            logger.error("error when update SUCCESS in export" + error);
+        }
     }
 }

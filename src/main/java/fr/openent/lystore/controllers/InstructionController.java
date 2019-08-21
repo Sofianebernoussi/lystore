@@ -107,6 +107,7 @@ public class InstructionController extends ControllerHelper {
                 eb.send(ExportWorker.class.getSimpleName(),
                         new JsonObject().put("action", "exportRME")
                                 .put("id", Integer.parseInt(request.getParam("id")))
+                                .put("titleFile", "Récapitulatif_mesures_engagées_")
                                 .put("userId", user.getUserId()),
                         handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
             }
@@ -128,6 +129,7 @@ public class InstructionController extends ControllerHelper {
                         new JsonObject().put("action", "exportEQU")
                                 .put("id", Integer.parseInt(request.getParam("id")))
                                 .put("type", type)
+                                .put("titleFile", "_EQUIPEMENT_RAPPORT_")
                                 .put("userId", user.getUserId()),
                         handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
             }
@@ -154,6 +156,7 @@ public class InstructionController extends ControllerHelper {
                 eb.send(ExportWorker.class.getSimpleName(),
                         new JsonObject().put("action", "exportNotificationCP")
                                 .put("id", Integer.parseInt(request.getParam("id")))
+                                .put("titleFile", "_Notification_Equipement_CP")
                                 .put("userId", user.getUserId()),
                         handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
             }
@@ -170,6 +173,7 @@ public class InstructionController extends ControllerHelper {
             eb.send(ExportWorker.class.getSimpleName(),
                     new JsonObject().put("action", "exportPublipostage")
                             .put("id", Integer.parseInt(request.getParam("id")))
+                            .put("titleFile", "_Liste_Etablissements_Publipostage_Notification")
                             .put("userId", user.getUserId()),
                     handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
             request.response().setStatusCode(201).end("Import started");

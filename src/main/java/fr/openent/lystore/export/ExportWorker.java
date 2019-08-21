@@ -90,14 +90,15 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
             }
         });
     }
+
     private void exportPublipostage(Integer instructionId, String userId) {
         this.instruction = new Instruction(instructionId);
 
-        this.instruction.exportPublipostage( file  -> {
-            if (file .isLeft()) {
+        this.instruction.exportPublipostage(file -> {
+            if (file.isLeft()) {
                 logger.error("error when creating xlsx");
             } else {
-                Buffer xlsx = file .right().getValue();
+                Buffer xlsx = file.right().getValue();
                 String fileName = getDate() + "_Liste_Etablissements_Publipostage_Notification" + ".xlsx";
                 saveBuffer(userId, xlsx, fileName);
             }

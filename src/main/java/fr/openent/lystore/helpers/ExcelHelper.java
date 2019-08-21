@@ -33,6 +33,9 @@ public class ExcelHelper {
     public final CellStyle blackOnRedLabel;
     public final CellStyle blueTabStyle;
     public final CellStyle blackTitleHeaderBorderlessStyle;
+    public final CellStyle blackTitleHeaderBorderlessCenteredStyle;
+    public final CellStyle blueTitleHeaderBorderlessCenteredStyle;
+
 
     protected Logger log = LoggerFactory.getLogger(ExcelHelper.class);
 
@@ -67,6 +70,8 @@ public class ExcelHelper {
         this.blackOnRedLabel = wb.createCellStyle();
         this.blueTabStyle = wb.createCellStyle();
         this.blackTitleHeaderBorderlessStyle = wb.createCellStyle();
+        this.blackTitleHeaderBorderlessCenteredStyle = wb.createCellStyle();
+        this.blueTitleHeaderBorderlessCenteredStyle = wb.createCellStyle();
 
         format = wb.createDataFormat();
         format.getFormat("#.#");
@@ -367,6 +372,24 @@ public class ExcelHelper {
         this.blackTitleHeaderBorderlessStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         this.blackTitleHeaderBorderlessStyle.setFont(blackOnRedLabelFont);
 
+        this.blackTitleHeaderBorderlessCenteredStyle.setWrapText(true);
+        this.blackTitleHeaderBorderlessCenteredStyle.setBorderLeft(BorderStyle.NONE);
+        this.blackTitleHeaderBorderlessCenteredStyle.setBorderRight(BorderStyle.NONE);
+        this.blackTitleHeaderBorderlessCenteredStyle.setBorderTop(BorderStyle.NONE);
+        this.blackTitleHeaderBorderlessCenteredStyle.setBorderBottom(BorderStyle.NONE);
+        this.blackTitleHeaderBorderlessCenteredStyle.setAlignment(HorizontalAlignment.CENTER);
+        this.blackTitleHeaderBorderlessCenteredStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.blackTitleHeaderBorderlessCenteredStyle.setFont(titleHeadFont);
+
+        this.blueTitleHeaderBorderlessCenteredStyle.setWrapText(true);
+        this.blueTitleHeaderBorderlessCenteredStyle.setBorderLeft(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredStyle.setBorderRight(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredStyle.setBorderTop(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredStyle.setBorderBottom(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredStyle.setAlignment(HorizontalAlignment.CENTER);
+        this.blueTitleHeaderBorderlessCenteredStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.blueTitleHeaderBorderlessCenteredStyle.setFont(blueTitleHeadFont);
+
 
     }
     public void setBold(Cell cell) {
@@ -443,6 +466,13 @@ public class ExcelHelper {
         RegionUtil.setBorderRight(BorderStyle.THIN, merge, sheet);
         RegionUtil.setBorderLeft(BorderStyle.THIN, merge, sheet);
 
+    }
+
+    public void setRegionHeaderStyle(CellRangeAddress merge, Sheet sheet, CellStyle style) {
+        RegionUtil.setBorderTop(style.getBorderTop(), merge, sheet);
+        RegionUtil.setBorderBottom(style.getBorderBottom(), merge, sheet);
+        RegionUtil.setBorderRight(style.getBorderRight(), merge, sheet);
+        RegionUtil.setBorderLeft(style.getBorderLeft(), merge, sheet);
     }
 
     public void setRegionUnderscoreHeader(CellRangeAddress merge, Sheet sheet) {
@@ -843,7 +873,37 @@ public class ExcelHelper {
 
     }
 
+    public void insertBlackTitleHeaderBorderlessCenter(int cellColumn, int line, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blackTitleHeaderBorderlessCenteredStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blackTitleHeaderBorderlessCenteredStyle);
+        }
 
+    }
+
+    public void insertBlueTitleHeaderBorderlessCenter(int cellColumn, int line, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blueTitleHeaderBorderlessCenteredStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blueTitleHeaderBorderlessCenteredStyle);
+        }
+
+    }
     /**
      * insert a header with blue police
      *

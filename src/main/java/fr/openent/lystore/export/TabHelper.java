@@ -8,6 +8,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -154,6 +155,16 @@ public abstract class TabHelper {
         CellRangeAddress merge = new CellRangeAddress(line, line, columnStart, columnEnd);
         sheet.addMergedRegion(merge);
         excel.setRegionHeader(merge, sheet);
+        short height = 1000;
+        Row row = sheet.getRow(line);
+        row.setHeight(height);
+
+    }
+
+    protected void sizeMergeRegionWithStyle(int line, int columnStart, int columnEnd, CellStyle style) {
+        CellRangeAddress merge = new CellRangeAddress(line, line, columnStart, columnEnd);
+        sheet.addMergedRegion(merge);
+        excel.setRegionHeaderStyle(merge, sheet, style);
         short height = 1000;
         Row row = sheet.getRow(line);
         row.setHeight(height);

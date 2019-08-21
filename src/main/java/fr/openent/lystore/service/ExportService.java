@@ -17,4 +17,8 @@ public interface ExportService {
     void deleteExport(JsonArray filesIds, Handler<JsonObject> handler);
 
     void deleteExportSql(JsonArray idsExports, Handler<Either<String, JsonObject>> handler);
+
+    void updateWhenError(Number idExport, Handler<Either<String, JsonObject>> handler);
+
+    void updateWhenSuccess(Number idExport, Handler<Either<String, JsonObject>> handler);
 }

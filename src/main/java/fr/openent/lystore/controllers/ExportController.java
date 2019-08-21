@@ -76,14 +76,14 @@ public class ExportController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void deleteExportExcel(HttpServerRequest request) {
-        RequestUtils.bodyToJson( request, idsExports -> exportService.deleteExport( idsExports.getJsonArray("idsFiles"), event -> {
+        RequestUtils.bodyToJson( request, ids -> exportService.deleteExport( ids.getJsonArray("idsFiles"), event -> {
                 if (event.getString("status").equals("ok")) {
-                    exportService.deleteExportSql( idsExports.getJsonArray("idsExport"), Logging.defaultResponseHandler(eb,
+                    exportService.deleteExportSql( ids.getJsonArray("idsExport"), Logging.defaultResponseHandler(eb,
                             request,
                             Contexts.EXPORT.toString(),
                             Actions.DELETE.toString(),
-                            idsExports.toString(),
-                            new JsonObject().put("ids", idsExports)));
+                            ids.getJsonArray("idsExport").toString(),
+                            new JsonObject().put("ids", ids)));
                 } else {
                     badRequest(request);
                     log.error("Erreur deleting file in storage");

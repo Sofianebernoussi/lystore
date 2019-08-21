@@ -20,22 +20,24 @@
                         <span></span>
                     </label>
                 </td>
-                <td>
-                    <i18n>
-                        lystore.nameFile
-                    </i18n>
+                <td ng-click="sort.export.type = 'filename';
+                    sort.export.reverse = !sort.export.reverse">
+                    <i18n>lystore.nameFile</i18n>
+                    <i class="up-open" ng-show="sort.export.type === 'filename' && !sort.export.reverse"></i>
+                    <i class="down-open" ng-show="sort.export.type === 'filename' && sort.export.reverse"></i>
                 </td>
-                <td>
-                    <i18n>
-                        lystore.creation.date
-                    </i18n>
+                <td ng-click="sort.export.type = 'created';
+                    sort.export.reverse = !sort.export.reverse">
+                    <i18n>lystore.creation.date</i18n>
+                    <i class="up-open" ng-show="sort.export.type === 'created' && !sort.export.reverse"></i>
+                    <i class="down-open" ng-show="sort.export.type === 'created' && sort.export.reverse"></i>
                 </td>
                 <td></td>
             </tr>
             </thead>
             <tbody>
             <tr
-                    ng-repeat="export in exports.all"
+                    ng-repeat="export in exports.all | orderBy:sort.export.type:sort.export.reverse"
                     class=[[export.classStatus]]
             >
                 <td workflow="lystore.manager" class="table-selector" >

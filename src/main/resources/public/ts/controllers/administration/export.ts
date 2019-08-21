@@ -8,6 +8,12 @@ export const exportCtrl = ng.controller('exportCtrl', [
         $scope.display = {
             delete: false
         };
+        $scope.sort = {
+            export : {
+                type: 'created',
+                reverse: true
+            }
+        };
         $scope.exports = new Exports([]);
         $scope.STATUS = STATUS;
         await $scope.exports.getExports();

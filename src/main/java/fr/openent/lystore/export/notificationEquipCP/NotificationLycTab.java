@@ -9,10 +9,9 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class NotificationLycTab extends NotifcationCpHelper {
     private int lineNumber = 0;
@@ -22,6 +21,10 @@ public class NotificationLycTab extends NotifcationCpHelper {
     private final String DATE = "DATE N° RAPPORT";
     private final String NUMBER_ORDER = "N° de demande";
     private final String AMOUNT = "Qté";
+
+    private final String ROOM = "Salle";
+    private final String STAIR = "Étage";
+    private final String BUILDING = "Bâtiment";
     final String Subvention = "236";
     private final String SubventionLabel = "GESTION DIRECTE\n" +
             "Les matériels seront fournis au lycée par l'intermédiaire des marchés publics Région.";
@@ -75,7 +78,11 @@ public class NotificationLycTab extends NotifcationCpHelper {
                 if (repStructures.isRight()) {
                     JsonArray structures = repStructures.right().getValue();
                     setStructures(structures);
-                    writeArray(handler);
+                    if (datas.isEmpty()) {
+                        handler.handle(new Either.Left<>("No data in database"));
+                    } else {
+                        writeArray(handler);
+                    }
                 }
             }
         });
@@ -85,36 +92,101 @@ public class NotificationLycTab extends NotifcationCpHelper {
 
     private void writeArray(Handler<Either<String, Boolean>> handler) {
         for (int i = 0; i < datas.size(); i++) {
-            lineNumber += 2;
-            excel.insertLabel(lineNumber, 0, datas.getJsonObject(i).getString("city"));
-            excel.insertLabel(lineNumber, 2, datas.getJsonObject(i).getString("nameEtab"));
-            excel.insertLabel(lineNumber, 4, datas.getJsonObject(i).getString("uai"));
-            lineNumber += 2;
+            lineNumber += 3;
+            excel.insertBlackTitleHeaderBorderless(0, lineNumber, datas.getJsonObject(i).getString("city"));
+            excel.insertBlackTitleHeaderBorderless(2, lineNumber, datas.getJsonObject(i).getString("nameEtab"));
+            excel.insertBlackTitleHeaderBorderless(4, lineNumber, datas.getJsonObject(i).getString("uai"));
             JsonObject structure = datas.getJsonObject(i);
             JsonArray orders = structure.getJsonArray("actionsJO");
             orders = sortByType(orders);
             String previousMarket = "";
             String previousCode = "";
-            for (int j = 0; j < orders.size(); j++) {
-                JsonObject order = orders.getJsonObject(j);
-                String market = order.getString("market");
-                String code = order.getString("code");
 
-                if (code.equals(Subvention)) {
-                    excel.insertLabel(lineNumber, 0, SubventionLabel);
-                } else {
-                    excel.insertLabel(lineNumber, 0, NotSubventionLabel);
+            if (orders.isEmpty()) {
+                handler.handle(new Either.Left<>("no orders linked to this Struct"));
+            } else {
+                for (int j = 0; j < orders.size(); j++) {
+                    JsonObject order = orders.getJsonObject(j);
+                    String market = order.getString("market");
+                    String code = order.getString("code");
+
+                    String room = getStr(order, "room");
+                    String stair = getStr(order, "stair");
+                    String building = getStr(order, "building");
+                    String date = getFormatDate(instruction.getString("date_cp"));
+                    String equipmentNameComment = "Libellé Region : " + formatStrToCell(order.getString("name_equipment"), 10);
+
+                    if (order.getBoolean("isregion"))
+                        equipmentNameComment += " \nCommentaire Région :" + formatStrToCell(order.getString("comment"), 10);
+                    if (!previousCode.equals(code)) {
+                        if (code.equals(Subvention)) {
+                            lineNumber += 2;
+                            excel.insertLabelOnRed(lineNumber, 0, SubventionLabel);
+                            sizeMergeRegion(lineNumber, 0, 6);
+                            previousCode = Subvention;
+                            lineNumber += 2;
+                            setLabels();
+                        } else if (!previousCode.equals("NOT SUBV")) {
+                            lineNumber += 2;
+
+                            excel.insertLabelOnRed(lineNumber, 0, NotSubventionLabel);
+                            sizeMergeRegion(lineNumber, 0, 6);
+                            previousCode = "NOT SUBV";
+                            lineNumber += 2;
+                            setLabels();
+                        }
+                        excel.insertCellTab(0, lineNumber,
+                                ROOM + ": " + room + "\n"
+                                        + STAIR + ": " + stair + "\n"
+                                        + BUILDING + ": " + building
+                        );
+
+                        excel.insertCellTabCenterBold(1, lineNumber, market);
+                        excel.insertCellTabBlue(2, lineNumber, equipmentNameComment);
+                        excel.insertCellTabCenterBold(3, lineNumber, instruction.getString("cp_number") + "\n" + date);
+                        excel.insertCellTabCenter(4, lineNumber, "-" + order.getInteger("id").toString());
+                        excel.insertCellTabCenterBold(5, lineNumber, order.getInteger("amount").toString());
+                        excel.insertCellTabFloatWithPrice(6, lineNumber, order.getFloat("total"));
+
+                        lineNumber++;
+
+                    }
+
                 }
-                lineNumber++;
-                setLabels();
-
             }
         }
-
         excel.autoSize(8);
         handler.handle(new Either.Right<>(true));
 
     }
+
+
+    private String getFormatDate(String dateCp) {
+        SimpleDateFormat formatterDate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        SimpleDateFormat formatterDateExcel = new SimpleDateFormat("dd/MM/yyyy");
+        Date orderDate = null;
+        try {
+            orderDate = formatterDate.parse(dateCp);
+        } catch (ParseException e) {
+            log.error("Incorrect date format");
+        }
+        return formatterDateExcel.format(orderDate);
+    }
+
+    private String getStr(JsonObject order, String key) {
+        try {
+            return (order.getString(key).equals("null")) ? "" : order.getString(key);
+        } catch (ClassCastException ee) {
+            try {
+                return order.getInteger(key).toString();
+            } catch (NullPointerException e) {
+                return "";
+            }
+        } catch (NullPointerException e) {
+            return "";
+        }
+    }
+
 
 
     private JsonArray sortByType(JsonArray orders) {
@@ -161,12 +233,12 @@ public class NotificationLycTab extends NotifcationCpHelper {
 
     @Override
     protected void setLabels() {
-        excel.insertLabel(lineNumber, 0, DESTINATION);
-        excel.insertLabel(lineNumber, 1, MARKET_CODE);
-        excel.insertLabel(lineNumber, 2, REGION_LABEL);
-        excel.insertLabel(lineNumber, 3, DATE);
-        excel.insertLabel(lineNumber, 4, NUMBER_ORDER);
-        excel.insertLabel(lineNumber, 5, AMOUNT);
+        excel.insertHeader(lineNumber, 0, DESTINATION);
+        excel.insertHeader(lineNumber, 1, MARKET_CODE);
+        excel.insertHeader(lineNumber, 2, REGION_LABEL);
+        excel.insertHeader(lineNumber, 3, DATE);
+        excel.insertHeader(lineNumber, 4, NUMBER_ORDER);
+        excel.insertHeader(lineNumber, 5, AMOUNT);
         lineNumber++;
     }
 
@@ -212,19 +284,20 @@ public class NotificationLycTab extends NotifcationCpHelper {
                 "             END as old_name,     " +
                 "             orders.id_structure,orders.id_operation as id_operation, label.label as operation ,     " +
                 "             orders.equipment_key as key, orders.name as name_equipment, true as region,  orders.id as id,  " +
-                "             program_action.id_program, orders.amount ,contract.id as market_id,   campaign.name as campaign, orders.comment,    " +
+                "             program_action.id_program, orders.amount ,contract.id as market_id,   campaign.name as campaign, orders.comment, project.room, orders.isregion, " +
+                "             project.stair,project.building,    " +
                 "             case when specific_structures.type is null      " +
                 "             then '" + LYCEE + "'          " +
                 "             ELSE specific_structures.type     " +
                 "             END as cite_mixte     " +
                 "             FROM (      " +
-                "             (select ore.id,  ore.price as \"price TTC\",  ore.amount,  ore.creation_date,  ore.modification_date,  ore.name,  ore.summary, " +
+                "             (select ore.id,  true as isregion, ore.price as \"price TTC\",  ore.amount,  ore.creation_date,  ore.modification_date,  ore.name,  ore.summary, " +
                 "             ore.description,  ore.image,    ore.status,  ore.id_contract,  ore.equipment_key,  ore.id_campaign,  ore.id_structure, " +
                 "             ore.cause_status,  ore.number_validation,  ore.id_order,  ore.comment,  ore.rank as \"prio\", null as price_proposal,  " +
-                "             ore.id_project,  ore.id_order_client_equipment, null as program, null as action,  ore.id_operation , " +
+                "             ore.id_project,  ore.id_order_client_equipment, null as program, null as action,  ore.id_operation ," +
                 "             null as override_region          from " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore )      " +
-                "             union      " +
-                "             (select oce.id," +
+                "             UNION      " +
+                "             (select oce.id ,  false as isregion," +
                 "             CASE WHEN price_proposal is null then  price + (price*tax_amount/100)  else price_proposal end as \"price TTC\", " +
                 "             amount, creation_date, null as modification_date, name,  " +
                 "             summary, description, image,  status, id_contract, equipment_key, id_campaign, id_structure, cause_status, number_validation, " +
@@ -237,6 +310,7 @@ public class NotificationLycTab extends NotifcationCpHelper {
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id)                  " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id )      " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".campaign ON orders.id_campaign = campaign.id  " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".project ON orders.id_project = project.id  " +
                 "             LEFT JOIN " + Lystore.lystoreSchema + ".specific_structures ON orders.id_structure = specific_structures.id    " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         " +
                 "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
@@ -248,8 +322,10 @@ public class NotificationLycTab extends NotifcationCpHelper {
 
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                 "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
-                "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id" +
-                "             order by code,campaign, id_structure,program,code  " +
+                "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id," +
+                "               orders.isregion, " +
+                "              project.room,project.stair, project.building " +
+                "             order by code,campaign,market_id, id_structure,program,code " +
                 "  )    SELECT  values.id_structure as id_structure,    array_to_json(array_agg(values))as actions  " +
                 "  from  values      " +
                 "  Group by values.id_structure   " +

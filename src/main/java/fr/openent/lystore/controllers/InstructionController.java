@@ -2,6 +2,7 @@ package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.ExportWorker;
+import fr.openent.lystore.helpers.ExcelHelper;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
@@ -169,11 +170,12 @@ public class InstructionController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void exportPublipostage(HttpServerRequest request) {
+        String titleFile = ExcelHelper.makeTheNameExcelExport("_Liste_Etablissements_Publipostage_Notification");
         UserUtils.getUserInfos(eb, request, user -> {
             eb.send(ExportWorker.class.getSimpleName(),
                     new JsonObject().put("action", "exportPublipostage")
                             .put("id", Integer.parseInt(request.getParam("id")))
-                            .put("titleFile", "_Liste_Etablissements_Publipostage_Notification")
+                            .put("titleFile", titleFile)
                             .put("userId", user.getUserId()),
                     handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
             request.response().setStatusCode(201).end("Import started");

@@ -36,13 +36,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
     @Override
     public void handle(Message<JsonObject> event) {
         final String action = event.body().getString("action", "");
-        String fileNamIn = "";
-        if(event.body().containsKey("type")){
-            fileNamIn = getDate() + event.body().getString("titleFile") + event.body().getString("type") + ".xlsx";
-        } else {
-            fileNamIn = getDate() + event.body().getString("titleFile") + ".xlsx";
-        }
-
+        String fileNamIn = event.body().getString("titleFile");
         switch (action) {
             case "exportEQU":
                 exportEquipment(
@@ -100,12 +94,6 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
         });
     }
 
-    private String getDate() {
-        java.util.Date date = Calendar.getInstance().getTime();
-        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-        return formatter.format(date);
-    }
-
     private void exportRME(Integer instructionId, String titleFile, String userId) {
         this.instruction = new Instruction(instructionId);
 
@@ -125,11 +113,8 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                 logger.error("An error occurred when inserting xlsx ");
             } else {
                 logger.info("Xlsx insert in storage");
-                exportService.createWhenStart(fileName, userId, exportCreating -> {
-                    if(exportCreating.isLeft()){
-                        logger.error("error when create export" + exportCreating.left());
-                    }
-                });
+                //todo id get
+                saveFile(file.getString("_id"), 12);
             }
         });
     }
@@ -146,21 +131,11 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
         }, type);
     }
 
-    private void saveFile(String fileId, String filename, String userId) {
-        String query = "INSERT into " + Lystore.lystoreSchema + ".export (fileid, filename, ownerid) " +
-                "VALUES (?, ?, ?) ;";
-        JsonArray params = new JsonArray().add(fileId)
-                .add(filename)
-                .add(userId);
-
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> event) {
-                if (event.isLeft()) {
-                    logger.error("Fail to insert file in SQL");
-                }
+    private void saveFile(String fileId, Number idExport) {
+        exportService.updateWhenSuccess(fileId, idExport, updateExport ->{
+            if (updateExport.isLeft()) {
+                logger.error("Fail to insert file in SQL");
             }
-        }));
-
+        });
     }
 }

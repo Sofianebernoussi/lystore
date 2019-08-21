@@ -109,15 +109,16 @@ public class DefaultExportServiceService implements ExportService {
         }
     }
 
-    public void updateWhenSuccess (Number idExport, Handler<Either<String, JsonObject>> handler){
+    public void updateWhenSuccess (String fileId, Number idExport, Handler<Either<String, JsonObject>> handler){
         try{
             String query = "" +
                     "UPDATE " +
                     Lystore.lystoreSchema + ".export  " +
                     "SET " +
+                    "fileid = ? ," +
                     "status = 'SUCCESS'  " +
                     "WHERE id = ? ";
-            Sql.getInstance().prepared(query, new JsonArray().add(idExport), SqlResult.validUniqueResultHandler(handler));
+            Sql.getInstance().prepared(query, new JsonArray().add(fileId).add(idExport), SqlResult.validUniqueResultHandler(handler));
         } catch (Exception error){
             logger.error("error when update SUCCESS in export" + error);
         }

@@ -8,8 +8,10 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -144,6 +146,37 @@ public abstract class TabHelper {
             sortedJsonArray.add(jsonValues.get(i));
         }
         return sortedJsonArray;
+    }
+
+    protected void sizeMergeRegion(int line, int columnStart, int columnEnd) {
+        CellRangeAddress merge = new CellRangeAddress(line, line, columnStart, columnEnd);
+        sheet.addMergedRegion(merge);
+        excel.setRegionHeader(merge, sheet);
+        short height = 1000;
+        Row row = sheet.getRow(line);
+        row.setHeight(height);
+
+    }
+
+    // doing \n when the str is too long
+    protected String formatStrToCell(String str, int nbWords) {
+        try {
+            String[] words = str.split(" ");
+            String resultStr = "";
+            if (words.length <= nbWords) {
+                return str;
+            } else {
+                for (int i = 0; i < words.length; i++) {
+                    resultStr += words[i] + " ";
+                    if (i % nbWords == 0 && i != 0) {
+                        resultStr += "\n";
+                    }
+                }
+            }
+            return resultStr;
+        } catch (NullPointerException e) {
+            return str;
+        }
     }
 
 }

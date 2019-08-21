@@ -80,7 +80,11 @@ public class RecapMarketGestion extends NotifcationCpHelper {
                 if (repStructures.isRight()) {
                     JsonArray structures = repStructures.right().getValue();
                     setStructures(structures);
-                    writeArray(handler);
+                    if (datas.isEmpty()) {
+                        handler.handle(new Either.Left<>("No data in database"));
+                    } else {
+                        writeArray(handler);
+                    }
                 }
             }
         });
@@ -167,17 +171,17 @@ public class RecapMarketGestion extends NotifcationCpHelper {
                 excel.insertCellTabCenter(1, lineNumber, order.getString("uai") + "\n" + order.getString("nameEtab") + "\n" + order.getString("city"));
 
                 excel.insertCellTabCenter(2, lineNumber, CIVILITY + "\n" + address + "\n TEL: " + order.getString("phone"));
-                excel.insertCellTabCenter(3, lineNumber, formatterDateExcel.format(orderDate));
+                excel.insertCellTabCenterBold(3, lineNumber, formatterDateExcel.format(orderDate));
                 excel.insertCellTabCenter(4, lineNumber, order.getString("market") + " \nCP " + instruction.getString("cp_number"));
                 excel.insertCellTabCenter(5, lineNumber,
                         "OPE : " + order.getString("operation") + "\nDDE : -" + order.getInteger("id").toString());
-                excel.insertCellTabCenter(6, lineNumber, formatStrToCell(campaign));
-                excel.insertCellTabCenter(7, lineNumber, formatStrToCell(order.getInteger("amount").toString()));
+                excel.insertCellTabCenter(6, lineNumber, formatStrToCell(campaign, 5));
+                excel.insertCellTabCenter(7, lineNumber, formatStrToCell(order.getInteger("amount").toString(), 5));
                 excel.insertCellTabFloat(8, lineNumber, order.getFloat("total"));
-                excel.insertCellTabCenter(9, lineNumber, formatStrToCell(order.getString("name_equipment")));
+                excel.insertCellTabCenter(9, lineNumber, formatStrToCell(order.getString("name_equipment"), 5));
                 excel.insertCellTabCenter(10, lineNumber, order.getString("cite_mixte"));
-                excel.insertCellTabCenter(11, lineNumber, formatStrToCell(order.getString("market")));
-                excel.insertCellTabCenter(12, lineNumber, formatStrToCell(order.getString("comment")));
+                excel.insertCellTabCenter(11, lineNumber, formatStrToCell(order.getString("market"), 5));
+                excel.insertCellTabCenter(12, lineNumber, formatStrToCell(order.getString("comment"), 5));
                 lineNumber++;
             }
             excel.insertHeader(lineNumber, 0, zip);
@@ -227,9 +231,7 @@ public class RecapMarketGestion extends NotifcationCpHelper {
 
     private void setLabel(String market) {
         excel.insertBlackOnGreenHeader(lineNumber, 0, market);
-        CellRangeAddress merge = new CellRangeAddress(lineNumber, lineNumber, 0, 12);
-        sheet.addMergedRegion(merge);
-        excel.setRegionHeader(merge, sheet);
+        sizeMergeRegion(lineNumber, 0, 12);
         lineNumber += 2;
 
     }

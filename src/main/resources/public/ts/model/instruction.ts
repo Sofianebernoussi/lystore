@@ -120,7 +120,7 @@ export class Instruction implements Selectable {
         }
     }
 
-    async exportPublipostage(){
+    async exportPublipostage() {
         try {
             const {data} = await http.get(`/lystore/instructions/export/publipostage/equipment/${this.id}`);
         } catch (e) {

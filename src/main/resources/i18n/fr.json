@@ -522,6 +522,6 @@
   "export.delete.lightbox.title": "Suppresion d'un export",
   "lystore.export.delete.err": "Erreur lors de la suppression d'un export",
   "lystore.output.project" : "Projet:",
-  "lystore.export.subvention" : "export subvention",
-  "lystore.export.publipostage" : "Export Publipostage"
+  "lystore.export.subvention": "export subvention",
+  "lystore.export.publipostage": "Export Publipostage"
 }

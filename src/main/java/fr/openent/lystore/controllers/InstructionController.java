@@ -174,7 +174,9 @@ public class InstructionController extends ControllerHelper {
                     handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
             request.response().setStatusCode(201).end("Import started");
         });
-    };
+    }
+
+    ;
 
     @Get("/instructions/export/subvention/equipment/:id")
     @ApiDoc("export subvention excel with id instruction")

@@ -7,6 +7,7 @@ import fr.openent.lystore.export.notificationEquipCP.LinesBudget;
 import fr.openent.lystore.export.notificationEquipCP.NotificationLycTab;
 import fr.openent.lystore.export.notificationEquipCP.RecapMarketGestion;
 import fr.openent.lystore.export.publipostage.Publipostage;
+import fr.openent.lystore.export.subventionEquipment.PublicsMarchés;
 import fr.openent.lystore.export.subventionEquipment.PublicsSubventions;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
@@ -184,19 +185,21 @@ public class Instruction {
                     Future<Boolean> CmrSubventions = Future.future();
                     Future<Boolean> PublicsSubventionsFuture = Future.future();
                     Future<Boolean> CmrMarchés = Future.future();
-                    Future<Boolean> PublicsMarchés = Future.future();
+                    Future<Boolean> PublicsMarchésFuture = Future.future();
 
-//                    futures.add(CmrSubventions);
+                    futures.add(CmrSubventions);
                     futures.add(PublicsSubventionsFuture);
-//                    futures.add(CmrMarchés);
-//                    futures.add(PublicsMarchés);
+                    futures.add(CmrMarchés);
+                    futures.add(PublicsMarchésFuture);
 
                     futureHandler(handler, workbook, futures);
 
 //                    new CmrSubventions(workbook, instruction).create(getHandler(CmrSubventions));
-                    new PublicsSubventions(workbook, instruction).create(getHandler(PublicsSubventionsFuture));
+                    new PublicsSubventions(workbook, instruction, true).create(getHandler(CmrSubventions));
+                    new PublicsSubventions(workbook, instruction, false).create(getHandler(PublicsSubventionsFuture));
 //                    new CmrMarchés(workbook, instruction).create(getHandler(CmrMarchés));
-//                    new PublicsMarchés(workbook, instruction).create(getHandler(PublicsMarchés));
+                    new PublicsMarchés(workbook, instruction, true).create(getHandler(CmrMarchés));
+                    new PublicsMarchés(workbook, instruction, false).create(getHandler(PublicsMarchésFuture));
                 }
             }
         }));

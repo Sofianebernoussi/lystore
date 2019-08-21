@@ -1,7 +1,6 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
-import fr.openent.lystore.export.ExportWorker;
 import fr.openent.lystore.helpers.ExcelHelper;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
@@ -10,31 +9,22 @@ import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.InstructionService;
 import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import fr.openent.lystore.service.impl.DefaultInstructionService;
-import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
-import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
-import org.entcore.common.user.UserInfos;
-import org.entcore.common.user.UserUtils;
 import fr.openent.lystore.service.ExportService;
-
-import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 
 public class InstructionController extends ControllerHelper {
     private InstructionService instructionService ;
     private Storage storage;
     private ExportService exportService;
-    private Logger logger = LoggerFactory.getLogger(DefaultProjectService.class);
 
     public InstructionController(Storage storage) {
         super();

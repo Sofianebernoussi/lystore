@@ -1,15 +1,26 @@
 package fr.openent.lystore.helpers;
 
+import fr.openent.lystore.export.ExportWorker;
+import fr.openent.lystore.logging.Actions;
+import fr.openent.lystore.logging.Contexts;
+import fr.openent.lystore.logging.Logging;
+import fr.openent.lystore.service.ExportService;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.RegionUtil;
+import org.entcore.common.user.UserUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 
 public class ExcelHelper {
     private Workbook wb;
@@ -38,7 +49,7 @@ public class ExcelHelper {
     public final CellStyle blueTabStyle;
     public final CellStyle blackTitleHeaderBorderlessStyle;
 
-    protected Logger log = LoggerFactory.getLogger(ExcelHelper.class);
+    protected static Logger log = LoggerFactory.getLogger(ExcelHelper.class);
 
     private DataFormat format;
     public static final String totalLabel = "Total";
@@ -1191,4 +1202,42 @@ public class ExcelHelper {
         DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         return formatter.format(date);
     }
+
+    public static void makeExportExcel(HttpServerRequest request, EventBus eb, ExportService exportService, String action, String name) {
+        boolean withType = request.getParam("type") != null;
+        String type = "";
+        JsonObject infoFile = new JsonObject();
+        if(withType){
+            type = request.getParam("type");
+            infoFile.put("type", type);
+        }
+        String titleFile = withType? ExcelHelper.makeTheNameExcelExport(name, type) : ExcelHelper.makeTheNameExcelExport(name);
+
+        UserUtils.getUserInfos(eb, request, user -> {
+            exportService.createWhenStart(titleFile, user.getUserId(), newExport -> {
+                if(newExport.isRight()){
+                    Number idFile = newExport.right().getValue().getInteger("id");
+                    infoFile.put("action", action)
+                            .put("id", Integer.parseInt(request.getParam("id")))
+                            .put("titleFile", titleFile)
+                            .put("idFile", idFile)
+                            .put("userId", user.getUserId());
+
+                    eb.send(ExportWorker.class.getSimpleName(),
+                            infoFile,
+                            handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
+
+                    Logging.insert(eb,
+                            request,
+                            Contexts.EXPORT.toString(),
+                            Actions.CREATE.toString(),
+                            idFile.toString(),
+                            new JsonObject().put("ids", idFile).put("fileName", titleFile));
+                    request.response().setStatusCode(201).end("Import started " + idFile);
+                } else {
+                    log.error("Fail to insert file in SQL " + newExport.left());
+                }
+            });
+        });
+    };
 }

@@ -8,7 +8,9 @@ import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.security.ManagerRight;
 import fr.openent.lystore.service.InstructionService;
+import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import fr.openent.lystore.service.impl.DefaultInstructionService;
+import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -16,11 +18,14 @@ import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
+import fr.openent.lystore.service.ExportService;
 
 import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
@@ -28,11 +33,14 @@ import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayRespo
 public class InstructionController extends ControllerHelper {
     private InstructionService instructionService ;
     private Storage storage;
+    private ExportService exportService;
+    private Logger logger = LoggerFactory.getLogger(DefaultProjectService.class);
 
     public InstructionController(Storage storage) {
         super();
         this.storage = storage;
         this.instructionService = new DefaultInstructionService(Lystore.lystoreSchema, "instruction");
+        this.exportService = new DefaultExportServiceService(Lystore.lystoreSchema, "export", storage);
     }
 
     @Get("/exercises")
@@ -102,18 +110,7 @@ public class InstructionController extends ControllerHelper {
     @Get("/instructions/:id/export")
     @ApiDoc("Export given instruction")
     public void exportInstruction(HttpServerRequest request) {
-        UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-            @Override
-            public void handle(UserInfos user) {
-                eb.send(ExportWorker.class.getSimpleName(),
-                        new JsonObject().put("action", "exportRME")
-                                .put("id", Integer.parseInt(request.getParam("id")))
-                                .put("titleFile", "Récapitulatif_mesures_engagées_")
-                                .put("userId", user.getUserId()),
-                        handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
-            }
-        });
-        request.response().setStatusCode(200).end("Import started");
+        ExcelHelper.makeExportExcel( request, eb, exportService, "exportRME","Récapitulatif_mesures_engagées_");
     }
 
     @Get("/instructions/export/equipment/rapport/:id/:type")
@@ -121,21 +118,7 @@ public class InstructionController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void exportRapportEquipment(HttpServerRequest request) {
-        UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-            @Override
-            public void handle(UserInfos user) {
-                String type = request.getParam("type");
-                // Display a date in day, month, year format
-                eb.send(ExportWorker.class.getSimpleName(),
-                        new JsonObject().put("action", "exportEQU")
-                                .put("id", Integer.parseInt(request.getParam("id")))
-                                .put("type", type)
-                                .put("titleFile", "_EQUIPEMENT_RAPPORT_")
-                                .put("userId", user.getUserId()),
-                        handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
-            }
-        });
-        request.response().setStatusCode(200).end("Import started");
+        ExcelHelper.makeExportExcel( request, eb, exportService, "exportEQU","_EQUIPEMENT_RAPPORT_");//type
     }
 
     @Get("/instruction/:id/operations")
@@ -151,34 +134,14 @@ public class InstructionController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void exportNotificationEquipment(HttpServerRequest request) {
-        UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-            @Override
-            public void handle(UserInfos user) {
-                eb.send(ExportWorker.class.getSimpleName(),
-                        new JsonObject().put("action", "exportNotificationCP")
-                                .put("id", Integer.parseInt(request.getParam("id")))
-                                .put("titleFile", "_Notification_Equipement_CP")
-                                .put("userId", user.getUserId()),
-                        handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
-            }
-        });
-        request.response().setStatusCode(200).end("Import started");
+        ExcelHelper.makeExportExcel( request, eb, exportService, "exportNotificationCP","_Notification_Equipement_CP");
     }
 
     @Get("/instructions/export/publipostage/equipment/:id")
     @ApiDoc("export publipostage excel with id instruction")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
-    public void exportPublipostage(HttpServerRequest request) {
-        String titleFile = ExcelHelper.makeTheNameExcelExport("_Liste_Etablissements_Publipostage_Notification");
-        UserUtils.getUserInfos(eb, request, user -> {
-            eb.send(ExportWorker.class.getSimpleName(),
-                    new JsonObject().put("action", "exportPublipostage")
-                            .put("id", Integer.parseInt(request.getParam("id")))
-                            .put("titleFile", titleFile)
-                            .put("userId", user.getUserId()),
-                    handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
-            request.response().setStatusCode(201).end("Import started");
-        });
+    public void exportPublipostageExcel(HttpServerRequest request) {
+        ExcelHelper.makeExportExcel( request, eb, exportService, "exportPublipostage", "_Liste_Etablissements_Publipostage_Notification");
     };
 }

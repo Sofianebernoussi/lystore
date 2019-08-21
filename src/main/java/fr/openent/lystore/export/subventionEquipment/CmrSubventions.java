@@ -28,20 +28,22 @@ public class CmrSubventions extends TabHelper {
 
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
-        header();
-        getDatas(event -> {
-            if (event.isLeft()) {
-                log.error("Failed to retrieve datas");
-                handler.handle(new Either.Left<>("Failed to retrieve datas"));
-            } else {
-                JsonArray programs = event.right().getValue();
-                initDatas(handler);
-                //Delete tab if empty
-                if (programs.size() == 0) {
-                    wb.removeSheetAt(wb.getSheetIndex(sheet));
-                }
-            }
-        });
+//        header();
+//        getDatas(event -> {
+//            if (event.isLeft()) {
+//                log.error("Failed to retrieve datas");
+//                handler.handle(new Either.Left<>("Failed to retrieve datas"));
+//            } else {
+//                JsonArray programs = event.right().getValue();
+//                initDatas(handler);
+//                //Delete tab if empty
+//                if (programs.size() == 0) {
+//                    wb.removeSheetAt(wb.getSheetIndex(sheet));
+//                }
+//            }
+//        });
+
+        handler.handle(new Either.Right<>(true));
     }
 
     private void initDatas(Handler<Either<String, Boolean>> handler) {
@@ -158,9 +160,7 @@ public class CmrSubventions extends TabHelper {
                 "             LEFT JOIN " + Lystore.lystoreSchema + ".specific_structures ON orders.id_structure = specific_structures.id    " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         ";
         query +=
-                "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
-                        "  OR (spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
-                        "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    ";
+                "   AND (spa.structure_type = '" + CMR + "' AND specific_structures.type ='" + CMR + "')  ";
         query +=
                 "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
                         "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           ";

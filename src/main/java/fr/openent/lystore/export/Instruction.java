@@ -7,6 +7,7 @@ import fr.openent.lystore.export.notificationEquipCP.LinesBudget;
 import fr.openent.lystore.export.notificationEquipCP.NotificationLycTab;
 import fr.openent.lystore.export.notificationEquipCP.RecapMarketGestion;
 import fr.openent.lystore.export.publipostage.Publipostage;
+import fr.openent.lystore.export.subventionEquipment.PublicsSubventions;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.data.FileResolver;
@@ -159,12 +160,56 @@ public class Instruction {
 
     }
 
+    public void exportSubvention(Handler<Either<String, Buffer>> handler) {
+        if (this.id == null) {
+            log.error("Instruction identifier is not nullable");
+            handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
+        }
+        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(eitherInstruction -> {
+            if (eitherInstruction.isLeft()) {
+                log.error("Error when getting sql datas for subvention");
+                handler.handle(new Either.Left<>("Error when getting sql datas for subvention"));
+            } else {
+
+               JsonObject instruction = eitherInstruction.right().getValue();
+                String operationStr = "operations";
+                if (!instruction.containsKey(operationStr)) {
+                    log.error("Error when getting operations");
+                    handler.handle(new Either.Left<>("Error when getting operations"));
+                } else {
+                    instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
+
+                    Workbook workbook = new XSSFWorkbook();
+                    List<Future> futures = new ArrayList<>();
+                    Future<Boolean> CmrSubventions = Future.future();
+                    Future<Boolean> PublicsSubventionsFuture = Future.future();
+                    Future<Boolean> CmrMarchés = Future.future();
+                    Future<Boolean> PublicsMarchés = Future.future();
+
+                    futures.add(CmrSubventions);
+                    futures.add(PublicsSubventionsFuture);
+//                    futures.add(CmrMarchés);
+//                    futures.add(PublicsMarchés);
+
+                    futureHandler(handler, workbook, futures);
+
+//                    new CmrSubventions(workbook, instruction).create(getHandler(CmrSubventions));
+                    new PublicsSubventions(workbook, instruction).create(getHandler(PublicsSubventionsFuture));
+//                    new CmrMarchés(workbook, instruction).create(getHandler(CmrMarchés));
+//                    new PublicsMarchés(workbook, instruction).create(getHandler(PublicsMarchés));
+                }
+            }
+        }));
+
+
+    }
+
     public void exportPublipostage(Handler<Either<String, Buffer>> handler) {
         if (this.id == null) {
             log.error("Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
-        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler( eitherInstruction -> {
+        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(eitherInstruction -> {
             if (eitherInstruction.isLeft()) {
                 log.error("Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));

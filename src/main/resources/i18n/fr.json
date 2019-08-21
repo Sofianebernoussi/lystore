@@ -516,10 +516,12 @@
   "lystore.type": "Type",
   "lystore.exportNotificationCP": "export notification Equipement",
   "lystore.type": "Type",
-  "delete.export.question": "Voulez vous supprimer les exports suivants ?",
+  "delete.export.question": "Voulez vous supprimer l'export suivant ?",
   "delete.export.label": "Nom du fichier",
   "lystore.delete.notif": "Votre fichier a bien été supprimé",
+  "export.delete.lightbox.title": "Suppresion d'un export",
   "lystore.export.delete.err": "Erreur lors de la suppression d'un export",
   "lystore.output.project" : "Projet:",
-  "lystore.export.publipostage" : "Export Publipostage"
+  "lystore.export.subvention": "export subvention",
+  "lystore.export.publipostage": "Export Publipostage"
 }

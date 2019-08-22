@@ -11,38 +11,73 @@
         <table class="twelve">
             <thead>
             <tr>
-                <td>
-                    <i18n>
-                        lystore.nameFile
-                    </i18n>
+                <td workflow="lystore.manager" class="table-selector">
+                    <label class="checkbox">
+                        <input type="checkbox"
+                               ng-show="exports.all.length > 0"
+                               ng-change="switchAllExports()"
+                               ng-model="allExportsSelected">
+                        <span></span>
+                    </label>
                 </td>
-                <td>
-                    <i18n>
-                        lystore.creation.date
-                    </i18n>
+                <td ng-click="sort.export.type = 'filename';
+                    sort.export.reverse = !sort.export.reverse">
+                    <i18n>lystore.nameFile</i18n>
+                    <i class="up-open" ng-show="sort.export.type === 'filename' && !sort.export.reverse"></i>
+                    <i class="down-open" ng-show="sort.export.type === 'filename' && sort.export.reverse"></i>
                 </td>
-                <td></td>
+                <td ng-click="sort.export.type = 'created';
+                    sort.export.reverse = !sort.export.reverse">
+                    <i18n>lystore.creation.date</i18n>
+                    <i class="up-open" ng-show="sort.export.type === 'created' && !sort.export.reverse"></i>
+                    <i class="down-open" ng-show="sort.export.type === 'created' && sort.export.reverse"></i>
+                </td>
                 <td></td>
             </tr>
             </thead>
             <tbody>
-            <tr ng-click="getExport(export)" ng-repeat="export in exports.all">
+            <tr
+                    ng-repeat="export in exports.all | orderBy:sort.export.type:sort.export.reverse"
+                    class=[[export.classStatus]]
+                    tooltip=[[export.tooltip]]
+            >
+                <td workflow="lystore.manager" class="table-selector" >
+                    <label class="checkbox">
+                        <input type="checkbox" ng-model="export.selected">
+                        <span></span>
+                    </label>
+                </td>
                 <td>
                     [[export.filename]]
                 </td>
                 <td>
                     [[export.created]]
                 </td>
-                <td>
-                    <i class="downloadButton"></i>
+                <td
+                        ng-click="getExport(export)"
+                        ng-show="export.status === STATUS.SUCCESS"
+                >
+                    <i class="downloadButton icon-medium-size"></i>
                 </td>
-                <td ng-click="$event.stopPropagation();confirmDelete(export)">
-                    <i class="trash"></i>
-                </td>
+                <td ng-show="!(export.status === STATUS.SUCCESS)">&nbsp;</td>
             </tr>
             </tbody>
         </table>
     </article>
+
+    <section class="toggle-buttons" ng-class="{ hide:exports.selected.length === 0 }">
+        <div class="toggle">
+            <div class="row">
+                <button
+                        ng-click="confirmDelete()"
+                        ng-disabled="controlDeleteExport()"
+                >
+                    <i18n>delete</i18n>
+                </button>
+            </div>
+        </div>
+    </section>
+
     <lightbox show="display.delete"
     >
         <container template="export.delete.lightbox"></container>

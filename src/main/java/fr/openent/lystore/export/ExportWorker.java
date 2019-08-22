@@ -1,20 +1,15 @@
 package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
-import fr.wseduc.webutils.Either;
+import fr.openent.lystore.helpers.ExcelHelper;
+import fr.openent.lystore.service.ExportService;
+import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 import org.entcore.common.storage.Storage;
 import org.vertx.java.busmods.BusModBase;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 import static fr.openent.lystore.Lystore.CONFIG;
 import static fr.openent.lystore.Lystore.STORAGE;
@@ -22,6 +17,8 @@ import static fr.openent.lystore.Lystore.STORAGE;
 public class ExportWorker extends BusModBase implements Handler<Message<JsonObject>> {
     private Instruction instruction;
     private Storage storage;
+    private ExportService exportService = new DefaultExportServiceService(Lystore.lystoreSchema, "export", storage);
+    private Number idNewFile;
 
     @Override
     public void start() {
@@ -34,123 +31,99 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
     @Override
     public void handle(Message<JsonObject> event) {
         final String action = event.body().getString("action", "");
+        String fileNamIn = event.body().getString("titleFile");
+        idNewFile =  event.body().getInteger("idFile");
         switch (action) {
             case "exportEQU":
                 exportEquipment(
                         event.body().getInteger("id"),
                         event.body().getString("type"),
-                        event.body().getString("userId"));
+                        fileNamIn);
                 break;
             case "exportRME":
                 exportRME(
                         event.body().getInteger("id"),
-                        event.body().getString("userId"));
+                        fileNamIn);
                 break;
             case "exportNotificationCP":
                 exportNotificationCp(event.body().getInteger("id"),
-                        event.body().getString("userId"));
+                        fileNamIn);
                 break;
             case "exportPublipostage":
                 exportPublipostage(event.body().getInteger("id"),
-                        event.body().getString("userId"));
+                        fileNamIn);
                 break;
             default:
-                logger.error("Invalid action in worker");
+                ExcelHelper.catchError(exportService, idNewFile, "Invalid action in worker");
                 break;
 
         }
     }
 
-    private void exportNotificationCp(Integer instructionId, String userId) {
-        this.instruction = new Instruction(instructionId);
-
+    private void exportNotificationCp(Integer instructionId, String titleFile) {
+        this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportNotficationCp(event1 -> {
             if (event1.isLeft()) {
-                logger.error("error when creating xlsx");
+                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left());
             } else {
                 Buffer xlsx = event1.right().getValue();
-                String fileName = getDate() + "_Notification_Equipement_CP" + ".xlsx";
-                saveBuffer(userId, xlsx, fileName);
+                saveBuffer( xlsx, titleFile);
             }
         });
     }
 
-    private void exportPublipostage(Integer instructionId, String userId) {
-        this.instruction = new Instruction(instructionId);
-
+    private void exportPublipostage(Integer instructionId, String titleFile) {
+        this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportPublipostage( file  -> {
-            if (file .isLeft()) {
-                logger.error("error when creating xlsx");
+            if (file.isLeft()) {
+                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + file.left());
             } else {
                 Buffer xlsx = file .right().getValue();
-                String fileName = getDate() + "_Liste_Etablissements_Publipostage_Notification" + ".xlsx";
-                saveBuffer(userId, xlsx, fileName);
+                saveBuffer( xlsx, titleFile);
             }
         });
     }
 
-    private String getDate() {
-        java.util.Date date = Calendar.getInstance().getTime();
-        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-        return formatter.format(date);
-    }
-
-    private void exportRME(Integer instructionId, String userId) {
-        this.instruction = new Instruction(instructionId);
-
+    private void exportRME(Integer instructionId, String titleFile) {
+        this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportInvestissement(event -> {
             if (event.isLeft()) {
-                logger.error("error when creating xlsx");
+                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event.left());
             } else {
                 Buffer xlsx = event.right().getValue();
-                String fileName = "Récapitulatif_mesures_engagées_" + getDate() + ".xlsx";
-                saveBuffer(userId, xlsx, fileName);
+                saveBuffer( xlsx, titleFile);
             }
         });
     }
 
-    private void saveBuffer(String userId, Buffer xlsx, String fileName) {
+    private void saveBuffer( Buffer xlsx, String fileName) {
         storage.writeBuffer(xlsx, "application/vnd.ms-excel", fileName, file -> {
             if (!"ok".equals(file.getString("status"))) {
-                logger.error("An error occurred when inserting xlsx ");
+                ExcelHelper.catchError(exportService, idNewFile, "An error occurred when inserting xlsx ");
             } else {
                 logger.info("Xlsx insert in storage");
-                saveFile(file.getString("_id"),
-                        fileName,
-                        userId);
+                saveFile(file.getString("_id"), idNewFile);
             }
         });
     }
 
-    private void exportEquipment(int instructionId, String type, String userId) {
-        this.instruction = new Instruction(instructionId);
-
+    private void exportEquipment(int instructionId, String type, String titleFile) {
+        this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportEquipmentRapp(event1 -> {
             if (event1.isLeft()) {
-                logger.error("error when creating xlsx");
+                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx");
             } else {
                 Buffer xlsx = event1.right().getValue();
-                String fileName = getDate() + "_EQUIPEMENT_RAPPORT_" + type + ".xlsx";
-                saveBuffer(userId, xlsx, fileName);
+                saveBuffer( xlsx, titleFile);
             }
         }, type);
     }
 
-    private void saveFile(String fileId, String filename, String userId) {
-        String query = "INSERT into " + Lystore.lystoreSchema + ".export (fileid, filename, ownerid) " +
-                "VALUES (?, ?, ?) ;";
-        JsonArray params = new JsonArray().add(fileId)
-                .add(filename)
-                .add(userId);
-
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> event) {
-                if (event.isLeft()) {
-                    logger.error("Fail to insert file in SQL");
-                }
+    private void saveFile(String fileId, Number idExport) {
+        exportService.updateWhenSuccess(fileId, idExport, updateExport ->{
+            if (updateExport.isLeft()) {
+                ExcelHelper.catchError(exportService, idNewFile, "Fail to insert file in SQL");
             }
-        }));
-
+        });
     }
 }

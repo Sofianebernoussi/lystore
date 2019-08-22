@@ -14,7 +14,13 @@ public interface ExportService {
 
     void getXlsxName(String fileId, Handler<Either<String, JsonArray>> handler);
 
-    void deleteExport(String fileId, Handler<JsonObject> handler);
+    void deleteExport(JsonArray filesIds, Handler<JsonObject> handler);
 
-    void deleteExportSql(String fileId, Handler<Either<String, JsonObject>> handler);
+    void deleteExportSql(JsonArray idsExports, Handler<Either<String, JsonObject>> handler);
+
+    void createWhenStart(String nameFile, String userId, Handler<Either<String, JsonObject>> handler);
+
+    void updateWhenError(Number idExport, Handler<Either<String, JsonObject>> handler);
+
+    void updateWhenSuccess(String fileId, Number idExport, Handler<Either<String, JsonObject>> handler);
 }

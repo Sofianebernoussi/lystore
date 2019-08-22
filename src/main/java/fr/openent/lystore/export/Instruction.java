@@ -7,6 +7,8 @@ import fr.openent.lystore.export.notificationEquipCP.LinesBudget;
 import fr.openent.lystore.export.notificationEquipCP.NotificationLycTab;
 import fr.openent.lystore.export.notificationEquipCP.RecapMarketGestion;
 import fr.openent.lystore.export.publipostage.Publipostage;
+import fr.openent.lystore.helpers.ExcelHelper;
+import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.data.FileResolver;
@@ -43,30 +45,33 @@ public class Instruction {
             "WHERE instruction.id = ? " +
             "GROUP BY instruction.id";
     private Integer id;
-
+    private Number idFile;
+    private ExportService exportService;
     private Logger log = LoggerFactory.getLogger(DefaultProjectService.class);
 
-    public Instruction(Integer instructionId) {
+    public Instruction(ExportService exportService, Number idFile, Integer instructionId) {
+        this.idFile = idFile;
+        this.exportService = exportService;
         this.id = instructionId;
     }
 
     public void exportInvestissement(Handler<Either<String, Buffer>> handler) {
         if (this.id == null) {
-            log.error("Instruction identifier is not nullable");
+            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
 
 
         Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
-                log.error("Error when getting sql datas ");
+                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
             } else {
 
                 JsonObject instruction = either.right().getValue();
                 String operationStr = "operations";
                 if (!instruction.containsKey(operationStr)) {
-                    log.error("Error when getting operations");
+                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
                     handler.handle(new Either.Left<>("Error when getting operations"));
                 } else {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
@@ -98,7 +103,7 @@ public class Instruction {
                         new RecapEPLETab(workbook, instruction).create(getHandler(RecapEPLEfuture));
                         new RecapImputationBud(workbook, instruction).create(getHandler(RecapImputationBudfuture));
                     } catch (IOException e) {
-                        log.error("Xlsx Failed to read template");
+                        ExcelHelper.catchError(exportService, idFile, "Xlsx Failed to read template");
                         handler.handle(new Either.Left<>("Xlsx Failed to read template"));
                     }
                 }
@@ -110,21 +115,21 @@ public class Instruction {
 
     public void exportEquipmentRapp(Handler<Either<String, Buffer>> handler, String type) {
         if (this.id == null) {
-            log.error("Instruction identifier is not nullable");
+            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
 
 
         Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
-                log.error("Error when getting sql datas ");
+                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
             } else {
 
                 JsonObject instruction = either.right().getValue();
                 String operationStr = "operations";
                 if (!instruction.containsKey(operationStr)) {
-                    log.error("Error when getting operations");
+                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
                     handler.handle(new Either.Left<>("Error when getting operations"));
                 } else {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
@@ -161,18 +166,18 @@ public class Instruction {
 
     public void exportPublipostage(Handler<Either<String, Buffer>> handler) {
         if (this.id == null) {
-            log.error("Instruction identifier is not nullable");
+            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
         Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler( eitherInstruction -> {
             if (eitherInstruction.isLeft()) {
-                log.error("Error when getting sql datas ");
+                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
             } else {
                 JsonObject instruction = eitherInstruction.right().getValue();
                 String operationStr = "operations";
                 if (!instruction.containsKey(operationStr)) {
-                    log.error("Error when getting operations");
+                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
                     handler.handle(new Either.Left<>("Error when getting operations"));
                 } else {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
@@ -193,21 +198,21 @@ public class Instruction {
 
     public void exportNotficationCp(Handler<Either<String, Buffer>> handler) {
         if (this.id == null) {
-            log.error("Instruction identifier is not nullable");
+            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
 
 
         Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
-                log.error("Error when getting sql datas ");
+                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
             } else {
 
                 JsonObject instruction = either.right().getValue();
                 String operationStr = "operations";
                 if (!instruction.containsKey(operationStr)) {
-                    log.error("Error when getting operations");
+                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
                     handler.handle(new Either.Left<>("Error when getting operations"));
                 } else {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
@@ -242,11 +247,11 @@ public class Instruction {
                     buff.appendBytes(fileOut.toByteArray());
                     handler.handle(new Either.Right<>(buff));
                 } catch (IOException e) {
-                    log.error(e.getMessage());
+                    ExcelHelper.catchError(exportService, idFile, e.getMessage());
                     handler.handle(new Either.Left<>(e.getMessage()));
                 }
             } else {
-                log.error("Error when resolving futures");
+                ExcelHelper.catchError(exportService, idFile, "Error when resolving futures");
                 handler.handle(new Either.Left<>("Error when resolving futures"));
             }
         });

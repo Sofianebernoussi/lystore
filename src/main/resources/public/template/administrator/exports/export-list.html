@@ -39,6 +39,7 @@
             <tr
                     ng-repeat="export in exports.all | orderBy:sort.export.type:sort.export.reverse"
                     class=[[export.classStatus]]
+                    tooltip=[[export.tooltip]]
             >
                 <td workflow="lystore.manager" class="table-selector" >
                     <label class="checkbox">

@@ -520,8 +520,9 @@
   "lystore.delete.notif": "Vos fichiers ont bien été supprimés",
   "lystore.export.delete.err": "Erreur lors de la suppression d'un export",
   "lystore.output.project" : "Projet:",
-  "lystore.export.publipostage" : "Export Publipostage",
-  "lystore.export.waiting" : "Export en cours de création ...",
+  "lystore.export.subvention": "export subvention",
+  "lystore.export.publipostage": "Export Publipostage",
+  "lystore.export.waiting": "Export en cours de création ...",
   "lystore.export.success": "Export disponible",
-  "lystore.export.error" : "Une erreur est survenue lors de la création de l'export"
+  "lystore.export.error": "Une erreur est survenue lors de la création de l'export"
 }

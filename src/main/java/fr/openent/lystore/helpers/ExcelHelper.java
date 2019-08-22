@@ -35,7 +35,7 @@ public class ExcelHelper {
     public final CellStyle blackTitleHeaderBorderlessStyle;
     public final CellStyle blackTitleHeaderBorderlessCenteredStyle;
     public final CellStyle blueTitleHeaderBorderlessCenteredStyle;
-
+    public final CellStyle labelBoldStyle;
 
     protected Logger log = LoggerFactory.getLogger(ExcelHelper.class);
 
@@ -72,6 +72,7 @@ public class ExcelHelper {
         this.blackTitleHeaderBorderlessStyle = wb.createCellStyle();
         this.blackTitleHeaderBorderlessCenteredStyle = wb.createCellStyle();
         this.blueTitleHeaderBorderlessCenteredStyle = wb.createCellStyle();
+        this.labelBoldStyle = wb.createCellStyle();
 
         format = wb.createDataFormat();
         format.getFormat("#.#");
@@ -111,7 +112,15 @@ public class ExcelHelper {
         this.labelStyle.setWrapText(true);
         this.labelStyle.setAlignment(HorizontalAlignment.LEFT);
         this.labelStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        this.labelStyle.setFont(labelFont);
+
+        this.labelBoldStyle.setBorderLeft(BorderStyle.THIN);
+        this.labelBoldStyle.setBorderRight(BorderStyle.THIN);
+        this.labelBoldStyle.setBorderTop(BorderStyle.THIN);
+        this.labelBoldStyle.setBorderBottom(BorderStyle.THIN);
+        this.labelBoldStyle.setWrapText(true);
+        this.labelBoldStyle.setAlignment(HorizontalAlignment.LEFT);
+        this.labelBoldStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.labelBoldStyle.setFont(headerFont);
 
         //TotalStyle
         Font totalFont = this.wb.createFont();
@@ -507,8 +516,6 @@ public class ExcelHelper {
     }
 
 
-
-
     public void insertFormula(Row row, int cellColumn, String data) {
         Cell cell = row.createCell(cellColumn);
         cell.setCellFormula(data);
@@ -571,6 +578,21 @@ public class ExcelHelper {
             Cell cell = tab.createCell(cellColumn);
             cell.setCellValue(data);
             cell.setCellStyle(this.labelStyle);
+        }
+    }
+
+    public void insertLabelBold(int line, int cellColumn, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.labelBoldStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.labelBoldStyle);
         }
     }
 
@@ -1181,6 +1203,12 @@ public class ExcelHelper {
      * @param columnInsert column where the total will be insert
      */
     public void setTotalX(int lineStart, int lineEnd, int column, int lineInsert, int columnInsert) {
+        setTotalXWithStyle(lineStart, lineEnd, column, lineInsert, columnInsert, tabCurrencyStyle);
+
+
+    }
+
+    public void setTotalXWithStyle(int lineStart, int lineEnd, int column, int lineInsert, int columnInsert, CellStyle style) {
         try {
             Row tab, tabStart, tabEnd;
             tabStart = sheet.getRow(lineStart);
@@ -1191,18 +1219,25 @@ public class ExcelHelper {
                 cell = tab.createCell(columnInsert);
             } catch (NullPointerException e) {
                 tab = sheet.createRow(lineInsert);
-                cell = tab.createCell(column);
+                cell = tab.createCell(columnInsert);
             }
-            cell.setCellStyle(this.tabCurrencyStyle);
+            cell.setCellStyle(style);
             cell.setCellValue("total");
             cellStartSum = tabStart.getCell(column);
             cellEndSum = tabEnd.getCell(column);
-            cell.setCellStyle(this.tabCurrencyStyle);
+            cell.setCellStyle(style);
             cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
         } catch (NullPointerException e) {
             log.error("Trying to sum a non init cell , init cells before calling this function");
         }
     }
+
+
+    public void setTotalXWithStyle(int lineStart, int lineEnd, int column, int lineInsert, CellStyle style) {
+        setTotalXWithStyle(lineStart, lineEnd, column, lineInsert, column, style);
+    }
+
+
 
     /**
      * Set total of a line

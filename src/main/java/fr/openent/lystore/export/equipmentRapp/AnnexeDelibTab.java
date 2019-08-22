@@ -70,6 +70,9 @@ public class AnnexeDelibTab extends TabHelper {
                     setStructures(structures);
                     setArray(datas);
                     handler.handle(new Either.Right<>(true));
+                } else {
+                    handler.handle(new Either.Left<>("Error when casting neo"));
+
                 }
             }
         });

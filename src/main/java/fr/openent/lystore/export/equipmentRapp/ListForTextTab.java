@@ -68,6 +68,9 @@ public class ListForTextTab extends TabHelper {
                     setStructures(structures);
                     setLabels();
                     handler.handle(new Either.Right<>(true));
+                } else {
+                    handler.handle(new Either.Left<>("Error when casting neo"));
+
                 }
             }
         });

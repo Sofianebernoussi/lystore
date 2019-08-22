@@ -199,10 +199,8 @@ public class Instruction {
 
                     futureHandler(handler, workbook, futures);
 
-//                    new CmrSubventions(workbook, instruction).create(getHandler(CmrSubventions));
                     new PublicsSubventions(workbook, instruction, true).create(getHandler(CmrSubventions));
                     new PublicsSubventions(workbook, instruction, false).create(getHandler(PublicsSubventionsFuture));
-//                    new CmrMarchés(workbook, instruction).create(getHandler(CmrMarchés));
                     new PublicsMarchés(workbook, instruction, true).create(getHandler(CmrMarchés));
                     new PublicsMarchés(workbook, instruction, false).create(getHandler(PublicsMarchésFuture));
                 }

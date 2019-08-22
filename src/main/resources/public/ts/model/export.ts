@@ -1,5 +1,5 @@
 import http from "axios";
-import {notify} from "entcore";
+import {idiom as lang, notify} from "entcore";
 import {Mix, Selectable, Selection} from "entcore-toolkit";
 
 export class Export implements Selectable {
@@ -23,12 +23,15 @@ export class Exports extends Selection<Export> {
                 switch(exportResponse.status) {
                     case STATUS.WAITING:
                         exportEdit.classStatus =  "disableRow";
+                        exportEdit.tooltip = lang.translate("lystore.export.waiting");
                         break;
                     case STATUS.SUCCESS:
                         exportEdit.classStatus =  "successRow";
+                        exportEdit.tooltip = lang.translate("lystore.export.success");
                         break;
                     default:
                         exportEdit.classStatus = "errorRow";
+                        exportEdit.tooltip = lang.translate("lystore.export.error");
                 }
                 return exportEdit;
             });

@@ -1,5 +1,5 @@
 import {moment, ng, template} from "entcore";
-import {Export, Exports, Notification, Utils, STATUS} from "../../model";
+import {Export, Notification, Utils, STATUS} from "../../model";
 
 declare let window: any;
 
@@ -14,20 +14,8 @@ export const exportCtrl = ng.controller('exportCtrl', [
                 reverse: true
             }
         };
-        $scope.exports = new Exports([]);
         $scope.STATUS = STATUS;
-        await $scope.exports.getExports();
 
-
-        $scope.getFormatedDate = (date) => {
-            return moment(date).format("DD/MM/YYYY HH:mm:ss");
-        };
-        $scope.updateDate = () => {
-            $scope.exports.all.map(exportT => {
-                exportT.created = $scope.getFormatedDate(exportT.created)
-            });
-            Utils.safeApply($scope);
-        };
         $scope.getExport = (exportTemp: Export) => {
             if(exportTemp.status === STATUS.SUCCESS){
                 window.location = `lystore/export/${exportTemp.fileid}`;
@@ -59,7 +47,7 @@ export const exportCtrl = ng.controller('exportCtrl', [
             $scope.notifications.push(new Notification('lystore.delete.notif', 'confirm'));
             $scope.exportToDelete = [];
             await $scope.exports.getExports();
-            $scope.updateDate()
+
         };
 
         $scope.isAllExportSelected = false;
@@ -77,6 +65,5 @@ export const exportCtrl = ng.controller('exportCtrl', [
             return $scope.exports.selected.some(exportSome => exportSome.status === STATUS.WAITING)
         };
 
-        $scope.updateDate();
     }
 ]);

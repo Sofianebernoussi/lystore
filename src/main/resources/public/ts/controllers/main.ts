@@ -11,6 +11,7 @@ import {
     Equipments,
     EquipmentTypes,
     Exercises,
+    Exports,
     Instructions,
     labels,
     Logs,
@@ -65,6 +66,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.equipmentTypes = new EquipmentTypes();
         $scope.instructions = new Instructions();
         $scope.exercises = new Exercises();
+        $scope.exports = new Exports([]);
         $scope.equipments.eventer.on('loading::true', $scope.$apply);
         $scope.equipments.eventer.on('loading::false', $scope.$apply);
 
@@ -298,6 +300,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
             exportList: async () => {
                 template.open('administrator-main', 'administrator/exports/export-list');
+                await $scope.exports.getExports();
                 Utils.safeApply($scope);
 
             }

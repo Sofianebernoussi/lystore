@@ -1,6 +1,7 @@
 import http from "axios";
-import {idiom as lang, notify} from "entcore";
+import {idiom as lang, moment, notify} from "entcore";
 import {Mix, Selectable, Selection} from "entcore-toolkit";
+import {Utils} from "./Utils";
 
 export class Export implements Selectable {
     selected: boolean;
@@ -33,6 +34,7 @@ export class Exports extends Selection<Export> {
                         exportEdit.classStatus = "errorRow";
                         exportEdit.tooltip = lang.translate("lystore.export.error");
                 }
+                exportEdit.created = moment(exportResponse.created).format("YYYY-MM-DD hh:mm:ss");
                 return exportEdit;
             });
             this.all = Mix.castArrayAs(Export, response);

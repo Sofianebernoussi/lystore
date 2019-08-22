@@ -34,7 +34,7 @@ export class Exports extends Selection<Export> {
                         exportEdit.classStatus = "errorRow";
                         exportEdit.tooltip = lang.translate("lystore.export.error");
                 }
-                exportEdit.created = moment(exportResponse.created).format("YYYY-MM-DD hh:mm:ss");
+                exportEdit.created = moment(exportResponse.created).format("YYYY-MM-DD HH:mm:ss");
                 return exportEdit;
             });
             this.all = Mix.castArrayAs(Export, response);

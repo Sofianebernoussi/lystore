@@ -32,7 +32,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
     public void handle(Message<JsonObject> event) {
         final String action = event.body().getString("action", "");
         String fileNamIn = event.body().getString("titleFile");
-        idNewFile =  event.body().getInteger("idFile");
+        idNewFile = event.body().getInteger("idFile");
         switch (action) {
             case "exportEQU":
                 exportEquipment(
@@ -55,7 +55,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                 break;
             case "exportSubvention":
                 exportSubvention(event.body().getInteger("id"),
-                        event.body().getString("userId"));
+                        fileNamIn);
                 break;
             default:
                 ExcelHelper.catchError(exportService, idNewFile, "Invalid action in worker");
@@ -71,32 +71,31 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                 ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left());
             } else {
                 Buffer xlsx = event1.right().getValue();
-                saveBuffer( xlsx, titleFile);
+                saveBuffer(xlsx, titleFile);
             }
         });
     }
 
-    private void exportSubvention(Integer instructionId, String userId) {
-        this.instruction = new Instruction(instructionId);
-        this.instruction.exportSubvention( file -> {
-            if (file.isLeft()) {
-                logger.error("error when creating xlsx");
+    private void exportSubvention(Integer instructionId, String titleFile) {
+        this.instruction = new Instruction(exportService, idNewFile, instructionId);
+        this.instruction.exportSubvention(event1 -> {
+            if (event1.isLeft()) {
+                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left());
             } else {
-                Buffer xlsx = file.right().getValue();
-                String fileName = getDate() + "_subvention_equipement" + ".xlsx";
-                saveBuffer(userId, xlsx, fileName);
+                Buffer xlsx = event1.right().getValue();
+                saveBuffer(xlsx, titleFile);
             }
         });
     }
 
     private void exportPublipostage(Integer instructionId, String titleFile) {
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
-        this.instruction.exportPublipostage( file  -> {
+        this.instruction.exportPublipostage(file -> {
             if (file.isLeft()) {
                 ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + file.left());
             } else {
-                Buffer xlsx = file .right().getValue();
-                saveBuffer( xlsx, titleFile);
+                Buffer xlsx = file.right().getValue();
+                saveBuffer(xlsx, titleFile);
             }
         });
     }
@@ -108,12 +107,12 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                 ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event.left());
             } else {
                 Buffer xlsx = event.right().getValue();
-                saveBuffer( xlsx, titleFile);
+                saveBuffer(xlsx, titleFile);
             }
         });
     }
 
-    private void saveBuffer( Buffer xlsx, String fileName) {
+    private void saveBuffer(Buffer xlsx, String fileName) {
         storage.writeBuffer(xlsx, "application/vnd.ms-excel", fileName, file -> {
             if (!"ok".equals(file.getString("status"))) {
                 ExcelHelper.catchError(exportService, idNewFile, "An error occurred when inserting xlsx ");
@@ -131,13 +130,13 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                 ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx");
             } else {
                 Buffer xlsx = event1.right().getValue();
-                saveBuffer( xlsx, titleFile);
+                saveBuffer(xlsx, titleFile);
             }
         }, type);
     }
 
     private void saveFile(String fileId, Number idExport) {
-        exportService.updateWhenSuccess(fileId, idExport, updateExport ->{
+        exportService.updateWhenSuccess(fileId, idExport, updateExport -> {
             if (updateExport.isLeft()) {
                 ExcelHelper.catchError(exportService, idNewFile, "Fail to insert file in SQL");
             }

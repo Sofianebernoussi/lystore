@@ -49,6 +49,9 @@ body.lystore {
         background-color: #f6f6f6;
         color: #bfbfbf !important;
       }
+      tr.errorRow{
+        color: $red;
+      }
     }
   }
 
@@ -942,6 +945,9 @@ body.lystore {
   }
   .orderEditByRegion{
     background-color: rgba($pink, 0.4);
+  }
+  .icon-medium-size{
+    font-size: 1.8em;
   }
 }
 

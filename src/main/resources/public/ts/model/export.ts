@@ -1,21 +1,17 @@
 import http from "axios";
-import {notify} from "entcore";
+import {idiom as lang, moment, notify} from "entcore";
 import {Mix, Selectable, Selection} from "entcore-toolkit";
+import {Utils} from "./Utils";
 
 export class Export implements Selectable {
     selected: boolean;
     filename: string;
     fileid: string;
     ownerid: string;
-
-
-    async delete() {
-        try {
-            await http.delete(`/lystore/export/${this.fileid}`);
-        } catch (e) {
-            notify.error('lystore.export.delete.err')
-        }
-
+    id: Number;
+    status: STATUS;
+    constructor(){
+        this.status = STATUS.WAITING;
     }
 }
 
@@ -23,11 +19,46 @@ export class Exports extends Selection<Export> {
     async getExports() {
         try {
             let {data} = await http.get(`/lystore/exports`);
-            this.all = Mix.castArrayAs(Export, data);
+            let response = data.map( exportResponse => {
+                let exportEdit = {...exportResponse};
+                switch(exportResponse.status) {
+                    case STATUS.WAITING:
+                        exportEdit.classStatus =  "disableRow";
+                        exportEdit.tooltip = lang.translate("lystore.export.waiting");
+                        break;
+                    case STATUS.SUCCESS:
+                        exportEdit.classStatus =  "successRow";
+                        exportEdit.tooltip = lang.translate("lystore.export.success");
+                        break;
+                    default:
+                        exportEdit.classStatus = "errorRow";
+                        exportEdit.tooltip = lang.translate("lystore.export.error");
+                }
+                exportEdit.created = moment(exportResponse.created).format("YYYY-MM-DD hh:mm:ss");
+                return exportEdit;
+            });
+            this.all = Mix.castArrayAs(Export, response);
         } catch (e) {
             notify.error('lystore.instruction.create.err');
             throw e;
         }
     }
 
+    async delete(idsExports: Array<number>, idsFiles: Array<number>):Promise<void> {
+        try {
+            const bodySend = {
+                idsExport: idsExports,
+                idsFiles: idsFiles,
+            };
+            await http.delete('/lystore/exports', { data: bodySend });
+        } catch (e) {
+            throw notify.error('lystore.export.delete.err');
+        }
+    }
+}
+
+export enum STATUS  {
+    WAITING = "WAITING",
+    SUCCESS = "SUCCESS",
+    ERROR = "ERROR",
 }

@@ -9,8 +9,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 
@@ -18,17 +16,25 @@ public class PublicsMarchés extends TabHelper {
     private StructureService structureService;
     private ArrayList<Integer> codes = new ArrayList<>();
     private int arraylength = 5;
-    private int lineNumber = 1;
+    private int lineNumber = 0;
+    private final String MARKET_LABEL = "Code Marché (Dotation)";
+    private final String AMOUNT = "Quantité accordé";
+    private final String TOTAL = "Somme Montant Accordé";
+    private final String ANNEXE_TEXT = "ANNEXE au rapport";
+    private final String TOTAL_TITLE = "Montant total dotations financières au titre du présent rapport";
+    private boolean isCMR;
+    Float totalSubv = 0.f;
 
-    public PublicsMarchés(Workbook workbook, JsonObject instruction) {
-        super(workbook, instruction, "ANN. 1 RAPPORT PUB. Marchés");
+
+    public PublicsMarchés(Workbook workbook, JsonObject instruction, boolean isCMR) {
+        super(workbook, instruction, (isCMR) ? "ANN. 1 Rapport CMR Marchés" : "ANN. 1 Rapport PUB. Marchés");
         structureService = new DefaultStructureService(Lystore.lystoreSchema);
+        this.isCMR = isCMR;
     }
 
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
-        excel.setCPNumber(instruction.getString("cp_number"), 1, 1);
         getDatas(event -> {
             if (event.isLeft()) {
                 log.error("Failed to retrieve datas");
@@ -36,14 +42,17 @@ public class PublicsMarchés extends TabHelper {
             } else {
 
                 JsonArray programs = event.right().getValue();
-                initDatas(handler);
-                //Delete tab if empty
                 if (programs.size() == 0) {
                     wb.removeSheetAt(wb.getSheetIndex(sheet));
+                    handler.handle(new Either.Right<>(true));
+                } else {
+                    initDatas(handler);
+                    //Delete tab if empty
                 }
             }
         });
     }
+
 
     private void initDatas(Handler<Either<String, Boolean>> handler) {
         ArrayList structuresId = new ArrayList<>();
@@ -56,25 +65,118 @@ public class PublicsMarchés extends TabHelper {
 
             }
         }
+        StructureService structureService = new DefaultStructureService(Lystore.lystoreSchema);
         structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
                 if (repStructures.isRight()) {
                     JsonArray structures = repStructures.right().getValue();
                     setStructures(structures);
-                    setLabels();
-                    setArray(datas);
-                    handler.handle(new Either.Right<>(true));
+                    if (datas.isEmpty()) {
+                        handler.handle(new Either.Left<>("No data in database"));
+                    } else {
+                        setTitle();
+                        writeArray(handler);
+                    }
                 }
             }
+
+
         });
+
+        datas = sortByCity(datas);
     }
+
+    private void setTitle() {
+        excel.insertBlackTitleHeaderBorderlessCenter(0, lineNumber, ANNEXE_TEXT);
+        sizeMergeRegionWithStyle(lineNumber, 0, 3, excel.blackTitleHeaderBorderlessCenteredStyle);
+        lineNumber++;
+        excel.insertBlackTitleHeaderBorderlessCenter(0, lineNumber, TOTAL_TITLE);
+        sizeMergeRegionWithStyle(lineNumber, 0, 3, excel.blackTitleHeaderBorderlessCenteredStyle);
+        lineNumber++;
+        excel.insertBlueTitleHeaderBorderlessCenter(0, lineNumber, totalSubv.toString() + "€");
+        sizeMergeRegionWithStyle(lineNumber, 0, 3, excel.blackTitleHeaderBorderlessCenteredStyle);
+        lineNumber += 2;
+
+    }
+
+    private void writeArray(Handler<Either<String, Boolean>> handler) {
+        for (int i = 0; i < datas.size(); i++) {
+            JsonObject campaignData = datas.getJsonObject(i);
+            JsonArray orders = campaignData.getJsonArray("ordersJO");
+            String campaign = campaignData.getString("campaign");
+            lineNumber++;
+            excel.insertUnderscoreHeader(0, lineNumber, campaign);
+            lineNumber += 2;
+            Integer initLine = lineNumber;
+            String previousIdStruct = "";
+            String market = "";
+            Integer previousMarketId = orders.getJsonObject(0).getInteger("market_id");
+
+            for (int j = 0; j < orders.size(); j++) {
+                JsonObject order = orders.getJsonObject(j);
+                String idStructure = order.getString("id_structure");
+                market = order.getString("market");
+                if (!idStructure.equals(previousIdStruct)) {
+                    String zip = order.getString("zipCode").substring(0, 2);
+                    String structString = zip + " - " +
+                            order.getString("city") + " " + order.getString("nameEtab") + "(" + order.getString("uai") + ")";
+                    excel.insertHeader(lineNumber, 0, structString);
+                    sizeMergeRegion(lineNumber, 0, 2);
+
+                    previousIdStruct = idStructure;
+                    lineNumber++;
+                    setLabels();
+                }
+                Integer marketId = order.getInteger("market_id");
+
+
+                if (previousMarketId != marketId) {
+                    excel.insertLabelBold(lineNumber, 0, order.getString("market"));
+                    excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabStringStyleCenterBold);
+                    excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
+                    initLine = lineNumber + 2;
+                    previousMarketId = marketId;
+                    lineNumber += 2;
+                }
+                excel.insertCellTab(0, lineNumber, order.getString("name_equipment") + " (" + order.getString("market") + ")");
+                excel.insertCellTabFloat(1, lineNumber, order.getInteger("amount"));
+                excel.insertCellTabFloat(2, lineNumber, order.getFloat("total"));
+                lineNumber++;
+            }
+            excel.insertLabelBold(lineNumber, 0, market);
+            excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabStringStyleCenterBold);
+            excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
+            initLine = lineNumber + 1;
+//            excel.insertCellTabFloatWithPrice(3, lineNumber, Float.parseFloat(campaignData.getString("totalprice")));
+            lineNumber += 2;
+
+
+        }
+
+        excel.autoSize(4);
+        handler.handle(new Either.Right<>(true));
+
+    }
+
+
+    @Override
+    protected void setLabels() {
+        excel.insertHeader(lineNumber, 0, MARKET_LABEL);
+        excel.insertHeader(lineNumber, 1, AMOUNT);
+        excel.insertHeader(lineNumber, 2, TOTAL);
+        lineNumber++;
+    }
+
+
+
     private void setStructures(JsonArray structures) {
-        JsonObject  structure;
+        JsonObject program, structure;
         JsonArray actions;
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
             actions = new JsonArray(data.getString("actions"));
+            totalSubv += Float.parseFloat(data.getString("totalprice"));
             for (int k = 0; k < actions.size(); k++) {
                 JsonObject action = actions.getJsonObject(k);
                 for (int j = 0; j < structures.size(); j++) {
@@ -83,14 +185,15 @@ public class PublicsMarchés extends TabHelper {
                         action.put("nameEtab", structure.getString("name"));
                         action.put("uai", structure.getString("uai"));
                         action.put("city", structure.getString("city"));
-                        action.put("type", structure.getString("type"));
                         action.put("zipCode", structure.getString("zipCode"));
                     }
                 }
             }
-            data.put("actionsJO", actions);
+            data.put("" +
+                    "ordersJO", actions);
         }
     }
+
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
@@ -113,20 +216,21 @@ public class PublicsMarchés extends TabHelper {
                 "             ELSE ''      " +
                 "             END as old_name,     " +
                 "             orders.id_structure,orders.id_operation as id_operation, label.label as operation ,     " +
-                "             orders.equipment_key as key, orders.name as name_equipment, true as region,    " +
-                "             program_action.id_program, orders.amount ,contract.id as market_id,       " +
+                "             orders.equipment_key as key, orders.name as name_equipment, true as region,  orders.id as id,  " +
+                "             program_action.id_program, orders.amount ,contract.id as market_id,   campaign.name as campaign, orders.comment, project.room, orders.isregion, " +
+                "             project.stair,project.building,    " +
                 "             case when specific_structures.type is null      " +
                 "             then '" + LYCEE + "'          " +
                 "             ELSE specific_structures.type     " +
                 "             END as cite_mixte     " +
                 "             FROM (      " +
-                "             (select ore.id,  ore.price as \"price TTC\",  ore.amount,  ore.creation_date,  ore.modification_date,  ore.name,  ore.summary, " +
+                "             (select ore.id,  true as isregion, ore.price as \"price TTC\",  ore.amount,  ore.creation_date,  ore.modification_date,  ore.name,  ore.summary, " +
                 "             ore.description,  ore.image,    ore.status,  ore.id_contract,  ore.equipment_key,  ore.id_campaign,  ore.id_structure, " +
                 "             ore.cause_status,  ore.number_validation,  ore.id_order,  ore.comment,  ore.rank as \"prio\", null as price_proposal,  " +
-                "             ore.id_project,  ore.id_order_client_equipment, null as program, null as action,  ore.id_operation , " +
+                "             ore.id_project,  ore.id_order_client_equipment, null as program, null as action,  ore.id_operation ," +
                 "             null as override_region          from " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore )      " +
-                "             union      " +
-                "             (select oce.id," +
+                "             UNION      " +
+                "             (select oce.id ,  false as isregion," +
                 "             CASE WHEN price_proposal is null then  price + (price*tax_amount/100)  else price_proposal end as \"price TTC\", " +
                 "             amount, creation_date, null as modification_date, name,  " +
                 "             summary, description, image,  status, id_contract, equipment_key, id_campaign, id_structure, cause_status, number_validation, " +
@@ -136,39 +240,33 @@ public class PublicsMarchés extends TabHelper {
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (orders.id_operation = operation.id   and (orders.override_region != true OR orders.override_region is NULL))               " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)      " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id  AND instruction.id = ?)    " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id )                  " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)      " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id)                  " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id" +
+                " AND   contract_type.code != '236')      " + // a modifier pour non subventions
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".campaign ON orders.id_campaign = campaign.id  " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".project ON orders.id_project = project.id  " +
                 "             LEFT JOIN " + Lystore.lystoreSchema + ".specific_structures ON orders.id_structure = specific_structures.id    " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         ";
-        query +=
-                "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
-                        "  OR (spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
-                        "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    ";
-        query +=
-                "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
-                        "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           ";
-
-
-        query +=
+        if (isCMR)
+            query += "   AND (spa.structure_type = '" + CMR + "' AND specific_structures.type ='" + CMR + "')  ";
+        else
+            query += "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
+                    "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    ";
+        query += "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
+                "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
-                        "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
-                        "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region " +
-                        "             order by id_operation, id_structure,program,code   " +
-                        "  )    SELECT values.id_operation as id, values.operation as label,    array_to_json(array_agg(values))as actions, SUM (values.total) as totalMarket       " +
-                        "  from  values      " +
-                        "  Group by values.id_operation, values.operation   " +
-                        "  Order by values.operation ;";
+                "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
+                "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id," +
+                "               orders.isregion, " +
+                "              project.room,project.stair, project.building " +
+                "             order by campaign,id_structure,code,market_id, id_structure,program,code " +
+                "  )    SELECT  values.campaign as campaign,    array_to_json(array_agg(values))as actions ,SUM(values.total) as totalPrice " +
+                "  from  values      " +
+                "  Group by values.campaign   " +
+                "  Order by values.campaign   ;";
 
 
+        sqlHandler(handler);
 
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
-            if (event.isLeft()) {
-                handler.handle(event.left());
-            } else {
-                datas = event.right().getValue();
-                handler.handle(new Either.Right<>(datas));
-            }
-
-        }));
     }
 }

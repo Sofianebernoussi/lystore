@@ -12,23 +12,22 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.ArrayList;
 
-public class PublicsSubventions extends TabHelper {
+public class Market extends TabHelper {
     private StructureService structureService;
     private ArrayList<Integer> codes = new ArrayList<>();
     private int arraylength = 5;
     private int lineNumber = 0;
-    private final String ORDER_LABEL = "Libellé demande";
-    private final String ORDER_COMMENT = "Commentaire demande";
+    private final String MARKET_LABEL = "Code Marché (Dotation)";
     private final String AMOUNT = "Quantité accordé";
     private final String TOTAL = "Somme Montant Accordé";
     private final String ANNEXE_TEXT = "ANNEXE au rapport";
-    private final String TOTAL_TITLE = "Dotation sur marchés régionaux au titre du présent rapport";
+    private final String TOTAL_TITLE = "Montant total dotations financières au titre du présent rapport";
     private boolean isCMR;
     Float totalSubv = 0.f;
 
 
-    public PublicsSubventions(Workbook workbook, JsonObject instruction, boolean isCMR) {
-        super(workbook, instruction, (isCMR) ? "ANN. 1RAPPORT CMR Subventions" : "ANN. 1 RAPPORT PUB. subventions");
+    public Market(Workbook workbook, JsonObject instruction, boolean isCMR) {
+        super(workbook, instruction, (isCMR) ? "ANN. 1 Rapport CMR Marchés" : "ANN. 1 Rapport PUB. Marchés");
         structureService = new DefaultStructureService(Lystore.lystoreSchema);
         this.isCMR = isCMR;
     }
@@ -81,7 +80,6 @@ public class PublicsSubventions extends TabHelper {
                     }
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
-
                 }
             }
 
@@ -106,27 +104,55 @@ public class PublicsSubventions extends TabHelper {
 
     private void writeArray(Handler<Either<String, Boolean>> handler) {
         for (int i = 0; i < datas.size(); i++) {
-            JsonObject structureDatas = datas.getJsonObject(i);
-            JsonArray orders = structureDatas.getJsonArray("ordersJO");
-            String zip = structureDatas.getString("zipCode").substring(0, 2);
-
-            String structString = zip + " - " +
-                    structureDatas.getString("city") + " " + structureDatas.getString("nameEtab") + "(" + structureDatas.getString("uai") + ")";
-            excel.insertHeader(lineNumber, 0, structString);
-            sizeMergeRegion(lineNumber, 0, 3);
+            JsonObject campaignData = datas.getJsonObject(i);
+            JsonArray orders = campaignData.getJsonArray("ordersJO");
+            String campaign = campaignData.getString("campaign");
             lineNumber++;
-
-            setLabels();
+            excel.insertUnderscoreHeader(0, lineNumber, campaign);
+            lineNumber += 2;
+            Integer initLine = lineNumber;
+            String previousIdStruct = "";
+            String market = "";
+            Integer previousMarketId = orders.getJsonObject(0).getInteger("market_id");
+            String previousMarket = orders.getJsonObject(0).getString("market");
             for (int j = 0; j < orders.size(); j++) {
                 JsonObject order = orders.getJsonObject(j);
-                excel.insertCellTab(0, lineNumber, order.getString("name_equipment"));
-                excel.insertCellTab(1, lineNumber, order.getString("comment"));
-                excel.insertCellTabCenter(2, lineNumber, order.getInteger("amount").toString());
-                excel.insertCellTabFloatWithPrice(3, lineNumber, order.getFloat("total"));
+                String idStructure = order.getString("id_structure");
+                market = order.getString("market");
+                Integer marketId = order.getInteger("market_id");
+
+                if (!idStructure.equals(previousIdStruct)) {
+                    String zip = order.getString("zipCode").substring(0, 2);
+                    String structString = zip + " - " +
+                            order.getString("city") + " " + order.getString("nameEtab") + "(" + order.getString("uai") + ")";
+                    excel.insertHeader(lineNumber, 0, structString);
+                    sizeMergeRegion(lineNumber, 0, 2);
+                    previousIdStruct = idStructure;
+                    previousMarketId = marketId;
+                    previousMarket = market;
+                    lineNumber += 2;
+                    setLabels();
+                }
+
+                if (previousMarketId != marketId) {
+                    excel.insertLabelBold(lineNumber, 0, previousMarket);
+                    excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
+                    excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
+                    initLine = lineNumber + 1;
+                    previousMarketId = marketId;
+                    previousMarket = market;
+                    lineNumber++;
+                }
+                excel.insertCellTab(0, lineNumber, formatStrToCell(order.getString("name_equipment"), 10));
+                excel.insertCellTabFloat(1, lineNumber, order.getInteger("amount"));
+                excel.insertCellTabFloat(2, lineNumber, order.getFloat("total"));
                 lineNumber++;
             }
-
-            excel.insertCellTabFloatWithPrice(3, lineNumber, Float.parseFloat(structureDatas.getString("totalprice")));
+            excel.insertLabelBold(lineNumber, 0, market);
+            excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
+            excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
+            initLine = lineNumber + 1;
+//            excel.insertCellTabFloatWithPrice(3, lineNumber, Float.parseFloat(campaignData.getString("totalprice")));
             lineNumber += 2;
 
 
@@ -140,12 +166,12 @@ public class PublicsSubventions extends TabHelper {
 
     @Override
     protected void setLabels() {
-        excel.insertHeader(lineNumber, 0, ORDER_LABEL);
-        excel.insertHeader(lineNumber, 1, ORDER_COMMENT);
-        excel.insertHeader(lineNumber, 2, AMOUNT);
-        excel.insertHeader(lineNumber, 3, TOTAL);
+        excel.insertHeader(lineNumber, 0, MARKET_LABEL);
+        excel.insertHeader(lineNumber, 1, AMOUNT);
+        excel.insertHeader(lineNumber, 2, TOTAL);
         lineNumber++;
     }
+
 
 
     private void setStructures(JsonArray structures) {
@@ -153,22 +179,23 @@ public class PublicsSubventions extends TabHelper {
         JsonArray actions;
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
-            totalSubv += Float.parseFloat(data.getString("totalprice"));
             actions = new JsonArray(data.getString("actions"));
-            for (int j = 0; j < structures.size(); j++) {
-                structure = structures.getJsonObject(j);
-                if (data.getString("id_structure").equals(structure.getString("id"))) {
-                    data.put("nameEtab", structure.getString("name"));
-                    data.put("uai", structure.getString("uai"));
-                    data.put("city", structure.getString("city"));
-                    data.put("type", structure.getString("type"));
-                    data.put("zipCode", structure.getString("zipCode"));
+            totalSubv += Float.parseFloat(data.getString("totalprice"));
+            for (int k = 0; k < actions.size(); k++) {
+                JsonObject action = actions.getJsonObject(k);
+                for (int j = 0; j < structures.size(); j++) {
+                    structure = structures.getJsonObject(j);
+                    if (action.getString("id_structure").equals(structure.getString("id"))) {
+                        action.put("nameEtab", structure.getString("name"));
+                        action.put("uai", structure.getString("uai"));
+                        action.put("city", structure.getString("city"));
+                        action.put("zipCode", structure.getString("zipCode"));
+                    }
                 }
             }
-            data.put("ordersJO", actions);
-
+            data.put("" +
+                    "ordersJO", actions);
         }
-
     }
 
 
@@ -219,7 +246,7 @@ public class PublicsSubventions extends TabHelper {
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id  AND instruction.id = ?)    " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id)                  " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id" +
-                " AND   contract_type.code = '236')      " + // a modifier pour non subventions
+                " AND   contract_type.code != '236')      " + // a modifier pour non subventions
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".campaign ON orders.id_campaign = campaign.id  " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".project ON orders.id_project = project.id  " +
                 "             LEFT JOIN " + Lystore.lystoreSchema + ".specific_structures ON orders.id_structure = specific_structures.id    " +
@@ -236,11 +263,11 @@ public class PublicsSubventions extends TabHelper {
                 "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id," +
                 "               orders.isregion, " +
                 "              project.room,project.stair, project.building " +
-                "             order by campaign,code,market_id, id_structure,program,code " +
-                "  )    SELECT  values.id_structure as id_structure,    array_to_json(array_agg(values))as actions ,SUM(values.total) as totalPrice " +
+                "             order by campaign,id_structure,code,market_id, id_structure,program,code " +
+                "  )    SELECT  values.campaign as campaign,    array_to_json(array_agg(values))as actions ,SUM(values.total) as totalPrice " +
                 "  from  values      " +
-                "  Group by values.id_structure   " +
-                "  Order by values.id_structure   ;";
+                "  Group by values.campaign   " +
+                "  Order by values.campaign   ;";
 
 
         sqlHandler(handler);

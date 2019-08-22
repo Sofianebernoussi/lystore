@@ -7,8 +7,8 @@ import fr.openent.lystore.export.notificationEquipCP.LinesBudget;
 import fr.openent.lystore.export.notificationEquipCP.NotificationLycTab;
 import fr.openent.lystore.export.notificationEquipCP.RecapMarketGestion;
 import fr.openent.lystore.export.publipostage.Publipostage;
-import fr.openent.lystore.export.subventionEquipment.PublicsMarchés;
-import fr.openent.lystore.export.subventionEquipment.PublicsSubventions;
+import fr.openent.lystore.export.subventionEquipment.Market;
+import fr.openent.lystore.export.subventionEquipment.Subventions;
 import fr.openent.lystore.helpers.ExcelHelper;
 import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultProjectService;
@@ -199,10 +199,10 @@ public class Instruction {
 
                     futureHandler(handler, workbook, futures);
 
-                    new PublicsSubventions(workbook, instruction, true).create(getHandler(CmrSubventions));
-                    new PublicsSubventions(workbook, instruction, false).create(getHandler(PublicsSubventionsFuture));
-                    new PublicsMarchés(workbook, instruction, true).create(getHandler(CmrMarchés));
-                    new PublicsMarchés(workbook, instruction, false).create(getHandler(PublicsMarchésFuture));
+                    new Subventions(workbook, instruction, true).create(getHandler(CmrSubventions));
+                    new Subventions(workbook, instruction, false).create(getHandler(PublicsSubventionsFuture));
+                    new Market(workbook, instruction, true).create(getHandler(CmrMarchés));
+                    new Market(workbook, instruction, false).create(getHandler(PublicsMarchésFuture));
                 }
             }
         }));

@@ -53,6 +53,7 @@ public class ExcelHelper {
     public final CellStyle blackTitleHeaderBorderlessCenteredStyle;
     public final CellStyle blueTitleHeaderBorderlessCenteredStyle;
     public final CellStyle labelBoldStyle;
+    public final CellStyle tabIntStyleCenterBold;
 
     protected static Logger log = LoggerFactory.getLogger(ExcelHelper.class);
 
@@ -90,6 +91,7 @@ public class ExcelHelper {
         this.blackTitleHeaderBorderlessCenteredStyle = wb.createCellStyle();
         this.blueTitleHeaderBorderlessCenteredStyle = wb.createCellStyle();
         this.labelBoldStyle = wb.createCellStyle();
+        this.tabIntStyleCenterBold = wb.createCellStyle();
 
         format = wb.createDataFormat();
         format.getFormat("#.#");
@@ -190,6 +192,17 @@ public class ExcelHelper {
         this.tabStringStyleCenter.setVerticalAlignment(VerticalAlignment.CENTER);
         this.tabStringStyleCenter.setFont(tabFont);
         this.tabStringStyleCenter.setDataFormat(format.getFormat("#,##0.00"));
+
+        this.tabIntStyleCenterBold.setBorderLeft(BorderStyle.THIN);
+        this.tabIntStyleCenterBold.setBorderRight(BorderStyle.THIN);
+        this.tabIntStyleCenterBold.setBorderTop(BorderStyle.THIN);
+        this.tabIntStyleCenterBold.setBorderBottom(BorderStyle.THIN);
+        this.tabIntStyleCenterBold.setWrapText(true);
+        this.tabIntStyleCenterBold.setAlignment(HorizontalAlignment.CENTER);
+        this.tabIntStyleCenterBold.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.tabIntStyleCenterBold.setFont(headerFont);
+        this.tabIntStyleCenterBold.setDataFormat(format.getFormat("#"));
+
 
         Font tabFontBold = this.wb.createFont();
         tabFontBold.setFontHeightInPoints((short) 11);

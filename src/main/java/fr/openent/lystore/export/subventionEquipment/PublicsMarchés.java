@@ -78,6 +78,8 @@ public class PublicsMarchés extends TabHelper {
                         setTitle();
                         writeArray(handler);
                     }
+                } else {
+                    handler.handle(new Either.Left<>("Error when casting neo"));
                 }
             }
 

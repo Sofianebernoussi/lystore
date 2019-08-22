@@ -85,6 +85,9 @@ public class RecapMarketGestion extends NotifcationCpHelper {
                     } else {
                         writeArray(handler);
                     }
+                } else {
+                    handler.handle(new Either.Left<>("Error when casting neo"));
+
                 }
             }
         });

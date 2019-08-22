@@ -63,6 +63,9 @@ public class LinesBudget extends NotifcationCpHelper {
                     setLabels();
                     setArray(datas);
                     handler.handle(new Either.Right<>(true));
+                } else {
+                    handler.handle(new Either.Left<>("Error when casting neo"));
+
                 }
             }
         });

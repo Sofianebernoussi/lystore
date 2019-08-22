@@ -517,7 +517,7 @@
   "lystore.exportNotificationCP": "export notification Equipement",
   "delete.export.question": "Voulez vous supprimer les exports suivants ?",
   "delete.export.label": "Nom du fichier",
-  "lystore.delete.notif": "Votre fichier a bien été supprimé",
+  "lystore.delete.notif": "Vos fichiers ont bien été supprimés",
   "lystore.export.delete.err": "Erreur lors de la suppression d'un export",
   "lystore.output.project" : "Projet:",
   "lystore.export.publipostage" : "Export Publipostage",

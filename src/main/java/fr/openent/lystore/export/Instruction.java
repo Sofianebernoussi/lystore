@@ -64,14 +64,14 @@ public class Instruction {
 
         Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
-                log.error("Error when getting sql datas ");
+                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
             } else {
 
                 JsonObject instruction = either.right().getValue();
                 String operationStr = "operations";
                 if (!instruction.containsKey(operationStr)) {
-                    log.error("Error when getting operations");
+                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
                     handler.handle(new Either.Left<>("Error when getting operations"));
                 } else {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
@@ -103,7 +103,7 @@ public class Instruction {
                         new RecapEPLETab(workbook, instruction).create(getHandler(RecapEPLEfuture));
                         new RecapImputationBud(workbook, instruction).create(getHandler(RecapImputationBudfuture));
                     } catch (IOException e) {
-                        log.error("Xlsx Failed to read template");
+                        ExcelHelper.catchError(exportService, idFile, "Xlsx Failed to read template");
                         handler.handle(new Either.Left<>("Xlsx Failed to read template"));
                     }
                 }
@@ -115,21 +115,21 @@ public class Instruction {
 
     public void exportEquipmentRapp(Handler<Either<String, Buffer>> handler, String type) {
         if (this.id == null) {
-            log.error("Instruction identifier is not nullable");
+            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
 
 
         Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
-                log.error("Error when getting sql datas ");
+                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
             } else {
 
                 JsonObject instruction = either.right().getValue();
                 String operationStr = "operations";
                 if (!instruction.containsKey(operationStr)) {
-                    log.error("Error when getting operations");
+                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
                     handler.handle(new Either.Left<>("Error when getting operations"));
                 } else {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
@@ -171,13 +171,13 @@ public class Instruction {
         }
         Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler( eitherInstruction -> {
             if (eitherInstruction.isLeft()) {
-                log.error("Error when getting sql datas ");
+                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
             } else {
                 JsonObject instruction = eitherInstruction.right().getValue();
                 String operationStr = "operations";
                 if (!instruction.containsKey(operationStr)) {
-                    log.error("Error when getting operations");
+                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
                     handler.handle(new Either.Left<>("Error when getting operations"));
                 } else {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
@@ -198,21 +198,21 @@ public class Instruction {
 
     public void exportNotficationCp(Handler<Either<String, Buffer>> handler) {
         if (this.id == null) {
-            log.error("Instruction identifier is not nullable");
+            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
 
 
         Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
-                log.error("Error when getting sql datas ");
+                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
             } else {
 
                 JsonObject instruction = either.right().getValue();
                 String operationStr = "operations";
                 if (!instruction.containsKey(operationStr)) {
-                    log.error("Error when getting operations");
+                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
                     handler.handle(new Either.Left<>("Error when getting operations"));
                 } else {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
@@ -247,11 +247,11 @@ public class Instruction {
                     buff.appendBytes(fileOut.toByteArray());
                     handler.handle(new Either.Right<>(buff));
                 } catch (IOException e) {
-                    log.error(e.getMessage());
+                    ExcelHelper.catchError(exportService, idFile, e.getMessage());
                     handler.handle(new Either.Left<>(e.getMessage()));
                 }
             } else {
-                log.error("Error when resolving futures");
+                ExcelHelper.catchError(exportService, idFile, "Error when resolving futures");
                 handler.handle(new Either.Left<>("Error when resolving futures"));
             }
         });

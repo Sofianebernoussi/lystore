@@ -1208,13 +1208,13 @@ public class ExcelHelper {
         log.error("Error for create file export excel " + errorCatch);
     }
 
-    public static void catchError (ExportService exportService, Number idFile, String errorCatch){
+    public static void catchError (ExportService exportService, Number idFile, String errorCatchTextOutput){
         exportService.updateWhenError(idFile, makeError ->{
             if(makeError.isLeft()){
-                log.error("Error for create file export excel " + makeError.left() + errorCatch);
+                log.error("Error for create file export excel " + makeError.left() + errorCatchTextOutput);
             }
         });
-        log.error("Error for create file export excel " + errorCatch);
+        log.error("Error for create file export excel " + errorCatchTextOutput);
     }
 
     private static String getDate() {
@@ -1238,21 +1238,20 @@ public class ExcelHelper {
                 if(newExport.isRight()){
                     Number idFile = newExport.right().getValue().getInteger("id");
                     try{
-                        infoFile.put("action", action)
-                                .put("id", Integer.parseInt(request.getParam("id")))
-                                .put("titleFile", titleFile)
-                                .put("idFile", idFile)
-                                .put("userId", user.getUserId());
-
-                        eb.send(ExportWorker.class.getSimpleName(),
-                                infoFile,
-                                handlerToAsyncHandler(eventExport -> log.info("Ok verticle worker")));
                         Logging.insert(eb,
                                 request,
                                 Contexts.EXPORT.toString(),
                                 Actions.CREATE.toString(),
                                 idFile.toString(),
                                 new JsonObject().put("ids", idFile).put("fileName", titleFile));
+                        infoFile.put("action", action)
+                                .put("id", Integer.parseInt(request.getParam("id")))
+                                .put("titleFile", titleFile)
+                                .put("idFile", idFile)
+                                .put("userId", user.getUserId());
+                        eb.send(ExportWorker.class.getSimpleName(), infoFile, handlerToAsyncHandler(eventExport ->
+                                log.info("Ok verticle worker"))
+                        );
                         request.response().setStatusCode(201).end("Import started " + idFile);
                     } catch (Exception error) {
                         catchError(exportService, idFile, error );

@@ -89,13 +89,13 @@ public class PublicsMarchés extends TabHelper {
 
     private void setTitle() {
         excel.insertBlackTitleHeaderBorderlessCenter(0, lineNumber, ANNEXE_TEXT);
-        sizeMergeRegionWithStyle(lineNumber, 0, 3, excel.blackTitleHeaderBorderlessCenteredStyle);
+        sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber++;
         excel.insertBlackTitleHeaderBorderlessCenter(0, lineNumber, TOTAL_TITLE);
-        sizeMergeRegionWithStyle(lineNumber, 0, 3, excel.blackTitleHeaderBorderlessCenteredStyle);
+        sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber++;
         excel.insertBlueTitleHeaderBorderlessCenter(0, lineNumber, totalSubv.toString() + "€");
-        sizeMergeRegionWithStyle(lineNumber, 0, 3, excel.blackTitleHeaderBorderlessCenteredStyle);
+        sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber += 2;
 
     }
@@ -133,7 +133,7 @@ public class PublicsMarchés extends TabHelper {
 
                 if (previousMarketId != marketId) {
                     excel.insertLabelBold(lineNumber, 0, order.getString("market"));
-                    excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabStringStyleCenterBold);
+                    excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
                     excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
                     initLine = lineNumber + 2;
                     previousMarketId = marketId;
@@ -145,7 +145,7 @@ public class PublicsMarchés extends TabHelper {
                 lineNumber++;
             }
             excel.insertLabelBold(lineNumber, 0, market);
-            excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabStringStyleCenterBold);
+            excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
             excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
             initLine = lineNumber + 1;
 //            excel.insertCellTabFloatWithPrice(3, lineNumber, Float.parseFloat(campaignData.getString("totalprice")));

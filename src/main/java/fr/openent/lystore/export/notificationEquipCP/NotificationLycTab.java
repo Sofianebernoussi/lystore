@@ -132,7 +132,8 @@ public class NotificationLycTab extends TabHelper {
                             lineNumber += 2;
                             setLabels();
                         }
-                        excel.insertCellTab(0, lineNumber,
+                    }
+                    excel.insertCellTab(0, lineNumber,
                                 ROOM + ": " + room + "\n"
                                         + STAIR + ": " + stair + "\n"
                                         + BUILDING + ": " + building
@@ -148,7 +149,6 @@ public class NotificationLycTab extends TabHelper {
 
                         lineNumber++;
 
-                    }
 
                 }
             }

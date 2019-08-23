@@ -103,7 +103,7 @@ export class OrderRegion implements Selectable {
         this.id_structure = order.id_structure;
         this.id_project = order.id_project;
         this.comment = order.comment;
-        this.price = order.price_proposal;
+        this.price = order.price_single_ttc;
         this.rank = order.rank;
         this.structure = order.structure;
         this.id_operation = order.id_operation;

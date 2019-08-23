@@ -19,6 +19,7 @@ export class OrderClient implements Selectable {
     status: string;
     number_validation: string;
     priceTTCtotal: number ;
+    price_single_ttc: number;
     priceProposalTTCTotal: number;
     grade?: Grade;
     title?: Title;

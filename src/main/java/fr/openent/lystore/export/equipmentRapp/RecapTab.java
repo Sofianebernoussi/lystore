@@ -16,12 +16,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class RecapTab extends TabHelper {
-    private JsonArray programs;
     String type = "";
-    final protected int yTab = 0;
-    final protected int xTab = 0;
     protected int operationsRowNumber = 2;
-    JsonArray operations;
     private String actionStr = "actions";
     private JsonObject programLabel = new JsonObject();
 
@@ -41,17 +37,15 @@ public class RecapTab extends TabHelper {
                 log.error("Failed to retrieve programs");
                 handler.handle(new Either.Left<>("Failed to retrieve programs"));
             } else {
-
-                JsonArray programs = event.right().getValue();
-                //Delete tab if empty
-                setLabels();
-                setArray(programs);
-
-                if (programs.size() == 0) {
-                    wb.removeSheetAt(wb.getSheetIndex(sheet));
+                if (checkEmpty()) {
+                    handler.handle(new Either.Right<>(true));
+                } else {
+                    //Delete tab if empty
+                    setLabels();
+                    setArray(datas);
+                    handler.handle(new Either.Right<>(true));
 
                 }
-                handler.handle(new Either.Right<>(true));
             }
         });
     }
@@ -68,12 +62,9 @@ public class RecapTab extends TabHelper {
         int endProgramX = 0;
         cellColumn = 2;
         ArrayList<String> programsActionList = new ArrayList<>();
-        if (programs.isEmpty()) {
-            return;
-        }
-        for (int i = 0; i < programs.size(); i++) {
+        for (int i = 0; i < datas.size(); i++) {
 
-            JsonObject operation = programs.getJsonObject(i);
+            JsonObject operation = datas.getJsonObject(i);
             String actionsStrToArray = operation.getString(actionStr);
             String labelOperation = operation.getString("label");
 
@@ -137,7 +128,7 @@ public class RecapTab extends TabHelper {
     protected void setArray(JsonArray datas) {
 
         for (int i = 0; i < datas.size(); i++) {
-            JsonObject operation = programs.getJsonObject(i);
+            JsonObject operation = datas.getJsonObject(i);
 
             String actionsStrToArray = operation.getString(actionStr);
             JsonArray actions = new JsonArray(actionsStrToArray);
@@ -155,13 +146,6 @@ public class RecapTab extends TabHelper {
                 } else {
                     oldTotals.put(key, action.getFloat("total") + oldTotals.getFloat(key));
                 }
-
-
-//                if (!old_key.equals(key)) {
-//                    oldTotal = 0.f;
-//                }
-//                old_key = key;
-//                oldTotal += action.getFloat("total");
                 excel.insertCellTabFloat(programLabel.getInteger(key) + 2,
                         2 + i,
                         oldTotals.getFloat(key));
@@ -266,10 +250,9 @@ public class RecapTab extends TabHelper {
             if (event.isLeft()) {
                 handler.handle(event.left());
             } else {
-                programs = event.right().getValue();
-                handler.handle(new Either.Right<>(programs));
+                datas = event.right().getValue();
+                handler.handle(new Either.Right<>(datas));
             }
-
         }));
     }
 

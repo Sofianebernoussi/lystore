@@ -1,6 +1,7 @@
 package fr.openent.lystore.export.notificationEquipCP;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.TabHelper;
 import fr.openent.lystore.service.StructureService;
 import fr.openent.lystore.service.impl.DefaultStructureService;
 import fr.wseduc.webutils.Either;
@@ -15,7 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class RecapMarketGestion extends NotifcationCpHelper {
+public class RecapMarketGestion extends TabHelper {
     private static final String DPT = "DPT";
     private static final String RNE_lYC = "RNE + NOM DU LYCEE ET COMMUNE";
     private static final String ADDR = "ADRESSE DU LYCEE";
@@ -46,23 +47,11 @@ public class RecapMarketGestion extends NotifcationCpHelper {
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
-        getDatas(event -> {
-            if (event.isLeft()) {
-                log.error("Failed to retrieve datas");
-                handler.handle(new Either.Left<>("Failed to retrieve datas"));
-            } else {
-
-                JsonArray programs = event.right().getValue();
-                initDatas(handler);
-                //Delete tab if empty
-                if (programs.size() == 0) {
-                    wb.removeSheetAt(wb.getSheetIndex(sheet));
-                }
-            }
-        });
+        getDatas(event -> handleDatasDefault(event, handler));
     }
 
-    private void initDatas(Handler<Either<String, Boolean>> handler) {
+    @Override
+    protected void initDatas(Handler<Either<String, Boolean>> handler) {
         ArrayList structuresId = new ArrayList<>();
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);

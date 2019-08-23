@@ -111,7 +111,7 @@ public class Subventions extends TabHelper {
             String zip = structureDatas.getString("zipCode").substring(0, 2);
 
             String structString = zip + " - " +
-                    structureDatas.getString("city") + " " + structureDatas.getString("nameEtab") + "(" + structureDatas.getString("uai") + ")";
+                    structureDatas.getString("city") + " - " + structureDatas.getString("nameEtab") + "(" + structureDatas.getString("uai") + ")";
             excel.insertHeader(lineNumber, 0, structString);
             sizeMergeRegion(lineNumber, 0, 3);
             lineNumber++;

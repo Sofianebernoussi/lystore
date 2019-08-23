@@ -52,6 +52,7 @@ public class ExcelHelper {
     public final CellStyle blackTitleHeaderBorderlessStyle;
     public final CellStyle blackTitleHeaderBorderlessCenteredStyle;
     public final CellStyle blueTitleHeaderBorderlessCenteredStyle;
+    public final CellStyle blueTitleHeaderBorderlessCenteredCurrencyStyle;
     public final CellStyle labelBoldStyle;
     public final CellStyle tabIntStyleCenterBold;
 
@@ -90,6 +91,7 @@ public class ExcelHelper {
         this.blackTitleHeaderBorderlessStyle = wb.createCellStyle();
         this.blackTitleHeaderBorderlessCenteredStyle = wb.createCellStyle();
         this.blueTitleHeaderBorderlessCenteredStyle = wb.createCellStyle();
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle = wb.createCellStyle();
         this.labelBoldStyle = wb.createCellStyle();
         this.tabIntStyleCenterBold = wb.createCellStyle();
 
@@ -428,6 +430,18 @@ public class ExcelHelper {
         this.blueTitleHeaderBorderlessCenteredStyle.setAlignment(HorizontalAlignment.CENTER);
         this.blueTitleHeaderBorderlessCenteredStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         this.blueTitleHeaderBorderlessCenteredStyle.setFont(blueTitleHeadFont);
+        this.blueTitleHeaderBorderlessCenteredStyle.setDataFormat(format.getFormat("#,##0.00"));
+
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setWrapText(true);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setBorderLeft(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setBorderRight(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setBorderTop(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setBorderBottom(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setAlignment(HorizontalAlignment.CENTER);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setFont(blueTitleHeadFont);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setDataFormat(format.getFormat("#,##0.00 €"));
+
 
 
     }
@@ -956,6 +970,22 @@ public class ExcelHelper {
         }
 
     }
+
+    public void insertBlueTitleHeaderBorderlessCenterFloatCurrency(int cellColumn, int line, Float data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blueTitleHeaderBorderlessCenteredCurrencyStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blueTitleHeaderBorderlessCenteredCurrencyStyle);
+        }
+    }
+
     /**
      * insert a header with blue police
      *
@@ -978,6 +1008,7 @@ public class ExcelHelper {
         }
 
     }
+
 
     /**
      * insert a data in an array wich will be centered in the cell
@@ -1238,7 +1269,8 @@ public class ExcelHelper {
 
     }
 
-    public void setTotalXWithStyle(int lineStart, int lineEnd, int column, int lineInsert, int columnInsert, CellStyle style) {
+    public void setTotalXWithStyle(int lineStart, int lineEnd, int column, int lineInsert,
+                                   int columnInsert, CellStyle style) {
         try {
             Row tab, tabStart, tabEnd;
             tabStart = sheet.getRow(lineStart);
@@ -1266,7 +1298,6 @@ public class ExcelHelper {
     public void setTotalXWithStyle(int lineStart, int lineEnd, int column, int lineInsert, CellStyle style) {
         setTotalXWithStyle(lineStart, lineEnd, column, lineInsert, column, style);
     }
-
 
 
     /**
@@ -1299,7 +1330,7 @@ public class ExcelHelper {
         }
     }
 
-    public static String makeTheNameExcelExport(String nameFile){
+    public static String makeTheNameExcelExport(String nameFile) {
         return getDate() + nameFile + ".xlsx";
     }
 
@@ -1307,18 +1338,18 @@ public class ExcelHelper {
         return getDate() + nameFile + type + ".xlsx";
     }
 
-    public static void catchError (ExportService exportService, Number idFile, Exception errorCatch){
-        exportService.updateWhenError(idFile, makeError ->{
-            if(makeError.isLeft()){
+    public static void catchError(ExportService exportService, Number idFile, Exception errorCatch) {
+        exportService.updateWhenError(idFile, makeError -> {
+            if (makeError.isLeft()) {
                 log.error("Error for create file export excel " + makeError.left() + errorCatch);
             }
         });
         log.error("Error for create file export excel " + errorCatch);
     }
 
-    public static void catchError (ExportService exportService, Number idFile, String errorCatchTextOutput){
-        exportService.updateWhenError(idFile, makeError ->{
-            if(makeError.isLeft()){
+    public static void catchError(ExportService exportService, Number idFile, String errorCatchTextOutput) {
+        exportService.updateWhenError(idFile, makeError -> {
+            if (makeError.isLeft()) {
                 log.error("Error for create file export excel " + makeError.left() + errorCatchTextOutput);
             }
         });
@@ -1331,21 +1362,22 @@ public class ExcelHelper {
         return formatter.format(date);
     }
 
-    public static void makeExportExcel(HttpServerRequest request, EventBus eb, ExportService exportService, String action, String name) {
+    public static void makeExportExcel(HttpServerRequest request, EventBus eb, ExportService exportService, String
+            action, String name) {
         boolean withType = request.getParam("type") != null;
         String type = "";
         JsonObject infoFile = new JsonObject();
-        if(withType){
+        if (withType) {
             type = request.getParam("type");
             infoFile.put("type", type);
         }
-        String titleFile = withType? ExcelHelper.makeTheNameExcelExport(name, type) : ExcelHelper.makeTheNameExcelExport(name);
+        String titleFile = withType ? ExcelHelper.makeTheNameExcelExport(name, type) : ExcelHelper.makeTheNameExcelExport(name);
 
         UserUtils.getUserInfos(eb, request, user -> {
             exportService.createWhenStart(titleFile, user.getUserId(), newExport -> {
-                if(newExport.isRight()){
+                if (newExport.isRight()) {
                     Number idFile = newExport.right().getValue().getInteger("id");
-                    try{
+                    try {
                         Logging.insert(eb,
                                 request,
                                 Contexts.EXPORT.toString(),
@@ -1362,12 +1394,16 @@ public class ExcelHelper {
                         );
                         request.response().setStatusCode(201).end("Import started " + idFile);
                     } catch (Exception error) {
-                        catchError(exportService, idFile, error );
+                        catchError(exportService, idFile, error);
                     }
                 } else {
                     log.error("Fail to insert file in SQL " + newExport.left());
                 }
             });
         });
-    };
+    }
+
+    ;
+
+
 }

@@ -192,6 +192,10 @@ public abstract class TabHelper {
         }
     }
 
+    public boolean checkEmpty() {
+        return datas.isEmpty();
+    }
+
     public void sqlHandler(Handler<Either<String, JsonArray>> handler) {
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {

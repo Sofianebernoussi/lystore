@@ -1039,20 +1039,21 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
     }
     public void getOneOrderClient(int idOrder, String status, Handler<Either<String, JsonObject>> handler){
+        //todo clean data is not used
         String query = "" +
                 "SELECT oce.*, " +
                 "       (  " +
                 "               (SELECT " +
                 "                  CASE " +
-                "                  WHEN ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL THEN 0 " +
+                "                  WHEN SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount)  IS NULL THEN 0 " +
                 "                  WHEN oce.price_proposal IS NOT NULL THEN 0 " +
-                "                  ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2) " +
+                "                  ELSE  SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount) " +
                 "                  END " +
                 "               FROM " + Lystore.lystoreSchema +".order_client_options oco " +
                 "               WHERE id_order_client_equipment = oce.id) + " +
                 "                                                         (CASE  " +
                 "                                                             WHEN oce.price_proposal IS NOT NULL THEN (oce.price_proposal)  " +
-                "                                                             ELSE (ROUND(oce.price + ((oce.price * oce.tax_amount) /100), 2))  " +
+                "                                                             ELSE (oce.price + ((oce.price * oce.tax_amount) /100))  " +
                 "                                                         END)) AS price_single_ttc,  " +
                 "       prj.id AS id_project, " +
                 "       prj.preference AS preference, " +

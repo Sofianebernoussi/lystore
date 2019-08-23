@@ -222,9 +222,10 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
 
     @Override
     public void getOneOrderRegion(int idOrder, Handler<Either<String, JsonObject>> handler) {
+        //todo clean data is not used
         String query = "" +
                 "SELECT ore.*, " +
-                "       ROUND( ore.price, 2 ) AS price_single_ttc, " +
+                "       ore.price AS price_single_ttc, " +
                 "       prj.id AS id_project, " +
                 "       prj.preference AS preference, " +
                 "       to_json(contract.*) contract, " +

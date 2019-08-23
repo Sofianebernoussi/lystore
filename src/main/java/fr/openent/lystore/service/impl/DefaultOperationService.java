@@ -263,7 +263,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 "       ore.name, " +
                 "       ore.id_structure, " +
                 "       ore.status, " +
-                "     ROUND( ore.price * ore.amount, 2 ) AS price, " +
+                "       ore.price * ore.amount AS price, " +
                 "       c.name AS contract_name " +
                 "FROM  " + Lystore.lystoreSchema +".\"order-region-equipment\" ore " +
                 "INNER JOIN  " + Lystore.lystoreSchema +".contract c ON ore.id_contract = c.id " +
@@ -277,21 +277,23 @@ public class DefaultOperationService extends SqlCrudService implements Operation
 
         Sql.getInstance().prepared(queryGetOrderRegion, new JsonArray().add(idOperation), SqlResult.validResultHandler(handler));
     }
+
+
     private void getOrderClientByOperation(int idOperation, Handler<Either<String, JsonArray>> handler){
         String queryGOrderClient = "" +
                 "SELECT oce.id,  " +
                 "       (  " +
                 "               (SELECT " +
                 "                  CASE " +
-                "                  WHEN ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL THEN 0 " +
+                "                  WHEN SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount)  IS NULL THEN 0 " +
                 "                  WHEN oce.price_proposal IS NOT NULL THEN 0 " +
-                "                  ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2) " +
+                "                  ELSE SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount) " +
                 "                  END " +
                 "               FROM " + Lystore.lystoreSchema +".order_client_options oco " +
                 "               WHERE id_order_client_equipment = oce.id) + " +
                 "                                                         (CASE  " +
                 "                                                             WHEN oce.price_proposal IS NOT NULL THEN (oce.price_proposal)  " +
-                "                                                             ELSE (ROUND(oce.price + ((oce.price * oce.tax_amount) /100), 2))  " +
+                "                                                             ELSE (oce.price + ((oce.price * oce.tax_amount) /100))  " +
                 "                                                         END))  * oce.amount AS price,  " +
                 "       oce.creation_date,  " +
                 "       oce.amount,  " +

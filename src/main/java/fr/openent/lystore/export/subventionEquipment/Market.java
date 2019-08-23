@@ -122,15 +122,22 @@ public class Market extends TabHelper {
                 Integer marketId = order.getInteger("market_id");
 
                 if (!idStructure.equals(previousIdStruct)) {
+                    if (j != 0) {
+                        excel.insertLabelBold(lineNumber, 0, previousMarket);
+                        excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
+                        excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
+                        initLine = lineNumber + 1;
+                        previousMarketId = marketId;
+                        previousMarket = market;
+                        lineNumber++;
+                    }
                     String zip = order.getString("zipCode").substring(0, 2);
                     String structString = zip + " - " +
-                            order.getString("city") + " " + order.getString("nameEtab") + "(" + order.getString("uai") + ")";
+                            order.getString("city") + " - " + order.getString("nameEtab") + "(" + order.getString("uai") + ")";
                     excel.insertHeader(lineNumber, 0, structString);
                     sizeMergeRegion(lineNumber, 0, 2);
                     previousIdStruct = idStructure;
-                    previousMarketId = marketId;
-                    previousMarket = market;
-                    lineNumber += 2;
+                    lineNumber++;
                     setLabels();
                 }
 
@@ -151,7 +158,7 @@ public class Market extends TabHelper {
             excel.insertLabelBold(lineNumber, 0, market);
             excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
             excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
-            initLine = lineNumber + 1;
+            initLine = lineNumber + 2;
 //            excel.insertCellTabFloatWithPrice(3, lineNumber, Float.parseFloat(campaignData.getString("totalprice")));
             lineNumber += 2;
 

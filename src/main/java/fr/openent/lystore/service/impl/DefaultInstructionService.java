@@ -206,7 +206,7 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
     private void getContractTypeOfOrderClient (JsonArray idsOperations, Handler<Either<String, JsonArray>> handler ){
         String queryGetContractClient = "" +
                 "SELECT o.id,  " +
-                "       array_to_json(array_agg(ct.name)) AS order_client_type_contract  " +
+                "       array_to_json(array_agg(ct.*)) AS order_client_type_contract  " +
                 "FROM  " + Lystore.lystoreSchema +".operation o  " +
                 "LEFT JOIN  " + Lystore.lystoreSchema +".order_client_equipment oce ON oce.id_operation = o.id  " +
                 "AND oce.override_region IS FALSE  " +
@@ -224,7 +224,7 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
     private void getContractTypeOfOrderRegion (JsonArray idsOperations, Handler<Either<String, JsonArray>> handler ){
         String queryGetContractRegion = "" +
                 "SELECT o.id,  " +
-                "       array_to_json(array_agg(ct.name)) AS order_region_type_contract  " +
+                "       array_to_json(array_agg(ct.*)) AS order_region_type_contract  " +
                 "FROM  " + Lystore.lystoreSchema +".operation o  " +
                 "LEFT JOIN  " + Lystore.lystoreSchema +".\"order-region-equipment\" ore ON ore.id_operation = o.id  " +
                 "LEFT JOIN  " + Lystore.lystoreSchema +".order o_region ON o_region.id = ore.id_order  " +

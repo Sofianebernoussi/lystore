@@ -212,5 +212,21 @@ public abstract class TabHelper {
 
     }
 
+    public void handleDatasDefault(Either<String, JsonArray> event, Handler<Either<String, Boolean>> handler) {
+        if (event.isLeft()) {
+            log.error("Failed to retrieve datas");
+            handler.handle(new Either.Left<>("Failed to retrieve datas"));
+        } else {
+            if (checkEmpty()) {
+                handler.handle(new Either.Right<>(true));
+            } else {
+                initDatas(handler);
+            }
+        }
+    }
+
+    protected void initDatas(Handler<Either<String, Boolean>> handler) {
+
+    }
 
 }

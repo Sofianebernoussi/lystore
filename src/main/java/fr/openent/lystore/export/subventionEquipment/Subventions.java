@@ -36,23 +36,12 @@ public class Subventions extends TabHelper {
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
-        getDatas(event -> {
-            if (event.isLeft()) {
-                log.error("Failed to retrieve datas");
-                handler.handle(new Either.Left<>("Failed to retrieve datas"));
-            } else {
-                if (checkEmpty()) {
-                    handler.handle(new Either.Right<>(true));
-                } else {
-                    initDatas(handler);
-                    //Delete tab if empty
-                }
-            }
-        });
+        getDatas(event -> handleDatasDefault(event, handler));
     }
 
 
-    private void initDatas(Handler<Either<String, Boolean>> handler) {
+    @Override
+    protected void initDatas(Handler<Either<String, Boolean>> handler) {
         ArrayList structuresId = new ArrayList<>();
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);

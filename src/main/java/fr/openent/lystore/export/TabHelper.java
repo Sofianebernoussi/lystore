@@ -192,6 +192,14 @@ public abstract class TabHelper {
         }
     }
 
+    public boolean checkEmpty() {
+        if (datas.isEmpty()) {
+            excel.insertBlackOnGreenHeader(0, 0, "Cet onglet ne possède pas de données à afficher");
+            excel.autoSize(1);
+        }
+        return datas.isEmpty();
+    }
+
     public void sqlHandler(Handler<Either<String, JsonArray>> handler) {
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
@@ -204,5 +212,21 @@ public abstract class TabHelper {
 
     }
 
+    public void handleDatasDefault(Either<String, JsonArray> event, Handler<Either<String, Boolean>> handler) {
+        if (event.isLeft()) {
+            log.error("Failed to retrieve datas");
+            handler.handle(new Either.Left<>("Failed to retrieve datas"));
+        } else {
+            if (checkEmpty()) {
+                handler.handle(new Either.Right<>(true));
+            } else {
+                initDatas(handler);
+            }
+        }
+    }
+
+    protected void initDatas(Handler<Either<String, Boolean>> handler) {
+
+    }
 
 }

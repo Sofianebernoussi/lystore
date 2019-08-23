@@ -19,6 +19,7 @@ export class OrderClient implements Selectable {
     status: string;
     number_validation: string;
     priceTTCtotal: number ;
+    price_single_ttc: number;
     priceProposalTTCTotal: number;
     grade?: Grade;
     title?: Title;
@@ -136,6 +137,7 @@ export class OrderClient implements Selectable {
         }
     }
 
+    //todo create orderDefault and  to use here, init and clean data is not used
     async getOneOrderClientProgress(id, withParent:Boolean = false){
         try{
             const {data} = await http.get(`/lystore/orderClient/${id}/order/progress`);
@@ -188,6 +190,7 @@ export class OrderClient implements Selectable {
         }
     }
 
+    //todo create orderDefault and to use here, init and clean data is not used
     async getOneOrderClientWaiting(id:Number, withParent:Boolean = false){
         try{
             const {data} = await http.get(`/lystore/orderClient/${id}/order/waiting`);
@@ -270,6 +273,8 @@ export class OrdersClient extends Selection<OrderClient> {
             notify.error('lystore.project.update.err');
         }
     }
+
+    //todo create orderDefault and here, init and clean data doesn't using
     async sync (status: string, structures: Structure[] = [], idCampaign?: number, idStructure?: string) {
         try {
             this.projects = new Selection<Project>([]);

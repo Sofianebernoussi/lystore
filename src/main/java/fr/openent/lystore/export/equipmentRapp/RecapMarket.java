@@ -17,7 +17,6 @@ import java.util.Collections;
 
 public class RecapMarket extends TabHelper {
     JsonArray operations;
-    private JsonArray datas;
     JsonObject programMarket;
     private String type;
 
@@ -42,14 +41,11 @@ public class RecapMarket extends TabHelper {
                 log.error("Failed to retrieve programs");
                 handler.handle(new Either.Left<>("Failed to retrieve programs"));
             } else {
-
+                if (checkEmpty()) {
+                    handler.handle(new Either.Right<>(true));
+                } else {
                 JsonArray programs = event.right().getValue();
                 setArray(programs);
-
-                //DElete tab if empty
-                if (programs.size() == 0) {
-                    wb.removeSheetAt(wb.getSheetIndex(sheet));
-
                 }
                 handler.handle(new Either.Right<>(true));
             }

@@ -41,10 +41,7 @@ public class Subventions extends TabHelper {
                 log.error("Failed to retrieve datas");
                 handler.handle(new Either.Left<>("Failed to retrieve datas"));
             } else {
-
-                JsonArray programs = event.right().getValue();
                 if (checkEmpty()) {
-                    System.out.println("cc");
                     handler.handle(new Either.Right<>(true));
                 } else {
                     initDatas(handler);

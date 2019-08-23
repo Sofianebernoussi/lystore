@@ -16,7 +16,6 @@ import org.entcore.common.sql.SqlResult;
 import java.util.ArrayList;
 
 public class ComptaTab extends TabHelper {
-    private JsonArray datas;
     private String type;
     private int yProgramLabel = 0;
     private StructureService structureService;
@@ -37,12 +36,11 @@ public class ComptaTab extends TabHelper {
                 log.error("Failed to retrieve programs");
                 handler.handle(new Either.Left<>("Failed to retrieve programs"));
             } else {
-
-                JsonArray programs = event.right().getValue();
-                initDatas(handler);
-                //Delete tab if empty
-                if (programs.size() == 0) {
-                    wb.removeSheetAt(wb.getSheetIndex(sheet));
+                if (checkEmpty()) {
+                    handler.handle(new Either.Right<>(true));
+                } else {
+                    JsonArray programs = event.right().getValue();
+                    initDatas(handler);
                 }
             }
         });

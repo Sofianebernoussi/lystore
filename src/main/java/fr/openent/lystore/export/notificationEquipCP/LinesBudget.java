@@ -1,6 +1,7 @@
 package fr.openent.lystore.export.notificationEquipCP;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.TabHelper;
 import fr.openent.lystore.service.StructureService;
 import fr.openent.lystore.service.impl.DefaultStructureService;
 import fr.wseduc.webutils.Either;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 
-public class LinesBudget extends NotifcationCpHelper {
+public class LinesBudget extends TabHelper {
     private StructureService structureService;
     private ArrayList<Integer> codes = new ArrayList<>();
     private int arraylength = 5;
@@ -32,12 +33,11 @@ public class LinesBudget extends NotifcationCpHelper {
                 log.error("Failed to retrieve datas");
                 handler.handle(new Either.Left<>("Failed to retrieve datas"));
             } else {
-
+                if (checkEmpty()) {
+                    handler.handle(new Either.Right<>(true));
+                } else {
                 JsonArray programs = event.right().getValue();
                 initDatas(handler);
-                //Delete tab if empty
-                if (programs.size() == 0) {
-                    wb.removeSheetAt(wb.getSheetIndex(sheet));
                 }
             }
         });

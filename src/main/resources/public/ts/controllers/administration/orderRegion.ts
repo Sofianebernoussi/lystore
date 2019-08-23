@@ -57,10 +57,10 @@ export const orderRegionController = ng.controller('orderRegionController',
             $scope.getContractType();
         };
 
+        //todo remove function starting when the controller is call
         if ($routeParams.idOrder) {
             let idOrder = $routeParams.idOrder;
             $scope.orderToUpdate.structure = $scope.structures.filter(structureFilter => structureFilter.id === $scope.orderToUpdate.id_structure)[0];
-            $scope.orderToUpdate.price_proposal = $scope.orderToUpdate.price_single_ttc;
             $scope.initDataUpdate();
         }
         $scope.isUpdating = $location.$$path.includes('/order/update');
@@ -124,7 +124,7 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.isValidFormUpdate = () => {
             return $scope.orderToUpdate.equipment_key
                 &&  $scope.orderToUpdate.equipment
-                && $scope.orderToUpdate.price_proposal
+                && $scope.orderToUpdate.price_single_ttc
                 && $scope.orderToUpdate.amount
                 && ((($scope.orderToUpdate.rank>0 &&
                     $scope.orderToUpdate.rank<11  ||

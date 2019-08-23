@@ -145,8 +145,7 @@ export class OrderRegion implements Selectable {
         }
     }
 
-
-
+    //todo create orderDefault and to use here, init and clean data is not used
     async getOneOrderRegion(id){
         try{
             const {data} =  await http.get(`/lystore/orderRegion/${id}/order`);

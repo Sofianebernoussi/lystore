@@ -46,7 +46,8 @@ public class Publipostage extends TabHelper {
         });
     }
 
-    private void initDatas(Handler<Either<String, Boolean>> handler) {
+    @Override
+    protected void initDatas(Handler<Either<String, Boolean>> handler) {
         JsonArray structuresId = new JsonArray();
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);

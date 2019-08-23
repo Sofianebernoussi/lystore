@@ -211,7 +211,6 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                 "LEFT JOIN  " + Lystore.lystoreSchema +".order_client_equipment oce ON oce.id_operation = o.id  " +
                 "AND oce.override_region IS FALSE  " +
                 "AND oce.status = 'IN PROGRESS'  " +
-                "LEFT JOIN  " + Lystore.lystoreSchema +".order o_client ON o_client.id = oce.id_order  " +
                 "LEFT JOIN  " + Lystore.lystoreSchema +".contract c_client ON c_client.id = oce.id_contract  " +
                 "LEFT JOIN  " + Lystore.lystoreSchema +".contract_type ct ON ct.id = c_client.id_contract_type  " +
                 "WHERE o.id IN " +
@@ -227,7 +226,6 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                 "       array_to_json(array_agg(ct.*)) AS order_region_type_contract  " +
                 "FROM  " + Lystore.lystoreSchema +".operation o  " +
                 "LEFT JOIN  " + Lystore.lystoreSchema +".\"order-region-equipment\" ore ON ore.id_operation = o.id  " +
-                "LEFT JOIN  " + Lystore.lystoreSchema +".order o_region ON o_region.id = ore.id_order  " +
                 "LEFT JOIN  " + Lystore.lystoreSchema +".contract c_region ON c_region.id = ore.id_contract  " +
                 "LEFT JOIN  " + Lystore.lystoreSchema +".contract_type ct ON ct.id = c_region.id_contract_type  " +
                 "WHERE o.id IN " +

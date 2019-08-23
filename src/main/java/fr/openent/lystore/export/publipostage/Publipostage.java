@@ -9,13 +9,13 @@ import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.entcore.common.neo4j.Neo4j;
 import org.entcore.common.neo4j.Neo4jResult;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
-import io.vertx.core.logging.Logger;
 
 public class Publipostage extends TabHelper {
     private StructureService structureService;
@@ -29,17 +29,18 @@ public class Publipostage extends TabHelper {
 
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
-        makeHeader();
         getDatas(dataFromRequest -> {
             if (dataFromRequest.isLeft()) {
                 log.error("Failed to retrieve datas");
                 handler.handle(new Either.Left<>("Failed to retrieve datas"));
             } else {
-                JsonArray order = dataFromRequest.right().getValue();
-                initDatas(handler);
-                //Delete tab if empty
-                if (order.size() == 0) {
-                    wb.removeSheetAt(wb.getSheetIndex(sheet));
+                if (checkEmpty()) {
+                    handler.handle(new Either.Right<>(true));
+                } else {
+                    makeHeader();
+                    JsonArray order = dataFromRequest.right().getValue();
+                    initDatas(handler);
+                    //Delete tab if empty
                 }
             }
         });

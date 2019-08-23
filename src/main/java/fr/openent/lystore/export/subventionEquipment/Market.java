@@ -42,8 +42,7 @@ public class Market extends TabHelper {
             } else {
 
                 JsonArray programs = event.right().getValue();
-                if (programs.size() == 0) {
-                    wb.removeSheetAt(wb.getSheetIndex(sheet));
+                if (checkEmpty()) {
                     handler.handle(new Either.Right<>(true));
                 } else {
                     initDatas(handler);

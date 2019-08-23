@@ -19,7 +19,6 @@ import java.util.ArrayList;
 public class VerifBudgetTab extends TabHelper {
     JsonArray operations;
     private int currentY = 0, programY = 0;
-    private JsonArray datas;
     private Double programTotal = 0.d;
     JsonObject programMarket;
     private StructureService structureService;
@@ -46,12 +45,13 @@ public class VerifBudgetTab extends TabHelper {
                 log.error("Failed to retrieve programs");
                 handler.handle(new Either.Left<>("Failed to retrieve programs"));
             } else {
-
+                if (checkEmpty()) {
+                    handler.handle(new Either.Right<>(true));
+                } else {
                 JsonArray programs = event.right().getValue();
                 initDatas(handler);
                 //Delete tab if empty
-                if (programs.size() == 0) {
-                    wb.removeSheetAt(wb.getSheetIndex(sheet));
+
                 }
             }
         });

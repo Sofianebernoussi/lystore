@@ -193,10 +193,11 @@ public abstract class TabHelper {
     }
 
     public boolean checkEmpty() {
-        excel.insertLabel(0, 0, "Cet onglet ne possède pas de données à afficher");
-
+        if (datas.isEmpty()) {
+            excel.insertBlackOnGreenHeader(0, 0, "Cet onglet ne possède pas de données à afficher");
+            excel.autoSize(1);
+        }
         return datas.isEmpty();
-
     }
 
     public void sqlHandler(Handler<Either<String, JsonArray>> handler) {

@@ -1,6 +1,7 @@
 package fr.openent.lystore.export.notificationEquipCP;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.TabHelper;
 import fr.openent.lystore.service.StructureService;
 import fr.openent.lystore.service.impl.DefaultStructureService;
 import fr.wseduc.webutils.Either;
@@ -13,7 +14,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class NotificationLycTab extends NotifcationCpHelper {
+public class NotificationLycTab extends TabHelper {
     private int lineNumber = 0;
     private final String DESTINATION = "Destination";
     private final String MARKET_CODE = "Code marché Région";
@@ -49,12 +50,12 @@ public class NotificationLycTab extends NotifcationCpHelper {
                 log.error("Failed to retrieve datas");
                 handler.handle(new Either.Left<>("Failed to retrieve datas"));
             } else {
-
-                JsonArray programs = event.right().getValue();
-                initDatas(handler);
-                //Delete tab if empty
-                if (programs.size() == 0) {
-                    wb.removeSheetAt(wb.getSheetIndex(sheet));
+                if (checkEmpty()) {
+                    handler.handle(new Either.Right<>(true));
+                } else {
+                    JsonArray programs = event.right().getValue();
+                    initDatas(handler);
+                    //Delete tab if empty
                 }
             }
         });

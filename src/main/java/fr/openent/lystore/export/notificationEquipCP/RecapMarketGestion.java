@@ -176,8 +176,14 @@ public class RecapMarketGestion extends NotifcationCpHelper {
                 excel.insertCellTabCenter(2, lineNumber, CIVILITY + "\n" + address + "\n TEL: " + order.getString("phone"));
                 excel.insertCellTabCenterBold(3, lineNumber, formatterDateExcel.format(orderDate));
                 excel.insertCellTabCenter(4, lineNumber, order.getString("market") + " \nCP " + instruction.getString("cp_number"));
-                excel.insertCellTabCenter(5, lineNumber,
-                        "OPE : " + order.getString("operation") + "\nDDE : -" + order.getInteger("id").toString());
+                if (order.getBoolean("isregion")) {
+                    excel.insertCellTabCenter(5, lineNumber,
+                            "OPE : " + order.getString("operation") + "\nDDE : R-" + order.getInteger("id").toString());
+                } else {
+                    excel.insertCellTabCenter(5, lineNumber,
+                            "OPE : " + order.getString("operation") + "\nDDE : C-" + order.getInteger("id").toString());
+                }
+
                 excel.insertCellTabCenter(6, lineNumber, formatStrToCell(campaign, 5));
                 excel.insertCellTabCenter(7, lineNumber, formatStrToCell(order.getInteger("amount").toString(), 5));
                 excel.insertCellTabFloat(8, lineNumber, order.getFloat("total"));
@@ -286,19 +292,19 @@ public class RecapMarketGestion extends NotifcationCpHelper {
                 "             END as old_name,     " +
                 "             orders.id_structure,orders.id_operation as id_operation, label.label as operation ,     " +
                 "             orders.equipment_key as key, orders.name as name_equipment, true as region,  orders.id as id,  " +
-                "             program_action.id_program, orders.amount ,contract.id as market_id,   campaign.name as campaign, orders.comment,    " +
+                "             program_action.id_program, orders.amount ,contract.id as market_id,   campaign.name as campaign, orders.comment, orders.isregion,   " +
                 "             case when specific_structures.type is null      " +
                 "             then '" + LYCEE + "'          " +
                 "             ELSE specific_structures.type     " +
                 "             END as cite_mixte     " +
                 "             FROM (      " +
-                "             (select ore.id,  ore.price as \"price TTC\",  ore.amount,  ore.creation_date,  ore.modification_date,  ore.name,  ore.summary, " +
+                "             (select ore.id,  true as isregion, ore.price as \"price TTC\",  ore.amount,  ore.creation_date,  ore.modification_date,  ore.name,  ore.summary, " +
                 "             ore.description,  ore.image,    ore.status,  ore.id_contract,  ore.equipment_key,  ore.id_campaign,  ore.id_structure, " +
                 "             ore.cause_status,  ore.number_validation,  ore.id_order,  ore.comment,  ore.rank as \"prio\", null as price_proposal,  " +
-                "             ore.id_project,  ore.id_order_client_equipment, null as program, null as action,  ore.id_operation , " +
+                "             ore.id_project,  ore.id_order_client_equipment, null as program, null as action,  ore.id_operation ," +
                 "             null as override_region          from " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore )      " +
-                "             union      " +
-                "             (select oce.id," +
+                "             UNION      " +
+                "             (select oce.id ,  false as isregion," +
                 "             CASE WHEN price_proposal is null then  price + (price*tax_amount/100)  else price_proposal end as \"price TTC\", " +
                 "             amount, creation_date, null as modification_date, name,  " +
                 "             summary, description, image,  status, id_contract, equipment_key, id_campaign, id_structure, cause_status, number_validation, " +
@@ -322,7 +328,8 @@ public class RecapMarketGestion extends NotifcationCpHelper {
 
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                 "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
-                "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id" +
+                "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name ," +
+                "             orders.id,orders.isregion " +
                 "             order by campaign,code,market_id, id_structure,program,code  " +
                 "  )    SELECT  values.market as market,    array_to_json(array_agg(values))as actions, SUM (values.total) as totalMarket       " +
                 "  from  values      " +

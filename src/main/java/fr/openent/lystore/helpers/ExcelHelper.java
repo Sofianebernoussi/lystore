@@ -50,6 +50,11 @@ public class ExcelHelper {
     public final CellStyle blackOnRedLabel;
     public final CellStyle blueTabStyle;
     public final CellStyle blackTitleHeaderBorderlessStyle;
+    public final CellStyle blackTitleHeaderBorderlessCenteredStyle;
+    public final CellStyle blueTitleHeaderBorderlessCenteredStyle;
+    public final CellStyle blueTitleHeaderBorderlessCenteredCurrencyStyle;
+    public final CellStyle labelBoldStyle;
+    public final CellStyle tabIntStyleCenterBold;
 
     protected static Logger log = LoggerFactory.getLogger(ExcelHelper.class);
 
@@ -84,6 +89,11 @@ public class ExcelHelper {
         this.blackOnRedLabel = wb.createCellStyle();
         this.blueTabStyle = wb.createCellStyle();
         this.blackTitleHeaderBorderlessStyle = wb.createCellStyle();
+        this.blackTitleHeaderBorderlessCenteredStyle = wb.createCellStyle();
+        this.blueTitleHeaderBorderlessCenteredStyle = wb.createCellStyle();
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle = wb.createCellStyle();
+        this.labelBoldStyle = wb.createCellStyle();
+        this.tabIntStyleCenterBold = wb.createCellStyle();
 
         format = wb.createDataFormat();
         format.getFormat("#.#");
@@ -123,7 +133,15 @@ public class ExcelHelper {
         this.labelStyle.setWrapText(true);
         this.labelStyle.setAlignment(HorizontalAlignment.LEFT);
         this.labelStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        this.labelStyle.setFont(labelFont);
+
+        this.labelBoldStyle.setBorderLeft(BorderStyle.THIN);
+        this.labelBoldStyle.setBorderRight(BorderStyle.THIN);
+        this.labelBoldStyle.setBorderTop(BorderStyle.THIN);
+        this.labelBoldStyle.setBorderBottom(BorderStyle.THIN);
+        this.labelBoldStyle.setWrapText(true);
+        this.labelBoldStyle.setAlignment(HorizontalAlignment.LEFT);
+        this.labelBoldStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.labelBoldStyle.setFont(headerFont);
 
         //TotalStyle
         Font totalFont = this.wb.createFont();
@@ -176,6 +194,17 @@ public class ExcelHelper {
         this.tabStringStyleCenter.setVerticalAlignment(VerticalAlignment.CENTER);
         this.tabStringStyleCenter.setFont(tabFont);
         this.tabStringStyleCenter.setDataFormat(format.getFormat("#,##0.00"));
+
+        this.tabIntStyleCenterBold.setBorderLeft(BorderStyle.THIN);
+        this.tabIntStyleCenterBold.setBorderRight(BorderStyle.THIN);
+        this.tabIntStyleCenterBold.setBorderTop(BorderStyle.THIN);
+        this.tabIntStyleCenterBold.setBorderBottom(BorderStyle.THIN);
+        this.tabIntStyleCenterBold.setWrapText(true);
+        this.tabIntStyleCenterBold.setAlignment(HorizontalAlignment.CENTER);
+        this.tabIntStyleCenterBold.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.tabIntStyleCenterBold.setFont(headerFont);
+        this.tabIntStyleCenterBold.setDataFormat(format.getFormat("#"));
+
 
         Font tabFontBold = this.wb.createFont();
         tabFontBold.setFontHeightInPoints((short) 11);
@@ -384,6 +413,36 @@ public class ExcelHelper {
         this.blackTitleHeaderBorderlessStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         this.blackTitleHeaderBorderlessStyle.setFont(blackOnRedLabelFont);
 
+        this.blackTitleHeaderBorderlessCenteredStyle.setWrapText(true);
+        this.blackTitleHeaderBorderlessCenteredStyle.setBorderLeft(BorderStyle.NONE);
+        this.blackTitleHeaderBorderlessCenteredStyle.setBorderRight(BorderStyle.NONE);
+        this.blackTitleHeaderBorderlessCenteredStyle.setBorderTop(BorderStyle.NONE);
+        this.blackTitleHeaderBorderlessCenteredStyle.setBorderBottom(BorderStyle.NONE);
+        this.blackTitleHeaderBorderlessCenteredStyle.setAlignment(HorizontalAlignment.CENTER);
+        this.blackTitleHeaderBorderlessCenteredStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.blackTitleHeaderBorderlessCenteredStyle.setFont(titleHeadFont);
+
+        this.blueTitleHeaderBorderlessCenteredStyle.setWrapText(true);
+        this.blueTitleHeaderBorderlessCenteredStyle.setBorderLeft(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredStyle.setBorderRight(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredStyle.setBorderTop(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredStyle.setBorderBottom(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredStyle.setAlignment(HorizontalAlignment.CENTER);
+        this.blueTitleHeaderBorderlessCenteredStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.blueTitleHeaderBorderlessCenteredStyle.setFont(blueTitleHeadFont);
+        this.blueTitleHeaderBorderlessCenteredStyle.setDataFormat(format.getFormat("#,##0.00"));
+
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setWrapText(true);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setBorderLeft(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setBorderRight(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setBorderTop(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setBorderBottom(BorderStyle.NONE);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setAlignment(HorizontalAlignment.CENTER);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setFont(blueTitleHeadFont);
+        this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setDataFormat(format.getFormat("#,##0.00 €"));
+
+
 
     }
     public void setBold(Cell cell) {
@@ -462,6 +521,13 @@ public class ExcelHelper {
 
     }
 
+    public void setRegionHeaderStyle(CellRangeAddress merge, Sheet sheet, CellStyle style) {
+        RegionUtil.setBorderTop(style.getBorderTop(), merge, sheet);
+        RegionUtil.setBorderBottom(style.getBorderBottom(), merge, sheet);
+        RegionUtil.setBorderRight(style.getBorderRight(), merge, sheet);
+        RegionUtil.setBorderLeft(style.getBorderLeft(), merge, sheet);
+    }
+
     public void setRegionUnderscoreHeader(CellRangeAddress merge, Sheet sheet) {
         RegionUtil.setBorderBottom(BorderStyle.THIN, merge, sheet);
     }
@@ -492,8 +558,6 @@ public class ExcelHelper {
         cell.setCellValue(data);
         cell.setCellStyle(this.labelStyle);
     }
-
-
 
 
     public void insertFormula(Row row, int cellColumn, String data) {
@@ -558,6 +622,21 @@ public class ExcelHelper {
             Cell cell = tab.createCell(cellColumn);
             cell.setCellValue(data);
             cell.setCellStyle(this.labelStyle);
+        }
+    }
+
+    public void insertLabelBold(int line, int cellColumn, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.labelBoldStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.labelBoldStyle);
         }
     }
 
@@ -860,6 +939,52 @@ public class ExcelHelper {
 
     }
 
+    public void insertBlackTitleHeaderBorderlessCenter(int cellColumn, int line, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blackTitleHeaderBorderlessCenteredStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blackTitleHeaderBorderlessCenteredStyle);
+        }
+
+    }
+
+    public void insertBlueTitleHeaderBorderlessCenter(int cellColumn, int line, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blueTitleHeaderBorderlessCenteredStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blueTitleHeaderBorderlessCenteredStyle);
+        }
+
+    }
+
+    public void insertBlueTitleHeaderBorderlessCenterFloatCurrency(int cellColumn, int line, Float data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blueTitleHeaderBorderlessCenteredCurrencyStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.blueTitleHeaderBorderlessCenteredCurrencyStyle);
+        }
+    }
 
     /**
      * insert a header with blue police
@@ -883,6 +1008,7 @@ public class ExcelHelper {
         }
 
     }
+
 
     /**
      * insert a data in an array wich will be centered in the cell
@@ -1138,6 +1264,13 @@ public class ExcelHelper {
      * @param columnInsert column where the total will be insert
      */
     public void setTotalX(int lineStart, int lineEnd, int column, int lineInsert, int columnInsert) {
+        setTotalXWithStyle(lineStart, lineEnd, column, lineInsert, columnInsert, tabCurrencyStyle);
+
+
+    }
+
+    public void setTotalXWithStyle(int lineStart, int lineEnd, int column, int lineInsert,
+                                   int columnInsert, CellStyle style) {
         try {
             Row tab, tabStart, tabEnd;
             tabStart = sheet.getRow(lineStart);
@@ -1148,18 +1281,24 @@ public class ExcelHelper {
                 cell = tab.createCell(columnInsert);
             } catch (NullPointerException e) {
                 tab = sheet.createRow(lineInsert);
-                cell = tab.createCell(column);
+                cell = tab.createCell(columnInsert);
             }
-            cell.setCellStyle(this.tabCurrencyStyle);
+            cell.setCellStyle(style);
             cell.setCellValue("total");
             cellStartSum = tabStart.getCell(column);
             cellEndSum = tabEnd.getCell(column);
-            cell.setCellStyle(this.tabCurrencyStyle);
+            cell.setCellStyle(style);
             cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
         } catch (NullPointerException e) {
             log.error("Trying to sum a non init cell , init cells before calling this function");
         }
     }
+
+
+    public void setTotalXWithStyle(int lineStart, int lineEnd, int column, int lineInsert, CellStyle style) {
+        setTotalXWithStyle(lineStart, lineEnd, column, lineInsert, column, style);
+    }
+
 
     /**
      * Set total of a line
@@ -1191,7 +1330,7 @@ public class ExcelHelper {
         }
     }
 
-    public static String makeTheNameExcelExport(String nameFile){
+    public static String makeTheNameExcelExport(String nameFile) {
         return getDate() + nameFile + ".xlsx";
     }
 
@@ -1199,18 +1338,18 @@ public class ExcelHelper {
         return getDate() + nameFile + type + ".xlsx";
     }
 
-    public static void catchError (ExportService exportService, Number idFile, Exception errorCatch){
-        exportService.updateWhenError(idFile, makeError ->{
-            if(makeError.isLeft()){
+    public static void catchError(ExportService exportService, Number idFile, Exception errorCatch) {
+        exportService.updateWhenError(idFile, makeError -> {
+            if (makeError.isLeft()) {
                 log.error("Error for create file export excel " + makeError.left() + errorCatch);
             }
         });
         log.error("Error for create file export excel " + errorCatch);
     }
 
-    public static void catchError (ExportService exportService, Number idFile, String errorCatchTextOutput){
-        exportService.updateWhenError(idFile, makeError ->{
-            if(makeError.isLeft()){
+    public static void catchError(ExportService exportService, Number idFile, String errorCatchTextOutput) {
+        exportService.updateWhenError(idFile, makeError -> {
+            if (makeError.isLeft()) {
                 log.error("Error for create file export excel " + makeError.left() + errorCatchTextOutput);
             }
         });
@@ -1223,21 +1362,22 @@ public class ExcelHelper {
         return formatter.format(date);
     }
 
-    public static void makeExportExcel(HttpServerRequest request, EventBus eb, ExportService exportService, String action, String name) {
+    public static void makeExportExcel(HttpServerRequest request, EventBus eb, ExportService exportService, String
+            action, String name) {
         boolean withType = request.getParam("type") != null;
         String type = "";
         JsonObject infoFile = new JsonObject();
-        if(withType){
+        if (withType) {
             type = request.getParam("type");
             infoFile.put("type", type);
         }
-        String titleFile = withType? ExcelHelper.makeTheNameExcelExport(name, type) : ExcelHelper.makeTheNameExcelExport(name);
+        String titleFile = withType ? ExcelHelper.makeTheNameExcelExport(name, type) : ExcelHelper.makeTheNameExcelExport(name);
 
         UserUtils.getUserInfos(eb, request, user -> {
             exportService.createWhenStart(titleFile, user.getUserId(), newExport -> {
-                if(newExport.isRight()){
+                if (newExport.isRight()) {
                     Number idFile = newExport.right().getValue().getInteger("id");
-                    try{
+                    try {
                         Logging.insert(eb,
                                 request,
                                 Contexts.EXPORT.toString(),
@@ -1254,12 +1394,16 @@ public class ExcelHelper {
                         );
                         request.response().setStatusCode(201).end("Import started " + idFile);
                     } catch (Exception error) {
-                        catchError(exportService, idFile, error );
+                        catchError(exportService, idFile, error);
                     }
                 } else {
                     log.error("Fail to insert file in SQL " + newExport.left());
                 }
             });
         });
-    };
+    }
+
+    ;
+
+
 }

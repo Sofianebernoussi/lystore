@@ -112,8 +112,15 @@ export class Instruction implements Selectable {
             notify.error("lystore.instruction.get.err")
         }
     }
+    async exportRapportSubvention() {
+        try {
+            const {data} = await http.get(`/lystore/instructions/export/subvention/equipment/${this.id}`);
+        } catch (e) {
+            notify.error("lystore.instruction.get.err")
+        }
+    }
 
-    async exportPublipostage(){
+    async exportPublipostage() {
         try {
             const {data} = await http.get(`/lystore/instructions/export/publipostage/equipment/${this.id}`);
         } catch (e) {

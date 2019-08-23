@@ -8,10 +8,13 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.entcore.common.sql.Sql;
+import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -158,6 +161,16 @@ public abstract class TabHelper {
 
     }
 
+    protected void sizeMergeRegionWithStyle(int line, int columnStart, int columnEnd, CellStyle style) {
+        CellRangeAddress merge = new CellRangeAddress(line, line, columnStart, columnEnd);
+        sheet.addMergedRegion(merge);
+        excel.setRegionHeaderStyle(merge, sheet, style);
+        short height = 1000;
+        Row row = sheet.getRow(line);
+        row.setHeight(height);
+
+    }
+
     // doing \n when the str is too long
     protected String formatStrToCell(String str, int nbWords) {
         try {
@@ -178,5 +191,18 @@ public abstract class TabHelper {
             return str;
         }
     }
+
+    public void sqlHandler(Handler<Either<String, JsonArray>> handler) {
+        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
+            if (event.isLeft()) {
+                handler.handle(event.left());
+            } else {
+                datas = event.right().getValue();
+                handler.handle(new Either.Right<>(datas));
+            }
+        }));
+
+    }
+
 
 }

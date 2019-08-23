@@ -209,10 +209,17 @@ public class VerifBudgetTab extends TabHelper {
             }
             excel.insertLabel(currentY, 3, "Ref : " + value.getInteger("key").toString());
             if (value.getBoolean("region")) {
-                excel.insertLabel(currentY, 4, "N° dem : " + " - " + value.getInteger("id").toString());
+                if (value.getBoolean("isregion"))
+                    excel.insertLabel(currentY, 4, "N° dem : R" + " - " + value.getInteger("id").toString());
+                else
+                    excel.insertLabel(currentY, 4, "N° dem : C" + " - " + value.getInteger("id").toString());
+
 
             } else {
-                excel.insertLabel(currentY, 4, "N° dem : " + value.getInteger("id").toString());
+                if (value.getBoolean("isregion"))
+                    excel.insertLabel(currentY, 4, "N° dem : R" + value.getInteger("id").toString());
+                else
+                    excel.insertLabel(currentY, 4, "N° dem : C" + value.getInteger("id").toString());
 
             }
             currentY++;
@@ -264,20 +271,20 @@ public class VerifBudgetTab extends TabHelper {
                 "             ELSE orders.name      " +
                 "             END as old_name,     " +
                 "             orders.id_structure,orders.id_operation as id_operation, label.label as operation ,     " +
-                "             orders.equipment_key as key, orders.name as name_equipment, true as region,    " +
+                "             orders.equipment_key as key, orders.name as name_equipment, true as region, orders.isregion,    " +
                 "             program_action.id_program, orders.amount ,contract.id as market_id,       " +
                 "             case when specific_structures.type is null      " +
                 "             then '" + LYCEE + "'          " +
                 "             ELSE specific_structures.type     " +
                 "             END as cite_mixte     " +
                 "             FROM (      " +
-                "             (select ore.id,  ore.price as \"price TTC\",  ore.amount,  ore.creation_date,  ore.modification_date,  ore.name,  ore.summary, " +
+                "             (select ore.id,  true as isregion, ore.price as \"price TTC\",  ore.amount,  ore.creation_date,  ore.modification_date,  ore.name,  ore.summary, " +
                 "             ore.description,  ore.image,    ore.status,  ore.id_contract,  ore.equipment_key,  ore.id_campaign,  ore.id_structure, " +
                 "             ore.cause_status,  ore.number_validation,  ore.id_order,  ore.comment,  ore.rank as \"prio\", null as price_proposal,  " +
-                "             ore.id_project,  ore.id_order_client_equipment, null as program, null as action,  ore.id_operation , " +
+                "             ore.id_project,  ore.id_order_client_equipment, null as program, null as action,  ore.id_operation ," +
                 "             null as override_region          from " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore )      " +
-                "             union      " +
-                "             (select oce.id," +
+                "             UNION      " +
+                "             (select oce.id ,  false as isregion," +
                 "             CASE WHEN price_proposal is null then  price + (price*tax_amount/100)  else price_proposal end as \"price TTC\", " +
                 "             amount, creation_date, null as modification_date, name,  " +
                 "             summary, description, image,  status, id_contract, equipment_key, id_campaign, id_structure, cause_status, number_validation, " +
@@ -315,7 +322,7 @@ public class VerifBudgetTab extends TabHelper {
         query +=
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                         "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
-                        "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region " +
+                        "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region, orders.isregion " +
                         "             order by  program,code,orders.id_operation     )        " +
                         "SELECT values.market, code,program , array_to_json(array_agg(values))as actions " +
                         ", SUM (values.total) as totalMarket  " +

@@ -107,9 +107,14 @@ public class NotificationLycTab extends TabHelper {
                     String building = getStr(order, "building");
                     String date = getFormatDate(instruction.getString("date_cp"));
                     String equipmentNameComment = "Libellé Region : " + formatStrToCell(order.getString("name_equipment"), 10);
-
-                    if (order.getBoolean("isregion"))
+                    String idFormatted = "";
+                    if (order.getBoolean("isregion")) {
                         equipmentNameComment += " \nCommentaire Région :" + formatStrToCell(order.getString("comment"), 10);
+                        idFormatted += "R-" + order.getInteger("id").toString();
+                    } else {
+                        idFormatted += "C-" + order.getInteger("id").toString();
+                    }
+
                     if (!previousCode.equals(code)) {
                         if (code.equals(Subvention)) {
                             lineNumber += 2;
@@ -133,10 +138,11 @@ public class NotificationLycTab extends TabHelper {
                                         + BUILDING + ": " + building
                         );
 
+
                         excel.insertCellTabCenterBold(1, lineNumber, market);
                         excel.insertCellTabBlue(2, lineNumber, equipmentNameComment);
                         excel.insertCellTabCenterBold(3, lineNumber, instruction.getString("cp_number") + "\n" + date);
-                        excel.insertCellTabCenter(4, lineNumber, "-" + order.getInteger("id").toString());
+                        excel.insertCellTabCenter(4, lineNumber, idFormatted);
                         excel.insertCellTabCenterBold(5, lineNumber, order.getInteger("amount").toString());
                         excel.insertCellTabFloatWithPrice(6, lineNumber, order.getFloat("total"));
 

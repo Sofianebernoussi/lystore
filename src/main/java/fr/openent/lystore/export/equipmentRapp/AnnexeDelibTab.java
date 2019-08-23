@@ -17,9 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class AnnexeDelibTab extends TabHelper {
-    private JsonArray datas;
     private String type;
-    private int yProgramLabel = 0;
     private StructureService structureService;
     private JsonObject programMarket;
 
@@ -39,23 +37,11 @@ public class AnnexeDelibTab extends TabHelper {
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
-        getDatas(event -> {
-            if (event.isLeft()) {
-                log.error("Failed to retrieve programs");
-                handler.handle(new Either.Left<>("Failed to retrieve programs"));
-            } else {
-
-                JsonArray programs = event.right().getValue();
-                initDatas(handler);
-                //Delete tab if empty
-                if (programs.size() == 0) {
-                    wb.removeSheetAt(wb.getSheetIndex(sheet));
-                }
-            }
-        });
+        getDatas(event -> handleDatasDefault(event, handler));
     }
 
-    private void initDatas(Handler<Either<String, Boolean>> handler) {
+    @Override
+    protected void initDatas(Handler<Either<String, Boolean>> handler) {
         ArrayList structuresId = new ArrayList<>();
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);

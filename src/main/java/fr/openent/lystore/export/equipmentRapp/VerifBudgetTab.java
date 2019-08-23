@@ -19,7 +19,6 @@ import java.util.ArrayList;
 public class VerifBudgetTab extends TabHelper {
     JsonArray operations;
     private int currentY = 0, programY = 0;
-    private JsonArray datas;
     private Double programTotal = 0.d;
     JsonObject programMarket;
     private StructureService structureService;
@@ -41,23 +40,11 @@ public class VerifBudgetTab extends TabHelper {
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
-        getDatas(event -> {
-            if (event.isLeft()) {
-                log.error("Failed to retrieve programs");
-                handler.handle(new Either.Left<>("Failed to retrieve programs"));
-            } else {
-
-                JsonArray programs = event.right().getValue();
-                initDatas(handler);
-                //Delete tab if empty
-                if (programs.size() == 0) {
-                    wb.removeSheetAt(wb.getSheetIndex(sheet));
-                }
-            }
-        });
+        getDatas(event -> handleDatasDefault(event, handler));
     }
 
-    private void initDatas(Handler<Either<String, Boolean>> handler) {
+    @Override
+    protected void initDatas(Handler<Either<String, Boolean>> handler) {
         ArrayList structuresId = new ArrayList<>();
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);

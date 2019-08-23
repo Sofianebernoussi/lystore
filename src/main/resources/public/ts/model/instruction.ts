@@ -71,7 +71,7 @@ export class Instruction implements Selectable {
                     : operation.label = new label();
                 operation.status = operation.status? true : false;
                 if(operation.order_contract_type){
-                    operation.nbOrberSub = operation.order_contract_type.filter(contract => contract === "Subventions").length
+                    operation.nbOrberSub = operation.order_contract_type.filter(contract => contract.code.toString() === "236").length
                 } else {
                     operation.nbOrberSub = 0;
                 }

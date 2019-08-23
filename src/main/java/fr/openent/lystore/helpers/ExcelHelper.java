@@ -428,6 +428,8 @@ public class ExcelHelper {
         this.blueTitleHeaderBorderlessCenteredStyle.setAlignment(HorizontalAlignment.CENTER);
         this.blueTitleHeaderBorderlessCenteredStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         this.blueTitleHeaderBorderlessCenteredStyle.setFont(blueTitleHeadFont);
+        this.blueTitleHeaderBorderlessCenteredStyle.setDataFormat(format.getFormat("#,##0.00"));
+
 
 
     }

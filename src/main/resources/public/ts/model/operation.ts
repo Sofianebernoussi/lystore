@@ -111,6 +111,7 @@ export class Operations extends Selection<Operation>{
                     operation.instruction =  JSON.parse(operation.instruction.toString())
                     : operation.instruction = null;
                 operation.nb_orders = operation.nb_orders || 0;
+                operation.nbOrberSub = operation.number_sub || 0;
             })
         } catch(e){
             notify.error('lystore.operation.sync.err');

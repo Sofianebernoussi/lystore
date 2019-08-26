@@ -87,8 +87,9 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                     Future<JsonArray> getCountOrderInOperationFuture = Future.future();
                     Future<JsonArray> getInstructionForOperationFuture = Future.future();
                     Future<JsonArray> getAllPriceOperationFuture = Future.future();
+                    Future<JsonArray> getNumberOrderSubventionFuture = Future.future();
 
-                    CompositeFuture.all(getCountOrderInOperationFuture, getInstructionForOperationFuture, getAllPriceOperationFuture).setHandler(asyncEvent -> {
+                    CompositeFuture.all(getCountOrderInOperationFuture, getInstructionForOperationFuture, getAllPriceOperationFuture, getNumberOrderSubventionFuture).setHandler(asyncEvent -> {
                         if (asyncEvent.failed()) {
                             String message = "Failed to retrieve operation";
                             handler.handle(new Either.Left<>(message));
@@ -98,6 +99,8 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                         JsonArray getOrderCount = getCountOrderInOperationFuture.result();
                         JsonArray getInstruction = getInstructionForOperationFuture.result();
                         JsonArray getSumPriceOperation = getAllPriceOperationFuture.result();
+                        JsonArray getNumberSubvention = getNumberOrderSubventionFuture.result();
+
                         JsonArray operationFinalSend = new JsonArray();
                         for (int i = 0; i < operations.size(); i++) {
                             JsonObject operation = operations.getJsonObject(i);
@@ -113,12 +116,19 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                                     operation.put("instruction", instruction.getString("instruction"));
                                 }
                             }
-                            for (int j = 0; j < getSumPriceOperation.size(); j++) {
-                                JsonObject sumPriceOperation = getSumPriceOperation.getJsonObject(j);
+                            for (int m = 0; m < getNumberSubvention.size(); m++) {
+                                JsonObject numberSubvention = getNumberSubvention.getJsonObject(m);
+                                if (operation.getInteger("id").equals(numberSubvention.getInteger("id_operation"))) {
+                                    operation.put("number_sub", numberSubvention.getString("number_sub"));
+                                }
+                            }
+                            for (int n = 0; n < getSumPriceOperation.size(); n++) {
+                                JsonObject sumPriceOperation = getSumPriceOperation.getJsonObject(n);
                                 if (operation.getInteger("id").equals(sumPriceOperation.getInteger("id"))) {
                                     operation.put("amount", sumPriceOperation.getString("amount"));
                                 }
                             }
+
                             operationFinalSend.add(operation);
                         }
                         handler.handle(new Either.Right<>(operationFinalSend));
@@ -127,19 +137,50 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                     SqlUtils.getCountOrderInOperation(idsOperations, FutureHelper.handlerJsonArray(getCountOrderInOperationFuture));
                     getInstructionForOperation(idsOperations, FutureHelper.handlerJsonArray(getInstructionForOperationFuture));
                     SqlUtils.getAllPriceOperation(idsOperations, FutureHelper.handlerJsonArray(getAllPriceOperationFuture));
-
+                    getNumberOrderSubvention(idsOperations,  FutureHelper.handlerJsonArray(getNumberOrderSubventionFuture));
 
                 } else {
                     handler.handle(new Either.Left<>("404"));
                 }
             } catch( Exception e){
                 LOGGER.error("An error when you want get all operation", e);
-                handler.handle(new Either.Left<>(""));
+                handler.handle(new Either.Left<>("An error when you want get all operation" + e));
             }
         }));
     }
 
+    public void getNumberOrderSubvention (JsonArray idsOperations, Handler<Either<String, JsonArray>> handler ){
+        String queryGetContractClient = "" +
+                "WITH operations AS " +
+                "  (SELECT ore.id_operation, " +
+                "          COUNT (ct) AS number_sub " +
+                "   FROM " + Lystore.lystoreSchema +".\"order-region-equipment\" ore " +
+                "   INNER JOIN " + Lystore.lystoreSchema +".contract c_region ON c_region.id = ore.id_contract " +
+                "   INNER JOIN " + Lystore.lystoreSchema +".contract_type ct ON ct.id = c_region.id_contract_type " +
+                "   AND ct.code = '236' " +
+                "   WHERE ore.id_operation IN " +
+                Sql.listPrepared(idsOperations.getList()) + " " +
+                "   GROUP BY (ore.id_operation) " +
+                "   UNION ALL SELECT oce.id_operation, " +
+                "                    COUNT(*) AS number_sub " +
+                "   FROM " + Lystore.lystoreSchema +".order_client_equipment oce " +
+                "   INNER JOIN " + Lystore.lystoreSchema +".contract c_client ON c_client.id = oce.id_contract " +
+                "   INNER JOIN " + Lystore.lystoreSchema +".contract_type ct ON ct.id = c_client.id_contract_type " +
+                "   AND ct.code = '236' " +
+                "   WHERE oce.id_operation IN " +
+                Sql.listPrepared(idsOperations.getList()) + " " +
+                "     AND oce.override_region IS FALSE " +
+                "     AND oce.status = 'IN PROGRESS' " +
+                "   GROUP BY (oce.id_operation)) " +
+                "SELECT operations.id_operation, " +
+                "       SUM(operations.number_sub) AS number_sub " +
+                "FROM operations " +
+                "GROUP BY (operations.id_operation)";
 
+        JsonArray params = SqlQueryUtils.multiplyArray(2, idsOperations);
+
+        Sql.getInstance().prepared(queryGetContractClient, params, SqlResult.validResultHandler(handler));
+    }
 
     private void getInstructionForOperation(JsonArray idsOperations, Handler<Either<String, JsonArray>> handler){
         String queryGetTotalOperation = "SELECT " +

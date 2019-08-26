@@ -44,10 +44,10 @@ public class RecapMarket extends TabHelper {
                 if (checkEmpty()) {
                     handler.handle(new Either.Right<>(true));
                 } else {
-                JsonArray programs = event.right().getValue();
-                setArray(programs);
+                    JsonArray programs = event.right().getValue();
+                    setArray(programs);
+                    handler.handle(new Either.Right<>(true));
                 }
-                handler.handle(new Either.Right<>(true));
             }
         });
     }

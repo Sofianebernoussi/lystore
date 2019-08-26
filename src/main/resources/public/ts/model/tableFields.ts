@@ -1,7 +1,12 @@
 export const orderWaiting = [
     {
+        name: 'UAI',
+        fieldName: 'structure.uai',
+        display: true,
+    },
+    {
         name:'Structure',
-        fieldName:'name_structure',
+        fieldName: 'structure.name',
         display: true
     },
     {

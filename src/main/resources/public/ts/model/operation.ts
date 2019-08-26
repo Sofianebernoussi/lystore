@@ -24,7 +24,7 @@ export class Operation implements Selectable {
     instruction: Instruction;
     date_cp: Date;
     nbOrberSub: Number;
-    order_contract_type : Array<any>;
+    number_sub : Number;
     constructor(){
 
     }

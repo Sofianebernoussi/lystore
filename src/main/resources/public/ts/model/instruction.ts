@@ -70,11 +70,7 @@ export class Instruction implements Selectable {
                     operation.label = Mix.castAs(label, JSON.parse(operation.label.toString()))
                     : operation.label = new label();
                 operation.status = operation.status? true : false;
-                if(operation.order_contract_type){
-                    operation.nbOrberSub = operation.order_contract_type.filter(contract => contract.code.toString() === "236").length
-                } else {
-                    operation.nbOrberSub = 0;
-                }
+                operation.nbOrberSub = operation.number_sub || 0;
             });
         } catch (e) {
             notify.error("lystore.instruction.get.err");

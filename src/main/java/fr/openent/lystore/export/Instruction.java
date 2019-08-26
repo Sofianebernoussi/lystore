@@ -283,6 +283,45 @@ public class Instruction {
         }));
     }
 
+    public void exportIris(Handler<Either<String, Buffer>> handler) {
+        if (this.id == null) {
+            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
+            handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
+        }
+        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
+            if (either.isLeft()) {
+                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
+                handler.handle(new Either.Left<>("Error when getting sql datas "));
+            } else {
+
+                JsonObject instruction = either.right().getValue();
+                String operationStr = "operations";
+                if (!instruction.containsKey(operationStr)) {
+                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
+                    handler.handle(new Either.Left<>("Error when getting operations"));
+                } else {
+                    instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
+
+                    Workbook workbook = new XSSFWorkbook();
+                    List<Future> futures = new ArrayList<>();
+                    Future<Boolean> LinesBudgetFuture = Future.future();
+                    Future<Boolean> RecapMarketGestionFuture = Future.future();
+                    Future<Boolean> NotifcationLyceeFuture = Future.future();
+
+                    futures.add(LinesBudgetFuture);
+                    futures.add(RecapMarketGestionFuture);
+                    futures.add(NotifcationLyceeFuture);
+
+                    futureHandler(handler, workbook, futures);
+                    new NotificationLycTab(workbook, instruction).create(getHandler(NotifcationLyceeFuture));
+                    new RecapMarketGestion(workbook, instruction).create(getHandler(RecapMarketGestionFuture));
+                    new LinesBudget(workbook, instruction).create(getHandler(LinesBudgetFuture));
+
+                }
+            }
+        }));
+
+    }
     private void futureHandler(Handler<Either<String, Buffer>> handler, Workbook workbook, List<Future> futures) {
         CompositeFuture.all(futures).setHandler(event -> {
             if (event.succeeded()) {

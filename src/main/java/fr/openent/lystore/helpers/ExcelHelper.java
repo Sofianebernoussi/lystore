@@ -538,6 +538,7 @@ public class ExcelHelper {
      * @param cellColumn
      * @param data
      */
+    @Deprecated
     public void insertHeader(Row row, int cellColumn, String data) {
         Cell cell = row.createCell(cellColumn);
         cell.setCellValue(data);
@@ -553,13 +554,20 @@ public class ExcelHelper {
      * @param cellColumn
      * @param data       data to insert
      */
+    @Deprecated
+    /**
+     * use insertLabel(int  line, int cellColumn, String data) instead
+     */
     public void insertLabel(Row row, int cellColumn, String data) {
         Cell cell = row.createCell(cellColumn);
         cell.setCellValue(data);
         cell.setCellStyle(this.labelStyle);
     }
 
-
+    @Deprecated
+    /**
+     * Use insertFormula(int , int , data) instead
+     */
     public void insertFormula(Row row, int cellColumn, String data) {
         Cell cell = row.createCell(cellColumn);
         cell.setCellFormula(data);

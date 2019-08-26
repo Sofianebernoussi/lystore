@@ -57,11 +57,27 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                 exportSubvention(event.body().getInteger("id"),
                         fileNamIn);
                 break;
+            case "exportIris":
+                exportIris(event.body().getInteger("id"),
+                        fileNamIn);
+                break;
             default:
                 ExcelHelper.catchError(exportService, idNewFile, "Invalid action in worker");
                 break;
 
         }
+    }
+
+    private void exportIris(Integer instructionId, String titleFile) {
+        this.instruction = new Instruction(exportService, idNewFile, instructionId);
+        this.instruction.exportIris(event1 -> {
+            if (event1.isLeft()) {
+                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left());
+            } else {
+                Buffer xlsx = event1.right().getValue();
+                saveBuffer(xlsx, titleFile);
+            }
+        });
     }
 
     private void exportNotificationCp(Integer instructionId, String titleFile) {

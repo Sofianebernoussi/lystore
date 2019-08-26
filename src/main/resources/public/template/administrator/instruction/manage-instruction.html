@@ -131,9 +131,9 @@
                 <i18n>lystore.export.airDelib</i18n>
             </button>
             <button
-                    ng-disabled="true"
-                    ng-click=""
-                    ng-show="false"
+                    ng-disabled="instructions.selected[0].operations.length === 0"
+                    ng-click="exportIris(instructions.selected[0])"
+                    ng-show="instructions.selected.length === 1"
             >
                 <i18n>lystore.export.airIris</i18n>
             </button>
@@ -141,6 +141,7 @@
                     ng-disabled="true"
                     ng-click=""
                     ng-show="false"
+                    download
             >
                 <i18n>lystore.list.equipment</i18n>
             </button>

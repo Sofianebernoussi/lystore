@@ -198,7 +198,7 @@ public class RecapTab extends TabHelper {
                 "             (select ore.id,  ore.price as \"price TTC\",  ore.amount,  ore.creation_date,  ore.modification_date,  ore.name,  ore.summary, " +
                 "             ore.description,  ore.image,    ore.status,  ore.id_contract,  ore.equipment_key,  ore.id_campaign,  ore.id_structure, " +
                 "             ore.cause_status,  ore.number_validation,  ore.id_order,  ore.comment,  ore.rank as \"prio\", null as price_proposal,  " +
-                "             ore.id_project,  ore.id_order_client_equipment, null as program, null as action,  ore.id_operation , " +
+                "             ore.id_project,  ore.id_order_client_equipment, program , action ,  ore.id_operation , " +
                 "             null as override_region          from " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore )      " +
                 "             union      " +
                 "             (select oce.id," +

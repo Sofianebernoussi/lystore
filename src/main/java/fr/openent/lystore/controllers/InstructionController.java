@@ -101,7 +101,7 @@ public class InstructionController extends ControllerHelper {
     @Get("/instructions/:id/export")
     @ApiDoc("Export given instruction")
     public void exportInstruction(HttpServerRequest request) {
-        ExcelHelper.makeExportExcel(request, eb, exportService, "exportRME", "Récapitulatif_mesures_engagées_");
+        ExcelHelper.makeExportExcel(request, eb, exportService, "exportRME", "_Récapitulatif_mesures_engagées");
     }
 
     @Get("/instructions/export/equipment/rapport/:id/:type")

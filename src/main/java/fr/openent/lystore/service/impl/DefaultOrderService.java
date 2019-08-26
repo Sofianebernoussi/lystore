@@ -188,11 +188,10 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "array_to_json(array_agg(structure_group.name)) as structure_groups, count(distinct row.id_structure) as structure_count, supplier.id as supplierId, " +
                 Lystore.lystoreSchema + ".order.label_program, " + Lystore.lystoreSchema + ".order.order_number " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment row " +
-                "LEFT JOIN " + Lystore.lystoreSchema + ".equipment ON (row.equipment_key = equipment.id) " +
-                "LEFT JOIN " + Lystore.lystoreSchema + ".contract ON (equipment.id_contract = contract.id) " +
-                "LEFT JOIN " + Lystore.lystoreSchema + ".supplier ON (contract.id_supplier = supplier.id) " +
-                "LEFT JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON (row.id_structure = rel_group_structure.id_structure) " +
-                "LEFT JOIN " + Lystore.lystoreSchema + ".structure_group ON (rel_group_structure.id_structure_group = structure_group.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (row.id_contract = contract.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".supplier ON (contract.id_supplier = supplier.id) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".rel_group_structure ON (row.id_structure = rel_group_structure.id_structure) " +
+                "INNER JOIN " + Lystore.lystoreSchema + ".structure_group ON (rel_group_structure.id_structure_group = structure_group.id) " +
                 "LEFT OUTER JOIN " + Lystore.lystoreSchema + ".order ON (row.id_order = lystore.order.id)  " +
                 "WHERE row.status IN " + Sql.listPrepared(status.getList()) +
                 " GROUP BY row.id_operation, row.number_validation, contract.name, supplier.name, contract.id, supplierId, row.status, " + Lystore.lystoreSchema +

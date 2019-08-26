@@ -206,12 +206,12 @@ public class OrderController extends ControllerHelper {
         JsonArray equipmentList;
         for (int i = 0; i < equipments.size(); i++) {
             equipment = equipments.getJsonObject(i);
-            if (equipment.containsKey("number_validation")) {
-                if (numbers.containsKey(equipment.getString("number_validation"))) {
+//            if (equipment.containsKey("number_validation")) {
+//                if (numbers.containsKey(equipment.getString("number_validation"))) {
                     equipmentList = numbers.getJsonArray(equipment.getString("number_validation"));
                     numbers.put(equipment.getString("number_validation"), equipmentList.add(equipment));
-                }
-            }
+//                }
+//            }
         }
         return numbers;
     }

@@ -3,6 +3,7 @@ package fr.openent.lystore.service.impl;
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.helpers.FutureHelper;
 import fr.openent.lystore.service.InstructionService;
+import fr.openent.lystore.service.OperationService;
 import fr.openent.lystore.utils.SqlQueryUtils;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.CompositeFuture;
@@ -11,7 +12,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.apache.commons.lang3.ArrayUtils;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.SqlResult;
 import io.vertx.core.json.JsonObject;
@@ -22,10 +22,13 @@ import java.util.List;
 
 public class DefaultInstructionService  extends SqlCrudService implements InstructionService {
 
-    public DefaultInstructionService(String schema, String table) {
+    private static final Logger LOGGER = LoggerFactory.getLogger (DefaultOrderService.class);
+    private DefaultOperationService operationService = new DefaultOperationService(Lystore.lystoreSchema, "operation");
+
+    public DefaultInstructionService(
+            String schema, String table) {
         super(schema, table);
     }
-    private static final Logger LOGGER = LoggerFactory.getLogger (DefaultOrderService.class);
 
     public void getExercises (Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Lystore.lystoreSchema +".exercise";
@@ -128,9 +131,9 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
 
                     Future<JsonArray> getCountOrderInOperationFuture = Future.future();
                     Future<JsonArray> getAllPriceOperationFuture = Future.future();
-                    Future<JsonArray> getNumberOrderClientSubventionFuture = Future.future();
+                    Future<JsonArray> getNumberOrderSubventionFuture = Future.future();
 
-                    CompositeFuture.all( getCountOrderInOperationFuture, getAllPriceOperationFuture, getNumberOrderClientSubventionFuture ).setHandler(asyncEvent -> {
+                    CompositeFuture.all( getCountOrderInOperationFuture, getAllPriceOperationFuture, getNumberOrderSubventionFuture ).setHandler(asyncEvent -> {
                         if (asyncEvent.failed()) {
                             String message = "Failed to retrieve instructions";
                             handler.handle(new Either.Left<>(message));
@@ -140,7 +143,7 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                         JsonArray operationsFinal = new JsonArray();
                         JsonArray getNbrOrder = getCountOrderInOperationFuture.result();
                         JsonArray getAmountsDemands = getAllPriceOperationFuture.result();
-                        JsonArray getNumberSubvention = getNumberOrderClientSubventionFuture.result();
+                        JsonArray getNumberSubvention = getNumberOrderSubventionFuture.result();
 
                         for (int i = 0; i < operations.size(); i++) {
                             JsonObject operation = operations.getJsonObject(i);
@@ -170,7 +173,7 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
 
                     SqlUtils.getCountOrderInOperation(idsOperations,  FutureHelper.handlerJsonArray(getCountOrderInOperationFuture));
                     SqlUtils.getAllPriceOperation(idsOperations,  FutureHelper.handlerJsonArray(getAllPriceOperationFuture));
-                    getNumberOrderSubvention(idsOperations,  FutureHelper.handlerJsonArray(getNumberOrderClientSubventionFuture));
+                    operationService.getNumberOrderSubvention(idsOperations,  FutureHelper.handlerJsonArray(getNumberOrderSubventionFuture));
                 }
             } catch ( Exception e){
                 LOGGER.error("An error when you want get all instructions", e);
@@ -180,38 +183,7 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
         }));
     }
 
-    private void getNumberOrderSubvention (JsonArray idsOperations, Handler<Either<String, JsonArray>> handler ){
-        String queryGetContractClient = "" +
-                "WITH operations AS " +
-                "  (SELECT ore.id_operation, " +
-                "          COUNT (ct) AS number_sub " +
-                "   FROM " + Lystore.lystoreSchema +".\"order-region-equipment\" ore " +
-                "   INNER JOIN " + Lystore.lystoreSchema +".contract c_region ON c_region.id = ore.id_contract " +
-                "   INNER JOIN " + Lystore.lystoreSchema +".contract_type ct ON ct.id = c_region.id_contract_type " +
-                "   AND ct.code = '236' " +
-                "   WHERE ore.id_operation IN " +
-                Sql.listPrepared(idsOperations.getList()) + " " +
-                "   GROUP BY (ore.id_operation) " +
-                "   UNION ALL SELECT oce.id_operation, " +
-                "                    COUNT(*) AS number_sub " +
-                "   FROM " + Lystore.lystoreSchema +".order_client_equipment oce " +
-                "   INNER JOIN " + Lystore.lystoreSchema +".contract c_client ON c_client.id = oce.id_contract " +
-                "   INNER JOIN " + Lystore.lystoreSchema +".contract_type ct ON ct.id = c_client.id_contract_type " +
-                "   AND ct.code = '236' " +
-                "   WHERE oce.id_operation IN " +
-                Sql.listPrepared(idsOperations.getList()) + " " +
-                "     AND oce.override_region IS FALSE " +
-                "     AND oce.status = 'IN PROGRESS' " +
-                "   GROUP BY (oce.id_operation)) " +
-                "SELECT operations.id_operation, " +
-                "       SUM(operations.number_sub) AS number_sub " +
-                "FROM operations " +
-                "GROUP BY (operations.id_operation)";
 
-        JsonArray params = SqlQueryUtils.multiplyArray(2, idsOperations);
-
-        Sql.getInstance().prepared(queryGetContractClient, params, SqlResult.validResultHandler(handler));
-    }
 
     public void create(JsonObject instruction, Handler<Either<String, JsonObject>> handler){
         String query = "INSERT INTO " + Lystore.lystoreSchema +".instruction (" +

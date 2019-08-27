@@ -1,6 +1,5 @@
 package fr.openent.lystore.export.investissement;
 
-import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.TabHelper;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
@@ -82,59 +81,50 @@ public class RecapImputationBud extends TabHelper {
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
-        query = "WITH results as(" +
-                "(SELECT  program_action.action as action_code, program.section, program_action.description as action_name,program_action.id as action_id , " +
-                "program.name as program_name,program.id as program_id,  " +
-                "program.label as program_label, program.functional_code, program.chapter,chapter.label as chapter_label, functional_code.label as code_label, " +
-                " SUM(" +
-                " CASE WHEN oce.price_proposal is not null" +
-                " THEN oce.price_proposal *  oce.amount " +
-                " ELSE (oce.price * oce.amount) + ((oce.price*oce.amount)*oce.tax_amount)/100 + " +
-                " ( " +
-                "           SELECT CASE WHEN  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  IS NULL " +
-                "           THEN 0  " +
-                "           ELSE  ROUND(SUM(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount), 2)  " +
-                "           END " +
-                "           from lystore.order_client_options oco  " +
-                "          WHERE id_order_client_equipment = oce.id  " +
-                " )  " +
-                " END) as Total   " +
-                "FROM " + Lystore.lystoreSchema + ".order_client_equipment oce " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".operation ON (oce.id_operation = operation.id)   " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)    " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (oce.id_contract = contract.id)   " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id) " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)   " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)  " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id) " +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".chapter ON (chapter.code =  program.chapter) " +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".functional_code ON (functional_code.code =  program.functional_code) " +
-                "WHERE instruction.id = ? " +
-                "AND oce.override_region = false " +
-                "group by program_action.id,program.id,chapter_label,code_label " +
-                "order by section desc,program_id,action_id)" +
-                " UNION " +
-                "(SELECT  program_action.action as action_code, program.section, program_action.description as action_name,program_action.id as action_id , program.name as program_name," +
-                "program.id as program_id,  " +
-                "program.label as program_label, program.functional_code, program.chapter,chapter.label as chapter_label, functional_code.label as code_label, " +
-                " SUM(ore.price * ore.amount) as Total   " +
-                "FROM " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".operation ON (ore.id_operation = operation.id)   " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id)    " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".contract ON (ore.id_contract = contract.id)   " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id) " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".structure_program_action ON (structure_program_action.contract_type_id = contract_type.id)   " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".program_action ON (structure_program_action.program_action_id = program_action.id)  " +
-                "INNER JOIN " + Lystore.lystoreSchema + ".program ON (program_action.id_program = program.id) " +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".chapter ON (chapter.code =  program.chapter) " +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".functional_code ON (functional_code.code =  program.functional_code) " +
-                "WHERE instruction.id = ? " +
-                "group by program_action.id,program.id,chapter_label,code_label " +
-                "order by section desc,program_id,action_id))" +
-                "SELECT results.* from results " +
-                "order by section desc,program_id,action_id " +
-                ";" +
-                "";
+        query = "With values as (" +
+                "SELECT orders.id," +
+                "contract_type.code AS code, program.name AS program, program.section as program_section," +
+                "chapter.code as chapter, chapter.label as chapter_label, functional_code.label as code_label, program.label" +
+                "as program_label," +
+                "program_action.action as action_code, program_action.description as action_name" +
+                "FROM(" +
+                "(SELECT ore.id, true AS isregion, ore.price AS\"price TTC\", ore.amount, ore.creation_date, ore.modification_date," +
+                "ore.name, ore.summary, ore.description, ore.image, ore.status, ore.id_contract, ore.equipment_key, ore.id_campaign," +
+                "ore.id_structure, ore.cause_status, ore.number_validation, ore.id_order, ore.comment, ore.rank AS\"prio\"," +
+                "NULL AS price_proposal, ore.id_project, ore.id_order_client_equipment, program, action, ore.id_operation," +
+                "NULL AS override_region" +
+                "FROM Lystore.\"order-region-equipment\"ore)" +
+                "UNION" +
+                "(SELECT oce.id, false AS isregion," +
+                "CASE WHEN price_proposal IS NULL then price + (price * tax_amount / 100) else price_proposal end" +
+                "AS \"price TTC\"," +
+                "amount, creation_date, NULL" +
+                "AS modification_date, name, summary, description, image, status, id_contract," +
+                "equipment_key, id_campaign, id_structure, cause_status, number_validation, id_order, comment, rank AS \"prio\"," +
+                "price_proposal, id_project, NULL" +
+                "AS id_order_client_equipment, program, action, id_operation, override_region" +
+                "FROM Lystore.order_client_equipment oce)" +
+                ")AS orders" +
+                "INNER JOIN Lystore.operation ON (orders.id_operation = operation.id AND(" +
+                "orders.override_region != true OR orders.override_region IS NULL))" +
+                "INNER JOIN Lystore.label_operation AS label ON (operation.id_label = label.id)" +
+                "INNER JOIN Lystore.instruction ON (operation.id_instruction = instruction.id AND instruction.id = 1)" +
+                "INNER JOIN Lystore.contract ON (orders.id_contract = contract.id)" +
+                "INNER JOIN Lystore.contract_type ON contract.id_contract_type = contract_type.id" +
+                "LEFT JOIN Lystore.specific_structures ON orders.id_structure = specific_structures.id" +
+                "INNER JOIN Lystore.program_action ON (orders.action = program_action.action)" +
+                "INNER JOIN Lystore.program ON orders.program = program.name" +
+                "INNER JOIN Lystore.chapter ON (chapter.code = program.chapter)" +
+                "INNER JOIN Lystore.functional_code ON (functional_code.code = program.functional_code)" +
+                "GROUP BY" +
+                "program.name, contract_type.code, program.functional_code, specific_structures.type, orders.amount, orders.name, orders.equipment_key," +
+                "orders.id_operation, orders.id_structure, orders.id, contract.id, label.label, program_action.id_program," +
+                "orders.id_order_client_equipment, orders.price_proposal, orders.override_region, orders.comment," +
+                "orders.id, orders.isregion, program.section, chapter.code, chapter.label, functional_code.label, program.label," +
+                "program_action.action, program_action.description" +
+                "ORDER BY id_structure, code, id_structure, program, code)" +
+                "SELECT *" +
+                "from values";
 
         Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")).add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {

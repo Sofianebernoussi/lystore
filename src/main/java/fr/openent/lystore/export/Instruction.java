@@ -3,6 +3,7 @@ package fr.openent.lystore.export;
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.equipmentRapp.*;
 import fr.openent.lystore.export.investissement.*;
+import fr.openent.lystore.export.iris.IrisTab;
 import fr.openent.lystore.export.notificationEquipCP.LinesBudget;
 import fr.openent.lystore.export.notificationEquipCP.NotificationLycTab;
 import fr.openent.lystore.export.notificationEquipCP.RecapMarketGestion;
@@ -304,18 +305,11 @@ public class Instruction {
 
                     Workbook workbook = new XSSFWorkbook();
                     List<Future> futures = new ArrayList<>();
-                    Future<Boolean> LinesBudgetFuture = Future.future();
-                    Future<Boolean> RecapMarketGestionFuture = Future.future();
-                    Future<Boolean> NotifcationLyceeFuture = Future.future();
+                    Future<Boolean> IrisFuture = Future.future();
 
-                    futures.add(LinesBudgetFuture);
-                    futures.add(RecapMarketGestionFuture);
-                    futures.add(NotifcationLyceeFuture);
-
+                    futures.add(IrisFuture);
                     futureHandler(handler, workbook, futures);
-                    new NotificationLycTab(workbook, instruction).create(getHandler(NotifcationLyceeFuture));
-                    new RecapMarketGestion(workbook, instruction).create(getHandler(RecapMarketGestionFuture));
-                    new LinesBudget(workbook, instruction).create(getHandler(LinesBudgetFuture));
+                    new IrisTab(workbook, instruction).create(getHandler(IrisFuture));
 
                 }
             }

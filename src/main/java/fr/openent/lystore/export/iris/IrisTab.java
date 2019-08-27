@@ -8,15 +8,32 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 
-public class irisTab extends TabHelper {
+public class IrisTab extends TabHelper {
     /**
      * open the tab or create it if it doesn't exists
      *
      * @param wb
      * @param instruction
-     * @param TabName
      */
-    public irisTab(Workbook wb, JsonObject instruction, String TabName) {
+
+    private final String IDDOS = "iddos";//
+    private final String LBDDOS = "lbdoss";//
+    private final String OBJDDOS = "objdos";//
+    private final String IDTIERS = "idtiers";//
+    private final String NATURE = "nature";//
+    private final String PROGRAMME = "programme";//
+    private final String ACTION = "action";//
+    private final String ENVILIG = "envilig";//
+    private final String MTPROP = "mtprop";//
+    private final String IDCOM = "idcom";//
+    private final String IDLOCAL = "idlocal";//
+    private final String IDCPER = "idcper";
+    private final String IDCPRD = "idcprd";
+    private final String QPVIDENT = "qpvident";
+    private final String CPVIDENT = "cvident";
+
+
+    public IrisTab(Workbook wb, JsonObject instruction) {
         super(wb, instruction, "IRIS");
     }
 
@@ -28,6 +45,21 @@ public class irisTab extends TabHelper {
 
     @Override
     public void initDatas(Handler<Either<String, Boolean>> handler) {
+        excel.insertStandarText(0, 0, IDDOS);
+        excel.insertStandarText(1, 0, LBDDOS);
+        excel.insertStandarText(2, 0, OBJDDOS);
+        excel.insertStandarText(3, 0, IDTIERS);
+        excel.insertStandarText(4, 0, NATURE);
+        excel.insertStandarText(5, 0, PROGRAMME);
+        excel.insertStandarText(6, 0, ACTION);
+        excel.insertStandarText(7, 0, ENVILIG);
+        excel.insertStandarText(8, 0, MTPROP);
+        excel.insertStandarText(9, 0, IDCOM);
+        excel.insertStandarText(10, 0, IDLOCAL);
+        excel.insertStandarText(11, 0, IDCPER);
+        excel.insertStandarText(12, 0, IDCPRD);
+        excel.insertStandarText(13, 0, QPVIDENT);
+        excel.insertStandarText(14, 0, CPVIDENT);
         handler.handle(new Either.Right<>(true));
     }
 

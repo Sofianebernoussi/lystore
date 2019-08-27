@@ -55,6 +55,7 @@ public class ExcelHelper {
     public final CellStyle blueTitleHeaderBorderlessCenteredCurrencyStyle;
     public final CellStyle labelBoldStyle;
     public final CellStyle tabIntStyleCenterBold;
+    public final CellStyle standardTextStyle;
 
     protected static Logger log = LoggerFactory.getLogger(ExcelHelper.class);
 
@@ -94,6 +95,7 @@ public class ExcelHelper {
         this.blueTitleHeaderBorderlessCenteredCurrencyStyle = wb.createCellStyle();
         this.labelBoldStyle = wb.createCellStyle();
         this.tabIntStyleCenterBold = wb.createCellStyle();
+        this.standardTextStyle = wb.createCellStyle();
 
         format = wb.createDataFormat();
         format.getFormat("#.#");
@@ -441,8 +443,6 @@ public class ExcelHelper {
         this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setFont(blueTitleHeadFont);
         this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setDataFormat(format.getFormat("#,##0.00 €"));
-
-
 
     }
     public void setBold(Cell cell) {
@@ -1079,6 +1079,20 @@ public class ExcelHelper {
         }
     }
 
+    public void insertStandarText(int cellColumn, int line, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.standardTextStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellValue(data);
+            cell.setCellStyle(this.standardTextStyle);
+        }
+    }
 
     /**
      * Set default style for a tab and init all non init cells of the tab

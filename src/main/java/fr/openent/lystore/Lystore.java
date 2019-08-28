@@ -18,6 +18,7 @@ public class Lystore extends BaseServer {
 
     public static final String ADMINISTRATOR_RIGHT = "lystore.administrator";
     public static final String MANAGER_RIGHT = "lystore.manager";
+    public static long timeout = 99999999999L;
 
     @Override
     public void start() throws Exception {

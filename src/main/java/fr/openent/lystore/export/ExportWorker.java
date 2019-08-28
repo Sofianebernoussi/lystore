@@ -4,12 +4,31 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.helpers.ExcelHelper;
 import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultExportServiceService;
-import io.vertx.core.Handler;
+import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.datagram.DatagramSocket;
+import io.vertx.core.datagram.DatagramSocketOptions;
+import io.vertx.core.dns.DnsClient;
+import io.vertx.core.dns.DnsClientOptions;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.file.FileSystem;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.NetClient;
+import io.vertx.core.net.NetClientOptions;
+import io.vertx.core.net.NetServer;
+import io.vertx.core.net.NetServerOptions;
+import io.vertx.core.shareddata.SharedData;
+import io.vertx.core.spi.VerticleFactory;
 import org.entcore.common.storage.Storage;
 import org.vertx.java.busmods.BusModBase;
+
+import java.util.Set;
+import java.util.function.Supplier;
 
 import static fr.openent.lystore.Lystore.CONFIG;
 import static fr.openent.lystore.Lystore.STORAGE;
@@ -24,8 +43,16 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
     public void start() {
         super.start();
         vertx.eventBus().localConsumer(ExportWorker.class.getSimpleName(), this);
+        vertx.setTimer(4L, new Handler<Long>() {
+            @Override
+            public void handle(Long event) {
+//                vertx.close();
+                System.out.println("plpo");
+            }
+        });
         this.config = CONFIG;
         this.storage = STORAGE;
+
     }
 
     @Override

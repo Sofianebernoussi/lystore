@@ -1,9 +1,11 @@
 package fr.openent.lystore.export;
 
+import fr.openent.lystore.Lystore;
 import fr.openent.lystore.helpers.ExcelHelper;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -25,6 +27,7 @@ public abstract class TabHelper {
     protected static final String CMD = "CMD";
     protected static final String CMR = "CMR";
     protected static final String LYCEE = "LYC";
+    protected static final String NULL_DATA="Pas de données sur l'établissement";
     protected static final String INVESTISSEMENT = "Investissement";
     protected static final String FONCTIONNEMENT = "Fonctionnement";
     protected Workbook wb;
@@ -39,6 +42,7 @@ public abstract class TabHelper {
     protected boolean isEmpty = false;
     protected Logger log = LoggerFactory.getLogger(DefaultProjectService.class);
     protected int arrayLength = 4;
+    protected long timeout = 999999999;
     protected JsonArray datas;
 
 
@@ -201,7 +205,7 @@ public abstract class TabHelper {
     }
 
     public void sqlHandler(Handler<Either<String, JsonArray>> handler) {
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
+        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), new DeliveryOptions().setSendTimeout(Lystore.timeout * 1000000000L),SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
                 handler.handle(event.left());
             } else {

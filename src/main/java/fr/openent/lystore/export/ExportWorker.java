@@ -30,6 +30,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
 
     @Override
     public void handle(Message<JsonObject> event) {
+        logger.info("Starting Worker");
         final String action = event.body().getString("action", "");
         String fileNamIn = event.body().getString("titleFile");
         idNewFile = event.body().getInteger("idFile");
@@ -65,11 +66,15 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
     }
 
     private void exportNotificationCp(Integer instructionId, String titleFile) {
+        logger.info("Export NotificationCP started");
+
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportNotficationCp(event1 -> {
             if (event1.isLeft()) {
                 ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left());
             } else {
+                logger.info("Export NotificationCP ended");
+
                 Buffer xlsx = event1.right().getValue();
                 saveBuffer(xlsx, titleFile);
             }
@@ -77,11 +82,15 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
     }
 
     private void exportSubvention(Integer instructionId, String titleFile) {
+        logger.info("Export Subvention started");
+
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportSubvention(event1 -> {
             if (event1.isLeft()) {
                 ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left());
             } else {
+                logger.info("Export Subvention ended");
+
                 Buffer xlsx = event1.right().getValue();
                 saveBuffer(xlsx, titleFile);
             }
@@ -89,11 +98,15 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
     }
 
     private void exportPublipostage(Integer instructionId, String titleFile) {
+        logger.info("Export Publipostage started");
+
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportPublipostage(file -> {
             if (file.isLeft()) {
                 ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + file.left());
             } else {
+                logger.info("Export Publipostage ended");
+
                 Buffer xlsx = file.right().getValue();
                 saveBuffer(xlsx, titleFile);
             }
@@ -101,11 +114,15 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
     }
 
     private void exportRME(Integer instructionId, String titleFile) {
+        logger.info("Export RME started");
+
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportInvestissement(event -> {
             if (event.isLeft()) {
                 ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event.left());
             } else {
+                logger.info("Export RME ended");
+
                 Buffer xlsx = event.right().getValue();
                 saveBuffer(xlsx, titleFile);
             }
@@ -124,12 +141,14 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
     }
 
     private void exportEquipment(int instructionId, String type, String titleFile) {
+        logger.info("Export Equipment started");
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportEquipmentRapp(event1 -> {
             if (event1.isLeft()) {
                 ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx");
             } else {
                 Buffer xlsx = event1.right().getValue();
+                logger.info("Export Equipment ended");
                 saveBuffer(xlsx, titleFile);
             }
         }, type);

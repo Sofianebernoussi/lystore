@@ -176,8 +176,11 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
 
     private void saveFile(String fileId, Number idExport) {
         exportService.updateWhenSuccess(fileId, idExport, updateExport -> {
+            logger.info("saving Success in sql");
             if (updateExport.isLeft()) {
                 ExcelHelper.catchError(exportService, idNewFile, "Fail to insert file in SQL");
+            }else{
+                logger.info("Successfully insert in SQL");
             }
         });
     }

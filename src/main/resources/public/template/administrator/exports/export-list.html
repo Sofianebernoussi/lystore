@@ -32,7 +32,15 @@
                     <i class="up-open" ng-show="sort.export.type === 'created' && !sort.export.reverse"></i>
                     <i class="down-open" ng-show="sort.export.type === 'created' && sort.export.reverse"></i>
                 </td>
-                <td></td>
+                <td ng-click="sort.export.type = 'instruction_name';
+                    sort.export.reverse = !sort.export.reverse">
+                    <i18n>lystore.instruction.name</i18n>
+                    <i class="up-open" ng-show="sort.export.type === 'instruction_name' && !sort.export.reverse"></i>
+                    <i class="down-open" ng-show="sort.export.type === 'instruction_name' && sort.export.reverse"></i>
+                </td>
+                <td>
+
+                </td>
             </tr>
             </thead>
             <tbody>
@@ -53,6 +61,9 @@
                 <td>
                     [[export.created]]
                 </td>
+                <td>
+                    [[export.instruction_name]]_[[export.instruction_id]]
+                </td>
                 <td
                         ng-click="getExport(export)"
                         ng-show="export.status === STATUS.SUCCESS"
@@ -60,6 +71,7 @@
                     <i class="downloadButton icon-medium-size"></i>
                 </td>
                 <td ng-show="!(export.status === STATUS.SUCCESS)">&nbsp;</td>
+
             </tr>
             </tbody>
         </table>

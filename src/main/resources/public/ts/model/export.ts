@@ -9,6 +9,8 @@ export class Export implements Selectable {
     fileid: string;
     ownerid: string;
     id: Number;
+    instruction_name:string;
+    instruction_id:Number;
     status: STATUS;
     constructor(){
         this.status = STATUS.WAITING;

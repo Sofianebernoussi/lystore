@@ -1386,7 +1386,10 @@ public class ExcelHelper {
 
     public static void makeExportExcel(HttpServerRequest request, EventBus eb, ExportService exportService, String
             action, String name) {
+        Integer id=-1;
         boolean withType = request.getParam("type") != null;
+        if(request.getParam("id")!=null)
+            id = Integer.parseInt(request.getParam("id"));
         String type = "";
         JsonObject infoFile = new JsonObject();
         if (withType) {
@@ -1395,8 +1398,9 @@ public class ExcelHelper {
         }
         String titleFile = withType ? ExcelHelper.makeTheNameExcelExport(name, type) : ExcelHelper.makeTheNameExcelExport(name);
 
+        Integer finalId = id;
         UserUtils.getUserInfos(eb, request, user -> {
-            exportService.createWhenStart(titleFile, user.getUserId(), newExport -> {
+            exportService.createWhenStart(finalId,titleFile, user.getUserId(), newExport -> {
                 if (newExport.isRight()) {
                     Number idFile = newExport.right().getValue().getInteger("id");
                     try {

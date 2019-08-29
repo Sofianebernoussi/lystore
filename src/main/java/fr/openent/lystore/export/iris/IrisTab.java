@@ -2,11 +2,15 @@ package fr.openent.lystore.export.iris;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.TabHelper;
+import fr.openent.lystore.service.StructureService;
+import fr.openent.lystore.service.impl.DefaultStructureService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
+
+import java.util.ArrayList;
 
 public class IrisTab extends TabHelper {
     /**
@@ -31,7 +35,7 @@ public class IrisTab extends TabHelper {
     private final String IDCPRD = "idcprd";
     private final String QPVIDENT = "qpvident";
     private final String CPVIDENT = "cvident";
-
+    private StructureService structureService;
 
     public IrisTab(Workbook wb, JsonObject instruction) {
         super(wb, instruction, "IRIS");
@@ -41,10 +45,64 @@ public class IrisTab extends TabHelper {
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
         getDatas(event -> handleDatasDefault(event, handler));
+        structureService= new DefaultStructureService(Lystore.lystoreSchema);
+    }
+
+
+    private void setStructures(JsonArray structures) {
+        JsonObject program, structure;
+        JsonArray actions;
+        for (int i = 0; i < datas.size(); i++) {
+            JsonObject data = datas.getJsonObject(i);
+            actions = new JsonArray(data.getString("actions"));
+
+                for (int j = 0; j < structures.size(); j++) {
+                    structure = structures.getJsonObject(j);
+                    data.put("nameEtab", NULL_DATA);
+                    data.put("uai",NULL_DATA);
+                    data.put("city", NULL_DATA);
+                    data.put("type", NULL_DATA);
+                    data.put("zipCode","??");
+
+                    if (data.getString("id_structure").equals(structure.getString("id"))) {
+                        data.put("nameEtab", structure.getString("name"));
+                        data.put("uai", structure.getString("uai"));
+                        data.put("city", structure.getString("city"));
+                        data.put("type", structure.getString("type"));
+                        data.put("zipCode", structure.getString("zipCode"));
+                    }
+                }
+//            data.put("actionsJO", actions);
+        }
     }
 
     @Override
     public void initDatas(Handler<Either<String, Boolean>> handler) {
+
+        ArrayList structuresId = new ArrayList<>();
+        for (int i = 0; i < datas.size(); i++) {
+            JsonObject data = datas.getJsonObject(i);
+                structuresId.add(structuresId.size(), data.getString("id_structure"));
+        }
+        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(Either<String, JsonArray> repStructures) {
+                if (repStructures.isRight()) {
+                    JsonArray structures = repStructures.right().getValue();
+                    setStructures(structures);
+                    setArray(datas);
+                    handler.handle(new Either.Right<>(true));
+                } else {
+                    handler.handle(new Either.Left<>("Error when casting neo"));
+
+                }
+            }
+        });
+
+    }
+
+    @Override
+    protected void setArray(JsonArray datas){
         excel.insertStandarText(0, 0, IDDOS);
         excel.insertStandarText(1, 0, LBDDOS);
         excel.insertStandarText(2, 0, OBJDDOS);
@@ -60,7 +118,12 @@ public class IrisTab extends TabHelper {
         excel.insertStandarText(12, 0, IDCPRD);
         excel.insertStandarText(13, 0, QPVIDENT);
         excel.insertStandarText(14, 0, CPVIDENT);
-        handler.handle(new Either.Right<>(true));
+        for(int i=0;i<datas.size();i++){
+            JsonObject data =datas.getJsonObject(i);
+            excel.insertStandarText(0,0,"");
+            excel.insertStandarText(1,0,"ETAB."+data.getString("uai"));
+            excel.insertStandarText(2,0,"");
+        }
     }
 
     @Override
@@ -126,10 +189,8 @@ public class IrisTab extends TabHelper {
                 "               orders.isregion, " +
                 "              project.room,project.stair, project.building " +
                 "             order by campaign,code,market_id, id_structure,program,code " +
-                "  )    SELECT  values.id_structure as id_structure,    array_to_json(array_agg(values))as actions ,SUM(values.total) as totalPrice " +
-                "  from  values      " +
-                "  Group by values.id_structure   " +
-                "  Order by values.id_structure   ;";
+                "  )    SELECT  values.* " +
+                "  from  values      " ;
 
 
         sqlHandler(handler);

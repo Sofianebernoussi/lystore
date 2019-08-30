@@ -6,6 +6,8 @@ import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultExportServiceService;
+import fr.wseduc.webutils.Either;
+import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
@@ -1368,13 +1370,16 @@ public class ExcelHelper {
         });
         log.error("Error for create file export excel " + errorCatch);
     }
-
     public static void catchError(ExportService exportService, Number idFile, String errorCatchTextOutput) {
         exportService.updateWhenError(idFile, makeError -> {
             if (makeError.isLeft()) {
                 log.error("Error for create file export excel " + makeError.left() + errorCatchTextOutput);
             }
         });
+        log.error("Error for create file export excel " + errorCatchTextOutput);
+    }
+    public static void catchError(ExportService exportService, Number idFile, String errorCatchTextOutput, Handler<Either<String,Boolean>> handler) {
+        exportService.updateWhenError(idFile,handler);
         log.error("Error for create file export excel " + errorCatchTextOutput);
     }
 
@@ -1416,7 +1421,7 @@ public class ExcelHelper {
                                 .put("idFile", idFile)
                                 .put("userId", user.getUserId());
                         eb.send(ExportWorker.class.getSimpleName(), infoFile, handlerToAsyncHandler(eventExport ->
-                                log.info("Ok verticle worker"))
+                                log.info("Ok calling worker"))
                         );
                         request.response().setStatusCode(201).end("Import started " + idFile);
                     } catch (Exception error) {

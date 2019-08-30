@@ -51,7 +51,8 @@ public class VerifBudgetTab extends TabHelper {
             JsonArray actions = new JsonArray(data.getString("actions"));
             for (int j = 0; j < actions.size(); j++) {
                 JsonObject action = actions.getJsonObject(j);
-                structuresId.add(structuresId.size(), action.getString("id_structure"));
+                if(!structuresId.contains(action.getString("id_structure")))
+                    structuresId.add(structuresId.size(), action.getString("id_structure"));
 
             }
         }

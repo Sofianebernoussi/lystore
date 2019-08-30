@@ -6,6 +6,7 @@ import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -114,7 +115,7 @@ public class DefaultExportServiceService implements ExportService {
         }
     }
 
-    public void updateWhenError (Number idExport, Handler<Either<String, JsonObject>> handler){
+    public void updateWhenError (Number idExport, Handler<Either<String, Boolean>> handler){
         try{
             String query = "" +
                     "UPDATE " +
@@ -122,13 +123,21 @@ public class DefaultExportServiceService implements ExportService {
                     "SET " +
                     "status = 'ERROR'  " +
                     "WHERE id = ? ";
-            Sql.getInstance().prepared(query, new JsonArray().add(idExport), SqlResult.validUniqueResultHandler(handler));
+            Sql.getInstance().prepared(query, new JsonArray().add(idExport),event -> {
+                if(event.body().getString("status").equals("ok")){
+                    logger.info("OK ERROR UPDATE " + idExport);
+                    handler.handle(new Either.Right<>(true));
+                }else {
+                    handler.handle(new Either.Left<>("ERROR UPDATING ERROR"));
+                    logger.info("ERROR UPDATING ERROR");
+                }
+            });
         } catch (Exception error){
             logger.error("error when update ERROR in export" + error);
         }
     }
 
-    public void updateWhenSuccess (String fileId, Number idExport, Handler<Either<String, JsonObject>> handler){
+    public void updateWhenSuccess (String fileId, Number idExport, Handler<Either<String, Boolean>> handler){
         try{
             String query = "" +
                     "UPDATE " +
@@ -137,7 +146,15 @@ public class DefaultExportServiceService implements ExportService {
                     "fileid = ? ," +
                     "status = 'SUCCESS'  " +
                     "WHERE id = ? ";
-            Sql.getInstance().prepared(query, new JsonArray().add(fileId).add(idExport), SqlResult.validUniqueResultHandler(handler));
+            Sql.getInstance().prepared(query, new JsonArray().add(fileId).add(idExport), event -> {
+             if(event.body().getString("status").equals("ok")){
+                 logger.info("OK SUCCESS UPDATE " + idExport);
+                 handler.handle(new Either.Right<>(true));
+             }else {
+                 handler.handle(new Either.Left<>("ERROR UPDATING SUCCESS"));
+                 logger.info("ERROR  UPDATING SUCCESS");
+             }
+            });
         } catch (Exception error){
             logger.error("error when update SUCCESS in export" + error);
         }

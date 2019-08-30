@@ -6,6 +6,8 @@ import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
@@ -32,7 +34,9 @@ public class DefaultExportServiceService implements ExportService {
                 "status, " +
                 "filename," +
                 "fileid," +
-                "created " +
+                "created," +
+                "instruction_name," +
+                "instruction_id " +
                 "FROM " + Lystore.lystoreSchema + ".export " +
                 "WHERE ownerid = ?" +
                 "order by created  DESC";
@@ -72,27 +76,46 @@ public class DefaultExportServiceService implements ExportService {
         Sql.getInstance().prepared(query, values, SqlResult.validRowsResultHandler(handler));
 
     }
-    public void createWhenStart (String nameFile, String userId, Handler<Either<String, JsonObject>> handler){
+    public void createWhenStart (Integer instruction_id,String nameFile, String userId, Handler<Either<String, JsonObject>> handler){
         try{
-        String query = "" +
-                "INSERT INTO " +
-                Lystore.lystoreSchema + ".export(  " +
-                "filename," +
-                 "ownerid) " +
-                "VALUES (" +
-                "?, " +
-                "?)" +
-                "RETURNING id ;";
-        JsonArray params = new JsonArray()
-                .add(nameFile)
-                .add(userId);
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+            String nameQuery= "SELECT object from "+Lystore.lystoreSchema+".instruction where id= ?";
+            Sql.getInstance().prepared(nameQuery,new JsonArray().add(instruction_id), SqlResult.validResultHandler(new Handler<Either<String, JsonArray>>() {
+                @Override
+                public void handle(Either<String, JsonArray> event) {
+                    if(event.isRight()){
+                        JsonArray results = event.right().getValue();
+                        String query = "" +
+                                "INSERT INTO " +
+                                Lystore.lystoreSchema + ".export(  " +
+                                "filename," +
+                                "ownerid," +
+                                " instruction_id," +
+                                " instruction_name) " +
+                                "VALUES (" +
+                                "?, " +
+                                "?," +
+                                "?," +
+                                "?)" +
+                                "RETURNING id ;";
+                        JsonArray params = new JsonArray()
+                                .add(nameFile)
+                                .add(userId)
+                                .add(instruction_id)
+                                .add(results.getJsonObject(0).getString("object"));
+
+                        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+                    }else{
+                        handler.handle(new Either.Left<>("Error when init export excel in SQL"));
+                        logger.error("Error when init export excel in SQL");
+                    }
+                }
+            }));
         } catch (Exception error){
             logger.error("error when create export" + error);
         }
     }
 
-    public void updateWhenError (Number idExport, Handler<Either<String, JsonObject>> handler){
+    public void updateWhenError (Number idExport, Handler<Either<String, Boolean>> handler){
         try{
             String query = "" +
                     "UPDATE " +
@@ -100,13 +123,21 @@ public class DefaultExportServiceService implements ExportService {
                     "SET " +
                     "status = 'ERROR'  " +
                     "WHERE id = ? ";
-            Sql.getInstance().prepared(query, new JsonArray().add(idExport), SqlResult.validUniqueResultHandler(handler));
+            Sql.getInstance().prepared(query, new JsonArray().add(idExport),event -> {
+                if(event.body().getString("status").equals("ok")){
+                    logger.info("OK ERROR UPDATE " + idExport);
+                    handler.handle(new Either.Right<>(true));
+                }else {
+                    handler.handle(new Either.Left<>("ERROR UPDATING ERROR"));
+                    logger.info("ERROR UPDATING ERROR");
+                }
+            });
         } catch (Exception error){
             logger.error("error when update ERROR in export" + error);
         }
     }
 
-    public void updateWhenSuccess (String fileId, Number idExport, Handler<Either<String, JsonObject>> handler){
+    public void updateWhenSuccess (String fileId, Number idExport, Handler<Either<String, Boolean>> handler){
         try{
             String query = "" +
                     "UPDATE " +
@@ -115,7 +146,15 @@ public class DefaultExportServiceService implements ExportService {
                     "fileid = ? ," +
                     "status = 'SUCCESS'  " +
                     "WHERE id = ? ";
-            Sql.getInstance().prepared(query, new JsonArray().add(fileId).add(idExport), SqlResult.validUniqueResultHandler(handler));
+            Sql.getInstance().prepared(query, new JsonArray().add(fileId).add(idExport), event -> {
+             if(event.body().getString("status").equals("ok")){
+                 logger.info("OK SUCCESS UPDATE " + idExport);
+                 handler.handle(new Either.Right<>(true));
+             }else {
+                 handler.handle(new Either.Left<>("ERROR UPDATING SUCCESS"));
+                 logger.info("ERROR  UPDATING SUCCESS");
+             }
+            });
         } catch (Exception error){
             logger.error("error when update SUCCESS in export" + error);
         }

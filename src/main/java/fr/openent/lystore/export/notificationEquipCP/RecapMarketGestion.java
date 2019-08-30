@@ -245,6 +245,14 @@ public class RecapMarketGestion extends TabHelper {
                 JsonObject action = actions.getJsonObject(k);
                 for (int j = 0; j < structures.size(); j++) {
                     structure = structures.getJsonObject(j);
+                    action.put("nameEtab", NULL_DATA);
+                    action.put("uai",NULL_DATA);
+                    action.put("city", NULL_DATA);
+                    action.put("type", NULL_DATA);
+                    action.put("address", NULL_DATA);
+                    action.put("zipCode","??");
+                    action.put("phone", NULL_DATA);
+
                     if (action.getString("id_structure").equals(structure.getString("id"))) {
                         action.put("nameEtab", structure.getString("name"));
                         action.put("uai", structure.getString("uai"));
@@ -252,6 +260,8 @@ public class RecapMarketGestion extends TabHelper {
                         action.put("address", structure.getString("address"));
                         action.put("zipCode", structure.getString("zipCode"));
                         action.put("phone", structure.getString("phone"));
+
+
                     }
                 }
             }

@@ -124,6 +124,15 @@ export class Instruction implements Selectable {
             notify.error("lystore.instruction.get.err")
         }
     }
+
+    async exportIris() {
+        try {
+            const {data} = await http.get(`/lystore/instructions/export/iris/${this.id}`);
+
+        } catch (e) {
+            notify.error("lystore.instruction.get.err")
+        }
+    }
 }
 
 export class Instructions extends Selection<Instruction>{

@@ -6,6 +6,8 @@ import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultExportServiceService;
+import fr.wseduc.webutils.Either;
+import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
@@ -1346,13 +1348,16 @@ public class ExcelHelper {
         });
         log.error("Error for create file export excel " + errorCatch);
     }
-
     public static void catchError(ExportService exportService, Number idFile, String errorCatchTextOutput) {
         exportService.updateWhenError(idFile, makeError -> {
             if (makeError.isLeft()) {
                 log.error("Error for create file export excel " + makeError.left() + errorCatchTextOutput);
             }
         });
+        log.error("Error for create file export excel " + errorCatchTextOutput);
+    }
+    public static void catchError(ExportService exportService, Number idFile, String errorCatchTextOutput, Handler<Either<String,Boolean>> handler) {
+        exportService.updateWhenError(idFile,handler);
         log.error("Error for create file export excel " + errorCatchTextOutput);
     }
 
@@ -1364,7 +1369,10 @@ public class ExcelHelper {
 
     public static void makeExportExcel(HttpServerRequest request, EventBus eb, ExportService exportService, String
             action, String name) {
+        Integer id=-1;
         boolean withType = request.getParam("type") != null;
+        if(request.getParam("id")!=null)
+            id = Integer.parseInt(request.getParam("id"));
         String type = "";
         JsonObject infoFile = new JsonObject();
         if (withType) {
@@ -1373,8 +1381,9 @@ public class ExcelHelper {
         }
         String titleFile = withType ? ExcelHelper.makeTheNameExcelExport(name, type) : ExcelHelper.makeTheNameExcelExport(name);
 
+        Integer finalId = id;
         UserUtils.getUserInfos(eb, request, user -> {
-            exportService.createWhenStart(titleFile, user.getUserId(), newExport -> {
+            exportService.createWhenStart(finalId,titleFile, user.getUserId(), newExport -> {
                 if (newExport.isRight()) {
                     Number idFile = newExport.right().getValue().getInteger("id");
                     try {
@@ -1390,7 +1399,7 @@ public class ExcelHelper {
                                 .put("idFile", idFile)
                                 .put("userId", user.getUserId());
                         eb.send(ExportWorker.class.getSimpleName(), infoFile, handlerToAsyncHandler(eventExport ->
-                                log.info("Ok verticle worker"))
+                                log.info("Ok calling worker"))
                         );
                         request.response().setStatusCode(201).end("Import started " + idFile);
                     } catch (Exception error) {

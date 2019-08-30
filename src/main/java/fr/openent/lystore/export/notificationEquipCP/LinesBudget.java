@@ -39,7 +39,8 @@ public class LinesBudget extends TabHelper {
             JsonArray actions = new JsonArray(data.getString("actions"));
             for (int j = 0; j < actions.size(); j++) {
                 JsonObject action = actions.getJsonObject(j);
-                structuresId.add(structuresId.size(), action.getString("id_structure"));
+                if(!structuresId.contains(action.getString("id_structure")))
+                    structuresId.add(structuresId.size(), action.getString("id_structure"));
 
             }
         }
@@ -68,8 +69,15 @@ public class LinesBudget extends TabHelper {
             actions = new JsonArray(data.getString("actions"));
             for (int k = 0; k < actions.size(); k++) {
                 JsonObject action = actions.getJsonObject(k);
+
                 for (int j = 0; j < structures.size(); j++) {
                     structure = structures.getJsonObject(j);
+                        action.put("nameEtab", NULL_DATA);
+                        action.put("uai",NULL_DATA);
+                        action.put("city", NULL_DATA);
+                        action.put("type", NULL_DATA);
+                        action.put("zipCode","??");
+
                     if (action.getString("id_structure").equals(structure.getString("id"))) {
                         action.put("nameEtab", structure.getString("name"));
                         action.put("uai", structure.getString("uai"));

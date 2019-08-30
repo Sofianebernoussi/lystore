@@ -19,7 +19,6 @@ import org.entcore.common.sql.SqlResult;
 
 public class Publipostage extends TabHelper {
     private StructureService structureService;
-    private Logger logger = LoggerFactory.getLogger(DefaultProjectService.class);
     private int lengthGlobalCols = 7;
     private int lengthGlobalRows = 1;
     public Publipostage(Workbook workbook, JsonObject instruction) {
@@ -147,19 +146,5 @@ public class Publipostage extends TabHelper {
                 handler.handle(new Either.Right<>(datas));
             }
         }));
-    }
-
-    private void getStructures(JsonArray ids, Handler<Either<String, JsonArray>> handler)  {
-        String query = "" +
-                "MATCH (s:Structure) " +
-                "WHERE s.id IN {ids} " +
-                "RETURN " +
-                "s.id as id," +
-                " s.UAI as uai," +
-                " s.name as name," +
-                " s.address + ' ,' + s.zipCode +' ' + s.city as address,  " +
-                "s.zipCode as zipCode," +
-                " s.city as city";
-        Neo4j.getInstance().execute(query, new JsonObject().put("ids", ids), Neo4jResult.validResultHandler(handler));
     }
 }

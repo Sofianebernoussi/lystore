@@ -50,20 +50,18 @@ public class IrisTab extends TabHelper {
 
 
     private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
+        JsonObject  structure;
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
-            actions = new JsonArray(data.getString("actions"));
-
                 for (int j = 0; j < structures.size(); j++) {
                     structure = structures.getJsonObject(j);
-                    data.put("nameEtab", NULL_DATA);
-                    data.put("uai",NULL_DATA);
-                    data.put("city", NULL_DATA);
-                    data.put("type", NULL_DATA);
-                    data.put("zipCode","??");
-
+                    if(!data.containsKey("nameEtab")) {
+                        data.put("nameEtab", NULL_DATA);
+                        data.put("uai", NULL_DATA);
+                        data.put("city", NULL_DATA);
+                        data.put("type", NULL_DATA);
+                        data.put("zipCode", "??");
+                    }
                     if (data.getString("id_structure").equals(structure.getString("id"))) {
                         data.put("nameEtab", structure.getString("name"));
                         data.put("uai", structure.getString("uai"));
@@ -72,7 +70,6 @@ public class IrisTab extends TabHelper {
                         data.put("zipCode", structure.getString("zipCode"));
                     }
                 }
-//            data.put("actionsJO", actions);
         }
     }
 
@@ -82,47 +79,97 @@ public class IrisTab extends TabHelper {
         ArrayList structuresId = new ArrayList<>();
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
+            if(!structuresId.contains(data.getString("id_structure")))
                 structuresId.add(structuresId.size(), data.getString("id_structure"));
         }
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> repStructures) {
-                if (repStructures.isRight()) {
-                    JsonArray structures = repStructures.right().getValue();
-                    setStructures(structures);
-                    setArray(datas);
-                    handler.handle(new Either.Right<>(true));
-                } else {
-                    handler.handle(new Either.Left<>("Error when casting neo"));
 
+        try {
+            structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+                @Override
+                public void handle(Either<String, JsonArray> repStructures) {
+                    if (repStructures.isRight()) {
+                        JsonArray structures = repStructures.right().getValue();
+                        setStructures(structures);
+                        setArray(datas);
+                        handler.handle(new Either.Right<>(true));
+                    } else {
+                        handler.handle(new Either.Left<>("Error when casting neo"));
+
+                    }
                 }
-            }
-        });
-
+            });
+        }catch (Exception e){
+            initDatas(handler);
+        }
     }
 
     @Override
     protected void setArray(JsonArray datas){
-        excel.insertStandarText(0, 0, IDDOS);
-        excel.insertStandarText(1, 0, LBDDOS);
-        excel.insertStandarText(2, 0, OBJDDOS);
-        excel.insertStandarText(3, 0, IDTIERS);
-        excel.insertStandarText(4, 0, NATURE);
-        excel.insertStandarText(5, 0, PROGRAMME);
-        excel.insertStandarText(6, 0, ACTION);
-        excel.insertStandarText(7, 0, ENVILIG);
-        excel.insertStandarText(8, 0, MTPROP);
-        excel.insertStandarText(9, 0, IDCOM);
-        excel.insertStandarText(10, 0, IDLOCAL);
-        excel.insertStandarText(11, 0, IDCPER);
-        excel.insertStandarText(12, 0, IDCPRD);
-        excel.insertStandarText(13, 0, QPVIDENT);
-        excel.insertStandarText(14, 0, CPVIDENT);
+        excel.insertStandardText(0, 0, IDDOS);
+        excel.insertStandardText(1, 0, LBDDOS);
+        excel.insertStandardText(2, 0, OBJDDOS);//: Objet du dossier sur 200 caractères Max. :  Libellé de l'équipement + " / " + Commentaire Région de la demande
+                                                              //(exemple : RIDEAUX COMPLEMENT RENOUVELLEMENT / LYSTORE / PRIORITE 3 / EQUIPEMENT DE RIDEAUX)
+        excel.insertStandardText(3, 0, IDTIERS);  //    Code Tiers Coriolis  - Cf. Nomemclature
+     //           (exemple : R3230 pour l'établissement 0750558Z)
+        excel.insertStandardText(4, 0, NATURE);//Code Nature Comptable du marché
+      //  (exemple 236)
+        excel.insertStandardText(5, 0, PROGRAMME); /* Colonne F : programme : Code contrat du programme Cf. éléments comptables de la demande  "type de contract "
+        (exemple 122008)*/
+        excel.insertStandardText(6, 0, ACTION);/* action : Code action Cf. éléments comptables de la demande
+                            (exemple 12200801)*/
+        excel.insertStandardText(7, 0, ENVILIG);/*Colonne H : envilig : Année d'exercice sur 4 caractères + "-" +
+        Code programme Cf. éléments comptables de la demande "programme" + "-" + Numéro (1 pour les CMD , 2 pour les CMR , 3 pour les EPLE hors CMD et CMR )
+                            (exemple 2019-HP222-008-3 : 2019=année d'exercice, HP222-008=programme, 3=EPLE hors CMR et CMD)*/
+        excel.insertStandardText(8, 0, MTPROP);//Colonne I : mtprop : Montant proposé en TTC de l'équipement
+        excel.insertStandardText(9, 0, IDCOM);//Colonne J : idcom : Codification de la commission IRIS : "AD000195"
+        excel.insertStandardText(10, 0, IDLOCAL);//Colonne K : idlocal : Codification Local : Champ Vide
+        excel.insertStandardText(11, 0, IDCPER);//Colonne L : idcper : codification CPER : "E0060728"
+        excel.insertStandardText(12, 0, IDCPRD);/*Colonne M : idcprd : codification CPRD : "L0003954"
+Colonne N : qpvident : Indicateur lycées en QPV : "QPVNON"
+Colonne O : cvident : Indicateur Contrat de Ville : "CVNON"*/
+        excel.insertStandardText(13, 0, QPVIDENT);
+        excel.insertStandardText(14, 0, CPVIDENT);
         for(int i=0;i<datas.size();i++){
             JsonObject data =datas.getJsonObject(i);
-            excel.insertStandarText(0,0,"");
-            excel.insertStandarText(1,0,"ETAB."+data.getString("uai"));
-            excel.insertStandarText(2,0,"");
+
+            String EnviligString = data.getString("school_year").substring(5,9)+  "-" +data.getString("program");
+                    switch(data.getString("cite_mixte")){
+                        case CMR:
+                            EnviligString+="-2";
+                            break;
+                       case CMD:
+                            EnviligString+="-1";
+                            break;
+                       default:
+                            EnviligString+="-3";
+                            break;
+            }
+
+            String OBJDDOS = data.getString("name_equipment") + " / ";
+            if(data.getBoolean("isregion"))
+                data.getString("comment");
+            excel.insertStandardText(0,1+i,"");
+            excel.insertStandardText(1,1+i,stringWithMaxCharacter("ETAB. "+data.getString("uai") +" Opération "+ data.getString("operation"),80));
+            excel.insertStandardText(2,1+i,stringWithMaxCharacter(OBJDDOS,200));
+            excel.insertStandardText(3,1+i,data.getLong("functional_code").toString());
+            excel.insertStandardText(4,1+i,data.getString("code").toString());
+            excel.insertStandardText(5,1+i,data.getString("program_type"));
+            excel.insertStandardText(6,1+i,data.getString("program_action"));
+            excel.insertStandardText(7,1+i,EnviligString);
+            excel.insertStandardText(8,1+i,data.getString("total"));
+            excel.insertStandardText(9,1+i,"AD000195");
+            excel.insertStandardText(10,1+i,"");
+            excel.insertStandardText(11,1+i,"E0060728");
+            excel.insertStandardText(12,1+i,"L0003954");
+
+        }
+    }
+
+    private String stringWithMaxCharacter(String s,int maxLength) {
+        if(s.length()<=maxLength){
+            return s;
+        }else{
+            return s.substring(0,maxLength);
         }
     }
 
@@ -140,7 +187,7 @@ public class IrisTab extends TabHelper {
                 "              where oco.id_order_client_equipment = orders.id " +
                 "             ) + orders.\"price TTC\" " +
                 "              ) * orders.amount   ,2 ) " +
-                "             as Total, contract.name as market, contract_type.code as code,    " +
+                "             as Total, contract.name as market, contract_type.code as code,  program.program_type,   " +
                 "             program.name as program,         CASE WHEN orders.id_order_client_equipment is not null  " +
                 "             THEN  (select oce.name FROM " + Lystore.lystoreSchema + ".order_client_equipment oce    " +
                 "              where oce.id = orders.id_order_client_equipment limit 1)     " +
@@ -148,8 +195,8 @@ public class IrisTab extends TabHelper {
                 "             END as old_name,     " +
                 "             orders.id_structure,orders.id_operation as id_operation, label.label as operation ,     " +
                 "             orders.equipment_key as key, orders.name as name_equipment, true as region,  orders.id as id,  " +
-                "             program_action.id_program, orders.amount ,contract.id as market_id,   campaign.name as campaign, orders.comment, project.room, orders.isregion, " +
-                "             project.stair,project.building,    " +
+                "             program_action.id_program,program_action.action as program_action, orders.amount ,contract.id as market_id,   campaign.name as campaign, orders.comment, project.room, orders.isregion, " +
+                "             project.stair,project.building,  program.functional_code, exercise.year as school_year,  " +
                 "             case when specific_structures.type is null      " +
                 "             then '" + LYCEE + "'          " +
                 "             ELSE specific_structures.type     " +
@@ -182,12 +229,13 @@ public class IrisTab extends TabHelper {
                 "     OR  (spa.structure_type = '" + CMR + "' AND specific_structures.type ='" + CMR + "') " +
                 "      OR (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    ";
         query += "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
-                "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
-                "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
+                "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id       " +
+                "      INNER JOIN  " + Lystore.lystoreSchema+".exercise on instruction.id_exercise = exercise.id "+
+                "             Group by program.name,contract_type.code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                 "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
-                "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id," +
-                "               orders.isregion, " +
-                "              project.room,project.stair, project.building " +
+                "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id,exercise.year," +
+                "               orders.isregion,  program.functional_code , program.program_type ," +
+                "              project.room,project.stair, project.building,program_action.action " +
                 "             order by campaign,code,market_id, id_structure,program,code " +
                 "  )    SELECT  values.* " +
                 "  from  values      " ;

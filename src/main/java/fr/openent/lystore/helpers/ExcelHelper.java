@@ -1081,7 +1081,7 @@ public class ExcelHelper {
         }
     }
 
-    public void insertStandarText(int cellColumn, int line, String data) {
+    public void insertStandardText(int cellColumn, int line, String data) {
         Row tab;
         try {
             tab = sheet.getRow(line);

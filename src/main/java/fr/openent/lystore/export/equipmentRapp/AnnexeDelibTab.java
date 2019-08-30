@@ -45,7 +45,8 @@ public class AnnexeDelibTab extends TabHelper {
         ArrayList structuresId = new ArrayList<>();
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
-            structuresId.add(structuresId.size(), data.getString("id_structure"));
+            if(!structuresId.contains(data.getString("id_structure")))
+                structuresId.add(structuresId.size(), data.getString("id_structure"));
 
         }
         structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {

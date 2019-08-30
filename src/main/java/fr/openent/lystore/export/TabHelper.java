@@ -16,6 +16,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.entcore.common.neo4j.Neo4j;
+import org.entcore.common.neo4j.Neo4jResult;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
@@ -25,6 +27,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public abstract class TabHelper {
+    protected Logger logger = LoggerFactory.getLogger(DefaultProjectService.class);
     protected static final String CMD = "CMD";
     protected static final String CMR = "CMR";
     protected static final String LYCEE = "LYC";
@@ -233,6 +236,21 @@ public abstract class TabHelper {
 
     protected void initDatas(Handler<Either<String, Boolean>> handler) {
 
+    }
+
+    protected void getStructures(JsonArray ids, Handler<Either<String, JsonArray>> handler)  {
+        String query = "" +
+                "MATCH (s:Structure) " +
+                "WHERE s.id IN {ids} " +
+                "RETURN " +
+                "s.id as id," +
+                " s.UAI as uai," +
+                " s.name as name," +
+                " s.phone as phone," +
+                " s.address + ' ,' + s.zipCode +' ' + s.city as address,  " +
+                "s.zipCode as zipCode," +
+                " s.city as city";
+        Neo4j.getInstance().execute(query, new JsonObject().put("ids", ids), Neo4jResult.validResultHandler(handler));
     }
 
 }

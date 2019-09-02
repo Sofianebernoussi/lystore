@@ -175,7 +175,7 @@ public class RecapMarketGestion extends TabHelper {
 
                 excel.insertCellTabCenter(6, lineNumber, formatStrToCell(campaign, 5));
                 excel.insertCellTabCenter(7, lineNumber, formatStrToCell(order.getInteger("amount").toString(), 5));
-                excel.insertCellTabFloat(8, lineNumber, order.getFloat("total"));
+                excel.insertCellTabFloat(8, lineNumber, safeGetFloat(order,"total"));
                 excel.insertCellTabCenter(9, lineNumber, formatStrToCell(order.getString("name_equipment"), 5));
                 excel.insertCellTabCenter(10, lineNumber, order.getString("cite_mixte"));
                 excel.insertCellTabCenter(11, lineNumber, formatStrToCell(order.getString("market"), 5));

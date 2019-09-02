@@ -151,7 +151,7 @@ public class ListForTextTab extends TabHelper {
 
                     oldTotal = 0.f;
                     oldkey = key;
-                    oldTotal += action.getFloat("total");
+                    oldTotal += safeGetFloat(action,"total") ;
                     excel.insertCellTabFloat(4 + programLabel.getInteger(key),
                             yProgramLabel, oldTotal);
                 } else {
@@ -160,7 +160,7 @@ public class ListForTextTab extends TabHelper {
                         oldTotal = 0.f;
                     }
                     oldkey = key;
-                    oldTotal += action.getFloat("total");
+                    oldTotal += safeGetFloat(action,"total") ;
                     excel.insertCellTabFloat(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")), yProgramLabel
                             , oldTotal);
                 }

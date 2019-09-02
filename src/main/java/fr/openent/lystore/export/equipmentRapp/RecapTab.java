@@ -150,9 +150,9 @@ public class RecapTab extends TabHelper {
                 JsonObject action = actions.getJsonObject(j);
                 String key = action.getString("program") + " - " + action.getString("code");
                 if (!oldTotals.containsKey(key)) {
-                    oldTotals.put(key, action.getFloat("total"));
+                    oldTotals.put(key,safeGetFloat(action,"total") );
                 } else {
-                    oldTotals.put(key, action.getFloat("total") + oldTotals.getFloat(key));
+                    oldTotals.put(key,safeGetFloat(action,"total")  + oldTotals.getFloat(key));
                 }
                 excel.insertCellTabFloat(programLabel.getInteger(key) + 2,
                         2 + i,

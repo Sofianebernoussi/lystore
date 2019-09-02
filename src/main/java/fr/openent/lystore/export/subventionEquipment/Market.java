@@ -139,7 +139,7 @@ public class Market extends TabHelper {
                 }
                 excel.insertCellTab(0, lineNumber, formatStrToCell(order.getString("name_equipment"), 10));
                 excel.insertCellTabFloat(1, lineNumber, order.getInteger("amount"));
-                excel.insertCellTabFloat(2, lineNumber, order.getFloat("total"));
+                excel.insertCellTabFloat(2, lineNumber, safeGetFloat(order,"total"));
                 lineNumber++;
             }
             excel.insertLabelBold(lineNumber, 0, market);

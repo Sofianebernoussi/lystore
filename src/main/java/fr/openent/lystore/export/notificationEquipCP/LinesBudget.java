@@ -132,7 +132,7 @@ public class LinesBudget extends TabHelper {
                     previousCode = code;
                     totalToInsert = 0.f;
                 }
-                totalToInsert += order.getFloat("total");
+                totalToInsert += safeGetFloat(order,"total");
                 excel.insertFloatYellow(lineNumber,
                         5 + codes.indexOf(Integer.parseInt(code)), totalToInsert);
             }

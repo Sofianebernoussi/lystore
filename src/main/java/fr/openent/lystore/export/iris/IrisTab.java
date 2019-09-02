@@ -161,6 +161,8 @@ Colonne O : cvident : Indicateur Contrat de Ville : "CVNON"*/
             excel.insertStandardText(10,1+i,"");
             excel.insertStandardText(11,1+i,"E0060728");
             excel.insertStandardText(12,1+i,"L0003954");
+            excel.insertStandardText(13,i+1,"QPVNON");
+            excel.insertStandardText(14,i+1,"CVNON");
 
         }
     }

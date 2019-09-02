@@ -222,15 +222,22 @@ public abstract class TabHelper {
     }
 
     public void handleDatasDefault(Either<String, JsonArray> event, Handler<Either<String, Boolean>> handler) {
-        if (event.isLeft()) {
-            log.error("Failed to retrieve datas");
-            handler.handle(new Either.Left<>("Failed to retrieve datas"));
-        } else {
-            if (checkEmpty()) {
-                handler.handle(new Either.Right<>(true));
+        try {
+            if (event.isLeft()) {
+                log.error("Failed to retrieve datas");
+                handler.handle(new Either.Left<>("Failed to retrieve datas"));
             } else {
-                initDatas(handler);
+                if (checkEmpty()) {
+                    handler.handle(new Either.Right<>(true));
+                } else {
+                    initDatas(handler);
+                }
             }
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            logger.error(e.getStackTrace());
+            handler.handle(new Either.Left<>("error when creating excel"));
+
         }
     }
 

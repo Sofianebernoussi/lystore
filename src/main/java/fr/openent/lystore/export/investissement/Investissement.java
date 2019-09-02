@@ -24,21 +24,33 @@ public abstract class Investissement extends TabHelper {
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
         excel.setCPNumber(instruction.getString("cp_number"));
-        setLabels();
+        try {
+            setLabels();
+        }catch(Exception e){
+            logger.error(e.getMessage());
+            logger.error(e.getStackTrace());
+            handler.handle(new Either.Left<>("error when creating excel"));
+        }
         getDatas(event -> {
-            if (event.isLeft()) {
-                log.error("Failed to retrieve programs");
-                handler.handle(new Either.Left<>("Failed to retrieve programs"));
-            } else {
+            try{
+                if (event.isLeft()) {
+                    log.error("Failed to retrieve programs");
+                    handler.handle(new Either.Left<>("Failed to retrieve programs"));
+                } else {
 
-                JsonArray programs = event.right().getValue();
-                //Delete tab if empty
+                    JsonArray programs = event.right().getValue();
+                    //Delete tab if empty
 
-                setArray(programs);
-                if (programs.size() == 0) {
-                    wb.removeSheetAt(wb.getSheetIndex(sheet));
+                    setArray(programs);
+                    if (programs.size() == 0) {
+                        wb.removeSheetAt(wb.getSheetIndex(sheet));
+                    }
+                    handler.handle(new Either.Right<>(true));
                 }
-                handler.handle(new Either.Right<>(true));
+            }catch(Exception e){
+                logger.error(e.getMessage());
+                logger.error(e.getStackTrace());
+                handler.handle(new Either.Left<>("error when creating excel"));
             }
         });
     }
@@ -65,6 +77,7 @@ public abstract class Investissement extends TabHelper {
             this.operationsRowNumber++;
         }
         excel.insertHeader(sheet.createRow(this.operationsRowNumber), cellLabelColumn, excel.totalLabel);
+
     }
 
     @Override

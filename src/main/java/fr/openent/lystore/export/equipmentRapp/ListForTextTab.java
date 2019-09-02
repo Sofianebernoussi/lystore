@@ -30,8 +30,9 @@ public class ListForTextTab extends TabHelper {
 
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
-        excel.setDefaultFont();
-        getDatas(event -> handleDatasDefault(event, handler));
+            excel.setDefaultFont();
+            getDatas(event -> handleDatasDefault(event, handler));
+
     }
 
     @Override
@@ -289,15 +290,7 @@ public class ListForTextTab extends TabHelper {
                         "  ; ";
 
 
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
-            if (event.isLeft()) {
-                handler.handle(event.left());
-            } else {
-                datas = event.right().getValue();
-                handler.handle(new Either.Right<>(datas));
-            }
-
-        }));
+        sqlHandler(handler);
     }
 }
 

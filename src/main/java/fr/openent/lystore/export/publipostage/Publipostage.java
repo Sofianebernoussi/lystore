@@ -29,18 +29,24 @@ public class Publipostage extends TabHelper {
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         getDatas(dataFromRequest -> {
-            if (dataFromRequest.isLeft()) {
-                log.error("Failed to retrieve datas");
-                handler.handle(new Either.Left<>("Failed to retrieve datas"));
-            } else {
-                if (checkEmpty()) {
-                    handler.handle(new Either.Right<>(true));
+            try{
+                if (dataFromRequest.isLeft()) {
+                    log.error("Failed to retrieve datas");
+                    handler.handle(new Either.Left<>("Failed to retrieve datas"));
                 } else {
-                    makeHeader();
-                    JsonArray order = dataFromRequest.right().getValue();
-                    initDatas(handler);
-                    //Delete tab if empty
+                    if (checkEmpty()) {
+                        handler.handle(new Either.Right<>(true));
+                    } else {
+                        makeHeader();
+                        JsonArray order = dataFromRequest.right().getValue();
+                        initDatas(handler);
+                        //Delete tab if empty
+                    }
                 }
+            }catch(Exception e){
+                logger.error(e.getMessage());
+                logger.error(e.getStackTrace());
+                handler.handle(new Either.Left<>("error when creating excel"));
             }
         });
     }
@@ -58,7 +64,7 @@ public class Publipostage extends TabHelper {
             if (structuresGet.isRight()) {
                 JsonArray structures = structuresGet.right().getValue();
                 makeBody(structures);
-                        handler.handle(new Either.Right<>(true));
+                handler.handle(new Either.Right<>(true));
             } else {
                 logger.error("error when get structuresId" + structuresGet.left());
                 handler.handle(new Either.Right<>(false));

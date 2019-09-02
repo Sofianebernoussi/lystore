@@ -27,12 +27,18 @@ public class RecapImputationBud extends TabHelper {
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         getDatas(event -> {
-            if (event.isLeft()) {
-                handler.handle(new Either.Left<>("Failed to retrieve programs"));
-                return;
+            try{
+                if (event.isLeft()) {
+                    handler.handle(new Either.Left<>("Failed to retrieve programs"));
+                    return;
+                }
+                setArray(programs);
+                handler.handle(new Either.Right<>(true));
+            }catch(Exception e){
+                logger.error(e.getMessage());
+                logger.error(e.getStackTrace());
+                handler.handle(new Either.Left<>("error when creating excel"));
             }
-            setArray(programs);
-            handler.handle(new Either.Right<>(true));
         });
     }
 

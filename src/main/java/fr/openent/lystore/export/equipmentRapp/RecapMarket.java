@@ -35,21 +35,30 @@ public class RecapMarket extends TabHelper {
 
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
+
         excel.setDefaultFont();
         getDatas(event -> {
-            if (event.isLeft()) {
-                log.error("Failed to retrieve programs");
-                handler.handle(new Either.Left<>("Failed to retrieve programs"));
-            } else {
-                if (checkEmpty()) {
-                    handler.handle(new Either.Right<>(true));
+            try{
+                if (event.isLeft()) {
+                    log.error("Failed to retrieve programs");
+                    handler.handle(new Either.Left<>("Failed to retrieve programs"));
                 } else {
-                    JsonArray programs = event.right().getValue();
-                    setArray(programs);
-                    handler.handle(new Either.Right<>(true));
+                    if (checkEmpty()) {
+                        handler.handle(new Either.Right<>(true));
+                    } else {
+                        JsonArray programs = event.right().getValue();
+                        setArray(programs);
+                        handler.handle(new Either.Right<>(true));
+                    }
                 }
+            }catch(Exception e)
+            {
+                logger.error(e.getMessage());
+                logger.error(e.getStackTrace());
+                handler.handle(new Either.Left<>("Failed to retrieve programs"));
             }
         });
+
     }
 
 

@@ -53,11 +53,17 @@ public class RecapEPLETab extends TabHelper {
         excel.setDefaultFont();
         excel.setCPNumber(instruction.getString("cp_number"));
         getDatas(event -> {
-            if (event.isLeft()) {
-                handler.handle(new Either.Left<>("Failed to retrieve programs"));
-                return;
+            try {
+                if (event.isLeft()) {
+                    handler.handle(new Either.Left<>("Failed to retrieve programs"));
+                    return;
+                }
+                getAndSetDatas(handler);
+            }catch(Exception e){
+                logger.error(e.getMessage());
+                logger.error(e.getStackTrace());
+                handler.handle(new Either.Left<>("error when creating excel"));
             }
-            getAndSetDatas(handler);
         });
     }
 

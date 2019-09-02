@@ -33,21 +33,29 @@ public class RecapTab extends TabHelper {
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
         getDatas(event -> {
-            if (event.isLeft()) {
-                log.error("Failed to retrieve programs");
-                handler.handle(new Either.Left<>("Failed to retrieve programs"));
-            } else {
-                if (checkEmpty()) {
-                    handler.handle(new Either.Right<>(true));
-                } else {
-                    //Delete tab if empty
-                    setLabels();
-                    setArray(datas);
-                    handler.handle(new Either.Right<>(true));
+            try{
 
+                if (event.isLeft()) {
+                    log.error("Failed to retrieve programs");
+                    handler.handle(new Either.Left<>("Failed to retrieve programs"));
+                } else {
+                    if (checkEmpty()) {
+                        handler.handle(new Either.Right<>(true));
+                    } else {
+                        //Delete tab if empty
+                        setLabels();
+                        setArray(datas);
+                        handler.handle(new Either.Right<>(true));
+
+                    }
                 }
+            }catch(Exception e){
+                logger.error(e.getMessage());
+                logger.error(e.getStackTrace());
+                handler.handle(new Either.Left<>("error when creating excel"));
             }
         });
+
     }
 
     //    /**
@@ -246,14 +254,8 @@ public class RecapTab extends TabHelper {
                         "  Group by values.id_operation, values.operation   " +
                         "  Order by values.operation ;";
 
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
-            if (event.isLeft()) {
-                handler.handle(event.left());
-            } else {
-                datas = event.right().getValue();
-                handler.handle(new Either.Right<>(datas));
-            }
-        }));
+        sqlHandler(handler);
+
     }
 
 

@@ -130,8 +130,12 @@ public class VerifBudgetTab extends TabHelper {
         } catch (ClassCastException e) {
             totalMarket = data.getInteger("totalmarket").toString();
         }
+        try{
+            programTotal += Double.parseDouble(totalMarket);
+        } catch ( ClassCastException err){
+            logger.error("It's Double " + err);
+        }
 
-        programTotal += Double.parseDouble(totalMarket);
         excel.insertBlueTitleHeader(0, currentY, market);
         CellRangeAddress merge = new CellRangeAddress(currentY, currentY, 0, 4);
         sheet.addMergedRegion(merge);

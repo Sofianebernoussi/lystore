@@ -90,7 +90,7 @@ public class RecapMarket extends TabHelper {
                         oldTotal = 0.f;
                     }
                     oldkey = key;
-                    oldTotal +=safeGetFloat(action,"total") ;;
+                    oldTotal +=safeGetFloat(action,"total", "RecapMarket") ;
                     excel.insertCellTabFloat(1 + programMarket.getInteger(key), i + 9, oldTotal);
                 }
             }

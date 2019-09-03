@@ -191,7 +191,7 @@ public class VerifBudgetTab extends TabHelper {
             excel.insertLabel(currentY, 2, "REG : " + value.getString("name_equipment"));
             excel.insertCellTabStringRight(3, currentY, value.getInteger("amount").toString());
             try {
-                excel.insertLabel(currentY, 4, "M : " + safeGetFloat(value,"total").toString() );
+                excel.insertLabel(currentY, 4, "M : " + safeGetFloat(value,"total", "verifBubgetTab" ).toString());
             } catch (ClassCastException e) {
                 excel.insertLabel(currentY, 4, "M : " + value.getInteger("total").toString());
             }

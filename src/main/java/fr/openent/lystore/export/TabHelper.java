@@ -241,11 +241,14 @@ public abstract class TabHelper {
         }
     }
 
-    protected  Float safeGetFloat(JsonObject jo, String  key){
+    protected  Float safeGetFloat(JsonObject jo, String  key, String nameTab){
      Float result;
         try {
+            //logger.info("Object safeGetFloat : " + jo + " key : " + key);
             result=  jo.getFloat(key);
         }catch (Exception e){
+            logger.info("Error safeGetFloat : " + jo + " ;key : " + key + " ;name tab : " + nameTab);
+            logger.error(e.getMessage());
             result= Float.parseFloat(jo.getString(key).replaceAll(",","."));
         }
         return  result;

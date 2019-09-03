@@ -36,7 +36,7 @@ public class ComptaTab extends TabHelper {
 
     @Override
     protected void initDatas(Handler<Either<String, Boolean>> handler) {
-        ArrayList structuresId = new ArrayList<>();
+        ArrayList structuresId = new ArrayList();
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
             JsonArray actions = new JsonArray(data.getString("actions"));
@@ -152,7 +152,7 @@ public class ComptaTab extends TabHelper {
                     oldTotal = 0.f;
                     oldkey = key;
 
-                    oldTotal +=  safeGetFloat(action,"total") ;
+                    oldTotal +=  safeGetFloat(action,"total", "ComptaTab") ;
                     excel.insertCellTabFloat(4 + programLabel.getInteger(key),
                             yProgramLabel, oldTotal);
                 } else {
@@ -161,7 +161,7 @@ public class ComptaTab extends TabHelper {
                         oldTotal = 0.f;
                     }
                     oldkey = key;
-                    oldTotal +=safeGetFloat(action,"total") ;
+                    oldTotal +=safeGetFloat(action,"total", "ComptaTab") ;
                     excel.insertCellTabFloat(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")), yProgramLabel
                             , oldTotal);
                 }

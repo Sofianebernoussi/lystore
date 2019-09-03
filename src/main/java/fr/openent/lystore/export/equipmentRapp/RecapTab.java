@@ -43,10 +43,17 @@ public class RecapTab extends TabHelper {
                         handler.handle(new Either.Right<>(true));
                     } else {
                         //Delete tab if empty
-                        setLabels();
-                        setArray(datas);
-                        handler.handle(new Either.Right<>(true));
+                        try{
 
+                            setLabels();
+                            setArray(datas);
+                            handler.handle(new Either.Right<>(true));
+
+                        }catch(Exception ee){
+                            logger.error(ee.getMessage());
+                            logger.error(ee.getStackTrace());
+                            handler.handle(new Either.Left<>("error when creating excel"));
+                        }
                     }
                 }
             }catch(Exception e){
@@ -140,9 +147,6 @@ public class RecapTab extends TabHelper {
 
             String actionsStrToArray = operation.getString(actionStr);
             JsonArray actions = new JsonArray(actionsStrToArray);
-            String old_key = "";
-            Float oldTotal = 0.f;
-
             JsonObject oldTotals = new JsonObject();
 
             for (int j = 0; j < actions.size(); j++) {
@@ -152,11 +156,11 @@ public class RecapTab extends TabHelper {
                 if (!oldTotals.containsKey(key)) {
                     oldTotals.put(key,safeGetFloat(action,"total") );
                 } else {
-                    oldTotals.put(key,safeGetFloat(action,"total")  + oldTotals.getFloat(key));
+                    oldTotals.put(key,safeGetFloat(action,"total")  + safeGetFloat(oldTotals,key));
                 }
                 excel.insertCellTabFloat(programLabel.getInteger(key) + 2,
                         2 + i,
-                        oldTotals.getFloat(key));
+                        safeGetFloat(oldTotals,key));
             }
         }
 

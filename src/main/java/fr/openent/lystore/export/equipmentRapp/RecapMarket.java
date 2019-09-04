@@ -279,14 +279,6 @@ public class RecapMarket extends TabHelper {
 
                         " Group by label  ;";
 
-
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
-            if (event.isLeft()) {
-                handler.handle(event.left());
-            } else {
-                datas = event.right().getValue();
-                handler.handle(new Either.Right<>(datas));
-            }
-        }));
+        sqlHandler(handler);
     }
 }

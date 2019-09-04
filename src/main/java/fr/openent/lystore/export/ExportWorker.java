@@ -78,7 +78,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
                     logger.info("end");
                     processExport();
                 } else {
-                    ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event.left());
+                    ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx " + event.left().getValue());
                 }
             };
 

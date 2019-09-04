@@ -61,10 +61,15 @@ public class VerifBudgetTab extends TabHelper {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
                 if (repStructures.isRight()) {
-                    JsonArray structures = repStructures.right().getValue();
-                    setStructures(structures);
-                    setArray(datas);
-                    handler.handle(new Either.Right<>(true));
+                    try {
+                        JsonArray structures = repStructures.right().getValue();
+                        setStructures(structures);
+                        setArray(datas);
+                        handler.handle(new Either.Right<>(true));
+                    }catch (Exception e){
+                        handler.handle(new Either.Left<>(e.getMessage()));
+                        logger.error("Error when creating VerifBudgetTAb");
+                    }
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
 
@@ -126,15 +131,17 @@ public class VerifBudgetTab extends TabHelper {
         String market = data.getString("market");
         String totalMarket;
         try {
-            totalMarket = String.format("%.2f", Float.parseFloat(data.getString("totalmarket")));
+            totalMarket = String.format("%.2f", safeGetFloat(data,"totalmarket","Verif Budget TAB"));
         } catch (ClassCastException e) {
             totalMarket = data.getInteger("totalmarket").toString();
         }
+
         try{
             programTotal += Double.parseDouble(totalMarket);
-        } catch ( ClassCastException err){
-            logger.error("It's Double " + err);
+        } catch (NumberFormatException err){
+            programTotal += Double.parseDouble(totalMarket.replaceAll(",","."));
         }
+
 
         excel.insertBlueTitleHeader(0, currentY, market);
         CellRangeAddress merge = new CellRangeAddress(currentY, currentY, 0, 4);

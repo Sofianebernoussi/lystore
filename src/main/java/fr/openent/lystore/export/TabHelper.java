@@ -247,8 +247,7 @@ public abstract class TabHelper {
             //logger.info("Object safeGetFloat : " + jo + " key : " + key);
             result=  jo.getFloat(key);
         }catch (Exception e){
-            logger.info("Error safeGetFloat : " + jo + " ;key : " + key + " ;name tab : " + nameTab);
-            logger.error(e.getMessage());
+            logger.info("Exception safeGetFloat : key : " + key + " ;name tab : " + nameTab);
             result= Float.parseFloat(jo.getString(key).replaceAll(",","."));
         }
         return  result;

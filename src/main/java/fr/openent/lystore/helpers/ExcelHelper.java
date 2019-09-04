@@ -1399,6 +1399,7 @@ public class ExcelHelper {
                                 .put("titleFile", titleFile)
                                 .put("idFile", idFile)
                                 .put("userId", user.getUserId());
+                        log.info("J'envoie le bus");
                         eb.send(ExportWorker.class.getSimpleName(), infoFile, new DeliveryOptions().setSendTimeout(1000 * 1000L), handlerToAsyncHandler(eventExport ->
                                 log.info("Ok calling worker " + eventExport.body().toString()))
                         );

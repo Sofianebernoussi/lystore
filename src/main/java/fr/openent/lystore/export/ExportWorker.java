@@ -72,55 +72,57 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
         if(MessagesQueue.isEmpty()){
             isWorking =  false;
         }else {
+            Message<JsonObject> eventMessage = MessagesQueue.poll();
             Handler<Either<String,Boolean>> exportHandler = event -> {
                 logger.info("exportHandler");
                 if (event.isRight()) {
+                    eventMessage.reply(new JsonObject().put("status", "ok"));
                     logger.info("end");
                     processExport();
                 } else {
+                    eventMessage.reply(new JsonObject().put("status", "ko"));
                     ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx " + event.left().getValue());
                 }
             };
-
-            Message<JsonObject> event = MessagesQueue.poll();
-            logger.info("Doing export "+ MessagesQueue.size() +" in waitinglist");
-            final String action = event.body().getString("action", "");
-            String fileNamIn = event.body().getString("titleFile");
-            idNewFile = event.body().getInteger("idFile");
-            switch (action) {
-                case "exportEQU":
-                    exportEquipment(
-                            event.body().getInteger("id"),
-                            event.body().getString("type"),
-                            fileNamIn,exportHandler );
-                    break;
-                case "exportRME":
-                    exportRME(
-                            event.body().getInteger("id"),
-                            fileNamIn,
-                            exportHandler);
-                    break;
-                case "exportNotificationCP":
-                    exportNotificationCp(event.body().getInteger("id"),
-                            fileNamIn,
-                            exportHandler);
-                    break;
-                case "exportPublipostage":
-                    exportPublipostage(event.body().getInteger("id"),
-                            fileNamIn,
-                            exportHandler);
-                    break;
-                case "exportSubvention":
-                    exportSubvention(event.body().getInteger("id"),
-                            fileNamIn,
-                            exportHandler);
-                    break;
-                default:
-                    ExcelHelper.catchError(exportService, idNewFile, "Invalid action in worker",exportHandler);
-                    break;
-
-
-
+            try{
+                logger.info("Doing export "+ MessagesQueue.size() +" in waitinglist");
+                final String action = eventMessage.body().getString("action", "");
+                String fileNamIn = eventMessage.body().getString("titleFile");
+                idNewFile = eventMessage.body().getInteger("idFile");
+                switch (action) {
+                    case "exportEQU":
+                        exportEquipment(
+                                eventMessage.body().getInteger("id"),
+                                eventMessage.body().getString("type"),
+                                fileNamIn,exportHandler );
+                        break;
+                    case "exportRME":
+                        exportRME(
+                                eventMessage.body().getInteger("id"),
+                                fileNamIn,
+                                exportHandler);
+                        break;
+                    case "exportNotificationCP":
+                        exportNotificationCp(eventMessage.body().getInteger("id"),
+                                fileNamIn,
+                                exportHandler);
+                        break;
+                    case "exportPublipostage":
+                        exportPublipostage(eventMessage.body().getInteger("id"),
+                                fileNamIn,
+                                exportHandler);
+                        break;
+                    case "exportSubvention":
+                        exportSubvention(eventMessage.body().getInteger("id"),
+                                fileNamIn,
+                                exportHandler);
+                        break;
+                    default:
+                        ExcelHelper.catchError(exportService, idNewFile, "Invalid action in worker",exportHandler);
+                        break;
+                }
+            } catch (Exception error) {
+                logger.error("Error in switch -> " + error);
             }
         }
     }

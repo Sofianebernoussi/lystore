@@ -8,6 +8,7 @@ import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
@@ -1398,8 +1399,8 @@ public class ExcelHelper {
                                 .put("titleFile", titleFile)
                                 .put("idFile", idFile)
                                 .put("userId", user.getUserId());
-                        eb.send(ExportWorker.class.getSimpleName(), infoFile, handlerToAsyncHandler(eventExport ->
-                                log.info("Ok calling worker"))
+                        eb.send(ExportWorker.class.getSimpleName(), infoFile, new DeliveryOptions().setSendTimeout(1000 * 1000L), handlerToAsyncHandler(eventExport ->
+                                log.info("Ok calling worker " + eventExport.body().toString()))
                         );
                         request.response().setStatusCode(201).end("Import started " + idFile);
                     } catch (Exception error) {

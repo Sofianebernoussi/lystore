@@ -7,36 +7,18 @@ import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.datagram.DatagramSocket;
-import io.vertx.core.datagram.DatagramSocketOptions;
-import io.vertx.core.dns.DnsClient;
-import io.vertx.core.dns.DnsClientOptions;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.file.FileSystem;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.net.NetClient;
-import io.vertx.core.net.NetClientOptions;
-import io.vertx.core.net.NetServer;
-import io.vertx.core.net.NetServerOptions;
-import io.vertx.core.shareddata.SharedData;
-import io.vertx.core.spi.VerticleFactory;
 import org.entcore.common.storage.Storage;
 import org.vertx.java.busmods.BusModBase;
 
 import java.util.Queue;
-import java.util.Set;
-import java.util.function.Supplier;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static fr.openent.lystore.Lystore.CONFIG;
 import static fr.openent.lystore.Lystore.STORAGE;
 
-public class ExportWorker extends BusModBase implements Handler<Message<JsonObject>> {
+public class ExportLystoreWorker extends BusModBase implements Handler<Message<JsonObject>> {
     private Instruction instruction;
     private Storage storage;
     private ExportService exportService = new DefaultExportServiceService(Lystore.lystoreSchema, "export", storage);
@@ -47,7 +29,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
     @Override
     public void start() {
         super.start();
-        vertx.eventBus().localConsumer(ExportWorker.class.getSimpleName(), this);
+        vertx.eventBus().localConsumer(ExportLystoreWorker.class.getSimpleName(), this);
         this.config = CONFIG;
         this.storage = STORAGE;
         this.vertx = vertx;

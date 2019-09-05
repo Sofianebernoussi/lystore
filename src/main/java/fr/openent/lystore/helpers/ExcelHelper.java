@@ -1400,7 +1400,7 @@ public class ExcelHelper {
                                 .put("idFile", idFile)
                                 .put("userId", user.getUserId());
                         log.info("J'envoie le bus");
-                        eb.send(ExportWorker.class.getSimpleName(), infoFile, new DeliveryOptions().setSendTimeout(1000 * 1000L), handlerToAsyncHandler(eventExport ->
+                        eb.send(ExportWorker.class.getName(), infoFile, new DeliveryOptions().setSendTimeout(1000 * 1000L), handlerToAsyncHandler(eventExport ->
                                 log.info("Ok calling worker " + eventExport.body().toString()))
                         );
                         request.response().setStatusCode(201).end("Import started " + idFile);

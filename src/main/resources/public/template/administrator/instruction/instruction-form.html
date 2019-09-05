@@ -12,13 +12,13 @@
         <form ng-submit="sendInstruction()" >
             <label class="row twelve vertical-spacing">
                         <span class="twelve">
-                            <i18n>lystore.instruction.object</i18n>
+                            <i18n>lystore.instruction.object</i18n> *
                         </span>
                 <input type="text" class="twelve" ng-model="instruction.object" required/>
             </label>
             <label class="row twelve vertical-spacing">
                         <span class="twelve">
-                            <i18n>lystore.exercise.number</i18n>
+                            <i18n>lystore.exercise.number</i18n> *
                         </span>
                 <select  ng-model="instruction.id_exercise" class="twelve"
                          ng-init="instruction.id_exercise = instruction.id_exercise ||
@@ -29,19 +29,19 @@
             </label>
             <label class="row twelve vertical-spacing">
                         <span class="twelve">
-                            <i18n>lystore.instruction.official.number</i18n>
+                            <i18n>lystore.instruction.official.number</i18n> *
                         </span>
                 <input type="text" class="twelve" ng-model="instruction.cp_number">
             </label>
             <label class="row twelve vertical-spacing">
                         <span class="twelve">
-                            <i18n>lystore.instruction.service.number</i18n>
+                            <i18n>lystore.instruction.service.number</i18n> *
                         </span>
                 <input type="text" class="twelve" ng-model="instruction.service_number">
             </label>
             <label class="row vertical-spacing twelve-mobile row-mobile">
                                 <span class="cell ">
-                                    <i18n>lystore.submitted.to.cp</i18n>
+                                    <i18n>lystore.submitted.to.cp</i18n> *
                                 </span>
                 <switch-toggle ng-model="instruction.submitted_to_cp"
                                class="cell">
@@ -52,14 +52,14 @@
             </label>
             <label class="row twelve vertical-spacing">
                         <span class="twelve">
-                            <i18n>lystore.instruction.commenter</i18n>
+                            <i18n>lystore.instruction.commenter</i18n> *
                         </span>
                 <textarea ng-model="instruction.comment"
                           cols="20" rows="10" maxlength="300"></textarea>
             </label>
             <div class="row twelve">
                 <h2 class="vertical-spacing">
-                    <i18n>lystore.instruction.operations</i18n>
+                    <i18n>lystore.instruction.operations</i18n> *
                 </h2>
                 <article>
                     <table class="twelve">

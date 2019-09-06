@@ -1,6 +1,6 @@
 import {_, idiom as lang, model, ng, template} from 'entcore';
 import {
-    Campaign, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD,
+    Campaign, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD, Userbook,
     Utils
 } from '../../model';
 import {Mix} from 'entcore-toolkit';
@@ -18,6 +18,7 @@ export const orderController = ng.controller('orderController',
                 reverse: false
             }
         };
+        $scope.ub = new Userbook();
 
         $scope.search = {
             filterWord : '',

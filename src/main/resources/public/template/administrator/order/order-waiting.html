@@ -106,7 +106,7 @@
               show="display.lightbox.validOrder">
         <container template="validOrder.lightbox"></container>
     </lightbox>
-    <parameter-table ng-model="tableFields">
+    <parameter-table ng-change="savePreference()" ng-model="tableFields">
     </parameter-table>
     <section class="toggle-buttons" ng-class="{ hide: ordersClient.selected.length === 0 }">
         <div class="toggle">

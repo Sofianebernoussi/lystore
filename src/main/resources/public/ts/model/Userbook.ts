@@ -11,6 +11,6 @@ export class Userbook {
 
     async getPreferences(){
          let data = await http.get('/userbook/preference/lystore');
-         console.log(data);
+         return data.data;
     }
 }

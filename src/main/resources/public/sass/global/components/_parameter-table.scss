@@ -35,6 +35,8 @@ parameter-table
   article{
     display: block;
     width: 200px ;
+    overflow-y: auto;
+    height: 60vh;
   }
 
 }

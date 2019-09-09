@@ -8,6 +8,10 @@ body.lystore {
     }
   }
 
+  .tooltip {
+    z-index: 99999;
+  }
+
   .heading-tabs {
     overflow-x: inherit;
   }

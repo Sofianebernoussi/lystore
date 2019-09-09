@@ -104,6 +104,7 @@ export const orderController = ng.controller('orderController',
                         return ('name_structure' in order ? regex.test(order.name_structure.toLowerCase()) : false)
                             || ('structure' in order && order.structure['name'] ? regex.test(order.structure.name.toLowerCase()): false)
                             || ('structure' in order && order.structure['academy'] ? regex.test(order.structure.academy.toLowerCase()) : false)
+                            || ('structure' in order && order.structure['city'] ? regex.test(order.structure.city.toLocaleLowerCase()) : false)
                             || ('structure' in order && order.structure['type'] ? regex.test(order.structure.type.toLowerCase()) : false)
                             || ('project' in order ? regex.test(order.project.title['name'].toLowerCase()) : false)
                             || ('contract_type' in order ? regex.test(order.contract_type.name.toLowerCase()) : false)

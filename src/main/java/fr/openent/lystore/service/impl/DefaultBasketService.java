@@ -565,7 +565,11 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             JsonObject returns = new JsonObject()
                     .put("nb_order", basicBDObject.getInteger(basicBDObject.containsKey("f2") ? "f2" : "f1"));
             if (basicBDObject.containsKey("f2")) {
-                returns.put("amount", basicBDObject.getInteger("f1"));
+               try{
+                   returns.put("amount", basicBDObject.getDouble("f1"));
+               }catch (Exception e){
+                   returns.put("amount",basicBDObject.getInteger("f1"));
+               }
             }
             DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
             final double cons = 100.0;

@@ -28,3 +28,4 @@ export * from './OrderRegion';
 export * from './tableFields';
 export * from './operation';
 export * from './export';
+export * from './Order';

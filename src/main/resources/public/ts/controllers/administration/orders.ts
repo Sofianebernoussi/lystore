@@ -1,6 +1,6 @@
 import {_, idiom as lang, model, ng, template} from 'entcore';
 import {
-    Campaign, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD,
+    Campaign, Notification, Operation, Order, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD,
     Utils
 } from '../../model';
 import {Mix} from 'entcore-toolkit';

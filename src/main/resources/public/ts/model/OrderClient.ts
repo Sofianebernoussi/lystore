@@ -1,71 +1,89 @@
 import {_, idiom as lang, model, moment, notify} from 'entcore';
 import {Mix, Selectable, Selection} from 'entcore-toolkit';
-import {Campaign, Contract, ContractType, Equipment, Structure, Supplier, TechnicalSpec, Utils} from './index';
+import {
+    Campaign,
+    Contract,
+    ContractType,
+    Order,
+    Structure,
+    Structures,
+    Supplier,
+    TechnicalSpec,
+    Utils
+} from './index';
 import http from 'axios';
 import {Project} from "./project";
 import {Title} from "./title";
 import {Grade} from "./grade";
 
-export class OrderClient implements Selectable {
+export class OrderClient implements Order  {
+    typeOrder;
+    amount;
+    campaign;
+    comment;
+    contract;
+    contract_type;
+    creation_date;
+    description;
+    files;
+    id_campaign;
+    id_contract;
+    id_operation;
+    id_project;
+    id_structure;
+    image;
+    label_program?;
+    name;
+    name_structure;
+    number_validation;
+    options;
+    price;
+    project;
+    program;
+    rank;
+    rankOrder;
+    selected;
+    status;
+    structure;
+    structure_groups;
+    summary;
+    supplier;
+    tax_amount;
+    technical_spec;
+
     id?: number;
-    amount: number;
-    name: string;
-    price: number;
-    tax_amount: number;
-    summary: string;
-    description: string;
-    image: string;
-    creation_date: Date;
-    status: string;
-    number_validation: string;
     priceTTCtotal: number ;
     price_single_ttc: number;
     priceProposalTTCTotal: number;
     grade?: Grade;
     title?: Title;
-    options: OrderOptionClient[];
-    technical_spec: TechnicalSpec[];
+
     preference: number;
-    contract: Contract;
-    supplier: Supplier;
-    campaign: Campaign;
-    structure_groups: string[];
     order_number?: string;
-    label_program?: string;
     contract_name?: string;
     supplier_name?: string;
-    project: Project;
-    files: any;
-    contract_type: ContractType;
-    name_structure: string;
-    id_contract: number;
-    id_campaign: number;
-    id_structure: string;
     id_supplier: string;
-    id_project: number;
-    id_operation: number;
-    selected: boolean;
-    comment?: string;
     price_proposal?: number;
-    rank?:number;
-    structure: Structure;
     priceUnitedTTC: number;
-    rankOrder: Number;
     isOrderRegion: Boolean;
     equipment:any;
+
     constructor() {
-
+        this.typeOrder= this.constructor.name;
     }
 
-    calculatePriceTTC ( roundNumber?: number, priceCalculate?: number)  {
-        let price = parseFloat(Utils.calculatePriceTTC(priceCalculate , this.tax_amount).toString());
-        if (this.options !== undefined) {
-            this.options.map((option) => {
-                price += parseFloat(Utils.calculatePriceTTC(option.price , option.tax_amount).toString() );
-            });
-        }
-        return (!isNaN(price)) ? (roundNumber ? price.toFixed(roundNumber) : price ) : price ;
+    initStructure(idStructure:string, structures:Structures):Structure{
+        const structure = _.findWhere(structures, { id : idStructure});
+        return  structure ? structure : new Structure() ;
     }
+
+    initNameStructure (idStructure: string, structures: Structures):string {
+        let structure = _.findWhere(structures, { id : idStructure});
+        return  structure ? structure.uai + '-' + structure.name : '' ;
+    }
+
+
+
 
     async updateComment(){
         try{
@@ -243,6 +261,8 @@ export class OrderClient implements Selectable {
             throw e;
         }
     }
+
+
 }
 export class OrdersClient extends Selection<OrderClient> {
 
@@ -275,14 +295,14 @@ export class OrdersClient extends Selection<OrderClient> {
     }
 
     //todo create orderDefault and here, init and clean data doesn't using
-    async sync (status: string, structures: Structure[] = [], idCampaign?: number, idStructure?: string) {
+    async sync (status: string, structures: Structures = new Structures(), idCampaign?: number, idStructure?: string) {
         try {
+            const orderClient = new OrderClient();
             this.projects = new Selection<Project>([]);
             this.id_project_use = -1;
             if (idCampaign && idStructure ) {
                 let { data } = await http.get(  `/lystore/orders/${idCampaign}/${idStructure}` );
                 this.all = Mix.castArrayAs(OrderClient, data);
-
                 this.all.map((order) => {
                     order.price = parseFloat(order.price.toString());
                     order.price_proposal = order.price_proposal? parseFloat( order.price_proposal.toString()) : null;
@@ -307,51 +327,57 @@ export class OrdersClient extends Selection<OrderClient> {
                     ? project.preference
                     : this.projects.all.length );
             } else {
-                let { data } = await http.get(  `/lystore/orders?status=${status}` );
-                this.all = Mix.castArrayAs(OrderClient, data);
-                this.all.map((order: OrderClient) => {
-                    order.name_structure =  structures.length > 0 ? this.initNameStructure(order.id_structure, structures) : '';
-                    order.structure = structures.length > 0 ? this.initStructure(order.id_structure, structures) : new Structure();
-                    order.price = parseFloat(status === 'VALID' ? order.price.toString().replace(',', '.') : order.price.toString());
-                    order.structure_groups = Utils.parsePostgreSQLJson(order.structure_groups);
+                let {data} = await http.get(`/lystore/orders?status=${status}`);
+                let a = Mix.castArrayAs(OrderClient, data);
+                this.all = a.map((orderMap) => new Order(orderMap, structures));
 
-                    if (status !== 'VALID') {
-                        order.tax_amount = parseFloat(order.tax_amount.toString());
-                        order.contract = Mix.castAs(Contract,  JSON.parse(order.contract.toString()));
-                        order.contract_type = Mix.castAs(ContractType,  JSON.parse(order.contract_type.toString()));
-                        order.supplier = Mix.castAs(Supplier,  JSON.parse(order.supplier.toString()));
-                        order.id_supplier = order.supplier.id;
-                        order.campaign = Mix.castAs(Campaign,  JSON.parse(order.campaign.toString()));
-                        order.project = Mix.castAs(Project, JSON.parse(order.project.toString()));
-                        order.project.title = Mix.castAs(Title, JSON.parse(order.title.toString()));
-                        order.rank = order.rank ? parseInt(order.rank.toString()) : null ;
-                        if (this.id_project_use != order.project.id) {
-                            this.id_project_use = order.project.id;
-                            this.projects.push(order.project);
+
+                if (status === 'VALID') {
+                    this.all.map((order: OrderClient) => {
+                        order.name_structure = structures.length > 0 ? orderClient.initNameStructure(order.id_structure, structures) : '';
+                        order.structure = structures.length > 0 ? orderClient.initStructure(order.id_structure, structures) : new Structure();
+                        order.price = parseFloat(status === 'VALID' ? order.price.toString().replace(',', '.') : order.price.toString());
+                        order.structure_groups = Utils.parsePostgreSQLJson(order.structure_groups);
+                    });
+                } else {
+                    //this.all.map((orderMap) => new Order(orderMap, structures));
+                    /*this.all.map((order: OrderClient) => {
+                        const resultMap = {
+                            ...order,
+                            //order.tax_amount = parseFloat(order.tax_amount.toString());
+                            //order.contract = Mix.castAs(Contract, JSON.parse(order.contract.toString()));
+                            //order.contract_type = Mix.castAs(ContractType, JSON.parse(order.contract_type.toString()));
+                            // order.supplier = Mix.castAs(Supplier, JSON.parse(order.supplier.toString()));
+                            //order.id_supplier = order.supplier.id;
+                            //order.campaign = Mix.castAs(Campaign, JSON.parse(order.campaign.toString()));
+                            //order.project = Mix.castAs(Project, JSON.parse(order.project.toString()));
+                            //order.project.title : Mix.castAs(Title, JSON.parse(order.title.toString())),
+                            //order.rank = order.rank ? parseInt(order.rank.toString()) : null;
+                            // this.id_project_use != order.project.id) {
+                            //     this.id_project_use = order.project.id;
+                            //     this.projects.push(order.project);
+                            // }
+                            //order.creation_date = moment(order.creation_date).format('L'),
+                            //     order.options.toString() !== '[null]' && order.options !== null ?
+                            //         order.options = Mix.castArrayAs(OrderOptionClient, JSON.parse(order.options.toString()))
+                            //         : order.options = [];
+                            //priceTTCtotal : parseFloat((order.calculatePriceTTC(2, order.price) as number).toString()) * order.amount,
+                                // order.priceUnitedTTC = order.price_proposal ?
+                                //     parseFloat((order.price_proposal).toString()) :
+                                //     parseFloat((order.calculatePriceTTC(2, order.price) as number).toString()),
+                                // order.priceProposalTTCTotal = order.price_proposal !== null ?
+                                //     parseFloat((order.price_proposal).toString()) * order.amount :
+                                //     null;
+
                         }
-                        order.creation_date = moment(order.creation_date).format('L');
-                        order.options.toString() !== '[null]' && order.options !== null ?
-                            order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
-                            : order.options = [];
-                        order.priceTTCtotal = parseFloat((order.calculatePriceTTC(2, order.price) as number).toString()) * order.amount;
-                        order.priceUnitedTTC = order.price_proposal ?
-                            parseFloat(( order.price_proposal).toString()):
-                            parseFloat((order.calculatePriceTTC(2, order.price) as number).toString());
-                        order.priceProposalTTCTotal = order.price_proposal !== null ?
-                            parseFloat(( order.price_proposal).toString()) * order.amount :
-                            null;
-                        if( order.campaign.orderPriorityEnable()){
-                            order.rankOrder = order.rank + 1;
-                        } else if (order.campaign.projectPriorityEnable()){
-                            order.rankOrder = order.project.preference + 1;
-                        }else{
-                            order.rankOrder = lang.translate("lystore.order.not.prioritized");
-                        }
-                    }
-                });
+                        }*/
+                 //   );
+
+
+                }
             }
-
         } catch (e) {
+            console.log(e);
             notify.error('lystore.order.sync.err');
         }
     }
@@ -409,14 +435,6 @@ export class OrdersClient extends Selection<OrderClient> {
         }
     }
 
-    initNameStructure (idStructure: string, structures: Structure[]) {
-        let structure = _.findWhere(structures, { id : idStructure});
-        return  structure ? structure.uai + '-' + structure.name : '' ;
-    }
-    initStructure (idStructure: string, structures: Structure[]) {
-        let structure = _.findWhere(structures, { id : idStructure});
-        return  structure ? structure : new Structure() ;
-    }
     calculTotalAmount () {
         let total = 0;
         this.all.map((order) => {

@@ -1,46 +1,76 @@
 import http from "axios";
-import {moment, notify} from "entcore";
+import {_, moment, notify} from "entcore";
 import {Project} from "./project";
-import {Campaign, Contract, ContractType, OrderOptionClient, Structure, TechnicalSpec, Utils} from "./index";
+import {
+    Campaign,
+    Contract,
+    ContractType,
+    Order,
+    OrderOptionClient,
+    Structure,
+    Structures,
+    TechnicalSpec,
+    Utils
+} from "./index";
 import {OrderClient} from "./OrderClient";
 import {Mix, Selectable, Selection} from "entcore-toolkit";
 import {Equipment} from "./Equipment";
 
-export class OrderRegion implements Selectable {
-    selected: boolean;
+export class OrderRegion implements Order  {
+    typeOrder;
+    amount;
+    campaign;
+    comment;
+    contract;
+    contract_type;
+    creation_date;
+    description;
+    files;
+    id_campaign;
+    id_contract;
+    id_operation;
+    id_project;
+    id_structure;
+    image;
+    label_program?;
+    name;
+    name_structure;
+    number_validation;
+    options;
+    price;
+    project;
+    program;
+    rankOrder;
+    selected;
+    status;
+    structure;
+    structure_groups;
+    summary;
+    supplier;
+    tax_amount;
+    technical_spec;
 
     id?: number;
-    amount: number;
-    name: string;
-    price: number;
-    summary: string;
-    description: string;
-    image: string;
-    creation_date: Date;
-    status: string;
-    number_validation: string;
-    technical_spec: TechnicalSpec[];
-    contract: Contract;
-    campaign: Campaign;
-    structure_groups: string[];
     contract_name?: string;
-    project: Project;
-    files: any;
-    contract_type: ContractType;
     order_client: OrderClient;
-    name_structure: string;
-    id_contract: number;
-    id_campaign: number;
-    id_structure: string;
-    id_project: number;
     id_orderClient: number;
-    comment?: string;
     rank?: number;
-    structure: Structure;
-    id_operation: number;
     equipment_key: number;
     title_id ?: number;
     equipment?: Equipment;
+    constructor() {
+        this.typeOrder= this.constructor.name;
+    }
+
+    initStructure(idStructure:string, structures:Structures):Structure{
+        const structure = _.findWhere(structures, { id : idStructure});
+        return  structure ? structure : new Structure() ;
+    }
+
+    initNameStructure (idStructure: string, structures: Structures):string {
+        let structure = _.findWhere(structures, { id : idStructure});
+        return  structure ? structure.uai + '-' + structure.name : '' ;
+    }
 
     toJson() {
         return {
@@ -206,6 +236,8 @@ export class OrderRegion implements Selectable {
             throw e;
         }
     }
+
+
 }
 
 export class OrdersRegion extends Selection<OrderRegion> {

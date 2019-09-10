@@ -144,6 +144,7 @@ public class RecapEPLETab extends TabHelper {
             merge = new CellRangeAddress(yProgramLabel + 4, yProgramLabel + 5, 2, 3);
             sheet.addMergedRegion(merge);
             excel.insertHeader(2, yProgramLabel + 3, excel.sumLabel);
+            excel.fillTab(3,3,yProgramLabel + 2 - nbLine,yProgramLabel + 2);
             excel.setTotalX(yProgramLabel + 2 - nbLine, yProgramLabel + 2, 3, yProgramLabel + 3);
             addTotalLabelInt(excel.getCellReference(yProgramLabel + 3, 3) + " +");
             nbLine = 0;

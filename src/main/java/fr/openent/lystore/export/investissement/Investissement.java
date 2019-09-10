@@ -131,7 +131,7 @@ public abstract class Investissement extends TabHelper {
             posx += treatActions(actions, code, posx, programRowNumber);
             excel.fillTab(xTab, this.cellColumn, yTab, this.operationsRowNumber);
         }
-        //TODO faire un rework de la fonction
+        //TODO faire un rework
 //        excel.setTotal(cellColumn, operationsRowNumber, xTab, yTab);
         CellRangeAddress totalMerge = new CellRangeAddress(programRowNumber, programRowNumber + 2, cellColumn, cellColumn);
         sheet.addMergedRegion(totalMerge);

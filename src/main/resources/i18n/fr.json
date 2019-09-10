@@ -525,5 +525,6 @@
   "lystore.export.waiting": "Export en cours de création ...",
   "lystore.export.success": "Export disponible",
   "lystore.export.error": "Une erreur est survenue lors de la création de l'export",
-  "lystore.instruction.name": "Nom du rapport"
+  "lystore.instruction.name": "Nom du rapport",
+  "lystore.operation.order.delete.err": "Erreur lors de la suppression des commandes dans l'opération"
 }

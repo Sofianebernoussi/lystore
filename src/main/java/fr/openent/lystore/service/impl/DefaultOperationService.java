@@ -302,35 +302,37 @@ public class DefaultOperationService extends SqlCrudService implements Operation
         JsonArray ordersRegionIds = ordersIds.getJsonObject(0).getJsonArray("ordersRegionId");
         JsonArray ordersClientsIds = ordersIds.getJsonObject(0).getJsonArray("ordersClientId");
 
-        statements.add(getDeletionRegion(ordersRegionIds));
-        statements.add(getClientsChangement(ordersClientsIds));
-//
-//        if (!statements.isEmpty()) {
-//            Sql.getInstance().transaction(statements, message -> {
-//                if ("ok".equals(message.body().getString("status"))) {
-//                    handler.handle(new Either.Right<>(message.body()));
-//                } else {
-//                    handler.handle(new Either.Left<>(message.body().getString("message")));
-//                }
-//            });
-//        } else {
-//            handler.handle(new Either.Right<>(new JsonObject().put("status", "ok")));
-//        }
+        if(!ordersRegionIds.isEmpty())
+            statements.add(getDeletionRegion(ordersRegionIds));
+        if(!ordersClientsIds.isEmpty())
+            statements.add(getClientsChangement(ordersClientsIds));
+
+        if (!statements.isEmpty()) {
+            Sql.getInstance().transaction(statements, message -> {
+                if ("ok".equals(message.body().getString("status"))) {
+                    handler.handle(new Either.Right<>(message.body()));
+                } else {
+                    handler.handle(new Either.Left<>(message.body().getString("message")));
+                }
+            });
+        } else {
+            handler.handle(new Either.Right<>(new JsonObject().put("status", "ok")));
+        }
     }
 
     private JsonObject getClientsChangement(JsonArray ordersClientsIds) {
-        String query= "UPDATE "+Lystore.lystoreSchema+".order_client_equipment" +
+        String query= "UPDATE "+Lystore.lystoreSchema+".order_client_equipment " +
+                " SET status='WAITING' " +
                 " WHERE id in " + Sql.listPrepared(ordersClientsIds.getList());
-           return new JsonObject()
+        return new JsonObject()
                 .put("statement", query)
                 .put("values", ordersClientsIds)
                 .put("action", "prepared");
     }
 
     private JsonObject getDeletionRegion(JsonArray ordersRegionIds) {
-            String query = "DELETE from "+Lystore.lystoreSchema+".\"order-region-equipment\"" +
-                    "WHERE id in"+Sql.listPrepared(ordersRegionIds.getList()) ;
-            System.out.println(query);
+        String query = "DELETE from "+Lystore.lystoreSchema+".\"order-region-equipment\" " +
+                " WHERE id in"+Sql.listPrepared(ordersRegionIds.getList()) ;
         return new JsonObject()
                 .put("statement", query)
                 .put("values", ordersRegionIds)

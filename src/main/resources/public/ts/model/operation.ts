@@ -61,11 +61,9 @@ export class Operation implements Selectable {
             }
         });
         try{
-            let arraytoSend= [];
-
-            await http.put(`lystore/operation/delete/orders`, [{"ordersClientId":ordersClientId,"ordersRegionId":ordersRegionId}])
+            return await http.put(`lystore/operation/delete/orders`, [{"ordersClientId":ordersClientId,"ordersRegionId":ordersRegionId}])
         }catch(e){
-            notify.error('à faire');
+            notify.error('lystore.operation.order.delete.err');
             throw e;
         }
     }

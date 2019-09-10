@@ -63,7 +63,7 @@ public class RecapImputationBud extends TabHelper {
 
     private String insertSetion(String section, String oldSection, int xTab, int y) {
         if (!section.equals(oldSection)) {
-            excel.insertHeader(y, xTab, section);
+            excel.insertHeader(xTab, y, section);
             if (y - nbToMerge != y - 1) {
                 CellRangeAddress merge = new CellRangeAddress(y - nbToMerge, y - 1, xTab, xTab);
                 sheet.addMergedRegion(merge);
@@ -73,7 +73,7 @@ public class RecapImputationBud extends TabHelper {
             oldSection = section;
 
         } else {
-            excel.insertHeader(y, xTab, section);
+            excel.insertHeader(xTab, y, section);
 
             nbToMerge++;
         }

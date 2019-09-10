@@ -10,8 +10,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -104,7 +102,7 @@ public class AnnexeDelibTab extends TabHelper {
         }
 
         for (int i = 0; i <= programMarket.size(); i++) {
-            excel.insertHeader(lineToInsert + 1, 3, excel.totalLabel);
+            excel.insertHeader(3, lineToInsert + 1, excel.totalLabel);
             excel.setTotalX(6, lineToInsert, 4 + i, lineToInsert + 1);
 
         }
@@ -126,13 +124,13 @@ public class AnnexeDelibTab extends TabHelper {
         sheet.addMergedRegion(merge);
         excel.setRegionHeader(merge, sheet);
 
-        excel.insertHeader(4, 1, "COMMUNE");
-        excel.insertHeader(5, 1, "");
+        excel.insertHeader(1, 4, "COMMUNE");
+        excel.insertHeader(1, 5, "");
 
-        excel.insertHeader(4, 2, "LYCEE");
-        excel.insertHeader(5, 2, "");
-        excel.insertHeader(4, 3, "UAI");
-        excel.insertHeader(5, 3, "");
+        excel.insertHeader(2, 4, "LYCEE");
+        excel.insertHeader(2, 5, "");
+        excel.insertHeader(3, 4, "UAI");
+        excel.insertHeader(3, 5, "");
 
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
@@ -159,9 +157,9 @@ public class AnnexeDelibTab extends TabHelper {
                     excel.setRegionHeader(merge, sheet);
                 }
                 initProgramX = 4 + programMarket.size();
-                excel.insertHeader(4, 4 + programMarket.size(), segments[0]);
+                excel.insertHeader(4 + programMarket.size(), 4, segments[0]);
             }
-            excel.insertHeader(5, 4 + programMarket.size(), segments[1]);
+            excel.insertHeader(4 + programMarket.size(), 5, segments[1]);
             programMarket.put(progM, i);
         }
 
@@ -172,8 +170,8 @@ public class AnnexeDelibTab extends TabHelper {
         }
 
         arrayLength += programMarket.size();
-        excel.insertHeader(4, 4 + programMarket.size(), excel.totalLabel);
-        excel.insertHeader(5, 4 + programMarket.size(), "");
+        excel.insertHeader(4 + programMarket.size(), 4, excel.totalLabel);
+        excel.insertHeader(4 + programMarket.size(), 5, "");
 
     }
 

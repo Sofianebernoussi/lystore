@@ -76,7 +76,7 @@ public abstract class Investissement extends TabHelper {
             excel.insertLabel(cellLabelColumn, this.operationsRowNumber,operation.getString("label"));
             this.operationsRowNumber++;
         }
-        excel.insertHeader( cellLabelColumn,this.operationsRowNumber, excel.totalLabel);
+        excel.insertHeader(this.operationsRowNumber, cellLabelColumn, excel.totalLabel);
 
     }
 
@@ -119,7 +119,7 @@ public abstract class Investissement extends TabHelper {
 
             JsonArray actions = program.getJsonArray(actionStr, new JsonArray());
             if (actions.isEmpty()) continue;
-            excel.insertHeader( cellColumn,programRowNumber, program.getString("name"));
+            excel.insertHeader(programRowNumber, cellColumn, program.getString("name"));
             numberActions = nbAction(actions);
             //check if merged region necessary
             if (numberActions != 1) {
@@ -131,11 +131,12 @@ public abstract class Investissement extends TabHelper {
             posx += treatActions(actions, code, posx, programRowNumber);
             excel.fillTab(xTab, this.cellColumn, yTab, this.operationsRowNumber);
         }
-        excel.setTotal(cellColumn, operationsRowNumber, xTab, yTab);
+        //TODO faire un rework de la fonction
+//        excel.setTotal(cellColumn, operationsRowNumber, xTab, yTab);
         CellRangeAddress totalMerge = new CellRangeAddress(programRowNumber, programRowNumber + 2, cellColumn, cellColumn);
         sheet.addMergedRegion(totalMerge);
         excel.setRegionHeader(totalMerge, sheet);
-        excel.insertHeader( cellColumn,programRowNumber, excel.totalLabel);
+        excel.insertHeader(programRowNumber, cellColumn, excel.totalLabel);
 
     }
 
@@ -149,8 +150,8 @@ public abstract class Investissement extends TabHelper {
                     posx++;
                 }
 
-                excel.insertHeader( cellColumn,programRowNumber + 1, action.getString("name"));
-                excel.insertHeader( cellColumn,programRowNumber + 2, action.getString("code"));
+                excel.insertHeader(programRowNumber + 1, cellColumn, action.getString("name"));
+                excel.insertHeader(programRowNumber + 2, cellColumn, action.getString("code"));
                 this.cellColumn++;
 
             }

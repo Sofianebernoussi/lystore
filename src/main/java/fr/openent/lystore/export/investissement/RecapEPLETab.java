@@ -143,7 +143,7 @@ public class RecapEPLETab extends TabHelper {
             sheet.addMergedRegion(merge);
             merge = new CellRangeAddress(yProgramLabel + 4, yProgramLabel + 5, 2, 3);
             sheet.addMergedRegion(merge);
-            excel.insertHeader(yProgramLabel + 3, 2, excel.sumLabel);
+            excel.insertHeader(2, yProgramLabel + 3, excel.sumLabel);
             excel.setTotalX(yProgramLabel + 2 - nbLine, yProgramLabel + 2, 3, yProgramLabel + 3);
             addTotalLabelInt(excel.getCellReference(yProgramLabel + 3, 3) + " +");
             nbLine = 0;
@@ -171,14 +171,14 @@ public class RecapEPLETab extends TabHelper {
             uai = program.getString("uai");
             zipCode = program.getString("zipCode");
             city = program.getString("city");
-            excel.insertHeader(0,yProgramLabel + 3,  zipCode + " - " + city + " - " + nameEtab + " (" + uai + ")");
+            excel.insertHeader(yProgramLabel + 3, 0, zipCode + " - " + city + " - " + nameEtab + " (" + uai + ")");
             merge = new CellRangeAddress(yProgramLabel + 3, yProgramLabel + 3, 0, 3);
             sheet.addMergedRegion(merge);
             excel.setRegionHeader(merge, sheet);
-            excel.insertHeader( 0,yProgramLabel + 4, orderLabel);
-            excel.insertHeader(1,yProgramLabel + 4, orderComment);
-            excel.insertHeader(2,yProgramLabel + 4, orderAmount);
-            excel.insertHeader(3,yProgramLabel + 4, orderTotal);
+            excel.insertHeader(yProgramLabel + 4, 0, orderLabel);
+            excel.insertHeader(yProgramLabel + 4, 1, orderComment);
+            excel.insertHeader(yProgramLabel + 4, 2, orderAmount);
+            excel.insertHeader(yProgramLabel + 4, 3, orderTotal);
             yProgramLabel += 2;
         }
         return id_structure;
@@ -207,13 +207,13 @@ public class RecapEPLETab extends TabHelper {
     public void setLabelHead(JsonObject program) {
         yProgramLabel += 4;
 
-        excel.insertLabelHead( xProgramLabel,yProgramLabel,
+        excel.insertLabelHead(yProgramLabel, xProgramLabel,
                 programLabel + program.getString("program_name") + " " + program.getString("program_label"));
-        excel.insertLabelHead( xProgramLabel,yProgramLabel + 2,
+        excel.insertLabelHead(yProgramLabel + 2, xProgramLabel,
                 actionLabel + program.getString("action_code") + " - " + program.getString("action_name"));
-        excel.insertLabelHead( xProgramLabel + 1,yProgramLabel,
+        excel.insertLabelHead(yProgramLabel, xProgramLabel + 1,
                 contractType + program.getString("contract_code") + " - " + program.getString("contract_name"));
-        excel.insertLabelHead(xProgramLabel + 2,yProgramLabel,  totalLabel);
+        excel.insertLabelHead(yProgramLabel, xProgramLabel + 2, totalLabel);
         xlabel = yProgramLabel;
         yProgramLabel += 2;
 

@@ -94,14 +94,14 @@ public class RecapMarket extends TabHelper {
             }
         }
         //Setting total
-        excel.insertYellowLabel(operationsRowNumber, 0, ExcelHelper.totalLabel);
+        excel.insertYellowLabel(0, operationsRowNumber, ExcelHelper.totalLabel);
         excel.fillTab(1, programMarket.size() + 1, 9, 9 + datas.size()); // init all empty tab cells
 
         for (int i = 1; i < programMarket.size() + 1; i++) {
             excel.setTotalX(9, operationsRowNumber - 1, i, operationsRowNumber);
         }
 
-        excel.insertYellowLabel(8, programMarket.size() + 1, ExcelHelper.totalLabel);
+        excel.insertYellowLabel(programMarket.size() + 1, 8, ExcelHelper.totalLabel);
 
         for (int i = 0; i <= datas.size(); i++) {
             excel.setTotalY(1, programMarket.size(), 9 + i, programMarket.size() + 1);
@@ -163,7 +163,7 @@ public class RecapMarket extends TabHelper {
                         excel.setRegionHeader(merge, sheet);
                     }
                     initProgramX = 3 + programMarket.size();
-                    excel.insertYellowLabel(operationsRowNumber - 2, 1 + programMarket.size(), segments[1]);
+                    excel.insertYellowLabel(1 + programMarket.size(), operationsRowNumber - 2, segments[1]);
                 }
             } else {
                 previousMarket = segments[0];
@@ -174,11 +174,11 @@ public class RecapMarket extends TabHelper {
                     excel.setRegionHeader(merge, sheet);
                 }
                 initMarketX = 1 + programMarket.size();
-                excel.insertYellowLabel(operationsRowNumber - 3, 1 + programMarket.size(), segments[0]);
-                excel.insertYellowLabel(operationsRowNumber - 2, 1 + programMarket.size(), segments[1]);
+                excel.insertYellowLabel(1 + programMarket.size(), operationsRowNumber - 3, segments[0]);
+                excel.insertYellowLabel(1 + programMarket.size(), operationsRowNumber - 2, segments[1]);
             }
             //always insert contract_type code
-            excel.insertYellowLabel(operationsRowNumber - 1, 1 + programMarket.size(), segments[2]);
+            excel.insertYellowLabel(1 + programMarket.size(), operationsRowNumber - 1, segments[2]);
 
             programMarket.put(progM, i);
         }

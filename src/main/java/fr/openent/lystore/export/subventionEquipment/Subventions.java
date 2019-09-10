@@ -99,7 +99,7 @@ public class Subventions extends TabHelper {
 
             String structString = zip + " - " +
                     structureDatas.getString("city") + " - " + structureDatas.getString("nameEtab") + "(" + structureDatas.getString("uai") + ")";
-            excel.insertHeader(lineNumber, 0, structString);
+            excel.insertHeader(0, lineNumber, structString);
             sizeMergeRegion(lineNumber, 0, 3);
             lineNumber++;
 
@@ -127,10 +127,10 @@ public class Subventions extends TabHelper {
 
     @Override
     protected void setLabels() {
-        excel.insertHeader(lineNumber, 0, ORDER_LABEL);
-        excel.insertHeader(lineNumber, 1, ORDER_COMMENT);
-        excel.insertHeader(lineNumber, 2, AMOUNT);
-        excel.insertHeader(lineNumber, 3, TOTAL);
+        excel.insertHeader(0, lineNumber, ORDER_LABEL);
+        excel.insertHeader(1, lineNumber, ORDER_COMMENT);
+        excel.insertHeader(2, lineNumber, AMOUNT);
+        excel.insertHeader(3, lineNumber, TOTAL);
         lineNumber++;
     }
 

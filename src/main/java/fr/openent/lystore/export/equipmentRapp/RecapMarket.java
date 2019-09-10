@@ -9,8 +9,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,7 +70,7 @@ public class RecapMarket extends TabHelper {
             JsonObject operation = datas.getJsonObject(i);
             String actionsStrToArray = operation.getString("actions");
 
-            excel.insertLabel(operationsRowNumber, 0, operation.getString("label"));
+            excel.insertLabel(0, operationsRowNumber, operation.getString("label"));
 
             this.operationsRowNumber++;
 

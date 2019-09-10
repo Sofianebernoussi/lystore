@@ -10,8 +10,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 
@@ -140,14 +138,14 @@ public class ListForTextTab extends TabHelper {
                     columnTotal = 4;
                     idPassed.put(action.getString("id_structure"), true);
                     try {
-                        excel.insertLabel(yProgramLabel, 0, action.getString("zipCode").substring(0, 2));
+                        excel.insertLabel(0, yProgramLabel, action.getString("zipCode").substring(0, 2));
 
                     } catch (NullPointerException e) {
-                        excel.insertLabel(yProgramLabel, 0, action.getString("zipCode"));
+                        excel.insertLabel(0, yProgramLabel, action.getString("zipCode"));
                     }
-                    excel.insertLabel(yProgramLabel, 1, action.getString("city"));
-                    excel.insertLabel(yProgramLabel, 2, action.getString("nameEtab"));
-                    excel.insertLabel(yProgramLabel, 3, action.getString("uai"));
+                    excel.insertLabel(1, yProgramLabel, action.getString("city"));
+                    excel.insertLabel(2, yProgramLabel, action.getString("nameEtab"));
+                    excel.insertLabel(3, yProgramLabel, action.getString("uai"));
 
                     oldTotal = 0.f;
                     oldkey = key;

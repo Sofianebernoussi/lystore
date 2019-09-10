@@ -169,7 +169,7 @@ public class LinesBudget extends TabHelper {
         }
         Collections.sort(codes);
         for (int i = 0; i < codes.size(); i++) {
-            excel.insertLabel(1, 5 + i, codes.get(i).toString());
+            excel.insertLabel(5 + i, 1, codes.get(i).toString());
         }
         arraylength += codes.size();
     }

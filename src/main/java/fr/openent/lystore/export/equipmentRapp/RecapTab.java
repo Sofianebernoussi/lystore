@@ -9,8 +9,6 @@ import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,8 +82,8 @@ public class RecapTab extends TabHelper {
             String labelOperation = operation.getString("label");
 
             Row operationRow = sheet.createRow(this.operationsRowNumber);
-            excel.insertLabel(operationRow, cellLabelColumn, operation.getLong("id").toString());
-            excel.insertLabel(operationRow, cellLabelColumn + 1, labelOperation);
+            excel.insertLabel(cellLabelColumn, operationRow, operation.getLong("id").toString());
+            excel.insertLabel(cellLabelColumn + 1, operationRow, labelOperation);
 
 
             JsonArray actions = new JsonArray(actionsStrToArray);

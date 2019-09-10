@@ -10,8 +10,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -195,44 +193,44 @@ public class VerifBudgetTab extends TabHelper {
                 currentY += 2;
             }
             if (value.containsKey("uai")) {
-                excel.insertLabel(currentY, 0, value.getString("uai"));
+                excel.insertLabel(0, currentY, value.getString("uai"));
             } else
-                excel.insertLabel(currentY, 0, "");
-            excel.insertLabel(currentY, 1, "R");
-            excel.insertLabel(currentY, 2, "REG : " + value.getString("name_equipment"));
+                excel.insertLabel(0, currentY, "");
+            excel.insertLabel(1, currentY, "R");
+            excel.insertLabel(2, currentY, "REG : " + value.getString("name_equipment"));
             excel.insertCellTabStringRight(3, currentY, value.getInteger("amount").toString());
             try {
-                excel.insertLabel(currentY, 4, "M : " + safeGetFloat(value,"total", "verifBubgetTab" ).toString());
+                excel.insertLabel(4, currentY, "M : " + safeGetFloat(value,"total", "verifBubgetTab" ).toString());
             } catch (ClassCastException e) {
-                excel.insertLabel(currentY, 4, "M : " + value.getInteger("total").toString());
+                excel.insertLabel(4, currentY, "M : " + value.getInteger("total").toString());
             }
 
             currentY++;
 
-            excel.insertLabel(currentY, 0, "OPE  : " + value.getInteger("id_operation").toString());
-            excel.insertLabel(currentY, 1, " ");
+            excel.insertLabel(0, currentY, "OPE  : " + value.getInteger("id_operation").toString());
+            excel.insertLabel(1, currentY, " ");
             try {
                 if (!value.getString("old_name").equals("null")) {
-                    excel.insertLabel(currentY, 2, "LYC : " + value.getString("old_name"));
+                    excel.insertLabel(2, currentY, "LYC : " + value.getString("old_name"));
                 } else {
-                    excel.insertLabel(currentY, 2, "LYC : " + value.getString("name_equipment"));
+                    excel.insertLabel(2, currentY, "LYC : " + value.getString("name_equipment"));
                 }
             } catch (NullPointerException e) {
-                excel.insertLabel(currentY, 2, "LYC : " + value.getString("name_equipment"));
+                excel.insertLabel(2, currentY, "LYC : " + value.getString("name_equipment"));
             }
-            excel.insertLabel(currentY, 3, "Ref : " + value.getInteger("key").toString());
+            excel.insertLabel(3, currentY, "Ref : " + value.getInteger("key").toString());
             if (value.getBoolean("region")) {
                 if (value.getBoolean("isregion"))
-                    excel.insertLabel(currentY, 4, "N° dem : R" + " - " + value.getInteger("id").toString());
+                    excel.insertLabel(4, currentY, "N° dem : R" + " - " + value.getInteger("id").toString());
                 else
-                    excel.insertLabel(currentY, 4, "N° dem : C" + " - " + value.getInteger("id").toString());
+                    excel.insertLabel(4, currentY, "N° dem : C" + " - " + value.getInteger("id").toString());
 
 
             } else {
                 if (value.getBoolean("isregion"))
-                    excel.insertLabel(currentY, 4, "N° dem : R" + value.getInteger("id").toString());
+                    excel.insertLabel(4, currentY, "N° dem : R" + value.getInteger("id").toString());
                 else
-                    excel.insertLabel(currentY, 4, "N° dem : C" + value.getInteger("id").toString());
+                    excel.insertLabel(4, currentY, "N° dem : C" + value.getInteger("id").toString());
 
             }
             currentY++;

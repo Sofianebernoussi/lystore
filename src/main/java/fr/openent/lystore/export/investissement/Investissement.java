@@ -73,7 +73,7 @@ public abstract class Investissement extends TabHelper {
             JsonObject operation = operations.getJsonObject(i);
             taby.add(operation.getInteger("id"));
             Row operationRow = sheet.createRow(this.operationsRowNumber);
-            excel.insertLabel(operationRow, cellLabelColumn, operation.getString("label"));
+            excel.insertLabel(cellLabelColumn, operationRow, operation.getString("label"));
             this.operationsRowNumber++;
         }
         excel.insertHeader(sheet.createRow(this.operationsRowNumber), cellLabelColumn, excel.totalLabel);

@@ -534,40 +534,83 @@ public class ExcelHelper {
     public void setRegionUnderscoreHeader(CellRangeAddress merge, Sheet sheet) {
         RegionUtil.setBorderBottom(BorderStyle.THIN, merge, sheet);
     }
-    /**
-     * insert Header
-     *
-     * @param row
-     * @param cellColumn
-     * @param data
-     */
-    public void insertHeader(Row row, int cellColumn, String data) {
-        Cell cell = row.createCell(cellColumn);
-        cell.setCellValue(data);
-        cell.setCellStyle(this.headCellStyle);
-        row.setHeight((short) -1);
-
-    }
 
     /**
-     * insert a cell with label style
      *
-     * @param row
-     * @param cellColumn
-     * @param data       data to insert
+     * @param cellColumn x
+     * @param line y
+     * @param data data to insert (any type of Object)
+     * @param style cell's style
      */
-    public void insertLabel(Row row, int cellColumn, String data) {
-        Cell cell = row.createCell(cellColumn);
-        cell.setCellValue(data);
-        cell.setCellStyle(this.labelStyle);
+    public void insertWithStyle(int cellColumn,int line, Object data, CellStyle style){
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+
+            setDataInCell(cell,data);
+            cell.setCellStyle(style);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            setDataInCell(cell,data);
+            cell.setCellStyle(style);
+        }
+    }
+
+    private void setDataInCell(Cell cell,Object data) {
+        switch (data.getClass().getName()){
+            case"String":
+                cell.setCellValue((String)data);
+                break;
+            case"Double":
+                cell.setCellValue((Double)data);
+
+            case "Integer":
+                cell.setCellValue((Integer)data);
+                break;
+            default:
+                cell.setCellValue(data.toString());
+                break;
+        }
     }
 
 
-    public void insertFormula(Row row, int cellColumn, String data) {
-        Cell cell = row.createCell(cellColumn);
-        cell.setCellFormula(data);
-        cell.setCellStyle(this.currencyStyle);
-    }
+//
+//    /**
+//     * insert Header
+//     *
+//     * @param row
+//     * @param cellColumn
+//     * @param data
+//     */
+//    public void insertHeader(Row row, int cellColumn, String data) {
+//        Cell cell = row.createCell(cellColumn);
+//        cell.setCellValue(data);
+//        cell.setCellStyle(this.headCellStyle);
+//        row.setHeight((short) -1);
+//
+//    }
+//
+//    /**
+//     * insert a cell with label style
+//     *
+//     * @param row
+//     * @param cellColumn
+//     * @param data       data to insert
+//     */
+//    public void insertLabel(Row row, int cellColumn, String data) {
+//        Cell cell = row.createCell(cellColumn);
+//        cell.setCellValue(data);
+//        cell.setCellStyle(this.labelStyle);
+//    }
+//
+//
+//    public void insertFormula(Row row, int cellColumn, String data) {
+//        Cell cell = row.createCell(cellColumn);
+//        cell.setCellFormula(data);
+//        cell.setCellStyle(this.currencyStyle);
+//    }
 
     /**
      * insert a cell with float in the tab
@@ -576,56 +619,23 @@ public class ExcelHelper {
      * @param line
      * @param data       data to insert
      */
-    public void insertCellTabFloat(int cellColumn, int line, float data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabNumeralStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabNumeralStyle);
-        }
+    public void insertCellTabFloat(int cellColumn, int line, Float data) {
+      insertWithStyle(cellColumn,line,data,this.tabNumeralStyle);
     }
 
+
     public void insertCellTabStringRight(int cellColumn, int line, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabStringStyleRight);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabStringStyleRight);
-        }
+        insertWithStyle(cellColumn, line, data, this.tabStringStyleRight);
     }
 
     /**
      * insert a label in a tab at line,column
-     *
+     *  @param cellColumn
      * @param line
-     * @param cellColumn
      * @param data
      */
-    public void insertLabel(int line, int cellColumn, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.labelStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.labelStyle);
-        }
+    public void insertLabel(int cellColumn, int line, String data) {
+        insertWithStyle(cellColumn, line, data, this.labelStyle);
     }
 
     public void insertLabelBold(int line, int cellColumn, String data) {

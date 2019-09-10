@@ -171,14 +171,14 @@ public class RecapEPLETab extends TabHelper {
             uai = program.getString("uai");
             zipCode = program.getString("zipCode");
             city = program.getString("city");
-            excel.insertHeader(sheet.createRow(yProgramLabel + 3), 0, zipCode + " - " + city + " - " + nameEtab + " (" + uai + ")");
+            excel.insertHeader(0,yProgramLabel + 3,  zipCode + " - " + city + " - " + nameEtab + " (" + uai + ")");
             merge = new CellRangeAddress(yProgramLabel + 3, yProgramLabel + 3, 0, 3);
             sheet.addMergedRegion(merge);
             excel.setRegionHeader(merge, sheet);
-            excel.insertHeader(sheet.createRow(yProgramLabel + 4), 0, orderLabel);
-            excel.insertHeader(sheet.getRow(yProgramLabel + 4), 1, orderComment);
-            excel.insertHeader(sheet.getRow(yProgramLabel + 4), 2, orderAmount);
-            excel.insertHeader(sheet.getRow(yProgramLabel + 4), 3, orderTotal);
+            excel.insertHeader( 0,yProgramLabel + 4, orderLabel);
+            excel.insertHeader(1,yProgramLabel + 4, orderComment);
+            excel.insertHeader(2,yProgramLabel + 4, orderAmount);
+            excel.insertHeader(3,yProgramLabel + 4, orderTotal);
             yProgramLabel += 2;
         }
         return id_structure;
@@ -193,27 +193,27 @@ public class RecapEPLETab extends TabHelper {
             totalLabelInt += cellToAdd;
         } else {
             totalLabelInt = totalLabelInt.substring(0, totalLabelInt.length() - 1);
-            excel.insertFormula(sheet.getRow(yProgramLabel + 3), 1589, totalLabelInt);
+            excel.insertFormula(yProgramLabel + 3, 1589, totalLabelInt);
             totalLabelInt = excel.getCellReference(yProgramLabel + 3, 1589) + " +" + cellToAdd;
         }
     }
 
     private void settingSumLabel() {
         totalLabelInt = totalLabelInt.substring(0, totalLabelInt.length() - 1);
-        excel.insertFormula(sheet.getRow(xlabel), yTotalLabel, totalLabelInt);
+        excel.insertFormula(xlabel, yTotalLabel, totalLabelInt);
         totalLabelInt = "";
     }
 
     public void setLabelHead(JsonObject program) {
         yProgramLabel += 4;
 
-        excel.insertLabelHead(yProgramLabel, xProgramLabel,
+        excel.insertLabelHead( xProgramLabel,yProgramLabel,
                 programLabel + program.getString("program_name") + " " + program.getString("program_label"));
-        excel.insertLabelHead(yProgramLabel + 2, xProgramLabel,
+        excel.insertLabelHead( xProgramLabel,yProgramLabel + 2,
                 actionLabel + program.getString("action_code") + " - " + program.getString("action_name"));
-        excel.insertLabelHead(yProgramLabel, xProgramLabel + 1,
+        excel.insertLabelHead( xProgramLabel + 1,yProgramLabel,
                 contractType + program.getString("contract_code") + " - " + program.getString("contract_name"));
-        excel.insertLabelHead(yProgramLabel, xProgramLabel + 2, totalLabel);
+        excel.insertLabelHead(xProgramLabel + 2,yProgramLabel,  totalLabel);
         xlabel = yProgramLabel;
         yProgramLabel += 2;
 

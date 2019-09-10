@@ -559,13 +559,15 @@ public class ExcelHelper {
     }
 
     private void setDataInCell(Cell cell,Object data) {
-        switch (data.getClass().getName()){
+        switch (data.getClass().getName().replace("java.lang.","")){
             case"String":
                 cell.setCellValue((String)data);
                 break;
             case"Double":
                 cell.setCellValue((Double)data);
-
+            case"Float":
+                cell.setCellValue((Float)data);
+                break;
             case "Integer":
                 cell.setCellValue((Integer)data);
                 break;
@@ -576,41 +578,20 @@ public class ExcelHelper {
     }
 
 
-//
-//    /**
-//     * insert Header
-//     *
-//     * @param row
-//     * @param cellColumn
-//     * @param data
-//     */
-//    public void insertHeader(Row row, int cellColumn, String data) {
-//        Cell cell = row.createCell(cellColumn);
-//        cell.setCellValue(data);
-//        cell.setCellStyle(this.headCellStyle);
-//        row.setHeight((short) -1);
-//
-//    }
-//
-//    /**
-//     * insert a cell with label style
-//     *
-//     * @param row
-//     * @param cellColumn
-//     * @param data       data to insert
-//     */
-//    public void insertLabel(Row row, int cellColumn, String data) {
-//        Cell cell = row.createCell(cellColumn);
-//        cell.setCellValue(data);
-//        cell.setCellStyle(this.labelStyle);
-//    }
-//
-//
-//    public void insertFormula(Row row, int cellColumn, String data) {
-//        Cell cell = row.createCell(cellColumn);
-//        cell.setCellFormula(data);
-//        cell.setCellStyle(this.currencyStyle);
-//    }
+    public void insertFormula(int cellColumn,int line, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellFormula(data);
+            cell.setCellStyle(this.currencyStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellFormula(data);
+            cell.setCellStyle(this.currencyStyle);
+        }
+    }
 
     /**
      * insert a cell with float in the tab

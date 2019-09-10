@@ -81,9 +81,8 @@ public class RecapTab extends TabHelper {
             String actionsStrToArray = operation.getString(actionStr);
             String labelOperation = operation.getString("label");
 
-            Row operationRow = sheet.createRow(this.operationsRowNumber);
-            excel.insertLabel(cellLabelColumn, operationRow, operation.getLong("id").toString());
-            excel.insertLabel(cellLabelColumn + 1, operationRow, labelOperation);
+            excel.insertLabel(cellLabelColumn, this.operationsRowNumber, operation.getLong("id").toString());
+            excel.insertLabel(cellLabelColumn + 1, this.operationsRowNumber, labelOperation);
 
 
             JsonArray actions = new JsonArray(actionsStrToArray);

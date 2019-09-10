@@ -73,10 +73,10 @@ public abstract class Investissement extends TabHelper {
             JsonObject operation = operations.getJsonObject(i);
             taby.add(operation.getInteger("id"));
             Row operationRow = sheet.createRow(this.operationsRowNumber);
-            excel.insertLabel(cellLabelColumn, operationRow, operation.getString("label"));
+            excel.insertLabel(cellLabelColumn, this.operationsRowNumber,operation.getString("label"));
             this.operationsRowNumber++;
         }
-        excel.insertHeader(sheet.createRow(this.operationsRowNumber), cellLabelColumn, excel.totalLabel);
+        excel.insertHeader( cellLabelColumn,this.operationsRowNumber, excel.totalLabel);
 
     }
 
@@ -113,14 +113,13 @@ public abstract class Investissement extends TabHelper {
         if (programs.isEmpty()) {
             return;
         }
-        Row programRow = sheet.createRow(programRowNumber);
 
         for (int i = 0; i < programs.size(); i++) {
             JsonObject program = programs.getJsonObject(i);
 
             JsonArray actions = program.getJsonArray(actionStr, new JsonArray());
             if (actions.isEmpty()) continue;
-            excel.insertHeader(programRow, cellColumn, program.getString("name"));
+            excel.insertHeader( cellColumn,programRowNumber, program.getString("name"));
             numberActions = nbAction(actions);
             //check if merged region necessary
             if (numberActions != 1) {
@@ -136,13 +135,11 @@ public abstract class Investissement extends TabHelper {
         CellRangeAddress totalMerge = new CellRangeAddress(programRowNumber, programRowNumber + 2, cellColumn, cellColumn);
         sheet.addMergedRegion(totalMerge);
         excel.setRegionHeader(totalMerge, sheet);
-        excel.insertHeader(sheet.getRow(programRowNumber), cellColumn, excel.totalLabel);
+        excel.insertHeader( cellColumn,programRowNumber, excel.totalLabel);
 
     }
 
     private int treatActions(JsonArray actions, String code, int posx, int programRowNumber) {
-        Row actionDescRow = sheet.getRow(programRowNumber + 1);
-        Row actionNumRow = sheet.getRow(programRowNumber + 2);
         for (int j = 0; j < actions.size(); j++) {
             JsonObject action = actions.getJsonObject(j);
             if (!code.equals(action.getString("code"))) {
@@ -152,8 +149,8 @@ public abstract class Investissement extends TabHelper {
                     posx++;
                 }
 
-                excel.insertHeader(actionDescRow, cellColumn, action.getString("name"));
-                excel.insertHeader(actionNumRow, cellColumn, action.getString("code"));
+                excel.insertHeader( cellColumn,programRowNumber + 1, action.getString("name"));
+                excel.insertHeader( cellColumn,programRowNumber + 2, action.getString("code"));
                 this.cellColumn++;
 
             }

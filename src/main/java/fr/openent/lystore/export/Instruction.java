@@ -92,7 +92,7 @@ public class Instruction {
                         Future<Boolean> Fonctionnementfuture = Future.future();
                         Future<Boolean> RecapEPLEfuture = Future.future();
                         Future<Boolean> RecapImputationBudfuture = Future.future();
-//                        futures.add(lyceeFuture);
+                        futures.add(lyceeFuture);
 //                        futures.add(CMRFuture);
 //                        futures.add(CMDfuture);
 //                        futures.add(Fonctionnementfuture);

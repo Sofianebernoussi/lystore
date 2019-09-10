@@ -144,9 +144,8 @@ public class RecapEPLETab extends TabHelper {
             merge = new CellRangeAddress(yProgramLabel + 4, yProgramLabel + 5, 2, 3);
             sheet.addMergedRegion(merge);
             excel.insertHeader(2, yProgramLabel + 3, excel.sumLabel);
-            excel.fillTab(3,3,yProgramLabel + 2 - nbLine,yProgramLabel + 2);
-            excel.setTotalX(yProgramLabel + 2 - nbLine, yProgramLabel + 2, 3, yProgramLabel + 3);
-            addTotalLabelInt(excel.getCellReference(yProgramLabel + 3, 3) + " +");
+//            excel.setTotalX(yProgramLabel + 2 - nbLine, yProgramLabel + 2, 3, yProgramLabel + 3);
+//            addTotalLabelInt(excel.getCellReference(yProgramLabel + 3, 3) + " +");
             nbLine = 0;
 
 
@@ -173,9 +172,9 @@ public class RecapEPLETab extends TabHelper {
             zipCode = program.getString("zipCode");
             city = program.getString("city");
             excel.insertHeader(yProgramLabel + 3, 0, zipCode + " - " + city + " - " + nameEtab + " (" + uai + ")");
-            merge = new CellRangeAddress(yProgramLabel + 3, yProgramLabel + 3, 0, 3);
-            sheet.addMergedRegion(merge);
-            excel.setRegionHeader(merge, sheet);
+//            merge = new CellRangeAddress(yProgramLabel + 3, yProgramLabel + 3, 0, 3);
+//            sheet.addMergedRegion(merge);
+//            excel.setRegionHeader(merge, sheet);
             excel.insertHeader(yProgramLabel + 4, 0, orderLabel);
             excel.insertHeader(yProgramLabel + 4, 1, orderComment);
             excel.insertHeader(yProgramLabel + 4, 2, orderAmount);

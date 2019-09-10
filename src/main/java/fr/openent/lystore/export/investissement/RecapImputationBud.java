@@ -65,9 +65,9 @@ public class RecapImputationBud extends TabHelper {
         if (!section.equals(oldSection)) {
             excel.insertHeader(xTab, y, section);
             if (y - nbToMerge != y - 1) {
-                CellRangeAddress merge = new CellRangeAddress(y - nbToMerge, y - 1, xTab, xTab);
-                sheet.addMergedRegion(merge);
-                nbToMerge = 1;
+//                CellRangeAddress merge = new CellRangeAddress(y - nbToMerge, y - 1, xTab, xTab);
+//                sheet.addMergedRegion(merge);
+//                nbToMerge = 1;
             }
 
             oldSection = section;

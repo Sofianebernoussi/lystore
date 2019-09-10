@@ -984,7 +984,7 @@ public class ExcelHelper {
             cell.setCellStyle(style);
             cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
         } catch (NullPointerException e) {
-            log.error("Trying to sum a non init cell , init cells before calling this function");
+            log.error("Trying to sum a non init cell , init cells before calling this function x");
         }
     }
 

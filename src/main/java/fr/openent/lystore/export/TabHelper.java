@@ -1,7 +1,6 @@
 package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
-import fr.openent.lystore.export.investissement.TabName;
 import fr.openent.lystore.helpers.ExcelHelper;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
@@ -241,14 +240,14 @@ public abstract class TabHelper {
         }
     }
 
-    protected  Float safeGetFloat(JsonObject jo, String  key, String nameTab){
-     Float result;
+    protected Double safeGetDouble(JsonObject jo, String key, String nameTab) {
+        Double result;
         try {
-            //logger.info("Object safeGetFloat : " + jo + " key : " + key);
-            result=  jo.getFloat(key);
+            //logger.info("Object safeGetDouble : " + jo + " key : " + key);
+            result = jo.getDouble(key);
         }catch (Exception e){
-            logger.info("Exception safeGetFloat : key : " + key + " ;name tab : " + nameTab);
-            result= Float.parseFloat(jo.getString(key).replaceAll(",","."));
+            logger.info("Exception safeGetDouble : key : " + key + " ;name tab : " + nameTab);
+            result = Double.parseDouble(jo.getString(key).replaceAll(",", "."));
         }
         return  result;
     }

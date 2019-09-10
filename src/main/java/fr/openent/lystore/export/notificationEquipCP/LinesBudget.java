@@ -97,7 +97,7 @@ public class LinesBudget extends TabHelper {
         int initLineNumber;
 
         for (int i = 0; i < datas.size(); i++) {
-            Float totalToInsert = 0.f;
+            Double totalToInsert = 0.d;
             String previousStructure = "";
             JsonObject operationData = datas.getJsonObject(i);
             JsonArray orders = operationData.getJsonArray("actionsJO");
@@ -120,7 +120,7 @@ public class LinesBudget extends TabHelper {
                         excel.insertWhiteOnBlueTab(lineNumber, 1, labelOperation);
                         operationAdded = true;
                     }
-                    totalToInsert = 0.f;
+                    totalToInsert = 0.d;
                     previousCode = "";
                     previousStructure = currentStructure;
                     excel.insertWhiteOnBlueTab(lineNumber, 2, order.getString("uai"));
@@ -130,10 +130,10 @@ public class LinesBudget extends TabHelper {
                 }
                 if (!previousCode.equals(code)) {
                     previousCode = code;
-                    totalToInsert = 0.f;
+                    totalToInsert = 0.d;
                 }
-                totalToInsert += safeGetFloat(order,"total", "LinesBudget");
-                excel.insertFloatYellow(lineNumber,
+                totalToInsert += safeGetDouble(order, "total", "LinesBudget");
+                excel.insertDoubleYellow(lineNumber,
                         5 + codes.indexOf(Integer.parseInt(code)), totalToInsert);
             }
             //insert Total

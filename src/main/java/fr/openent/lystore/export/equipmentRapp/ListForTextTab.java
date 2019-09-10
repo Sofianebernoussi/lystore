@@ -10,8 +10,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 
@@ -105,7 +103,7 @@ public class ListForTextTab extends TabHelper {
             String operation = "";
 //            //Insert datas
             String key = "", oldkey = "";
-            Float oldTotal = 0.f;
+            Double oldTotal = 0.d;
 //
             for (int j = 0; j < actions.size(); j++) {
                 JsonObject action = actions.getJsonObject(j);
@@ -149,19 +147,19 @@ public class ListForTextTab extends TabHelper {
                     excel.insertLabel(yProgramLabel, 2, action.getString("nameEtab"));
                     excel.insertLabel(yProgramLabel, 3, action.getString("uai"));
 
-                    oldTotal = 0.f;
+                    oldTotal = 0.d;
                     oldkey = key;
-                    oldTotal += safeGetFloat(action,"total", "ListForTextTab") ;
-                    excel.insertCellTabFloat(4 + programLabel.getInteger(key),
+                    oldTotal += safeGetDouble(action, "total", "ListForTextTab");
+                    excel.insertCellTabDouble(4 + programLabel.getInteger(key),
                             yProgramLabel, oldTotal);
                 } else {
                     yProgramLabel--;
                     if (!oldkey.equals(key)) {
-                        oldTotal = 0.f;
+                        oldTotal = 0.d;
                     }
                     oldkey = key;
-                    oldTotal += safeGetFloat(action,"total", "ListForTextTab") ;
-                    excel.insertCellTabFloat(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")), yProgramLabel
+                    oldTotal += safeGetDouble(action, "total", "ListForTextTab");
+                    excel.insertCellTabDouble(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")), yProgramLabel
                             , oldTotal);
                 }
 

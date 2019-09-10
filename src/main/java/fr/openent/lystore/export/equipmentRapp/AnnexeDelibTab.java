@@ -10,8 +10,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -94,7 +92,7 @@ public class AnnexeDelibTab extends TabHelper {
             oldkey = key;
             oldTotal += Float.parseFloat(action.getString("total"));
 
-            excel.insertCellTabFloat(columnToInsert + 4, lineToInsert, oldTotal);
+            excel.insertCellTabDouble(columnToInsert + 4, lineToInsert, oldTotal);
 
         }
 

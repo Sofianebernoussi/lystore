@@ -9,8 +9,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,7 +74,7 @@ public class RecapMarket extends TabHelper {
 
             this.operationsRowNumber++;
 
-            Float oldTotal = 0.f;
+            Double oldTotal = 0.d;
             String oldkey = "";
 
             JsonArray actions = new JsonArray(actionsStrToArray);
@@ -87,11 +85,11 @@ public class RecapMarket extends TabHelper {
                 String key = action.getString("market") + " - " + action.getString("program") + " - " + action.getString("code");
                 if (programMarket.containsKey(key)) {
                     if (!oldkey.equals(key)) {
-                        oldTotal = 0.f;
+                        oldTotal = 0.d;
                     }
                     oldkey = key;
-                    oldTotal +=safeGetFloat(action,"total", "RecapMarket") ;
-                    excel.insertCellTabFloat(1 + programMarket.getInteger(key), i + 9, oldTotal);
+                    oldTotal += safeGetDouble(action, "total", "RecapMarket");
+                    excel.insertCellTabDouble(1 + programMarket.getInteger(key), i + 9, oldTotal);
                 }
             }
         }

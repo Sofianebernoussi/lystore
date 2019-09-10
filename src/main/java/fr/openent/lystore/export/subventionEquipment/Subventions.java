@@ -109,11 +109,11 @@ public class Subventions extends TabHelper {
                 excel.insertCellTab(0, lineNumber, order.getString("name_equipment"));
                 excel.insertCellTab(1, lineNumber, order.getString("comment"));
                 excel.insertCellTabCenter(2, lineNumber, order.getInteger("amount").toString());
-                excel.insertCellTabFloatWithPrice(3, lineNumber, order.getFloat("total"));
+                excel.insertCellTabDoubleWithPrice(3, lineNumber, order.getDouble("total"));
                 lineNumber++;
             }
 
-            excel.insertCellTabFloatWithPrice(3, lineNumber, Float.parseFloat(structureDatas.getString("totalprice")));
+            excel.insertCellTabDoubleWithPrice(3, lineNumber, Double.parseDouble(structureDatas.getString("totalprice")));
             lineNumber += 2;
 
 

@@ -10,8 +10,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -131,7 +129,7 @@ public class VerifBudgetTab extends TabHelper {
         String market = data.getString("market");
         String totalMarket;
         try {
-            totalMarket = String.format("%.2f", safeGetFloat(data,"totalmarket","Verif Budget TAB"));
+            totalMarket = String.format("%.2f", safeGetDouble(data, "totalmarket", "Verif Budget TAB"));
         } catch (ClassCastException e) {
             totalMarket = data.getInteger("totalmarket").toString();
         }
@@ -202,7 +200,7 @@ public class VerifBudgetTab extends TabHelper {
             excel.insertLabel(currentY, 2, "REG : " + value.getString("name_equipment"));
             excel.insertCellTabStringRight(3, currentY, value.getInteger("amount").toString());
             try {
-                excel.insertLabel(currentY, 4, "M : " + safeGetFloat(value,"total", "verifBubgetTab" ).toString());
+                excel.insertLabel(currentY, 4, "M : " + safeGetDouble(value, "total", "verifBubgetTab").toString());
             } catch (ClassCastException e) {
                 excel.insertLabel(currentY, 4, "M : " + value.getInteger("total").toString());
             }

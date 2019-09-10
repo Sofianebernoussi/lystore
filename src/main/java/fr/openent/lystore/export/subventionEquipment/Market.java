@@ -138,15 +138,15 @@ public class Market extends TabHelper {
                     lineNumber++;
                 }
                 excel.insertCellTab(0, lineNumber, formatStrToCell(order.getString("name_equipment"), 10));
-                excel.insertCellTabFloat(1, lineNumber, order.getInteger("amount"));
-                excel.insertCellTabFloat(2, lineNumber, safeGetFloat(order,"total", "Market"));
+                excel.insertCellTabDouble(1, lineNumber, order.getInteger("amount"));
+                excel.insertCellTabDouble(2, lineNumber, safeGetDouble(order, "total", "Market"));
                 lineNumber++;
             }
             excel.insertLabelBold(lineNumber, 0, market);
             excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
             excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
             initLine = lineNumber + 2;
-//            excel.insertCellTabFloatWithPrice(3, lineNumber, Float.parseFloat(campaignData.getString("totalprice")));
+//            excel.insertCellTabDoubleWithPrice(3, lineNumber, Double.parseDouble(campaignData.getString("totalprice")));
             lineNumber += 2;
 
 

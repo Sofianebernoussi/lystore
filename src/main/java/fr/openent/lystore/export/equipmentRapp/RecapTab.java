@@ -9,8 +9,6 @@ import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -154,13 +152,13 @@ public class RecapTab extends TabHelper {
                 JsonObject action = actions.getJsonObject(j);
                 String key = action.getString("program") + " - " + action.getString("code");
                 if (!oldTotals.containsKey(key)) {
-                    oldTotals.put(key,safeGetFloat(action,"total", "RecapTab") );
+                    oldTotals.put(key, safeGetDouble(action, "total", "RecapTab"));
                 } else {
-                    oldTotals.put(key,safeGetFloat(action,"total", "RecapTab")  + safeGetFloat(oldTotals,key, "RecapTab"));
+                    oldTotals.put(key, safeGetDouble(action, "total", "RecapTab") + safeGetDouble(oldTotals, key, "RecapTab"));
                 }
-                excel.insertCellTabFloat(programLabel.getInteger(key) + 2,
+                excel.insertCellTabDouble(programLabel.getInteger(key) + 2,
                         2 + i,
-                        safeGetFloat(oldTotals,key, "RecapTab"));
+                        safeGetDouble(oldTotals, key, "RecapTab"));
             }
         }
 

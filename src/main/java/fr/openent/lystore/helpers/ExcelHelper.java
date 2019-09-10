@@ -576,7 +576,7 @@ public class ExcelHelper {
      * @param line
      * @param data       data to insert
      */
-    public void insertCellTabFloat(int cellColumn, int line, float data) {
+    public void insertCellTabDouble(int cellColumn, int line, double data) {
         Row tab;
         try {
             tab = sheet.getRow(line);
@@ -691,7 +691,8 @@ public class ExcelHelper {
 
 
     }
-    public void insertFloatYellow(int line, int cellColumn, Float data) {
+
+    public void insertDoubleYellow(int line, int cellColumn, Double data) {
         Row tab;
         try {
             tab = sheet.getRow(line);
@@ -715,7 +716,7 @@ public class ExcelHelper {
      * @param line
      * @param data
      */
-    public void insertCellTabFloatWithPrice(int cellColumn, int line, float data) {
+    public void insertCellTabDoubleWithPrice(int cellColumn, int line, Double data) {
         Row tab;
         try {
             tab = sheet.getRow(line);

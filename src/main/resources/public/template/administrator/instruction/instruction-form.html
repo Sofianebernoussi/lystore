@@ -3,12 +3,12 @@
 <div ng-if="loadingArray">
     <h1><i18n>lystore.loading</i18n></h1>
 </div>
-<div class="row ten centered">
+<div  ng-show="!loadingArray" class="row ten centered">
     <h1>
         <i18n ng-show="instruction.id == undefined">lystore.instruction.add</i18n>
         <i18n ng-show="instruction.id !== undefined">lystore.instruction.modify</i18n>
     </h1>
-    <article ng-show="!loadingArray" class="responsive-table">
+    <article class="responsive-table">
         <form ng-submit="sendInstruction()" >
             <label class="row twelve vertical-spacing">
                         <span class="twelve">

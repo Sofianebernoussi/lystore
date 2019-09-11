@@ -23,6 +23,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.poi.ss.format.CellNumberStringMod;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.entcore.common.sql.Sql;
@@ -47,11 +48,11 @@ public class Instruction {
             "WHERE instruction.id = ? " +
             "GROUP BY instruction.id";
     private Integer id;
-    private Number idFile;
+    private String idFile;
     private ExportService exportService;
     private Logger log = LoggerFactory.getLogger(DefaultProjectService.class);
 
-    public Instruction(ExportService exportService, Number idFile, Integer instructionId) {
+    public Instruction(ExportService exportService, String idFile, Integer instructionId) {
         this.idFile = idFile;
         this.exportService = exportService;
         this.id = instructionId;

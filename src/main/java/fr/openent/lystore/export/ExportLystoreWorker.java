@@ -2,6 +2,7 @@ package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.helpers.ExcelHelper;
+import fr.openent.lystore.helpers.MongoHelper;
 import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import fr.wseduc.webutils.Either;
@@ -22,7 +23,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
     private Instruction instruction;
     private Storage storage;
     private ExportService exportService = new DefaultExportServiceService(Lystore.lystoreSchema, "export", storage);
-    private Number idNewFile;
+    private String idNewFile;
     private boolean isWorking = false;
     Queue<Message<JsonObject>> MessagesQueue = new ConcurrentLinkedQueue<>();
 
@@ -70,32 +71,35 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                 logger.info("Doing export "+ MessagesQueue.size() +" in waitinglist");
                 final String action = eventMessage.body().getString("action", "");
                 String fileNamIn = eventMessage.body().getString("titleFile");
-                idNewFile = eventMessage.body().getInteger("idFile");
+                idNewFile = eventMessage.body().getString("idFile");
                 switch (action) {
                     case "exportEQU":
                         exportEquipment(
-                                eventMessage.body().getInteger("id"),
+                                Integer.parseInt(eventMessage.body().getString("id")),
                                 eventMessage.body().getString("type"),
                                 fileNamIn,exportHandler );
                         break;
                     case "exportRME":
                         exportRME(
-                                eventMessage.body().getInteger("id"),
+                                Integer.parseInt(eventMessage.body().getString("id")),
                                 fileNamIn,
                                 exportHandler);
                         break;
                     case "exportNotificationCP":
-                        exportNotificationCp(eventMessage.body().getInteger("id"),
+                        exportNotificationCp(
+                                Integer.parseInt(eventMessage.body().getString("id")),
                                 fileNamIn,
                                 exportHandler);
                         break;
                     case "exportPublipostage":
-                        exportPublipostage(eventMessage.body().getInteger("id"),
+                        exportPublipostage(
+                                Integer.parseInt(eventMessage.body().getString("id")),
                                 fileNamIn,
                                 exportHandler);
                         break;
                     case "exportSubvention":
-                        exportSubvention(eventMessage.body().getInteger("id"),
+                        exportSubvention(
+                                Integer.parseInt(eventMessage.body().getString("id")),
                                 fileNamIn,
                                 exportHandler);
                         break;

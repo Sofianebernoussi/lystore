@@ -1,13 +1,12 @@
 package fr.openent.lystore.service.impl;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.helpers.MongoHelper;
 import fr.openent.lystore.service.ExportService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
@@ -21,9 +20,13 @@ public class DefaultExportServiceService implements ExportService {
     Storage storage;
     private Logger logger = LoggerFactory.getLogger(DefaultProjectService.class);
     private EventBus eb;
+    private final String LYSTORE_COLLECTION = "lystore_export";
+    MongoHelper mh;
 
     public DefaultExportServiceService(String lystoreSchema, String instruction, Storage storage) {
         this.storage = storage;
+        mh = new MongoHelper(LYSTORE_COLLECTION,eb);
+
     }
 
     @Override
@@ -77,33 +80,45 @@ public class DefaultExportServiceService implements ExportService {
 
     }
     public void createWhenStart (Integer instruction_id,String nameFile, String userId, Handler<Either<String, JsonObject>> handler){
-        try{
+        try {
+
             String nameQuery= "SELECT object from "+Lystore.lystoreSchema+".instruction where id= ?";
             Sql.getInstance().prepared(nameQuery,new JsonArray().add(instruction_id), SqlResult.validResultHandler(new Handler<Either<String, JsonArray>>() {
                 @Override
                 public void handle(Either<String, JsonArray> event) {
                     if(event.isRight()){
-                        JsonArray results = event.right().getValue();
-                        String query = "" +
-                                "INSERT INTO " +
-                                Lystore.lystoreSchema + ".export(  " +
-                                "filename," +
-                                "ownerid," +
-                                " instruction_id," +
-                                " instruction_name) " +
-                                "VALUES (" +
-                                "?, " +
-                                "?," +
-                                "?," +
-                                "?)" +
-                                "RETURNING id ;";
-                        JsonArray params = new JsonArray()
-                                .add(nameFile)
-                                .add(userId)
-                                .add(instruction_id)
-                                .add(results.getJsonObject(0).getString("object"));
 
-                        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+                        JsonArray results = event.right().getValue();
+//                        String query = "" +
+//                                "INSERT INTO " +
+//                                Lystore.lystoreSchema + ".export(  " +
+//                                "filename," +
+//                                "ownerid," +
+//                                " instruction_id," +
+//                                " instruction_name) " +
+//                                "VALUES (" +
+//                                "?, " +
+//                                "?," +
+//                                "?," +
+//                                "?)" +
+//                                "RETURNING id ;";
+                        JsonObject params = new JsonObject()
+                                .put("name_file",nameFile)
+                                .put("userId",userId)
+                                .put("instruction_id",instruction_id)
+                                .put("object",results.getJsonObject(0).getString("object"));
+
+                        mh.addExport(params, new Handler<String>() {
+                            @Override
+                            public void handle(String event) {
+                                if(event.equals("mongoinsertfailed"))
+                                    handler.handle(new Either.Left<>("Error when inserting mongo"));
+                                else{
+                                    handler.handle(new Either.Right<>(new JsonObject().put("id",event)));
+                                }
+                            }
+                        });
+//                        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
                     }else{
                         handler.handle(new Either.Left<>("Error when init export excel in SQL"));
                         logger.error("Error when init export excel in SQL");
@@ -115,7 +130,7 @@ public class DefaultExportServiceService implements ExportService {
         }
     }
 
-    public void updateWhenError (Number idExport, Handler<Either<String, Boolean>> handler){
+    public void updateWhenError (String idExport, Handler<Either<String, Boolean>> handler){
         try{
             String query = "" +
                     "UPDATE " +
@@ -137,7 +152,7 @@ public class DefaultExportServiceService implements ExportService {
         }
     }
 
-    public void updateWhenSuccess (String fileId, Number idExport, Handler<Either<String, Boolean>> handler){
+    public void updateWhenSuccess (String fileId, String idExport, Handler<Either<String, Boolean>> handler){
         try{
             String query = "" +
                     "UPDATE " +

@@ -1341,7 +1341,7 @@ public class ExcelHelper {
         return getDate() + nameFile + type + ".xlsx";
     }
 
-    public static void catchError(ExportService exportService, Number idFile, Exception errorCatch) {
+    public static void catchError(ExportService exportService, String idFile, Exception errorCatch) {
         exportService.updateWhenError(idFile, makeError -> {
             if (makeError.isLeft()) {
                 log.error("Error for create file export excel " + makeError.left() + errorCatch);
@@ -1349,7 +1349,7 @@ public class ExcelHelper {
         });
         log.error("Error for create file export excel " + errorCatch);
     }
-    public static void catchError(ExportService exportService, Number idFile, String errorCatchTextOutput) {
+    public static void catchError(ExportService exportService, String idFile, String errorCatchTextOutput) {
         exportService.updateWhenError(idFile, makeError -> {
             if (makeError.isLeft()) {
                 log.error("Error for create file export excel " + makeError.left() + errorCatchTextOutput);
@@ -1357,7 +1357,7 @@ public class ExcelHelper {
         });
         log.error("Error for create file export excel " + errorCatchTextOutput);
     }
-    public static void catchError(ExportService exportService, Number idFile, String errorCatchTextOutput, Handler<Either<String,Boolean>> handler) {
+    public static void catchError(ExportService exportService, String idFile, String errorCatchTextOutput, Handler<Either<String,Boolean>> handler) {
         exportService.updateWhenError(idFile,handler);
         log.error("Error for create file export excel " + errorCatchTextOutput);
     }
@@ -1381,12 +1381,12 @@ public class ExcelHelper {
             infoFile.put("type", type);
         }
         String titleFile = withType ? ExcelHelper.makeTheNameExcelExport(name, type) : ExcelHelper.makeTheNameExcelExport(name);
-
+        log.info("makeExportExcel");
         Integer finalId = id;
         UserUtils.getUserInfos(eb, request, user -> {
             exportService.createWhenStart(finalId,titleFile, user.getUserId(), newExport -> {
                 if (newExport.isRight()) {
-                    Number idFile = newExport.right().getValue().getInteger("id");
+                    String idFile = newExport.right().getValue().getString("id");
                     try {
                         Logging.insert(eb,
                                 request,
@@ -1395,7 +1395,7 @@ public class ExcelHelper {
                                 idFile.toString(),
                                 new JsonObject().put("ids", idFile).put("fileName", titleFile));
                         infoFile.put("action", action)
-                                .put("id", Integer.parseInt(request.getParam("id")))
+                                .put("id", request.getParam("id"))
                                 .put("titleFile", titleFile)
                                 .put("idFile", idFile)
                                 .put("userId", user.getUserId());

@@ -34,7 +34,8 @@ public class MongoHelper extends MongoDbCrudService {
                 if ("ok".equals(result.body().getString(STATUS))) {
                     JsonObject exportProperties = result.body().getJsonObject("result");
                     exportProperties.put("status",status);
-                    exportProperties.put("fileId",fileId);
+                    if(!fileId.isEmpty())
+                        exportProperties.put("fileId",fileId);
                     mongo.save(collection, exportProperties, new Handler<Message<JsonObject>>() {
                         @Override
                         public void handle(Message<JsonObject> event) {

@@ -99,7 +99,7 @@ public class DefaultExportServiceService implements ExportService {
 
     public void updateWhenError (String idExport, Handler<Either<String, Boolean>> handler){
         try{
-            mongo.updateExport(idExport,"ERROR", "NO FILE", new Handler<String>() {
+            mongo.updateExport(idExport,"ERROR", "", new Handler<String>() {
                 @Override
                 public void handle(String event) {
                     if(event.equals("mongoinsertfailed"))

@@ -89,24 +89,12 @@ public class DefaultExportServiceService implements ExportService {
                     if(event.isRight()){
 
                         JsonArray results = event.right().getValue();
-//                        String query = "" +
-//                                "INSERT INTO " +
-//                                Lystore.lystoreSchema + ".export(  " +
-//                                "filename," +
-//                                "ownerid," +
-//                                " instruction_id," +
-//                                " instruction_name) " +
-//                                "VALUES (" +
-//                                "?, " +
-//                                "?," +
-//                                "?," +
-//                                "?)" +
-//                                "RETURNING id ;";
                         JsonObject params = new JsonObject()
                                 .put("name_file",nameFile)
                                 .put("userId",userId)
                                 .put("instruction_id",instruction_id)
-                                .put("object",results.getJsonObject(0).getString("object"));
+                                .put("object",results.getJsonObject(0).getString("object"))
+                                .put("status","WAITING");
 
                         mh.addExport(params, new Handler<String>() {
                             @Override
@@ -118,10 +106,9 @@ public class DefaultExportServiceService implements ExportService {
                                 }
                             }
                         });
-//                        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
                     }else{
-                        handler.handle(new Either.Left<>("Error when init export excel in SQL"));
-                        logger.error("Error when init export excel in SQL");
+                        handler.handle(new Either.Left<>("Error when init export excel in Mongo"));
+                        logger.error("Error when init export excel in Mongo");
                     }
                 }
             }));
@@ -132,19 +119,15 @@ public class DefaultExportServiceService implements ExportService {
 
     public void updateWhenError (String idExport, Handler<Either<String, Boolean>> handler){
         try{
-            String query = "" +
-                    "UPDATE " +
-                    Lystore.lystoreSchema + ".export  " +
-                    "SET " +
-                    "status = 'ERROR'  " +
-                    "WHERE id = ? ";
-            Sql.getInstance().prepared(query, new JsonArray().add(idExport),event -> {
-                if(event.body().getString("status").equals("ok")){
-                    logger.info("OK ERROR UPDATE " + idExport);
-                    handler.handle(new Either.Right<>(true));
-                }else {
-                    handler.handle(new Either.Left<>("ERROR UPDATING ERROR"));
-                    logger.info("ERROR UPDATING ERROR");
+            mh.updateExport(idExport,"ERROR", new Handler<String>() {
+                @Override
+                public void handle(String event) {
+                    if(event.equals("mongoinsertfailed"))
+                        handler.handle(new Either.Left<>("Error when inserting mongo"));
+                    else{
+                        handler.handle(new Either.Right<>(true));
+                    }
+
                 }
             });
         } catch (Exception error){
@@ -152,26 +135,21 @@ public class DefaultExportServiceService implements ExportService {
         }
     }
 
-    public void updateWhenSuccess (String fileId, String idExport, Handler<Either<String, Boolean>> handler){
-        try{
-            String query = "" +
-                    "UPDATE " +
-                    Lystore.lystoreSchema + ".export  " +
-                    "SET " +
-                    "fileid = ? ," +
-                    "status = 'SUCCESS'  " +
-                    "WHERE id = ? ";
-            Sql.getInstance().prepared(query, new JsonArray().add(fileId).add(idExport), event -> {
-             if(event.body().getString("status").equals("ok")){
-                 logger.info("OK SUCCESS UPDATE " + idExport);
-                 handler.handle(new Either.Right<>(true));
-             }else {
-                 handler.handle(new Either.Left<>("ERROR UPDATING SUCCESS"));
-                 logger.info("ERROR  UPDATING SUCCESS");
-             }
+    public void updateWhenSuccess (String fileId, String idExport, Handler<Either<String, Boolean>> handler) {
+        try {
+            mh.updateExport(idExport, "SUCCESS", new Handler<String>() {
+                @Override
+                public void handle(String event) {
+                    if (event.equals("mongoinsertfailed"))
+                        handler.handle(new Either.Left<>("Error when inserting mongo"));
+                    else {
+                        handler.handle(new Either.Right<>(true));
+                    }
+                }
             });
-        } catch (Exception error){
-            logger.error("error when update SUCCESS in export" + error);
+        } catch (Exception error) {
+            logger.error("error when update ERROR in export" + error);
+
         }
     }
 }

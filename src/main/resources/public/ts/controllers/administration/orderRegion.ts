@@ -12,7 +12,6 @@ export const orderRegionController = ng.controller('orderRegionController',
     ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) => {
 
         $scope.orderToCreate = new OrderRegion();
-        $scope.equipments = new Equipments();
         $scope.structure_groups = new StructureGroups();
         $scope.structuresToDisplay = new Structures();
         $scope.titles = new Titles();
@@ -48,19 +47,19 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
 
         $scope.initDataUpdate = async () => {
-            await $scope.equipments.sync($scope.orderToUpdate.id_campaign, $scope.orderToUpdate.id_structure);
-            if (!$scope.orderToUpdate.project.room)
-                $scope.orderToUpdate.project.room = '-';
-            if (!$scope.orderToUpdate.project.building)
-                $scope.orderToUpdate.project.building = '-';
-            $scope.orderToCreate.rows = [];
-            $scope.getContractType();
+            //await $scope.equipments.sync($scope.orderToUpdate.id_campaign, $scope.orderToUpdate.id_structure);
+            // if (!$scope.orderToUpdate.project.room)
+            //     $scope.orderToUpdate.project.room = '-';
+            // if (!$scope.orderToUpdate.project.building)
+            //     $scope.orderToUpdate.project.building = '-';
+            // $scope.orderToCreate.rows = [];
+            //$scope.getContractType();
         };
 
         //todo remove function starting when the controller is call
         if ($routeParams.idOrder) {
-            let idOrder = $routeParams.idOrder;
-            $scope.orderToUpdate.structure = $scope.structures.filter(structureFilter => structureFilter.id === $scope.orderToUpdate.id_structure)[0];
+
+            //$scope.orderToUpdate.structure = $scope.structures.filter(structureFilter => structureFilter.id === $scope.orderToUpdate.id_structure)[0];
             $scope.initDataUpdate();
         }
         $scope.isUpdating = $location.$$path.includes('/order/update');
@@ -158,7 +157,7 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
         $scope.getContractType = () => {
             let newContract;
-            if($scope.orderToUpdate.equipment){
+            /*if($scope.orderToUpdate.equipment){
                 $scope.contracts.all.map(contract => {
                     if (contract.id === $scope.orderToUpdate.equipment.id_contract)
                         newContract = contract
@@ -168,8 +167,8 @@ export const orderRegionController = ng.controller('orderRegionController',
                         $scope.contract_type = contract.displayName
                     }
                 });
-            }
-            Utils.safeApply($scope);
+            }*/
+            //Utils.safeApply($scope);
         };
 
         $scope.addRow = () => {

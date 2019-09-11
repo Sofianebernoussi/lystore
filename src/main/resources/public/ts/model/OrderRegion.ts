@@ -9,7 +9,6 @@ import {
     OrderOptionClient,
     Structure,
     Structures,
-    TechnicalSpec,
     Utils
 } from "./index";
 import {OrderClient} from "./OrderClient";
@@ -175,69 +174,15 @@ export class OrderRegion implements Order  {
         }
     }
 
-    //todo create orderDefault and to use here, init and clean data is not used
-    async getOneOrderRegion(id){
+    async getOneOrderRegion(id:number, structures:Structures){
         try{
             const {data} =  await http.get(`/lystore/orderRegion/${id}/order`);
-            let result = {
-                ...data,
-                project: data.project?Mix.castAs(Project, JSON.parse(data.project.toString())):null,
-                campaign: data.campaign?Mix.castAs(Campaign, JSON.parse(data.campaign)):null,
-                contract_type: data.contract_type?JSON.parse(data.contract_type):null,
-                contract: data.contract?JSON.parse(data.contract):null,
-                structure_groups: data.structure_groups?JSON.parse(data.structure_groups):null,
-                supplier: data.supplier?JSON.parse(data.supplier):null,
-                title: data.title?JSON.parse(data.title):null,
-                price : data.price?parseFloat(data.price):null,
-                amount : data.amount?parseInt(data.amount):null,
-                rank : data.rank?parseInt(data.rank.toString()) +1 : null,
-                price_single_ttc : data.price_single_ttc?parseFloat(data.price_single_ttc):null,
-                technical_spec: data.technical_spec?Utils.parsePostgreSQLJson(this.technical_spec):null,
-                order_client_equipment_parent: data.order_client_equipment_parent?
-                    Mix.castAs(OrderClient, JSON.parse(data.order_client_equipment_parent.toString())):
-                    null,
-                isOrderRegion: true,
-            };
-            result.equipment = {
-                name : result.name,
-                contract_type_name : result.contract_type.name,
-                id_contract : result.id_contract,
-            };
-            if(result.order_client_equipment_parent) {
-                result.order_client_equipment_parent.options = data.options_client_parent.toString() !== '[null]' && data.options_client_parent !== null?
-                    Mix.castArrayAs(OrderOptionClient, JSON.parse(data.options_client_parent.toString())) :
-                    [];
-                result.order_client_equipment_parent.equipment = data.equipment_order_client_parent ?
-                    Mix.castAs(Equipment, JSON.parse(data.equipment_order_client_parent)) :
-                    null;
-
-                result.order_client_equipment_parent.price_united = result.order_client_equipment_parent.price_proposal ?
-                    result.order_client_equipment_parent.price_proposal :
-                    result.order_client_equipment_parent
-                        .calculatePriceTTC(2, result.order_client_equipment_parent.price);
-                if (result.order_client_equipment_parent.price_proposal) {
-                    result.order_client_equipment_parent.price_total = Math
-                        .round(result.order_client_equipment_parent.price_proposal *
-                            result.order_client_equipment_parent.amount * 100) / 100
-                } else {
-                    result.order_client_equipment_parent.price_total =  result.order_client_equipment_parent
-                            .calculatePriceTTC(2, result.order_client_equipment_parent.price) *
-                        result.order_client_equipment_parent.amount;
-                }
-                result.order_client_equipment_parent.rank = result.order_client_equipment_parent.rank?
-                    parseInt(result.order_client_equipment_parent.rank.toString()) +1 :
-                    null;
-                result.order_client_equipment_parent.contract_type = {name:''};
-                result.order_client_equipment_parent.contract_type.name = result.equipment.contract_type_name;
-            }
-            return  Mix.castAs(OrderRegion, result);
+            return new Order(data, structures);
         } catch (e) {
             notify.error('lystore.admin.order.update.err');
             throw e;
         }
     }
-
-
 }
 
 export class OrdersRegion extends Selection<OrderRegion> {

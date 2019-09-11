@@ -1,149 +1,147 @@
 import {
     Campaign,
     Contract,
-    ContractType, OrderClient, OrderOptionClient, OrderRegion,
+    ContractType, Equipment, OrderClient, OrderOptionClient, OrderRegion,
     Project, Structure,
     Structures,
-    Supplier,
-    TechnicalSpec, Utils
+    Title, Utils
 } from './index';
 import {Mix, Selectable} from "entcore-toolkit";
-import {_, idiom as lang, moment} from "entcore";
-import forEach = require("core-js/fn/array/for-each");
+import {_} from "entcore";
 
-"use strict";
 export interface OrderImp extends Selectable{
-    selected;
-
-    typeOrder:string;
     amount: number;
     campaign: Campaign;
     comment: string;
     contract: Contract;
     contract_type: ContractType;
     creation_date: Date;
-    description: string;
-    files: string;
-    id_campaign: number;
-    id_contract: number;
-    id_operation: number;
-    id_project: number;
+    equipment_key:number;
     id_structure: string;
-    image: string;
-    label_program?: string;
-    name: string;
-    name_structure: string;
-    number_validation: string;
-    options: OrderOptionClient[];
     price: number;
+    price_proposal: number;
     price_single_ttc: number;
     project: Project;
-    program: string;
     rank: number;
     rankOrder: Number;
-    status: string;
-    structure: Structures;
-    structure_groups:any;
-    summary: string;
-    supplier: Supplier;
+    selected:boolean;
+    structure: Structure;
     tax_amount: number;
-    technical_spec: TechnicalSpec[];
+    title:Title;
 }
 
 export class Order implements OrderImp{
-    typeOrder;
-    amount;//waiting
-    campaign;//waiting
-    comment;//waiting
-    contract;//waiting
-    contract_type;//waiting
-    creation_date;
-    description;
-    files;
-    id_campaign;
-    id_contract;
-    id_operation;
-    id_project;
+    amount;//waiting//
+    campaign;//waiting//
+    comment;//waiting//
+    contract;//waiting//
+    contract_type;//waiting//
+    creation_date;//
+    equipment: Equipment;
+    equipment_key;//
     id_structure;
-    image;
-    label_program?;
-    name;//waiting
-    name_structure;
-    number_validation;
     options;
-    price;
-    price_single_ttc;
-    project;//waiting
+    price;//
+    price_proposal;
+    price_single_ttc;//
+    project;//waiting//
     program;//waiting
-    rank;
+    rank;//
     rankOrder;//waiting
     selected;
-    status;
-    structure;//waiting
-    structure_groups;
-    summary;
-    supplier;
+    structure;//waiting//
     tax_amount;
-    technical_spec;
-    inheritedClass:Order|OrderClient|OrderRegion;
+    title;//
+    inheritedClass:Order|OrderClient|OrderRegion;//
 
 
-    order_client_equipment_parent?:Order|OrderClient|OrderRegion;
+    order_client_equipment_parent?:any;//
 
-    constructor(order: Order|OrderClient|OrderRegion, structures:Structures){
-
+    //this.typeOrder = order.constructor.name;
+    //this.name_structure = order.id_structure? OrderUtils.initNameStructure( order.id_structure, structures) : "";
+    //this.structure_groups = order.structure_groups? JSON.parse(order.structure_groups) : null;
+    //this.supplier = order.supplier? JSON.parse(order.supplier) : null;
+    //this.creation_date = moment(order.creation_date).format('L');
+    //this.technical_spec = order.technical_spec? Utils.parsePostgreSQLJson(this.technical_spec) : null;
+    constructor(order: Order, structures:Structures){
+        if(order.order_client_equipment_parent){
+            this.order_client_equipment_parent = order.order_client_equipment_parent;
+        }
         this.inheritedClass = order;
-        this.typeOrder = order.constructor.name;
-        this.structure = order.id_structure? this.initStructure( order.id_structure, structures) : new Structure();
-        this.name_structure = order.id_structure? this.initNameStructure( order.id_structure, structures) : "";
-        if(order.order_client_equipment_parent)this.order_client_equipment_parent = order.order_client_equipment_parent;
-
+        this.comment = order.comment;
+        this.equipment_key = order.equipment_key;
+        this.structure = order.id_structure? OrderUtils.initStructure( order.id_structure, structures) : new Structure();
         this.project = order.project? Mix.castAs(Project, JSON.parse(order.project.toString())) : null;
         this.campaign = order.campaign? Mix.castAs(Campaign, JSON.parse(order.campaign.toString())) : null;
         this.contract_type = order.contract_type? JSON.parse(order.contract_type) : null;
         this.contract = order.contract? JSON.parse(order.contract) : null;
-        this.structure_groups = order.structure_groups? JSON.parse(order.structure_groups) : null;
-        this.options = order.options.toString() !== '[null]' && order.options !== null ?
-            Mix.castArrayAs(OrderOptionClient, JSON.parse(order.options.toString()))  :
-            [];
-        this.supplier = order.supplier? JSON.parse(order.supplier) : null;
-        //this.title = order.title?JSON.parse(order.title) : null;
+        this.title = order.title?JSON.parse(order.title) : null;
         this.price  = order.price? parseFloat(order.price) : null;
         this.amount  = order.amount? parseInt(order.amount) : null;
-        //this.price_proposal  = order.price_proposal?parseFloat(order.price_proposal) =null;
+        this.price_proposal = order.price_proposal? parseFloat(order.price_proposal) : null;
         this.rank  = order.rank? parseInt(order.rank.toString())+1  : null;
         this.tax_amount  = order.tax_amount? parseFloat(order.tax_amount) : null;
         this.price_single_ttc  = order.price_single_ttc? parseFloat(order.price_single_ttc) : null;
-        this.technical_spec = order.technical_spec? Utils.parsePostgreSQLJson(this.technical_spec) : null;
-        this.creation_date = moment(order.creation_date).format('L');
-
-        // if (order.campaign.orderPriorityEnable()) {
-        //     order.rankOrder = order.rank + 1;
-        // } else if (order.campaign.projectPriorityEnable()) {
-        //     order.rankOrder = order.project.preference + 1;
-        // } else {
-        //     order.rankOrder = lang.translate("lystore.order.not.prioritized");
-        // }
+        if(order.options){
+            this.options = order.options.toString() !== '[null]' && order.options !== null ?
+                Mix.castArrayAs(OrderOptionClient, JSON.parse(order.options.toString()))  :
+                [];
+        }
+        if(this.campaign){
+            if(this.campaign.orderPriorityEnable()) order.rankOrder = order.rank + 1;
+        }
     }
+}
 
-    initStructure(idStructure:string, structures:Structures):Structure{
+export class OrderUtils {
+    static initStructure(idStructure:string, structures:Structures):Structure{
         const structure = _.findWhere(structures, { id : idStructure});
         return  structure ? structure : new Structure() ;
     }
 
-    initNameStructure (idStructure: string, structures: Structures):string {
+    static initNameStructure (idStructure: string, structures: Structures):string {
         let structure = _.findWhere(structures, { id : idStructure});
         return  structure ? structure.uai + '-' + structure.name : '' ;
     }
 
-
-    calculatePriceTTC ( roundNumber?: number, priceCalculate?: number):number|string {
-        let price = parseFloat(Utils.calculatePriceTTC(priceCalculate , this.tax_amount).toString());
-        if (this.options !== undefined) {
-            this.options.map((option) => {
+    static calculatePriceTTC( roundNumber?: number, order?:Order|OrderClient|OrderRegion):number|any {
+        let price = parseFloat(Utils.calculatePriceTTC(order.price , order.tax_amount).toString());
+        if (order.options !== undefined) {
+            order.options.map((option) => {
                 price += parseFloat(Utils.calculatePriceTTC(option.price , option.tax_amount).toString() );
             });
         }
         return (!isNaN(price)) ? (roundNumber ? price.toFixed(roundNumber) : price ) : price ;
+    }
+    static initParentOrder( order:Order):Object{
+        if(!order)return;
+        if(order.equipment) {
+            return {
+                amount: order.amount || 0,
+                comment: order.comment || "",
+                equipment: {
+                    contract_type_name: order.equipment.contract_type_name || "",
+                    name: order.equipment.name || "",
+                },
+                price_single_ttc: OrderUtils.findGoodPrice(order) || 0,
+                rank: order.rank || 0,
+            };
+        } else {
+            return  {
+                amount : order.amount || 0,
+                comment : order.comment || "",
+                equipment : {
+                    contract_type_name: "",
+                    name: "",
+                },
+                price_single_ttc : OrderUtils.findGoodPrice(order) || 0,
+                rank : order.rank || 0,
+            };
+        }
+    }
+    static findGoodPrice(order:Order):Number{
+        if(order.price_single_ttc) return order.price_single_ttc;
+        if(order.price_proposal) return order.price_proposal;
+        if(order.price) return OrderUtils.calculatePriceTTC(2,order);
     }
 }

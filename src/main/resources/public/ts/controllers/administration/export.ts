@@ -18,7 +18,7 @@ export const exportCtrl = ng.controller('exportCtrl', [
 
         $scope.getExport = (exportTemp: Export) => {
             if(exportTemp.status === STATUS.SUCCESS){
-                window.location = `lystore/export/${exportTemp.fileid}`;
+                window.location = `lystore/export/${exportTemp.fileId}`;
             }
         };
 

@@ -21,29 +21,31 @@ public class DefaultExportServiceService implements ExportService {
     private Logger logger = LoggerFactory.getLogger(DefaultProjectService.class);
     private EventBus eb;
     private final String LYSTORE_COLLECTION = "lystore_export";
-    MongoHelper mh;
+    MongoHelper mongo;
 
     public DefaultExportServiceService(String lystoreSchema, String instruction, Storage storage) {
         this.storage = storage;
-        mh = new MongoHelper(LYSTORE_COLLECTION,eb);
+        mongo = new MongoHelper(LYSTORE_COLLECTION,eb);
 
     }
 
     @Override
     public void getExports(Handler<Either<String, JsonArray>> handler, UserInfos user) {
-        String query = "" +
-                "SELECT " +
-                "id, " +
-                "status, " +
-                "filename," +
-                "fileid," +
-                "created," +
-                "instruction_name," +
-                "instruction_id " +
-                "FROM " + Lystore.lystoreSchema + ".export " +
-                "WHERE ownerid = ?" +
-                "order by created  DESC";
-        Sql.getInstance().prepared(query, new JsonArray().add(user.getUserId()), SqlResult.validResultHandler(handler));
+      mongo.getExports(handler,user.getUserId());
+
+//        String query = "" +
+//                "SELECT " +
+//                "id, " +
+//                "status, " +
+//                "filename," +
+//                "fileid," +
+//                "created," +
+//                "instruction_name," +
+//                "instruction_id " +
+//                "FROM " + Lystore.lystoreSchema + ".export " +
+//                "WHERE ownerid = ?" +
+//                "order by created  DESC";
+//        Sql.getInstance().prepared(query, new JsonArray().add(user.getUserId()), SqlResult.validResultHandler(handler));
     }
 
 
@@ -90,13 +92,13 @@ public class DefaultExportServiceService implements ExportService {
 
                         JsonArray results = event.right().getValue();
                         JsonObject params = new JsonObject()
-                                .put("name_file",nameFile)
+                                .put("filename",nameFile)
                                 .put("userId",userId)
                                 .put("instruction_id",instruction_id)
-                                .put("object",results.getJsonObject(0).getString("object"))
+                                .put("instruction_name",results.getJsonObject(0).getString("object"))
                                 .put("status","WAITING");
 
-                        mh.addExport(params, new Handler<String>() {
+                        mongo.addExport(params, new Handler<String>() {
                             @Override
                             public void handle(String event) {
                                 if(event.equals("mongoinsertfailed"))
@@ -119,7 +121,7 @@ public class DefaultExportServiceService implements ExportService {
 
     public void updateWhenError (String idExport, Handler<Either<String, Boolean>> handler){
         try{
-            mh.updateExport(idExport,"ERROR", new Handler<String>() {
+            mongo.updateExport(idExport,"ERROR", "NO FILE", new Handler<String>() {
                 @Override
                 public void handle(String event) {
                     if(event.equals("mongoinsertfailed"))
@@ -137,7 +139,7 @@ public class DefaultExportServiceService implements ExportService {
 
     public void updateWhenSuccess (String fileId, String idExport, Handler<Either<String, Boolean>> handler) {
         try {
-            mh.updateExport(idExport, "SUCCESS", new Handler<String>() {
+            mongo.updateExport(idExport,"SUCCESS",fileId,  new Handler<String>() {
                 @Override
                 public void handle(String event) {
                     if (event.equals("mongoinsertfailed"))

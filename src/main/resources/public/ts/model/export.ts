@@ -6,7 +6,7 @@ import {Utils} from "./Utils";
 export class Export implements Selectable {
     selected: boolean;
     filename: string;
-    fileid: string;
+    fileId: string;
     ownerid: string;
     id: Number;
     instruction_name:string;

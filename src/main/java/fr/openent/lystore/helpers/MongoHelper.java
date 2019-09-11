@@ -58,7 +58,7 @@ public class MongoHelper extends MongoDbCrudService {
         mongo.find(collection, new JsonObject().put("userId",userId), new Handler<Message<JsonObject>>() {
             @Override
             public void handle(Message<JsonObject> event) {
-                handler.handle(new Either.Right(event.body()));
+                handler.handle(new Either.Right(event.body().getJsonArray("results")));
             }
         });
     }

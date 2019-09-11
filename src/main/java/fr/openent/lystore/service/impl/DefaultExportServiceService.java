@@ -20,32 +20,17 @@ public class DefaultExportServiceService implements ExportService {
     Storage storage;
     private Logger logger = LoggerFactory.getLogger(DefaultProjectService.class);
     private EventBus eb;
-    private final String LYSTORE_COLLECTION = "lystore_export";
     MongoHelper mongo;
 
     public DefaultExportServiceService(String lystoreSchema, String instruction, Storage storage) {
         this.storage = storage;
-        mongo = new MongoHelper(LYSTORE_COLLECTION,eb);
+        mongo = new MongoHelper(Lystore.LYSTORE_COLLECTION);
 
     }
 
     @Override
     public void getExports(Handler<Either<String, JsonArray>> handler, UserInfos user) {
       mongo.getExports(handler,user.getUserId());
-
-//        String query = "" +
-//                "SELECT " +
-//                "id, " +
-//                "status, " +
-//                "filename," +
-//                "fileid," +
-//                "created," +
-//                "instruction_name," +
-//                "instruction_id " +
-//                "FROM " + Lystore.lystoreSchema + ".export " +
-//                "WHERE ownerid = ?" +
-//                "order by created  DESC";
-//        Sql.getInstance().prepared(query, new JsonArray().add(user.getUserId()), SqlResult.validResultHandler(handler));
     }
 
 
@@ -60,7 +45,7 @@ public class DefaultExportServiceService implements ExportService {
         String query = "SELECT filename " +
                 "FROM " + Lystore.lystoreSchema + ".export " +
                 "WHERE fileId = ?";
-        Sql.getInstance().prepared(query, new JsonArray().add(fileId), SqlResult.validResultHandler(handler));
+        mongo.getExport(new JsonObject().put("fileId",fileId),handler);
     }
 
     public void deleteExport(JsonArray filesIds, Handler<JsonObject> handler) {

@@ -11,13 +11,11 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.service.impl.MongoDbCrudService;
 
 public class MongoHelper extends MongoDbCrudService {
-    private final EventBus eb;
     private static final Logger logger = LoggerFactory.getLogger(MongoHelper.class);
 
     private static final String  STATUS = "status";
-    public MongoHelper(String collection ,EventBus eb) {
+    public MongoHelper(String collection) {
         super(collection);
-        this.eb = eb;
     }
 
 
@@ -56,6 +54,15 @@ public class MongoHelper extends MongoDbCrudService {
 
     public void getExports(Handler<Either<String, JsonArray>> handler, String userId) {
         mongo.find(collection, new JsonObject().put("userId",userId), new Handler<Message<JsonObject>>() {
+            @Override
+            public void handle(Message<JsonObject> event) {
+                handler.handle(new Either.Right(event.body().getJsonArray("results")));
+            }
+        });
+    }
+
+    public void getExport( JsonObject params, Handler<Either<String, JsonArray>> handler) {
+        mongo.find(collection, params, new Handler<Message<JsonObject>>() {
             @Override
             public void handle(Message<JsonObject> event) {
                 handler.handle(new Either.Right(event.body().getJsonArray("results")));

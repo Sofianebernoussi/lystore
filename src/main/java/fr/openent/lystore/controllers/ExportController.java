@@ -60,6 +60,7 @@ public class ExportController extends ControllerHelper {
         exportService.getXlsxName(fileId, new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> event) {
+                log.info(event.right().getValue());
                 exportService.getXlsx(fileId, file ->
                         request.response()
                                 .putHeader("Content-type", "application/vnd.ms-excel; charset=utf-8")

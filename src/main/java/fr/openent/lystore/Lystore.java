@@ -15,7 +15,7 @@ public class Lystore extends BaseServer {
     public static JsonObject CONFIG;
     public static Storage STORAGE;
     public static Integer PAGE_SIZE = 50;
-
+    public static final String LYSTORE_COLLECTION = "lystore_export";
     public static final String ADMINISTRATOR_RIGHT = "lystore.administrator";
     public static final String MANAGER_RIGHT = "lystore.manager";
     public static long timeout = 99999999999L;

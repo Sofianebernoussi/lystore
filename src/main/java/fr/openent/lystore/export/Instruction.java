@@ -92,11 +92,11 @@ public class Instruction {
                         Future<Boolean> Fonctionnementfuture = Future.future();
                         Future<Boolean> RecapEPLEfuture = Future.future();
                         Future<Boolean> RecapImputationBudfuture = Future.future();
-                        futures.add(lyceeFuture);
+//                        futures.add(lyceeFuture);
 //                        futures.add(CMRFuture);
 //                        futures.add(CMDfuture);
 //                        futures.add(Fonctionnementfuture);
-                        futures.add(RecapEPLEfuture);
+//                        futures.add(RecapEPLEfuture);
                         futures.add(RecapImputationBudfuture);
 //
                         futureHandler(handler, workbook, futures);
@@ -105,7 +105,7 @@ public class Instruction {
 //                        new CMRTab(workbook, instruction).create(getHandler(CMRFuture));
 //                        new CMDTab(workbook, instruction).create(getHandler(CMDfuture));
 //                        new FonctionnementTab(workbook, instruction).create(getHandler(Fonctionnementfuture));
-                        new RecapEPLETab(workbook, instruction).create(getHandler(RecapEPLEfuture));
+//                        new RecapEPLETab(workbook, instruction).create(getHandler(RecapEPLEfuture));
                         new RecapImputationBud(workbook, instruction).create(getHandler(RecapImputationBudfuture));
                     } catch (IOException e) {
                         ExcelHelper.catchError(exportService, idFile, "Xlsx Failed to read template");

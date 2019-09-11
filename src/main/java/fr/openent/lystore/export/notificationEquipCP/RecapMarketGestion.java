@@ -245,14 +245,15 @@ public class RecapMarketGestion extends TabHelper {
                 JsonObject action = actions.getJsonObject(k);
                 for (int j = 0; j < structures.size(); j++) {
                     structure = structures.getJsonObject(j);
-                    action.put("nameEtab", NULL_DATA);
-                    action.put("uai",NULL_DATA);
-                    action.put("city", NULL_DATA);
-                    action.put("type", NULL_DATA);
-                    action.put("address", NULL_DATA);
-                    action.put("zipCode","??");
-                    action.put("phone", NULL_DATA);
-
+                    if(j == 0) {
+                        action.put("nameEtab", NULL_DATA);
+                        action.put("uai", NULL_DATA);
+                        action.put("city", NULL_DATA);
+                        action.put("type", NULL_DATA);
+                        action.put("address", NULL_DATA);
+                        action.put("zipCode", "??");
+                        action.put("phone", NULL_DATA);
+                    }
                     if (action.getString("id_structure").equals(structure.getString("id"))) {
                         action.put("nameEtab", structure.getString("name"));
                         action.put("uai", structure.getString("uai"));

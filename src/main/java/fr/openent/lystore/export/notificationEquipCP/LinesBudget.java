@@ -72,12 +72,13 @@ public class LinesBudget extends TabHelper {
 
                 for (int j = 0; j < structures.size(); j++) {
                     structure = structures.getJsonObject(j);
+                    if(j == 0) {
                         action.put("nameEtab", NULL_DATA);
-                        action.put("uai",NULL_DATA);
+                        action.put("uai", NULL_DATA);
                         action.put("city", NULL_DATA);
                         action.put("type", NULL_DATA);
-                        action.put("zipCode","??");
-
+                        action.put("zipCode", "??");
+                    }
                     if (action.getString("id_structure").equals(structure.getString("id"))) {
                         action.put("nameEtab", structure.getString("name"));
                         action.put("uai", structure.getString("uai"));

@@ -1,10 +1,5 @@
 package fr.openent.lystore.helpers;
 
-import com.mongodb.DBObject;
-import com.mongodb.QueryBuilder;
-import fr.wseduc.mongodb.MongoDb;
-import fr.wseduc.mongodb.MongoQueryBuilder;
-import fr.wseduc.mongodb.MongoUpdateBuilder;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
@@ -13,7 +8,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.entcore.common.service.CrudService;
 import org.entcore.common.service.impl.MongoDbCrudService;
 
 public class MongoHelper extends MongoDbCrudService {
@@ -35,13 +29,14 @@ public class MongoHelper extends MongoDbCrudService {
         }
     }
 
-    public void updateExport(String idExport,String status,Handler<String> handler){
+    public void updateExport(String idExport, String status, String fileId, Handler<String> handler){
         try {
             final JsonObject matches = new JsonObject().put("_id", idExport);
             mongo.findOne(this.collection, matches , result -> {
                 if ("ok".equals(result.body().getString(STATUS))) {
                     JsonObject exportProperties = result.body().getJsonObject("result");
                     exportProperties.put("status",status);
+                    exportProperties.put("fileId",fileId);
                     mongo.save(collection, exportProperties, new Handler<Message<JsonObject>>() {
                         @Override
                         public void handle(Message<JsonObject> event) {
@@ -57,5 +52,14 @@ public class MongoHelper extends MongoDbCrudService {
         } catch (Exception e) {
             handler.handle("mongoinsertfailed");
         }
+    }
+
+    public void getExports(Handler<Either<String, JsonArray>> handler, String userId) {
+        mongo.find(collection, new JsonObject().put("userId",userId), new Handler<Message<JsonObject>>() {
+            @Override
+            public void handle(Message<JsonObject> event) {
+                handler.handle(new Either.Right(event.body()));
+            }
+        });
     }
 }

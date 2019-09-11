@@ -52,19 +52,12 @@ public class DefaultExportServiceService implements ExportService {
         storage.removeFiles(filesIds, handler);
     }
 
-    public void deleteExportSql(JsonArray idsExports, Handler<Either<String, JsonObject>> handler) {
+    public void deleteExportMongo(JsonArray idsExports, Handler<Either<String, JsonObject>> handler) {
         JsonArray values = new JsonArray();
         for (int i = 0; i < idsExports.size(); i++) {
             values.add(idsExports.getValue(i));
         }
-
-        String query = "DELETE " +
-                "FROM " + Lystore.lystoreSchema + ".export " +
-                "WHERE id IN " +
-                Sql.listPrepared(idsExports.getList()) + " " +
-                "RETURNING id ";
-        Sql.getInstance().prepared(query, values, SqlResult.validRowsResultHandler(handler));
-
+        mongo.deleteExports(values,handler);
     }
     public void createWhenStart (Integer instruction_id,String nameFile, String userId, Handler<Either<String, JsonObject>> handler){
         try {

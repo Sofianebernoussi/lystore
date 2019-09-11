@@ -38,9 +38,9 @@ export const exportCtrl = ng.controller('exportCtrl', [
 
         $scope.deleteExport = async ():Promise<void> => {
             await $scope.exports.delete( $scope.exportsToDelete
-                    .map(exportMap => exportMap.id),
+                    .map(exportMap => exportMap._id),
                 $scope.exportsToDelete
-                    .map(exportMap => exportMap.fileid));
+                    .map(exportMap => exportMap.fileId));
             $scope.isAllExportSelected = false;
             $scope.display.delete = false;
             template.close('export.delete.lightbox');

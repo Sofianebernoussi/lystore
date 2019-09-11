@@ -69,4 +69,17 @@ public class MongoHelper extends MongoDbCrudService {
             }
         });
     }
+
+    public void deleteExports(JsonArray values, Handler<Either<String, JsonObject>> handler) {
+        mongo.delete(collection, new JsonObject().put("_id", new JsonObject().put("$in", values)), new Handler<Message<JsonObject>>() {
+            @Override
+            public void handle(Message<JsonObject> event) {
+                if(!event.body().getString("status").equals("ok")) {
+                    handler.handle(new Either.Left<>("mongoinsertfailed"));
+                }else {
+                    handler.handle(new Either.Right<>(new JsonObject()));
+                }
+            }
+        });
+    }
 }

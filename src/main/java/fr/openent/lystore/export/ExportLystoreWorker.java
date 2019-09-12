@@ -9,6 +9,7 @@ import fr.wseduc.webutils.Either;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.storage.Storage;
 import org.vertx.java.busmods.BusModBase;
@@ -53,6 +54,13 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
     private void processExport(){
         logger.info("Process export nb Queue:" + MessagesQueue.size());
         if(MessagesQueue.isEmpty()){
+            logger.info("cc");
+//            exportService.getWaitingExport(new Handler<Either<String, JsonArray>>() {
+//                @Override
+//                public void handle(Either<String, JsonArray> event) {
+//                    logger.info(event);
+//                }
+//            });
             isWorking =  false;
         }else {
             Message<JsonObject> eventMessage = MessagesQueue.poll();
@@ -189,7 +197,6 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                 handler.handle(new Either.Left<>("An error occurred when inserting xlsx"));
             } else {
                 logger.info("Xlsx insert in storage");
-                exportService.updateWhenSuccess(file.getString("_id"), idNewFile,handler);
             }
         });
     }

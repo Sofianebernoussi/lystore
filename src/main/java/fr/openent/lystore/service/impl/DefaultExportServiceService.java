@@ -16,6 +16,9 @@ import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import io.vertx.core.logging.Logger;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class DefaultExportServiceService implements ExportService {
     Storage storage;
     private Logger logger = LoggerFactory.getLogger(DefaultProjectService.class);
@@ -67,14 +70,17 @@ public class DefaultExportServiceService implements ExportService {
                 @Override
                 public void handle(Either<String, JsonArray> event) {
                     if(event.isRight()){
-
+                        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+                        LocalDateTime now = LocalDateTime.now();
                         JsonArray results = event.right().getValue();
                         JsonObject params = new JsonObject()
                                 .put("filename",nameFile)
                                 .put("userId",userId)
                                 .put("instruction_id",instruction_id)
                                 .put("instruction_name",results.getJsonObject(0).getString("object"))
-                                .put("status","WAITING");
+                                .put("status","WAITING")
+                                .put("created",dtf.format(now));
+
 
                         mongo.addExport(params, new Handler<String>() {
                             @Override
@@ -131,5 +137,11 @@ public class DefaultExportServiceService implements ExportService {
             logger.error("error when update ERROR in export" + error);
 
         }
+    }
+
+    @Override
+    public void getWaitingExport(Handler<Either<String,JsonArray>> handler) {
+        logger.info("gt Waiting");
+        mongo.getWaitingExports(handler);
     }
 }

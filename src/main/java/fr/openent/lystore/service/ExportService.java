@@ -23,4 +23,7 @@ public interface ExportService {
     void updateWhenError(String idExport, Handler<Either<String, Boolean>> handler);
 
     void updateWhenSuccess(String fileId, String idExport, Handler<Either<String, Boolean>> handler);
+
+
+    void getWaitingExport(Handler<Either<String, JsonArray>> handler);
 }

@@ -10,6 +10,9 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.service.impl.MongoDbCrudService;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class MongoHelper extends MongoDbCrudService {
     private static final Logger logger = LoggerFactory.getLogger(MongoHelper.class);
 
@@ -32,10 +35,18 @@ public class MongoHelper extends MongoDbCrudService {
             final JsonObject matches = new JsonObject().put("_id", idExport);
             mongo.findOne(this.collection, matches , result -> {
                 if ("ok".equals(result.body().getString(STATUS))) {
+
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+                    LocalDateTime now = LocalDateTime.now();
+
                     JsonObject exportProperties = result.body().getJsonObject("result");
-                    exportProperties.put("status",status);
+
+                    exportProperties.put("status",status)
+                            .put("updated",dtf.format(now));
+                    ;
                     if(!fileId.isEmpty())
                         exportProperties.put("fileId",fileId);
+
                     mongo.save(collection, exportProperties, new Handler<Message<JsonObject>>() {
                         @Override
                         public void handle(Message<JsonObject> event) {
@@ -62,6 +73,15 @@ public class MongoHelper extends MongoDbCrudService {
         });
     }
 
+    public void getWaitingExports(Handler<Either<String,JsonArray>> handler){
+        logger.info("Waiting exports getter");
+        mongo.findOne(collection, new JsonObject().put("status","WAITING"),new Handler<Message<JsonObject>>(){
+            @Override
+            public void handle(Message<JsonObject> event){
+                handler.handle(new Either.Right(event.body().getJsonArray("results")));
+            }
+        });
+    }
     public void getExport( JsonObject params, Handler<Either<String, JsonArray>> handler) {
         mongo.find(collection, params, new Handler<Message<JsonObject>>() {
             @Override

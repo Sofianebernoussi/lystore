@@ -145,5 +145,6 @@ export class OrderUtils {
         if(order.price_single_ttc) return order.price_single_ttc;
         if(order.price_proposal) return order.price_proposal;
         if(order.price) return OrderUtils.calculatePriceTTC(2,order);
+        return 0;
     }
 }

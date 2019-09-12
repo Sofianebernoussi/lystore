@@ -1394,11 +1394,6 @@ public class ExcelHelper {
                                 Actions.CREATE.toString(),
                                 idExport.toString(),
                                 new JsonObject().put("ids", idExport).put("fileName", titleFile));
-                        infoFile.put("action", action)
-                                .put("instruction_id", request.getParam("id"))
-                                .put("filename", titleFile)
-                                .put("_id", idExport)
-                                .put("userId", user.getUserId());
                         log.info("J'envoie le bus");
                         eb.send(ExportLystoreWorker.class.getSimpleName(), infoFile, new DeliveryOptions().setSendTimeout(1000 * 1000L), handlerToAsyncHandler(eventExport ->
                                 log.info("Ok calling worker " + eventExport.body().toString()))

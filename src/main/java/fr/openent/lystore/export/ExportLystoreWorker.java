@@ -16,6 +16,7 @@ import org.vertx.java.busmods.BusModBase;
 
 import javax.print.DocFlavor;
 import java.util.Queue;
+import java.util.Timer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static fr.openent.lystore.Lystore.CONFIG;
@@ -27,7 +28,6 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
     private ExportService exportService = new DefaultExportServiceService(Lystore.lystoreSchema, "export", storage);
     private String idNewFile;
     private boolean isWorking = false;
-    Queue<Message<JsonObject>> MessagesQueue = new ConcurrentLinkedQueue<>();
 
     @Override
     public void start() {
@@ -41,9 +41,8 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
 
     @Override
     public void handle(Message<JsonObject> event) {
-        logger.info("Calling Worker");
-        MessagesQueue.add(event);
-        if(!isWorking && !MessagesQueue.isEmpty()){
+        if(!isWorking){
+            logger.info("Calling Worker");
             isWorking = true;
             processExport();
         }
@@ -53,9 +52,8 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
 
 
     private void processExport(){
-        logger.info("Process export nb Queue:" + MessagesQueue.size());
-        if(MessagesQueue.isEmpty()){
-            Handler<Either<String,Boolean>> exportHandler = event -> {
+
+        Handler<Either<String,Boolean>> exportHandler = event -> {
                 logger.info("exportHandler");
                 if (event.isRight()) {
                     logger.info("export to Waiting");
@@ -72,30 +70,18 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                         chooseExport( waitingOrder,exportHandler);
                     }else{
                         logger.info("no more waiting");
-                        isWorking =  false;
+                        new java.util.Timer().schedule(
+                                new java.util.TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        processExport();
+                                    }
+                                },
+                                10000
+                        );
                     }
                 }
             });
-        }else {
-            Message<JsonObject> eventMessage = MessagesQueue.poll();
-            Handler<Either<String,Boolean>> exportHandler = event -> {
-                logger.info("exportHandler");
-                if (event.isRight()) {
-                    eventMessage.reply(new JsonObject().put("status", "ok"));
-                    logger.info("end");
-                    processExport();
-                } else {
-                    eventMessage.reply(new JsonObject().put("status", "ko"));
-                    ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx " + event.left().getValue());
-                }
-            };
-            try{
-                logger.info("Doing export "+ MessagesQueue.size() +" in waitinglist");
-                chooseExport(eventMessage.body(),exportHandler);
-            } catch (Exception error) {
-                logger.error("Error in switch -> " + error);
-            }
-        }
     }
 
     private void chooseExport(JsonObject body, Handler<Either<String, Boolean>> exportHandler) {

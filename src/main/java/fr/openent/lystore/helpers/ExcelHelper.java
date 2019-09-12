@@ -1384,7 +1384,7 @@ public class ExcelHelper {
         log.info("makeExportExcel");
         Integer finalId = id;
         UserUtils.getUserInfos(eb, request, user -> {
-            exportService.createWhenStart(finalId,titleFile, user.getUserId(), newExport -> {
+            exportService.createWhenStart(finalId,titleFile, action,user.getUserId(), newExport -> {
                 if (newExport.isRight()) {
                     String idFile = newExport.right().getValue().getString("id");
                     try {

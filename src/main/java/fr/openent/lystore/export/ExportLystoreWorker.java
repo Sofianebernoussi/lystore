@@ -14,6 +14,7 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.storage.Storage;
 import org.vertx.java.busmods.BusModBase;
 
+import javax.print.DocFlavor;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -54,14 +55,27 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
     private void processExport(){
         logger.info("Process export nb Queue:" + MessagesQueue.size());
         if(MessagesQueue.isEmpty()){
-            logger.info("cc");
-//            exportService.getWaitingExport(new Handler<Either<String, JsonArray>>() {
-//                @Override
-//                public void handle(Either<String, JsonArray> event) {
-//                    logger.info(event);
-//                }
-//            });
-            isWorking =  false;
+            Handler<Either<String,Boolean>> exportHandler = event -> {
+                logger.info("exportHandler");
+                if (event.isRight()) {
+                    logger.info("export to Waiting");
+                    processExport();
+                } else {
+                    ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx " + event.left().getValue());
+                }
+            };
+            exportService.getWaitingExport(new Handler<Either<String, JsonObject>>() {
+                @Override
+                public void handle(Either<String, JsonObject> event) {
+                    if(event.isRight()){
+                        JsonObject waitingOrder = event.right().getValue();
+                        chooseExport( waitingOrder,exportHandler);
+                    }else{
+                        logger.info("no more waiting");
+                        isWorking =  false;
+                    }
+                }
+            });
         }else {
             Message<JsonObject> eventMessage = MessagesQueue.poll();
             Handler<Either<String,Boolean>> exportHandler = event -> {
@@ -77,47 +91,58 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
             };
             try{
                 logger.info("Doing export "+ MessagesQueue.size() +" in waitinglist");
-                final String action = eventMessage.body().getString("action", "");
-                String fileNamIn = eventMessage.body().getString("titleFile");
-                idNewFile = eventMessage.body().getString("idFile");
-                switch (action) {
-                    case "exportEQU":
-                        exportEquipment(
-                                Integer.parseInt(eventMessage.body().getString("id")),
-                                eventMessage.body().getString("type"),
-                                fileNamIn,exportHandler );
-                        break;
-                    case "exportRME":
-                        exportRME(
-                                Integer.parseInt(eventMessage.body().getString("id")),
-                                fileNamIn,
-                                exportHandler);
-                        break;
-                    case "exportNotificationCP":
-                        exportNotificationCp(
-                                Integer.parseInt(eventMessage.body().getString("id")),
-                                fileNamIn,
-                                exportHandler);
-                        break;
-                    case "exportPublipostage":
-                        exportPublipostage(
-                                Integer.parseInt(eventMessage.body().getString("id")),
-                                fileNamIn,
-                                exportHandler);
-                        break;
-                    case "exportSubvention":
-                        exportSubvention(
-                                Integer.parseInt(eventMessage.body().getString("id")),
-                                fileNamIn,
-                                exportHandler);
-                        break;
-                    default:
-                        ExcelHelper.catchError(exportService, idNewFile, "Invalid action in worker",exportHandler);
-                        break;
-                }
+                chooseExport(eventMessage.body(),exportHandler);
             } catch (Exception error) {
                 logger.error("Error in switch -> " + error);
             }
+        }
+    }
+
+    private void chooseExport(JsonObject body, Handler<Either<String, Boolean>> exportHandler) {
+        final String action = body.getString("action", "");
+        String fileNamIn = body.getString("filename");
+        idNewFile = body.getString("_id");
+        logger.info(idNewFile);
+        Integer instruction_id = -1;
+        try {
+            instruction_id = Integer.parseInt(body.getString("instruction_id"));
+        }catch (ClassCastException ce){
+            instruction_id =body.getInteger("instruction_id");
+        }
+        switch (action) {
+            case "exportEQU":
+                exportEquipment(
+                        instruction_id,
+                        body.getString("type"),
+                        fileNamIn,exportHandler );
+                break;
+            case "exportRME":
+                exportRME(
+                        instruction_id,
+                        fileNamIn,
+                        exportHandler);
+                break;
+            case "exportNotificationCP":
+                exportNotificationCp(
+                        instruction_id,
+                        fileNamIn,
+                        exportHandler);
+                break;
+            case "exportPublipostage":
+                exportPublipostage(
+                        instruction_id,
+                        fileNamIn,
+                        exportHandler);
+                break;
+            case "exportSubvention":
+                exportSubvention(
+                        instruction_id,
+                        fileNamIn,
+                        exportHandler);
+                break;
+            default:
+                ExcelHelper.catchError(exportService, idNewFile, "Invalid action in worker",exportHandler);
+                break;
         }
     }
 
@@ -197,6 +222,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                 handler.handle(new Either.Left<>("An error occurred when inserting xlsx"));
             } else {
                 logger.info("Xlsx insert in storage");
+                exportService.updateWhenSuccess(file.getString("_id"), idNewFile,handler);
             }
         });
     }

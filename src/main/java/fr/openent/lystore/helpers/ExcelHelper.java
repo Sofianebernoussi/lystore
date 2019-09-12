@@ -1384,28 +1384,28 @@ public class ExcelHelper {
         log.info("makeExportExcel");
         Integer finalId = id;
         UserUtils.getUserInfos(eb, request, user -> {
-            exportService.createWhenStart(finalId,titleFile, action,user.getUserId(), newExport -> {
+            exportService.createWhenStart(infoFile,finalId,titleFile,user.getUserId(), action, newExport -> {
                 if (newExport.isRight()) {
-                    String idFile = newExport.right().getValue().getString("id");
+                    String idExport = newExport.right().getValue().getString("id");
                     try {
                         Logging.insert(eb,
                                 request,
                                 Contexts.EXPORT.toString(),
                                 Actions.CREATE.toString(),
-                                idFile.toString(),
-                                new JsonObject().put("ids", idFile).put("fileName", titleFile));
+                                idExport.toString(),
+                                new JsonObject().put("ids", idExport).put("fileName", titleFile));
                         infoFile.put("action", action)
-                                .put("id", request.getParam("id"))
-                                .put("titleFile", titleFile)
-                                .put("idFile", idFile)
+                                .put("instruction_id", request.getParam("id"))
+                                .put("filename", titleFile)
+                                .put("_id", idExport)
                                 .put("userId", user.getUserId());
                         log.info("J'envoie le bus");
                         eb.send(ExportLystoreWorker.class.getSimpleName(), infoFile, new DeliveryOptions().setSendTimeout(1000 * 1000L), handlerToAsyncHandler(eventExport ->
                                 log.info("Ok calling worker " + eventExport.body().toString()))
                         );
-                        request.response().setStatusCode(201).end("Import started " + idFile);
+                        request.response().setStatusCode(201).end("Import started " + idExport);
                     } catch (Exception error) {
-                        catchError(exportService, idFile, error);
+                        catchError(exportService, idExport, error);
                     }
                 } else {
                     log.error("Fail to insert file in SQL " + newExport.left());

@@ -4,6 +4,7 @@ import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -40,7 +41,6 @@ public class MongoHelper extends MongoDbCrudService {
                     LocalDateTime now = LocalDateTime.now();
 
                     JsonObject exportProperties = result.body().getJsonObject("result");
-
                     exportProperties.put("status",status)
                             .put("updated",dtf.format(now));
                     ;
@@ -73,12 +73,15 @@ public class MongoHelper extends MongoDbCrudService {
         });
     }
 
-    public void getWaitingExports(Handler<Either<String,JsonArray>> handler){
-        logger.info("Waiting exports getter");
+    public void getWaitingExports(Handler<Either<String,JsonObject>> handler){
         mongo.findOne(collection, new JsonObject().put("status","WAITING"),new Handler<Message<JsonObject>>(){
             @Override
             public void handle(Message<JsonObject> event){
-                handler.handle(new Either.Right(event.body().getJsonArray("results")));
+                JsonObject result = event.body();
+                if(result.containsKey("result"))
+                    handler.handle(new Either.Right(result.getJsonObject("result")));
+                else
+                    handler.handle(new Either.Left<>("No waiting orders"));
             }
         });
     }

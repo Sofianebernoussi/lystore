@@ -62,9 +62,8 @@ public class DefaultExportServiceService implements ExportService {
         }
         mongo.deleteExports(values,handler);
     }
-    public void createWhenStart (Integer instruction_id,String nameFile, String userId, Handler<Either<String, JsonObject>> handler){
+    public void createWhenStart (JsonObject infoFile,Integer instruction_id,String nameFile, String userId,String action, Handler<Either<String, JsonObject>> handler){
         try {
-
             String nameQuery= "SELECT object from "+Lystore.lystoreSchema+".instruction where id= ?";
             Sql.getInstance().prepared(nameQuery,new JsonArray().add(instruction_id), SqlResult.validResultHandler(new Handler<Either<String, JsonArray>>() {
                 @Override
@@ -79,8 +78,11 @@ public class DefaultExportServiceService implements ExportService {
                                 .put("instruction_id",instruction_id)
                                 .put("instruction_name",results.getJsonObject(0).getString("object"))
                                 .put("status","WAITING")
-                                .put("created",dtf.format(now));
+                                .put("created",dtf.format(now))
+                                .put("action",action);
 
+                        if(infoFile.containsKey("type"))
+                            params.put("type",infoFile.getString("type"));
 
                         mongo.addExport(params, new Handler<String>() {
                             @Override
@@ -123,6 +125,7 @@ public class DefaultExportServiceService implements ExportService {
 
     public void updateWhenSuccess (String fileId, String idExport, Handler<Either<String, Boolean>> handler) {
         try {
+            logger.info("SUCCESS");
             mongo.updateExport(idExport,"SUCCESS",fileId,  new Handler<String>() {
                 @Override
                 public void handle(String event) {
@@ -140,8 +143,7 @@ public class DefaultExportServiceService implements ExportService {
     }
 
     @Override
-    public void getWaitingExport(Handler<Either<String,JsonArray>> handler) {
-        logger.info("gt Waiting");
+    public void getWaitingExport(Handler<Either<String,JsonObject>> handler) {
         mongo.getWaitingExports(handler);
     }
 }

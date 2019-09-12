@@ -13,18 +13,21 @@
         <div class="row vertical-spacing-four">
             <label class="two right-padding-form-field cell">
                 <i18n>CAMPAIGN</i18n>
+                :
             </label>
             <label class="six cell">[[orderToUpdate.campaign.name]]</label>
         </div>
         <div class="row vertical-spacing-four">
             <label class="two right-padding-form-field cell">
                 <i18n>lystore.project</i18n>
+                :
             </label>
             <label class="six cell">[[orderToUpdate.title.name || '-']]</label>
         </div>
         <div class="row vertical-spacing-four">
             <label class="two right-padding-form-field cell">
                 <i18n>lystore.project.comment</i18n>
+                :
             </label>
             <label ng-if="orderToUpdate.project.description"
                    class="six cell comment">[[orderToUpdate.project.description || '-']]</label>
@@ -35,12 +38,14 @@
         <div class="row vertical-spacing-four">
             <label class="two right-padding-form-field cell">
                 <i18n>room</i18n>
+                :
             </label>
             <label class="six cell">[[orderToUpdate.project.room || '-']]</label>
         </div>
         <div class="row vertical-spacing-four">
             <label class="two right-padding-form-field cell">
                 <i18n>building</i18n>
+                :
             </label>
             <label class="six cell">[[orderToUpdate.project.building || '-']]</label>
         </div>
@@ -48,6 +53,7 @@
         <div class="row vertical-spacing-four">
             <label class="two right-padding-form-field cell">
                 <i18n>lystore.contract.type.name</i18n>
+                :
             </label>
             <label class="six cell">[[orderToUpdate.contract_type.name || '-']]</label>
         </div>
@@ -55,6 +61,7 @@
         <div class="row vertical-spacing-four">
             <label class="two right-padding-form-field cell">
                 <i18n>lystore.amountTTC</i18n>
+                :
             </label>
             <span
                     class="four cell horizontal-margin"
@@ -73,6 +80,7 @@
         <div class="row vertical-spacing-four">
             <label class="two right-padding-form-field cell">
                 <i18n>EQUIPMENT</i18n>
+                :
             </label>
             <span
                     class="four cell horizontal-margin"
@@ -82,8 +90,7 @@
                 -&nbsp
                 [[orderParent.equipment.name]]
             </span>
-           <search-and-select
-                    ng-change="getContractType()"
+            <search-and-select
                     class="four cell"
                     options="equipments.all"
                     param1="'contract_type_name'"
@@ -100,6 +107,7 @@
         <div class="row vertical-spacing-four">
             <label class="two right-padding-form-field cell">
                 <i18n>quantity.full</i18n>
+                :
             </label>
             <span
                     class="four cell horizontal-margin"
@@ -120,6 +128,7 @@
         <div class="row vertical-spacing-four">
             <label class="two right-padding-form-field cell">
                 <i18n>lystore.price.TTC</i18n>
+                :
             </label>
             <span
                     class="four cell horizontal-margin"
@@ -141,6 +150,7 @@
              class="row vertical-spacing-four">
             <label class="two right-padding-form-field cell">
                 <i18n>lystore.project.priority.order</i18n>
+                :
             </label>
             <span
                     class="four cell horizontal-margin"
@@ -162,15 +172,14 @@
         <div class="row vertical-spacing-four">
             <label class="two right-padding-form-field cell">
                 <i18n>comment</i18n>
+                :
             </label>
-            <textarea readonly
-                      auto-height=""
-                      style="resize: none; height: 62px;"
-                      ng-model="orderParent.comment"
-                      class="ng-pristine ng-valid ng-touched four cell horizontal-margin"
-                      ng-if="orderParent"
+            <div
+                    class="comment ng-pristine ng-valid ng-touched four cell horizontal-margin"
+                    ng-if="orderParent"
             >
-            </textarea>
+                [[orderParent.comment]]
+            </div>
             <textarea auto-height=""
                       style="resize: none; height: 62px;"
                       ng-model="orderToUpdate.comment"

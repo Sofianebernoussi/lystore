@@ -1,11 +1,17 @@
 import {_, idiom as lang, ng, notify, template} from 'entcore';
 import {
-    Notification, Operation, OrderClient, OrderRegion, OrdersRegion, Structure, StructureGroup, StructureGroups,
-    Structures, Title, Titles, Utils
+    Notification,
+    Operation,
+    OrderRegion,
+    OrdersRegion,
+    Structure,
+    StructureGroup,
+    StructureGroups,
+    Structures,
+    Titles,
+    Utils,
+    Equipments
 } from "../../model";
-import {Equipments} from "../../model/Equipment";
-import {Mix} from "entcore-toolkit";
-
 
 declare let window: any;
 export const orderRegionController = ng.controller('orderRegionController',
@@ -15,7 +21,6 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.structure_groups = new StructureGroups();
         $scope.structuresToDisplay = new Structures();
         $scope.titles = new Titles();
-        $scope.contract_type = "-";
         $scope.display = {
             lightbox: {
                 validOrder: false,
@@ -46,22 +51,6 @@ export const orderRegionController = ng.controller('orderRegionController',
             Utils.safeApply($scope);
         };
 
-        $scope.initDataUpdate = async () => {
-            //await $scope.equipments.sync($scope.orderToUpdate.id_campaign, $scope.orderToUpdate.id_structure);
-            // if (!$scope.orderToUpdate.project.room)
-            //     $scope.orderToUpdate.project.room = '-';
-            // if (!$scope.orderToUpdate.project.building)
-            //     $scope.orderToUpdate.project.building = '-';
-            // $scope.orderToCreate.rows = [];
-            //$scope.getContractType();
-        };
-
-        //todo remove function starting when the controller is call
-        if ($routeParams.idOrder) {
-
-            //$scope.orderToUpdate.structure = $scope.structures.filter(structureFilter => structureFilter.id === $scope.orderToUpdate.id_structure)[0];
-            $scope.initDataUpdate();
-        }
         $scope.isUpdating = $location.$$path.includes('/order/update');
         $scope.isUpdatingFromOrder = $location.$$path.includes('/order/operation/update');
 
@@ -76,7 +65,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                 orderRegion.id_operation = operation.id;
                 orderRegion.equipment_key = $scope.orderToUpdate.equipment_key;
                 orderRegion.technical_spec = $scope.orderToUpdate.equipment.technical_specs;
-                let {status, data} = await orderRegion.set();
+                let {status, data} = await orderRegion.create();
                 if (status === 200) {
                     $scope.notifications.push(new Notification('lystore.order.region.update', 'confirm'));
                     await $scope.ordersClient.addOperationInProgress(operation.id, [$routeParams.idOrder]);
@@ -99,10 +88,8 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
 
         $scope.cancelUpdate = () => {
-            if ($scope.isUpdating)
-                $scope.redirectTo('/order/waiting');
-            if ($scope.isUpdatingFromOrder)
-                $scope.redirectTo('/operation');
+            if ($scope.isUpdating) $scope.redirectTo('/order/waiting');
+            if ($scope.isUpdatingFromOrder) $scope.redirectTo('/operation/order');
         };
         $scope.updateOrderConfirm = async () => {
             await $scope.selectOperationForOrder();
@@ -112,11 +99,11 @@ export const orderRegionController = ng.controller('orderRegionController',
             let orderRegion = new OrderRegion();
             orderRegion.createFromOrderClient($scope.orderToUpdate);
             orderRegion.equipment_key = $scope.orderToUpdate.equipment_key;
-            $scope.redirectTo('/operation');
-            if($scope.orderToUpdate.isOrderRegion){
+            $scope.redirectTo('/operation/order');
+            if($scope.orderToUpdate.typeOrder === "region"){
                 await orderRegion.update($scope.orderToUpdate.id);
             } else {
-                await orderRegion.set();
+                await orderRegion.create();
             }
             $scope.notifications.push(new Notification('lystore.order.region.update', 'confirm'));
         };
@@ -155,21 +142,6 @@ export const orderRegionController = ng.controller('orderRegionController',
                     row.rank === null))
                     || !$scope.orderToCreate.campaign.orderPriorityEnable());
         };
-        $scope.getContractType = () => {
-            let newContract;
-            /*if($scope.orderToUpdate.equipment){
-                $scope.contracts.all.map(contract => {
-                    if (contract.id === $scope.orderToUpdate.equipment.id_contract)
-                        newContract = contract
-                });
-                $scope.contractTypes.all.map(contract => {
-                    if (contract.id === newContract.id_contract_type) {
-                        $scope.contract_type = contract.displayName
-                    }
-                });
-            }*/
-            //Utils.safeApply($scope);
-        };
 
         $scope.addRow = () => {
             let row = {
@@ -207,7 +179,6 @@ export const orderRegionController = ng.controller('orderRegionController',
                 row.equipments.push(equipment);
                 if (row.equipment.id === equipment.id)
                     row.equipment = equipment;
-
             });
             $scope.orderToCreate.rows.splice(index + 1, 0, row)
         };
@@ -220,12 +191,10 @@ export const orderRegionController = ng.controller('orderRegionController',
             await row.equipments.syncAll($scope.orderToCreate.campaign.id, (structure) ? structure.id : undefined);
             row.equipment = undefined;
             Utils.safeApply($scope);
-
         };
         $scope.initEquipmentData = (row) => {
             row.price = row.equipment.priceTTC;
             row.amount = 1;
-
         };
         $scope.swapTypeStruct = (row) => {
             row.display.struct = !row.display.struct;

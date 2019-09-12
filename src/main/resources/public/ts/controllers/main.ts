@@ -246,26 +246,27 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             updateOrder: async (params) => {
                 let idOrder = parseInt(params.idOrder);
                 await $scope.initOrderStructures();
-                $scope.orderToUpdate = await $scope.orderClient.getOneOrderClientWaiting(idOrder, $scope.structures.all);
-                await $scope.contracts.sync();
-                await $scope.contractTypes.sync();
+                $scope.orderToUpdate = await $scope.orderClient.getOneOrderClient(idOrder, $scope.structures.all, "waiting");
+                await $scope.equipments.syncAll($scope.orderToUpdate.campaign.id,  $scope.orderToUpdate.structure.id);
+                $scope.orderToUpdate.equipment = $scope.equipments.all.find(findElement => findElement.id === $scope.orderToUpdate.equipment_key);
+                $scope.orderParent = OrderUtils.initParentOrder($scope.orderToUpdate);
                 template.open('administrator-main', 'administrator/order/order-update-form');
                 Utils.safeApply($scope);
 
             },
-            updateLinkedOrder: async (params) => {
+            updateLinkedOrder: async (params):Promise<void> => {
                 let idOrder = parseInt(params.idOrder);
                 await $scope.initOrderStructures();
                 $scope.orderToUpdate = params.typeOrder === 'client' ?
-                    await $scope.orderClient.getOneOrderClientProgress(idOrder, $scope.structures.all) :
+                    await $scope.orderClient.getOneOrderClient(idOrder, $scope.structures.all, "progress") :
                     await $scope.orderRegion.getOneOrderRegion(idOrder, $scope.structures.all);
                 await $scope.equipments.syncAll($scope.orderToUpdate.campaign.id,  $scope.orderToUpdate.structure.id);
                 $scope.orderToUpdate.equipment = $scope.equipments.all.find(findElement => findElement.id === $scope.orderToUpdate.equipment_key);
                 if(params.typeOrder === 'client'){
                     $scope.orderParent = OrderUtils.initParentOrder($scope.orderToUpdate);
-                } else{
-                    if($scope.orderToUpdate.order_client_equipment_parent){
-                        $scope.orderParent = new Order(JSON.parse($scope.orderToUpdate.order_client_equipment_parent), $scope.structures.all);
+                } else {
+                    if($scope.orderToUpdate.order_parent){
+                        $scope.orderParent = new Order(JSON.parse($scope.orderToUpdate.order_parent), $scope.structures.all);
                         $scope.orderParent.equipment = $scope.equipments.all.find(findElement => findElement.id === $scope.orderParent.equipment_key);
                         $scope.orderParent = OrderUtils.initParentOrder($scope.orderParent);
                     } else {
@@ -290,10 +291,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             operationOrders: async () =>{
                 template.close('administrator-main');
                 template.close('operation-main');
-                if($scope.operations.selected.length === 0){
-                    $scope.redirectTo(`/operation`);
-                    return
-                }
                 $scope.structures = new Structures();
                 await $scope.structures.sync();
                 $scope.operation = $scope.operations.selected[0];

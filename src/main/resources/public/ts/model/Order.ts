@@ -1,10 +1,17 @@
 import {
     Campaign,
     Contract,
-    ContractType, Equipment, OrderClient, OrderOptionClient, OrderRegion,
-    Project, Structure,
+    ContractType,
+    Equipment,
+    OrderClient,
+    OrderOptionClient,
+    OrderRegion,
+    Program,
+    Project,
+    Structure,
     Structures,
-    Title, Utils
+    Title,
+    Utils
 } from './index';
 import {Mix, Selectable} from "entcore-toolkit";
 import {_} from "entcore";
@@ -31,64 +38,59 @@ export interface OrderImp extends Selectable{
 }
 
 export class Order implements OrderImp{
-    amount;//waiting//
-    campaign;//waiting//
-    comment;//waiting//
-    contract;//waiting//
-    contract_type;//waiting//
-    creation_date;//
+    amount: number;
+    campaign: Campaign;
+    comment: string;
+    contract: Contract;
+    contract_type: ContractType;
+    creation_date: Date;
     equipment: Equipment;
-    equipment_key;//
-    id_structure;
+    equipment_key:number;
+    id?: number;
+    id_operation:Number;
+    id_structure: string;
+    inheritedClass:Order|OrderClient|OrderRegion;
     options;
-    price;//
-    price_proposal;
-    price_single_ttc;//
-    project;//waiting//
-    program;//waiting
-    rank;//
-    rankOrder;//waiting
-    selected;
-    structure;//waiting//
-    tax_amount;
-    title;//
-    inheritedClass:Order|OrderClient|OrderRegion;//
+    order_parent?:any;
+    price: number;
+    price_proposal: number;
+    price_single_ttc: number;
+    program: Program;
+    project: Project;
+    rank: number;
+    rankOrder: Number;
+    selected:boolean;
+    structure: Structure;
+    tax_amount: number;
+    title:Title;
+    typeOrder:string;
 
-
-    order_client_equipment_parent?:any;//
-
-    //this.typeOrder = order.constructor.name;
-    //this.name_structure = order.id_structure? OrderUtils.initNameStructure( order.id_structure, structures) : "";
-    //this.structure_groups = order.structure_groups? JSON.parse(order.structure_groups) : null;
-    //this.supplier = order.supplier? JSON.parse(order.supplier) : null;
-    //this.creation_date = moment(order.creation_date).format('L');
-    //this.technical_spec = order.technical_spec? Utils.parsePostgreSQLJson(this.technical_spec) : null;
     constructor(order: Order, structures:Structures){
-        if(order.order_client_equipment_parent){
-            this.order_client_equipment_parent = order.order_client_equipment_parent;
-        }
-        this.inheritedClass = order;
-        this.comment = order.comment;
-        this.equipment_key = order.equipment_key;
-        this.structure = order.id_structure? OrderUtils.initStructure( order.id_structure, structures) : new Structure();
-        this.project = order.project? Mix.castAs(Project, JSON.parse(order.project.toString())) : null;
+        this.amount  = order.amount? parseInt(order.amount.toString()) : null;
         this.campaign = order.campaign? Mix.castAs(Campaign, JSON.parse(order.campaign.toString())) : null;
-        this.contract_type = order.contract_type? JSON.parse(order.contract_type) : null;
-        this.contract = order.contract? JSON.parse(order.contract) : null;
-        this.title = order.title?JSON.parse(order.title) : null;
-        this.price  = order.price? parseFloat(order.price) : null;
-        this.amount  = order.amount? parseInt(order.amount) : null;
-        this.price_proposal = order.price_proposal? parseFloat(order.price_proposal) : null;
-        this.rank  = order.rank? parseInt(order.rank.toString())+1  : null;
-        this.tax_amount  = order.tax_amount? parseFloat(order.tax_amount) : null;
-        this.price_single_ttc  = order.price_single_ttc? parseFloat(order.price_single_ttc) : null;
+        this.comment = order.comment;
+        this.contract = order.contract? JSON.parse(order.contract.toString()) : null;
+        this.contract_type = order.contract_type? JSON.parse(order.contract_type.toString()) : null;
+        this.equipment_key = order.equipment_key;
+        this.inheritedClass = order;
+        this.project = order.project? Mix.castAs(Project, JSON.parse(order.project.toString())) : null;
+        this.price = order.price? parseFloat(order.price.toString()) : null;
+        this.price_proposal = order.price_proposal? parseFloat(order.price_proposal.toString()) : null;
+        this.price_single_ttc  = order.price_single_ttc? parseFloat(order.price_single_ttc.toString()) : null;
+        this.rank  = order.rank? parseInt(order.rank.toString()) + 1: null;
+        this.structure = order.id_structure? OrderUtils.initStructure( order.id_structure, structures) : new Structure();
+        this.tax_amount  = order.tax_amount? parseFloat(order.tax_amount.toString()) : null;
+        this.title = order.title?JSON.parse(order.title.toString()) : null;
+        this.typeOrder = order.typeOrder;
+        if(order.id)this.id = order.id;
+        if(order.id_operation)this.id_operation = order.id_operation;
+        if(order.order_parent){
+            this.order_parent = order.order_parent;
+        }
         if(order.options){
             this.options = order.options.toString() !== '[null]' && order.options !== null ?
                 Mix.castArrayAs(OrderOptionClient, JSON.parse(order.options.toString()))  :
                 [];
-        }
-        if(this.campaign){
-            if(this.campaign.orderPriorityEnable()) order.rankOrder = order.rank + 1;
         }
     }
 }

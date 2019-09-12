@@ -235,7 +235,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 "       array_to_json(array_agg(DISTINCT structure_group.name)) AS structure_groups, " +
                 "       to_json(prj.*) AS project, " +
                 "       to_json(tt.*) AS title, " +
-                "       to_json(oce.*) AS order_client_equipment_parent, " +
+                "       to_json(oce.*) AS order_parent, " +
                 "       to_json(ce.*) AS equipment_order_client_parent, " +
                 "       array_to_json(array_agg(DISTINCT order_opts)) as options_client_parent, " +
                 "       o.order_number " +

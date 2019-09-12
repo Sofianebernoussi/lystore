@@ -1,64 +1,79 @@
 import http from "axios";
 import {_, moment, notify} from "entcore";
-import {Project} from "./project";
 import {
     Campaign,
     Contract,
-    ContractType,
+    ContractType, Grade,
     Order,
-    OrderOptionClient,
+    Program,
     Structure,
-    Structures,
-    Utils
+    Structures, Supplier, TechnicalSpec, Title,
+    Utils,
+    OrderClient,
+    Equipment,
+    Project,
 } from "./index";
-import {OrderClient} from "./OrderClient";
-import {Mix, Selectable, Selection} from "entcore-toolkit";
-import {Equipment} from "./Equipment";
+import {Selection} from "entcore-toolkit";
+
 
 export class OrderRegion implements Order  {
-    typeOrder;
-    amount;
-    campaign;
-    comment;
-    contract;
-    contract_type;
-    creation_date;
-    description;
-    files;
-    id_campaign;
-    id_contract;
-    id_operation;
-    id_project;
-    id_structure;
-    image;
-    label_program?;
-    name;
-    name_structure;
-    number_validation;
-    options;
-    price;
-    project;
-    program;
-    rankOrder;
-    selected;
-    status;
-    structure;
-    structure_groups;
-    summary;
-    supplier;
-    tax_amount;
-    technical_spec;
-
+    amount: number;
+    campaign: Campaign;
+    comment: string;
+    contract: Contract;
+    contract_type: ContractType;
+    creation_date: Date;
+    equipment: Equipment;
+    equipment_key:number;
     id?: number;
+    id_operation:Number;
+    id_structure: string;
+    inheritedClass:Order|OrderClient|OrderRegion;
+    options;
+    order_parent?:any;
+    price: number;
+    price_proposal: number;
+    price_single_ttc: number;
+    program: Program;
+    project: Project;
+    rank: number;
+    rankOrder: Number;
+    selected:boolean;
+    structure: Structure;
+    tax_amount: number;
+    title:Title;
+    typeOrder:string;
+
     contract_name?: string;
-    order_client: OrderClient;
+    description:string;
+    files: string;
+    id_campaign:number;
+    id_contract:number;
     id_orderClient: number;
-    rank?: number;
-    equipment_key: number;
+    id_project:number;
+    id_supplier: string;
+    grade?: Grade;
+    name:string;
+    name_structure: string;
+    number_validation:string;
+    label_program:string;
+    order_client: OrderClient;
+    order_number?: string;
+    preference: number;
+    priceProposalTTCTotal: number;
+    priceTTCtotal: number ;
+    priceUnitedTTC: number;
+    structure_groups: any;
+    supplier: Supplier;
+    supplier_name?: string;
+    summary:string;
+    image:string;
+    status:string;
+    technical_spec:TechnicalSpec;
     title_id ?: number;
-    equipment?: Equipment;
+
     constructor() {
-        this.typeOrder= this.constructor.name;
+        this.typeOrder = this.constructor.name;
     }
 
     initStructure(idStructure:string, structures:Structures):Structure{
@@ -139,7 +154,8 @@ export class OrderRegion implements Order  {
         this.equipment = order.equipment;
     }
 
-    async set() {
+
+    async create() {
         try {
             return await http.post(`/lystore/region/order`, this.toJson());
         } catch (e) {
@@ -177,7 +193,7 @@ export class OrderRegion implements Order  {
     async getOneOrderRegion(id:number, structures:Structures){
         try{
             const {data} =  await http.get(`/lystore/orderRegion/${id}/order`);
-            return new Order(data, structures);
+            return new Order(Object.assign(data, {typeOrder:"region"}), structures);
         } catch (e) {
             notify.error('lystore.admin.order.update.err');
             throw e;

@@ -119,7 +119,7 @@ export const operationController = ng.controller('operationController',
             $scope.ordersClientByOperation = await operation.getOrders();
         };
         $scope.dropOrderOperation = async (order:any) => {
-            if(order.isOrderRegion){
+            if(order.typeOrder === "region"){
                 await $scope.orderRegion.delete(order.id);
                 if(order.id_order_client_equipment){
                     await order.updateStatusOrder('WAITING', order.id_order_client_equipment);
@@ -149,8 +149,7 @@ export const operationController = ng.controller('operationController',
 
         $scope.insertOrderRegion = (order: OrderClient):void => {
             $scope.order = order;
-            let type = order.isOrderRegion? 'region' : 'client';
-            $scope.redirectTo(`/order/operation/update/${order.id}/${type}`);
+            $scope.redirectTo(`/order/operation/update/${order.id}/${order.typeOrder}`);
         };
         $scope.switchAllOrders = ():void => {
             $scope.allOrdersOperationSelected  =  !$scope.allOrdersOperationSelected;
@@ -173,8 +172,8 @@ export const operationController = ng.controller('operationController',
         };
         $scope.operationSelected = async (operation:Operation) => {
             template.close('operation.lightbox');
-            let idsOrdersClient = $scope.ordersClientByOperation.filter(order => order.selected && !order.isOrderRegion).map(order => order.id);
-            let idsOrdersRegion = $scope.ordersClientByOperation.filter(order => order.selected && order.isOrderRegion).map(order => order.id);
+            let idsOrdersClient = $scope.ordersClientByOperation.filter(order => order.selected && !(order.typeOrder === "client")).map(order => order.id);
+            let idsOrdersRegion = $scope.ordersClientByOperation.filter(order => order.selected && (order.typeOrder === "region")).map(order => order.id);
             if(idsOrdersClient.length !== 0){
                 await $scope.ordersClient.addOperation(operation.id, idsOrdersClient);
             }
@@ -183,6 +182,7 @@ export const operationController = ng.controller('operationController',
             }
             $scope.ordersClientByOperation = await $scope.operation.getOrders();
             $scope.display.lightbox.operation = false;
+            $scope.notifications.push(new Notification('lystore.operation.order.affect', 'info'));
             Utils.safeApply($scope);
         };
     }]);

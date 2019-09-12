@@ -200,11 +200,11 @@
                 <input type="button" class=" cancel" ng-click="cancelUpdate()"
                        i18n-value="cancel"/>
 
-                <input type="button" ng-if="isUpdating" class=" button" ng-disabled="!isValidFormUpdate()"
+                <input type="button" ng-if="!orderToUpdate.id_operation" class=" button" ng-disabled="!isValidFormUpdate()"
                        ng-click="updateOrderConfirm()"
                        i18n-value="lystore.order.operation.select"/>
 
-                <input type="button" ng-if="isUpdatingFromOrder" ng-disabled="!isValidFormUpdate()" class=" button"
+                <input type="button" ng-if="orderToUpdate.id_operation" ng-disabled="!isValidFormUpdate()" class=" button"
                        ng-click="updateLinkedOrderConfirm()"
                        i18n-value="confirm"/>
 

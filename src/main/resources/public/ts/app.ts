@@ -94,7 +94,7 @@ routes.define(($routeProvider) => {
             .when('/instruction', {
                 action: 'instruction'
             })
-            .when('/operation/order', {
+            .when('/operation/order/:idOperation', {
                 action: 'operationOrders'
             })
             .when('/exports', {

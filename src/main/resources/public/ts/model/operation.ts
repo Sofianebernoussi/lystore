@@ -62,7 +62,7 @@ export class Operation implements Selectable {
                 resultData = resultData.map(order => {
                     return {
                         ...order,
-                        structure : structures.filter(structureFilter => structureFilter.id === order.id_structure)[0],
+                        structure : structures.find(structureFilter => structureFilter.id === order.id_structure),
                     }
                 })
             }

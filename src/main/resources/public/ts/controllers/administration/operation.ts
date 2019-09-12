@@ -185,4 +185,7 @@ export const operationController = ng.controller('operationController',
             $scope.notifications.push(new Notification('lystore.operation.order.affect', 'info'));
             Utils.safeApply($scope);
         };
+        $scope.openOrders = () => {
+            $scope.redirectTo(`/operation/order/${$scope.operations.selected[0].id}`)
+        }
     }]);

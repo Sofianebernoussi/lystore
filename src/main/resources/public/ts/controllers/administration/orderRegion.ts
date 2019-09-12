@@ -51,17 +51,13 @@ export const orderRegionController = ng.controller('orderRegionController',
             Utils.safeApply($scope);
         };
 
-        $scope.isUpdating = $location.$$path.includes('/order/update');
-        $scope.isUpdatingFromOrder = $location.$$path.includes('/order/operation/update');
-
+        //todo refacto it
         $scope.operationSelected = async (operation: Operation) => {
             $scope.isOperationSelected = true;
             $scope.operation = operation;
-            if ($scope.isUpdating) {
-
+            if (!$scope.orderToUpdate.id_operation) {
                 let orderRegion = new OrderRegion();
                 orderRegion.createFromOrderClient($scope.orderToUpdate);
-
                 orderRegion.id_operation = operation.id;
                 orderRegion.equipment_key = $scope.orderToUpdate.equipment_key;
                 orderRegion.technical_spec = $scope.orderToUpdate.equipment.technical_specs;
@@ -88,8 +84,7 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
 
         $scope.cancelUpdate = () => {
-            if ($scope.isUpdating) $scope.redirectTo('/order/waiting');
-            if ($scope.isUpdatingFromOrder) $scope.redirectTo('/operation/order');
+            window.history.back();
         };
         $scope.updateOrderConfirm = async () => {
             await $scope.selectOperationForOrder();
@@ -99,7 +94,7 @@ export const orderRegionController = ng.controller('orderRegionController',
             let orderRegion = new OrderRegion();
             orderRegion.createFromOrderClient($scope.orderToUpdate);
             orderRegion.equipment_key = $scope.orderToUpdate.equipment_key;
-            $scope.redirectTo('/operation/order');
+            window.history.back();
             if($scope.orderToUpdate.typeOrder === "region"){
                 await orderRegion.update($scope.orderToUpdate.id);
             } else {

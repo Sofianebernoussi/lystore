@@ -28,7 +28,7 @@ import {
     Suppliers,
     Tags,
     Taxes,
-    Titles,
+    Titles, Userbook,
     Utils,
 } from '../model';
 import {Mix} from "entcore-toolkit";
@@ -67,6 +67,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.instructions = new Instructions();
         $scope.exercises = new Exercises();
         $scope.exports = new Exports([]);
+        $scope.ub = new Userbook();
         $scope.equipments.eventer.on('loading::true', $scope.$apply);
         $scope.equipments.eventer.on('loading::false', $scope.$apply);
         $scope.loadingArray = false;
@@ -225,6 +226,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
             orderWaiting: async () => {
                 await $scope.syncCampaignInputSelected();
+                $scope.preferences =  await $scope.ub.getPreferences()
                 await $scope.openLightSelectCampaign();
                 Utils.safeApply($scope);
             },

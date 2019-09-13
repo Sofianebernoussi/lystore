@@ -115,10 +115,25 @@ export const operationController = ng.controller('operationController',
                 Utils.safeApply($scope);
             }
         };
-        $scope.syncOrderByOperation = async (operation: Operation) =>{
-            $scope.ordersClientByOperation = await operation.getOrders();
+
+
+        $scope.dropOrdersOperation = async (orders)=>{
+
+            Promise.all([
+                await $scope.operation.deleteOrders(orders),
+            await $scope.initOperation(),
+                    await $scope.syncOrderByOperation($scope.operation),]);
+
+            $scope.notifications.push(
+                       new Notification('lystore.order.operation.delete', 'confirm'))
+            Utils.safeApply($scope);
         };
-        $scope.dropOrderOperation = async (order:any) => {
+
+        $scope.syncOrderByOperation = async (operation: Operation) =>{
+            $scope.ordersClientByOperation = await operation.getOrders($scope.structures.all);
+        };
+
+        $scope.dropOrderOperation = async (order:any, bool?:boolean) => {
             if(order.typeOrder === "region"){
                 await $scope.orderRegion.delete(order.id);
                 if(order.id_order_client_equipment){
@@ -127,12 +142,10 @@ export const operationController = ng.controller('operationController',
             } else {
                 await order.updateStatusOrder('WAITING');
             }
-            await Promise.all([
-                await $scope.syncOrderByOperation($scope.operation),
-                await $scope.initOperation(),
-            ]);
-            $scope.notifications.push(new Notification('lystore.order.operation.delete', 'confirm'));
-            Utils.safeApply($scope);
+            if(bool){
+                $scope.notifications.push(new Notification('lystore.order.operation.delete', 'confirm'));
+                Utils.safeApply($scope);
+            }
         };
         $scope.formatArrayToolTip = (tooltipsIn:string) => {
             let tooltips = JSON.parse(tooltipsIn);
@@ -163,6 +176,31 @@ export const operationController = ng.controller('operationController',
         $scope.isOrderOperationSelected = ():boolean => {
             return $scope.ordersClientByOperation.some(order => order.selected)
         };
+
+        $scope.oneOrderSelected = () : boolean =>{
+            let nbSelected =  0 ;
+            $scope.ordersClientByOperation.forEach(order =>{
+                if(order.selected){
+                    nbSelected++;
+                }
+            });
+            return  nbSelected === 1;
+        };
+
+        $scope.getSelectedOrder  = () =>{
+            return $scope.ordersClientByOperation.find(order => order.selected);
+        };
+
+        $scope.getSelectedOrders = () =>{
+            let selectedOrders = [] ;
+            $scope.ordersClientByOperation.forEach(order =>{
+                if (order.selected)
+                    selectedOrders.push(order);
+            });
+            return selectedOrders;
+        };
+
+
         $scope.selectOperationForOrder = async () =>{
             await $scope.initOperation();
             $scope.operations.all = $scope.operations.all.filter(operation => operation.id !== $scope.operation.id);

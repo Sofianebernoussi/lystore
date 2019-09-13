@@ -47,7 +47,6 @@
                 <i class="up-open" ng-show="sort.order.type === 'price' && !sort.order.reverse"></i>
                 <i class="down-open" ng-show="sort.order.type === 'price' && sort.order.reverse"></i>
             </td>
-            <td></td>
         </tr>
         </thead>
         <tbody>
@@ -66,10 +65,6 @@
             <td>[[order.amount]]</td>
             <td>[[formatDate(order.creation_date)]]</td>
             <td ><span ng-bind="order.price | currency"></span></td>
-            <td class="two aligne-text-center">
-                <i class="edit" ng-click="insertOrderRegion(order)"></i>
-                <i class="trash" ng-click="dropOrderOperation(order)"></i>
-            </td>
         </tr>
         </tbody>
     </table>
@@ -77,9 +72,16 @@
 <section class="toggle-buttons" ng-class="{ hide: !isOrderOperationSelected() }">
     <div class="toggle">
         <div class="row">
-            <button ng-click="selectOperationForOrder()">
-                <i18n>lystore.operation.order.move</i18n>
+            <button ng-if="oneOrderSelected()"
+                    ng-click="insertOrderRegion(getSelectedOrder())">
+                <i18n>lystore.order.update</i18n>
             </button>
+            <button ng-click="selectOperationForOrder()">
+            <i18n>lystore.operation.order.move</i18n>
+        </button>
+            <button ng-click="dropOrdersOperation(getSelectedOrders())">
+            <i18n>delete</i18n>
+        </button>
         </div>
     </div>
 </section>

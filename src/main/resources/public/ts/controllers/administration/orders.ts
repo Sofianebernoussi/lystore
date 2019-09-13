@@ -1,6 +1,6 @@
 import {_, idiom as lang, model, ng, template} from 'entcore';
 import {
-    Campaign, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD,
+    Campaign, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD, Userbook,
     Utils
 } from '../../model';
 import {Mix} from 'entcore-toolkit';
@@ -20,6 +20,17 @@ export const orderController = ng.controller('orderController',
             }
         };
 
+
+        $scope.initPreferences = ()  => {
+            if ($scope.preferences && $scope.preferences.preference) {
+                let loadedPreferences = JSON.parse($scope.preferences.preference);
+                $scope.tableFields.map(table => {
+                    table.display = loadedPreferences.ordersWaiting[table.fieldName]
+                })
+            }
+        };
+
+        $scope.initPreferences();
         $scope.search = {
             filterWord : '',
             filterWords : []
@@ -35,6 +46,7 @@ export const orderController = ng.controller('orderController',
                 type: 'ORDER'
             }
         };
+
         $scope.switchAll = (model: boolean, collection) => {
             model ? collection.selectAll() : collection.deselectAll();
             Utils.safeApply($scope);
@@ -44,6 +56,17 @@ export const orderController = ng.controller('orderController',
             return totalPrice.toFixed(roundNumber);
         };
 
+        $scope.savePreference = () =>{
+            $scope.ub.putPreferences(({"ordersWaiting" : $scope.jsonPref($scope.tableFields)}));
+        };
+
+        $scope.jsonPref = (prefs) =>{
+            let json = {};
+            prefs.forEach(pref =>{
+                json[pref.fieldName]= pref.display;
+            });
+            return json;
+        };
         $scope.addFilter = (filterWord: string, event?) => {
             if (event && (event.which === 13 || event.keyCode === 13 )) {
                 $scope.addFilterWords(filterWord);

@@ -3,11 +3,14 @@ package fr.openent.lystore;
 import fr.openent.lystore.controllers.*;
 import fr.openent.lystore.export.ExportLystoreWorker;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.http.BaseServer;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.storage.StorageFactory;
+
+import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 
 public class Lystore extends BaseServer {
 
@@ -57,5 +60,8 @@ public class Lystore extends BaseServer {
 
         CONFIG = config;
         vertx.deployVerticle(ExportLystoreWorker.class, new DeploymentOptions().setConfig(config).setWorker(true));
+        eb.send(ExportLystoreWorker.class.getSimpleName(), new JsonObject(), new DeliveryOptions().setSendTimeout(1000 * 1000L), handlerToAsyncHandler(eventExport ->
+                log.info("Ok calling worker " + eventExport.body().toString()))
+        );
     }
 }

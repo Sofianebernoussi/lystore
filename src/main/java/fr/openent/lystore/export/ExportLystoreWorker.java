@@ -77,7 +77,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                                         processExport();
                                     }
                                 },
-                                10000
+                                1000
                         );
                     }
                 }

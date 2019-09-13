@@ -1394,10 +1394,7 @@ public class ExcelHelper {
                                 Actions.CREATE.toString(),
                                 idExport.toString(),
                                 new JsonObject().put("ids", idExport).put("fileName", titleFile));
-                        log.info("J'envoie le bus");
-                        eb.send(ExportLystoreWorker.class.getSimpleName(), infoFile, new DeliveryOptions().setSendTimeout(1000 * 1000L), handlerToAsyncHandler(eventExport ->
-                                log.info("Ok calling worker " + eventExport.body().toString()))
-                        );
+                        log.info("J'envoie la demande d export");
                         request.response().setStatusCode(201).end("Import started " + idExport);
                     } catch (Exception error) {
                         catchError(exportService, idExport, error);

@@ -33,12 +33,14 @@ export const instructionController = ng.controller('instructionController',
 
         $scope.isOperationEdit = false;
         $scope.openInstructionForm = async (action: string) => {
+                $scope.instruction = new Instruction();
+            $scope.loadingArray = true;
+            template.open('instruction-main', 'administrator/instruction/instruction-form');
             await $scope.initOperation();
             $scope.operationEditRemoveInstructionIds = [];
             $scope.operations.all = $scope.operations.all
-                .filter(operation => operation.instruction === null && operation.status === 'false')
+                .filter(operation => operation.instruction === null && operation.status === 'false');
             if(action === 'create'){
-                $scope.instruction = new Instruction();
                 $scope.instruction.operations = [];
             } else if (action === 'edit'){
                 $scope.instruction = $scope.instructions.selected[0];
@@ -48,9 +50,10 @@ export const instructionController = ng.controller('instructionController',
                     .filter(operation => operation.id_instruction !== $scope.instruction.id);
             }
             $scope.knowOperationIsEmpty();
-            template.open('instruction-main', 'administrator/instruction/instruction-form');
+            $scope.loadingArray = false;
             Utils.safeApply($scope);
         };
+
         $scope.isNewOperation = false;
         $scope.addOperationRow = () => {
             if ( $scope.operations.all.length !== 0)  $scope.isNewOperation = true;

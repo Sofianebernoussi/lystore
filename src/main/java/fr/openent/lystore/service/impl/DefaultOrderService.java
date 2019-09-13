@@ -411,6 +411,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                             res.put("f2", newOrderNumberArray.size() > 0
                                     ? Float.parseFloat(newOrderNumberArray.getLong(0).toString())
                                     : 0);
+
                             getTransactionHandler(event, res, handler);
 
                         }
@@ -903,8 +904,9 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         JsonObject result = event.body();
         if (result.containsKey("status")&& "ok".equals(result.getString("status"))){
             JsonObject returns = new JsonObject();
-            returns.put("amount", amountPurseNbOrder.getInteger("f1"));
-            returns.put("nb_order",amountPurseNbOrder.getInteger("f2"));
+
+            returns.put("amount", amountPurseNbOrder.getFloat("f1"));
+            returns.put("nb_order",amountPurseNbOrder.getFloat("f2"));
             handler.handle(new Either.Right<String, JsonObject>(returns));
         }  else {
             LOGGER.error("An error occurred when launching 'order' transaction");

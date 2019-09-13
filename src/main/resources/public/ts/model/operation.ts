@@ -51,7 +51,7 @@ export class Operation implements Selectable {
         let ordersRegionId= [];
 
         orders.forEach(order => {
-            if(order.isOrderRegion){
+            if(order.typeOrder === "region"){
                 ordersRegionId.push(order.id);
                 if(order.id_order_client_equipment){
                     ordersClientId.push(order.id_order_client_equipment);

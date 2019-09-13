@@ -118,14 +118,13 @@ export const operationController = ng.controller('operationController',
 
 
         $scope.dropOrdersOperation = async (orders)=>{
-
             Promise.all([
                 await $scope.operation.deleteOrders(orders),
-            await $scope.initOperation(),
-                    await $scope.syncOrderByOperation($scope.operation),]);
-
+                await $scope.initOperation(),
+                await $scope.syncOrderByOperation($scope.operation),
+            ]);
             $scope.notifications.push(
-                       new Notification('lystore.order.operation.delete', 'confirm'))
+                new Notification('lystore.order.operation.delete', 'confirm'));
             Utils.safeApply($scope);
         };
 

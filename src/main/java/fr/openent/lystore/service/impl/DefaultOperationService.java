@@ -322,7 +322,8 @@ public class DefaultOperationService extends SqlCrudService implements Operation
 
     private JsonObject getClientsChangement(JsonArray ordersClientsIds) {
         String query= "UPDATE "+Lystore.lystoreSchema+".order_client_equipment " +
-                " SET status='WAITING' " +
+                " SET status='WAITING'," +
+                "id_operation = NULL " +
                 " WHERE id in " + Sql.listPrepared(ordersClientsIds.getList());
         return new JsonObject()
                 .put("statement", query)

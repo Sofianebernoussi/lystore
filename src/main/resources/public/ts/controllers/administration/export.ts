@@ -1,5 +1,5 @@
 import {moment, ng, template} from "entcore";
-import {Export, Notification, Utils, STATUS} from "../../model";
+import {Export, Notification, Utils, STATUS, Userbook} from "../../model";
 
 declare let window: any;
 

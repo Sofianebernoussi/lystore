@@ -6,6 +6,7 @@ import {Instruction} from "./instruction";
 import {OrderClient} from "./OrderClient";
 import {Structure} from "./Structure";
 import {Contract} from "./Contract";
+import {Notification} from "./Notification";
 
 
 export class Operation implements Selectable {
@@ -45,6 +46,27 @@ export class Operation implements Selectable {
         }
     }
 
+    async deleteOrders(orders){
+        let ordersClientId= [];
+        let ordersRegionId= [];
+
+        orders.forEach(order => {
+            if(order.isOrderRegion){
+                ordersRegionId.push(order.id);
+                if(order.id_order_client_equipment){
+                    ordersClientId.push(order.id_order_client_equipment);
+                }
+            } else {
+                ordersClientId.push(order.id);
+            }
+        });
+        try{
+            return await http.put(`lystore/operation/delete/orders`, [{"ordersClientId":ordersClientId,"ordersRegionId":ordersRegionId}])
+        }catch(e){
+            notify.error('lystore.operation.order.delete.err');
+            throw e;
+        }
+    }
     async update () {
         try {
             await http.put(`/lystore/operation/${this.id}`, this.toJson());

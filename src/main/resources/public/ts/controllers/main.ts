@@ -28,7 +28,7 @@ import {
     Suppliers,
     Tags,
     Taxes,
-    Titles,
+    Titles, Userbook,
     Utils,
 } from '../model';
 import {Mix} from "entcore-toolkit";
@@ -67,8 +67,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.instructions = new Instructions();
         $scope.exercises = new Exercises();
         $scope.exports = new Exports([]);
+        $scope.ub = new Userbook();
         $scope.equipments.eventer.on('loading::true', $scope.$apply);
         $scope.equipments.eventer.on('loading::false', $scope.$apply);
+        $scope.loadingArray = false;
 
         route({
             main: async () => {
@@ -224,6 +226,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
             orderWaiting: async () => {
                 await $scope.syncCampaignInputSelected();
+                $scope.preferences =  await $scope.ub.getPreferences()
                 await $scope.openLightSelectCampaign();
                 Utils.safeApply($scope);
             },
@@ -234,7 +237,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.orderToSend = null;
                 Utils.safeApply($scope);
             },
-            orderClientValided: async () => {
+            orderClientValided: () => {
                 $scope.initOrders('VALID');
                 template.open('administrator-main', 'administrator/order/order-valided');
                 Utils.safeApply($scope);
@@ -271,16 +274,20 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             operation: async () =>{
+                $scope.loadingArray = true;
                 await $scope.initOperation();
                 template.open('administrator-main', 'administrator/operation/operation-container');
                 template.open('operation-main', 'administrator/operation/manage-operation');
+                $scope.loadingArray = false;
                 Utils.safeApply($scope);
             },
             operationOrders: async () =>{
+                $scope.loadingArray = true;
                 template.close('administrator-main');
                 template.close('operation-main');
                 if($scope.operations.selected.length === 0){
                     $scope.redirectTo(`/operation`);
+                    $scope.loadingArray = false;
                     return
                 }
                 $scope.structures = new Structures();
@@ -289,24 +296,31 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.ordersClientByOperation = await $scope.operation.getOrders($scope.structures.all);
                 template.open('administrator-main', 'administrator/operation/operation-container');
                 template.open('operation-main', 'administrator/operation/operation-orders-list');
+                $scope.loadingArray = false;
                 Utils.safeApply($scope);
             },
             createRegionOrder: async () => {
+                $scope.loadingArray = true;
                 await  $scope.campaigns.sync();
                 await  $scope.operations.sync();
                 await $scope.structures.sync();
                 template.open('administrator-main', 'administrator/orderRegion/order-region-create-form');
+                $scope.loadingArray = false;
                 Utils.safeApply($scope);
             },
             exportList: async () => {
-                template.open('administrator-main', 'administrator/exports/export-list');
+                $scope.loadingArray = true;
                 await $scope.exports.getExports();
+                template.open('administrator-main', 'administrator/exports/export-list');
+                $scope.loadingArray = false;
                 Utils.safeApply($scope);
 
             }
         });
         $scope.initInstructions = async ()=>{
+            $scope.loadingArray = true;
             await $scope.instructions.sync();
+            $scope.loadingArray = false;
         };
         $scope.initCampaignOrderView=()=>{
             if( $scope.campaign.priority_enabled == true && $scope.campaign.priority_field == PRIORITY_FIELD.ORDER){
@@ -421,10 +435,12 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         };
 
         $scope.initOrders = async (status) => {
+            $scope.loadingArray = true;
             $scope.structures = new Structures();
             await $scope.structures.sync();
             await $scope.structures.getStructureType();
             await $scope.syncOrders(status);
+            $scope.loadingArray = false;
             Utils.safeApply($scope);
         };
 
@@ -434,7 +450,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             $scope.orderToSend.preview = await $scope.orderToSend.getPreviewData();
             $scope.orderToSend.preview.index = 0;
         };
-        $scope.syncCampaignInputSelected = async () => {
+        $scope.syncCampaignInputSelected = async ():Promise<void> => {
             $scope.campaignsForSelectInput = [];
             $scope.allCampaignsSelect = new Campaign(lang.translate("lystore.campaign.order.all"), '');
             $scope.allCampaignsSelect.id = 0;
@@ -443,14 +459,16 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             $scope.campaignsForSelectInput.unshift( $scope.allCampaignsSelect);
 
         };
-        $scope.openLightSelectCampaign = async () => {
+        $scope.openLightSelectCampaign = async ():Promise<void> => {
             template.open('administrator-main');
             template.open('selectCampaign', 'administrator/order/select-campaign');
             $scope.display.lightbox.lightBoxIsOpen = true;
             $scope.initOrders('WAITING');
             Utils.safeApply($scope);
         };
-        $scope.selectCampaignShow = (campaign?: Campaign) => {
+        $scope.selectCampaignShow = (campaign?: Campaign): void => {
+            $scope.display.lightbox.lightBoxIsOpen = false;
+            template.close('selectCampaign');
             if(campaign){
                 $scope.campaign = campaign;
                 $scope.displayedOrders.all = $scope.ordersClient.all
@@ -465,9 +483,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             await $scope.initOrders('WAITING');
             $scope.selectCampaignShow(campaign);
         };
-        $scope.cancelSelectCampaign = (initOrder: boolean) => {
-            template.close('selectCampaign');
-            $scope.display.lightbox.lightBoxIsOpen = false;
+        $scope.cancelSelectCampaign = (initOrder: boolean):void => {
             if(initOrder) {
                 $scope.displayedOrders.all = $scope.ordersClient.all;
             }

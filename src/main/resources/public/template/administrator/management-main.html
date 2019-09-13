@@ -56,4 +56,9 @@
 <lightbox show="display.lightbox.lightBoxIsOpen" on-close="cancelSelectCampaign(true)">
     <container template="selectCampaign"></container>
 </lightbox>
-<container template="administrator-main"></container>
+<div class="loading-bar" ng-class="{loading: loadingArray}"></div>
+<div ng-if="loadingArray">
+    <h1><i18n>lystore.loading</i18n></h1>
+</div>
+
+<container ng-show="!loadingArray" template="administrator-main"></container>

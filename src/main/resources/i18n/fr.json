@@ -526,5 +526,6 @@
   "lystore.export.success": "Export disponible",
   "lystore.export.error": "Une erreur est survenue lors de la création de l'export",
   "lystore.instruction.name": "Nom du rapport",
-  "lystore.update.comment": "Modifier le commentaire"
+  "lystore.update.comment": "Modifier le commentaire",
+  "lystore.loading": "Chargement en cours ..."
 }

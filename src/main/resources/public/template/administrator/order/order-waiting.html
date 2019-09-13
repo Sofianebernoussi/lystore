@@ -85,7 +85,7 @@
                 <td ng-if="tableFields[19].display">[[order.project.description || '-']]</td>
                 <td ng-if="tableFields[20].display">[[order.structure.department]]</td>
                 <td ng-if="tableFields[21].display">[[order.program]]</td>
-                <td ng-if="tableFields[22].display"><span ng-bind="showPriceProposalOrNot(order) | currency"></span>
+                <td ng-if="tableFields[22].display"><span ng-bind="order.priceTotalTTC | currency"></span>
                 </td>
             </tr>
             </tbody>

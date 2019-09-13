@@ -243,7 +243,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('administrator-main', 'administrator/order/order-send-prepare');
                 template.open('sendOrder.preview', 'pdf/preview');
             },
-            updateOrder: async (params) => {
+            updateOrder: async (params:any):Promise<void> => {
                 let idOrder = parseInt(params.idOrder);
                 await $scope.initOrderStructures();
                 $scope.orderToUpdate = await $scope.orderClient.getOneOrderClient(idOrder, $scope.structures.all, "waiting");
@@ -254,7 +254,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
 
             },
-            updateLinkedOrder: async (params):Promise<void> => {
+            updateLinkedOrder: async (params:any):Promise<void> => {
                 let idOrder = parseInt(params.idOrder);
                 await $scope.initOrderStructures();
                 $scope.orderToUpdate = params.typeOrder === 'client' ?

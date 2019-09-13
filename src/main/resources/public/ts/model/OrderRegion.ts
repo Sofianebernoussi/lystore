@@ -60,8 +60,6 @@ export class OrderRegion implements Order  {
     order_client: OrderClient;
     order_number?: string;
     preference: number;
-    priceProposalTTCTotal: number;
-    priceTTCtotal: number ;
     priceUnitedTTC: number;
     structure_groups: any;
     supplier: Supplier;
@@ -76,17 +74,7 @@ export class OrderRegion implements Order  {
         this.typeOrder = this.constructor.name;
     }
 
-    initStructure(idStructure:string, structures:Structures):Structure{
-        const structure = _.findWhere(structures, { id : idStructure});
-        return  structure ? structure : new Structure() ;
-    }
-
-    initNameStructure (idStructure: string, structures: Structures):string {
-        let structure = _.findWhere(structures, { id : idStructure});
-        return  structure ? structure.uai + '-' + structure.name : '' ;
-    }
-
-    toJson() {
+    toJson():any {
         return {
             amount: this.amount,
             name: this.equipment.name,
@@ -122,7 +110,7 @@ export class OrderRegion implements Order  {
         }
     }
 
-    createFromOrderClient(order: OrderClient) {
+    createFromOrderClient(order: OrderClient):void {
         this.order_client = order;
         this.id_orderClient = order.id;
         this.amount = order.amount;
@@ -155,7 +143,7 @@ export class OrderRegion implements Order  {
     }
 
 
-    async create() {
+    async create():Promise<any> {
         try {
             return await http.post(`/lystore/region/order`, this.toJson());
         } catch (e) {
@@ -164,7 +152,7 @@ export class OrderRegion implements Order  {
         }
     }
 
-    async update(id){
+    async update(id:number):Promise<any>{
         try {
             return await http.put(`/lystore/region/order/${id}`, this.toJson());
         } catch (e) {
@@ -173,7 +161,7 @@ export class OrderRegion implements Order  {
         }
     }
 
-    initDataFromEquipment() {
+    initDataFromEquipment():void {
         if (this.equipment) {
             this.summary = this.equipment.name;
             this.image = this.equipment.image;
@@ -181,7 +169,7 @@ export class OrderRegion implements Order  {
         }
     }
 
-    async delete(id){
+    async delete(id:number):Promise<any>{
         try{
             return await http.delete(`/lystore/region/${id}/order`);
         } catch (e) {
@@ -190,7 +178,7 @@ export class OrderRegion implements Order  {
         }
     }
 
-    async getOneOrderRegion(id:number, structures:Structures){
+    async getOneOrderRegion(id:number, structures:Structures):Promise<Order>{
         try{
             const {data} =  await http.get(`/lystore/orderRegion/${id}/order`);
             return new Order(Object.assign(data, {typeOrder:"region"}), structures);
@@ -206,7 +194,7 @@ export class OrdersRegion extends Selection<OrderRegion> {
         super([]);
     }
 
-    async create() {
+    async create():Promise<any> {
         let orders = [];
         this.all.map(order => {
             order.initDataFromEquipment();
@@ -219,7 +207,7 @@ export class OrdersRegion extends Selection<OrderRegion> {
             throw e;
         }
     }
-    async updateOperation(idOperation:number, idsRegions: Array<number>){
+    async updateOperation(idOperation:number, idsRegions: Array<number>):Promise<any>{
         try {
             await http.put(`/lystore/order/region/${idOperation}/operation`, idsRegions);
         } catch (e) {

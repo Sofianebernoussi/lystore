@@ -48,11 +48,14 @@ export class OrderClient implements Order  {
     title:Title;
     typeOrder:string;
 
+    action?:string;
+    cause_status?:string;
     contract_name?: string;
     description:string;
     files: string;
     id_campaign:number;
     id_contract:number;
+    id_order:number;
     id_project:number;
     id_supplier: string;
     grade?: Grade;
@@ -62,8 +65,7 @@ export class OrderClient implements Order  {
     label_program:string;
     order_number?: string;
     preference: number;
-    priceProposalTTCTotal: number;
-    priceTTCtotal: number ;
+    priceTotalTTC: number;
     priceUnitedTTC: number;
     structure_groups: any;
     supplier: Supplier;
@@ -77,7 +79,7 @@ export class OrderClient implements Order  {
         this.typeOrder= this.constructor.name;
     }
 
-    async updateComment(){
+    async updateComment():Promise<void>{
         try{
             http.put(`/lystore/order/${this.id}/comment`, { comment: this.comment });
         }catch (e){
@@ -87,7 +89,7 @@ export class OrderClient implements Order  {
     }
 
 
-    async delete () {
+    async delete ():Promise<any> {
         try {
             return await http.delete(`/lystore/order/${this.id}/${this.id_structure}/${this.id_campaign}`);
         } catch (e) {
@@ -95,11 +97,11 @@ export class OrderClient implements Order  {
         }
     }
 
-    downloadFile(file) {
+    downloadFile(file):void {
         window.open(`/lystore/order/${this.id}/file/${file.id}`);
     }
 
-    async updateStatusOrder(status: String, id:number = this.id){
+    async updateStatusOrder(status: String, id:number = this.id):Promise<void>{
         try {
             await http.put(`/lystore/order/${id}`, {status: status});
         } catch (e) {
@@ -107,7 +109,7 @@ export class OrderClient implements Order  {
         }
     }
 
-    static formatSqlDataToModel(data: any) {
+    static formatSqlDataToModel(data: any):any {
         return {
             action: data.action,
             amount: data.amount,
@@ -137,7 +139,7 @@ export class OrderClient implements Order  {
             ;
     }
 
-    async get() {
+    async get():Promise<void> {
         try {
             let {data} = await http.get(`/lystore/order/${this.id}`);
             Mix.extend(this, OrderClient.formatSqlDataToModel(data));
@@ -154,37 +156,6 @@ export class OrderClient implements Order  {
         } catch (e) {
             notify.error('lystore.admin.order.get.err');
             throw e;
-        }
-    }
-
-    makeOrderNotValid(order:OrderClient, ordersClients:OrdersClient){
-        order.tax_amount = parseFloat(order.tax_amount.toString());
-        order.contract = Mix.castAs(Contract,  JSON.parse(order.contract.toString()));
-        order.contract_type = Mix.castAs(ContractType,  JSON.parse(order.contract_type.toString()));
-        order.supplier = Mix.castAs(Supplier,  JSON.parse(order.supplier.toString()));
-        order.id_supplier = order.supplier.id;
-        order.campaign = Mix.castAs(Campaign,  JSON.parse(order.campaign.toString()));
-        order.project = Mix.castAs(Project, JSON.parse(order.project.toString()));
-        order.project.title = Mix.castAs(Title, JSON.parse(order.title.toString()));
-        order.rank = order.rank ? parseInt(order.rank.toString()) : null ;
-        if (ordersClients.id_project_use != order.project.id)ordersClients.makeProjects(order, ordersClients);
-        order.creation_date = moment(order.creation_date).format('L');
-        order.options.toString() !== '[null]' && order.options !== null ?
-            order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
-            : order.options = [];
-        order.priceTTCtotal = parseFloat((OrderUtils.calculatePriceTTC(2, order) as number).toString()) * order.amount;
-        order.priceUnitedTTC = order.price_proposal ?
-            parseFloat(( order.price_proposal).toString()):
-            parseFloat((OrderUtils.calculatePriceTTC(2, order) as number).toString());
-        order.priceProposalTTCTotal = order.price_proposal !== null ?
-            parseFloat(( order.price_proposal).toString()) * order.amount :
-            null;
-        if( order.campaign.orderPriorityEnable()){
-            order.rankOrder = order.rank + 1;
-        } else if (order.campaign.projectPriorityEnable()){
-            order.rankOrder = order.project.preference + 1;
-        }else{
-            order.rankOrder = lang.translate("lystore.order.not.prioritized");
         }
     }
 }
@@ -209,7 +180,7 @@ export class OrdersClient extends Selection<OrderClient> {
         this.filters = [];
     }
 
-    async updateReference(tabIdsProjects: Array<object>, id_campaign:number, id_project:number, id_structure:string) {
+    async updateReference(tabIdsProjects: Array<object>, id_campaign:number, id_project:number, id_structure:string):Promise<void> {
         try {
             await  http.put(`/lystore/campaign/${id_campaign}/projects/${id_project}/preferences?structureId=${id_structure}`,
                 { preferences: tabIdsProjects });
@@ -218,16 +189,16 @@ export class OrdersClient extends Selection<OrderClient> {
         }
     }
 
-    async sync (status: string, structures: Structures = new Structures(), idCampaign?: number, idStructure?: string) {
+    async sync (status: string, structures: Structures = new Structures(), idCampaign?: number, idStructure?: string):Promise<void> {
         try {
             this.projects = new Selection<Project>([]);
             this.id_project_use = -1;
-            if (idCampaign && idStructure ) {
+            if (idCampaign && idStructure) {
                 const { data } = await http.get(  `/lystore/orders/${idCampaign}/${idStructure}` );
                 this.all = Mix.castArrayAs(OrderClient, data);
                 this.syncWithIdsCampaignAndStructure(idCampaign, idStructure);
             } else {
-                let { data } = await http.get(  `/lystore/orders?status=${status}` );
+                const { data } = await http.get(  `/lystore/orders?status=${status}`);
                 this.all = Mix.castArrayAs(OrderClient, data);
                 this.all.map((order: OrderClient) => {
                     order.name_structure =  structures.length > 0 ? OrderUtils.initNameStructure(order.id_structure, structures) : '';
@@ -235,7 +206,7 @@ export class OrdersClient extends Selection<OrderClient> {
                     order.price = parseFloat(status === 'VALID' ? order.price.toString().replace(',', '.') : order.price.toString());
                     order.structure_groups = Utils.parsePostgreSQLJson(order.structure_groups);
                     if (status !== 'VALID') {
-                        order.makeOrderNotValid(order, this);
+                        this.makeOrderNotValid(order);
                     }
                 });
             }
@@ -254,7 +225,6 @@ export class OrdersClient extends Selection<OrderClient> {
             order.project.title = Mix.castAs(Title, JSON.parse(order.title.toString()));
             if(this.id_project_use != order.project.id)this.makeProjects(order);
             order.rank = order.rank ? parseInt(order.rank.toString()) : null ;
-
             order.options = order.options.toString() !== '[null]' && order.options !== null ?
                 Mix.castArrayAs(OrderOptionClient, JSON.parse(order.options.toString()))
                 : order.options = [];
@@ -272,7 +242,41 @@ export class OrdersClient extends Selection<OrderClient> {
         ordersClients.projects.push(order.project);
     }
 
-    toJson (status: string) {
+    makeOrderNotValid(order:OrderClient):void{
+        order.tax_amount = parseFloat(order.tax_amount.toString());
+        order.contract = Mix.castAs(Contract,  JSON.parse(order.contract.toString()));
+        order.contract_type = Mix.castAs(ContractType,  JSON.parse(order.contract_type.toString()));
+        order.supplier = Mix.castAs(Supplier,  JSON.parse(order.supplier.toString()));
+        order.id_supplier = order.supplier.id;
+        order.campaign = Mix.castAs(Campaign,  JSON.parse(order.campaign.toString()));
+        order.project = Mix.castAs(Project, JSON.parse(order.project.toString()));
+        order.project.title = Mix.castAs(Title, JSON.parse(order.title.toString()));
+        order.rank = order.rank ? parseInt(order.rank.toString()) : null ;
+        if (this.id_project_use != order.project.id)this.makeProjects(order);
+        order.creation_date = moment(order.creation_date).format('L');
+        order.options.toString() !== '[null]' && order.options !== null ?
+            order.options = Mix.castArrayAs( OrderOptionClient, JSON.parse(order.options.toString()))
+            : order.options = [];
+        order.priceUnitedTTC = order.price_proposal ?
+            parseFloat(( order.price_proposal).toString()):
+            parseFloat((OrderUtils.calculatePriceTTC(2, order) as number).toString());
+        order.priceTotalTTC = this.choosePriceTotal(order);
+        if( order.campaign.orderPriorityEnable()){
+            order.rankOrder = order.rank + 1;
+        } else if (order.campaign.projectPriorityEnable()){
+            order.rankOrder = order.project.preference + 1;
+        }else{
+            order.rankOrder = lang.translate("lystore.order.not.prioritized");
+        }
+    }
+
+    choosePriceTotal(order:OrderClient):number{
+        return order.price_proposal !== null?
+            parseFloat(( order.price_proposal).toString()) * order.amount :
+            parseFloat((OrderUtils.calculatePriceTTC(2, order) as number).toString()) * order.amount;
+    }
+
+    toJson (status: string):any {
         const ids = status === 'SENT'
             ? _.pluck(this.all, 'number_validation')
             : _.pluck(this.all, 'id');
@@ -302,9 +306,9 @@ export class OrdersClient extends Selection<OrderClient> {
         }
     }
 
-    async updateStatus(status: string) {
+    async updateStatus(status: string):Promise<any> {
         try {
-            let statusURL = status
+            let statusURL = status;
             if (status === "IN PROGRESS") {
                 statusURL = "inprogress";
             }
@@ -316,7 +320,7 @@ export class OrdersClient extends Selection<OrderClient> {
         }
     }
 
-    async updateOrderRanks(tabIdsProjects: Array<object>, structureId:string, campaignId:number){
+    async updateOrderRanks(tabIdsProjects: Array<object>, structureId:string, campaignId:number):Promise<void>{
         try {
             await  http.put(`/lystore/order/rank/move?idStructure=${structureId}&idCampaign=${campaignId}`,{ orders: tabIdsProjects });
         }catch (e) {
@@ -325,23 +329,23 @@ export class OrdersClient extends Selection<OrderClient> {
         }
     }
 
-    calculTotalAmount () {
+    calculTotalAmount ():number {
         let total = 0;
         this.all.map((order) => {
             total += order.amount;
         });
         return total;
     }
-    calculTotalPriceTTC () {
+    calculTotalPriceTTC ():number {
         let total = 0;
         for (let i = 0; i < this.all.length; i++) {
             let order = this.all[i];
-            total += order.price_proposal !== null ? order.priceProposalTTCTotal : order.priceTTCtotal;
+            total += this.choosePriceTotal(order);
         }
         return total;
     }
 
-    async cancel (orders: OrderClient[]) {
+    async cancel (orders: OrderClient[]):Promise<void> {
         try {
             let params = '';
             orders.map((order) => {
@@ -353,7 +357,7 @@ export class OrdersClient extends Selection<OrderClient> {
             throw e;
         }
     }
-    async addOperation (idOperation:number, idsOrder: Array<number>) {
+    async addOperation (idOperation:number, idsOrder: Array<number>):Promise<void> {
         try{
             await http.put(`/lystore/orders/operation/${idOperation}`, idsOrder);
         }catch (e){
@@ -361,7 +365,7 @@ export class OrdersClient extends Selection<OrderClient> {
             throw e;
         }
     }
-    async addOperationInProgress (idOperation:number, idsOrder: Array<number>) {
+    async addOperationInProgress (idOperation:number, idsOrder: Array<number>):Promise<void> {
         try{
             await http.put(`/lystore/orders/operation/in-progress/${idOperation}`, idsOrder);
         }catch (e){

@@ -24,7 +24,7 @@ public class Subventions extends TabHelper {
     private final String ANNEXE_TEXT = "ANNEXE au rapport";
     private final String TOTAL_TITLE = "Dotation sur marchés régionaux au titre du présent rapport";
     private boolean isCMR;
-    Float totalSubv = 0.f;
+    Double totalSubv = 0.d;
 
 
     public Subventions(Workbook workbook, JsonObject instruction, boolean isCMR) {
@@ -85,7 +85,7 @@ public class Subventions extends TabHelper {
         excel.insertBlackTitleHeaderBorderlessCenter(0, lineNumber, TOTAL_TITLE);
         sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber++;
-        excel.insertBlueTitleHeaderBorderlessCenterFloatCurrency(0, lineNumber, totalSubv);
+        excel.insertBlueTitleHeaderBorderlessCenterDoubleCurrency(0, lineNumber, totalSubv);
         sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber += 2;
 
@@ -140,7 +140,7 @@ public class Subventions extends TabHelper {
         JsonArray actions;
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
-            totalSubv += Float.parseFloat(data.getString("totalprice"));
+            totalSubv += Double.parseDouble(data.getString("totalprice"));
             actions = new JsonArray(data.getString("actions"));
             for (int j = 0; j < structures.size(); j++) {
                 structure = structures.getJsonObject(j);

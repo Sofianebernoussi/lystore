@@ -54,7 +54,7 @@ public abstract class TabHelper {
      */
     protected JsonObject tabx;
     protected JsonArray taby;
-    protected ArrayList<ArrayList<Float>> priceTab;
+    protected ArrayList<ArrayList<Double>> priceTab;
 
     /**
      * open the tab or create it if it doesn't exists
@@ -73,7 +73,7 @@ public abstract class TabHelper {
             this.sheet = wb.createSheet(TabName);
         }
         this.excel = new ExcelHelper(wb, sheet);
-        priceTab = new ArrayList<ArrayList<Float>>();
+        priceTab = new ArrayList<ArrayList<Double>>();
         log.info("Initialize tab : " + TabName);
     }
 

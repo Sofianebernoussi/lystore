@@ -244,7 +244,7 @@ public class PurseController extends ControllerHelper {
                         for (int i = 0; i < purses.size(); i++) {
                             purse = purses.getJsonObject(i);
                             exportValues.put(purse.getString("id_structure"),
-                                    Float.parseFloat(purse.getString("amount")));
+                                    Double.parseDouble(purse.getString("amount")));
                             ids.add(purse.getString("id_structure"));
                         }
                         retrieveUAIs(ids, exportValues, request);
@@ -395,7 +395,7 @@ public class PurseController extends ControllerHelper {
         String[] uais = values.fieldNames().toArray(new String[0]);
         StringBuilder exportString = new StringBuilder(getCSVHeader(request));
         for (String uai : uais) {
-            exportString.append(getCSVLine(uai, values.getFloat(uai)));
+            exportString.append(getCSVLine(uai, values.getDouble(uai)));
         }
         request.response()
                 .putHeader("Content-Type", "text/csv; charset=utf-8")

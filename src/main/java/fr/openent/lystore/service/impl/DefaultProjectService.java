@@ -266,7 +266,7 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                     .add(order.getInteger("id_campaign"))
                     .add(order.getString("id_structure"))
                     .add(order.getString("comment"))
-                    .add(Float.valueOf(order.getString("price_proposal")));
+                    .add(Double.valueOf(order.getString("price_proposal")));
 
         } catch (NullPointerException e) {
             queryBasketEquipment = new StringBuilder()

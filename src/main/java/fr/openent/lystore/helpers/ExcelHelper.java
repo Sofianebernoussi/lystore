@@ -570,7 +570,7 @@ public class ExcelHelper {
     }
 
     /**
-     * insert a cell with float in the tab
+     * insert a cell with double in the tab
      *
      * @param cellColumn
      * @param line
@@ -975,7 +975,7 @@ public class ExcelHelper {
 
     }
 
-    public void insertBlueTitleHeaderBorderlessCenterFloatCurrency(int cellColumn, int line, Float data) {
+    public void insertBlueTitleHeaderBorderlessCenterDoubleCurrency(int cellColumn, int line, Double data) {
         Row tab;
         try {
             tab = sheet.getRow(line);

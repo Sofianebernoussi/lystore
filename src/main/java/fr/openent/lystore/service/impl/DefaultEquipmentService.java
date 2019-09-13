@@ -598,7 +598,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
     @Override
     public void search(String query,  List<String> listFields, Handler<Either<String, JsonArray>> handler) {
 
-        String sqlQuery = "SELECT e.id, e.name, e.summary, e.description, CAST(e.price AS FLOAT) as price, t.value as tax_amount, t.id as id_tax, e.image, e.reference, e.warranty, " +
+        String sqlQuery = "SELECT e.id, e.name, e.summary, e.description, CAST(e.price AS DOUBLE) as price, t.value as tax_amount, t.id as id_tax, e.image, e.reference, e.warranty, " +
                                     "e.id_type, e.option_enabled, et.name as nameType "+
                 "FROM " + Lystore.lystoreSchema + ".equipment as e " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax as t ON (e.id_tax = t.id) " +
@@ -682,7 +682,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 .add(equipment.getString("name"))
                 .add(equipment.getString("summary"))
                 .add(equipment.getString("description"))
-                .add(equipment.getFloat("price"))
+                .add(equipment.getDouble("price"))
                 .add(equipment.getInteger("id_tax"))
                 .add(equipment.getString("image"))
                 .add(equipment.getInteger("id_contract"))
@@ -840,7 +840,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 .add(equipment.getString("name"))
                 .add(equipment.getString("summary"))
                 .add(equipment.getString("description"))
-                .add(equipment.getFloat("price"))
+                .add(equipment.getDouble("price"))
                 .add(equipment.getInteger("id_tax"))
                 .add(equipment.getString("image"))
                 .add(equipment.getInteger("id_contract"))

@@ -161,7 +161,7 @@ public abstract class Investissement extends TabHelper {
             for (int oIndex = 0; oIndex < operations.size(); oIndex++) {
                 JsonObject operation = operations.getJsonObject(oIndex);
                 if (action.getInteger("id_operation").equals(operation.getInteger("id"))) {
-                    excel.insertCellTabDouble(posx, oIndex + yTab, action.getFloat("total"));
+                    excel.insertCellTabDouble(posx, oIndex + yTab, action.getDouble("total"));
                 }
 
             }

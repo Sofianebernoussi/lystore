@@ -79,7 +79,8 @@ public class DefaultExportServiceService implements ExportService {
                                 .put("instruction_name",results.getJsonObject(0).getString("object"))
                                 .put("status","WAITING")
                                 .put("created",dtf.format(now))
-                                .put("action",action);
+                                .put("action",action)
+                                .put("NbIterationsLeft",Lystore.iterationWorker);
 
                         if(infoFile.containsKey("type"))
                             params.put("type",infoFile.getString("type"));

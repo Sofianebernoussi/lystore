@@ -70,6 +70,17 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                         chooseExport( waitingOrder,exportHandler);
                     }else{
                         logger.info("no more waiting");
+                        Future timeout1,timeout2;
+//                        new java.util.Timer().schedule(
+//                                new java.util.TimerTask() {
+//                                    @Override
+//                                    public void run() {
+//                                        logger.info("10");
+//                                        processExport();
+//                                    }
+//                                },
+//                                10
+//                        );
                         new java.util.Timer().schedule(
                                 new java.util.TimerTask() {
                                     @Override
@@ -77,7 +88,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                                         processExport();
                                     }
                                 },
-                                1000
+                                10000
                         );
                     }
                 }

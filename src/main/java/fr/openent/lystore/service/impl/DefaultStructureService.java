@@ -4,6 +4,7 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.StructureService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
+import io.vertx.core.VertxException;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -45,13 +46,17 @@ public class DefaultStructureService extends SqlCrudService implements Structure
 
     @Override
     public void getStructureById(JsonArray ids, Handler<Either<String, JsonArray>> handler) {
-        String query = "MATCH (s:Structure) WHERE s.id IN {ids} return s.id as id, s.UAI as uai," +
-                " s.name as name, s.phone as phone, s.address + ' ,' + s.zipCode +' ' + s.city as address,  " +
-                "s.zipCode  as zipCode, s.city as city, s.type as type ";
+        try {
+            String query = "MATCH (s:Structure) WHERE s.id IN {ids} return s.id as id, s.UAI as uai," +
+                    " s.name as name, s.phone as phone, s.address + ' ,' + s.zipCode +' ' + s.city as address,  " +
+                    "s.zipCode  as zipCode, s.city as city, s.type as type ";
 
-        Neo4j.getInstance().execute(query,
-                new JsonObject().put("ids", ids),
-                Neo4jResult.validResultHandler(handler));
+            Neo4j.getInstance().execute(query,
+                    new JsonObject().put("ids", ids),
+                    Neo4jResult.validResultHandler(handler));
+        }catch (VertxException e){
+            getStructureById(ids,handler);
+        }
     }
 
 }

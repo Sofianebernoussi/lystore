@@ -15,6 +15,7 @@ import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 public class Lystore extends BaseServer {
 
     public static String lystoreSchema;
+    public static Integer iterationWorker;
     public static JsonObject CONFIG;
     public static Storage STORAGE;
     public static Integer PAGE_SIZE = 50;
@@ -27,6 +28,7 @@ public class Lystore extends BaseServer {
     public void start() throws Exception {
         super.start();
         lystoreSchema = config.getString("db-schema");
+        iterationWorker = config.getInteger("iteration-worker");
         EventBus eb = getEventBus(vertx);
         Storage storage = new StorageFactory(vertx, config).getStorage();
         STORAGE = storage;

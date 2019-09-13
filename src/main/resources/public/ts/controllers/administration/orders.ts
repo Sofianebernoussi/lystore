@@ -12,6 +12,7 @@ export const orderController = ng.controller('orderController',
         ($scope.ordersClient.selected[0]) ? $scope.orderToUpdate = $scope.ordersClient.selected[0] : $scope.orderToUpdate = new OrderClient();
         $scope.allOrdersSelected = false;
         $scope.tableFields = orderWaiting;
+        let isPageOrderWaiting = $location.path() === "/order/waiting";
         $scope.sort = {
             order : {
                 type: 'name_structure',
@@ -95,7 +96,7 @@ export const orderController = ng.controller('orderController',
                 return bool;
             };
             if($scope.search.filterWords.length > 0){
-                await $scope.selectCampaignShow($scope.campaign);
+                if(isPageOrderWaiting)await $scope.selectCampaignShow($scope.campaign);
                 $scope.search.filterWords.map((searchTerm: string, index: number): void => {
                     let searchItems: OrderClient[] = index === 0 ? $scope.displayedOrders.all : searchResult;
                     regex = generateRegexp([searchTerm]);
@@ -103,8 +104,8 @@ export const orderController = ng.controller('orderController',
                     searchResult = _.filter(searchItems, (order: OrderClient) => {
                         return ('name_structure' in order ? regex.test(order.name_structure.toLowerCase()) : false)
                             || ('structure' in order && order.structure['name'] ? regex.test(order.structure.name.toLowerCase()): false)
-                            || ('structure' in order && order.structure['academy'] ? regex.test(order.structure.academy.toLowerCase()) : false)
                             || ('structure' in order && order.structure['city'] ? regex.test(order.structure.city.toLocaleLowerCase()) : false)
+                            || ('structure' in order && order.structure['academy'] ? regex.test(order.structure.academy.toLowerCase()) : false)
                             || ('structure' in order && order.structure['type'] ? regex.test(order.structure.type.toLowerCase()) : false)
                             || ('project' in order ? regex.test(order.project.title['name'].toLowerCase()) : false)
                             || ('contract_type' in order ? regex.test(order.contract_type.name.toLowerCase()) : false)
@@ -126,13 +127,13 @@ export const orderController = ng.controller('orderController',
                             || (order.label_program !== null && 'label_program' in order
                                 ? regex.test(order.label_program.toLowerCase())
                                 : false);
-
                     });
                 });
-
                 $scope.displayedOrders.all = searchResult;
-            }else{
-                $scope.selectCampaignShow($scope.campaign);
+            } else {
+                isPageOrderWaiting?
+                    $scope.selectCampaignShow($scope.campaign):
+                    $scope.displayedOrders.all = $scope.ordersClient.all;
             }
         };
 

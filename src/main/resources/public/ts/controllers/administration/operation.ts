@@ -134,7 +134,6 @@ export const operationController = ng.controller('operationController',
         };
 
         $scope.syncOrderByOperation = async (operation: Operation) =>{
-            console.log("calling sync ")
             $scope.ordersClientByOperation = await operation.getOrders($scope.structures.all);
         };
         $scope.dropOrderOperation = async (order:any , bool?) => {

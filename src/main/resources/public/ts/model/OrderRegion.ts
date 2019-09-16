@@ -71,7 +71,7 @@ export class OrderRegion implements Order  {
     title_id ?: number;
 
     constructor() {
-        this.typeOrder = this.constructor.name;
+        this.typeOrder = "region";
     }
 
     toJson():any {

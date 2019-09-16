@@ -76,7 +76,7 @@ export class OrderClient implements Order  {
     technical_spec:TechnicalSpec;
 
     constructor() {
-        this.typeOrder= this.constructor.name;
+        this.typeOrder= "client";
     }
 
     async updateComment():Promise<void>{

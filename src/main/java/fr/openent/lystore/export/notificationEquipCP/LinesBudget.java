@@ -72,12 +72,13 @@ public class LinesBudget extends TabHelper {
 
                 for (int j = 0; j < structures.size(); j++) {
                     structure = structures.getJsonObject(j);
+                    if(j == 0) {
                         action.put("nameEtab", NULL_DATA);
-                        action.put("uai",NULL_DATA);
+                        action.put("uai", NULL_DATA);
                         action.put("city", NULL_DATA);
                         action.put("type", NULL_DATA);
-                        action.put("zipCode","??");
-
+                        action.put("zipCode", "??");
+                    }
                     if (action.getString("id_structure").equals(structure.getString("id"))) {
                         action.put("nameEtab", structure.getString("name"));
                         action.put("uai", structure.getString("uai"));
@@ -117,15 +118,15 @@ public class LinesBudget extends TabHelper {
                     nbTotaux++;
                     lineNumber++;
                     if (!operationAdded) {
-                        excel.insertWhiteOnBlueTab(lineNumber, 1, labelOperation);
+                        excel.insertWhiteOnBlueTab(1, lineNumber, labelOperation);
                         operationAdded = true;
                     }
                     totalToInsert = 0.f;
                     previousCode = "";
                     previousStructure = currentStructure;
-                    excel.insertWhiteOnBlueTab(lineNumber, 2, order.getString("uai"));
-                    excel.insertWhiteOnBlueTab(lineNumber, 3, order.getString("type"));
-                    excel.insertWhiteOnBlueTab(lineNumber, 4, order.getString("nameEtab"));
+                    excel.insertWhiteOnBlueTab(2, lineNumber, order.getString("uai"));
+                    excel.insertWhiteOnBlueTab(3, lineNumber, order.getString("type"));
+                    excel.insertWhiteOnBlueTab(4, lineNumber, order.getString("nameEtab"));
 
                 }
                 if (!previousCode.equals(code)) {
@@ -133,15 +134,15 @@ public class LinesBudget extends TabHelper {
                     totalToInsert = 0.f;
                 }
                 totalToInsert += safeGetFloat(order,"total", "LinesBudget");
-                excel.insertFloatYellow(lineNumber,
-                        5 + codes.indexOf(Integer.parseInt(code)), totalToInsert);
+                excel.insertFloatYellow(5 + codes.indexOf(Integer.parseInt(code)), lineNumber,
+                        totalToInsert);
             }
             //insert Total
             excel.fillTabWithStyle(1, 4, initLineNumber + 1, lineNumber + 1, excel.whiteOnBlueLabel);
             excel.fillTabWithStyle(5, arraylength, initLineNumber + 1, lineNumber + 1, excel.floatOnYellowStyle);
 
             lineNumber++;
-            excel.insertHeader(lineNumber, 1, excel.totalLabel + " : " + labelOperation);
+            excel.insertHeader(1, lineNumber, excel.totalLabel + " : " + labelOperation);
             for (int nbTotal = 0; nbTotal < codes.size(); nbTotal++) {
                 excel.setTotalX(initLineNumber + 1, lineNumber - 1, 5 + nbTotal, lineNumber);
             }
@@ -169,7 +170,7 @@ public class LinesBudget extends TabHelper {
         }
         Collections.sort(codes);
         for (int i = 0; i < codes.size(); i++) {
-            excel.insertLabel(1, 5 + i, codes.get(i).toString());
+            excel.insertLabel(5 + i, 1, codes.get(i).toString());
         }
         arraylength += codes.size();
     }

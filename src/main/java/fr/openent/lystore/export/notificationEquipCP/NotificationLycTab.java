@@ -118,7 +118,7 @@ public class NotificationLycTab extends TabHelper {
                     if (!previousCode.equals(code)) {
                         if (code.equals(Subvention)) {
                             lineNumber += 2;
-                            excel.insertLabelOnRed(lineNumber, 0, SubventionLabel);
+                            excel.insertLabelOnRed(0, lineNumber, SubventionLabel);
                             sizeMergeRegion(lineNumber, 0, 6);
                             previousCode = Subvention;
                             lineNumber += 2;
@@ -126,7 +126,7 @@ public class NotificationLycTab extends TabHelper {
                         } else if (!previousCode.equals("NOT SUBV")) {
                             lineNumber += 2;
 
-                            excel.insertLabelOnRed(lineNumber, 0, NotSubventionLabel);
+                            excel.insertLabelOnRed(0, lineNumber, NotSubventionLabel);
                             sizeMergeRegion(lineNumber, 0, 6);
                             previousCode = "NOT SUBV";
                             lineNumber += 2;
@@ -231,12 +231,12 @@ public class NotificationLycTab extends TabHelper {
 
     @Override
     protected void setLabels() {
-        excel.insertHeader(lineNumber, 0, DESTINATION);
-        excel.insertHeader(lineNumber, 1, MARKET_CODE);
-        excel.insertHeader(lineNumber, 2, REGION_LABEL);
-        excel.insertHeader(lineNumber, 3, DATE);
-        excel.insertHeader(lineNumber, 4, NUMBER_ORDER);
-        excel.insertHeader(lineNumber, 5, AMOUNT);
+        excel.insertHeader(0, lineNumber, DESTINATION);
+        excel.insertHeader(1, lineNumber, MARKET_CODE);
+        excel.insertHeader(2, lineNumber, REGION_LABEL);
+        excel.insertHeader(3, lineNumber, DATE);
+        excel.insertHeader(4, lineNumber, NUMBER_ORDER);
+        excel.insertHeader(5, lineNumber, AMOUNT);
         lineNumber++;
     }
 

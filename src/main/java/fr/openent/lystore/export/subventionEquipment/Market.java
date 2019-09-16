@@ -23,7 +23,7 @@ public class Market extends TabHelper {
     private final String ANNEXE_TEXT = "ANNEXE au rapport";
     private final String TOTAL_TITLE = "Montant total dotations financières au titre du présent rapport";
     private boolean isCMR;
-    Double totalSubv = 0.d;
+    Float totalSubv = 0.f;
 
 
     public Market(Workbook workbook, JsonObject instruction, boolean isCMR) {
@@ -83,7 +83,7 @@ public class Market extends TabHelper {
         excel.insertBlackTitleHeaderBorderlessCenter(0, lineNumber, TOTAL_TITLE);
         sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber++;
-        excel.insertBlueTitleHeaderBorderlessCenterDoubleCurrency(0, lineNumber, totalSubv);
+        excel.insertBlueTitleHeaderBorderlessCenterFloatCurrency(0, lineNumber, totalSubv);
         sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber += 2;
 
@@ -110,7 +110,7 @@ public class Market extends TabHelper {
 
                 if (!idStructure.equals(previousIdStruct)) {
                     if (j != 0) {
-                        excel.insertLabelBold(lineNumber, 0, previousMarket);
+                        excel.insertLabelBold(0, lineNumber, previousMarket);
                         excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
                         excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
                         initLine = lineNumber + 1;
@@ -121,7 +121,7 @@ public class Market extends TabHelper {
                     String zip = order.getString("zipCode").substring(0, 2);
                     String structString = zip + " - " +
                             order.getString("city") + " - " + order.getString("nameEtab") + "(" + order.getString("uai") + ")";
-                    excel.insertHeader(lineNumber, 0, structString);
+                    excel.insertHeader(0, lineNumber, structString);
                     sizeMergeRegion(lineNumber, 0, 2);
                     previousIdStruct = idStructure;
                     lineNumber++;
@@ -129,7 +129,7 @@ public class Market extends TabHelper {
                 }
 
                 if (previousMarketId != marketId) {
-                    excel.insertLabelBold(lineNumber, 0, previousMarket);
+                    excel.insertLabelBold(0, lineNumber, previousMarket);
                     excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
                     excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
                     initLine = lineNumber + 1;
@@ -138,15 +138,15 @@ public class Market extends TabHelper {
                     lineNumber++;
                 }
                 excel.insertCellTab(0, lineNumber, formatStrToCell(order.getString("name_equipment"), 10));
-                excel.insertCellTabDouble(1, lineNumber, order.getInteger("amount"));
-                excel.insertCellTabDouble(2, lineNumber, safeGetDouble(order, "total", "Market"));
+                excel.insertCellTabFloat(1, lineNumber, order.getInteger("amount")*1.f);
+                excel.insertCellTabFloat(2, lineNumber, safeGetFloat(order,"total", "Market"));
                 lineNumber++;
             }
-            excel.insertLabelBold(lineNumber, 0, market);
+            excel.insertLabelBold(0, lineNumber, market);
             excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
             excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
             initLine = lineNumber + 2;
-//            excel.insertCellTabDoubleWithPrice(3, lineNumber, Double.parseDouble(campaignData.getString("totalprice")));
+//            excel.insertCellTabFloatWithPrice(3, lineNumber, Float.parseFloat(campaignData.getString("totalprice")));
             lineNumber += 2;
 
 
@@ -160,9 +160,9 @@ public class Market extends TabHelper {
 
     @Override
     protected void setLabels() {
-        excel.insertHeader(lineNumber, 0, MARKET_LABEL);
-        excel.insertHeader(lineNumber, 1, AMOUNT);
-        excel.insertHeader(lineNumber, 2, TOTAL);
+        excel.insertHeader(0, lineNumber, MARKET_LABEL);
+        excel.insertHeader(1, lineNumber, AMOUNT);
+        excel.insertHeader(2, lineNumber, TOTAL);
         lineNumber++;
     }
 
@@ -174,7 +174,7 @@ public class Market extends TabHelper {
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
             actions = new JsonArray(data.getString("actions"));
-            totalSubv += Double.parseDouble(data.getString("totalprice"));
+            totalSubv += Float.parseFloat(data.getString("totalprice"));
             for (int k = 0; k < actions.size(); k++) {
                 JsonObject action = actions.getJsonObject(k);
                 for (int j = 0; j < structures.size(); j++) {

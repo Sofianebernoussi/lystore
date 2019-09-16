@@ -6,7 +6,6 @@ import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 
@@ -81,9 +80,8 @@ public class RecapTab extends TabHelper {
             String actionsStrToArray = operation.getString(actionStr);
             String labelOperation = operation.getString("label");
 
-            Row operationRow = sheet.createRow(this.operationsRowNumber);
-            excel.insertLabel(operationRow, cellLabelColumn, operation.getLong("id").toString());
-            excel.insertLabel(operationRow, cellLabelColumn + 1, labelOperation);
+            excel.insertLabel(cellLabelColumn, this.operationsRowNumber, operation.getLong("id").toString());
+            excel.insertLabel(cellLabelColumn + 1, this.operationsRowNumber, labelOperation);
 
 
             JsonArray actions = new JsonArray(actionsStrToArray);
@@ -124,9 +122,9 @@ public class RecapTab extends TabHelper {
                     excel.setRegionHeader(merge, sheet);
                 }
                 initProgramX = cellColumn;
-                excel.insertHeader(programRowNumber, cellColumn, program);
+                excel.insertHeader(cellColumn, programRowNumber, program);
             }
-            excel.insertHeader(programRowNumber + 1, cellColumn, code);
+            excel.insertHeader(cellColumn, programRowNumber + 1, code);
             cellColumn++;
 
         }
@@ -163,13 +161,13 @@ public class RecapTab extends TabHelper {
         }
 
         excel.fillTab(2, programLabel.size() + 2, 2, operationsRowNumber);
-        excel.insertHeader(operationsRowNumber, 1, excel.totalLabel);
+        excel.insertHeader(1, operationsRowNumber, excel.totalLabel);
 
         for (int i = 0; i < programLabel.size(); i++) {
             excel.setTotalX(2, operationsRowNumber - 1, i + 2, operationsRowNumber);
         }
 
-        excel.insertHeader(1, programLabel.size() + 2, excel.totalLabel);
+        excel.insertHeader(programLabel.size() + 2, 1, excel.totalLabel);
 
         for (int i = 0; i <= datas.size(); i++) {
             excel.setTotalY(2, programLabel.size() + 1, 2 + i, programLabel.size() + 2);

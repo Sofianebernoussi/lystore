@@ -122,7 +122,7 @@ public class RecapMarketGestion extends TabHelper {
 
                 if (!previousCampaign.equals(campaign)) {
                     if (j != 0) {
-                        excel.insertHeader(lineNumber, 0, previousZip);
+                        excel.insertHeader(0, lineNumber, previousZip);
                         previousZip = zip;
                         excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
                         lineNumber++;
@@ -141,7 +141,7 @@ public class RecapMarketGestion extends TabHelper {
                 if (!previousCode.equals(code)) {
                     lineNumber++;
                     previousCode = code;
-                    excel.insertHeader(lineNumber, 0, code);
+                    excel.insertHeader(0, lineNumber, code);
                     mergeCurrentLine(false);
                     lineNumber++;
                     insertHeaders();
@@ -150,7 +150,7 @@ public class RecapMarketGestion extends TabHelper {
                 }
 
                 if (!previousZip.equals(zip)) {
-                    excel.insertHeader(lineNumber, 0, previousZip);
+                    excel.insertHeader(0, lineNumber, previousZip);
                     previousZip = zip;
                     excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
                     lineNumber++;
@@ -182,7 +182,7 @@ public class RecapMarketGestion extends TabHelper {
                 excel.insertCellTabCenter(12, lineNumber, formatStrToCell(order.getString("comment"), 5));
                 lineNumber++;
             }
-            excel.insertHeader(lineNumber, 0, zip);
+            excel.insertHeader(0, lineNumber, zip);
             excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
             lineNumber++;
 
@@ -210,25 +210,25 @@ public class RecapMarketGestion extends TabHelper {
     private void insertHeaders() {
 
 
-        excel.insertHeader(lineNumber, 0, DPT);
-        excel.insertHeader(lineNumber, 1, RNE_lYC);
+        excel.insertHeader(0, lineNumber, DPT);
+        excel.insertHeader(1, lineNumber, RNE_lYC);
 
-        excel.insertHeader(lineNumber, 2, ADDR);
-        excel.insertHeader(lineNumber, 3, CPDATE);
-        excel.insertHeader(lineNumber, 4, MARKET_CP);
-        excel.insertHeader(lineNumber, 5, OP_DDE_NUMBER);
-        excel.insertHeader(lineNumber, 6, CAMPAIGN);
-        excel.insertHeader(lineNumber, 7, AMOUNT);
-        excel.insertHeader(lineNumber, 8, TOTAL_PRICE);
-        excel.insertHeader(lineNumber, 9, EQUIPMENT_NAME);
-        excel.insertHeader(lineNumber, 10, TYPE);
-        excel.insertHeader(lineNumber, 11, MARKET_NUMBER);
-        excel.insertHeader(lineNumber, 12, REGION_COMMENT);
+        excel.insertHeader(2, lineNumber, ADDR);
+        excel.insertHeader(3, lineNumber, CPDATE);
+        excel.insertHeader(4, lineNumber, MARKET_CP);
+        excel.insertHeader(5, lineNumber, OP_DDE_NUMBER);
+        excel.insertHeader(6, lineNumber, CAMPAIGN);
+        excel.insertHeader(7, lineNumber, AMOUNT);
+        excel.insertHeader(8, lineNumber, TOTAL_PRICE);
+        excel.insertHeader(9, lineNumber, EQUIPMENT_NAME);
+        excel.insertHeader(10, lineNumber, TYPE);
+        excel.insertHeader(11, lineNumber, MARKET_NUMBER);
+        excel.insertHeader(12, lineNumber, REGION_COMMENT);
         lineNumber++;
     }
 
     private void setLabel(String market) {
-        excel.insertBlackOnGreenHeader(lineNumber, 0, market);
+        excel.insertBlackOnGreenHeader(0, lineNumber, market);
         sizeMergeRegion(lineNumber, 0, 12);
         lineNumber += 2;
 
@@ -245,14 +245,15 @@ public class RecapMarketGestion extends TabHelper {
                 JsonObject action = actions.getJsonObject(k);
                 for (int j = 0; j < structures.size(); j++) {
                     structure = structures.getJsonObject(j);
-                    action.put("nameEtab", NULL_DATA);
-                    action.put("uai",NULL_DATA);
-                    action.put("city", NULL_DATA);
-                    action.put("type", NULL_DATA);
-                    action.put("address", NULL_DATA);
-                    action.put("zipCode","??");
-                    action.put("phone", NULL_DATA);
-
+                    if(j == 0) {
+                        action.put("nameEtab", NULL_DATA);
+                        action.put("uai", NULL_DATA);
+                        action.put("city", NULL_DATA);
+                        action.put("type", NULL_DATA);
+                        action.put("address", NULL_DATA);
+                        action.put("zipCode", "??");
+                        action.put("phone", NULL_DATA);
+                    }
                     if (action.getString("id_structure").equals(structure.getString("id"))) {
                         action.put("nameEtab", structure.getString("name"));
                         action.put("uai", structure.getString("uai"));

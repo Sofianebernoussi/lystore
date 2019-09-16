@@ -127,10 +127,10 @@ public class ListForTextTab extends TabHelper {
                 key = action.getString("program") + " - " + action.getString("code");
                 if (!programLabel.containsKey(key)) {
                     programLabel.put(key, programLabel.size());
-                    excel.insertHeader(initYProgramLabel, 4 + programLabel.getInteger(key)
-                            , action.getString("program"));
-                    excel.insertHeader(initYProgramLabel + 1, 4 + programLabel.getInteger(key)
-                            , action.getString("code"));
+                    excel.insertHeader(4 + programLabel.getInteger(key), initYProgramLabel,
+                            action.getString("program"));
+                    excel.insertHeader(4 + programLabel.getInteger(key), initYProgramLabel + 1,
+                            action.getString("code"));
                 }
 
 
@@ -138,14 +138,14 @@ public class ListForTextTab extends TabHelper {
                     columnTotal = 4;
                     idPassed.put(action.getString("id_structure"), true);
                     try {
-                        excel.insertLabel(yProgramLabel, 0, action.getString("zipCode").substring(0, 2));
+                        excel.insertLabel(0, yProgramLabel, action.getString("zipCode").substring(0, 2));
 
                     } catch (NullPointerException e) {
-                        excel.insertLabel(yProgramLabel, 0, action.getString("zipCode"));
+                        excel.insertLabel(0, yProgramLabel, action.getString("zipCode"));
                     }
-                    excel.insertLabel(yProgramLabel, 1, action.getString("city"));
-                    excel.insertLabel(yProgramLabel, 2, action.getString("nameEtab"));
-                    excel.insertLabel(yProgramLabel, 3, action.getString("uai"));
+                    excel.insertLabel(1, yProgramLabel, action.getString("city"));
+                    excel.insertLabel(2, yProgramLabel, action.getString("nameEtab"));
+                    excel.insertLabel(3, yProgramLabel, action.getString("uai"));
 
                     oldTotal = 0.d;
                     oldkey = key;
@@ -193,11 +193,11 @@ public class ListForTextTab extends TabHelper {
 
     private void setTotal(int nbTotaux, int initYProgramLabel) {
         excel.fillTab(4, nbTotaux, initYProgramLabel + 2, yProgramLabel);
-        excel.insertHeader(yProgramLabel, 3, excel.totalLabel);
+        excel.insertHeader(3, yProgramLabel, excel.totalLabel);
         for (int nbTotal = 4; nbTotal < nbTotaux; nbTotal++) {
             excel.setTotalX(initYProgramLabel + 1, yProgramLabel - 1, nbTotal, yProgramLabel);
         }
-        excel.insertHeader(initYProgramLabel + 1, nbTotaux, excel.totalLabel);
+        excel.insertHeader(nbTotaux, initYProgramLabel + 1, excel.totalLabel);
         for (int y = initYProgramLabel + 2; y <= yProgramLabel; y++) {
             excel.setTotalY(4, nbTotaux - 1, y, nbTotaux);
         }

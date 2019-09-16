@@ -7,8 +7,8 @@ export const searchAndSelect = ng.directive('searchAndSelect', function() {
         scope: {
             options: '=',
             ngModel: '=',
-            param1: '=',
-            param2: '=',
+            param1: '@',
+            param2: '@',
             searchOn: '@',
             orderBy: '@',
             disable: '&',

@@ -1,5 +1,6 @@
 package fr.openent.lystore.helpers;
 
+import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.ExportLystoreWorker;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
@@ -1395,6 +1396,7 @@ public class ExcelHelper {
                                 idExport.toString(),
                                 new JsonObject().put("ids", idExport).put("fileName", titleFile));
                         log.info("J'envoie la demande d export");
+                        Lystore.launchWorker(eb);
                         request.response().setStatusCode(201).end("Import started " + idExport);
                     } catch (Exception error) {
                         catchError(exportService, idExport, error);

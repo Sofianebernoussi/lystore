@@ -28,6 +28,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
     private ExportService exportService = new DefaultExportServiceService(Lystore.lystoreSchema, "export", storage);
     private String idNewFile;
     private boolean isWorking = false;
+    private boolean isSleeping = true;
 
     @Override
     public void start() {
@@ -40,10 +41,11 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
     }
 
     @Override
-    public void handle(Message<JsonObject> event) {
-        if(!isWorking){
+    public void handle(Message<JsonObject> eventMessage) {
+        eventMessage.reply(new JsonObject().put("status", "ok"));
+        if (isSleeping) {
             logger.info("Calling Worker");
-            isWorking = true;
+            isSleeping = false;
             processExport();
         }
     }
@@ -69,18 +71,8 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                         JsonObject waitingOrder = event.right().getValue();
                         chooseExport( waitingOrder,exportHandler);
                     }else{
+                        isSleeping = true;
                         logger.info("no more waiting");
-                        Future timeout1,timeout2;
-//                        new java.util.Timer().schedule(
-//                                new java.util.TimerTask() {
-//                                    @Override
-//                                    public void run() {
-//                                        logger.info("10");
-//                                        processExport();
-//                                    }
-//                                },
-//                                10
-//                        );
                         new java.util.Timer().schedule(
                                 new java.util.TimerTask() {
                                     @Override
@@ -88,7 +80,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                                         processExport();
                                     }
                                 },
-                                10000
+                                3600*1000
                         );
                     }
                 }
@@ -99,7 +91,6 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         final String action = body.getString("action", "");
         String fileNamIn = body.getString("filename");
         idNewFile = body.getString("_id");
-        logger.info(idNewFile);
         Integer instruction_id = -1;
         try {
             instruction_id = Integer.parseInt(body.getString("instruction_id"));

@@ -6,6 +6,7 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
+import org.apache.poi.ss.formula.functions.Even;
 import org.entcore.common.http.BaseServer;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.storage.StorageFactory;
@@ -59,11 +60,18 @@ public class Lystore extends BaseServer {
         addController(new InstructionController(storage));
         addController(new OrderRegionController());
         addController(new ExportController(storage));
-
         CONFIG = config;
         vertx.deployVerticle(ExportLystoreWorker.class, new DeploymentOptions().setConfig(config).setWorker(true));
-        eb.send(ExportLystoreWorker.class.getSimpleName(), new JsonObject(), new DeliveryOptions().setSendTimeout(1000 * 1000L), handlerToAsyncHandler(eventExport ->
-                log.info("Ok calling worker " + eventExport.body().toString()))
-        );
+        launchWorker(eb);
+
+    }
+
+    public static void launchWorker(EventBus eb) {
+        eb.send(ExportLystoreWorker.class.getSimpleName(), new JsonObject(), new DeliveryOptions().setSendTimeout(1000 * 1000L), handlerToAsyncHandler(eventExport ->{
+                    if(!eventExport.body().getString("status").equals("ok"))
+                        launchWorker(eb);
+                    log.info("Ok calling worker " + eventExport.body().toString());
+                }
+        ));
     }
 }

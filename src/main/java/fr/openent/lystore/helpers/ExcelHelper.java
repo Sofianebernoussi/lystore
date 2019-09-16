@@ -565,8 +565,6 @@ public class ExcelHelper {
                 break;
             case"Double":
                 cell.setCellValue((Double)data);
-            case"Float":
-                cell.setCellValue((Float)data);
                 break;
             case "Integer":
                 cell.setCellValue((Integer)data);
@@ -594,13 +592,13 @@ public class ExcelHelper {
     }
 
     /**
-     * insert a cell with float in the tab
+     * insert a cell with doulbe in the tab
      *
      * @param cellColumn
      * @param line
      * @param data       data to insert
      */
-    public void insertCellTabFloat(int cellColumn, int line, Float data) {
+    public void insertCellTabDouble(int cellColumn, int line, Double data) {
       insertWithStyle(cellColumn,line,data,this.tabNumeralStyle);
     }
 
@@ -634,7 +632,7 @@ public class ExcelHelper {
     public void insertBlackOnGreenHeader(int cellColumn, int line, String data) {
         insertWithStyle(cellColumn, line, data, this.blackOnGreenHeaderStyle);
     }
-    public void insertFloatYellow(int cellColumn, int line, Float data) {
+    public void insertDoubleYellow(int cellColumn, int line, Double data) {
         insertWithStyle(cellColumn, line, data,this.floatOnYellowStyle);
     }
 
@@ -645,7 +643,7 @@ public class ExcelHelper {
      * @param line
      * @param data
      */
-    public void insertCellTabFloatWithPrice(int cellColumn, int line, float data) {
+    public void insertCellTabDoubleWithPrice(int cellColumn, int line, Double data) {
         insertWithStyle(cellColumn, line, data,this.tabCurrencyStyle);
 
         }
@@ -750,7 +748,7 @@ public class ExcelHelper {
         insertWithStyle(cellColumn, line, data,this.blueTitleHeaderBorderlessCenteredStyle);
     }
 
-    public void insertBlueTitleHeaderBorderlessCenterFloatCurrency(int cellColumn, int line, Float data) {
+    public void insertBlueTitleHeaderBorderlessCenterDoubleCurrency(int cellColumn, int line, Double data) {
         insertWithStyle(cellColumn, line, data,this.blueTitleHeaderBorderlessCenteredCurrencyStyle);
     }
 

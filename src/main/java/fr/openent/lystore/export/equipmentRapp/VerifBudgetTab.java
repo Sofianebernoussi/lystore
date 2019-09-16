@@ -129,7 +129,7 @@ public class VerifBudgetTab extends TabHelper {
         String market = data.getString("market");
         String totalMarket;
         try {
-            totalMarket = String.format("%.2f", safeGetFloat(data,"totalmarket","Verif Budget TAB"));
+            totalMarket = String.format("%.2f", safeGetDouble(data,"totalmarket","Verif Budget TAB"));
         } catch (ClassCastException e) {
             totalMarket = data.getInteger("totalmarket").toString();
         }
@@ -200,7 +200,7 @@ public class VerifBudgetTab extends TabHelper {
             excel.insertLabel(2, currentY, "REG : " + value.getString("name_equipment"));
             excel.insertCellTabStringRight(3, currentY, value.getInteger("amount").toString());
             try {
-                excel.insertLabel(4, currentY, "M : " + safeGetFloat(value,"total", "verifBubgetTab" ).toString());
+                excel.insertLabel(4, currentY, "M : " + safeGetDouble(value,"total", "verifBubgetTab" ).toString());
             } catch (ClassCastException e) {
                 excel.insertLabel(4, currentY, "M : " + value.getInteger("total").toString());
             }

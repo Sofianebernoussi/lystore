@@ -2,7 +2,10 @@ package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.equipmentRapp.*;
-import fr.openent.lystore.export.investissement.*;
+import fr.openent.lystore.export.investissement.FonctionnementTab;
+import fr.openent.lystore.export.investissement.LyceeTab;
+import fr.openent.lystore.export.investissement.RecapEPLETab;
+import fr.openent.lystore.export.investissement.RecapImputationBud;
 import fr.openent.lystore.export.notificationEquipCP.LinesBudget;
 import fr.openent.lystore.export.notificationEquipCP.NotificationLycTab;
 import fr.openent.lystore.export.notificationEquipCP.RecapMarketGestion;
@@ -90,20 +93,20 @@ public class Instruction {
                         Future<Boolean> Fonctionnementfuture = Future.future();
                         Future<Boolean> RecapEPLEfuture = Future.future();
                         Future<Boolean> RecapImputationBudfuture = Future.future();
-                        futures.add(lyceeFuture);
-                        futures.add(CMRFuture);
-                        futures.add(CMDfuture);
-                        futures.add(Fonctionnementfuture);
-                        futures.add(RecapEPLEfuture);
+//                        futures.add(lyceeFuture);
+//                        futures.add(CMRFuture);
+//                        futures.add(CMDfuture);
+//                        futures.add(Fonctionnementfuture);
+//                        futures.add(RecapEPLEfuture);
                         futures.add(RecapImputationBudfuture);
-
+//
                         futureHandler(handler, workbook, futures);
 
-                        new LyceeTab(workbook, instruction).create(getHandler(lyceeFuture));
-                        new CMRTab(workbook, instruction).create(getHandler(CMRFuture));
-                        new CMDTab(workbook, instruction).create(getHandler(CMDfuture));
-                        new FonctionnementTab(workbook, instruction).create(getHandler(Fonctionnementfuture));
-                        new RecapEPLETab(workbook, instruction).create(getHandler(RecapEPLEfuture));
+//                        new LyceeTab(workbook, instruction).create(getHandler(lyceeFuture));
+//                        new CMRTab(workbook, instruction).create(getHandler(CMRFuture));
+//                        new CMDTab(workbook, instruction).create(getHandler(CMDfuture));
+//                        new FonctionnementTab(workbook, instruction).create(getHandler(Fonctionnementfuture));
+//                        new RecapEPLETab(workbook, instruction).create(getHandler(RecapEPLEfuture));
                         new RecapImputationBud(workbook, instruction).create(getHandler(RecapImputationBudfuture));
                     } catch (IOException e) {
                         ExcelHelper.catchError(exportService, idFile, "Xlsx Failed to read template");

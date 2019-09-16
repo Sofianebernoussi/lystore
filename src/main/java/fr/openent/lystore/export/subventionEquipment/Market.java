@@ -110,7 +110,7 @@ public class Market extends TabHelper {
 
                 if (!idStructure.equals(previousIdStruct)) {
                     if (j != 0) {
-                        excel.insertLabelBold(lineNumber, 0, previousMarket);
+                        excel.insertLabelBold(0, lineNumber, previousMarket);
                         excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
                         excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
                         initLine = lineNumber + 1;
@@ -121,7 +121,7 @@ public class Market extends TabHelper {
                     String zip = order.getString("zipCode").substring(0, 2);
                     String structString = zip + " - " +
                             order.getString("city") + " - " + order.getString("nameEtab") + "(" + order.getString("uai") + ")";
-                    excel.insertHeader(lineNumber, 0, structString);
+                    excel.insertHeader(0, lineNumber, structString);
                     sizeMergeRegion(lineNumber, 0, 2);
                     previousIdStruct = idStructure;
                     lineNumber++;
@@ -129,7 +129,7 @@ public class Market extends TabHelper {
                 }
 
                 if (previousMarketId != marketId) {
-                    excel.insertLabelBold(lineNumber, 0, previousMarket);
+                    excel.insertLabelBold(0, lineNumber, previousMarket);
                     excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
                     excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
                     initLine = lineNumber + 1;
@@ -138,11 +138,11 @@ public class Market extends TabHelper {
                     lineNumber++;
                 }
                 excel.insertCellTab(0, lineNumber, formatStrToCell(order.getString("name_equipment"), 10));
-                excel.insertCellTabFloat(1, lineNumber, order.getInteger("amount"));
+                excel.insertCellTabFloat(1, lineNumber, order.getInteger("amount")*1.f);
                 excel.insertCellTabFloat(2, lineNumber, safeGetFloat(order,"total", "Market"));
                 lineNumber++;
             }
-            excel.insertLabelBold(lineNumber, 0, market);
+            excel.insertLabelBold(0, lineNumber, market);
             excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
             excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
             initLine = lineNumber + 2;
@@ -160,9 +160,9 @@ public class Market extends TabHelper {
 
     @Override
     protected void setLabels() {
-        excel.insertHeader(lineNumber, 0, MARKET_LABEL);
-        excel.insertHeader(lineNumber, 1, AMOUNT);
-        excel.insertHeader(lineNumber, 2, TOTAL);
+        excel.insertHeader(0, lineNumber, MARKET_LABEL);
+        excel.insertHeader(1, lineNumber, AMOUNT);
+        excel.insertHeader(2, lineNumber, TOTAL);
         lineNumber++;
     }
 

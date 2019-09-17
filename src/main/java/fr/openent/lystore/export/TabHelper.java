@@ -77,6 +77,9 @@ public abstract class TabHelper {
         log.info("Initialize tab : " + TabName);
     }
 
+    public void startTimer(Handler<Either<String,Boolean>> handler){
+
+    }
 
     public abstract void create(Handler<Either<String, Boolean>> handler);
 

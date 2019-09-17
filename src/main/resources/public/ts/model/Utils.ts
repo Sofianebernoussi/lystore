@@ -1,4 +1,5 @@
 import {moment} from "entcore";
+import {Order} from "./Order";
 
 export class Utils {
 

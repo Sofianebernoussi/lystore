@@ -64,14 +64,23 @@ public class NotificationLycTab extends TabHelper {
         structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
+                boolean errorCatch= false;
                 if (repStructures.isRight()) {
-                    JsonArray structures = repStructures.right().getValue();
-                    setStructures(structures);
-                    if (datas.isEmpty()) {
-                        handler.handle(new Either.Left<>("No data in database"));
-                    } else {
-                        writeArray(handler);
+                    try {
+                        JsonArray structures = repStructures.right().getValue();
+                        setStructures(structures);
+                        if (datas.isEmpty()) {
+                            handler.handle(new Either.Left<>("No data in database"));
+                        } else {
+                            writeArray(handler);
+                        }
+                    }catch (Exception e){
+                        errorCatch = true;
                     }
+                    if(errorCatch)
+                        handler.handle(new Either.Left<>("Error when writting files"));
+                    else
+                        handler.handle(new Either.Right<>(true));
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
 
@@ -134,28 +143,26 @@ public class NotificationLycTab extends TabHelper {
                         }
                     }
                     excel.insertCellTab(0, lineNumber,
-                                ROOM + ": " + room + "\n"
-                                        + STAIR + ": " + stair + "\n"
-                                        + BUILDING + ": " + building
-                        );
+                            ROOM + ": " + room + "\n"
+                                    + STAIR + ": " + stair + "\n"
+                                    + BUILDING + ": " + building
+                    );
 
 
-                        excel.insertCellTabCenterBold(1, lineNumber, market);
-                        excel.insertCellTabBlue(2, lineNumber, equipmentNameComment);
-                        excel.insertCellTabCenterBold(3, lineNumber, instruction.getString("cp_number") + "\n" + date);
-                        excel.insertCellTabCenter(4, lineNumber, idFormatted);
-                        excel.insertCellTabCenterBold(5, lineNumber, order.getInteger("amount").toString());
-                        excel.insertCellTabFloatWithPrice(6, lineNumber, safeGetFloat(order,"total", "NotificationLycTab"));
+                    excel.insertCellTabCenterBold(1, lineNumber, market);
+                    excel.insertCellTabBlue(2, lineNumber, equipmentNameComment);
+                    excel.insertCellTabCenterBold(3, lineNumber, instruction.getString("cp_number") + "\n" + date);
+                    excel.insertCellTabCenter(4, lineNumber, idFormatted);
+                    excel.insertCellTabCenterBold(5, lineNumber, order.getInteger("amount").toString());
+                    excel.insertCellTabFloatWithPrice(6, lineNumber, safeGetFloat(order,"total", "NotificationLycTab"));
 
-                        lineNumber++;
+                    lineNumber++;
 
 
                 }
             }
         }
         excel.autoSize(8);
-        handler.handle(new Either.Right<>(true));
-
     }
 
 

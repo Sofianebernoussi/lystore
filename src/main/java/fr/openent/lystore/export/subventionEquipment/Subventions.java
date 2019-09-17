@@ -57,15 +57,25 @@ public class Subventions extends TabHelper {
         structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
+
+                boolean errorCatch= false;
                 if (repStructures.isRight()) {
-                    JsonArray structures = repStructures.right().getValue();
-                    setStructures(structures);
-                    if (datas.isEmpty()) {
-                        handler.handle(new Either.Left<>("No data in database"));
-                    } else {
-                        setTitle();
-                        writeArray(handler);
+                    try {
+                        JsonArray structures = repStructures.right().getValue();
+                        setStructures(structures);
+                        if (datas.isEmpty()) {
+                            handler.handle(new Either.Left<>("No data in database"));
+                        } else {
+                            setTitle();
+                            writeArray(handler);
+                        }
+                    }catch (Exception e){
+                        errorCatch = true;
                     }
+                    if(errorCatch)
+                        handler.handle(new Either.Left<>("Error when writting files"));
+                    else
+                        handler.handle(new Either.Right<>(true));
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
 
@@ -120,7 +130,6 @@ public class Subventions extends TabHelper {
         }
 
         excel.autoSize(4);
-        handler.handle(new Either.Right<>(true));
     }
 
 

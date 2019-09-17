@@ -406,7 +406,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                             JsonArray newPurseArray = purseEnabled ? newPurse.getJsonArray("results").getJsonArray(0) : new JsonArray();
                             JsonArray newOrderNumberArray = newOrderNumber.getJsonArray("results").getJsonArray(0);
                             res.put("f1", newPurseArray.size() > 0
-                                    ? Float.parseFloat(newPurseArray.getString(0))
+                                    ? Double.parseDouble(newPurseArray.getString(0))
                                     : 0);
                             res.put("f2", newOrderNumberArray.size() > 0
                                     ? Float.parseFloat(newOrderNumberArray.getLong(0).toString())
@@ -905,7 +905,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         if (result.containsKey("status")&& "ok".equals(result.getString("status"))){
             JsonObject returns = new JsonObject();
 
-            returns.put("amount", amountPurseNbOrder.getFloat("f1"));
+            returns.put("amount", amountPurseNbOrder.getDouble("f1"));
             returns.put("nb_order",amountPurseNbOrder.getFloat("f2"));
             handler.handle(new Either.Right<String, JsonObject>(returns));
         }  else {

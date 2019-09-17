@@ -62,7 +62,7 @@ public class ListForTextTab extends TabHelper {
         });
     }
 
-    private void setStructures(JsonArray structures) {
+    public void setStructures(JsonArray structures) {
         JsonObject program, structure;
         JsonArray actions;
         for (int i = 0; i < datas.size(); i++) {

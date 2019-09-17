@@ -257,7 +257,7 @@ public abstract class TabHelper {
     }
 
     protected void setStructuresFromDatas(JsonArray structures) {
-        JsonObject program, structure;
+        JsonObject  structure;
         JsonArray actions;
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
@@ -276,10 +276,8 @@ public abstract class TabHelper {
         }
     }
     protected void setStructures(JsonArray structures) {
-        JsonObject program, structure;
+        JsonObject  structure;
         JsonArray actions;
-        logger.info("set Structures");
-
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
             actions = new JsonArray(data.getString("actions"));
@@ -309,8 +307,12 @@ public abstract class TabHelper {
             }
             data.put("actionsJO", actions);
         }
-        logger.info("end set Structures");
     }
+
+
+
+
+
     protected void getStructures(JsonArray ids, Handler<Either<String, JsonArray>> handler)  {
         String query = "" +
                 "MATCH (s:Structure) " +

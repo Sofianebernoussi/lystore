@@ -175,7 +175,7 @@ public class AnnexeDelibTab extends TabHelper {
 
     }
 
-    private void setStructures(JsonArray structures) {
+    protected void setStructures(JsonArray structures) {
         JsonObject program, structure;
         JsonArray actions;
         for (int i = 0; i < datas.size(); i++) {

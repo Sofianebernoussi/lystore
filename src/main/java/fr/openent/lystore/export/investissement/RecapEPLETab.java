@@ -90,7 +90,7 @@ public class RecapEPLETab extends TabHelper {
 
     }
 
-    private void setStructures(JsonArray structures) {
+    public void setStructures(JsonArray structures) {
         JsonObject program, structure;
         for (int i = 0; i < programs.size(); i++) {
             program = programs.getJsonObject(i);

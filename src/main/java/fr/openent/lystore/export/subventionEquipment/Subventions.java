@@ -121,8 +121,6 @@ public class Subventions extends TabHelper {
 
         excel.autoSize(4);
         handler.handle(new Either.Right<>(true));
-//TODO handelr à  changer
-//        handler.handle(new Either.Left<>("pass de chance"));
     }
 
 

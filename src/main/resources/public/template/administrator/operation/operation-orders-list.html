@@ -51,7 +51,7 @@
         </thead>
         <tbody>
         <tr ng-repeat="order in ordersClientByOperation | orderBy:sort.order.type:sort.order.reverse"
-            ng-class="{ orderEditByRegion: order.isOrderRegion }"
+            ng-class="{ orderEditByRegion: order.typeOrder === 'region' }"
         >
             <td workflow="lystore.manager" class="table-selector">
                 <label class="checkbox">

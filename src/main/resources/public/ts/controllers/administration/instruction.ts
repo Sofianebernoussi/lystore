@@ -33,6 +33,7 @@ export const instructionController = ng.controller('instructionController',
 
         $scope.isOperationEdit = false;
         $scope.openInstructionForm = async (action: string) => {
+                $scope.instruction = new Instruction();
             $scope.loadingArray = true;
             template.open('instruction-main', 'administrator/instruction/instruction-form');
             await $scope.initOperation();
@@ -40,7 +41,6 @@ export const instructionController = ng.controller('instructionController',
             $scope.operations.all = $scope.operations.all
                 .filter(operation => operation.instruction === null && operation.status === 'false');
             if(action === 'create'){
-                $scope.instruction = new Instruction();
                 $scope.instruction.operations = [];
             } else if (action === 'edit'){
                 $scope.instruction = $scope.instructions.selected[0];

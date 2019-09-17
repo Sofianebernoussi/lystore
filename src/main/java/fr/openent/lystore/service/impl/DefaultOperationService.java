@@ -285,11 +285,11 @@ public class DefaultOperationService extends SqlCrudService implements Operation
             JsonArray ordersClientsByOperation = getOrderClientByOperationFuture.result();
 
             for (int i = 0 ; i<ordersClientsByOperation.size() ; i++){
-                ordersClientsByOperation.getJsonObject(i).put("isOrderRegion", false);
+                ordersClientsByOperation.getJsonObject(i).put("typeOrder", "client");
             }
 
             for (int i = 0 ; i<ordersRegionsByOperation.size() ; i++){
-                ordersClientsByOperation.add(ordersRegionsByOperation.getJsonObject(i).put("isOrderRegion", true));
+                ordersClientsByOperation.add(ordersRegionsByOperation.getJsonObject(i).put("typeOrder", "region"));
             }
 
             handler.handle(new Either.Right<>(ordersClientsByOperation));
@@ -322,7 +322,8 @@ public class DefaultOperationService extends SqlCrudService implements Operation
 
     private JsonObject getClientsChangement(JsonArray ordersClientsIds) {
         String query= "UPDATE "+Lystore.lystoreSchema+".order_client_equipment " +
-                " SET status='WAITING' " +
+                " SET status='WAITING'," +
+                "id_operation = NULL " +
                 " WHERE id in " + Sql.listPrepared(ordersClientsIds.getList());
         return new JsonObject()
                 .put("statement", query)

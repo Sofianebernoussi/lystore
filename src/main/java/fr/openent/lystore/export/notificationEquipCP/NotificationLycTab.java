@@ -255,6 +255,15 @@ public class NotificationLycTab extends TabHelper {
             actions = new JsonArray(data.getString("actions"));
             for (int j = 0; j < structures.size(); j++) {
                 structure = structures.getJsonObject(j);
+                if(j == 0) {
+                    data.put("nameEtab", NULL_DATA);
+                    data.put("uai", NULL_DATA);
+                    data.put("city", NULL_DATA);
+                    data.put("type", NULL_DATA);
+                    data.put("address", NULL_DATA);
+                    data.put("zipCode", "??");
+                    data.put("phone", NULL_DATA);
+                }
                 if (data.getString("id_structure").equals(structure.getString("id"))) {
                     data.put("nameEtab", structure.getString("name"));
                     data.put("uai", structure.getString("uai"));

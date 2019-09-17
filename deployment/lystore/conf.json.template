@@ -17,6 +17,7 @@
         "entcore.port" : 8009,
         "sql": true,
         "db-schema": "lystore",
+        "iteration-worker": ${lystoreIterationWorker},
         "exports" : {
             "template-path" : "./public/template/pdf/",
             "logo-path": "./public/img/ile_de_france.png"

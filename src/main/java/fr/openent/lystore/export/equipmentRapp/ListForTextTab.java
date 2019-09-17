@@ -28,8 +28,8 @@ public class ListForTextTab extends TabHelper {
 
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
-            excel.setDefaultFont();
-            getDatas(event -> handleDatasDefault(event, handler));
+        excel.setDefaultFont();
+        getDatas(event -> handleDatasDefault(event, handler));
 
     }
 
@@ -49,11 +49,20 @@ public class ListForTextTab extends TabHelper {
         structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
+
+                boolean errorCatch= false;
                 if (repStructures.isRight()) {
-                    JsonArray structures = repStructures.right().getValue();
-                    setStructures(structures);
-                    setLabels();
-                    handler.handle(new Either.Right<>(true));
+                    try {
+                        JsonArray structures = repStructures.right().getValue();
+                        setStructures(structures);
+                        setLabels();
+                    }catch (Exception e){
+                        errorCatch = true;
+                    }
+                    if(errorCatch)
+                        handler.handle(new Either.Left<>("Error when writting files"));
+                    else
+                        handler.handle(new Either.Right<>(true));
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
 

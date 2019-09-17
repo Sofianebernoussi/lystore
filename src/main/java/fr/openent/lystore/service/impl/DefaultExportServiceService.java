@@ -1,13 +1,12 @@
 package fr.openent.lystore.service.impl;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.helpers.MongoHelper;
 import fr.openent.lystore.service.ExportService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
@@ -17,30 +16,24 @@ import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import io.vertx.core.logging.Logger;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class DefaultExportServiceService implements ExportService {
     Storage storage;
     private Logger logger = LoggerFactory.getLogger(DefaultProjectService.class);
     private EventBus eb;
+    MongoHelper mongo;
 
     public DefaultExportServiceService(String lystoreSchema, String instruction, Storage storage) {
         this.storage = storage;
+        mongo = new MongoHelper(Lystore.LYSTORE_COLLECTION);
+
     }
 
     @Override
     public void getExports(Handler<Either<String, JsonArray>> handler, UserInfos user) {
-        String query = "" +
-                "SELECT " +
-                "id, " +
-                "status, " +
-                "filename," +
-                "fileid," +
-                "created," +
-                "instruction_name," +
-                "instruction_id " +
-                "FROM " + Lystore.lystoreSchema + ".export " +
-                "WHERE ownerid = ?" +
-                "order by created  DESC";
-        Sql.getInstance().prepared(query, new JsonArray().add(user.getUserId()), SqlResult.validResultHandler(handler));
+      mongo.getExports(handler,user.getUserId());
     }
 
 
@@ -55,58 +48,56 @@ public class DefaultExportServiceService implements ExportService {
         String query = "SELECT filename " +
                 "FROM " + Lystore.lystoreSchema + ".export " +
                 "WHERE fileId = ?";
-        Sql.getInstance().prepared(query, new JsonArray().add(fileId), SqlResult.validResultHandler(handler));
+        mongo.getExport(new JsonObject().put("fileId",fileId),handler);
     }
 
     public void deleteExport(JsonArray filesIds, Handler<JsonObject> handler) {
         storage.removeFiles(filesIds, handler);
     }
 
-    public void deleteExportSql(JsonArray idsExports, Handler<Either<String, JsonObject>> handler) {
+    public void deleteExportMongo(JsonArray idsExports, Handler<Either<String, JsonObject>> handler) {
         JsonArray values = new JsonArray();
         for (int i = 0; i < idsExports.size(); i++) {
             values.add(idsExports.getValue(i));
         }
-
-        String query = "DELETE " +
-                "FROM " + Lystore.lystoreSchema + ".export " +
-                "WHERE id IN " +
-                Sql.listPrepared(idsExports.getList()) + " " +
-                "RETURNING id ";
-        Sql.getInstance().prepared(query, values, SqlResult.validRowsResultHandler(handler));
-
+        mongo.deleteExports(values,handler);
     }
-    public void createWhenStart (Integer instruction_id,String nameFile, String userId, Handler<Either<String, JsonObject>> handler){
-        try{
+    public void createWhenStart (JsonObject infoFile,Integer instruction_id,String nameFile, String userId,String action, Handler<Either<String, JsonObject>> handler){
+        try {
             String nameQuery= "SELECT object from "+Lystore.lystoreSchema+".instruction where id= ?";
             Sql.getInstance().prepared(nameQuery,new JsonArray().add(instruction_id), SqlResult.validResultHandler(new Handler<Either<String, JsonArray>>() {
                 @Override
                 public void handle(Either<String, JsonArray> event) {
                     if(event.isRight()){
+                        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+                        LocalDateTime now = LocalDateTime.now();
                         JsonArray results = event.right().getValue();
-                        String query = "" +
-                                "INSERT INTO " +
-                                Lystore.lystoreSchema + ".export(  " +
-                                "filename," +
-                                "ownerid," +
-                                " instruction_id," +
-                                " instruction_name) " +
-                                "VALUES (" +
-                                "?, " +
-                                "?," +
-                                "?," +
-                                "?)" +
-                                "RETURNING id ;";
-                        JsonArray params = new JsonArray()
-                                .add(nameFile)
-                                .add(userId)
-                                .add(instruction_id)
-                                .add(results.getJsonObject(0).getString("object"));
+                        JsonObject params = new JsonObject()
+                                .put("filename",nameFile)
+                                .put("userId",userId)
+                                .put("instruction_id",instruction_id)
+                                .put("instruction_name",results.getJsonObject(0).getString("object"))
+                                .put("status","WAITING")
+                                .put("created",dtf.format(now))
+                                .put("action",action)
+                                .put("NbIterationsLeft",Lystore.iterationWorker);
 
-                        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+                        if(infoFile.containsKey("type"))
+                            params.put("type",infoFile.getString("type"));
+
+                        mongo.addExport(params, new Handler<String>() {
+                            @Override
+                            public void handle(String event) {
+                                if(event.equals("mongoinsertfailed"))
+                                    handler.handle(new Either.Left<>("Error when inserting mongo"));
+                                else{
+                                    handler.handle(new Either.Right<>(new JsonObject().put("id",event)));
+                                }
+                            }
+                        });
                     }else{
-                        handler.handle(new Either.Left<>("Error when init export excel in SQL"));
-                        logger.error("Error when init export excel in SQL");
+                        handler.handle(new Either.Left<>("Error when init export excel in Mongo"));
+                        logger.error("Error when init export excel in Mongo");
                     }
                 }
             }));
@@ -115,21 +106,17 @@ public class DefaultExportServiceService implements ExportService {
         }
     }
 
-    public void updateWhenError (Number idExport, Handler<Either<String, Boolean>> handler){
+    public void updateWhenError (String idExport, Handler<Either<String, Boolean>> handler){
         try{
-            String query = "" +
-                    "UPDATE " +
-                    Lystore.lystoreSchema + ".export  " +
-                    "SET " +
-                    "status = 'ERROR'  " +
-                    "WHERE id = ? ";
-            Sql.getInstance().prepared(query, new JsonArray().add(idExport),event -> {
-                if(event.body().getString("status").equals("ok")){
-                    logger.info("OK ERROR UPDATE " + idExport);
-                    handler.handle(new Either.Right<>(true));
-                }else {
-                    handler.handle(new Either.Left<>("ERROR UPDATING ERROR"));
-                    logger.info("ERROR UPDATING ERROR");
+            mongo.updateExport(idExport,"ERROR", "", new Handler<String>() {
+                @Override
+                public void handle(String event) {
+                    if(event.equals("mongoinsertfailed"))
+                        handler.handle(new Either.Left<>("Error when inserting mongo"));
+                    else{
+                        handler.handle(new Either.Right<>(true));
+                    }
+
                 }
             });
         } catch (Exception error){
@@ -137,26 +124,27 @@ public class DefaultExportServiceService implements ExportService {
         }
     }
 
-    public void updateWhenSuccess (String fileId, Number idExport, Handler<Either<String, Boolean>> handler){
-        try{
-            String query = "" +
-                    "UPDATE " +
-                    Lystore.lystoreSchema + ".export  " +
-                    "SET " +
-                    "fileid = ? ," +
-                    "status = 'SUCCESS'  " +
-                    "WHERE id = ? ";
-            Sql.getInstance().prepared(query, new JsonArray().add(fileId).add(idExport), event -> {
-             if(event.body().getString("status").equals("ok")){
-                 logger.info("OK SUCCESS UPDATE " + idExport);
-                 handler.handle(new Either.Right<>(true));
-             }else {
-                 handler.handle(new Either.Left<>("ERROR UPDATING SUCCESS"));
-                 logger.info("ERROR  UPDATING SUCCESS");
-             }
+    public void updateWhenSuccess (String fileId, String idExport, Handler<Either<String, Boolean>> handler) {
+        try {
+            logger.info("SUCCESS");
+            mongo.updateExport(idExport,"SUCCESS",fileId,  new Handler<String>() {
+                @Override
+                public void handle(String event) {
+                    if (event.equals("mongoinsertfailed"))
+                        handler.handle(new Either.Left<>("Error when inserting mongo"));
+                    else {
+                        handler.handle(new Either.Right<>(true));
+                    }
+                }
             });
-        } catch (Exception error){
-            logger.error("error when update SUCCESS in export" + error);
+        } catch (Exception error) {
+            logger.error("error when update ERROR in export" + error);
+
         }
+    }
+
+    @Override
+    public void getWaitingExport(Handler<Either<String,JsonObject>> handler) {
+        mongo.getWaitingExports(handler);
     }
 }

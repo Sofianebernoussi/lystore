@@ -29,7 +29,12 @@ public class Lystore extends BaseServer {
     public void start() throws Exception {
         super.start();
         lystoreSchema = config.getString("db-schema");
-        iterationWorker = config.getInteger("iteration-worker");
+       if(config.containsKey("iteration-worker")){
+           iterationWorker = config.getInteger("iteration-worker");
+       }else{
+           log.info("no iteration worker in config");
+           iterationWorker = 10 ;
+        }
         EventBus eb = getEventBus(vertx);
         Storage storage = new StorageFactory(vertx, config).getStorage();
         STORAGE = storage;

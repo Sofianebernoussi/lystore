@@ -88,7 +88,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
 
     private void chooseExport(JsonObject body, Handler<Either<String, Boolean>> exportHandler) {
         final String action = body.getString("action", "");
-        String fileNamIn = body.getString("filename");
+        String fileName = body.getString("filename");
         idNewFile = body.getString("_id");
         Integer instruction_id = -1;
         try {
@@ -101,30 +101,30 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                 exportEquipment(
                         instruction_id,
                         body.getString("type"),
-                        fileNamIn,exportHandler );
+                        fileName,exportHandler );
                 break;
             case "exportRME":
                 exportRME(
                         instruction_id,
-                        fileNamIn,
+                        fileName,
                         exportHandler);
                 break;
             case "exportNotificationCP":
                 exportNotificationCp(
                         instruction_id,
-                        fileNamIn,
+                        fileName,
                         exportHandler);
                 break;
             case "exportPublipostage":
                 exportPublipostage(
                         instruction_id,
-                        fileNamIn,
+                        fileName,
                         exportHandler);
                 break;
             case "exportSubvention":
                 exportSubvention(
                         instruction_id,
-                        fileNamIn,
+                        fileName,
                         exportHandler);
                 break;
             default:

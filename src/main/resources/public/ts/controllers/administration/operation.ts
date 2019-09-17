@@ -1,4 +1,4 @@
-import {_, ng, template, idiom as lang} from 'entcore';
+import {_, ng, template, idiom as lang, toasts} from 'entcore';
 import {Notification, Operation, OrderClient, OrderRegion, OrdersRegion, Utils} from "../../model";
 import {Mix} from 'entcore-toolkit';
 
@@ -123,8 +123,7 @@ export const operationController = ng.controller('operationController',
                 await $scope.initOperation(),
                 await $scope.syncOrderByOperation($scope.operation),
             ]);
-            $scope.notifications.push(
-                new Notification('lystore.order.operation.delete', 'confirm'));
+            toasts.confirm('lystore.order.operation.delete');
             Utils.safeApply($scope);
         };
 
@@ -142,7 +141,7 @@ export const operationController = ng.controller('operationController',
                 await order.updateStatusOrder('WAITING');
             }
             if(bool){
-                $scope.notifications.push(new Notification('lystore.order.operation.delete', 'confirm'));
+                toasts.confirm('lystore.order.operation.delete');
                 Utils.safeApply($scope);
             }
         };
@@ -219,7 +218,7 @@ export const operationController = ng.controller('operationController',
             }
             $scope.ordersClientByOperation = await $scope.operation.getOrders();
             $scope.display.lightbox.operation = false;
-            $scope.notifications.push(new Notification('lystore.operation.order.affect', 'info'));
+            toasts.info('lystore.operation.order.affect');
             Utils.safeApply($scope);
         };
         $scope.openOrders = () => {

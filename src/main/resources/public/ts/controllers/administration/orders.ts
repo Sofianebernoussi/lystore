@@ -1,4 +1,4 @@
-import {_, idiom as lang, model, ng, template} from 'entcore';
+import {_, idiom as lang, model, ng, template, toasts} from 'entcore';
 import {
     Campaign, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD, Userbook, Order,
     Utils
@@ -190,7 +190,7 @@ export const orderController = ng.controller('orderController',
             ordersToWindUp.all = Mix.castArrayAs(OrderClient, orders);
             let { status } = await ordersToWindUp.updateStatus('DONE');
             if (status === 200) {
-                $scope.notifications.push(new Notification('lystore.windUp.notif', 'confirm'));
+                toasts.confirm('lystore.windUp.notif');
             }
             await $scope.syncOrders('SENT');
             Utils.safeApply($scope);
@@ -216,7 +216,7 @@ export const orderController = ng.controller('orderController',
                     await $scope.initOrdersForPreview(orders);
                 } catch (e) {
                     console.error(e);
-                    $scope.notifications.push(new Notification('lystore.order.pdf.preview.error', 'warning'));
+                    toasts.warning('lystore.order.pdf.preview.error');
                 } finally {
                     if ($scope.orderToSend.hasOwnProperty('preview')) {
                         $scope.redirectTo('/order/preview');
@@ -235,7 +235,7 @@ export const orderController = ng.controller('orderController',
             let { status, data } = await orders.updateStatus('SENT');
             $scope.saveByteArray(`BC_${orders.bc_number}`, data);
             if (status === 200) {
-                $scope.notifications.push(new Notification( 'lystore.sent.notif' , 'confirm'));
+                toasts.confirm( 'lystore.sent.notif');
             }
             $scope.redirectTo('/order/valid');
             Utils.safeApply($scope);
@@ -308,9 +308,9 @@ export const orderController = ng.controller('orderController',
             try {
                 await $scope.displayedOrders.cancel(orders);
                 await $scope.syncOrders('VALID');
-                $scope.notifications.push(new Notification('lystore.orders.valid.cancel.confirmation', 'confirm'));
+                toasts.confirm('lystore.orders.valid.cancel.confirmation');
             } catch (e) {
-                $scope.notifications.push(new Notification('lystore.orders.valid.cancel.error', 'warning'));
+                toasts.warning('lystore.orders.valid.cancel.error');
             } finally {
                 Utils.safeApply($scope);
             }

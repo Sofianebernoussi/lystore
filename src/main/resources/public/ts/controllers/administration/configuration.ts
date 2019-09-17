@@ -1,4 +1,4 @@
-import {_, moment, ng, template} from 'entcore';
+import {_, moment, ng, template, toasts} from 'entcore';
 import {Mix} from 'entcore-toolkit';
 import {
     Agent,
@@ -257,10 +257,11 @@ export const configurationController = ng.controller('configurationController',
             $scope.importer = new EquipmentImporter();
             $scope.importer.eventer.on('loading::true', () => $scope.$apply());
             $scope.importer.eventer.on('loading::false', () => {
-                $scope.notifications.push(new Notification(
-                    $scope.importer.err ? 'lystore.equipments.import.error' : 'lystore.equipments.import.success',
-                    $scope.importer.err ? 'warning' : 'confirm'
-                ));
+                if ($scope.importer.err) {
+                    toasts.warning('lystore.equipments.import.error');
+                } else {
+                    toasts.confirm('lystore.equipments.import.success');
+                }
                 $scope.$apply();
             });
             template.open('equipment.lightbox', 'administrator/equipment/equipment-importer');
@@ -578,7 +579,7 @@ export const configurationController = ng.controller('configurationController',
             await $scope.equipments.setStatus(status);
             await $scope.equipments.sync();
             $scope.allEquipmentSelected = false;
-            $scope.notifications.push(new Notification('lystore.status.update.ok', 'confirm'));
+            toasts.confirm('lystore.status.update.ok');
             Utils.safeApply($scope);
         };
 

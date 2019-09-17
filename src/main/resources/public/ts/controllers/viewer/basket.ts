@@ -1,4 +1,4 @@
-import {_, moment, ng, template} from 'entcore';
+import {_, moment, ng, template, toasts} from 'entcore';
 import {Basket, Baskets, Notification, Utils} from '../../model';
 
 export const basketController = ng.controller('basketController',
@@ -226,9 +226,9 @@ export const basketController = ng.controller('basketController',
                 Utils.safeApply($scope);
                 await basket.deleteDocument(file);
                 basket.files = _.reject(basket.files, (doc) => doc.id === file.id);
-                $scope.notifications.push(new Notification('lystore.basket.file.delete.success', 'confirm'));
+                toasts.confirm('lystore.basket.file.delete.success');
             } catch (err) {
-                $scope.notifications.push(new Notification('lystore.basket.file.delete.error', 'warning'));
+                toasts.warning('lystore.basket.file.delete.error');
                 delete file.status;
             } finally {
                 Utils.safeApply($scope);

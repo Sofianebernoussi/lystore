@@ -295,7 +295,7 @@ export const configurationController = ng.controller('configurationController',
             $scope.equipment.tags = _.without($scope.equipment.tags, tag);
         };
 
-        $scope.validEquipmentOptions = (options: EquipmentOption[]) => {
+        $scope.validEquipmentOptions = (options: EquipmentOption[]):boolean => {
             if (options.length > 0) {
                 let valid = true;
                 for (let i = 0; i < options.length; i++) {
@@ -303,6 +303,7 @@ export const configurationController = ng.controller('configurationController',
                         || options[i].amount.toString().trim() === ''
                         || isNaN(parseInt(options[i].amount.toString()))
                         || typeof(options[i].required ) !== 'boolean'
+                        || !options[i].id_option
                     ) {
                         valid = false;
                         break;

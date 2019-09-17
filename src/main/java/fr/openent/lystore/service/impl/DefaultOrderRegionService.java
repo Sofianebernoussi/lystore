@@ -222,51 +222,32 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
 
     @Override
     public void getOneOrderRegion(int idOrder, Handler<Either<String, JsonObject>> handler) {
-        //todo clean data is not used
         String query = "" +
                 "SELECT ore.*, " +
                 "       ore.price AS price_single_ttc, " +
-                "       prj.id AS id_project, " +
-                "       prj.preference AS preference, " +
                 "       to_json(contract.*) contract, " +
                 "       to_json(ct.*) contract_type, " +
-                "       to_json(supplier.*) supplier, " +
                 "       to_json(campaign.*) campaign, " +
-                "       array_to_json(array_agg(DISTINCT structure_group.name)) AS structure_groups, " +
                 "       to_json(prj.*) AS project, " +
                 "       to_json(tt.*) AS title, " +
-                "       to_json(oce.*) AS order_client_equipment_parent, " +
-                "       to_json(ce.*) AS equipment_order_client_parent, " +
-                "       array_to_json(array_agg(DISTINCT order_opts)) as options_client_parent, " +
-                "       o.order_number " +
+                "       to_json(oce.*) AS order_parent " +
                 "FROM  " + Lystore.lystoreSchema + ".\"order-region-equipment\" AS ore " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".order_client_equipment AS oce ON ore.id_order_client_equipment = oce.id " +
                 "LEFT JOIN  " + Lystore.lystoreSchema + ".contract ON ore.id_contract = contract.id " +
-                "LEFT JOIN " + Lystore.lystoreSchema + ".equipment AS ce ON oce.equipment_key = ce.id " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ct ON ct.id = contract.id_contract_type " +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".supplier ON contract.id_supplier = supplier.id " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".campaign ON ore.id_campaign = campaign.id " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".project AS prj ON ore.id_project = prj.id " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".title AS tt ON tt.id = prj.id_title " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".rel_group_campaign ON (ore.id_campaign = rel_group_campaign.id_campaign) " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".rel_group_structure ON (ore.id_structure = rel_group_structure.id_structure) " +
-                "LEFT OUTER JOIN " + Lystore.lystoreSchema + ".order AS o ON (ore.id_order = o.id) " +
-                "LEFT JOIN " + Lystore.lystoreSchema + ".order_client_options order_opts ON " +
-                "                oce.id = order_opts.id_order_client_equipment " +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".structure_group ON (rel_group_structure.id_structure_group = structure_group.id " +
-                "                                       AND rel_group_campaign.id_structure_group = structure_group.id) " +
                 "WHERE ore.status = 'IN PROGRESS' AND ore.id = ? " +
-                "GROUP BY (prj.preference, " +
-                "          prj.id, " +
+                "GROUP BY ( prj.id, " +
                 "          ore.id, " +
                 "          contract.id, " +
                 "          ct.id, " +
-                "          supplier.id, " +
                 "          campaign.id, " +
                 "          tt.id, " +
-                "          oce.id, " +
-                "          ce.id, " +
-                "          o.order_number)";
+                "          oce.id )";
 
         Sql.getInstance().prepared(query, new JsonArray().add(idOrder), SqlResult.validUniqueResultHandler(handler));
     }

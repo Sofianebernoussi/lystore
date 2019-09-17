@@ -528,5 +528,7 @@
   "lystore.instruction.name": "Nom du rapport",
   "lystore.operation.order.delete.err": "Erreur lors de la suppression des commandes dans l'opération",
   "lystore.update.comment": "Modifier le commentaire",
+  "lystore.operation.order.affect": "Demande(s) affectée(s) à l'opération",
+  "lystore.project.lowerCase": "projet",
   "lystore.loading": "Chargement en cours ..."
 }

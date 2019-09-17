@@ -47,12 +47,20 @@ public class LinesBudget extends TabHelper {
         structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
+                boolean errorCatch= false;
                 if (repStructures.isRight()) {
-                    JsonArray structures = repStructures.right().getValue();
-                    setStructures(structures);
-                    setLabels();
-                    setArray(datas);
-                    handler.handle(new Either.Right<>(true));
+                    try {
+                        JsonArray structures = repStructures.right().getValue();
+                        setStructures(structures);
+                        setLabels();
+                        setArray(datas);
+                    }catch (Exception e){
+                        errorCatch = true;
+                    }
+                    if(errorCatch)
+                        handler.handle(new Either.Left<>("Error when writting files"));
+                    else
+                        handler.handle(new Either.Right<>(true));
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
 
@@ -96,7 +104,6 @@ public class LinesBudget extends TabHelper {
     @Override
     protected void setArray(JsonArray datas) {
         int initLineNumber;
-
         for (int i = 0; i < datas.size(); i++) {
             Double totalToInsert = 0.d;
             String previousStructure = "";

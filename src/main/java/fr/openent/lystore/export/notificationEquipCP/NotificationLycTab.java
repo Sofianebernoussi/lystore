@@ -66,7 +66,7 @@ public class NotificationLycTab extends TabHelper {
             public void handle(Either<String, JsonArray> repStructures) {
                 if (repStructures.isRight()) {
                     JsonArray structures = repStructures.right().getValue();
-                    setStructures(structures);
+                    setStructuresFromDatas(structures);
                     if (datas.isEmpty()) {
                         handler.handle(new Either.Left<>("No data in database"));
                     } else {
@@ -240,25 +240,7 @@ public class NotificationLycTab extends TabHelper {
         lineNumber++;
     }
 
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            actions = new JsonArray(data.getString("actions"));
-            for (int j = 0; j < structures.size(); j++) {
-                structure = structures.getJsonObject(j);
-                if (data.getString("id_structure").equals(structure.getString("id"))) {
-                    data.put("nameEtab", structure.getString("name"));
-                    data.put("uai", structure.getString("uai"));
-                    data.put("city", structure.getString("city"));
-                    data.put("type", structure.getString("type"));
-                    data.put("zipCode", structure.getString("zipCode"));
-                }
-            }
-            data.put("actionsJO", actions);
-        }
-    }
+
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {

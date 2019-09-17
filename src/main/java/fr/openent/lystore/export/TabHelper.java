@@ -256,6 +256,61 @@ public abstract class TabHelper {
 
     }
 
+    protected void setStructuresFromDatas(JsonArray structures) {
+        JsonObject program, structure;
+        JsonArray actions;
+        for (int i = 0; i < datas.size(); i++) {
+            JsonObject data = datas.getJsonObject(i);
+            actions = new JsonArray(data.getString("actions"));
+            for (int j = 0; j < structures.size(); j++) {
+                structure = structures.getJsonObject(j);
+                if (data.getString("id_structure").equals(structure.getString("id"))) {
+                    data.put("nameEtab", structure.getString("name"));
+                    data.put("uai", structure.getString("uai"));
+                    data.put("city", structure.getString("city"));
+                    data.put("type", structure.getString("type"));
+                    data.put("zipCode", structure.getString("zipCode"));
+                }
+            }
+            data.put("actionsJO", actions);
+        }
+    }
+    protected void setStructures(JsonArray structures) {
+        JsonObject program, structure;
+        JsonArray actions;
+        logger.info("set Structures");
+
+        for (int i = 0; i < datas.size(); i++) {
+            JsonObject data = datas.getJsonObject(i);
+            actions = new JsonArray(data.getString("actions"));
+            for (int k = 0; k < actions.size(); k++) {
+                JsonObject action = actions.getJsonObject(k);
+                for (int j = 0; j < structures.size(); j++) {
+                    structure = structures.getJsonObject(j);
+                    if(j == 0) {
+                        action.put("nameEtab", NULL_DATA);
+                        action.put("uai", NULL_DATA);
+                        action.put("city", NULL_DATA);
+                        action.put("type", NULL_DATA);
+                        action.put("zipCode", "??");
+                        action.put("phone", NULL_DATA);
+
+                    }
+                    if (action.getString("id_structure").equals(structure.getString("id"))) {
+                        action.put("nameEtab", structure.getString("name"));
+                        action.put("uai", structure.getString("uai"));
+                        action.put("city", structure.getString("city"));
+                        action.put("type", structure.getString("type"));
+                        action.put("zipCode", structure.getString("zipCode"));
+                        action.put("phone", structure.getString("phone"));
+
+                    }
+                }
+            }
+            data.put("actionsJO", actions);
+        }
+        logger.info("end set Structures");
+    }
     protected void getStructures(JsonArray ids, Handler<Either<String, JsonArray>> handler)  {
         String query = "" +
                 "MATCH (s:Structure) " +

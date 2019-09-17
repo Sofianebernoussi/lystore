@@ -42,13 +42,8 @@ public class MongoHelper extends MongoDbCrudService {
 
                     JsonObject exportProperties = result.body().getJsonObject("result");
                     exportProperties.put("updated",dtf.format(now));
-//                    if(exportProperties.getInteger("NbIterationsLeft") ==0 ){
-//                        exportProperties.put(STATUS,"ERROR");
-//
-//                    }else{
-//                        exportProperties.put(STATUS,"WAITING");
-                        exportProperties.put(STATUS,status);
-                        exportProperties.put("NbIterationsLeft",exportProperties.getInteger("NbIterationsLeft")-1);
+                    exportProperties.put(STATUS,status);
+                    exportProperties.put("NbIterationsLeft",exportProperties.getInteger("NbIterationsLeft")-1);
 
                     if(!fileId.isEmpty())
                         exportProperties.put("fileId",fileId);

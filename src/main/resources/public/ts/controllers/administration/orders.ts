@@ -1,6 +1,6 @@
 import {_, idiom as lang, model, ng, template} from 'entcore';
 import {
-    Campaign, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD, Userbook,
+    Campaign, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD, Userbook, Order,
     Utils
 } from '../../model';
 import {Mix} from 'entcore-toolkit';
@@ -366,9 +366,7 @@ export const orderController = ng.controller('orderController',
             await $scope.syncOrders('WAITING');
             Utils.safeApply($scope);
         };
-        $scope.showPriceProposalOrNot = (order:OrderClient) => {
-            return  order.price_proposal !== null? order.priceProposalTTCTotal : order.priceTTCtotal;
-        };
+
         $scope.orderShow = (order:OrderClient) => {
             if(order.rank !== undefined){
                 if(order.campaign.priority_field === PRIORITY_FIELD.ORDER && order.campaign.orderPriorityEnable()){

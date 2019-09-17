@@ -72,7 +72,6 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                         chooseExport( waitingOrder,exportHandler);
                     }else{
                         isSleeping = true;
-                        logger.info("no more waiting");
                         new java.util.Timer().schedule(
                                 new java.util.TimerTask() {
                                     @Override

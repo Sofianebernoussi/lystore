@@ -148,20 +148,20 @@ public class Instruction {
                     Future<Boolean> RecapMarketFuture = Future.future();
                     Future<Boolean> VerifBudgetFuture = Future.future();
                     futures.add(ListForTextFuture);
-                    futures.add(RecapFuture);
-                    futures.add(ComptaFuture);
-                    futures.add(AnnexeDelibFuture);
-                    futures.add(RecapMarketFuture);
-                    futures.add(VerifBudgetFuture);
+//                    futures.add(RecapFuture);
+//                    futures.add(ComptaFuture);
+//                    futures.add(AnnexeDelibFuture);
+//                    futures.add(RecapMarketFuture);
+//                    futures.add(VerifBudgetFuture);
 
                     futureHandler(handler, workbook, futures);
 
-                    new ComptaTab(workbook, instruction, type).create(getHandler(ComptaFuture));
+//                    new ComptaTab(workbook, instruction, type).create(getHandler(ComptaFuture));
                     new ListForTextTab(workbook, instruction, type).create(getHandler(ListForTextFuture));
-                    new RecapTab(workbook, instruction, type).create(getHandler(RecapFuture));
-                    new AnnexeDelibTab(workbook, instruction, type).create(getHandler(AnnexeDelibFuture));
-                    new RecapMarket(workbook, instruction, type).create(getHandler(RecapMarketFuture));
-                    new VerifBudgetTab(workbook, instruction, type).create(getHandler(VerifBudgetFuture));
+//                    new RecapTab(workbook, instruction, type).create(getHandler(RecapFuture));
+//                    new AnnexeDelibTab(workbook, instruction, type).create(getHandler(AnnexeDelibFuture));
+//                    new RecapMarket(workbook, instruction, type).create(getHandler(RecapMarketFuture));
+//                    new VerifBudgetTab(workbook, instruction, type).create(getHandler(VerifBudgetFuture));
                 }
             }
         }));

@@ -320,10 +320,11 @@ public abstract class TabHelper {
                 "s.id as id," +
                 " s.UAI as uai," +
                 " s.name as name," +
-                " s.phone as phone," +
                 " s.address + ' ,' + s.zipCode +' ' + s.city as address,  " +
                 "s.zipCode as zipCode," +
-                " s.city as city";
+                " s.city as city," +
+                " s.type as type," +
+                " s.phone as phone";
         Neo4j.getInstance().execute(query, new JsonObject().put("ids", ids), Neo4jResult.validResultHandler(handler));
     }
 

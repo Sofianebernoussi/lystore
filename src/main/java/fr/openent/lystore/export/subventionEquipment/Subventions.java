@@ -90,7 +90,7 @@ public class Subventions extends TabHelper {
     private void setTitle() {
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
-            totalSubv += Float.parseFloat(data.getString("totalprice"));
+            totalSubv += Double.parseDouble(data.getString("totalprice"));
         }
 
         excel.insertBlackTitleHeaderBorderlessCenter(0, lineNumber, ANNEXE_TEXT);

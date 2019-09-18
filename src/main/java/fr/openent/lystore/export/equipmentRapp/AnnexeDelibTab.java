@@ -53,12 +53,8 @@ public class AnnexeDelibTab extends TabHelper {
                 if (repStructures.isRight()) {
                     try {
                         JsonArray structures = repStructures.right().getValue();
-                        logger.info("struct initialized");
                         setStructuresFromDatas(structures);
-                        logger.info("struct set");
                         setArray(datas);
-                        logger.info("data set");
-
                     }catch (Exception e){
                         errorCatch = true;
                         log.error(e.getMessage());

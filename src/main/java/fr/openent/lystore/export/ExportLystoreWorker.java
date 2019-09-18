@@ -128,8 +128,8 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                         exportHandler);
                 break;
             case "exportIris":
-                    exportIris(event.body().getInteger("id"),
-                            fileNamIn,
+                    exportIris(instruction_id,
+                            fileName,
                             exportHandler);
                     break;
                 default:
@@ -143,10 +143,11 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
     }
 
     private void exportIris(Integer instructionId, String titleFile, Handler<Either<String, Boolean>> handler) {
+        logger.info("Export Iris started");
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportIris(event1 -> {
             if (event1.isLeft()) {
-                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left());
+                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
             } else {
                 Buffer xlsx = event1.right().getValue();
                 saveBuffer(xlsx, titleFile,handler);

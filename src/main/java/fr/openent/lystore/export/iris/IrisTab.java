@@ -35,7 +35,6 @@ public class IrisTab extends TabHelper {
     private final String IDCPRD = "idcprd";
     private final String QPVIDENT = "qpvident";
     private final String CPVIDENT = "cvident";
-    private StructureService structureService;
 
     public IrisTab(Workbook wb, JsonObject instruction) {
         super(wb, instruction, "IRIS");
@@ -45,33 +44,10 @@ public class IrisTab extends TabHelper {
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
         getDatas(event -> handleDatasDefault(event, handler));
-        structureService= new DefaultStructureService(Lystore.lystoreSchema);
     }
 
 
-    private void setStructures(JsonArray structures) {
-        JsonObject  structure;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-                for (int j = 0; j < structures.size(); j++) {
-                    structure = structures.getJsonObject(j);
-                    if(!data.containsKey("nameEtab")) {
-                        data.put("nameEtab", NULL_DATA);
-                        data.put("uai", NULL_DATA);
-                        data.put("city", NULL_DATA);
-                        data.put("type", NULL_DATA);
-                        data.put("zipCode", "??");
-                    }
-                    if (data.getString("id_structure").equals(structure.getString("id"))) {
-                        data.put("nameEtab", structure.getString("name"));
-                        data.put("uai", structure.getString("uai"));
-                        data.put("city", structure.getString("city"));
-                        data.put("type", structure.getString("type"));
-                        data.put("zipCode", structure.getString("zipCode"));
-                    }
-                }
-        }
-    }
+
 
     @Override
     public void initDatas(Handler<Either<String, Boolean>> handler) {
@@ -84,14 +60,22 @@ public class IrisTab extends TabHelper {
         }
 
         try {
-            structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+            getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
                 @Override
                 public void handle(Either<String, JsonArray> repStructures) {
+                    boolean errorCatch= false;
                     if (repStructures.isRight()) {
-                        JsonArray structures = repStructures.right().getValue();
-                        setStructures(structures);
-                        setArray(datas);
-                        handler.handle(new Either.Right<>(true));
+                        try {                        JsonArray structures = repStructures.right().getValue();
+                            setStructuresFromDatas(structures);
+                            setArray(datas);
+                            handler.handle(new Either.Right<>(true));
+                        }catch (Exception e){
+                            errorCatch = true;
+                        }
+                        if(errorCatch)
+                            handler.handle(new Either.Left<>("Error when writting files"));
+                        else
+                            handler.handle(new Either.Right<>(true));
                     } else {
                         handler.handle(new Either.Left<>("Error when casting neo"));
 
@@ -108,11 +92,11 @@ public class IrisTab extends TabHelper {
         excel.insertStandardText(0, 0, IDDOS);
         excel.insertStandardText(1, 0, LBDDOS);
         excel.insertStandardText(2, 0, OBJDDOS);//: Objet du dossier sur 200 caractères Max. :  Libellé de l'équipement + " / " + Commentaire Région de la demande
-                                                              //(exemple : RIDEAUX COMPLEMENT RENOUVELLEMENT / LYSTORE / PRIORITE 3 / EQUIPEMENT DE RIDEAUX)
+        //(exemple : RIDEAUX COMPLEMENT RENOUVELLEMENT / LYSTORE / PRIORITE 3 / EQUIPEMENT DE RIDEAUX)
         excel.insertStandardText(3, 0, IDTIERS);  //    Code Tiers Coriolis  - Cf. Nomemclature
-     //           (exemple : R3230 pour l'établissement 0750558Z)
+        //           (exemple : R3230 pour l'établissement 0750558Z)
         excel.insertStandardText(4, 0, NATURE);//Code Nature Comptable du marché
-      //  (exemple 236)
+        //  (exemple 236)
         excel.insertStandardText(5, 0, PROGRAMME); /* Colonne F : programme : Code contrat du programme Cf. éléments comptables de la demande  "type de contract "
         (exemple 122008)*/
         excel.insertStandardText(6, 0, ACTION);/* action : Code action Cf. éléments comptables de la demande
@@ -133,16 +117,16 @@ Colonne O : cvident : Indicateur Contrat de Ville : "CVNON"*/
             JsonObject data =datas.getJsonObject(i);
 
             String EnviligString = data.getString("school_year").substring(5,9)+  "-" +data.getString("program");
-                    switch(data.getString("cite_mixte")){
-                        case CMR:
-                            EnviligString+="-2";
-                            break;
-                       case CMD:
-                            EnviligString+="-1";
-                            break;
-                       default:
-                            EnviligString+="-3";
-                            break;
+            switch(data.getString("cite_mixte")){
+                case CMR:
+                    EnviligString+="-2";
+                    break;
+                case CMD:
+                    EnviligString+="-1";
+                    break;
+                default:
+                    EnviligString+="-3";
+                    break;
             }
 
             String OBJDDOS = data.getString("name_equipment") + " / ";

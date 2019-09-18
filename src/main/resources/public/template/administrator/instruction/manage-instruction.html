@@ -133,7 +133,7 @@
             <button
                     ng-disabled="instructions.selected[0].operations.length === 0"
                     ng-click="exportIris(instructions.selected[0])"
-                    ng-show="false"
+                    ng-show="instructions.selected.length === 1"
             >
                 <i18n>lystore.export.airIris</i18n>
             </button>

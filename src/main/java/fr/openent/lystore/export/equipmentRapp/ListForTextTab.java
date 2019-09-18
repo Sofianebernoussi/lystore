@@ -10,19 +10,15 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 
 public class ListForTextTab extends TabHelper {
     private String type;
     private int yProgramLabel = 1;
-    private StructureService structureService;
 
     public ListForTextTab(Workbook workbook, JsonObject instruction, String type) {
         super(workbook, instruction, "liste pour texte du RAPPORT " + type);
-        structureService = new DefaultStructureService(Lystore.lystoreSchema);
         this.type = type;
         excel.setDefaultFont();
     }
@@ -32,6 +28,7 @@ public class ListForTextTab extends TabHelper {
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
         getDatas(event -> handleDatasDefault(event, handler));
+
     }
 
     @Override
@@ -47,14 +44,23 @@ public class ListForTextTab extends TabHelper {
 
             }
         }
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
+
+                boolean errorCatch= false;
                 if (repStructures.isRight()) {
-                    JsonArray structures = repStructures.right().getValue();
-                    setStructures(structures);
-                    setLabels();
-                    handler.handle(new Either.Right<>(true));
+                    try {
+                        JsonArray structures = repStructures.right().getValue();
+                        setStructures(structures);
+                        setLabels();
+                    }catch (Exception e){
+                        errorCatch = true;
+                    }
+                    if(errorCatch)
+                        handler.handle(new Either.Left<>("Error when writting files"));
+                    else
+                        handler.handle(new Either.Right<>(true));
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
 
@@ -63,27 +69,6 @@ public class ListForTextTab extends TabHelper {
         });
     }
 
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            actions = new JsonArray(data.getString("actions"));
-            for (int k = 0; k < actions.size(); k++) {
-                JsonObject action = actions.getJsonObject(k);
-                for (int j = 0; j < structures.size(); j++) {
-                    structure = structures.getJsonObject(j);
-                    if (action.getString("id_structure").equals(structure.getString("id"))) {
-                        action.put("nameEtab", structure.getString("name"));
-                        action.put("uai", structure.getString("uai"));
-                        action.put("city", structure.getString("city"));
-                        action.put("zipCode", structure.getString("zipCode"));
-                    }
-                }
-            }
-            data.put("actionsJO", actions);
-        }
-    }
 
 
     @Override
@@ -128,10 +113,10 @@ public class ListForTextTab extends TabHelper {
                 key = action.getString("program") + " - " + action.getString("code");
                 if (!programLabel.containsKey(key)) {
                     programLabel.put(key, programLabel.size());
-                    excel.insertHeader(initYProgramLabel, 4 + programLabel.getInteger(key)
-                            , action.getString("program"));
-                    excel.insertHeader(initYProgramLabel + 1, 4 + programLabel.getInteger(key)
-                            , action.getString("code"));
+                    excel.insertHeader(4 + programLabel.getInteger(key), initYProgramLabel,
+                            action.getString("program"));
+                    excel.insertHeader(4 + programLabel.getInteger(key), initYProgramLabel + 1,
+                            action.getString("code"));
                 }
 
 
@@ -139,18 +124,18 @@ public class ListForTextTab extends TabHelper {
                     columnTotal = 4;
                     idPassed.put(action.getString("id_structure"), true);
                     try {
-                        excel.insertLabel(yProgramLabel, 0, action.getString("zipCode").substring(0, 2));
+                        excel.insertLabel(0, yProgramLabel, action.getString("zipCode").substring(0, 2));
 
                     } catch (NullPointerException e) {
-                        excel.insertLabel(yProgramLabel, 0, action.getString("zipCode"));
+                        excel.insertLabel(0, yProgramLabel, action.getString("zipCode"));
                     }
-                    excel.insertLabel(yProgramLabel, 1, action.getString("city"));
-                    excel.insertLabel(yProgramLabel, 2, action.getString("nameEtab"));
-                    excel.insertLabel(yProgramLabel, 3, action.getString("uai"));
+                    excel.insertLabel(1, yProgramLabel, action.getString("city"));
+                    excel.insertLabel(2, yProgramLabel, action.getString("nameEtab"));
+                    excel.insertLabel(3, yProgramLabel, action.getString("uai"));
 
                     oldTotal = 0.f;
                     oldkey = key;
-                    oldTotal += action.getFloat("total");
+                    oldTotal += safeGetFloat(action,"total", "ListForTextTab") ;
                     excel.insertCellTabFloat(4 + programLabel.getInteger(key),
                             yProgramLabel, oldTotal);
                 } else {
@@ -159,7 +144,7 @@ public class ListForTextTab extends TabHelper {
                         oldTotal = 0.f;
                     }
                     oldkey = key;
-                    oldTotal += action.getFloat("total");
+                    oldTotal += safeGetFloat(action,"total", "ListForTextTab") ;
                     excel.insertCellTabFloat(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")), yProgramLabel
                             , oldTotal);
                 }
@@ -194,11 +179,11 @@ public class ListForTextTab extends TabHelper {
 
     private void setTotal(int nbTotaux, int initYProgramLabel) {
         excel.fillTab(4, nbTotaux, initYProgramLabel + 2, yProgramLabel);
-        excel.insertHeader(yProgramLabel, 3, excel.totalLabel);
+        excel.insertHeader(3, yProgramLabel, excel.totalLabel);
         for (int nbTotal = 4; nbTotal < nbTotaux; nbTotal++) {
             excel.setTotalX(initYProgramLabel + 1, yProgramLabel - 1, nbTotal, yProgramLabel);
         }
-        excel.insertHeader(initYProgramLabel + 1, nbTotaux, excel.totalLabel);
+        excel.insertHeader(nbTotaux, initYProgramLabel + 1, excel.totalLabel);
         for (int y = initYProgramLabel + 2; y <= yProgramLabel; y++) {
             excel.setTotalY(4, nbTotaux - 1, y, nbTotaux);
         }
@@ -289,15 +274,7 @@ public class ListForTextTab extends TabHelper {
                         "  ; ";
 
 
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
-            if (event.isLeft()) {
-                handler.handle(event.left());
-            } else {
-                datas = event.right().getValue();
-                handler.handle(new Either.Right<>(datas));
-            }
-
-        }));
+        sqlHandler(handler);
     }
 }
 

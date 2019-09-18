@@ -17,6 +17,7 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 
+
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 
 public class OperationController  extends ControllerHelper {
@@ -117,5 +118,18 @@ public class OperationController  extends ControllerHelper {
     public void getOperationOrders(HttpServerRequest request) {
         Integer operationId = Integer.parseInt(request.getParam("id"));
         operationService.getOperationOrders(operationId, arrayResponseHandler(request));
+    }
+
+    @Put("/operation/delete/orders")
+    @ApiDoc("delete link between orders and operation")
+    @SecuredAction(value = "",type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void deleteOrdersFromOperation(HttpServerRequest request){
+       RequestUtils.bodyToJsonArray(request, operationIds -> operationService.deleteOrdersOperation(operationIds, Logging.defaultResponseHandler(eb,
+                request,
+                Contexts.OPERATION.toString(),
+                Actions.DELETE.toString(),
+                operationIds.toString(),
+                new JsonObject().put("ids", operationIds))));
     }
 }

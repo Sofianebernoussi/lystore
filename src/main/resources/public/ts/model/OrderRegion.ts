@@ -1,48 +1,80 @@
 import http from "axios";
-import {moment, notify} from "entcore";
-import {Project} from "./project";
-import {Campaign, Contract, ContractType, OrderOptionClient, Structure, TechnicalSpec, Utils} from "./index";
-import {OrderClient} from "./OrderClient";
-import {Mix, Selectable, Selection} from "entcore-toolkit";
-import {Equipment} from "./Equipment";
+import {_, moment, notify} from "entcore";
+import {
+    Campaign,
+    Contract,
+    ContractType, Grade,
+    Order,
+    Program,
+    Structure,
+    Structures, Supplier, TechnicalSpec, Title,
+    Utils,
+    OrderClient,
+    Equipment,
+    Project,
+} from "./index";
+import {Selection} from "entcore-toolkit";
 
-export class OrderRegion implements Selectable {
-    selected: boolean;
 
-    id?: number;
+export class OrderRegion implements Order  {
     amount: number;
-    name: string;
-    price: number;
-    summary: string;
-    description: string;
-    image: string;
-    creation_date: Date;
-    status: string;
-    number_validation: string;
-    technical_spec: TechnicalSpec[];
-    contract: Contract;
     campaign: Campaign;
-    structure_groups: string[];
-    contract_name?: string;
-    project: Project;
-    files: any;
+    comment: string;
+    contract: Contract;
     contract_type: ContractType;
-    order_client: OrderClient;
-    name_structure: string;
-    id_contract: number;
-    id_campaign: number;
+    creation_date: Date;
+    equipment: Equipment;
+    equipment_key:number;
+    id?: number;
+    id_operation:Number;
     id_structure: string;
-    id_project: number;
-    id_orderClient: number;
-    comment?: string;
-    rank?: number;
+    inheritedClass:Order|OrderClient|OrderRegion;
+    options;
+    order_parent?:any;
+    price: number;
+    price_proposal: number;
+    price_single_ttc: number;
+    program: Program;
+    project: Project;
+    rank: number;
+    rankOrder: Number;
+    selected:boolean;
     structure: Structure;
-    id_operation: number;
-    equipment_key: number;
-    title_id ?: number;
-    equipment?: Equipment;
+    tax_amount: number;
+    title:Title;
+    typeOrder:string;
 
-    toJson() {
+    contract_name?: string;
+    description:string;
+    files: string;
+    id_campaign:number;
+    id_contract:number;
+    id_orderClient: number;
+    id_project:number;
+    id_supplier: string;
+    grade?: Grade;
+    name:string;
+    name_structure: string;
+    number_validation:string;
+    label_program:string;
+    order_client: OrderClient;
+    order_number?: string;
+    preference: number;
+    priceUnitedTTC: number;
+    structure_groups: any;
+    supplier: Supplier;
+    supplier_name?: string;
+    summary:string;
+    image:string;
+    status:string;
+    technical_spec:TechnicalSpec;
+    title_id ?: number;
+
+    constructor() {
+        this.typeOrder = "region";
+    }
+
+    toJson():any {
         return {
             amount: this.amount,
             name: this.equipment.name,
@@ -78,7 +110,7 @@ export class OrderRegion implements Selectable {
         }
     }
 
-    createFromOrderClient(order: OrderClient) {
+    createFromOrderClient(order: OrderClient):void {
         this.order_client = order;
         this.id_orderClient = order.id;
         this.amount = order.amount;
@@ -110,7 +142,8 @@ export class OrderRegion implements Selectable {
         this.equipment = order.equipment;
     }
 
-    async set() {
+
+    async create():Promise<any> {
         try {
             return await http.post(`/lystore/region/order`, this.toJson());
         } catch (e) {
@@ -119,7 +152,7 @@ export class OrderRegion implements Selectable {
         }
     }
 
-    async update(id){
+    async update(id:number):Promise<any>{
         try {
             return await http.put(`/lystore/region/order/${id}`, this.toJson());
         } catch (e) {
@@ -128,7 +161,7 @@ export class OrderRegion implements Selectable {
         }
     }
 
-    initDataFromEquipment() {
+    initDataFromEquipment():void {
         if (this.equipment) {
             this.summary = this.equipment.name;
             this.image = this.equipment.image;
@@ -136,7 +169,7 @@ export class OrderRegion implements Selectable {
         }
     }
 
-    async delete(id){
+    async delete(id:number):Promise<any>{
         try{
             return await http.delete(`/lystore/region/${id}/order`);
         } catch (e) {
@@ -145,62 +178,10 @@ export class OrderRegion implements Selectable {
         }
     }
 
-    //todo create orderDefault and to use here, init and clean data is not used
-    async getOneOrderRegion(id){
+    async getOneOrderRegion(id:number, structures:Structures):Promise<Order>{
         try{
             const {data} =  await http.get(`/lystore/orderRegion/${id}/order`);
-            let result = {
-                ...data,
-                project: data.project?Mix.castAs(Project, JSON.parse(data.project.toString())):null,
-                campaign: data.campaign?Mix.castAs(Campaign, JSON.parse(data.campaign)):null,
-                contract_type: data.contract_type?JSON.parse(data.contract_type):null,
-                contract: data.contract?JSON.parse(data.contract):null,
-                structure_groups: data.structure_groups?JSON.parse(data.structure_groups):null,
-                supplier: data.supplier?JSON.parse(data.supplier):null,
-                title: data.title?JSON.parse(data.title):null,
-                price : data.price?parseFloat(data.price):null,
-                amount : data.amount?parseInt(data.amount):null,
-                rank : data.rank?parseInt(data.rank.toString()) +1 : null,
-                price_single_ttc : data.price_single_ttc?parseFloat(data.price_single_ttc):null,
-                technical_spec: data.technical_spec?Utils.parsePostgreSQLJson(this.technical_spec):null,
-                order_client_equipment_parent: data.order_client_equipment_parent?
-                    Mix.castAs(OrderClient, JSON.parse(data.order_client_equipment_parent.toString())):
-                    null,
-                isOrderRegion: true,
-            };
-            result.equipment = {
-                name : result.name,
-                contract_type_name : result.contract_type.name,
-                id_contract : result.id_contract,
-            };
-            if(result.order_client_equipment_parent) {
-                result.order_client_equipment_parent.options = data.options_client_parent.toString() !== '[null]' && data.options_client_parent !== null?
-                    Mix.castArrayAs(OrderOptionClient, JSON.parse(data.options_client_parent.toString())) :
-                    [];
-                result.order_client_equipment_parent.equipment = data.equipment_order_client_parent ?
-                    Mix.castAs(Equipment, JSON.parse(data.equipment_order_client_parent)) :
-                    null;
-
-                result.order_client_equipment_parent.price_united = result.order_client_equipment_parent.price_proposal ?
-                    result.order_client_equipment_parent.price_proposal :
-                    result.order_client_equipment_parent
-                        .calculatePriceTTC(2, result.order_client_equipment_parent.price);
-                if (result.order_client_equipment_parent.price_proposal) {
-                    result.order_client_equipment_parent.price_total = Math
-                        .round(result.order_client_equipment_parent.price_proposal *
-                            result.order_client_equipment_parent.amount * 100) / 100
-                } else {
-                    result.order_client_equipment_parent.price_total =  result.order_client_equipment_parent
-                            .calculatePriceTTC(2, result.order_client_equipment_parent.price) *
-                        result.order_client_equipment_parent.amount;
-                }
-                result.order_client_equipment_parent.rank = result.order_client_equipment_parent.rank?
-                    parseInt(result.order_client_equipment_parent.rank.toString()) +1 :
-                    null;
-                result.order_client_equipment_parent.contract_type = {name:''};
-                result.order_client_equipment_parent.contract_type.name = result.equipment.contract_type_name;
-            }
-            return  Mix.castAs(OrderRegion, result);
+            return new Order(Object.assign(data, {typeOrder:"region"}), structures);
         } catch (e) {
             notify.error('lystore.admin.order.update.err');
             throw e;
@@ -213,7 +194,7 @@ export class OrdersRegion extends Selection<OrderRegion> {
         super([]);
     }
 
-    async create() {
+    async create():Promise<any> {
         let orders = [];
         this.all.map(order => {
             order.initDataFromEquipment();
@@ -226,7 +207,7 @@ export class OrdersRegion extends Selection<OrderRegion> {
             throw e;
         }
     }
-    async updateOperation(idOperation:number, idsRegions: Array<number>){
+    async updateOperation(idOperation:number, idsRegions: Array<number>):Promise<any>{
         try {
             await http.put(`/lystore/order/region/${idOperation}/operation`, idsRegions);
         } catch (e) {

@@ -10,18 +10,13 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class VerifBudgetTab extends TabHelper {
-    JsonArray operations;
     private int currentY = 0, programY = 0;
     private Double programTotal = 0.d;
-    JsonObject programMarket;
-    private StructureService structureService;
     private String type;
 
     /**
@@ -33,14 +28,14 @@ public class VerifBudgetTab extends TabHelper {
      */
     public VerifBudgetTab(Workbook wb, JsonObject instruction, String type) {
         super(wb, instruction, "Vérification ligne budgétaire");
-        structureService = new DefaultStructureService(Lystore.lystoreSchema);
         this.type = type;
     }
 
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
-        excel.setDefaultFont();
-        getDatas(event -> handleDatasDefault(event, handler));
+              excel.setDefaultFont();
+              getDatas(event -> handleDatasDefault(event, handler));
+
     }
 
     @Override
@@ -56,14 +51,19 @@ public class VerifBudgetTab extends TabHelper {
 
             }
         }
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
                 if (repStructures.isRight()) {
-                    JsonArray structures = repStructures.right().getValue();
-                    setStructures(structures);
-                    setArray(datas);
-                    handler.handle(new Either.Right<>(true));
+                    try {
+                        JsonArray structures = repStructures.right().getValue();
+                        setStructures(structures);
+                        setArray(datas);
+                        handler.handle(new Either.Right<>(true));
+                    }catch (Exception e){
+                        handler.handle(new Either.Left<>(e.getMessage()));
+                        logger.error("Error when creating VerifBudgetTAb");
+                    }
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
 
@@ -125,12 +125,18 @@ public class VerifBudgetTab extends TabHelper {
         String market = data.getString("market");
         String totalMarket;
         try {
-            totalMarket = String.format("%.2f", Float.parseFloat(data.getString("totalmarket")));
+            totalMarket = String.format("%.2f", safeGetFloat(data,"totalmarket","Verif Budget TAB"));
         } catch (ClassCastException e) {
             totalMarket = data.getInteger("totalmarket").toString();
         }
 
-        programTotal += Double.parseDouble(totalMarket);
+        try{
+            programTotal += Double.parseDouble(totalMarket);
+        } catch (NumberFormatException err){
+            programTotal += Double.parseDouble(totalMarket.replaceAll(",","."));
+        }
+
+
         excel.insertBlueTitleHeader(0, currentY, market);
         CellRangeAddress merge = new CellRangeAddress(currentY, currentY, 0, 4);
         sheet.addMergedRegion(merge);
@@ -183,71 +189,48 @@ public class VerifBudgetTab extends TabHelper {
                 currentY += 2;
             }
             if (value.containsKey("uai")) {
-                excel.insertLabel(currentY, 0, value.getString("uai"));
+                excel.insertLabel(0, currentY, value.getString("uai"));
             } else
-                excel.insertLabel(currentY, 0, "");
-            excel.insertLabel(currentY, 1, "R");
-            excel.insertLabel(currentY, 2, "REG : " + value.getString("name_equipment"));
+                excel.insertLabel(0, currentY, "");
+            excel.insertLabel(1, currentY, "R");
+            excel.insertLabel(2, currentY, "REG : " + value.getString("name_equipment"));
             excel.insertCellTabStringRight(3, currentY, value.getInteger("amount").toString());
             try {
-                excel.insertLabel(currentY, 4, "M : " + value.getFloat("total").toString());
+                excel.insertLabel(4, currentY, "M : " + safeGetFloat(value,"total", "verifBubgetTab" ).toString());
             } catch (ClassCastException e) {
-                excel.insertLabel(currentY, 4, "M : " + value.getInteger("total").toString());
+                excel.insertLabel(4, currentY, "M : " + value.getInteger("total").toString());
             }
 
             currentY++;
 
-            excel.insertLabel(currentY, 0, "OPE  : " + value.getInteger("id_operation").toString());
-            excel.insertLabel(currentY, 1, " ");
+            excel.insertLabel(0, currentY, "OPE  : " + value.getInteger("id_operation").toString());
+            excel.insertLabel(1, currentY, " ");
             try {
                 if (!value.getString("old_name").equals("null")) {
-                    excel.insertLabel(currentY, 2, "LYC : " + value.getString("old_name"));
+                    excel.insertLabel(2, currentY, "LYC : " + value.getString("old_name"));
                 } else {
-                    excel.insertLabel(currentY, 2, "LYC : " + value.getString("name_equipment"));
+                    excel.insertLabel(2, currentY, "LYC : " + value.getString("name_equipment"));
                 }
             } catch (NullPointerException e) {
-                excel.insertLabel(currentY, 2, "LYC : " + value.getString("name_equipment"));
+                excel.insertLabel(2, currentY, "LYC : " + value.getString("name_equipment"));
             }
-            excel.insertLabel(currentY, 3, "Ref : " + value.getInteger("key").toString());
+            excel.insertLabel(3, currentY, "Ref : " + value.getInteger("key").toString());
             if (value.getBoolean("region")) {
                 if (value.getBoolean("isregion"))
-                    excel.insertLabel(currentY, 4, "N° dem : R" + " - " + value.getInteger("id").toString());
+                    excel.insertLabel(4, currentY, "N° dem : R" + " - " + value.getInteger("id").toString());
                 else
-                    excel.insertLabel(currentY, 4, "N° dem : C" + " - " + value.getInteger("id").toString());
+                    excel.insertLabel(4, currentY, "N° dem : C" + " - " + value.getInteger("id").toString());
 
 
             } else {
                 if (value.getBoolean("isregion"))
-                    excel.insertLabel(currentY, 4, "N° dem : R" + value.getInteger("id").toString());
+                    excel.insertLabel(4, currentY, "N° dem : R" + value.getInteger("id").toString());
                 else
-                    excel.insertLabel(currentY, 4, "N° dem : C" + value.getInteger("id").toString());
+                    excel.insertLabel(4, currentY, "N° dem : C" + value.getInteger("id").toString());
 
             }
             currentY++;
 
-        }
-    }
-
-
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            actions = new JsonArray(data.getString("actions"));
-            for (int k = 0; k < actions.size(); k++) {
-                JsonObject action = actions.getJsonObject(k);
-                for (int j = 0; j < structures.size(); j++) {
-                    structure = structures.getJsonObject(j);
-                    if (action.getString("id_structure").equals(structure.getString("id"))) {
-                        action.put("nameEtab", structure.getString("name"));
-                        action.put("uai", structure.getString("uai"));
-                        action.put("city", structure.getString("city"));
-                        action.put("zipCode", structure.getString("zipCode"));
-                    }
-                }
-            }
-            data.put("actionsJO", actions);
         }
     }
 
@@ -330,14 +313,6 @@ public class VerifBudgetTab extends TabHelper {
                         "FROM values   " +
                         " Group by market , code,program" +
                         " Order by program,code ;";
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
-            if (event.isLeft()) {
-                handler.handle(event.left());
-            } else {
-                datas = event.right().getValue();
-                handler.handle(new Either.Right<>(datas));
-            }
-
-        }));
+        sqlHandler(handler);
     }
 }

@@ -9,8 +9,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,21 +33,30 @@ public class RecapMarket extends TabHelper {
 
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
+
         excel.setDefaultFont();
         getDatas(event -> {
-            if (event.isLeft()) {
-                log.error("Failed to retrieve programs");
-                handler.handle(new Either.Left<>("Failed to retrieve programs"));
-            } else {
-                if (checkEmpty()) {
-                    handler.handle(new Either.Right<>(true));
+            try{
+                if (event.isLeft()) {
+                    log.error("Failed to retrieve programs");
+                    handler.handle(new Either.Left<>("Failed to retrieve programs"));
                 } else {
-                    JsonArray programs = event.right().getValue();
-                    setArray(programs);
-                    handler.handle(new Either.Right<>(true));
+                    if (checkEmpty()) {
+                        handler.handle(new Either.Right<>(true));
+                    } else {
+                        JsonArray programs = event.right().getValue();
+                        setArray(programs);
+                        handler.handle(new Either.Right<>(true));
+                    }
                 }
+            }catch(Exception e)
+            {
+                logger.error(e.getMessage());
+                logger.error(e.getStackTrace());
+                handler.handle(new Either.Left<>("Failed to retrieve programs"));
             }
         });
+
     }
 
 
@@ -63,7 +70,7 @@ public class RecapMarket extends TabHelper {
             JsonObject operation = datas.getJsonObject(i);
             String actionsStrToArray = operation.getString("actions");
 
-            excel.insertLabel(operationsRowNumber, 0, operation.getString("label"));
+            excel.insertLabel(0, operationsRowNumber, operation.getString("label"));
 
             this.operationsRowNumber++;
 
@@ -81,20 +88,20 @@ public class RecapMarket extends TabHelper {
                         oldTotal = 0.f;
                     }
                     oldkey = key;
-                    oldTotal += action.getFloat("total");
+                    oldTotal +=safeGetFloat(action,"total", "RecapMarket") ;
                     excel.insertCellTabFloat(1 + programMarket.getInteger(key), i + 9, oldTotal);
                 }
             }
         }
         //Setting total
-        excel.insertYellowLabel(operationsRowNumber, 0, ExcelHelper.totalLabel);
+        excel.insertYellowLabel(0, operationsRowNumber, ExcelHelper.totalLabel);
         excel.fillTab(1, programMarket.size() + 1, 9, 9 + datas.size()); // init all empty tab cells
 
         for (int i = 1; i < programMarket.size() + 1; i++) {
             excel.setTotalX(9, operationsRowNumber - 1, i, operationsRowNumber);
         }
 
-        excel.insertYellowLabel(8, programMarket.size() + 1, ExcelHelper.totalLabel);
+        excel.insertYellowLabel(programMarket.size() + 1, 8, ExcelHelper.totalLabel);
 
         for (int i = 0; i <= datas.size(); i++) {
             excel.setTotalY(1, programMarket.size(), 9 + i, programMarket.size() + 1);
@@ -156,7 +163,7 @@ public class RecapMarket extends TabHelper {
                         excel.setRegionHeader(merge, sheet);
                     }
                     initProgramX = 3 + programMarket.size();
-                    excel.insertYellowLabel(operationsRowNumber - 2, 1 + programMarket.size(), segments[1]);
+                    excel.insertYellowLabel(1 + programMarket.size(), operationsRowNumber - 2, segments[1]);
                 }
             } else {
                 previousMarket = segments[0];
@@ -167,11 +174,11 @@ public class RecapMarket extends TabHelper {
                     excel.setRegionHeader(merge, sheet);
                 }
                 initMarketX = 1 + programMarket.size();
-                excel.insertYellowLabel(operationsRowNumber - 3, 1 + programMarket.size(), segments[0]);
-                excel.insertYellowLabel(operationsRowNumber - 2, 1 + programMarket.size(), segments[1]);
+                excel.insertYellowLabel(1 + programMarket.size(), operationsRowNumber - 3, segments[0]);
+                excel.insertYellowLabel(1 + programMarket.size(), operationsRowNumber - 2, segments[1]);
             }
             //always insert contract_type code
-            excel.insertYellowLabel(operationsRowNumber - 1, 1 + programMarket.size(), segments[2]);
+            excel.insertYellowLabel(1 + programMarket.size(), operationsRowNumber - 1, segments[2]);
 
             programMarket.put(progM, i);
         }
@@ -270,14 +277,6 @@ public class RecapMarket extends TabHelper {
 
                         " Group by label  ;";
 
-
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
-            if (event.isLeft()) {
-                handler.handle(event.left());
-            } else {
-                datas = event.right().getValue();
-                handler.handle(new Either.Right<>(datas));
-            }
-        }));
+        sqlHandler(handler);
     }
 }

@@ -1,6 +1,7 @@
 package fr.openent.lystore.helpers;
 
-import fr.openent.lystore.export.ExportWorker;
+import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.ExportLystoreWorker;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
@@ -8,6 +9,7 @@ import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
@@ -533,47 +535,63 @@ public class ExcelHelper {
     public void setRegionUnderscoreHeader(CellRangeAddress merge, Sheet sheet) {
         RegionUtil.setBorderBottom(BorderStyle.THIN, merge, sheet);
     }
-    /**
-     * insert Header
-     *
-     * @param row
-     * @param cellColumn
-     * @param data
-     */
-    @Deprecated
-    public void insertHeader(Row row, int cellColumn, String data) {
-        Cell cell = row.createCell(cellColumn);
-        cell.setCellValue(data);
-        cell.setCellStyle(this.headCellStyle);
-        row.setHeight((short) -1);
 
+    /**
+     *
+     * @param cellColumn x
+     * @param line y
+     * @param data data to insert (any type of Object)
+     * @param style cell's style
+     */
+    public void insertWithStyle(int cellColumn,int line, Object data, CellStyle style){
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+
+            setDataInCell(cell,data);
+            cell.setCellStyle(style);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            setDataInCell(cell,data);
+            cell.setCellStyle(style);
+        }
     }
 
-    /**
-     * insert a cell with label style
-     *
-     * @param row
-     * @param cellColumn
-     * @param data       data to insert
-     */
-    @Deprecated
-    /**
-     * use insertLabel(int  line, int cellColumn, String data) instead
-     */
-    public void insertLabel(Row row, int cellColumn, String data) {
-        Cell cell = row.createCell(cellColumn);
-        cell.setCellValue(data);
-        cell.setCellStyle(this.labelStyle);
+    private void setDataInCell(Cell cell,Object data) {
+        switch (data.getClass().getName().replace("java.lang.","")){
+            case"String":
+                cell.setCellValue((String)data);
+                break;
+            case"Double":
+                cell.setCellValue((Double)data);
+            case"Float":
+                cell.setCellValue((Float)data);
+                break;
+            case "Integer":
+                cell.setCellValue((Integer)data);
+                break;
+            default:
+                cell.setCellValue(data.toString());
+                break;
+        }
     }
 
-    @Deprecated
-    /**
-     * Use insertFormula(int , int , data) instead
-     */
-    public void insertFormula(Row row, int cellColumn, String data) {
-        Cell cell = row.createCell(cellColumn);
-        cell.setCellFormula(data);
-        cell.setCellStyle(this.currencyStyle);
+
+    public void insertFormula(int cellColumn,int line, String data) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellFormula(data);
+            cell.setCellStyle(this.currencyStyle);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(cellColumn);
+            cell.setCellFormula(data);
+            cell.setCellStyle(this.currencyStyle);
+        }
     }
 
     /**
@@ -583,136 +601,42 @@ public class ExcelHelper {
      * @param line
      * @param data       data to insert
      */
-    public void insertCellTabFloat(int cellColumn, int line, float data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabNumeralStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabNumeralStyle);
-        }
+    public void insertCellTabFloat(int cellColumn, int line, Float data) {
+      insertWithStyle(cellColumn,line,data,this.tabNumeralStyle);
     }
 
+
     public void insertCellTabStringRight(int cellColumn, int line, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabStringStyleRight);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabStringStyleRight);
-        }
+        insertWithStyle(cellColumn, line, data, this.tabStringStyleRight);
     }
 
     /**
      * insert a label in a tab at line,column
-     *
+     *  @param cellColumn
      * @param line
-     * @param cellColumn
      * @param data
      */
-    public void insertLabel(int line, int cellColumn, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.labelStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.labelStyle);
-        }
+    public void insertLabel(int cellColumn, int line, String data) {
+        insertWithStyle(cellColumn, line, data, this.labelStyle);
     }
 
-    public void insertLabelBold(int line, int cellColumn, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.labelBoldStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.labelBoldStyle);
-        }
+    public void insertLabelBold(int cellColumn, int line, String data) {
+        insertWithStyle(cellColumn, line, data, this.labelBoldStyle);
     }
 
-    public void insertLabelHead(int line, int cellColumn, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.labelHeadStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.labelHeadStyle);
-        }
+    public void insertLabelHead(int cellColumn, int line, String data) {
+        insertWithStyle(cellColumn, line, data, this.labelHeadStyle);
     }
 
-    public void insertHeader(int line, int cellColumn, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.headCellStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.headCellStyle);
-        }
-
-
+    public void insertHeader(int cellColumn, int line, String data) {
+        insertWithStyle(cellColumn, line, data, this.headCellStyle);
     }
 
-    public void insertBlackOnGreenHeader(int line, int cellColumn, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blackOnGreenHeaderStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blackOnGreenHeaderStyle);
-        }
-
-
+    public void insertBlackOnGreenHeader(int cellColumn, int line, String data) {
+        insertWithStyle(cellColumn, line, data, this.blackOnGreenHeaderStyle);
     }
-    public void insertFloatYellow(int line, int cellColumn, Float data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.floatOnYellowStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.floatOnYellowStyle);
-        }
-
-
+    public void insertFloatYellow(int cellColumn, int line, Float data) {
+        insertWithStyle(cellColumn, line, data,this.floatOnYellowStyle);
     }
 
     /**
@@ -723,19 +647,9 @@ public class ExcelHelper {
      * @param data
      */
     public void insertCellTabFloatWithPrice(int cellColumn, int line, float data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabCurrencyStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabCurrencyStyle);
+        insertWithStyle(cellColumn, line, data,this.tabCurrencyStyle);
+
         }
-    }
     /**
      * insert a cell in the tab
      *
@@ -744,19 +658,7 @@ public class ExcelHelper {
      * @param data
      */
     public void insertCellTab(int cellColumn, int line, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabStringStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabStringStyle);
-        }
-
+        insertWithStyle(cellColumn, line, data,this.tabStringStyle);
     }
 
     /**
@@ -767,117 +669,45 @@ public class ExcelHelper {
      * @param data
      */
     public void insertCellTabInt(int cellColumn, int line, int data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabNumeralStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabNumeralStyle);
-        }
-
+        insertWithStyle(cellColumn, line, data,this.tabNumeralStyle);
     }
 
     public void insertCellTabCenterBold(int cellColumn, int line, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabStringStyleCenterBold);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabStringStyleCenterBold);
-        }
-
+        insertWithStyle(cellColumn, line, data,this.tabStringStyleCenterBold);
     }
     /**
      * insert a header with yellow background
-     *
+     *  @param cellColumn
      * @param line
-     * @param cellColumn
      * @param data
      */
-    public void insertYellowHeader(int line, int cellColumn, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.yellowHeader);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.yellowHeader);
-        }
-
+    public void insertYellowHeader(int cellColumn, int line, String data) {
+        insertWithStyle(cellColumn, line, data,this.yellowHeader);
     }
 
     /**
      * insert a label with yellow background
-     *
+     *  @param cellColumn
      * @param line
-     * @param cellColumn
      * @param data
      */
-    public void insertYellowLabel(int line, int cellColumn, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.yellowLabel);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.yellowLabel);
-        }
+    public void insertYellowLabel(int cellColumn, int line, String data) {
+        insertWithStyle(cellColumn, line, data,this.yellowLabel);
     }
 
 
     /**
      * insert a cell in a tab ith blue background and white font
-     *
+     *  @param cellColumn
      * @param line
-     * @param cellColumn
      * @param data
      */
-    public void insertWhiteOnBlueTab(int line, int cellColumn, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.whiteOnBlueLabel);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.whiteOnBlueLabel);
-        }
+    public void insertWhiteOnBlueTab(int cellColumn, int line, String data) {
+        insertWithStyle(cellColumn, line, data,this.whiteOnBlueLabel);
     }
 
-    public void insertLabelOnRed(int line, int cellColumn, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blackOnRedLabel);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blackOnRedLabel);
-        }
+    public void insertLabelOnRed(int cellColumn, int line, String data) {
+        insertWithStyle(cellColumn, line, data,this.blackOnRedLabel);
     }
 
     /**
@@ -888,19 +718,7 @@ public class ExcelHelper {
      * @param data
      */
     public void insertTitleHeader(int cellColumn, int line, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.titleHeaderStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.titleHeaderStyle);
-        }
-
+        insertWithStyle(cellColumn, line, data,this.titleHeaderStyle);
     }
 
     /**
@@ -911,19 +729,7 @@ public class ExcelHelper {
      * @param data
      */
     public void insertBlackTitleHeader(int cellColumn, int line, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blackTitleHeaderStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blackTitleHeaderStyle);
-        }
-
+        insertWithStyle(cellColumn, line, data,this.blackTitleHeaderStyle);
     }
 
     /**
@@ -934,66 +740,19 @@ public class ExcelHelper {
      * @param data
      */
     public void insertBlackTitleHeaderBorderless(int cellColumn, int line, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blackTitleHeaderBorderlessStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blackTitleHeaderBorderlessStyle);
-        }
-
+        insertWithStyle(cellColumn, line, data,this.blackTitleHeaderBorderlessStyle);
     }
 
     public void insertBlackTitleHeaderBorderlessCenter(int cellColumn, int line, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blackTitleHeaderBorderlessCenteredStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blackTitleHeaderBorderlessCenteredStyle);
-        }
-
+        insertWithStyle(cellColumn, line, data,this.blackTitleHeaderBorderlessCenteredStyle);
     }
 
     public void insertBlueTitleHeaderBorderlessCenter(int cellColumn, int line, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blueTitleHeaderBorderlessCenteredStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blueTitleHeaderBorderlessCenteredStyle);
-        }
-
+        insertWithStyle(cellColumn, line, data,this.blueTitleHeaderBorderlessCenteredStyle);
     }
 
     public void insertBlueTitleHeaderBorderlessCenterFloatCurrency(int cellColumn, int line, Float data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blueTitleHeaderBorderlessCenteredCurrencyStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blueTitleHeaderBorderlessCenteredCurrencyStyle);
-        }
+        insertWithStyle(cellColumn, line, data,this.blueTitleHeaderBorderlessCenteredCurrencyStyle);
     }
 
     /**
@@ -1004,19 +763,7 @@ public class ExcelHelper {
      * @param data
      */
     public void insertBlueTitleHeader(int cellColumn, int line, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blueTitleHeaderStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blueTitleHeaderStyle);
-        }
-
+        insertWithStyle(cellColumn, line, data,this.blueTitleHeaderStyle);
     }
 
 
@@ -1028,35 +775,11 @@ public class ExcelHelper {
      * @param data
      */
     public void insertCellTabCenter(int cellColumn, int line, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabStringStyleCenter);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.tabStringStyleCenter);
-        }
-
+        insertWithStyle(cellColumn, line, data,this.tabStringStyleCenter);
     }
 
     public void insertCellTabBlue(int cellColumn, int line, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blueTabStyle);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.blueTabStyle);
-        }
-
+        insertWithStyle(cellColumn, line, data,this.blueTabStyle);
     }
 
     /**
@@ -1067,18 +790,7 @@ public class ExcelHelper {
      * @param data
      */
     public void insertUnderscoreHeader(int cellColumn, int line, String data) {
-        Row tab;
-        try {
-            tab = sheet.getRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.underscoreHeader);
-        } catch (NullPointerException e) {
-            tab = sheet.createRow(line);
-            Cell cell = tab.createCell(cellColumn);
-            cell.setCellValue(data);
-            cell.setCellStyle(this.underscoreHeader);
-        }
+        insertWithStyle(cellColumn, line, data,this.underscoreHeader);
     }
 
     public void insertStandardText(int cellColumn, int line, String data) {
@@ -1105,34 +817,7 @@ public class ExcelHelper {
      * @param lineEnd
      */
     public void fillTab(int columnStart, int columnEnd, int lineStart, int lineEnd) {
-        Row tab;
-        Cell cell;
-        for (int line = lineStart; line < lineEnd; line++) {
-            try {
-                tab = sheet.getRow(line);
-
-                for (int column = columnStart; column < columnEnd; column++) {
-                    try {
-                        cell = tab.getCell(column);
-                        cell.setCellStyle(this.tabNumeralStyle);
-                    } catch (NullPointerException e) {
-                        cell = tab.createCell(column);
-                        cell.setCellStyle(this.tabNumeralStyle);
-                    }
-                }
-            } catch (NullPointerException e) {
-                tab = sheet.createRow(line);
-                for (int column = columnStart; column < columnEnd; column++) {
-                    try {
-                        cell = tab.getCell(column);
-                        cell.setCellStyle(this.tabNumeralStyle);
-                    } catch (NullPointerException ee) {
-                        cell = tab.createCell(column);
-                        cell.setCellStyle(this.tabNumeralStyle);
-                    }
-                }
-            }
-        }
+        fillTabWithStyle(columnStart,columnEnd,lineStart,lineEnd,this.tabNumeralStyle);
     }
 
 
@@ -1314,7 +999,7 @@ public class ExcelHelper {
             cell.setCellStyle(style);
             cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
         } catch (NullPointerException e) {
-            log.error("Trying to sum a non init cell , init cells before calling this function");
+            log.error("Trying to sum a non init cell , init cells before calling this function x");
         }
     }
 
@@ -1362,7 +1047,7 @@ public class ExcelHelper {
         return getDate() + nameFile + type + ".xlsx";
     }
 
-    public static void catchError(ExportService exportService, Number idFile, Exception errorCatch) {
+    public static void catchError(ExportService exportService, String idFile, Exception errorCatch) {
         exportService.updateWhenError(idFile, makeError -> {
             if (makeError.isLeft()) {
                 log.error("Error for create file export excel " + makeError.left() + errorCatch);
@@ -1370,7 +1055,7 @@ public class ExcelHelper {
         });
         log.error("Error for create file export excel " + errorCatch);
     }
-    public static void catchError(ExportService exportService, Number idFile, String errorCatchTextOutput) {
+    public static void catchError(ExportService exportService, String idFile, String errorCatchTextOutput) {
         exportService.updateWhenError(idFile, makeError -> {
             if (makeError.isLeft()) {
                 log.error("Error for create file export excel " + makeError.left() + errorCatchTextOutput);
@@ -1378,7 +1063,7 @@ public class ExcelHelper {
         });
         log.error("Error for create file export excel " + errorCatchTextOutput);
     }
-    public static void catchError(ExportService exportService, Number idFile, String errorCatchTextOutput, Handler<Either<String,Boolean>> handler) {
+    public static void catchError(ExportService exportService, String idFile, String errorCatchTextOutput, Handler<Either<String,Boolean>> handler) {
         exportService.updateWhenError(idFile,handler);
         log.error("Error for create file export excel " + errorCatchTextOutput);
     }
@@ -1402,30 +1087,24 @@ public class ExcelHelper {
             infoFile.put("type", type);
         }
         String titleFile = withType ? ExcelHelper.makeTheNameExcelExport(name, type) : ExcelHelper.makeTheNameExcelExport(name);
-
+        log.info("makeExportExcel");
         Integer finalId = id;
         UserUtils.getUserInfos(eb, request, user -> {
-            exportService.createWhenStart(finalId,titleFile, user.getUserId(), newExport -> {
+            exportService.createWhenStart(infoFile,finalId,titleFile,user.getUserId(), action, newExport -> {
                 if (newExport.isRight()) {
-                    Number idFile = newExport.right().getValue().getInteger("id");
+                    String idExport = newExport.right().getValue().getString("id");
                     try {
                         Logging.insert(eb,
                                 request,
                                 Contexts.EXPORT.toString(),
                                 Actions.CREATE.toString(),
-                                idFile.toString(),
-                                new JsonObject().put("ids", idFile).put("fileName", titleFile));
-                        infoFile.put("action", action)
-                                .put("id", Integer.parseInt(request.getParam("id")))
-                                .put("titleFile", titleFile)
-                                .put("idFile", idFile)
-                                .put("userId", user.getUserId());
-                        eb.send(ExportWorker.class.getSimpleName(), infoFile, handlerToAsyncHandler(eventExport ->
-                                log.info("Ok calling worker"))
-                        );
-                        request.response().setStatusCode(201).end("Import started " + idFile);
+                                idExport.toString(),
+                                new JsonObject().put("ids", idExport).put("fileName", titleFile));
+                        log.info("J'envoie la demande d export");
+                        Lystore.launchWorker(eb);
+                        request.response().setStatusCode(201).end("Import started " + idExport);
                     } catch (Exception error) {
-                        catchError(exportService, idFile, error);
+                        catchError(exportService, idExport, error);
                     }
                 } else {
                     log.error("Fail to insert file in SQL " + newExport.left());

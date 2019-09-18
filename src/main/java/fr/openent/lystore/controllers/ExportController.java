@@ -25,8 +25,6 @@ import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
-import java.awt.*;
-
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 
 public class ExportController extends ControllerHelper {
@@ -78,7 +76,7 @@ public class ExportController extends ControllerHelper {
     public void deleteExportExcel(HttpServerRequest request) {
         RequestUtils.bodyToJson( request, ids -> exportService.deleteExport( ids.getJsonArray("idsFiles"), event -> {
                 if (event.getString("status").equals("ok")) {
-                    exportService.deleteExportSql( ids.getJsonArray("idsExport"), Logging.defaultResponseHandler(eb,
+                    exportService.deleteExportMongo( ids.getJsonArray("idsExport"), Logging.defaultResponseHandler(eb,
                             request,
                             Contexts.EXPORT.toString(),
                             Actions.DELETE.toString(),

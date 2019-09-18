@@ -85,7 +85,7 @@
                 <td ng-if="tableFields[19].display">[[order.project.description || '-']]</td>
                 <td ng-if="tableFields[20].display">[[order.structure.department]]</td>
                 <td ng-if="tableFields[21].display">[[order.program]]</td>
-                <td ng-if="tableFields[22].display"><span ng-bind="showPriceProposalOrNot(order) | currency"></span>
+                <td ng-if="tableFields[22].display"><span ng-bind="order.priceTotalTTC | currency"></span>
                 </td>
             </tr>
             </tbody>
@@ -106,7 +106,7 @@
               show="display.lightbox.validOrder">
         <container template="validOrder.lightbox"></container>
     </lightbox>
-    <parameter-table ng-model="tableFields">
+    <parameter-table ng-change="savePreference()" ng-model="tableFields">
     </parameter-table>
     <section class="toggle-buttons" ng-class="{ hide: ordersClient.selected.length === 0 }">
         <div class="toggle">

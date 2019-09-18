@@ -53,11 +53,17 @@ public class RecapEPLETab extends TabHelper {
         excel.setDefaultFont();
         excel.setCPNumber(instruction.getString("cp_number"));
         getDatas(event -> {
-            if (event.isLeft()) {
-                handler.handle(new Either.Left<>("Failed to retrieve programs"));
-                return;
+            try {
+                if (event.isLeft()) {
+                    handler.handle(new Either.Left<>("Failed to retrieve programs"));
+                    return;
+                }
+                getAndSetDatas(handler);
+            }catch(Exception e){
+                logger.error(e.getMessage());
+                logger.error(e.getStackTrace());
+                handler.handle(new Either.Left<>("error when creating excel"));
             }
-            getAndSetDatas(handler);
         });
     }
 
@@ -84,7 +90,7 @@ public class RecapEPLETab extends TabHelper {
 
     }
 
-    private void setStructures(JsonArray structures) {
+    public void setStructures(JsonArray structures) {
         JsonObject program, structure;
         for (int i = 0; i < programs.size(); i++) {
             program = programs.getJsonObject(i);
@@ -137,9 +143,9 @@ public class RecapEPLETab extends TabHelper {
             sheet.addMergedRegion(merge);
             merge = new CellRangeAddress(yProgramLabel + 4, yProgramLabel + 5, 2, 3);
             sheet.addMergedRegion(merge);
-            excel.insertHeader(yProgramLabel + 3, 2, excel.sumLabel);
-            excel.setTotalX(yProgramLabel + 2 - nbLine, yProgramLabel + 2, 3, yProgramLabel + 3);
-            addTotalLabelInt(excel.getCellReference(yProgramLabel + 3, 3) + " +");
+            excel.insertHeader(2, yProgramLabel + 3, excel.sumLabel);
+//            excel.setTotalX(yProgramLabel + 2 - nbLine, yProgramLabel + 2, 3, yProgramLabel + 3);
+//            addTotalLabelInt(excel.getCellReference(yProgramLabel + 3, 3) + " +");
             nbLine = 0;
 
 
@@ -165,14 +171,14 @@ public class RecapEPLETab extends TabHelper {
             uai = program.getString("uai");
             zipCode = program.getString("zipCode");
             city = program.getString("city");
-            excel.insertHeader(sheet.createRow(yProgramLabel + 3), 0, zipCode + " - " + city + " - " + nameEtab + " (" + uai + ")");
-            merge = new CellRangeAddress(yProgramLabel + 3, yProgramLabel + 3, 0, 3);
-            sheet.addMergedRegion(merge);
-            excel.setRegionHeader(merge, sheet);
-            excel.insertHeader(sheet.createRow(yProgramLabel + 4), 0, orderLabel);
-            excel.insertHeader(sheet.getRow(yProgramLabel + 4), 1, orderComment);
-            excel.insertHeader(sheet.getRow(yProgramLabel + 4), 2, orderAmount);
-            excel.insertHeader(sheet.getRow(yProgramLabel + 4), 3, orderTotal);
+            excel.insertHeader(yProgramLabel + 3, 0, zipCode + " - " + city + " - " + nameEtab + " (" + uai + ")");
+//            merge = new CellRangeAddress(yProgramLabel + 3, yProgramLabel + 3, 0, 3);
+//            sheet.addMergedRegion(merge);
+//            excel.setRegionHeader(merge, sheet);
+            excel.insertHeader(yProgramLabel + 4, 0, orderLabel);
+            excel.insertHeader(yProgramLabel + 4, 1, orderComment);
+            excel.insertHeader(yProgramLabel + 4, 2, orderAmount);
+            excel.insertHeader(yProgramLabel + 4, 3, orderTotal);
             yProgramLabel += 2;
         }
         return id_structure;
@@ -187,14 +193,14 @@ public class RecapEPLETab extends TabHelper {
             totalLabelInt += cellToAdd;
         } else {
             totalLabelInt = totalLabelInt.substring(0, totalLabelInt.length() - 1);
-            excel.insertFormula(sheet.getRow(yProgramLabel + 3), 1589, totalLabelInt);
+            excel.insertFormula(yProgramLabel + 3, 1589, totalLabelInt);
             totalLabelInt = excel.getCellReference(yProgramLabel + 3, 1589) + " +" + cellToAdd;
         }
     }
 
     private void settingSumLabel() {
         totalLabelInt = totalLabelInt.substring(0, totalLabelInt.length() - 1);
-        excel.insertFormula(sheet.getRow(xlabel), yTotalLabel, totalLabelInt);
+        excel.insertFormula(xlabel, yTotalLabel, totalLabelInt);
         totalLabelInt = "";
     }
 

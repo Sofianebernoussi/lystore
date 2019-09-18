@@ -1,4 +1,4 @@
-import {_, ng, template, idiom as lang} from 'entcore';
+import {_, ng, template, idiom as lang, toasts} from 'entcore';
 import {Notification, Operation, OrderClient, OrderRegion, OrdersRegion, Utils} from "../../model";
 import {Mix} from 'entcore-toolkit';
 
@@ -115,11 +115,24 @@ export const operationController = ng.controller('operationController',
                 Utils.safeApply($scope);
             }
         };
-        $scope.syncOrderByOperation = async (operation: Operation) =>{
-            $scope.ordersClientByOperation = await operation.getOrders();
+
+
+        $scope.dropOrdersOperation = async (orders)=>{
+            Promise.all([
+                await $scope.operation.deleteOrders(orders),
+                await $scope.initOperation(),
+                await $scope.syncOrderByOperation($scope.operation),
+            ]);
+            toasts.confirm('lystore.order.operation.delete');
+            Utils.safeApply($scope);
         };
-        $scope.dropOrderOperation = async (order:any) => {
-            if(order.isOrderRegion){
+
+        $scope.syncOrderByOperation = async (operation: Operation) =>{
+            $scope.ordersClientByOperation = await operation.getOrders($scope.structures.all);
+        };
+
+        $scope.dropOrderOperation = async (order:any, bool?:boolean) => {
+            if(order.typeOrder === "region"){
                 await $scope.orderRegion.delete(order.id);
                 if(order.id_order_client_equipment){
                     await order.updateStatusOrder('WAITING', order.id_order_client_equipment);
@@ -127,12 +140,10 @@ export const operationController = ng.controller('operationController',
             } else {
                 await order.updateStatusOrder('WAITING');
             }
-            await Promise.all([
-                await $scope.syncOrderByOperation($scope.operation),
-                await $scope.initOperation(),
-            ]);
-            $scope.notifications.push(new Notification('lystore.order.operation.delete', 'confirm'));
-            Utils.safeApply($scope);
+            if(bool){
+                toasts.confirm('lystore.order.operation.delete');
+                Utils.safeApply($scope);
+            }
         };
         $scope.formatArrayToolTip = (tooltipsIn:string) => {
             let tooltips = JSON.parse(tooltipsIn);
@@ -149,8 +160,7 @@ export const operationController = ng.controller('operationController',
 
         $scope.insertOrderRegion = (order: OrderClient):void => {
             $scope.order = order;
-            let type = order.isOrderRegion? 'region' : 'client';
-            $scope.redirectTo(`/order/operation/update/${order.id}/${type}`);
+            $scope.redirectTo(`/order/operation/update/${order.id}/${order.typeOrder}`);
         };
         $scope.switchAllOrders = ():void => {
             $scope.allOrdersOperationSelected  =  !$scope.allOrdersOperationSelected;
@@ -164,6 +174,31 @@ export const operationController = ng.controller('operationController',
         $scope.isOrderOperationSelected = ():boolean => {
             return $scope.ordersClientByOperation.some(order => order.selected)
         };
+
+        $scope.oneOrderSelected = () : boolean =>{
+            let nbSelected =  0 ;
+            $scope.ordersClientByOperation.forEach(order =>{
+                if(order.selected){
+                    nbSelected++;
+                }
+            });
+            return  nbSelected === 1;
+        };
+
+        $scope.getSelectedOrder  = () =>{
+            return $scope.ordersClientByOperation.find(order => order.selected);
+        };
+
+        $scope.getSelectedOrders = () =>{
+            let selectedOrders = [] ;
+            $scope.ordersClientByOperation.forEach(order =>{
+                if (order.selected)
+                    selectedOrders.push(order);
+            });
+            return selectedOrders;
+        };
+
+
         $scope.selectOperationForOrder = async () =>{
             await $scope.initOperation();
             $scope.operations.all = $scope.operations.all.filter(operation => operation.id !== $scope.operation.id);
@@ -173,8 +208,8 @@ export const operationController = ng.controller('operationController',
         };
         $scope.operationSelected = async (operation:Operation) => {
             template.close('operation.lightbox');
-            let idsOrdersClient = $scope.ordersClientByOperation.filter(order => order.selected && !order.isOrderRegion).map(order => order.id);
-            let idsOrdersRegion = $scope.ordersClientByOperation.filter(order => order.selected && order.isOrderRegion).map(order => order.id);
+            let idsOrdersClient = $scope.ordersClientByOperation.filter(order => order.selected && !(order.typeOrder === "client")).map(order => order.id);
+            let idsOrdersRegion = $scope.ordersClientByOperation.filter(order => order.selected && (order.typeOrder === "region")).map(order => order.id);
             if(idsOrdersClient.length !== 0){
                 await $scope.ordersClient.addOperation(operation.id, idsOrdersClient);
             }
@@ -183,6 +218,10 @@ export const operationController = ng.controller('operationController',
             }
             $scope.ordersClientByOperation = await $scope.operation.getOrders();
             $scope.display.lightbox.operation = false;
+            toasts.info('lystore.operation.order.affect');
             Utils.safeApply($scope);
         };
+        $scope.openOrders = () => {
+            $scope.redirectTo(`/operation/order/${$scope.operations.selected[0].id}`)
+        }
     }]);

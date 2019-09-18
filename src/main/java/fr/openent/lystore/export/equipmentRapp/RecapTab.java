@@ -6,11 +6,8 @@ import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,21 +30,36 @@ public class RecapTab extends TabHelper {
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
         getDatas(event -> {
-            if (event.isLeft()) {
-                log.error("Failed to retrieve programs");
-                handler.handle(new Either.Left<>("Failed to retrieve programs"));
-            } else {
-                if (checkEmpty()) {
-                    handler.handle(new Either.Right<>(true));
-                } else {
-                    //Delete tab if empty
-                    setLabels();
-                    setArray(datas);
-                    handler.handle(new Either.Right<>(true));
+            try{
 
+                if (event.isLeft()) {
+                    log.error("Failed to retrieve programs");
+                    handler.handle(new Either.Left<>("Failed to retrieve programs"));
+                } else {
+                    if (checkEmpty()) {
+                        handler.handle(new Either.Right<>(true));
+                    } else {
+                        //Delete tab if empty
+                        try{
+
+                            setLabels();
+                            setArray(datas);
+                            handler.handle(new Either.Right<>(true));
+
+                        }catch(Exception ee){
+                            logger.error(ee.getMessage());
+                            logger.error(ee.getStackTrace());
+                            handler.handle(new Either.Left<>("error when creating excel"));
+                        }
+                    }
                 }
+            }catch(Exception e){
+                logger.error(e.getMessage());
+                logger.error(e.getStackTrace());
+                handler.handle(new Either.Left<>("error when creating excel"));
             }
         });
+
     }
 
     //    /**
@@ -68,9 +80,8 @@ public class RecapTab extends TabHelper {
             String actionsStrToArray = operation.getString(actionStr);
             String labelOperation = operation.getString("label");
 
-            Row operationRow = sheet.createRow(this.operationsRowNumber);
-            excel.insertLabel(operationRow, cellLabelColumn, operation.getLong("id").toString());
-            excel.insertLabel(operationRow, cellLabelColumn + 1, labelOperation);
+            excel.insertLabel(cellLabelColumn, this.operationsRowNumber, operation.getLong("id").toString());
+            excel.insertLabel(cellLabelColumn + 1, this.operationsRowNumber, labelOperation);
 
 
             JsonArray actions = new JsonArray(actionsStrToArray);
@@ -111,9 +122,9 @@ public class RecapTab extends TabHelper {
                     excel.setRegionHeader(merge, sheet);
                 }
                 initProgramX = cellColumn;
-                excel.insertHeader(programRowNumber, cellColumn, program);
+                excel.insertHeader(cellColumn, programRowNumber, program);
             }
-            excel.insertHeader(programRowNumber + 1, cellColumn, code);
+            excel.insertHeader(cellColumn, programRowNumber + 1, code);
             cellColumn++;
 
         }
@@ -132,9 +143,6 @@ public class RecapTab extends TabHelper {
 
             String actionsStrToArray = operation.getString(actionStr);
             JsonArray actions = new JsonArray(actionsStrToArray);
-            String old_key = "";
-            Float oldTotal = 0.f;
-
             JsonObject oldTotals = new JsonObject();
 
             for (int j = 0; j < actions.size(); j++) {
@@ -142,24 +150,24 @@ public class RecapTab extends TabHelper {
                 JsonObject action = actions.getJsonObject(j);
                 String key = action.getString("program") + " - " + action.getString("code");
                 if (!oldTotals.containsKey(key)) {
-                    oldTotals.put(key, action.getFloat("total"));
+                    oldTotals.put(key,safeGetFloat(action,"total", "RecapTab") );
                 } else {
-                    oldTotals.put(key, action.getFloat("total") + oldTotals.getFloat(key));
+                    oldTotals.put(key,safeGetFloat(action,"total", "RecapTab")  + safeGetFloat(oldTotals,key, "RecapTab"));
                 }
                 excel.insertCellTabFloat(programLabel.getInteger(key) + 2,
                         2 + i,
-                        oldTotals.getFloat(key));
+                        safeGetFloat(oldTotals,key, "RecapTab"));
             }
         }
 
         excel.fillTab(2, programLabel.size() + 2, 2, operationsRowNumber);
-        excel.insertHeader(operationsRowNumber, 1, excel.totalLabel);
+        excel.insertHeader(1, operationsRowNumber, excel.totalLabel);
 
         for (int i = 0; i < programLabel.size(); i++) {
             excel.setTotalX(2, operationsRowNumber - 1, i + 2, operationsRowNumber);
         }
 
-        excel.insertHeader(1, programLabel.size() + 2, excel.totalLabel);
+        excel.insertHeader(programLabel.size() + 2, 1, excel.totalLabel);
 
         for (int i = 0; i <= datas.size(); i++) {
             excel.setTotalY(2, programLabel.size() + 1, 2 + i, programLabel.size() + 2);
@@ -246,14 +254,8 @@ public class RecapTab extends TabHelper {
                         "  Group by values.id_operation, values.operation   " +
                         "  Order by values.operation ;";
 
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
-            if (event.isLeft()) {
-                handler.handle(event.left());
-            } else {
-                datas = event.right().getValue();
-                handler.handle(new Either.Right<>(datas));
-            }
-        }));
+        sqlHandler(handler);
+
     }
 
 

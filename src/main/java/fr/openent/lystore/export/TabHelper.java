@@ -1,7 +1,6 @@
 package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
-import fr.openent.lystore.export.investissement.TabName;
 import fr.openent.lystore.helpers.ExcelHelper;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
@@ -78,6 +77,9 @@ public abstract class TabHelper {
         log.info("Initialize tab : " + TabName);
     }
 
+    public void startTimer(Handler<Either<String,Boolean>> handler){
+
+    }
 
     public abstract void create(Handler<Either<String, Boolean>> handler);
 
@@ -222,21 +224,93 @@ public abstract class TabHelper {
     }
 
     public void handleDatasDefault(Either<String, JsonArray> event, Handler<Either<String, Boolean>> handler) {
-        if (event.isLeft()) {
-            log.error("Failed to retrieve datas");
-            handler.handle(new Either.Left<>("Failed to retrieve datas"));
-        } else {
-            if (checkEmpty()) {
-                handler.handle(new Either.Right<>(true));
+        try {
+            if (event.isLeft()) {
+                log.error("Failed to retrieve datas");
+                handler.handle(new Either.Left<>("Failed to retrieve datas"));
             } else {
-                initDatas(handler);
+                if (checkEmpty()) {
+                    handler.handle(new Either.Right<>(true));
+                } else {
+                    initDatas(handler);
+                }
             }
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            logger.error(e.getStackTrace());
+            handler.handle(new Either.Left<>("error when creating excel"));
+
         }
+    }
+
+    protected  Float safeGetFloat(JsonObject jo, String  key, String nameTab){
+     Float result;
+        try {
+            //logger.info("Object safeGetFloat : " + jo + " key : " + key);
+            result=  jo.getFloat(key);
+        }catch (Exception e){
+            logger.info("Exception safeGetFloat : key : " + key + " ;name tab : " + nameTab);
+            result= Float.parseFloat(jo.getString(key).replaceAll(",","."));
+        }
+        return  result;
     }
 
     protected void initDatas(Handler<Either<String, Boolean>> handler) {
 
     }
+
+    protected void setStructuresFromDatas(JsonArray structures) {
+        JsonArray actions;
+        JsonObject  structure;
+        for (int i = 0; i < datas.size(); i++) {
+            JsonObject data = datas.getJsonObject(i);
+            actions = new JsonArray(data.getString("actions"));
+            getElemsStructure(structures,data);
+            data.put("actionsJO", actions);
+        }
+    }
+
+    protected  void getElemsStructure(JsonArray structures,JsonObject data){
+        JsonObject  structure;
+        for (int j = 0; j < structures.size(); j++) {
+            if(j == 0) {
+                data.put("nameEtab", NULL_DATA);
+                data.put("uai", NULL_DATA);
+                data.put("city", NULL_DATA);
+                data.put("type", NULL_DATA);
+                data.put("zipCode", "??");
+                data.put("phone", NULL_DATA);
+            }
+            structure = structures.getJsonObject(j);
+            if (data.getString("id_structure").equals(structure.getString("id"))) {
+                data.put("nameEtab", structure.getString("name"));
+                data.put("uai", structure.getString("uai"));
+                data.put("city", structure.getString("city"));
+                data.put("type", structure.getString("type"));
+                data.put("zipCode", structure.getString("zipCode"));
+                data.put("phone", structure.getString("phone"));
+            }
+        }
+    }
+    protected void setStructures(JsonArray structures) {
+        JsonObject  structure;
+        JsonArray actions;
+        for (int i = 0; i < datas.size(); i++) {
+            JsonObject data = datas.getJsonObject(i);
+            actions = new JsonArray(data.getString("actions"));
+            for (int k = 0; k < actions.size(); k++) {
+                JsonObject action = actions.getJsonObject(k);
+                for (int j = 0; j < structures.size(); j++) {
+                    getElemsStructure(structures,action);
+                }
+            }
+            data.put("actionsJO", actions);
+        }
+    }
+
+
+
+
 
     protected void getStructures(JsonArray ids, Handler<Either<String, JsonArray>> handler)  {
         String query = "" +
@@ -246,10 +320,11 @@ public abstract class TabHelper {
                 "s.id as id," +
                 " s.UAI as uai," +
                 " s.name as name," +
-                " s.phone as phone," +
                 " s.address + ' ,' + s.zipCode +' ' + s.city as address,  " +
                 "s.zipCode as zipCode," +
-                " s.city as city";
+                " s.city as city," +
+                " s.type as type," +
+                " s.phone as phone";
         Neo4j.getInstance().execute(query, new JsonObject().put("ids", ids), Neo4jResult.validResultHandler(handler));
     }
 

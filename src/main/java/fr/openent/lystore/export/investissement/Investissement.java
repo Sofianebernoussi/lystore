@@ -24,21 +24,33 @@ public abstract class Investissement extends TabHelper {
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
         excel.setCPNumber(instruction.getString("cp_number"));
-        setLabels();
+        try {
+            setLabels();
+        }catch(Exception e){
+            logger.error(e.getMessage());
+            logger.error(e.getStackTrace());
+            handler.handle(new Either.Left<>("error when creating excel"));
+        }
         getDatas(event -> {
-            if (event.isLeft()) {
-                log.error("Failed to retrieve programs");
-                handler.handle(new Either.Left<>("Failed to retrieve programs"));
-            } else {
+            try{
+                if (event.isLeft()) {
+                    log.error("Failed to retrieve programs");
+                    handler.handle(new Either.Left<>("Failed to retrieve programs"));
+                } else {
 
-                JsonArray programs = event.right().getValue();
-                //Delete tab if empty
+                    JsonArray programs = event.right().getValue();
+                    //Delete tab if empty
 
-                setArray(programs);
-                if (programs.size() == 0) {
-                    wb.removeSheetAt(wb.getSheetIndex(sheet));
+                    setArray(programs);
+                    if (programs.size() == 0) {
+                        wb.removeSheetAt(wb.getSheetIndex(sheet));
+                    }
+                    handler.handle(new Either.Right<>(true));
                 }
-                handler.handle(new Either.Right<>(true));
+            }catch(Exception e){
+                logger.error(e.getMessage());
+                logger.error(e.getStackTrace());
+                handler.handle(new Either.Left<>("error when creating excel"));
             }
         });
     }
@@ -61,16 +73,16 @@ public abstract class Investissement extends TabHelper {
             JsonObject operation = operations.getJsonObject(i);
             taby.add(operation.getInteger("id"));
             Row operationRow = sheet.createRow(this.operationsRowNumber);
-            excel.insertLabel(operationRow, cellLabelColumn, operation.getString("label"));
+            excel.insertLabel(cellLabelColumn, this.operationsRowNumber,operation.getString("label"));
             this.operationsRowNumber++;
         }
-        excel.insertHeader(sheet.createRow(this.operationsRowNumber), cellLabelColumn, excel.totalLabel);
+        excel.insertHeader(this.operationsRowNumber, cellLabelColumn, excel.totalLabel);
+
     }
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
-
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")).add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
+        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
                 handler.handle(event.left());
             } else {
@@ -85,6 +97,7 @@ public abstract class Investissement extends TabHelper {
             }
         }));
     }
+
     /**
      * Set the headers of tab for investissement
      *
@@ -100,14 +113,13 @@ public abstract class Investissement extends TabHelper {
         if (programs.isEmpty()) {
             return;
         }
-        Row programRow = sheet.createRow(programRowNumber);
 
         for (int i = 0; i < programs.size(); i++) {
             JsonObject program = programs.getJsonObject(i);
 
             JsonArray actions = program.getJsonArray(actionStr, new JsonArray());
             if (actions.isEmpty()) continue;
-            excel.insertHeader(programRow, cellColumn, program.getString("name"));
+            excel.insertHeader(programRowNumber, cellColumn, program.getString("name"));
             numberActions = nbAction(actions);
             //check if merged region necessary
             if (numberActions != 1) {
@@ -119,17 +131,16 @@ public abstract class Investissement extends TabHelper {
             posx += treatActions(actions, code, posx, programRowNumber);
             excel.fillTab(xTab, this.cellColumn, yTab, this.operationsRowNumber);
         }
-        excel.setTotal(cellColumn, operationsRowNumber, xTab, yTab);
+        //TODO faire un rework
+//        excel.setTotal(cellColumn, operationsRowNumber, xTab, yTab);
         CellRangeAddress totalMerge = new CellRangeAddress(programRowNumber, programRowNumber + 2, cellColumn, cellColumn);
         sheet.addMergedRegion(totalMerge);
         excel.setRegionHeader(totalMerge, sheet);
-        excel.insertHeader(sheet.getRow(programRowNumber), cellColumn, excel.totalLabel);
+        excel.insertHeader(programRowNumber, cellColumn, excel.totalLabel);
 
     }
 
     private int treatActions(JsonArray actions, String code, int posx, int programRowNumber) {
-        Row actionDescRow = sheet.getRow(programRowNumber + 1);
-        Row actionNumRow = sheet.getRow(programRowNumber + 2);
         for (int j = 0; j < actions.size(); j++) {
             JsonObject action = actions.getJsonObject(j);
             if (!code.equals(action.getString("code"))) {
@@ -139,8 +150,8 @@ public abstract class Investissement extends TabHelper {
                     posx++;
                 }
 
-                excel.insertHeader(actionDescRow, cellColumn, action.getString("name"));
-                excel.insertHeader(actionNumRow, cellColumn, action.getString("code"));
+                excel.insertHeader(programRowNumber + 1, cellColumn, action.getString("name"));
+                excel.insertHeader(programRowNumber + 2, cellColumn, action.getString("code"));
                 this.cellColumn++;
 
             }

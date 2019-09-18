@@ -2,7 +2,10 @@ package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.equipmentRapp.*;
-import fr.openent.lystore.export.investissement.*;
+import fr.openent.lystore.export.investissement.FonctionnementTab;
+import fr.openent.lystore.export.investissement.LyceeTab;
+import fr.openent.lystore.export.investissement.RecapEPLETab;
+import fr.openent.lystore.export.investissement.RecapImputationBud;
 import fr.openent.lystore.export.iris.IrisTab;
 import fr.openent.lystore.export.notificationEquipCP.LinesBudget;
 import fr.openent.lystore.export.notificationEquipCP.NotificationLycTab;
@@ -24,6 +27,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.poi.ss.format.CellNumberStringMod;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.entcore.common.sql.Sql;
@@ -48,11 +52,11 @@ public class Instruction {
             "WHERE instruction.id = ? " +
             "GROUP BY instruction.id";
     private Integer id;
-    private Number idFile;
+    private String idFile;
     private ExportService exportService;
     private Logger log = LoggerFactory.getLogger(DefaultProjectService.class);
 
-    public Instruction(ExportService exportService, Number idFile, Integer instructionId) {
+    public Instruction(ExportService exportService, String idFile, Integer instructionId) {
         this.idFile = idFile;
         this.exportService = exportService;
         this.id = instructionId;
@@ -90,20 +94,20 @@ public class Instruction {
                         Future<Boolean> Fonctionnementfuture = Future.future();
                         Future<Boolean> RecapEPLEfuture = Future.future();
                         Future<Boolean> RecapImputationBudfuture = Future.future();
-                        futures.add(lyceeFuture);
-                        futures.add(CMRFuture);
-                        futures.add(CMDfuture);
-                        futures.add(Fonctionnementfuture);
-                        futures.add(RecapEPLEfuture);
+//                        futures.add(lyceeFuture);
+//                        futures.add(CMRFuture);
+//                        futures.add(CMDfuture);
+//                        futures.add(Fonctionnementfuture);
+//                        futures.add(RecapEPLEfuture);
                         futures.add(RecapImputationBudfuture);
-
+//
                         futureHandler(handler, workbook, futures);
 
-                        new LyceeTab(workbook, instruction).create(getHandler(lyceeFuture));
-                        new CMRTab(workbook, instruction).create(getHandler(CMRFuture));
-                        new CMDTab(workbook, instruction).create(getHandler(CMDfuture));
-                        new FonctionnementTab(workbook, instruction).create(getHandler(Fonctionnementfuture));
-                        new RecapEPLETab(workbook, instruction).create(getHandler(RecapEPLEfuture));
+//                        new LyceeTab(workbook, instruction).create(getHandler(lyceeFuture));
+//                        new CMRTab(workbook, instruction).create(getHandler(CMRFuture));
+//                        new CMDTab(workbook, instruction).create(getHandler(CMDfuture));
+//                        new FonctionnementTab(workbook, instruction).create(getHandler(Fonctionnementfuture));
+//                        new RecapEPLETab(workbook, instruction).create(getHandler(RecapEPLEfuture));
                         new RecapImputationBud(workbook, instruction).create(getHandler(RecapImputationBudfuture));
                     } catch (IOException e) {
                         ExcelHelper.catchError(exportService, idFile, "Xlsx Failed to read template");
@@ -146,20 +150,20 @@ public class Instruction {
                     Future<Boolean> RecapMarketFuture = Future.future();
                     Future<Boolean> VerifBudgetFuture = Future.future();
                     futures.add(ListForTextFuture);
-                    futures.add(RecapFuture);
-                    futures.add(ComptaFuture);
-                    futures.add(AnnexeDelibFuture);
-                    futures.add(RecapMarketFuture);
-                    futures.add(VerifBudgetFuture);
+//                    futures.add(RecapFuture);
+//                    futures.add(ComptaFuture);
+//                    futures.add(AnnexeDelibFuture);
+//                    futures.add(RecapMarketFuture);
+//                    futures.add(VerifBudgetFuture);
 
                     futureHandler(handler, workbook, futures);
 
-                    new ComptaTab(workbook, instruction, type).create(getHandler(ComptaFuture));
+//                    new ComptaTab(workbook, instruction, type).create(getHandler(ComptaFuture));
                     new ListForTextTab(workbook, instruction, type).create(getHandler(ListForTextFuture));
-                    new RecapTab(workbook, instruction, type).create(getHandler(RecapFuture));
-                    new AnnexeDelibTab(workbook, instruction, type).create(getHandler(AnnexeDelibFuture));
-                    new RecapMarket(workbook, instruction, type).create(getHandler(RecapMarketFuture));
-                    new VerifBudgetTab(workbook, instruction, type).create(getHandler(VerifBudgetFuture));
+//                    new RecapTab(workbook, instruction, type).create(getHandler(RecapFuture));
+//                    new AnnexeDelibTab(workbook, instruction, type).create(getHandler(AnnexeDelibFuture));
+//                    new RecapMarket(workbook, instruction, type).create(getHandler(RecapMarketFuture));
+//                    new VerifBudgetTab(workbook, instruction, type).create(getHandler(VerifBudgetFuture));
                 }
             }
         }));
@@ -278,7 +282,6 @@ public class Instruction {
                     new NotificationLycTab(workbook, instruction).create(getHandler(NotifcationLyceeFuture));
                     new RecapMarketGestion(workbook, instruction).create(getHandler(RecapMarketGestionFuture));
                     new LinesBudget(workbook, instruction).create(getHandler(LinesBudgetFuture));
-
                 }
             }
         }));

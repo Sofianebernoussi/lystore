@@ -1,4 +1,4 @@
-import {_, ng, template} from 'entcore';
+import {_, ng, template, toasts} from 'entcore';
 import {Instruction, Notification, Operation, Utils} from "../../model";
 
 
@@ -33,12 +33,14 @@ export const instructionController = ng.controller('instructionController',
 
         $scope.isOperationEdit = false;
         $scope.openInstructionForm = async (action: string) => {
+                $scope.instruction = new Instruction();
+            $scope.loadingArray = true;
+            template.open('instruction-main', 'administrator/instruction/instruction-form');
             await $scope.initOperation();
             $scope.operationEditRemoveInstructionIds = [];
             $scope.operations.all = $scope.operations.all
-                .filter(operation => operation.instruction === null && operation.status === 'false')
+                .filter(operation => operation.instruction === null && operation.status === 'false');
             if(action === 'create'){
-                $scope.instruction = new Instruction();
                 $scope.instruction.operations = [];
             } else if (action === 'edit'){
                 $scope.instruction = $scope.instructions.selected[0];
@@ -48,9 +50,10 @@ export const instructionController = ng.controller('instructionController',
                     .filter(operation => operation.id_instruction !== $scope.instruction.id);
             }
             $scope.knowOperationIsEmpty();
-            template.open('instruction-main', 'administrator/instruction/instruction-form');
+            $scope.loadingArray = false;
             Utils.safeApply($scope);
         };
+
         $scope.isNewOperation = false;
         $scope.addOperationRow = () => {
             if ( $scope.operations.all.length !== 0)  $scope.isNewOperation = true;
@@ -160,7 +163,7 @@ export const instructionController = ng.controller('instructionController',
 
         $scope.exportRME = async (instruction) => {
             $scope.instructions.selected[0].selected = false;
-            $scope.notifications.push(new Notification('lystore.export.notif', 'info'));
+            toasts.info('lystore.export.notif');
             await  instruction.getExportRME();
 
             Utils.safeApply($scope);
@@ -174,28 +177,28 @@ export const instructionController = ng.controller('instructionController',
         };
 
         $scope.exportNotification = async (instruction) => {
-            $scope.notifications.push(new Notification('lystore.export.notif', 'info'));
+            toasts.info('lystore.export.notif');
             await instruction.exportNotificationCP();
             $scope.instructions.selected[0].selected = false;
             Utils.safeApply($scope);
         };
 
         $scope.exportSubvention = async (instruction) => {
-            $scope.notifications.push(new Notification('lystore.export.notif', 'info'));
+            toasts.info('lystore.export.notif');
             await instruction.exportRapportSubvention();
             $scope.instructions.selected[0].selected = false;
             Utils.safeApply($scope);
         };
 
         $scope.exportPublipostage = async (instruction) => {
-            $scope.notifications.push(new Notification('lystore.export.notif', 'info'));
+            toasts.info('lystore.export.notif');
             await instruction.exportPublipostage();
             $scope.instructions.selected[0].selected = false;
             Utils.safeApply($scope);
         };
 
         $scope.exportIris = async (instruction) => {
-            $scope.notifications.push(new Notification('lystore.export.notif', 'info'));
+            toasts.info('lystore.export.notif');
             await instruction.exportIris();
             $scope.instructions.selected[0].selected = false;
             Utils.safeApply($scope);
@@ -206,7 +209,7 @@ export const instructionController = ng.controller('instructionController',
             $scope.display.lightbox.exportEquipment = false;
 
             template.close('export.equipment.lightbox');
-            $scope.notifications.push(new Notification('lystore.export.notif', 'info'));
+            toasts.info('lystore.export.notif');
             await instruction.getExportEquipment(type);
             $scope.instructions.selected[0].selected = false;
             Utils.safeApply($scope);

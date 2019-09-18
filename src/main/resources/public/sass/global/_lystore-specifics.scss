@@ -8,6 +8,10 @@ body.lystore {
     }
   }
 
+  .tooltip {
+    z-index: 99999;
+  }
+
   .heading-tabs {
     overflow-x: inherit;
   }
@@ -953,7 +957,7 @@ body.lystore {
 
 .comment {
   border: 1px solid #ddd;
-  margin-top: 0;
+  margin-top: 7px;
 }
 
 i.house {
@@ -989,4 +993,12 @@ i.downloadButton {
 select.disabled {
   background-color: rgb(235, 235, 228);
   opacity: 0.4 !important;
+}
+input[type=number].numberWithoutArrow::-webkit-inner-spin-button,
+input[type=number].numberWithoutArrow::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number].numberWithoutArrow {
+  -moz-appearance:textfield;
 }

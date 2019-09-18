@@ -2,52 +2,38 @@ package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.helpers.ExcelHelper;
+import fr.openent.lystore.helpers.MongoHelper;
 import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.datagram.DatagramSocket;
-import io.vertx.core.datagram.DatagramSocketOptions;
-import io.vertx.core.dns.DnsClient;
-import io.vertx.core.dns.DnsClientOptions;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.file.FileSystem;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.net.NetClient;
-import io.vertx.core.net.NetClientOptions;
-import io.vertx.core.net.NetServer;
-import io.vertx.core.net.NetServerOptions;
-import io.vertx.core.shareddata.SharedData;
-import io.vertx.core.spi.VerticleFactory;
 import org.entcore.common.storage.Storage;
 import org.vertx.java.busmods.BusModBase;
 
+import javax.print.DocFlavor;
 import java.util.Queue;
-import java.util.Set;
-import java.util.function.Supplier;
+import java.util.Timer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static fr.openent.lystore.Lystore.CONFIG;
 import static fr.openent.lystore.Lystore.STORAGE;
 
-public class ExportWorker extends BusModBase implements Handler<Message<JsonObject>> {
+public class ExportLystoreWorker extends BusModBase implements Handler<Message<JsonObject>> {
     private Instruction instruction;
     private Storage storage;
     private ExportService exportService = new DefaultExportServiceService(Lystore.lystoreSchema, "export", storage);
-    private Number idNewFile;
+    private String idNewFile;
     private boolean isWorking = false;
-    Queue<Message<JsonObject>> MessagesQueue = new ConcurrentLinkedQueue<>();
+    private boolean isSleeping = true;
 
     @Override
     public void start() {
         super.start();
-        vertx.eventBus().localConsumer(ExportWorker.class.getSimpleName(), this);
+        vertx.eventBus().localConsumer(ExportLystoreWorker.class.getSimpleName(), this);
         this.config = CONFIG;
         this.storage = STORAGE;
         this.vertx = vertx;
@@ -55,11 +41,11 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
     }
 
     @Override
-    public void handle(Message<JsonObject> event) {
-        logger.info("Calling Worker");
-        MessagesQueue.add(event);
-        if(!isWorking && !MessagesQueue.isEmpty()){
-            isWorking = true;
+    public void handle(Message<JsonObject> eventMessage) {
+        eventMessage.reply(new JsonObject().put("status", "ok"));
+        if (isSleeping) {
+            logger.info("Calling Worker");
+            isSleeping = false;
             processExport();
         }
     }
@@ -68,54 +54,80 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
 
 
     private void processExport(){
-        logger.info("Process export nb Queue:" + MessagesQueue.size());
-        if(MessagesQueue.isEmpty()){
-            isWorking =  false;
-        }else {
-            Handler<Either<String,Boolean>> exportHandler = event -> {
+
+        Handler<Either<String,Boolean>> exportHandler = event -> {
                 logger.info("exportHandler");
                 if (event.isRight()) {
-                    logger.info("end");
+                    logger.info("export to Waiting");
                     processExport();
                 } else {
-                    ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event.left());
+                    ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx " + event.left().getValue());
                 }
             };
+            exportService.getWaitingExport(new Handler<Either<String, JsonObject>>() {
+                @Override
+                public void handle(Either<String, JsonObject> event) {
+                    if(event.isRight()){
+                        JsonObject waitingOrder = event.right().getValue();
+                        chooseExport( waitingOrder,exportHandler);
+                    }else{
+                        isSleeping = true;
+                        new java.util.Timer().schedule(
+                                new java.util.TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        processExport();
+                                    }
+                                },
+                                3600*1000
+                        );
+                    }
+                }
+            });
+    }
 
-            Message<JsonObject> event = MessagesQueue.poll();
-            logger.info("Doing export "+ MessagesQueue.size() +" in waitinglist");
-            final String action = event.body().getString("action", "");
-            String fileNamIn = event.body().getString("titleFile");
-            idNewFile = event.body().getInteger("idFile");
-            switch (action) {
-                case "exportEQU":
-                    exportEquipment(
-                            event.body().getInteger("id"),
-                            event.body().getString("type"),
-                            fileNamIn,exportHandler );
-                    break;
-                case "exportRME":
-                    exportRME(
-                            event.body().getInteger("id"),
-                            fileNamIn,
-                            exportHandler);
-                    break;
-                case "exportNotificationCP":
-                    exportNotificationCp(event.body().getInteger("id"),
-                            fileNamIn,
-                            exportHandler);
-                    break;
-                case "exportPublipostage":
-                    exportPublipostage(event.body().getInteger("id"),
-                            fileNamIn,
-                            exportHandler);
-                    break;
-                case "exportSubvention":
-                    exportSubvention(event.body().getInteger("id"),
-                            fileNamIn,
-                            exportHandler);
-                    break;
-                case "exportIris":
+    private void chooseExport(JsonObject body, Handler<Either<String, Boolean>> exportHandler) {
+        final String action = body.getString("action", "");
+        String fileName = body.getString("filename");
+        idNewFile = body.getString("_id");
+        Integer instruction_id = -1;
+        try {
+            instruction_id = Integer.parseInt(body.getString("instruction_id"));
+        }catch (ClassCastException ce){
+            instruction_id =body.getInteger("instruction_id");
+        }
+        switch (action) {
+            case "exportEQU":
+                exportEquipment(
+                        instruction_id,
+                        body.getString("type"),
+                        fileName,exportHandler );
+                break;
+            case "exportRME":
+                exportRME(
+                        instruction_id,
+                        fileName,
+                        exportHandler);
+                break;
+            case "exportNotificationCP":
+                exportNotificationCp(
+                        instruction_id,
+                        fileName,
+                        exportHandler);
+                break;
+            case "exportPublipostage":
+                exportPublipostage(
+                        instruction_id,
+                        fileName,
+                        exportHandler);
+                break;
+            case "exportSubvention":
+                exportSubvention(
+                        instruction_id,
+                        fileName,
+                        exportHandler);
+                break;
+            case "exportIris":
                     exportIris(event.body().getInteger("id"),
                             fileNamIn,
                             exportHandler);
@@ -126,7 +138,7 @@ public class ExportWorker extends BusModBase implements Handler<Message<JsonObje
 
 
 
-            }
+
         }
     }
 

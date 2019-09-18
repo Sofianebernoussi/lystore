@@ -833,7 +833,7 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
         String query = "UPDATE " + Lystore.lystoreSchema + ".equipment SET " +
                 "name = ?, summary = ?, description = ?, price = ?, id_tax = ?, image = ?, " +
                 "id_contract = ?, status = ?, technical_specs = to_json(?::text), " +
-                "id_type = ?, catalog_enabled = ?, option_enabled = ?, reference = ?, price_editable = ? " +
+                "id_type = ?, catalog_enabled = ?, option_enabled = ?, price_editable = ? " +
                 "WHERE id = ?";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
@@ -849,7 +849,6 @@ public class DefaultEquipmentService extends SqlCrudService implements Equipment
                 .add(equipment.getInteger("id_type"))
                 .add(equipment.getBoolean("catalog_enabled"))
                 .add(equipment.getBoolean("option_enabled"))
-                .add(equipment.getString("reference"))
                 .add(equipment.getBoolean("price_editable"))
                 .add(id);
 

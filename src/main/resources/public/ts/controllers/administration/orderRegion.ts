@@ -1,4 +1,4 @@
-import {_, idiom as lang, ng, notify, template} from 'entcore';
+import {_, idiom as lang, ng, notify, template, toasts} from 'entcore';
 import {
     Notification,
     Operation,
@@ -62,7 +62,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                 orderRegionCreate.technical_spec = $scope.orderToUpdate.equipment.technical_specs;
                 const { status } = await orderRegionCreate.create();
                 if (status === 200) {
-                    $scope.notifications.push(new Notification('lystore.order.region.update', 'confirm'));
+                    toasts.confirm('lystore.order.region.update');
                     await $scope.ordersClient.addOperationInProgress(operation.id, [$routeParams.idOrder]);
                     $scope.cancelUpdate();
                 }
@@ -99,7 +99,7 @@ export const orderRegionController = ng.controller('orderRegionController',
             } else {
                 await orderRegion.create();
             }
-            $scope.notifications.push(new Notification('lystore.order.region.update', 'confirm'));
+            toasts.confirm('lystore.order.region.update');
         };
         $scope.isValidFormUpdate = ():boolean => {
             return $scope.orderToUpdate.equipment_key
@@ -249,7 +249,7 @@ export const orderRegionController = ng.controller('orderRegionController',
             });
             let {status} = await ordersToCreate.create();
             if (status === 201) {
-                $scope.notifications.push(new Notification('lystore.order.region.create.message', 'confirm'));
+                toasts.confirm('lystore.order.region.create.message');
                 $scope.orderToCreate = new OrderRegion();
                 $scope.titles = new Titles();
             }

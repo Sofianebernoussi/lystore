@@ -55,7 +55,7 @@ public class RecapImputationBud extends TabHelper {
             excel.insertCellTab(xTab + 4, yTab + i, program.getString("program_label"));
             excel.insertCellTabCenter(xTab + 5, yTab + i, program.getString("action_code"));
             excel.insertCellTab(xTab + 6, yTab + i, program.getString("action_name"));
-            excel.insertCellTabFloatWithPrice(xTab + 7, yTab + i, Float.parseFloat(program.getString("total")));
+            excel.insertCellTabDoubleWithPrice(xTab + 7, yTab + i, Double.parseDouble(program.getString("total")));
 
 
         }

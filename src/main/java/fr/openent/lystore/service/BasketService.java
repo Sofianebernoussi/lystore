@@ -74,7 +74,7 @@ public interface BasketService {
      * @param price_proposal
      * @param eitherHandler
      */
-    void updatePriceProposal(Integer id, Float price_proposal, Handler<Either<String, JsonObject>> eitherHandler);
+    void updatePriceProposal(Integer id, Double price_proposal, Handler<Either<String, JsonObject>> eitherHandler);
 
     /**
      * Add file to a specific basket

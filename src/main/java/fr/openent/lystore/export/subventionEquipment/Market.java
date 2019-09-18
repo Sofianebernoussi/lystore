@@ -23,7 +23,7 @@ public class Market extends TabHelper {
     private final String ANNEXE_TEXT = "ANNEXE au rapport";
     private final String TOTAL_TITLE = "Montant total dotations financières au titre du présent rapport";
     private boolean isCMR;
-    Float totalSubv = 0.f;
+    Double totalSubv = 0.d;
 
 
     public Market(Workbook workbook, JsonObject instruction, boolean isCMR) {
@@ -95,7 +95,7 @@ public class Market extends TabHelper {
         excel.insertBlackTitleHeaderBorderlessCenter(0, lineNumber, TOTAL_TITLE);
         sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber++;
-        excel.insertBlueTitleHeaderBorderlessCenterFloatCurrency(0, lineNumber, totalSubv);
+        excel.insertBlueTitleHeaderBorderlessCenterDoubleCurrency(0, lineNumber, totalSubv);
         sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber += 2;
 
@@ -150,15 +150,15 @@ public class Market extends TabHelper {
                     lineNumber++;
                 }
                 excel.insertCellTab(0, lineNumber, formatStrToCell(order.getString("name_equipment"), 10));
-                excel.insertCellTabFloat(1, lineNumber, order.getInteger("amount")*1.f);
-                excel.insertCellTabFloat(2, lineNumber, safeGetFloat(order,"total", "Market"));
+                excel.insertCellTabDouble(1, lineNumber, order.getInteger("amount")*1.d);
+                excel.insertCellTabDouble(2, lineNumber, safeGetDouble(order,"total", "Market"));
                 lineNumber++;
             }
             excel.insertLabelBold(0, lineNumber, market);
             excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
             excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
             initLine = lineNumber + 2;
-//            excel.insertCellTabFloatWithPrice(3, lineNumber, Float.parseFloat(campaignData.getString("totalprice")));
+//            excel.insertCellTabDoubleWithPrice(3, lineNumber, Double.parseDouble(campaignData.getString("totalprice")));
             lineNumber += 2;
 
 

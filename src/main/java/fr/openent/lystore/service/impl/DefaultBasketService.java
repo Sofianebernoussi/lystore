@@ -147,7 +147,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
     }
 
 
-    public void updatePriceProposal(Integer id, Float price_proposal, Handler<Either<String, JsonObject>> eitherHandler) {
+    public void updatePriceProposal(Integer id, Double price_proposal, Handler<Either<String, JsonObject>> eitherHandler) {
         JsonArray values;
         String query = "UPDATE " + Lystore.lystoreSchema + ".basket_equipment " +
                 "Set price_proposal = " + (price_proposal == null ? " null " : " ? ") +
@@ -250,7 +250,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             for (int i = 0; i < baskets.size(); i++) {
                 basket = baskets.getJsonObject(i);
                 if (purse_enabled) {
-                    statements.add(purseService.updatePurseAmountStatement(Float.valueOf(basket.getString("total_price")),
+                    statements.add(purseService.updatePurseAmountStatement(Double.valueOf(basket.getString("total_price")),
                             idCampaign, idStructure, "-"));
                 }
                 statements.add(getInsertEquipmentOrderStatement(basket, idProject));
@@ -407,8 +407,8 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             params = new fr.wseduc.webutils.collections.JsonArray();
 
             params.add(basket.getInteger("id_order"))
-                    .add(Float.valueOf(basket.getString("price")))
-                    .add(Float.valueOf(basket.getString("tax_amount")))
+                    .add(Double.valueOf(basket.getString("price")))
+                    .add(Double.valueOf(basket.getString("tax_amount")))
                     .add(basket.getInteger("amount"))
                     .add(basket.getInteger("id_campaign"))
                     .add(basket.getString("id_structure"))
@@ -422,7 +422,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                     .add(basket.getInteger("id_contract"))
                     .add(basket.getInteger("id_equipment"))
                     .add(basket.getString("comment"))
-                    .add(Float.valueOf(basket.getString("price_proposal")))
+                    .add(Double.valueOf(basket.getString("price_proposal")))
                     .add(basket.getInteger("id_campaign"))
                     .add(basket.getString("id_structure"))
             ;
@@ -439,8 +439,8 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             params = new fr.wseduc.webutils.collections.JsonArray();
 
             params.add(basket.getInteger("id_order"))
-                    .add(Float.valueOf(basket.getString("price")))
-                    .add(Float.valueOf(basket.getString("tax_amount")))
+                    .add(Double.valueOf(basket.getString("price")))
+                    .add(Double.valueOf(basket.getString("tax_amount")))
                     .add(basket.getInteger("amount"))
                     .add(basket.getInteger("id_campaign"))
                     .add(basket.getString("id_structure"))
@@ -486,8 +486,8 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
             queryEOptionEquipmentOrder.append("( ?, ?, ?, ?, ?, ?)");
             queryEOptionEquipmentOrder.append( i == options.size()-1 ? "; " : ", ");
             JsonObject option = options.getJsonObject(i);
-            params.add( option.getFloat("tax_amount"))
-                    .add(option.getFloat("price"))
+            params.add( option.getDouble("tax_amount"))
+                    .add(option.getDouble("price"))
                     .add( basket.getInteger("id_order"))
                     .add(option.getString("name"))
                     .add(option.getInteger("amount"))
@@ -557,7 +557,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
      * @param basicBDObject
      * @return Transaction handler
      */
-    private static void getTransactionHandler(HttpServerRequest request, String nameStructure, Float totalPrice,
+    private static void getTransactionHandler(HttpServerRequest request, String nameStructure, Double totalPrice,
                                               Message<JsonObject> event, JsonObject basicBDObject,
                                               Handler<Either<String, JsonObject>> handler) {
         JsonObject result = event.body();
@@ -602,10 +602,10 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
         }
     }
 
-    private static Float getTotalPriceOfBasketList(JsonArray baskets) {
-        Float total = Float.valueOf(0);
+    private static Double getTotalPriceOfBasketList(JsonArray baskets) {
+        Double total = Double.valueOf(0);
         for(int i = 0; i < baskets.size(); i++) {
-            total += Float.valueOf((baskets.getJsonObject(i)).getString("total_price"));
+            total += Double.valueOf((baskets.getJsonObject(i)).getString("total_price"));
         }
         return total;
     }

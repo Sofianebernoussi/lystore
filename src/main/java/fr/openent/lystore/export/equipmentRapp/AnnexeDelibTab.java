@@ -80,7 +80,7 @@ public class AnnexeDelibTab extends TabHelper {
         int lineToInsert = 5;
         JsonObject idPassed = new JsonObject();
         String key = "", oldkey = "";
-        Float oldTotal = 0.f;
+        Double oldTotal = 0.d;
         for (int i = 0; i < datas.size(); i++) {
             JsonObject action = datas.getJsonObject(i);
             key = action.getString("program") + " - " + action.getString("code");
@@ -95,12 +95,12 @@ public class AnnexeDelibTab extends TabHelper {
                 oldkey = "";
             }
             if (!oldkey.equals(key)) {
-                oldTotal = 0.f;
+                oldTotal = 0.d;
             }
             oldkey = key;
-            oldTotal += Float.parseFloat(action.getString("total"));
+            oldTotal += Double.parseDouble(action.getString("total"));
 
-            excel.insertCellTabFloat(columnToInsert + 4, lineToInsert, oldTotal);
+            excel.insertCellTabDouble(columnToInsert + 4, lineToInsert, oldTotal);
 
         }
 

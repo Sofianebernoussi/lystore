@@ -54,7 +54,7 @@ public abstract class TabHelper {
      */
     protected JsonObject tabx;
     protected JsonArray taby;
-    protected ArrayList<ArrayList<Float>> priceTab;
+    protected ArrayList<ArrayList<Double>> priceTab;
 
     /**
      * open the tab or create it if it doesn't exists
@@ -73,7 +73,7 @@ public abstract class TabHelper {
             this.sheet = wb.createSheet(TabName);
         }
         this.excel = new ExcelHelper(wb, sheet);
-        priceTab = new ArrayList<ArrayList<Float>>();
+        priceTab = new ArrayList<ArrayList<Double>>();
         log.info("Initialize tab : " + TabName);
     }
 
@@ -243,14 +243,14 @@ public abstract class TabHelper {
         }
     }
 
-    protected  Float safeGetFloat(JsonObject jo, String  key, String nameTab){
-     Float result;
+    protected Double safeGetDouble(JsonObject jo, String key, String nameTab) {
+        Double result;
         try {
-            //logger.info("Object safeGetFloat : " + jo + " key : " + key);
-            result=  jo.getFloat(key);
+            //logger.info("Object safeGetDouble : " + jo + " key : " + key);
+            result = jo.getDouble(key);
         }catch (Exception e){
-            logger.info("Exception safeGetFloat : key : " + key + " ;name tab : " + nameTab);
-            result= Float.parseFloat(jo.getString(key).replaceAll(",","."));
+            logger.info("Exception safeGetDouble : key : " + key + " ;name tab : " + nameTab);
+            result = Double.parseDouble(jo.getString(key).replaceAll(",", "."));
         }
         return  result;
     }

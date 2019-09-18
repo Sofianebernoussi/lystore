@@ -61,9 +61,9 @@ public class DefaultPurseService implements PurseService {
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(structureId)
-                .add(Float.parseFloat(amount))
+                .add(Double.parseDouble(amount))
                 .add(campaignId)
-                .add(Float.parseFloat(amount))
+                .add(Double.parseDouble(amount))
                 .add(structureId)
                 .add(campaignId);
 
@@ -86,7 +86,7 @@ public class DefaultPurseService implements PurseService {
     }
 
     @Override
-    public JsonObject updatePurseAmountStatement(Float price, Integer idCampaign, String idStructure,String operation) {
+    public JsonObject updatePurseAmountStatement(Double price, Integer idCampaign, String idStructure,String operation) {
         final double cons = 100.0;
         String updateQuery = "UPDATE lystore.purse " +
                 "SET amount = amount " +  operation + " ?  " +

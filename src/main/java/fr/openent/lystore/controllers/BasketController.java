@@ -138,7 +138,7 @@ public class BasketController extends ControllerHelper {
                 }
                 try {
                     Integer id = Integer.parseInt(request.params().get("idBasket"));
-                    Float price_proposal = basket.getFloat("price_proposal");
+                    Double price_proposal = basket.getDouble("price_proposal");
                     basketService.updatePriceProposal(id, price_proposal, defaultResponseHandler(request));
                 } catch (NumberFormatException e) {
                     e.printStackTrace();

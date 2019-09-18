@@ -45,6 +45,7 @@ public class AnnexeDelibTab extends TabHelper {
                 structuresId.add(structuresId.size(), data.getString("id_structure"));
 
         }
+        logger.info("structid add");
         getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
@@ -52,10 +53,15 @@ public class AnnexeDelibTab extends TabHelper {
                 if (repStructures.isRight()) {
                     try {
                         JsonArray structures = repStructures.right().getValue();
-                        setStructures(structures);
+                        logger.info("struct initialized");
+                        setStructuresFromDatas(structures);
+                        logger.info("struct set");
                         setArray(datas);
+                        logger.info("data set");
+
                     }catch (Exception e){
                         errorCatch = true;
+                        log.error(e.getMessage());
                     }
                     if(errorCatch)
                         handler.handle(new Either.Left<>("Error when writting files"));

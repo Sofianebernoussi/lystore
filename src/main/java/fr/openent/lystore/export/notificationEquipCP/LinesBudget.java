@@ -105,7 +105,7 @@ public class LinesBudget extends TabHelper {
     protected void setArray(JsonArray datas) {
         int initLineNumber;
         for (int i = 0; i < datas.size(); i++) {
-            Float totalToInsert = 0.f;
+            Double totalToInsert = 0.d;
             String previousStructure = "";
             JsonObject operationData = datas.getJsonObject(i);
             JsonArray orders = operationData.getJsonArray("actionsJO");
@@ -128,7 +128,7 @@ public class LinesBudget extends TabHelper {
                         excel.insertWhiteOnBlueTab(1, lineNumber, labelOperation);
                         operationAdded = true;
                     }
-                    totalToInsert = 0.f;
+                    totalToInsert = 0.d;
                     previousCode = "";
                     previousStructure = currentStructure;
                     excel.insertWhiteOnBlueTab(2, lineNumber, order.getString("uai"));
@@ -138,15 +138,15 @@ public class LinesBudget extends TabHelper {
                 }
                 if (!previousCode.equals(code)) {
                     previousCode = code;
-                    totalToInsert = 0.f;
+                    totalToInsert = 0.d;
                 }
-                totalToInsert += safeGetFloat(order,"total", "LinesBudget");
-                excel.insertFloatYellow(5 + codes.indexOf(Integer.parseInt(code)), lineNumber,
+                totalToInsert += safeGetDouble(order,"total", "LinesBudget");
+                excel.insertDoubleYellow(5 + codes.indexOf(Integer.parseInt(code)), lineNumber,
                         totalToInsert);
             }
             //insert Total
             excel.fillTabWithStyle(1, 4, initLineNumber + 1, lineNumber + 1, excel.whiteOnBlueLabel);
-            excel.fillTabWithStyle(5, arraylength, initLineNumber + 1, lineNumber + 1, excel.floatOnYellowStyle);
+            excel.fillTabWithStyle(5, arraylength, initLineNumber + 1, lineNumber + 1, excel.doubleOnYellowStyle);
 
             lineNumber++;
             excel.insertHeader(1, lineNumber, excel.totalLabel + " : " + labelOperation);

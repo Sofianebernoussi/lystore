@@ -108,7 +108,7 @@ public class ComptaTab extends TabHelper {
             initYProgramLabel = yProgramLabel;
             yProgramLabel += 2;
             String campaign = "", key = "", oldkey = "";
-            Float oldTotal = 0.f;
+            Double oldTotal = 0.d;
 
 //            //Insert datas
 //
@@ -155,20 +155,20 @@ public class ComptaTab extends TabHelper {
                     excel.insertLabel(2, yProgramLabel, action.getString("nameEtab"));
                     excel.insertLabel(3, yProgramLabel, action.getString("uai"));
 
-                    oldTotal = 0.f;
+                    oldTotal = 0.d;
                     oldkey = key;
 
-                    oldTotal +=  safeGetFloat(action,"total", "ComptaTab") ;
-                    excel.insertCellTabFloat(4 + programLabel.getInteger(key),
+                    oldTotal += safeGetDouble(action, "total", "ComptaTab");
+                    excel.insertCellTabDouble(4 + programLabel.getInteger(key),
                             yProgramLabel, oldTotal);
                 } else {
                     yProgramLabel--;
                     if (!oldkey.equals(key)) {
-                        oldTotal = 0.f;
+                        oldTotal = 0.d;
                     }
                     oldkey = key;
-                    oldTotal +=safeGetFloat(action,"total", "ComptaTab") ;
-                    excel.insertCellTabFloat(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")), yProgramLabel
+                    oldTotal += safeGetDouble(action, "total", "ComptaTab");
+                    excel.insertCellTabDouble(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")), yProgramLabel
                             , oldTotal);
                 }
 

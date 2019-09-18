@@ -1,7 +1,6 @@
 package fr.openent.lystore.helpers;
 
 import fr.openent.lystore.Lystore;
-import fr.openent.lystore.export.ExportLystoreWorker;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
@@ -9,7 +8,6 @@ import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
-import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
@@ -24,8 +22,6 @@ import org.entcore.common.user.UserUtils;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-
-import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 
 public class ExcelHelper {
     private static DefaultExportServiceService exportService;
@@ -48,7 +44,7 @@ public class ExcelHelper {
     public final CellStyle blackTitleHeaderStyle;
     public final CellStyle blueTitleHeaderStyle;
     public final CellStyle tabStringStyleRight;
-    public final CellStyle floatOnYellowStyle;
+    public final CellStyle doubleOnYellowStyle;
     public final CellStyle whiteOnBlueLabel;
     public final CellStyle blackOnGreenHeaderStyle;
     public final CellStyle blackOnRedLabel;
@@ -87,7 +83,7 @@ public class ExcelHelper {
         this.titleHeaderStyle = wb.createCellStyle();
         this.blueTitleHeaderStyle = wb.createCellStyle();
         this.tabStringStyleRight = wb.createCellStyle();
-        this.floatOnYellowStyle = wb.createCellStyle();
+        this.doubleOnYellowStyle = wb.createCellStyle();
         this.blackOnGreenHeaderStyle = wb.createCellStyle();
         this.whiteOnBlueLabel = wb.createCellStyle();
         this.blackOnRedLabel = wb.createCellStyle();
@@ -348,17 +344,17 @@ public class ExcelHelper {
         this.yellowLabel.setVerticalAlignment(VerticalAlignment.CENTER);
         this.yellowLabel.setFont(labelHeadFont);
 
-        this.floatOnYellowStyle.setWrapText(true);
-        this.floatOnYellowStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
-        this.floatOnYellowStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        this.floatOnYellowStyle.setBorderLeft(BorderStyle.THIN);
-        this.floatOnYellowStyle.setBorderRight(BorderStyle.THIN);
-        this.floatOnYellowStyle.setBorderTop(BorderStyle.THIN);
-        this.floatOnYellowStyle.setBorderBottom(BorderStyle.THIN);
-        this.floatOnYellowStyle.setAlignment(HorizontalAlignment.RIGHT);
-        this.floatOnYellowStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        this.floatOnYellowStyle.setFont(tabFont);
-        this.floatOnYellowStyle.setDataFormat(format.getFormat("#,##0.00"));
+        this.doubleOnYellowStyle.setWrapText(true);
+        this.doubleOnYellowStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
+        this.doubleOnYellowStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        this.doubleOnYellowStyle.setBorderLeft(BorderStyle.THIN);
+        this.doubleOnYellowStyle.setBorderRight(BorderStyle.THIN);
+        this.doubleOnYellowStyle.setBorderTop(BorderStyle.THIN);
+        this.doubleOnYellowStyle.setBorderBottom(BorderStyle.THIN);
+        this.doubleOnYellowStyle.setAlignment(HorizontalAlignment.RIGHT);
+        this.doubleOnYellowStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.doubleOnYellowStyle.setFont(tabFont);
+        this.doubleOnYellowStyle.setDataFormat(format.getFormat("#,##0.00"));
 
 
         Font whiteTabFont = this.wb.createFont();
@@ -566,8 +562,6 @@ public class ExcelHelper {
                 break;
             case"Double":
                 cell.setCellValue((Double)data);
-            case"Float":
-                cell.setCellValue((Float)data);
                 break;
             case "Integer":
                 cell.setCellValue((Integer)data);
@@ -595,13 +589,13 @@ public class ExcelHelper {
     }
 
     /**
-     * insert a cell with float in the tab
+     * insert a cell with doulbe in the tab
      *
      * @param cellColumn
      * @param line
      * @param data       data to insert
      */
-    public void insertCellTabFloat(int cellColumn, int line, Float data) {
+    public void insertCellTabDouble(int cellColumn, int line, Double data) {
       insertWithStyle(cellColumn,line,data,this.tabNumeralStyle);
     }
 
@@ -635,8 +629,8 @@ public class ExcelHelper {
     public void insertBlackOnGreenHeader(int cellColumn, int line, String data) {
         insertWithStyle(cellColumn, line, data, this.blackOnGreenHeaderStyle);
     }
-    public void insertFloatYellow(int cellColumn, int line, Float data) {
-        insertWithStyle(cellColumn, line, data,this.floatOnYellowStyle);
+    public void insertDoubleYellow(int cellColumn, int line, Double data) {
+        insertWithStyle(cellColumn, line, data,this.doubleOnYellowStyle);
     }
 
     /**
@@ -646,7 +640,7 @@ public class ExcelHelper {
      * @param line
      * @param data
      */
-    public void insertCellTabFloatWithPrice(int cellColumn, int line, float data) {
+    public void insertCellTabDoubleWithPrice(int cellColumn, int line, Double data) {
         insertWithStyle(cellColumn, line, data,this.tabCurrencyStyle);
 
         }
@@ -751,7 +745,7 @@ public class ExcelHelper {
         insertWithStyle(cellColumn, line, data,this.blueTitleHeaderBorderlessCenteredStyle);
     }
 
-    public void insertBlueTitleHeaderBorderlessCenterFloatCurrency(int cellColumn, int line, Float data) {
+    public void insertBlueTitleHeaderBorderlessCenterDoubleCurrency(int cellColumn, int line, Double data) {
         insertWithStyle(cellColumn, line, data,this.blueTitleHeaderBorderlessCenteredCurrencyStyle);
     }
 

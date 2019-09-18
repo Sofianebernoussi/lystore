@@ -280,7 +280,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     }
 
     @Override
-    public void updatePriceProposal(Integer id, Float price_proposal, Handler<Either<String, JsonObject>> handler) {
+    public void updatePriceProposal(Integer id, Double price_proposal, Handler<Either<String, JsonObject>> handler) {
         JsonArray values;
         String query = "UPDATE " + Lystore.lystoreSchema + ".order_client_equipment" +
                 "SET price_proposal = " + (price_proposal == null ? " null " : " ? ") +
@@ -383,7 +383,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
             if (event.isRight()) {
                 JsonArray results = event.right().getValue();
                 Boolean purseEnabled = (results.size() > 0 && results.getJsonObject(0).getBoolean("purse_enabled"));
-                Float price = Float.valueOf(order.getString("price_total_equipment"));
+                Double price = Double.valueOf(order.getString("price_total_equipment"));
                 try {
                     JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
                     if (purseEnabled) {
@@ -409,7 +409,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                                     ? Double.parseDouble(newPurseArray.getString(0))
                                     : 0);
                             res.put("f2", newOrderNumberArray.size() > 0
-                                    ? Float.parseFloat(newOrderNumberArray.getLong(0).toString())
+                                    ? Double.parseDouble(newOrderNumberArray.getLong(0).toString())
                                     : 0);
 
                             getTransactionHandler(event, res, handler);
@@ -704,19 +704,19 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
     private JsonObject getTotalsOrdersPrices(JsonArray orders){
 
-        Float tva = new Float(0);
-        Float total = new Float(0);
+        Double tva = new Double(0);
+        Double total = new Double(0);
         final Integer Const = 100;
-        Float totalTTC ;
+        Double totalTTC ;
         try {
-            tva = Float.parseFloat((orders.getJsonObject(0)).getString("tax_amount"));
+            tva = Double.parseDouble((orders.getJsonObject(0)).getString("tax_amount"));
         }catch (ClassCastException e) {
             LOGGER.error("An error occurred when casting tax amount", e);
         }
         for (int i = 0; i < orders.size(); i++) {
             try {
-                total += Float.parseFloat((orders.getJsonObject(0)).getString("price")) *
-                        Float.parseFloat((orders.getJsonObject(0)).getInstant("amount").toString());
+                total += Double.parseDouble((orders.getJsonObject(0)).getString("price")) *
+                        Double.parseDouble((orders.getJsonObject(0)).getInstant("amount").toString());
             }catch (ClassCastException e) {
                 LOGGER.error("An error occurred when casting order price", e);
             }
@@ -906,7 +906,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
             JsonObject returns = new JsonObject();
 
             returns.put("amount", amountPurseNbOrder.getDouble("f1"));
-            returns.put("nb_order",amountPurseNbOrder.getFloat("f2"));
+            returns.put("nb_order",amountPurseNbOrder.getDouble("f2"));
             handler.handle(new Either.Right<String, JsonObject>(returns));
         }  else {
             LOGGER.error("An error occurred when launching 'order' transaction");

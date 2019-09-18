@@ -122,7 +122,7 @@ public class RecapEPLETab extends TabHelper {
             excel.insertCellTab(0, yProgramLabel + 3, program.getString("label"));
             excel.insertCellTab(1, yProgramLabel + 3, program.getString("comment"));
             excel.insertCellTabInt(2, yProgramLabel + 3, Integer.parseInt(program.getInteger("amount").toString()));
-            excel.insertCellTabFloat(3, yProgramLabel + 3, Float.parseFloat(program.getString("total")));
+            excel.insertCellTabDouble(3, yProgramLabel + 3, Double.parseDouble(program.getString("total")));
             yProgramLabel++;
             nbLine++;
 

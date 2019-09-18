@@ -112,7 +112,7 @@ public class ListForTextTab extends TabHelper {
             String operation = "";
 //            //Insert datas
             String key = "", oldkey = "";
-            Float oldTotal = 0.f;
+            Double oldTotal = 0.d;
 //
             for (int j = 0; j < actions.size(); j++) {
                 JsonObject action = actions.getJsonObject(j);
@@ -156,19 +156,19 @@ public class ListForTextTab extends TabHelper {
                     excel.insertLabel(2, yProgramLabel, action.getString("nameEtab"));
                     excel.insertLabel(3, yProgramLabel, action.getString("uai"));
 
-                    oldTotal = 0.f;
+                    oldTotal = 0.d;
                     oldkey = key;
-                    oldTotal += safeGetFloat(action,"total", "ListForTextTab") ;
-                    excel.insertCellTabFloat(4 + programLabel.getInteger(key),
+                    oldTotal += safeGetDouble(action, "total", "ListForTextTab");
+                    excel.insertCellTabDouble(4 + programLabel.getInteger(key),
                             yProgramLabel, oldTotal);
                 } else {
                     yProgramLabel--;
                     if (!oldkey.equals(key)) {
-                        oldTotal = 0.f;
+                        oldTotal = 0.d;
                     }
                     oldkey = key;
-                    oldTotal += safeGetFloat(action,"total", "ListForTextTab") ;
-                    excel.insertCellTabFloat(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")), yProgramLabel
+                    oldTotal += safeGetDouble(action, "total", "ListForTextTab");
+                    excel.insertCellTabDouble(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")), yProgramLabel
                             , oldTotal);
                 }
 

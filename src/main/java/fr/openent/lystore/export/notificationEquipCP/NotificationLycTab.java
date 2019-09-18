@@ -154,7 +154,7 @@ public class NotificationLycTab extends TabHelper {
                     excel.insertCellTabCenterBold(3, lineNumber, instruction.getString("cp_number") + "\n" + date);
                     excel.insertCellTabCenter(4, lineNumber, idFormatted);
                     excel.insertCellTabCenterBold(5, lineNumber, order.getInteger("amount").toString());
-                    excel.insertCellTabFloatWithPrice(6, lineNumber, safeGetFloat(order,"total", "NotificationLycTab"));
+                    excel.insertCellTabDoubleWithPrice(6, lineNumber, safeGetDouble(order,"total", "NotificationLycTab"));
 
                     lineNumber++;
 

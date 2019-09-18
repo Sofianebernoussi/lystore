@@ -79,7 +79,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 "WHERE id = ? " +
                 "RETURNING id;";
 
-        params.add(order.getFloat("price"))
+        params.add(order.getDouble("price"))
                 .add(order.getInteger("amount"))
                 .add(order.getString("creation_date"))
                 .add(user.getUsername())
@@ -119,7 +119,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 "WHERE id = ?" +
                 "RETURNING id;";
 
-        params.add(order.getFloat("price"))
+        params.add(order.getDouble("price"))
                 .add(order.getInteger("amount"))
                 .add(order.getString("creation_date"))
                 .add(user.getUsername())
@@ -172,7 +172,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
         }
 
         params = new fr.wseduc.webutils.collections.JsonArray()
-                .add(order.getFloat("price"))
+                .add(order.getDouble("price"))
                 .add(order.getInteger("amount"))
                 .add(order.getString("creation_date"))
                 .add(user.getUsername())

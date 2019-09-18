@@ -146,7 +146,7 @@ public class LinesBudget extends TabHelper {
             }
             //insert Total
             excel.fillTabWithStyle(1, 4, initLineNumber + 1, lineNumber + 1, excel.whiteOnBlueLabel);
-            excel.fillTabWithStyle(5, arraylength, initLineNumber + 1, lineNumber + 1, excel.floatOnYellowStyle);
+            excel.fillTabWithStyle(5, arraylength, initLineNumber + 1, lineNumber + 1, excel.doubleOnYellowStyle);
 
             lineNumber++;
             excel.insertHeader(1, lineNumber, excel.totalLabel + " : " + labelOperation);

@@ -15,11 +15,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class VerifBudgetTab extends TabHelper {
-    JsonArray operations;
     private int currentY = 0, programY = 0;
     private Double programTotal = 0.d;
-    JsonObject programMarket;
-    private StructureService structureService;
     private String type;
 
     /**
@@ -31,7 +28,6 @@ public class VerifBudgetTab extends TabHelper {
      */
     public VerifBudgetTab(Workbook wb, JsonObject instruction, String type) {
         super(wb, instruction, "Vérification ligne budgétaire");
-        structureService = new DefaultStructureService(Lystore.lystoreSchema);
         this.type = type;
     }
 
@@ -55,7 +51,7 @@ public class VerifBudgetTab extends TabHelper {
 
             }
         }
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
                 if (repStructures.isRight()) {
@@ -235,29 +231,6 @@ public class VerifBudgetTab extends TabHelper {
             }
             currentY++;
 
-        }
-    }
-
-
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            actions = new JsonArray(data.getString("actions"));
-            for (int k = 0; k < actions.size(); k++) {
-                JsonObject action = actions.getJsonObject(k);
-                for (int j = 0; j < structures.size(); j++) {
-                    structure = structures.getJsonObject(j);
-                    if (action.getString("id_structure").equals(structure.getString("id"))) {
-                        action.put("nameEtab", structure.getString("name"));
-                        action.put("uai", structure.getString("uai"));
-                        action.put("city", structure.getString("city"));
-                        action.put("zipCode", structure.getString("zipCode"));
-                    }
-                }
-            }
-            data.put("actionsJO", actions);
         }
     }
 

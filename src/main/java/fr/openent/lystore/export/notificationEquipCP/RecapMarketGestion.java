@@ -62,8 +62,7 @@ public class RecapMarketGestion extends TabHelper {
 
             }
         }
-        StructureService structureService = new DefaultStructureService(Lystore.lystoreSchema);
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
                 boolean errorCatch= false;
@@ -78,6 +77,7 @@ public class RecapMarketGestion extends TabHelper {
                         }
                     }catch (Exception e){
                         errorCatch = true;
+                        logger.error(e.getMessage()+" Recap");
                     }
                     if(errorCatch)
                         handler.handle(new Either.Left<>("Error when writting files"));
@@ -242,40 +242,6 @@ public class RecapMarketGestion extends TabHelper {
     }
 
 
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            actions = new JsonArray(data.getString("actions"));
-            for (int k = 0; k < actions.size(); k++) {
-                JsonObject action = actions.getJsonObject(k);
-                for (int j = 0; j < structures.size(); j++) {
-                    structure = structures.getJsonObject(j);
-                    if(j == 0) {
-                        action.put("nameEtab", NULL_DATA);
-                        action.put("uai", NULL_DATA);
-                        action.put("city", NULL_DATA);
-                        action.put("type", NULL_DATA);
-                        action.put("address", NULL_DATA);
-                        action.put("zipCode", "??");
-                        action.put("phone", NULL_DATA);
-                    }
-                    if (action.getString("id_structure").equals(structure.getString("id"))) {
-                        action.put("nameEtab", structure.getString("name"));
-                        action.put("uai", structure.getString("uai"));
-                        action.put("city", structure.getString("city"));
-                        action.put("address", structure.getString("address"));
-                        action.put("zipCode", structure.getString("zipCode"));
-                        action.put("phone", structure.getString("phone"));
-
-
-                    }
-                }
-            }
-            data.put("actionsJO", actions);
-        }
-    }
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {

@@ -16,11 +16,9 @@ import java.util.ArrayList;
 public class ListForTextTab extends TabHelper {
     private String type;
     private int yProgramLabel = 1;
-    private StructureService structureService;
 
     public ListForTextTab(Workbook workbook, JsonObject instruction, String type) {
         super(workbook, instruction, "liste pour texte du RAPPORT " + type);
-        structureService = new DefaultStructureService(Lystore.lystoreSchema);
         this.type = type;
         excel.setDefaultFont();
     }
@@ -46,7 +44,7 @@ public class ListForTextTab extends TabHelper {
 
             }
         }
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
 
@@ -71,27 +69,6 @@ public class ListForTextTab extends TabHelper {
         });
     }
 
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            actions = new JsonArray(data.getString("actions"));
-            for (int k = 0; k < actions.size(); k++) {
-                JsonObject action = actions.getJsonObject(k);
-                for (int j = 0; j < structures.size(); j++) {
-                    structure = structures.getJsonObject(j);
-                    if (action.getString("id_structure").equals(structure.getString("id"))) {
-                        action.put("nameEtab", structure.getString("name"));
-                        action.put("uai", structure.getString("uai"));
-                        action.put("city", structure.getString("city"));
-                        action.put("zipCode", structure.getString("zipCode"));
-                    }
-                }
-            }
-            data.put("actionsJO", actions);
-        }
-    }
 
 
     @Override

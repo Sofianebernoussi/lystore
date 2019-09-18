@@ -16,7 +16,6 @@ import java.util.Collections;
 
 public class AnnexeDelibTab extends TabHelper {
     private String type;
-    private StructureService structureService;
     private JsonObject programMarket;
 
     /**
@@ -28,7 +27,6 @@ public class AnnexeDelibTab extends TabHelper {
     public AnnexeDelibTab(Workbook wb, JsonObject instruction, String type) {
         super(wb, instruction, "ANNEXE DELIB");
         this.type = type;
-        structureService = new DefaultStructureService(Lystore.lystoreSchema);
         programMarket = new JsonObject();
     }
 
@@ -47,17 +45,19 @@ public class AnnexeDelibTab extends TabHelper {
                 structuresId.add(structuresId.size(), data.getString("id_structure"));
 
         }
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        logger.info("structid add");
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
                 boolean errorCatch= false;
                 if (repStructures.isRight()) {
                     try {
                         JsonArray structures = repStructures.right().getValue();
-                        setStructures(structures);
+                        setStructuresFromDatas(structures);
                         setArray(datas);
                     }catch (Exception e){
                         errorCatch = true;
+                        log.error(e.getMessage());
                     }
                     if(errorCatch)
                         handler.handle(new Either.Left<>("Error when writting files"));
@@ -183,22 +183,7 @@ public class AnnexeDelibTab extends TabHelper {
 
     }
 
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject action = datas.getJsonObject(i);
-            for (int j = 0; j < structures.size(); j++) {
-                structure = structures.getJsonObject(j);
-                if (action.getString("id_structure").equals(structure.getString("id"))) {
-                    action.put("nameEtab", structure.getString("name"));
-                    action.put("uai", structure.getString("uai"));
-                    action.put("city", structure.getString("city"));
-                    action.put("zipCode", structure.getString("zipCode"));
-                }
-            }
-        }
-    }
+
 
 
     @Override

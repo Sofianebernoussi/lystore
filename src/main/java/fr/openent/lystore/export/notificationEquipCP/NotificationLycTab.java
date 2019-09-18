@@ -60,21 +60,21 @@ public class NotificationLycTab extends TabHelper {
                     structuresId.add(structuresId.size(), action.getString("id_structure"));
             }
         }
-        StructureService structureService = new DefaultStructureService(Lystore.lystoreSchema);
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
                 boolean errorCatch= false;
                 if (repStructures.isRight()) {
                     try {
                         JsonArray structures = repStructures.right().getValue();
-                        setStructures(structures);
+                        setStructuresFromDatas(structures);
                         if (datas.isEmpty()) {
                             handler.handle(new Either.Left<>("No data in database"));
                         } else {
                             writeArray(handler);
                         }
                     }catch (Exception e){
+                        logger.error(e.getMessage() + " Notification");
                         errorCatch = true;
                     }
                     if(errorCatch)
@@ -100,7 +100,6 @@ public class NotificationLycTab extends TabHelper {
             JsonObject structure = datas.getJsonObject(i);
             JsonArray orders = structure.getJsonArray("actionsJO");
             orders = sortByType(orders);
-            String previousMarket = "";
             String previousCode = "";
 
             if (orders.isEmpty()) {
@@ -247,34 +246,7 @@ public class NotificationLycTab extends TabHelper {
         lineNumber++;
     }
 
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            actions = new JsonArray(data.getString("actions"));
-            for (int j = 0; j < structures.size(); j++) {
-                structure = structures.getJsonObject(j);
-                if(j == 0) {
-                    data.put("nameEtab", NULL_DATA);
-                    data.put("uai", NULL_DATA);
-                    data.put("city", NULL_DATA);
-                    data.put("type", NULL_DATA);
-                    data.put("address", NULL_DATA);
-                    data.put("zipCode", "??");
-                    data.put("phone", NULL_DATA);
-                }
-                if (data.getString("id_structure").equals(structure.getString("id"))) {
-                    data.put("nameEtab", structure.getString("name"));
-                    data.put("uai", structure.getString("uai"));
-                    data.put("city", structure.getString("city"));
-                    data.put("type", structure.getString("type"));
-                    data.put("zipCode", structure.getString("zipCode"));
-                }
-            }
-            data.put("actionsJO", actions);
-        }
-    }
+
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {

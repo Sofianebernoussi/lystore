@@ -53,8 +53,7 @@ public class Subventions extends TabHelper {
 
             }
         }
-        StructureService structureService = new DefaultStructureService(Lystore.lystoreSchema);
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
 
@@ -62,7 +61,7 @@ public class Subventions extends TabHelper {
                 if (repStructures.isRight()) {
                     try {
                         JsonArray structures = repStructures.right().getValue();
-                        setStructures(structures);
+                        setStructuresFromDatas(structures);
                         if (datas.isEmpty()) {
                             handler.handle(new Either.Left<>("No data in database"));
                         } else {
@@ -89,6 +88,11 @@ public class Subventions extends TabHelper {
     }
 
     private void setTitle() {
+        for (int i = 0; i < datas.size(); i++) {
+            JsonObject data = datas.getJsonObject(i);
+            totalSubv += Double.parseDouble(data.getString("totalprice"));
+        }
+
         excel.insertBlackTitleHeaderBorderlessCenter(0, lineNumber, ANNEXE_TEXT);
         sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber++;
@@ -102,9 +106,10 @@ public class Subventions extends TabHelper {
     }
 
     private void writeArray(Handler<Either<String, Boolean>> handler) {
+
         for (int i = 0; i < datas.size(); i++) {
             JsonObject structureDatas = datas.getJsonObject(i);
-            JsonArray orders = structureDatas.getJsonArray("ordersJO");
+            JsonArray orders = structureDatas.getJsonArray("actionsJO");
             String zip = structureDatas.getString("zipCode").substring(0, 2);
 
             String structString = zip + " - " +
@@ -142,29 +147,29 @@ public class Subventions extends TabHelper {
         lineNumber++;
     }
 
-
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            totalSubv += Double.parseDouble(data.getString("totalprice"));
-            actions = new JsonArray(data.getString("actions"));
-            for (int j = 0; j < structures.size(); j++) {
-                structure = structures.getJsonObject(j);
-                if (data.getString("id_structure").equals(structure.getString("id"))) {
-                    data.put("nameEtab", structure.getString("name"));
-                    data.put("uai", structure.getString("uai"));
-                    data.put("city", structure.getString("city"));
-                    data.put("type", structure.getString("type"));
-                    data.put("zipCode", structure.getString("zipCode"));
-                }
-            }
-            data.put("ordersJO", actions);
-
-        }
-
-    }
+//
+//    public void setStructures(JsonArray structures) {
+//        JsonObject program, structure;
+//        JsonArray actions;
+//        for (int i = 0; i < datas.size(); i++) {
+//            JsonObject data = datas.getJsonObject(i);
+//            totalSubv += Float.parseFloat(data.getString("totalprice"));
+//            actions = new JsonArray(data.getString("actions"));
+//            for (int j = 0; j < structures.size(); j++) {
+//                structure = structures.getJsonObject(j);
+//                if (data.getString("id_structure").equals(structure.getString("id"))) {
+//                    data.put("nameEtab", structure.getString("name"));
+//                    data.put("uai", structure.getString("uai"));
+//                    data.put("city", structure.getString("city"));
+//                    data.put("type", structure.getString("type"));
+//                    data.put("zipCode", structure.getString("zipCode"));
+//                }
+//            }
+//            data.put("ordersJO", actions);
+//
+//        }
+//
+//    }
 
 
     @Override

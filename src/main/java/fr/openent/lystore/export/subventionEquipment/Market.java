@@ -52,8 +52,7 @@ public class Market extends TabHelper {
 
             }
         }
-        StructureService structureService = new DefaultStructureService(Lystore.lystoreSchema);
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
                 boolean errorCatch= false;
@@ -86,6 +85,10 @@ public class Market extends TabHelper {
     }
 
     private void setTitle() {
+        for (int i = 0; i < datas.size(); i++) {
+            JsonObject data = datas.getJsonObject(i);
+            totalSubv += Double.parseDouble(data.getString("totalprice"));
+        }
         excel.insertBlackTitleHeaderBorderlessCenter(0, lineNumber, ANNEXE_TEXT);
         sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber++;
@@ -101,7 +104,7 @@ public class Market extends TabHelper {
     private void writeArray(Handler<Either<String, Boolean>> handler) {
         for (int i = 0; i < datas.size(); i++) {
             JsonObject campaignData = datas.getJsonObject(i);
-            JsonArray orders = campaignData.getJsonArray("ordersJO");
+            JsonArray orders = campaignData.getJsonArray("actionsJO");
             String campaign = campaignData.getString("campaign");
             lineNumber++;
             excel.insertUnderscoreHeader(0, lineNumber, campaign);
@@ -176,29 +179,29 @@ public class Market extends TabHelper {
 
 
 
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            actions = new JsonArray(data.getString("actions"));
-            totalSubv += Double.parseDouble(data.getString("totalprice"));
-            for (int k = 0; k < actions.size(); k++) {
-                JsonObject action = actions.getJsonObject(k);
-                for (int j = 0; j < structures.size(); j++) {
-                    structure = structures.getJsonObject(j);
-                    if (action.getString("id_structure").equals(structure.getString("id"))) {
-                        action.put("nameEtab", structure.getString("name"));
-                        action.put("uai", structure.getString("uai"));
-                        action.put("city", structure.getString("city"));
-                        action.put("zipCode", structure.getString("zipCode"));
-                    }
-                }
-            }
-            data.put("" +
-                    "ordersJO", actions);
-        }
-    }
+//    protected void setStructures(JsonArray structures) {
+//        JsonObject program, structure;
+//        JsonArray actions;
+//        for (int i = 0; i < datas.size(); i++) {
+//            JsonObject data = datas.getJsonObject(i);
+//            actions = new JsonArray(data.getString("actions"));
+//            totalSubv += Float.parseFloat(data.getString("totalprice"));
+//            for (int k = 0; k < actions.size(); k++) {
+//                JsonObject action = actions.getJsonObject(k);
+//                for (int j = 0; j < structures.size(); j++) {
+//                    structure = structures.getJsonObject(j);
+//                    if (action.getString("id_structure").equals(structure.getString("id"))) {
+//                        action.put("nameEtab", structure.getString("name"));
+//                        action.put("uai", structure.getString("uai"));
+//                        action.put("city", structure.getString("city"));
+//                        action.put("zipCode", structure.getString("zipCode"));
+//                    }
+//                }
+//            }
+//            data.put("" +
+//                    "ordersJO", actions);
+//        }
+//    }
 
 
     @Override

@@ -203,7 +203,8 @@ public class LinesBudget extends TabHelper {
         query +=
                 "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
                         "  OR (spa.structure_type = '" + CMR + "' AND specific_structures.type ='" + CMR + "') " +
-                        "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    ";
+                        "     OR                     (spa.structure_type = '" + LYCEE + "' AND" +
+                        " ( specific_structures.type is null OR  specific_structures.type ='" + LYCEE + "') ))    ";
         query +=
                 "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
                         "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           ";

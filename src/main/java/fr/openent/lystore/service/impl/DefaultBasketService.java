@@ -48,7 +48,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
 
     public void listBasket(Integer idCampaign, String idStructure, Handler<Either<String, JsonArray>> handler){
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray();
-        String query = "SELECT basket.id, basket.amount, basket.comment, basket.price_proposal::double , basket.processing_date, basket.id_campaign, basket.id_structure, " +
+        String query = "SELECT basket.id, basket.amount, basket.comment, basket.price_proposal::float , basket.processing_date, basket.id_campaign, basket.id_structure, " +
                 "array_to_json(array_agg( e.* )) as equipment," +
                 "array_to_json(array_agg(DISTINCT ep.*)) as options, array_to_json(array_agg(DISTINCT basket_file.*)) as files " +
                 "FROM " + Lystore.lystoreSchema + ".basket_equipment basket " +

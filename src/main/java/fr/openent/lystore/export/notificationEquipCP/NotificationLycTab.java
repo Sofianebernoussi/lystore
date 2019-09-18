@@ -60,8 +60,7 @@ public class NotificationLycTab extends TabHelper {
                     structuresId.add(structuresId.size(), action.getString("id_structure"));
             }
         }
-        StructureService structureService = new DefaultStructureService(Lystore.lystoreSchema);
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
                 boolean errorCatch= false;
@@ -75,6 +74,7 @@ public class NotificationLycTab extends TabHelper {
                             writeArray(handler);
                         }
                     }catch (Exception e){
+                        logger.error(e.getMessage() + " Notification");
                         errorCatch = true;
                     }
                     if(errorCatch)
@@ -100,7 +100,6 @@ public class NotificationLycTab extends TabHelper {
             JsonObject structure = datas.getJsonObject(i);
             JsonArray orders = structure.getJsonArray("actionsJO");
             orders = sortByType(orders);
-            String previousMarket = "";
             String previousCode = "";
 
             if (orders.isEmpty()) {

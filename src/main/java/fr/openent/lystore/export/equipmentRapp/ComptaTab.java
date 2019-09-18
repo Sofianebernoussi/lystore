@@ -20,7 +20,6 @@ public class ComptaTab extends TabHelper {
 
     public ComptaTab(Workbook workbook, JsonObject instruction, String type) {
         super(workbook, instruction, "COMPTA du rapport  " + type);
-        structureService = new DefaultStructureService(Lystore.lystoreSchema);
         this.type = type;
         excel.setDefaultFont();
     }
@@ -45,7 +44,7 @@ public class ComptaTab extends TabHelper {
 
             }
         }
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
                 boolean errorCatch= false;

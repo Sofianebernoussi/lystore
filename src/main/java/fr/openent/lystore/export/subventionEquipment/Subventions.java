@@ -53,8 +53,7 @@ public class Subventions extends TabHelper {
 
             }
         }
-        StructureService structureService = new DefaultStructureService(Lystore.lystoreSchema);
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
 

@@ -15,13 +15,11 @@ import java.util.Collections;
 
 
 public class LinesBudget extends TabHelper {
-    private StructureService structureService;
     private ArrayList<Integer> codes = new ArrayList<>();
     private int arraylength = 5;
     private int lineNumber = 1;
     public LinesBudget(Workbook workbook, JsonObject instruction) {
         super(workbook, instruction, "Lignes Budgetaires");
-        structureService = new DefaultStructureService(Lystore.lystoreSchema);
     }
 
     @Override
@@ -44,7 +42,7 @@ public class LinesBudget extends TabHelper {
 
             }
         }
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
                 boolean errorCatch= false;
@@ -55,6 +53,7 @@ public class LinesBudget extends TabHelper {
                         setLabels();
                         setArray(datas);
                     }catch (Exception e){
+                        logger.error(e.getMessage() +" Lines");
                         errorCatch = true;
                     }
                     if(errorCatch)

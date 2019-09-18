@@ -62,8 +62,7 @@ public class RecapMarketGestion extends TabHelper {
 
             }
         }
-        StructureService structureService = new DefaultStructureService(Lystore.lystoreSchema);
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
                 boolean errorCatch= false;
@@ -78,6 +77,7 @@ public class RecapMarketGestion extends TabHelper {
                         }
                     }catch (Exception e){
                         errorCatch = true;
+                        logger.error(e.getMessage()+" Recap");
                     }
                     if(errorCatch)
                         handler.handle(new Either.Left<>("Error when writting files"));

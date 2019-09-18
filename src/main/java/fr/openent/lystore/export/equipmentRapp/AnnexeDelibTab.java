@@ -16,7 +16,6 @@ import java.util.Collections;
 
 public class AnnexeDelibTab extends TabHelper {
     private String type;
-    private StructureService structureService;
     private JsonObject programMarket;
 
     /**
@@ -28,7 +27,6 @@ public class AnnexeDelibTab extends TabHelper {
     public AnnexeDelibTab(Workbook wb, JsonObject instruction, String type) {
         super(wb, instruction, "ANNEXE DELIB");
         this.type = type;
-        structureService = new DefaultStructureService(Lystore.lystoreSchema);
         programMarket = new JsonObject();
     }
 
@@ -47,7 +45,7 @@ public class AnnexeDelibTab extends TabHelper {
                 structuresId.add(structuresId.size(), data.getString("id_structure"));
 
         }
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
                 boolean errorCatch= false;

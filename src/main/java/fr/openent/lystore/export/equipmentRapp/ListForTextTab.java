@@ -16,11 +16,9 @@ import java.util.ArrayList;
 public class ListForTextTab extends TabHelper {
     private String type;
     private int yProgramLabel = 1;
-    private StructureService structureService;
 
     public ListForTextTab(Workbook workbook, JsonObject instruction, String type) {
         super(workbook, instruction, "liste pour texte du RAPPORT " + type);
-        structureService = new DefaultStructureService(Lystore.lystoreSchema);
         this.type = type;
         excel.setDefaultFont();
     }
@@ -46,7 +44,7 @@ public class ListForTextTab extends TabHelper {
 
             }
         }
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
 

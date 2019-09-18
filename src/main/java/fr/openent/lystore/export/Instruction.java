@@ -281,7 +281,6 @@ public class Instruction {
                     new NotificationLycTab(workbook, instruction).create(getHandler(NotifcationLyceeFuture));
                     new RecapMarketGestion(workbook, instruction).create(getHandler(RecapMarketGestionFuture));
                     new LinesBudget(workbook, instruction).create(getHandler(LinesBudgetFuture));
-
                 }
             }
         }));

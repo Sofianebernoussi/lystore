@@ -13,7 +13,7 @@
   "lystore.campaigns.empty": "Aucune campagne n'est actuellement affectée à l'établissement",
   "lystore.contracts": "Marchés",
   "lystore.logs": "Logs",
-  "lystore.orders.validations.waiting": "Valider les demandes en attente",
+  "lystore.orders.validations.waiting": "Traiter les demandes en attente",
   "lystore.order": "Bon de commande",
   "lystore.order.number": "Numéro du Bon de Commande",
   "lystore.certificates": "Certificat(s) de service fait",

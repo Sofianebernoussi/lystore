@@ -264,7 +264,10 @@ public abstract class TabHelper {
         JsonObject  structure;
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
-            actions = new JsonArray(data.getString("actions"));
+            if(data.containsKey("actions"))
+                actions = new JsonArray(data.getString("actions"));
+            else
+                actions =new JsonArray();
             getElemsStructure(structures,data);
             data.put("actionsJO", actions);
         }

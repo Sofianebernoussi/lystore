@@ -9,6 +9,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.joda.time.chrono.IslamicChronology;
 
 import java.util.ArrayList;
 
@@ -65,10 +66,10 @@ public class IrisTab extends TabHelper {
                 public void handle(Either<String, JsonArray> repStructures) {
                     boolean errorCatch= false;
                     if (repStructures.isRight()) {
-                        try {                        JsonArray structures = repStructures.right().getValue();
+                        try {
+                            JsonArray structures = repStructures.right().getValue();
                             setStructuresFromDatas(structures);
                             setArray(datas);
-                            handler.handle(new Either.Right<>(true));
                         }catch (Exception e){
                             errorCatch = true;
                         }
@@ -132,21 +133,21 @@ Colonne O : cvident : Indicateur Contrat de Ville : "CVNON"*/
             String OBJDDOS = data.getString("name_equipment") + " / ";
             if(data.getBoolean("isregion"))
                 data.getString("comment");
-            excel.insertStandardText(0,1+i,"");
-            excel.insertStandardText(1,1+i,stringWithMaxCharacter("ETAB. "+data.getString("uai") +" Opération "+ data.getString("operation"),80));
-            excel.insertStandardText(2,1+i,stringWithMaxCharacter(OBJDDOS,200));
-            excel.insertStandardText(3,1+i,data.getLong("functional_code").toString());
-            excel.insertStandardText(4,1+i,data.getString("code").toString());
-            excel.insertStandardText(5,1+i,data.getString("program_type"));
-            excel.insertStandardText(6,1+i,data.getString("program_action"));
-            excel.insertStandardText(7,1+i,EnviligString);
-            excel.insertStandardText(8,1+i,data.getString("total"));
-            excel.insertStandardText(9,1+i,"AD000195");
-            excel.insertStandardText(10,1+i,"");
-            excel.insertStandardText(11,1+i,"E0060728");
-            excel.insertStandardText(12,1+i,"L0003954");
-            excel.insertStandardText(13,i+1,"QPVNON");
-            excel.insertStandardText(14,i+1,"CVNON");
+            excel.insertStandardText(0,1 + i,"");
+            excel.insertStandardText(1,1 + i,stringWithMaxCharacter("ETAB. "+data.getString("uai") +" Opération "+ data.getString("operation"),80));
+            excel.insertStandardText(2,1 + i,stringWithMaxCharacter(OBJDDOS,200));
+            excel.insertStandardText(3,1 + i,data.getString("code_coriolis"));
+            excel.insertStandardText(4,1 + i,data.getString("code"));
+            excel.insertStandardText(5,1 + i,data.getString("program_type"));
+            excel.insertStandardText(6,1 + i,data.getString("program_action"));
+            excel.insertStandardText(7,1 + i,EnviligString);
+            excel.insertStandardText(8,1 + i,data.getString("total"));
+            excel.insertStandardText(9,1 + i,"AD000195");
+            excel.insertStandardText(10,1 + i,"");
+            excel.insertStandardText(11,1 + i,"E0060728");
+            excel.insertStandardText(12,1 + i,"L0003954");
+            excel.insertStandardText(13,i + 1,"QPVNON");
+            excel.insertStandardText(14,i + 1,"CVNON");
 
         }
     }
@@ -182,7 +183,7 @@ Colonne O : cvident : Indicateur Contrat de Ville : "CVNON"*/
                 "             orders.id_structure,orders.id_operation as id_operation, label.label as operation ,     " +
                 "             orders.equipment_key as key, orders.name as name_equipment, true as region,  orders.id as id,  " +
                 "             program_action.id_program,program_action.action as program_action, orders.amount ,contract.id as market_id,   campaign.name as campaign, orders.comment, project.room, orders.isregion, " +
-                "             project.stair,project.building,  program.functional_code, exercise.year as school_year,  " +
+                "             project.stair,project.building,  program.functional_code, exercise.year as school_year, specific_structures.code_coriolis ," +
                 "             case when specific_structures.type is null      " +
                 "             then '" + LYCEE + "'          " +
                 "             ELSE specific_structures.type     " +
@@ -213,7 +214,7 @@ Colonne O : cvident : Indicateur Contrat de Ville : "CVNON"*/
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         ";
         query += "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
                 "     OR  (spa.structure_type = '" + CMR + "' AND specific_structures.type ='" + CMR + "') " +
-                "      OR (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    ";
+                "      OR (spa.structure_type = '" + LYCEE + "' AND ( specific_structures.type is null OR specific_structures.type = '"+ LYCEE+"' )))    ";
         query += "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
                 "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id       " +
                 "      INNER JOIN  " + Lystore.lystoreSchema+".exercise on instruction.id_exercise = exercise.id "+
@@ -221,7 +222,7 @@ Colonne O : cvident : Indicateur Contrat de Ville : "CVNON"*/
                 "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                 "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id,exercise.year," +
                 "               orders.isregion,  program.functional_code , program.program_type ," +
-                "              project.room,project.stair, project.building,program_action.action " +
+                "              project.room,project.stair, project.building,program_action.action ,specific_structures.code_coriolis" +
                 "             order by campaign,code,market_id, id_structure,program,code " +
                 "  )    SELECT  values.* " +
                 "  from  values      " ;

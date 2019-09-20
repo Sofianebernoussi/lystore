@@ -281,6 +281,7 @@ public abstract class TabHelper {
                 data.put("uai", NULL_DATA);
                 data.put("city", NULL_DATA);
                 data.put("type", NULL_DATA);
+                data.put("address",NULL_DATA);
                 data.put("zipCode", "??");
                 data.put("phone", NULL_DATA);
             }
@@ -290,6 +291,7 @@ public abstract class TabHelper {
                 data.put("uai", structure.getString("uai"));
                 data.put("city", structure.getString("city"));
                 data.put("type", structure.getString("type"));
+                data.put("address",structure.getString("address"));
                 data.put("zipCode", structure.getString("zipCode"));
                 data.put("phone", structure.getString("phone"));
             }

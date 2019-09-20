@@ -36,6 +36,12 @@
                         <i class="up-open" ng-show="sort.purse.type === 'amount' && !sort.purse.reverse"></i>
                         <i class="down-open" ng-show="sort.purse.type === 'amount' && sort.purse.reverse"></i>
                     </td>
+                    <td ng-click="sort.purse.type = 'amount';
+                        sort.purse.reverse = !sort.purse.reverse">
+                        <i18n>lystore.campaign.purse.init</i18n>
+                        <i class="up-open" ng-show="sort.purse.type === 'amount' && !sort.purse.reverse"></i>
+                        <i class="down-open" ng-show="sort.purse.type === 'amount' && sort.purse.reverse"></i>
+                    </td>
                 </thead>
                 <tbody>
                 <tr ng-repeat="purse in campaign.purses.all | orderBy:sort.purse.type:sort.purse.reverse">
@@ -48,6 +54,8 @@
                     <td>[[purse.uai]]</td>
                     <td>[[purse.name]]</td>
                     <td><span ng-bind="purse.amount | currency"></span></td>
+                    <td><span ng-bind="purse.initial_amount | currency"></span></td>
+
                 </tr>
                 </tbody>
             </table>

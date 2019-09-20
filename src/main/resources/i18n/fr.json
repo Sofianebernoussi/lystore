@@ -530,5 +530,7 @@
   "lystore.update.comment": "Modifier le commentaire",
   "lystore.operation.order.affect": "Demande(s) affectée(s) à l'opération",
   "lystore.project.lowerCase": "projet",
-  "lystore.loading": "Chargement en cours ..."
+  "lystore.loading": "Chargement en cours ...",
+  "lystore.campaign.purse.init": "Cagnottes initiales"
+
 }

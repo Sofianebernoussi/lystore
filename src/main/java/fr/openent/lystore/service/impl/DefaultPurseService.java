@@ -80,10 +80,12 @@ public class DefaultPurseService implements PurseService {
 
     public void update(Integer id, JsonObject purse, Handler<Either<String, JsonObject>> handler) {
         String query = "UPDATE " + Lystore.lystoreSchema + ".purse " +
-                "SET amount = ? WHERE id = ? RETURNING *;";
+                "SET amount = ? ,initial_amount = ?" +
+                " WHERE id = ? RETURNING *;";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
-                .add(purse.getInteger("amount"))
+                .add(purse.getDouble("amount"))
+                .add(purse.getDouble("amount"))
                 .add(id);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));

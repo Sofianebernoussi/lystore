@@ -1,4 +1,4 @@
-import {_, Behaviours, idiom as lang, model, moment, ng, template} from 'entcore';
+import {_, Behaviours, idiom as lang, model, moment, ng, template, toasts} from 'entcore';
 import {
     Agents,
     Basket,
@@ -16,10 +16,10 @@ import {
     labels,
     Logs,
     Notification,
-    Operations,
+    Operations, Order,
     OrderClient,
     OrderRegion,
-    OrdersClient,
+    OrdersClient, OrderUtils,
     PRIORITY_FIELD,
     Programs,
     StructureGroups,
@@ -28,7 +28,7 @@ import {
     Suppliers,
     Tags,
     Taxes,
-    Titles,
+    Titles, Userbook,
     Utils,
 } from '../model';
 import {Mix} from "entcore-toolkit";
@@ -67,8 +67,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.instructions = new Instructions();
         $scope.exercises = new Exercises();
         $scope.exports = new Exports([]);
+        $scope.ub = new Userbook();
         $scope.equipments.eventer.on('loading::true', $scope.$apply);
         $scope.equipments.eventer.on('loading::false', $scope.$apply);
+        $scope.loadingArray = false;
 
         route({
             main: async () => {
@@ -224,6 +226,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
             orderWaiting: async () => {
                 await $scope.syncCampaignInputSelected();
+                $scope.preferences =  await $scope.ub.getPreferences()
                 await $scope.openLightSelectCampaign();
                 Utils.safeApply($scope);
             },
@@ -234,7 +237,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.orderToSend = null;
                 Utils.safeApply($scope);
             },
-            orderClientValided: async () => {
+            orderClientValided: () => {
                 $scope.initOrders('VALID');
                 template.open('administrator-main', 'administrator/order/order-valided');
                 Utils.safeApply($scope);
@@ -243,24 +246,36 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('administrator-main', 'administrator/order/order-send-prepare');
                 template.open('sendOrder.preview', 'pdf/preview');
             },
-            updateOrder: async (params) => {
+            updateOrder: async (params:any):Promise<void> => {
                 let idOrder = parseInt(params.idOrder);
-                $scope.orderToUpdate = await $scope.orderClient.getOneOrderClientWaiting(idOrder, true);
-                await $scope.contracts.sync();
-                await $scope.contractTypes.sync();
+                await $scope.initOrderStructures();
+                $scope.orderToUpdate = await $scope.orderClient.getOneOrderClient(idOrder, $scope.structures.all, "waiting");
+                await $scope.equipments.syncAll($scope.orderToUpdate.campaign.id);
+                $scope.orderToUpdate.equipment = $scope.equipments.all.find(findElement => findElement.id === $scope.orderToUpdate.equipment_key);
+                $scope.orderParent = OrderUtils.initParentOrder($scope.orderToUpdate);
                 template.open('administrator-main', 'administrator/order/order-update-form');
                 Utils.safeApply($scope);
 
             },
-            updateLinkedOrder: async (params) => {
+            updateLinkedOrder: async (params:any):Promise<void> => {
                 let idOrder = parseInt(params.idOrder);
-                let region = params.region;
-                if(region === 'client'){
-                    $scope.orderToUpdate = await $scope.orderClient.getOneOrderClientProgress(idOrder, true);
+                await $scope.initOrderStructures();
+                $scope.orderToUpdate = params.typeOrder === 'client' ?
+                    await $scope.orderClient.getOneOrderClient(idOrder, $scope.structures.all, "progress") :
+                    await $scope.orderRegion.getOneOrderRegion(idOrder, $scope.structures.all);
+                await $scope.equipments.syncAll($scope.orderToUpdate.campaign.id);
+                $scope.orderToUpdate.equipment = $scope.equipments.all.find(findElement => findElement.id === $scope.orderToUpdate.equipment_key);
+                if(params.typeOrder === 'client'){
+                    $scope.orderParent = OrderUtils.initParentOrder($scope.orderToUpdate);
                 } else {
-                    $scope.orderToUpdate = await $scope.orderRegion.getOneOrderRegion(idOrder);
+                    if($scope.orderToUpdate.order_parent){
+                        $scope.orderParent = new Order(JSON.parse($scope.orderToUpdate.order_parent), $scope.structures.all);
+                        $scope.orderParent.equipment = $scope.equipments.all.find(findElement => findElement.id === $scope.orderParent.equipment_key);
+                        $scope.orderParent = OrderUtils.initParentOrder($scope.orderParent);
+                    } else {
+                        $scope.orderParent = undefined;
+                    }
                 }
-                await $scope.initOrders('IN PROGRESS');
                 template.open('administrator-main', 'administrator/order/order-update-form');
                 Utils.safeApply($scope);
             },
@@ -271,42 +286,51 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             operation: async () =>{
+                $scope.loadingArray = true;
                 await $scope.initOperation();
                 template.open('administrator-main', 'administrator/operation/operation-container');
                 template.open('operation-main', 'administrator/operation/manage-operation');
+                $scope.loadingArray = false;
                 Utils.safeApply($scope);
             },
-            operationOrders: async () =>{
+
+            operationOrders: async (params) =>{
+            $scope.loadingArray = true;
                 template.close('administrator-main');
                 template.close('operation-main');
-                if($scope.operations.selected.length === 0){
-                    $scope.redirectTo(`/operation`);
-                    return
-                }
+                $scope.operations = new Operations();
                 $scope.structures = new Structures();
                 await $scope.structures.sync();
-                $scope.operation = $scope.operations.selected[0];
+                await $scope.operations.sync();
+                $scope.operation = await $scope.operations.all.find(operationFound => operationFound.id.toString() === params.idOperation.toString());
                 $scope.ordersClientByOperation = await $scope.operation.getOrders($scope.structures.all);
                 template.open('administrator-main', 'administrator/operation/operation-container');
                 template.open('operation-main', 'administrator/operation/operation-orders-list');
+                $scope.loadingArray = false;
                 Utils.safeApply($scope);
             },
             createRegionOrder: async () => {
+                $scope.loadingArray = true;
                 await  $scope.campaigns.sync();
                 await  $scope.operations.sync();
                 await $scope.structures.sync();
                 template.open('administrator-main', 'administrator/orderRegion/order-region-create-form');
+                $scope.loadingArray = false;
                 Utils.safeApply($scope);
             },
             exportList: async () => {
-                template.open('administrator-main', 'administrator/exports/export-list');
+                $scope.loadingArray = true;
                 await $scope.exports.getExports();
+                template.open('administrator-main', 'administrator/exports/export-list');
+                $scope.loadingArray = false;
                 Utils.safeApply($scope);
 
             }
         });
         $scope.initInstructions = async ()=>{
+            $scope.loadingArray = true;
             await $scope.instructions.sync();
+            $scope.loadingArray = false;
         };
         $scope.initCampaignOrderView=()=>{
             if( $scope.campaign.priority_enabled == true && $scope.campaign.priority_field == PRIORITY_FIELD.ORDER){
@@ -405,7 +429,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 + basket.equipment.name + '" ' + lang.translate('lystore.basket.' + action + '.article');
             let messageForMany = basket.amount + ' ' + lang.translate('articles') + ' "'
                 + basket.equipment.name + '" ' + lang.translate('lystore.basket.' + action + '.articles');
-            $scope.notifications.push(new Notification(basket.amount === 1 ? messageForOne : messageForMany, 'confirm'));
+            toasts.confirm(basket.amount === 1 ? messageForOne : messageForMany);
         };
 
         $scope.initCampaign = async (structure) => {
@@ -421,10 +445,17 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         };
 
         $scope.initOrders = async (status) => {
+            await $scope.initOrderStructures();
+            await $scope.syncOrders(status);
+            Utils.safeApply($scope);
+        };
+
+        $scope.initOrderStructures = async () => {
+            $scope.loadingArray = true;
             $scope.structures = new Structures();
             await $scope.structures.sync();
             await $scope.structures.getStructureType();
-            await $scope.syncOrders(status);
+            $scope.loadingArray = false;
             Utils.safeApply($scope);
         };
 
@@ -434,7 +465,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             $scope.orderToSend.preview = await $scope.orderToSend.getPreviewData();
             $scope.orderToSend.preview.index = 0;
         };
-        $scope.syncCampaignInputSelected = async () => {
+        $scope.syncCampaignInputSelected = async ():Promise<void> => {
             $scope.campaignsForSelectInput = [];
             $scope.allCampaignsSelect = new Campaign(lang.translate("lystore.campaign.order.all"), '');
             $scope.allCampaignsSelect.id = 0;
@@ -443,14 +474,16 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             $scope.campaignsForSelectInput.unshift( $scope.allCampaignsSelect);
 
         };
-        $scope.openLightSelectCampaign = async () => {
+        $scope.openLightSelectCampaign = async ():Promise<void> => {
             template.open('administrator-main');
             template.open('selectCampaign', 'administrator/order/select-campaign');
             $scope.display.lightbox.lightBoxIsOpen = true;
             $scope.initOrders('WAITING');
             Utils.safeApply($scope);
         };
-        $scope.selectCampaignShow = (campaign?: Campaign) => {
+        $scope.selectCampaignShow = (campaign?: Campaign): void => {
+            $scope.display.lightbox.lightBoxIsOpen = false;
+            template.close('selectCampaign');
             if(campaign){
                 $scope.campaign = campaign;
                 $scope.displayedOrders.all = $scope.ordersClient.all
@@ -465,9 +498,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             await $scope.initOrders('WAITING');
             $scope.selectCampaignShow(campaign);
         };
-        $scope.cancelSelectCampaign = (initOrder: boolean) => {
-            template.close('selectCampaign');
-            $scope.display.lightbox.lightBoxIsOpen = false;
+        $scope.cancelSelectCampaign = (initOrder: boolean):void => {
             if(initOrder) {
                 $scope.displayedOrders.all = $scope.ordersClient.all;
             }

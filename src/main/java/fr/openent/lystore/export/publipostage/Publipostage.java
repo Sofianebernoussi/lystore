@@ -38,9 +38,7 @@ public class Publipostage extends TabHelper {
                         handler.handle(new Either.Right<>(true));
                     } else {
                         makeHeader();
-                        JsonArray order = dataFromRequest.right().getValue();
                         initDatas(handler);
-                        //Delete tab if empty
                     }
                 }
             }catch(Exception e){

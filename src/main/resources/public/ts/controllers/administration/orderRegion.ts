@@ -1,30 +1,34 @@
-import {_, idiom as lang, ng, notify, template} from 'entcore';
+import {_, idiom as lang, ng, notify, template, toasts} from 'entcore';
 import {
-    Notification, Operation, OrderClient, OrderRegion, OrdersRegion, Structure, StructureGroup, StructureGroups,
-    Structures, Title, Titles, Utils
+    Notification,
+    Operation,
+    OrderRegion,
+    OrdersRegion,
+    Structure,
+    StructureGroup,
+    StructureGroups,
+    Structures,
+    Titles,
+    Utils,
+    Equipments
 } from "../../model";
-import {Equipments} from "../../model/Equipment";
-import {Mix} from "entcore-toolkit";
-
 
 declare let window: any;
 export const orderRegionController = ng.controller('orderRegionController',
     ['$scope', '$location', '$routeParams', ($scope, $location, $routeParams) => {
 
         $scope.orderToCreate = new OrderRegion();
-        $scope.equipments = new Equipments();
         $scope.structure_groups = new StructureGroups();
         $scope.structuresToDisplay = new Structures();
         $scope.titles = new Titles();
-        $scope.contract_type = "-";
         $scope.display = {
             lightbox: {
                 validOrder: false,
             },
         };
-        $scope.translate = (key: string) => lang.translate(key);
+        $scope.translate = (key: string):string => lang.translate(key);
 
-        $scope.updateCampaign = async () => {
+        $scope.updateCampaign = async ():Promise<void> => {
             $scope.orderToCreate.project = undefined;
             await $scope.titles.syncAdmin($scope.orderToCreate.campaign.id);
             await $scope.structure_groups.syncByCampaign($scope.orderToCreate.campaign.id);
@@ -34,52 +38,31 @@ export const orderRegionController = ng.controller('orderRegionController',
                     let newStructure = new Structure();
                     newStructure.id = structureId;
                     newStructure = $scope.structures.all.find(s => s.id === newStructure.id);
-                    if (structures.all.indexOf(newStructure) === -1) // no duplicate data
+                    if (structures.all.indexOf(newStructure) === -1)
                         structures.push(newStructure);
                 })
             });
             $scope.structuresToDisplay = structures;
-            $scope.structuresToDisplay.all.sort((s, ss) => {
-                if (s.name < ss.name) return 1;
-                if (s.name > ss.name) return -1;
+            $scope.structuresToDisplay.all.sort((firstStructure, secondStructure) => {
+                if (firstStructure.name < secondStructure.name) return 1;
+                if (firstStructure.name > secondStructure.name) return -1;
                 return 0;
             });
             Utils.safeApply($scope);
         };
 
-        $scope.initDataUpdate = async () => {
-            await $scope.equipments.sync($scope.orderToUpdate.id_campaign, $scope.orderToUpdate.id_structure);
-            if (!$scope.orderToUpdate.project.room)
-                $scope.orderToUpdate.project.room = '-';
-            if (!$scope.orderToUpdate.project.building)
-                $scope.orderToUpdate.project.building = '-';
-            $scope.orderToCreate.rows = [];
-            $scope.getContractType();
-        };
-
-        //todo remove function starting when the controller is call
-        if ($routeParams.idOrder) {
-            let idOrder = $routeParams.idOrder;
-            $scope.orderToUpdate.structure = $scope.structures.filter(structureFilter => structureFilter.id === $scope.orderToUpdate.id_structure)[0];
-            $scope.initDataUpdate();
-        }
-        $scope.isUpdating = $location.$$path.includes('/order/update');
-        $scope.isUpdatingFromOrder = $location.$$path.includes('/order/operation/update');
-
-        $scope.operationSelected = async (operation: Operation) => {
+        $scope.operationSelected = async (operation: Operation):Promise<void> => {
             $scope.isOperationSelected = true;
             $scope.operation = operation;
-            if ($scope.isUpdating) {
-
-                let orderRegion = new OrderRegion();
-                orderRegion.createFromOrderClient($scope.orderToUpdate);
-
-                orderRegion.id_operation = operation.id;
-                orderRegion.equipment_key = $scope.orderToUpdate.equipment_key;
-                orderRegion.technical_spec = $scope.orderToUpdate.equipment.technical_specs;
-                let {status, data} = await orderRegion.set();
+            if (!$scope.orderToUpdate.id_operation) {
+                let orderRegionCreate = new OrderRegion();
+                orderRegionCreate.createFromOrderClient($scope.orderToUpdate);
+                orderRegionCreate.id_operation = operation.id;
+                orderRegionCreate.equipment_key = $scope.orderToUpdate.equipment_key;
+                orderRegionCreate.technical_spec = $scope.orderToUpdate.equipment.technical_specs;
+                const { status } = await orderRegionCreate.create();
                 if (status === 200) {
-                    $scope.notifications.push(new Notification('lystore.order.region.update', 'confirm'));
+                    toasts.confirm('lystore.order.region.update');
                     await $scope.ordersClient.addOperationInProgress(operation.id, [$routeParams.idOrder]);
                     $scope.cancelUpdate();
                 }
@@ -92,36 +75,33 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
 
         $scope.isOperationsIsEmpty = false;
-        $scope.selectOperationForOrder = async () => {
+        $scope.selectOperationForOrder = async ():Promise<void> => {
             await $scope.initOperation();
             $scope.isOperationsIsEmpty = !$scope.operations.all.some(operation => operation.status === 'true');
             template.open('validOrder.lightbox', 'administrator/order/order-select-operation');
             $scope.display.lightbox.validOrder = true;
         };
 
-        $scope.cancelUpdate = () => {
-            if ($scope.isUpdating)
-                $scope.redirectTo('/order/waiting');
-            if ($scope.isUpdatingFromOrder)
-                $scope.redirectTo('/operation');
+        $scope.cancelUpdate = ():void => {
+            window.history.back();
         };
-        $scope.updateOrderConfirm = async () => {
+        $scope.updateOrderConfirm = async ():Promise<void> => {
             await $scope.selectOperationForOrder();
         };
 
-        $scope.updateLinkedOrderConfirm = async () => {
+        $scope.updateLinkedOrderConfirm = async ():Promise<void> => {
             let orderRegion = new OrderRegion();
             orderRegion.createFromOrderClient($scope.orderToUpdate);
             orderRegion.equipment_key = $scope.orderToUpdate.equipment_key;
-            $scope.redirectTo('/operation');
-            if($scope.orderToUpdate.isOrderRegion){
+            $scope.cancelUpdate();
+            if($scope.orderToUpdate.typeOrder === "region"){
                 await orderRegion.update($scope.orderToUpdate.id);
             } else {
-                await orderRegion.set();
+                await orderRegion.create();
             }
-            $scope.notifications.push(new Notification('lystore.order.region.update', 'confirm'));
+            toasts.confirm('lystore.order.region.update');
         };
-        $scope.isValidFormUpdate = () => {
+        $scope.isValidFormUpdate = ():boolean => {
             return $scope.orderToUpdate.equipment_key
                 &&  $scope.orderToUpdate.equipment
                 && $scope.orderToUpdate.price_single_ttc
@@ -132,21 +112,21 @@ export const orderRegionController = ng.controller('orderRegionController',
                     !$scope.orderToUpdate.campaign.orderPriorityEnable())
         };
 
-        function checkRow(row) {
+        function checkRow(row):boolean {
             return row.equipment && row.price && row.structure && row.amount
         }
 
-        $scope.oneRow = () => {
+        $scope.oneRow = ():boolean => {
             let oneValidRow = false;
             if ($scope.orderToCreate.rows)
-                $scope.orderToCreate.rows.map(r => {
-                    if (checkRow(r))
+                $scope.orderToCreate.rows.map(row => {
+                    if (checkRow(row))
                         oneValidRow = true;
                 });
             return oneValidRow;
         };
 
-        $scope.validForm = () => {
+        $scope.validForm = ():boolean => {
             return $scope.orderToCreate.campaign
                 && $scope.orderToCreate.project
                 && $scope.orderToCreate.operation
@@ -156,23 +136,8 @@ export const orderRegionController = ng.controller('orderRegionController',
                     row.rank === null))
                     || !$scope.orderToCreate.campaign.orderPriorityEnable());
         };
-        $scope.getContractType = () => {
-            let newContract;
-            if($scope.orderToUpdate.equipment){
-                $scope.contracts.all.map(contract => {
-                    if (contract.id === $scope.orderToUpdate.equipment.id_contract)
-                        newContract = contract
-                });
-                $scope.contractTypes.all.map(contract => {
-                    if (contract.id === newContract.id_contract_type) {
-                        $scope.contract_type = contract.displayName
-                    }
-                });
-            }
-            Utils.safeApply($scope);
-        };
 
-        $scope.addRow = () => {
+        $scope.addRow = ():void => {
             let row = {
                 equipment: undefined,
                 equipments: new Equipments(),
@@ -191,11 +156,11 @@ export const orderRegionController = ng.controller('orderRegionController',
 
         };
 
-        $scope.dropRow = (index) => {
+        $scope.dropRow = (index:number):void => {
             $scope.orderToCreate.rows.splice(index, 1);
         };
 
-        $scope.duplicateRow = (index) => {
+        $scope.duplicateRow = (index:number):void => {
             let row = JSON.parse(JSON.stringify($scope.orderToCreate.rows[index]));
             row.equipments = new Equipments();
 
@@ -208,32 +173,29 @@ export const orderRegionController = ng.controller('orderRegionController',
                 row.equipments.push(equipment);
                 if (row.equipment.id === equipment.id)
                     row.equipment = equipment;
-
             });
             $scope.orderToCreate.rows.splice(index + 1, 0, row)
         };
-        $scope.cancelBasketDelete = () => {
+        $scope.cancelBasketDelete = ():void => {
             $scope.display.lightbox.validOrder = false;
             template.close('validOrder.lightbox');
         };
 
-        $scope.switchStructure = async (row, structure) => {
+        $scope.switchStructure = async (row:any, structure:Structure):Promise<void> => {
             await row.equipments.syncAll($scope.orderToCreate.campaign.id, (structure) ? structure.id : undefined);
             row.equipment = undefined;
             Utils.safeApply($scope);
-
         };
-        $scope.initEquipmentData = (row) => {
+        $scope.initEquipmentData = (row:OrderRegion):void => {
             row.price = row.equipment.priceTTC;
             row.amount = 1;
-
         };
-        $scope.swapTypeStruct = (row) => {
+        $scope.swapTypeStruct = (row):void => {
             row.display.struct = !row.display.struct;
             Utils.safeApply($scope);
         };
 
-        $scope.createOrder = async () => {
+        $scope.createOrder = async ():Promise<void> => {
             let ordersToCreate = new OrdersRegion();
             $scope.orderToCreate.rows.map(row => {
                 if (checkRow(row)) {
@@ -285,9 +247,9 @@ export const orderRegionController = ng.controller('orderRegionController',
                     }
                 }
             });
-            let {status, data} = await ordersToCreate.create();
+            let {status} = await ordersToCreate.create();
             if (status === 201) {
-                $scope.notifications.push(new Notification('lystore.order.region.create.message', 'confirm'));
+                toasts.confirm('lystore.order.region.create.message');
                 $scope.orderToCreate = new OrderRegion();
                 $scope.titles = new Titles();
             }

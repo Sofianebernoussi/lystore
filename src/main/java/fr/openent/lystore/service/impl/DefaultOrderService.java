@@ -280,7 +280,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     }
 
     @Override
-    public void updatePriceProposal(Integer id, Float price_proposal, Handler<Either<String, JsonObject>> handler) {
+    public void updatePriceProposal(Integer id, Double price_proposal, Handler<Either<String, JsonObject>> handler) {
         JsonArray values;
         String query = "UPDATE " + Lystore.lystoreSchema + ".order_client_equipment" +
                 "SET price_proposal = " + (price_proposal == null ? " null " : " ? ") +
@@ -383,7 +383,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
             if (event.isRight()) {
                 JsonArray results = event.right().getValue();
                 Boolean purseEnabled = (results.size() > 0 && results.getJsonObject(0).getBoolean("purse_enabled"));
-                Float price = Float.valueOf(order.getString("price_total_equipment"));
+                Double price = Double.valueOf(order.getString("price_total_equipment"));
                 try {
                     JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
                     if (purseEnabled) {
@@ -406,11 +406,12 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                             JsonArray newPurseArray = purseEnabled ? newPurse.getJsonArray("results").getJsonArray(0) : new JsonArray();
                             JsonArray newOrderNumberArray = newOrderNumber.getJsonArray("results").getJsonArray(0);
                             res.put("f1", newPurseArray.size() > 0
-                                    ? Float.parseFloat(newPurseArray.getString(0))
+                                    ? Double.parseDouble(newPurseArray.getString(0))
                                     : 0);
                             res.put("f2", newOrderNumberArray.size() > 0
-                                    ? Float.parseFloat(newOrderNumberArray.getLong(0).toString())
+                                    ? Double.parseDouble(newOrderNumberArray.getLong(0).toString())
                                     : 0);
+
                             getTransactionHandler(event, res, handler);
 
                         }
@@ -703,19 +704,19 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
     private JsonObject getTotalsOrdersPrices(JsonArray orders){
 
-        Float tva = new Float(0);
-        Float total = new Float(0);
+        Double tva = new Double(0);
+        Double total = new Double(0);
         final Integer Const = 100;
-        Float totalTTC ;
+        Double totalTTC ;
         try {
-            tva = Float.parseFloat((orders.getJsonObject(0)).getString("tax_amount"));
+            tva = Double.parseDouble((orders.getJsonObject(0)).getString("tax_amount"));
         }catch (ClassCastException e) {
             LOGGER.error("An error occurred when casting tax amount", e);
         }
         for (int i = 0; i < orders.size(); i++) {
             try {
-                total += Float.parseFloat((orders.getJsonObject(0)).getString("price")) *
-                        Float.parseFloat((orders.getJsonObject(0)).getInstant("amount").toString());
+                total += Double.parseDouble((orders.getJsonObject(0)).getString("price")) *
+                        Double.parseDouble((orders.getJsonObject(0)).getInstant("amount").toString());
             }catch (ClassCastException e) {
                 LOGGER.error("An error occurred when casting order price", e);
             }
@@ -903,8 +904,9 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
         JsonObject result = event.body();
         if (result.containsKey("status")&& "ok".equals(result.getString("status"))){
             JsonObject returns = new JsonObject();
-            returns.put("amount", amountPurseNbOrder.getInteger("f1"));
-            returns.put("nb_order",amountPurseNbOrder.getInteger("f2"));
+
+            returns.put("amount", amountPurseNbOrder.getDouble("f1"));
+            returns.put("nb_order",amountPurseNbOrder.getDouble("f2"));
             handler.handle(new Either.Right<String, JsonObject>(returns));
         }  else {
             LOGGER.error("An error occurred when launching 'order' transaction");
@@ -1038,7 +1040,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
     }
     public void getOneOrderClient(int idOrder, String status, Handler<Either<String, JsonObject>> handler){
-        //todo clean data is not used
         String query = "" +
                 "SELECT oce.*, " +
                 "       (  " +
@@ -1054,40 +1055,24 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "                                                             WHEN oce.price_proposal IS NOT NULL THEN (oce.price_proposal)  " +
                 "                                                             ELSE (oce.price + ((oce.price * oce.tax_amount) /100))  " +
                 "                                                         END)) AS price_single_ttc,  " +
-                "       prj.id AS id_project, " +
-                "       prj.preference AS preference, " +
                 "       to_json(contract.*) contract, " +
                 "       to_json(ct.*) contract_type, " +
-                "       to_json(supplier.*) supplier, " +
                 "       to_json(campaign.*) campaign, " +
-                "       array_to_json(array_agg(DISTINCT oco.*)) AS OPTIONS, " +
-                "       array_to_json(array_agg(DISTINCT structure_group.name)) AS structure_groups, " +
                 "       to_json(prj.*) AS project, " +
-                "       to_json(tt.*) AS title, " +
-                "       o.order_number " +
+                "       to_json(tt.*) AS title " +
                 "FROM  " + Lystore.lystoreSchema + ".order_client_equipment oce " +
-                "LEFT JOIN  " + Lystore.lystoreSchema + ".order_client_options oco ON oco.id_order_client_equipment = oce.id " +
                 "LEFT JOIN  " + Lystore.lystoreSchema + ".contract ON oce.id_contract = contract.id " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ct ON ct.id = contract.id_contract_type " +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".supplier ON contract.id_supplier = supplier.id " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".campaign ON oce.id_campaign = campaign.id " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".project AS prj ON oce.id_project = prj.id " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".title AS tt ON tt.id = prj.id_title " +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".rel_group_campaign ON (oce.id_campaign = rel_group_campaign.id_campaign) " +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".rel_group_structure ON (oce.id_structure = rel_group_structure.id_structure) " +
-                "LEFT OUTER JOIN  " + Lystore.lystoreSchema + ".order AS o ON (oce.id_order = o.id) " +
-                "INNER JOIN  " + Lystore.lystoreSchema + ".structure_group ON (rel_group_structure.id_structure_group = structure_group.id " +
-                "                                       AND rel_group_campaign.id_structure_group = structure_group.id) " +
                 "WHERE oce.status = '" + status + "' AND oce.id = ? " +
-                "GROUP BY (prj.preference, " +
-                "          prj.id, " +
+                "GROUP BY (prj.id, " +
                 "          oce.id, " +
                 "          contract.id, " +
                 "          ct.id, " +
-                "          supplier.id, " +
                 "          campaign.id, " +
-                "          tt.id, " +
-                "          o.order_number)";
+                "          tt.id)";
 
         Sql.getInstance().prepared(query, new JsonArray().add(idOrder), SqlResult.validUniqueResultHandler(handler));
     }

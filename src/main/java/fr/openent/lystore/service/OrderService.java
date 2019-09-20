@@ -161,7 +161,7 @@ public interface OrderService {
      */
     void getFile(Integer orderId, String fileId, Handler<Either<String, JsonObject>> handler);
 
-    void updatePriceProposal(Integer id, Float price_proposal, Handler<Either<String, JsonObject>> eitherHandler);
+    void updatePriceProposal(Integer id, Double price_proposal, Handler<Either<String, JsonObject>> eitherHandler);
 
     /**
      * Update the rank of two orders

@@ -24,7 +24,7 @@ public class Subventions extends TabHelper {
     private final String ANNEXE_TEXT = "ANNEXE au rapport";
     private final String TOTAL_TITLE = "Dotation sur marchés régionaux au titre du présent rapport";
     private boolean isCMR;
-    Float totalSubv = 0.f;
+    Double totalSubv = 0.d;
 
 
     public Subventions(Workbook workbook, JsonObject instruction, boolean isCMR) {
@@ -53,19 +53,28 @@ public class Subventions extends TabHelper {
 
             }
         }
-        StructureService structureService = new DefaultStructureService(Lystore.lystoreSchema);
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
+
+                boolean errorCatch= false;
                 if (repStructures.isRight()) {
-                    JsonArray structures = repStructures.right().getValue();
-                    setStructures(structures);
-                    if (datas.isEmpty()) {
-                        handler.handle(new Either.Left<>("No data in database"));
-                    } else {
-                        setTitle();
-                        writeArray(handler);
+                    try {
+                        JsonArray structures = repStructures.right().getValue();
+                        setStructuresFromDatas(structures);
+                        if (datas.isEmpty()) {
+                            handler.handle(new Either.Left<>("No data in database"));
+                        } else {
+                            setTitle();
+                            writeArray(handler);
+                        }
+                    }catch (Exception e){
+                        errorCatch = true;
                     }
+                    if(errorCatch)
+                        handler.handle(new Either.Left<>("Error when writting files"));
+                    else
+                        handler.handle(new Either.Right<>(true));
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
 
@@ -79,27 +88,33 @@ public class Subventions extends TabHelper {
     }
 
     private void setTitle() {
+        for (int i = 0; i < datas.size(); i++) {
+            JsonObject data = datas.getJsonObject(i);
+            totalSubv += Double.parseDouble(data.getString("totalprice"));
+        }
+
         excel.insertBlackTitleHeaderBorderlessCenter(0, lineNumber, ANNEXE_TEXT);
         sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber++;
         excel.insertBlackTitleHeaderBorderlessCenter(0, lineNumber, TOTAL_TITLE);
         sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber++;
-        excel.insertBlueTitleHeaderBorderlessCenterFloatCurrency(0, lineNumber, totalSubv);
+        excel.insertBlueTitleHeaderBorderlessCenterDoubleCurrency(0, lineNumber, totalSubv);
         sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber += 2;
 
     }
 
     private void writeArray(Handler<Either<String, Boolean>> handler) {
+
         for (int i = 0; i < datas.size(); i++) {
             JsonObject structureDatas = datas.getJsonObject(i);
-            JsonArray orders = structureDatas.getJsonArray("ordersJO");
+            JsonArray orders = structureDatas.getJsonArray("actionsJO");
             String zip = structureDatas.getString("zipCode").substring(0, 2);
 
             String structString = zip + " - " +
                     structureDatas.getString("city") + " - " + structureDatas.getString("nameEtab") + "(" + structureDatas.getString("uai") + ")";
-            excel.insertHeader(lineNumber, 0, structString);
+            excel.insertHeader(0, lineNumber, structString);
             sizeMergeRegion(lineNumber, 0, 3);
             lineNumber++;
 
@@ -109,54 +124,52 @@ public class Subventions extends TabHelper {
                 excel.insertCellTab(0, lineNumber, order.getString("name_equipment"));
                 excel.insertCellTab(1, lineNumber, order.getString("comment"));
                 excel.insertCellTabCenter(2, lineNumber, order.getInteger("amount").toString());
-                excel.insertCellTabFloatWithPrice(3, lineNumber, order.getFloat("total"));
+                excel.insertCellTabDoubleWithPrice(3, lineNumber, order.getDouble("total"));
                 lineNumber++;
             }
 
-            excel.insertCellTabFloatWithPrice(3, lineNumber, Float.parseFloat(structureDatas.getString("totalprice")));
+            excel.insertCellTabDoubleWithPrice(3, lineNumber, Double.parseDouble(structureDatas.getString("totalprice")));
             lineNumber += 2;
 
 
         }
 
         excel.autoSize(4);
-        handler.handle(new Either.Right<>(true));
-
     }
 
 
     @Override
     protected void setLabels() {
-        excel.insertHeader(lineNumber, 0, ORDER_LABEL);
-        excel.insertHeader(lineNumber, 1, ORDER_COMMENT);
-        excel.insertHeader(lineNumber, 2, AMOUNT);
-        excel.insertHeader(lineNumber, 3, TOTAL);
+        excel.insertHeader(0, lineNumber, ORDER_LABEL);
+        excel.insertHeader(1, lineNumber, ORDER_COMMENT);
+        excel.insertHeader(2, lineNumber, AMOUNT);
+        excel.insertHeader(3, lineNumber, TOTAL);
         lineNumber++;
     }
 
-
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            totalSubv += Float.parseFloat(data.getString("totalprice"));
-            actions = new JsonArray(data.getString("actions"));
-            for (int j = 0; j < structures.size(); j++) {
-                structure = structures.getJsonObject(j);
-                if (data.getString("id_structure").equals(structure.getString("id"))) {
-                    data.put("nameEtab", structure.getString("name"));
-                    data.put("uai", structure.getString("uai"));
-                    data.put("city", structure.getString("city"));
-                    data.put("type", structure.getString("type"));
-                    data.put("zipCode", structure.getString("zipCode"));
-                }
-            }
-            data.put("ordersJO", actions);
-
-        }
-
-    }
+//
+//    public void setStructures(JsonArray structures) {
+//        JsonObject program, structure;
+//        JsonArray actions;
+//        for (int i = 0; i < datas.size(); i++) {
+//            JsonObject data = datas.getJsonObject(i);
+//            totalSubv += Float.parseFloat(data.getString("totalprice"));
+//            actions = new JsonArray(data.getString("actions"));
+//            for (int j = 0; j < structures.size(); j++) {
+//                structure = structures.getJsonObject(j);
+//                if (data.getString("id_structure").equals(structure.getString("id"))) {
+//                    data.put("nameEtab", structure.getString("name"));
+//                    data.put("uai", structure.getString("uai"));
+//                    data.put("city", structure.getString("city"));
+//                    data.put("type", structure.getString("type"));
+//                    data.put("zipCode", structure.getString("zipCode"));
+//                }
+//            }
+//            data.put("ordersJO", actions);
+//
+//        }
+//
+//    }
 
 
     @Override

@@ -55,15 +55,15 @@ public final class SqlUtils {
                     return;
                 }
                 JsonObject result = new JsonObject();
-                Float totalPriceClient, totalPriceRegion;
+                Double totalPriceClient, totalPriceRegion;
                 String resultTotalOperation;
 
 
                 JsonObject getTotalClient = getTotalOrderClientFuture.result();
                 JsonObject getTotalRegion = getTotalOrderRegionFuture.result();
 
-                totalPriceClient = Float.parseFloat(getTotalClient.getString("price_total_orders_clients") != null? getTotalClient.getString("price_total_orders_clients"):"0.0");
-                totalPriceRegion = Float.parseFloat(getTotalRegion.getString("price_total_orders_regions") != null? getTotalRegion.getString("price_total_orders_regions"):"0.0");
+                totalPriceClient = Double.parseDouble(getTotalClient.getString("price_total_orders_clients") != null? getTotalClient.getString("price_total_orders_clients"):"0.0");
+                totalPriceRegion = Double.parseDouble(getTotalRegion.getString("price_total_orders_regions") != null? getTotalRegion.getString("price_total_orders_regions"):"0.0");
 
                 resultTotalOperation = String.valueOf(totalPriceClient + totalPriceRegion);
 
@@ -223,14 +223,14 @@ public final class SqlUtils {
                     }
                     for (int i = 0 ; i<idsInstructions.size() ; i++){
                         JsonObject correspondenceIds  = new JsonObject();
-                        Float sumPriceOperations = 0f;
+                        Double sumPriceOperations = 0d;
                         for( int j = 0 ; j<resultRequest.size() ; j++){
-                            Float amount = Float.parseFloat( resultRequest.getJsonObject(j).getString("amount"));
+                            Double amount = Double.parseDouble( resultRequest.getJsonObject(j).getString("amount"));
                             Integer idInstruction = resultRequest.getJsonObject(j).getInteger("id_instruction");
                             if(idInstruction.equals(idsInstructions.getInteger(i))) sumPriceOperations += amount;
                         }
                         correspondenceIds.put("id", idsInstructions.getInteger(i))
-                                .put("amount",  Float.toString(sumPriceOperations));
+                                .put("amount",  Double.toString(sumPriceOperations));
                         result.add(correspondenceIds);
                     }
                     handler.handle(new Either.Right<>(result));

@@ -152,6 +152,7 @@ Colonne O : cvident : Indicateur Contrat de Ville : "CVNON"*/
         }
     }
 
+
     private String stringWithMaxCharacter(String s,int maxLength) {
         if(s.length()<=maxLength){
             return s;

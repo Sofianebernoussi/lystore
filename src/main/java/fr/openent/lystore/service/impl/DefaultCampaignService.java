@@ -113,7 +113,7 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
     }
 
     private void getCampaignsPurses(String idStructure, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT amount, id_campaign as id_campaign " +
+        String query = "SELECT amount, initial_amount, id_campaign as id_campaign " +
                 "FROM " + Lystore.lystoreSchema + ".purse " +
                 "WHERE id_structure = ?";
 
@@ -190,6 +190,7 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                     object = purses.getJsonObject(i);
                     campaign = campaignMap.getJsonObject(object.getInteger("id_campaign").toString());
                     campaign.put("purse_amount", object.getString("amount"));
+                    campaign.put("initial_purse_amount",object.getString("initial_amount"));
                 }
 
                 for (int i = 0; i < orders.size(); i++) {

@@ -1,4 +1,4 @@
-import {_, Behaviours, idiom as lang, model, moment, ng, template, toasts} from 'entcore';
+import {_, $, Behaviours, idiom as lang, model, moment, ng, template, toasts} from 'entcore';
 import {
     Agents,
     Basket,

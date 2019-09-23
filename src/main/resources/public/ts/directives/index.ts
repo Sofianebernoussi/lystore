@@ -5,5 +5,6 @@ export * from './async-autocomplete';
 export * from './upload-files';
 export * from './auto-height';
 export * from './parameter-table';
+export * from './postNgRepeat';
 export * from './searchAndSelect';
 export * from './tabs';

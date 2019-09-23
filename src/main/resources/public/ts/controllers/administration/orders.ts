@@ -1,4 +1,4 @@
-import {_, idiom as lang, model, ng, template, toasts} from 'entcore';
+import {_, idiom as lang,angular, model, ng, template, toasts} from 'entcore';
 import {
     Campaign, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD, Userbook, Order,
     Utils
@@ -57,6 +57,9 @@ export const orderController = ng.controller('orderController',
         };
 
         $scope.savePreference = () =>{
+            let elements = document.getElementsByClassName('test-scroll');
+            elements[0].scrollLeft = 9999999999999 ;
+            Utils.safeApply($scope);
             $scope.ub.putPreferences(({"ordersWaiting" : $scope.jsonPref($scope.tableFields)}));
         };
 
@@ -111,7 +114,6 @@ export const orderController = ng.controller('orderController',
         $scope.filterDisplayedOrders = async () => {
             let searchResult = [];
             let regex;
-
             const matchStructureGroups = (structureGroups: string[]): boolean => {
                 let bool: boolean = false;
                 if (typeof structureGroups === 'string') structureGroups = Utils.parsePostgreSQLJson(structureGroups);
@@ -385,4 +387,17 @@ export const orderController = ng.controller('orderController',
             await $scope.selectCampaignShow(campaign);
             $scope.search.filterWords = [];
         };
+
+        $scope.test = () =>{
+            let elements = document.getElementsByClassName('test-scroll');
+            console.log("yop")
+            elements[0].scrollLeft = 9000000000000;
+            Utils.safeApply($scope);
+        }
+        angular.element(document).ready(function(){
+            let elements = document.getElementsByClassName('test-scroll');
+            console.log("yup")
+            elements[0].scrollLeft = 9000000000000;
+            Utils.safeApply($scope);
+        });
     }]);

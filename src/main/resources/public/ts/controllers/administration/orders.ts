@@ -390,13 +390,11 @@ export const orderController = ng.controller('orderController',
 
         $scope.test = () =>{
             let elements = document.getElementsByClassName('test-scroll');
-            console.log("yop")
             elements[0].scrollLeft = 9000000000000;
             Utils.safeApply($scope);
         }
         angular.element(document).ready(function(){
             let elements = document.getElementsByClassName('test-scroll');
-            console.log("yup")
             elements[0].scrollLeft = 9000000000000;
             Utils.safeApply($scope);
         });

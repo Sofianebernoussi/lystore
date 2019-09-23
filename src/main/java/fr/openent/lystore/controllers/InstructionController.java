@@ -146,4 +146,12 @@ public class InstructionController extends ControllerHelper {
     public void exportSubventionEquipment(HttpServerRequest request) {
         ExcelHelper.makeExportExcel(request, eb, exportService, "exportSubvention", "_subvention_equipement");
     }
+
+    @Get("/instructions/export/iris/:id")
+    @ApiDoc("export irirs excel with id instruction")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void exportIris(HttpServerRequest request) {
+        ExcelHelper.makeExportExcel(request, eb, exportService, "exportIris", "_Iris");
+    }
 }

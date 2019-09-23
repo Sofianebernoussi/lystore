@@ -40,6 +40,8 @@ public class Lystore extends BaseServer {
         STORAGE = storage;
         JsonObject mail = config.getJsonObject("mail", new JsonObject());
 
+
+
         addController(new LystoreController());
         addController(new AgentController());
         addController(new SupplierController());

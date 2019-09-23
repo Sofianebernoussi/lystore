@@ -1,4 +1,4 @@
-import {_, idiom as lang,angular, model, ng, template, toasts} from 'entcore';
+import {_, $,idiom as lang,angular, model, ng, template, toasts} from 'entcore';
 import {
     Campaign, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD, Userbook, Order,
     Utils
@@ -58,7 +58,7 @@ export const orderController = ng.controller('orderController',
 
         $scope.savePreference = () =>{
             let elements = document.getElementsByClassName('test-scroll');
-            elements[0].scrollLeft = 9999999999999 ;
+            elements[0].scrollLeft = $(".test-scroll").scrollLeft() ;
             Utils.safeApply($scope);
             $scope.ub.putPreferences(({"ordersWaiting" : $scope.jsonPref($scope.tableFields)}));
         };

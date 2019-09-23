@@ -1007,8 +1007,9 @@ input[type=number].numberWithoutArrow {
   overflow-x: auto;
   transform: rotate(-180deg);
   transform-origin: center;
+  scrollbar-color: #aaa white; //Mozilla
+  scrollbar-width: auto; //Mozilla
   padding: 0;
-
 }
 .test-scroll::-webkit-scrollbar{
   width: 9px;

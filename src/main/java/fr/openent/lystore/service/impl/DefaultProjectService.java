@@ -112,6 +112,7 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                                                                JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
 
                                                                Double totalToAdd =Double.parseDouble( event.right().getValue().getString("total"));
+                                                               statements.add(getUpdatePurse(idCampaign,idStructure,totalToAdd));
                                                                //Query
                                                                for (int i = 0; i < orders.size(); i++) {
                                                                    order = orders.getJsonObject(i);
@@ -124,12 +125,11 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                                                                        }
                                                                    }
                                                                }
+
                                                                statements.add(getNewNbBasket(idCampaign, idStructure));
                                                                statements.add(deleteProject(id));
                                                                statements.add(getNewNbORDER(idCampaign, idStructure));
-                                                               statements.add(getUpdatePurse(idCampaign,idStructure,totalToAdd));
-                                                               log.info(statements);
-
+                                                               statements.add(getPurse(idCampaign, idStructure));
 
                                                                sql.transaction(statements, new Handler<Message<JsonObject>>() {
                                                                    @Override
@@ -140,6 +140,8 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                                                                            handler.handle(new Either.Left<>(message));
                                                                        } else {
                                                                            JsonArray results = event.body().getJsonArray("results");
+                                                                           log.info(results.getJsonObject(results.size()-1));
+                                                                           Double purse_amount = Double.parseDouble(results.getJsonObject(results.size()-1).getJsonArray("results").getJsonArray(0).getString(0));
                                                                            JsonObject res;
                                                                            Integer nb_order = -1;
                                                                            Integer nb_basket = -1;
@@ -161,12 +163,10 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                                                                                        nb_basket = nb_basket_array.getInteger(0);
                                                                                    }
                                                                                }
-
-
                                                                            }
                                                                            JsonObject resultfinal = new JsonObject().put("status", "ok");
                                                                            if (nb_basket >= 0 && nb_order >= 0) {
-                                                                               resultfinal.put("nb_order", nb_order).put("nb_basket", nb_basket);
+                                                                               resultfinal.put("nb_order", nb_order).put("nb_basket", nb_basket).put("purse_amount",purse_amount);
                                                                            }
                                                                            handler.handle(new Either.Right<>(resultfinal));
                                                                        }
@@ -176,6 +176,19 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                                                        }
                                                    }
                 ));
+    }
+
+    private JsonObject getPurse(Integer idCampaign, String idStructure) {
+        String query = "SELECT amount from "+Lystore.lystoreSchema+".purse " +
+                "where id_structure = ? AND id_campaign = ?;";
+
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+             .add(idStructure).add(idCampaign);
+
+        return new JsonObject()
+                .put("statement", query)
+                .put("values", params)
+                .put("action", "prepared");
     }
 
     private JsonObject getUpdatePurse(Integer idCampaign, String idStructure,Double price) {

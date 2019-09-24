@@ -2,6 +2,8 @@ import {Mix, Selectable, Selection} from 'entcore-toolkit';
 import {_, notify} from 'entcore';
 import http from 'axios';
 import {Equipment, EquipmentOption, Structure, Utils} from './index';
+import * as ts from "typescript/lib/tsserverlibrary";
+import convertCompilerOptions = ts.server.convertCompilerOptions;
 
 export class Basket implements Selectable {
     id?: number;

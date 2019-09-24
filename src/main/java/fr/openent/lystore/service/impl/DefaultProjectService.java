@@ -2,6 +2,7 @@ package fr.openent.lystore.service.impl;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.ProjectService;
+import fr.openent.lystore.service.PurseService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
@@ -14,9 +15,11 @@ import org.entcore.common.sql.SqlResult;
 
 
 public class DefaultProjectService extends SqlCrudService implements ProjectService {
+    private PurseService purseService;
     private Logger log = LoggerFactory.getLogger(DefaultProjectService.class);
     public DefaultProjectService(String schema, String table) {
         super(schema, table);
+        purseService = new DefaultPurseService();
     }
 
     /**
@@ -63,11 +66,11 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
 
     private String getTheLastPreferenceProject() {
         return "(select case  WHEN max(p.preference) is null THEN 0 " +
-            "ELSE max(p.preference + 1) " +
-            "END " +
-            "from "+ Lystore.lystoreSchema+".order_client_equipment as oce " +
-            "inner join "+Lystore.lystoreSchema+".project p ON p.id = oce.id_project "+
-            "where oce.id_campaign = ? and oce.id_structure = ? ) ";
+                "ELSE max(p.preference + 1) " +
+                "END " +
+                "from "+ Lystore.lystoreSchema+".order_client_equipment as oce " +
+                "inner join "+Lystore.lystoreSchema+".project p ON p.id = oce.id_project "+
+                "where oce.id_campaign = ? and oce.id_structure = ? ) ";
     }
 
     @Override
@@ -84,66 +87,112 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
 
     @Override
     public void revertOrderAndDeleteProject(JsonArray orders, Integer id, Integer idCampaign, String idStructure, Handler<Either<String, JsonObject>> handler) {
-        JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
-        JsonObject order;
-        for (int i = 0; i < orders.size(); i++) {
-            order = orders.getJsonObject(i);
+        String getTotalToUpdate = " WITH values as ( SELECT  " +
+                "                CASE count(opts) " +
+                "                WHEN 0 THEN ROUND((oe.price + (oe.tax_amount * oe.price)/100), 2) * oe.amount " +
+                "                ELSE (price_all_options +(ROUND(oe.price + (oe.tax_amount * oe.price)/100, 2))) * oe.amount " +
+                "                END as price_total_equipment " +
+                "                FROM " + Lystore.lystoreSchema + ".order_client_equipment  oe " +
+                "                LEFT JOIN (SELECT SUM((ROUND(price +(tax_amount * price)/100,2))) as price_all_options, " +
+                "                id_order_client_equipment FROM " + Lystore.lystoreSchema + ".order_client_options " +
+                "                GROUP BY id_order_client_equipment) opts ON oe.id = opts.id_order_client_equipment " +
+                "                Where id_campaign= "+ idCampaign +
+                "                GROUP BY oe.id, price_all_options) " +
+                "     " +
+                "    SELECT sum (values.price_total_equipment) as total " +
+                "    from values " +
+                "    ";
 
-            statements.add(getInsertBasketEquipmentOrderStatement(order));
-            if (order.containsKey("options")) {
-                try {
-                    statements.add(getInsertBasketOptionOrderStatement(order));
-                } catch (NullPointerException e) {
+        sql.raw(getTotalToUpdate,
+                SqlResult.validUniqueResultHandler(new Handler<Either<String, JsonObject>>() {
+                                                       @Override
+                                                       public void handle(Either<String, JsonObject> event) {
+                                                           if(event.isRight()){
+                                                               JsonObject order;
+                                                               JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
 
-                }
-            }
-        }
-        statements.add(getNewNbBasket(idCampaign, idStructure));
-        statements.add(deleteProject(id));
-        statements.add(getNewNbORDER(idCampaign, idStructure));
+                                                               Double totalToAdd =Double.parseDouble( event.right().getValue().getString("total"));
+                                                               statements.add(getUpdatePurse(idCampaign,idStructure,totalToAdd));
+                                                               //Query
+                                                               for (int i = 0; i < orders.size(); i++) {
+                                                                   order = orders.getJsonObject(i);
+                                                                   statements.add(getInsertBasketEquipmentOrderStatement(order));
+                                                                   if (order.containsKey("options")) {
+                                                                       try {
+                                                                           statements.add(getInsertBasketOptionOrderStatement(order));
+                                                                       } catch (NullPointerException e) {
 
+                                                                       }
+                                                                   }
+                                                               }
 
-        sql.transaction(statements, new Handler<Message<JsonObject>>() {
-            @Override
-            public void handle(Message<JsonObject> event) {
-                if (!"ok".equals(event.body().getString("status"))) {
-                    String message = "An error occurred when deleting project " + id;
-                    log.error(message);
-                    handler.handle(new Either.Left<>(message));
-                } else {
-                    JsonArray results = event.body().getJsonArray("results");
-                    JsonObject res;
-                    Integer nb_order = -1;
-                    Integer nb_basket = -1;
-                    JsonArray fields, nb_order_array, nb_basket_array;
-                    for (int i = 0; i < results.size(); i++) {
-                        res = results.getJsonObject(i);
-                        fields = res.getJsonArray("fields");
-                        if (fields.size() != 0) {
-                            String type = fields.getString(0);
+                                                               statements.add(getNewNbBasket(idCampaign, idStructure));
+                                                               statements.add(deleteProject(id));
+                                                               statements.add(getNewNbORDER(idCampaign, idStructure));
+                                                               statements.add(getPurse(idCampaign, idStructure));
 
-                            if (type.equals("nb_order")) {
-                                nb_order_array = res.getJsonArray("results");
-                                nb_order_array = nb_order_array.getJsonArray(0);
-                                nb_order = nb_order_array.getInteger(0);
-                            }
-                            if (type.equals("nb_basket")) {
-                                nb_basket_array = res.getJsonArray("results");
-                                nb_basket_array = nb_basket_array.getJsonArray(0);
-                                nb_basket = nb_basket_array.getInteger(0);
-                            }
-                        }
+                                                               sql.transaction(statements, new Handler<Message<JsonObject>>() {
+                                                                   @Override
+                                                                   public void handle(Message<JsonObject> event) {
+                                                                       if (!"ok".equals(event.body().getString("status"))) {
+                                                                           String message = "An error occurred when deleting project " + id;
+                                                                           log.error(message);
+                                                                           handler.handle(new Either.Left<>(message));
+                                                                       } else {
+                                                                           JsonArray results = event.body().getJsonArray("results");
+                                                                           log.info(results.getJsonObject(results.size()-1));
+                                                                           Double purse_amount = Double.parseDouble(results.getJsonObject(results.size()-1).getJsonArray("results").getJsonArray(0).getString(0));
+                                                                           JsonObject res;
+                                                                           Integer nb_order = -1;
+                                                                           Integer nb_basket = -1;
+                                                                           JsonArray fields, nb_order_array, nb_basket_array;
+                                                                           for (int i = 0; i < results.size(); i++) {
+                                                                               res = results.getJsonObject(i);
+                                                                               fields = res.getJsonArray("fields");
+                                                                               if (fields.size() != 0) {
+                                                                                   String type = fields.getString(0);
 
+                                                                                   if (type.equals("nb_order")) {
+                                                                                       nb_order_array = res.getJsonArray("results");
+                                                                                       nb_order_array = nb_order_array.getJsonArray(0);
+                                                                                       nb_order = nb_order_array.getInteger(0);
+                                                                                   }
+                                                                                   if (type.equals("nb_basket")) {
+                                                                                       nb_basket_array = res.getJsonArray("results");
+                                                                                       nb_basket_array = nb_basket_array.getJsonArray(0);
+                                                                                       nb_basket = nb_basket_array.getInteger(0);
+                                                                                   }
+                                                                               }
+                                                                           }
+                                                                           JsonObject resultfinal = new JsonObject().put("status", "ok");
+                                                                           if (nb_basket >= 0 && nb_order >= 0) {
+                                                                               resultfinal.put("nb_order", nb_order).put("nb_basket", nb_basket).put("purse_amount",purse_amount);
+                                                                           }
+                                                                           handler.handle(new Either.Right<>(resultfinal));
+                                                                       }
+                                                                   }
+                                                               });
+                                                           }
+                                                       }
+                                                   }
+                ));
+    }
 
-                    }
-                    JsonObject resultfinal = new JsonObject().put("status", "ok");
-                    if (nb_basket >= 0 && nb_order >= 0) {
-                        resultfinal.put("nb_order", nb_order).put("nb_basket", nb_basket);
-                    }
-                    handler.handle(new Either.Right<>(resultfinal));
-                }
-            }
-        });
+    private JsonObject getPurse(Integer idCampaign, String idStructure) {
+        String query = "SELECT amount from "+Lystore.lystoreSchema+".purse " +
+                "where id_structure = ? AND id_campaign = ?;";
+
+        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+             .add(idStructure).add(idCampaign);
+
+        return new JsonObject()
+                .put("statement", query)
+                .put("values", params)
+                .put("action", "prepared");
+    }
+
+    private JsonObject getUpdatePurse(Integer idCampaign, String idStructure,Double price) {
+        return purseService.updatePurseAmountStatement(price, idCampaign, idStructure, "+");
     }
 
     private JsonObject getNewNbORDER(Integer idCampaign, String idStructure) {

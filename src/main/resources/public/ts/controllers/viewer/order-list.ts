@@ -152,6 +152,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
                     if (data) {
                         $scope.campaign.nb_order = data.nb_order;
                         $scope.campaign.nb_panier = data.nb_basket;
+                        $scope.campaign.purse_amount = data.purse_amount
                     }
                 }
             }

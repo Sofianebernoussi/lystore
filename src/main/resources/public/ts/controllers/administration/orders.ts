@@ -57,8 +57,8 @@ export const orderController = ng.controller('orderController',
         };
 
         $scope.savePreference = () =>{
-            let elements = document.getElementsByClassName('test-scroll');
-            elements[0].scrollLeft = $(".test-scroll").scrollLeft() ;
+            let elements = document.getElementsByClassName('scroll');
+            elements[0].scrollLeft = $(".scroll").scrollLeft() ;
             Utils.safeApply($scope);
             $scope.ub.putPreferences(({"ordersWaiting" : $scope.jsonPref($scope.tableFields)}));
         };
@@ -389,12 +389,12 @@ export const orderController = ng.controller('orderController',
         };
 
         $scope.test = () =>{
-            let elements = document.getElementsByClassName('test-scroll');
+            let elements = document.getElementsByClassName('scroll');
             elements[0].scrollLeft = 9000000000000;
             Utils.safeApply($scope);
         }
         angular.element(document).ready(function(){
-            let elements = document.getElementsByClassName('test-scroll');
+            let elements = document.getElementsByClassName('scroll');
             elements[0].scrollLeft = 9000000000000;
             Utils.safeApply($scope);
         });

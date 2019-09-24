@@ -4,7 +4,7 @@ import {Utils} from "../model";
 export const postNgRepeat = ng.directive('postNgRepeat', () => {
     return function(scope, element, attrs) {
         if (scope.$last){
-            let elements = document.getElementsByClassName('test-scroll');
+            let elements = document.getElementsByClassName('scroll');
             elements[0].scrollLeft = 9999999999999 ;
         }
     }

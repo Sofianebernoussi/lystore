@@ -23,6 +23,7 @@ body.lystore {
   .responsive-table {
     table {
       thead {
+        white-space: nowrap;
         i {
           display: initial;
           position: relative;
@@ -1008,12 +1009,12 @@ input[type=number].numberWithoutArrow {
   transform: rotate(-180deg);
   transform-origin: center;
   scrollbar-color: #aaa white; //Mozilla
-  scrollbar-width: auto; //Mozilla
+  scrollbar-width: thin; //Mozilla
   padding: 0;
 }
 .test-scroll::-webkit-scrollbar{
-  width: 9px;
   background-color: #F5F5F5;
+  height: 8px;
 }
 .test-scroll::-webkit-scrollbar-thumb
 {

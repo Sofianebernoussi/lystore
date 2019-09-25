@@ -100,7 +100,7 @@
                 <td colspan="[[countColSpan('totaux')]]">
                     <i18n>totals</i18n>
                 </td>
-                <td ng-if="tableFields[8].display">[[displayedOrders.calculTotalAmount() ]]</td>
+                <td ng-if="tableFields[8].display"> <div class="tabElem">[[displayedOrders.calculTotalAmount() ]]</div></td>
                 <td ng-if="tableFields[22].display" colspan="[[countColSpan('price')]]" class="text-right">
                     [[displayedOrders.calculTotalPriceTTC() | currency]]
                 </td>

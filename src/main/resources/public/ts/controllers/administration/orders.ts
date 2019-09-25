@@ -24,8 +24,9 @@ export const orderController = ng.controller('orderController',
         $scope.initPreferences = ()  => {
             if ($scope.preferences && $scope.preferences.preference) {
                 let loadedPreferences = JSON.parse($scope.preferences.preference);
+                if(loadedPreferences.ordersWaitingDisplay)
                 $scope.tableFields.map(table => {
-                    table.display = loadedPreferences.ordersWaiting[table.fieldName]
+                    table.display = loadedPreferences.ordersWaitingDisplay[table.fieldName]
                 })
             }
         };
@@ -60,7 +61,7 @@ export const orderController = ng.controller('orderController',
             let elements = document.getElementsByClassName('scroll');
             elements[0].scrollLeft = $(".scroll").scrollLeft() ;
             Utils.safeApply($scope);
-            $scope.ub.putPreferences(({"ordersWaiting" : $scope.jsonPref($scope.tableFields)}));
+            $scope.ub.putPreferences("ordersWaitingDisplay", $scope.jsonPref($scope.tableFields));
         };
 
         $scope.jsonPref = (prefs) =>{

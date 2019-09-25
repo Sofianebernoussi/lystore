@@ -83,7 +83,10 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
 
         $scope.cancelUpdate = ():void => {
-            template.open('administrator-main', 'administrator/order/order-waiting');
+            if ($scope.fromWaiting)
+                $scope.redirectTo('/order/waiting');
+            else
+                window.history.back();
         };
         $scope.updateOrderConfirm = async ():Promise<void> => {
             await $scope.selectOperationForOrder();

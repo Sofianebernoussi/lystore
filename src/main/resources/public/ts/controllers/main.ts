@@ -227,7 +227,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             orderWaiting: async () => {
                 await $scope.syncCampaignInputSelected();
                 $scope.preferences =  await $scope.ub.getPreferences();
-                if($scope.preferences && JSON.parse($scope.preferences.preference).ordersWaitingCampaign && $scope.fromWaiting){
+                if($scope.preferences && $scope.preferences.preference && JSON.parse($scope.preferences.preference).ordersWaitingCampaign && $scope.fromWaiting){
                     $scope.fromWaiting = false;
                     let campaignPref;
                     $scope.campaignsForSelectInput.forEach(c=>{
@@ -496,6 +496,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             Utils.safeApply($scope);
         };
         $scope.selectCampaignShow = (campaign?: Campaign): void => {
+            $scope.ub.putPreferences("ordersWaitingCampaign", campaign.id);
             $scope.display.lightbox.lightBoxIsOpen = false;
             template.close('selectCampaign');
             if(campaign){

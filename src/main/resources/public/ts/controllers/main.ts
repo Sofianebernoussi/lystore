@@ -226,8 +226,21 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
             orderWaiting: async () => {
                 await $scope.syncCampaignInputSelected();
-                $scope.preferences =  await $scope.ub.getPreferences()
-                await $scope.openLightSelectCampaign();
+                $scope.preferences =  await $scope.ub.getPreferences();
+                if($scope.preferences && $scope.preferences.preference && JSON.parse($scope.preferences.preference).ordersWaitingCampaign && $scope.fromWaiting){
+                    $scope.fromWaiting = false;
+                    let campaignPref;
+                    $scope.campaignsForSelectInput.forEach(c=>{
+                        if(c.id === JSON.parse($scope.preferences.preference).ordersWaitingCampaign)
+                            campaignPref = c;
+                    });
+                    if(campaignPref) {
+                        await $scope.initOrders('WAITING');
+                        $scope.selectCampaignShow(campaignPref);
+                    }else
+                        await $scope.openLightSelectCampaign();
+                }else
+                    await $scope.openLightSelectCampaign();
                 Utils.safeApply($scope);
             },
             orderSent: async () => {
@@ -248,6 +261,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
             updateOrder: async (params:any):Promise<void> => {
                 let idOrder = parseInt(params.idOrder);
+                $scope.fromWaiting = true;
                 await $scope.initOrderStructures();
                 $scope.orderToUpdate = await $scope.orderClient.getOneOrderClient(idOrder, $scope.structures.all, "waiting");
                 await $scope.equipments.syncAll($scope.orderToUpdate.campaign.id);
@@ -468,7 +482,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.syncCampaignInputSelected = async ():Promise<void> => {
             $scope.campaignsForSelectInput = [];
             $scope.allCampaignsSelect = new Campaign(lang.translate("lystore.campaign.order.all"), '');
-            $scope.allCampaignsSelect.id = 0;
+            $scope.allCampaignsSelect.id = -1;
             await $scope.campaigns.sync();
             $scope.campaignsForSelectInput = [...$scope.campaigns.all];
             $scope.campaignsForSelectInput.unshift( $scope.allCampaignsSelect);
@@ -482,12 +496,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             Utils.safeApply($scope);
         };
         $scope.selectCampaignShow = (campaign?: Campaign): void => {
+            $scope.ub.putPreferences("ordersWaitingCampaign", campaign.id);
             $scope.display.lightbox.lightBoxIsOpen = false;
             template.close('selectCampaign');
             if(campaign){
                 $scope.campaign = campaign;
                 $scope.displayedOrders.all = $scope.ordersClient.all
-                    .filter( order => order.campaign.id === campaign.id || campaign.id === 0);
+                    .filter( order => order.campaign.id === campaign.id || campaign.id === -1);
                 $scope.cancelSelectCampaign(false);
             } else {
                 $scope.campaign = $scope.allCampaignsSelect;

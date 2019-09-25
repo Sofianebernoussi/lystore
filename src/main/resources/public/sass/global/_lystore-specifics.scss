@@ -1025,3 +1025,16 @@ input[type=number].numberWithoutArrow {
 .scroll > table{
   transform: rotate(-180deg);
 }
+.scroll td{
+  @media (max-width: 767px) {
+    border-bottom: 1px solid #ddd;
+  }
+}
+.tabElem{
+  min-width: 300px;
+  max-width: 500px;
+  @media(max-width: 767px){
+    min-width: 100px;
+    max-width: 300px;
+  }
+}

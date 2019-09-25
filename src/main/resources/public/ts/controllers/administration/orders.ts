@@ -22,10 +22,10 @@ export const orderController = ng.controller('orderController',
 
 
         $scope.initPreferences = ()  => {
-            if ($scope.preferences && $scope.preferences.preference) {
+            if ($scope.preferences && $scope.preferences.preference && $scope.preferences.preference.ordersWaitingDisplay) {
                 let loadedPreferences = JSON.parse($scope.preferences.preference);
                 $scope.tableFields.map(table => {
-                    table.display = loadedPreferences.ordersWaiting[table.fieldName]
+                    table.display = loadedPreferences.ordersWaitingDisplay[table.fieldName]
                 })
             }
         };
@@ -57,7 +57,7 @@ export const orderController = ng.controller('orderController',
         };
 
         $scope.savePreference = () =>{
-            $scope.ub.putPreferences(({"ordersWaiting" : $scope.jsonPref($scope.tableFields)}));
+            $scope.ub.putPreferences(({"ordersWaitingDisplay" : $scope.jsonPref($scope.tableFields)}));
         };
 
         $scope.jsonPref = (prefs) =>{
@@ -382,6 +382,7 @@ export const orderController = ng.controller('orderController',
 
         };
         $scope.selectCampaignAndInitFilter = async (campaign: Campaign) =>{
+            await $scope.ub.putPreferences(({"ordersWaitingCampaign" : campaign.id}));
             await $scope.selectCampaignShow(campaign);
             $scope.search.filterWords = [];
         };

@@ -1,4 +1,4 @@
-import {_, idiom as lang, model, ng, template, toasts} from 'entcore';
+import {_, $,idiom as lang,angular, model, ng, template, toasts} from 'entcore';
 import {
     Campaign, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD, Userbook, Order,
     Utils
@@ -23,7 +23,6 @@ export const orderController = ng.controller('orderController',
 
         $scope.initPreferences = ()  => {
             if ($scope.preferences && $scope.preferences.preference) {
-
                 let loadedPreferences = JSON.parse($scope.preferences.preference);
                 if(loadedPreferences.ordersWaitingDisplay)
                 $scope.tableFields.map(table => {
@@ -59,6 +58,9 @@ export const orderController = ng.controller('orderController',
         };
 
         $scope.savePreference = () =>{
+            let elements = document.getElementsByClassName('scroll');
+            elements[0].scrollLeft = $(".scroll").scrollLeft() ;
+            Utils.safeApply($scope);
             $scope.ub.putPreferences("ordersWaitingDisplay", $scope.jsonPref($scope.tableFields));
         };
 
@@ -113,7 +115,6 @@ export const orderController = ng.controller('orderController',
         $scope.filterDisplayedOrders = async () => {
             let searchResult = [];
             let regex;
-
             const matchStructureGroups = (structureGroups: string[]): boolean => {
                 let bool: boolean = false;
                 if (typeof structureGroups === 'string') structureGroups = Utils.parsePostgreSQLJson(structureGroups);
@@ -387,4 +388,15 @@ export const orderController = ng.controller('orderController',
             await $scope.selectCampaignShow(campaign);
             $scope.search.filterWords = [];
         };
+
+        $scope.test = () =>{
+            let elements = document.getElementsByClassName('scroll');
+            elements[0].scrollLeft = 9000000000000;
+            Utils.safeApply($scope);
+        }
+        angular.element(document).ready(function(){
+            let elements = document.getElementsByClassName('scroll');
+            elements[0].scrollLeft = 9000000000000;
+            Utils.safeApply($scope);
+        });
     }]);

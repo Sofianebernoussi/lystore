@@ -1,4 +1,4 @@
-package fr.openent.lystore.export.investissement;
+package fr.openent.lystore.export.RME;
 
 import fr.openent.lystore.export.TabHelper;
 import fr.wseduc.webutils.Either;

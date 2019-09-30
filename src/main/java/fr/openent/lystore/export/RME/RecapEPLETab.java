@@ -231,7 +231,6 @@ public class RecapEPLETab extends TabHelper {
                 "                          program.NAME               AS program_name,  " +
                 "                          program.id                 AS program_id,  " +
                 "                          program.label              AS program_label,  " +
-                "                          orders.id_structure,  " +
                 "                          orders.amount                 AS amount,  " +
                 "                          orders.NAME                   AS label,  " +
                 "                          orders.comment                AS comment,        " +
@@ -294,7 +293,11 @@ public class RecapEPLETab extends TabHelper {
                 "              orders.isregion " +
                         "             order by  program,code,orders.id_operation     )        " +
                         "SELECT  values.*" +
-                "   from values;";
+                "  from values " +
+                "  order by program_name, " +
+                "  action_code, " +
+                "  contract_code, " +
+                "  id_structure; ";
 
 
       sqlHandler(handler);

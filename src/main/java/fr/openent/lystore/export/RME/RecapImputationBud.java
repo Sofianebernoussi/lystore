@@ -47,7 +47,7 @@ public class RecapImputationBud extends TabHelper {
         String oldSection = "";
         for (int i = 0; i < datas.size(); i++) {
             program = datas.getJsonObject(i);
-            oldSection = insertSetion(program.getString("section"), oldSection, xTab, yTab + i);
+            oldSection = insertSetion(program.getString("section"), oldSection, xTab, yTab + i,false);
             excel.insertCellTab(xTab + 1, yTab + i, program.getInteger("chapter").toString() + " - " + program.getString("chapter_label"));
             excel.insertCellTab(xTab + 2, yTab + i, program.getInteger("functional_code").toString() + " - " + program.getString("code_label"));
             excel.insertCellTab(xTab + 3, yTab + i, program.getString("program_name"));
@@ -58,22 +58,23 @@ public class RecapImputationBud extends TabHelper {
 
 
         }
+        insertSetion(";",oldSection,xTab,yTab+datas.size(), true);
     }
 
-    private String insertSetion(String section, String oldSection, int xTab, int y) {
+    private String insertSetion(String section, String oldSection, int xTab, int y,boolean last) {
         if (!section.equals(oldSection)) {
-            excel.insertHeader(xTab, y, section);
+            if(!last)
+                excel.insertHeader(xTab, y, section);
             if (y - nbToMerge != y - 1) {
-//                CellRangeAddress merge = new CellRangeAddress(y - nbToMerge, y - 1, xTab, xTab);
-//                sheet.addMergedRegion(merge);
-//                nbToMerge = 1;
+                CellRangeAddress merge = new CellRangeAddress(y - nbToMerge, y - 1, xTab, xTab);
+                sheet.addMergedRegion(merge);
+                nbToMerge = 1;
             }
 
             oldSection = section;
 
         } else {
-            excel.insertHeader(xTab, y, section);
-
+                excel.insertHeader(xTab, y, section);
             nbToMerge++;
         }
         return oldSection;
@@ -300,7 +301,10 @@ public class RecapImputationBud extends TabHelper {
                 "         functional_code,  " +
                 "         chapter,  " +
                 "         chapter_label,  " +
-                "         code_label;";
+                "         code_label" +
+                " ORDER BY section DESC, " +
+                "   program_name, " +
+                "   action_code";
 
        sqlHandler(handler);
     }

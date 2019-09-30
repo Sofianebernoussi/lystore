@@ -96,7 +96,6 @@ public class Instruction {
                         futures.add(Fonctionnementfuture);
                         futures.add(RecapEPLEfuture);
                         futures.add(RecapImputationBudfuture);
-//
                         futureHandler(handler, workbook, futures);
 
                         new LyceeTab(workbook, instruction).create(getHandler(lyceeFuture));
@@ -104,7 +103,7 @@ public class Instruction {
                         new CMDTab(workbook, instruction).create(getHandler(CMDfuture));
                         new FonctionnementTab(workbook, instruction).create(getHandler(Fonctionnementfuture));
                         new RecapEPLETab(workbook, instruction).create(getHandler(RecapEPLEfuture));
-                        new RecapImputationBud(workbook, instruction).create(getHandler(RecapImputationBudfuture));
+                       new RecapImputationBud(workbook, instruction).create(getHandler(RecapImputationBudfuture));
                     } catch (IOException e) {
                         ExcelHelper.catchError(exportService, idFile, "Xlsx Failed to read template");
                         handler.handle(new Either.Left<>("Xlsx Failed to read template"));

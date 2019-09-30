@@ -1,4 +1,4 @@
-package fr.openent.lystore.export.investissement;
+package fr.openent.lystore.export.RME;
 
 public enum TabName {
     LYCEE("Investissement-LYCEES"),

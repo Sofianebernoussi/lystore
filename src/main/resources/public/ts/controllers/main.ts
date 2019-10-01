@@ -125,8 +125,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('equipments-main', 'administrator/equipment/equipment-form');
             },
             viewLogs: async () => {
+                $scope.loadingArray = true;
                 $scope.logs.reset();
                 template.open('administrator-main', 'administrator/log/view-logs');
+                await $scope.logs.loadPage($scope.current.page);
+                $scope.loadingArray = false;
                 Utils.safeApply($scope);
             },
             manageCampaigns: async () => {

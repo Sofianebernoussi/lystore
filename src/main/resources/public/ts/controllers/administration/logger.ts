@@ -46,7 +46,7 @@ export const loggerController = ng.controller('loggerController', [
             return arr;
         };
 
-        await $scope.logs.loadPage($scope.current.page);
+        // await $scope.logs.loadPage($scope.current.page);
         Utils.safeApply($scope);
     }
 ]);

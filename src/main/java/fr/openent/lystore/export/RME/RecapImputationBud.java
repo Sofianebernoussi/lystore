@@ -6,6 +6,7 @@ import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.entcore.common.sql.Sql;
@@ -31,7 +32,21 @@ public class RecapImputationBud extends TabHelper {
                     handler.handle(new Either.Left<>("Failed to retrieve datas"));
                     return;
                 }
-                setArray(datas);
+                if (checkEmpty()) {
+                    Row row = sheet.getRow(1);
+                    sheet.removeRow(row);
+                    row = sheet.getRow(2);
+                    sheet.removeRow(row);
+                    row = sheet.getRow(4);
+                    sheet.removeRow(row);
+                    row = sheet.getRow(7);
+                    sheet.removeRow(row);
+                    row = sheet.getRow(8);
+                    sheet.removeRow(row);
+                    handler.handle(new Either.Right<>(true));
+                } else {
+                    setArray(datas);
+                }
                 handler.handle(new Either.Right<>(true));
             }catch(Exception e){
                 logger.error(e.getMessage());

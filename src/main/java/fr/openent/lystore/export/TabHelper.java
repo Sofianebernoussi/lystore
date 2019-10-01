@@ -5,6 +5,7 @@ import fr.openent.lystore.helpers.ExcelHelper;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
+import io.vertx.core.VertxException;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -330,7 +331,11 @@ public abstract class TabHelper {
                 " s.city as city," +
                 " s.type as type," +
                 " s.phone as phone";
-        Neo4j.getInstance().execute(query, new JsonObject().put("ids", ids), Neo4jResult.validResultHandler(handler));
+        try {
+            Neo4j.getInstance().execute(query, new JsonObject().put("ids", ids), Neo4jResult.validResultHandler(handler));
+        }catch (VertxException e){
+            getStructures(ids,handler);
+        }
     }
 
 }

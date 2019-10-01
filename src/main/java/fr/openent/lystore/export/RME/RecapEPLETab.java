@@ -61,13 +61,7 @@ public class RecapEPLETab extends TabHelper {
                 if (checkEmpty()) {
                     Row row = sheet.getRow(1);
                     sheet.removeRow(row);
-                    row = sheet.getRow(2);
-                    sheet.removeRow(row);
-                    row = sheet.getRow(4);
-                    sheet.removeRow(row);
-                    row = sheet.getRow(7);
-                    sheet.removeRow(row);
-                    row = sheet.getRow(8);
+                    row = sheet.getRow(3);
                     sheet.removeRow(row);
                     handler.handle(new Either.Right<>(true));
                 } else {

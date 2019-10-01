@@ -35,19 +35,15 @@ public class RecapImputationBud extends TabHelper {
                 if (checkEmpty()) {
                     Row row = sheet.getRow(1);
                     sheet.removeRow(row);
-                    row = sheet.getRow(2);
-                    sheet.removeRow(row);
                     row = sheet.getRow(4);
                     sheet.removeRow(row);
-                    row = sheet.getRow(7);
-                    sheet.removeRow(row);
-                    row = sheet.getRow(8);
+                    row = sheet.getRow(6);
                     sheet.removeRow(row);
                     handler.handle(new Either.Right<>(true));
                 } else {
                     setArray(datas);
+                    handler.handle(new Either.Right<>(true));
                 }
-                handler.handle(new Either.Right<>(true));
             }catch(Exception e){
                 logger.error(e.getMessage());
                 logger.error(e.getStackTrace());

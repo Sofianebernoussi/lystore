@@ -1004,7 +1004,7 @@ input[type=number].numberWithoutArrow {
   -moz-appearance:textfield;
 }
 
-.scroll{
+.vertical-array-scroll{
   overflow-x: auto;
   transform: rotate(-180deg);
   transform-origin: center;
@@ -1012,20 +1012,20 @@ input[type=number].numberWithoutArrow {
   scrollbar-width: thin; //Mozilla
   padding: 0;
 }
-.scroll::-webkit-scrollbar{
+.vertical-array-scroll::-webkit-scrollbar{
   background-color: #F5F5F5;
   height: 8px;
 }
-.scroll::-webkit-scrollbar-thumb
+.vertical-array-scroll::-webkit-scrollbar-thumb
 {
   border-radius: 10px;
   -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
   background-color: #aaa;
 }
-.scroll > table{
+.vertical-array-scroll > table{
   transform: rotate(-180deg);
 }
-.scroll td{
+.vertical-array-scroll td{
   @media (max-width: 767px) {
     border-bottom: 1px solid #ddd;
   }

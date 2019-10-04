@@ -32,7 +32,7 @@ public class CMDTab extends Investissement {
                 "             END as old_name,     " +
                 "             orders.id_structure,orders.id_operation as id_operation, label.label as operation ,     " +
                 "             orders.equipment_key as key, orders.name as name_equipment, true as region,  orders.id as id,  " +
-                "             program_action.id_program,program_action.description as action_name, orders.amount ,contract.id as market_id,   campaign.name as campaign, orders.comment, project.room, orders.isregion, " +
+                "             program_action.id_program,program_action.description as action_name, orders.amount ,contract.id as market_id,  contract_type.name as contract_name,   campaign.name as campaign, orders.comment, project.room, orders.isregion, " +
                 "             project.stair,project.building,    " +
                 "             case when specific_structures.type is null      " +
                 "             then '" + LYCEE + "'          " +
@@ -67,7 +67,7 @@ public class CMDTab extends Investissement {
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                 "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                 "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id," +
-                "               orders.isregion, action_name, " +
+                "               orders.isregion, action_name,contract_name, " +
                 "              project.room,project.stair, project.building " +
                 "             ORDER by campaign,code,market_id, id_structure,program,code " +
                 "  )          SELECT program.*, array_to_json(array_agg(values)) AS actions " +

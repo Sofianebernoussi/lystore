@@ -148,7 +148,7 @@ public abstract class Investissement extends TabHelper {
                     posx++;
                 }
 
-                excel.insertHeader( cellColumn,programRowNumber + 1, action.getString("action_name"));
+                excel.insertHeader( cellColumn,programRowNumber + 1, action.getString("contract_name"));
                 excel.insertHeader( cellColumn,programRowNumber + 2, action.getString("code"));
                 this.cellColumn++;
 

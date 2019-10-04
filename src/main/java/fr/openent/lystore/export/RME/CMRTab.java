@@ -31,7 +31,7 @@ public class CMRTab extends Investissement {
                 "             ELSE ''      " +
                 "             END as old_name,     " +
                 "             orders.id_structure,orders.id_operation as id_operation, label.label as operation ,     " +
-                "             orders.equipment_key as key, orders.name as name_equipment, true as region,  orders.id as id,  " +
+                "             orders.equipment_key as key, orders.name as name_equipment, true as region,  orders.id as id,  contract_type.name as contract_name,  " +
                 "             program_action.id_program,program_action.description as action_name, orders.amount ,contract.id as market_id,   campaign.name as campaign, orders.comment, project.room, orders.isregion, " +
                 "             project.stair,project.building,    " +
                 "             case when specific_structures.type is null      " +
@@ -66,7 +66,7 @@ public class CMRTab extends Investissement {
                 "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                 "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
-                "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id," +
+                "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , contract_name,orders.id," +
                 "               orders.isregion, action_name, " +
                 "              project.room,project.stair, project.building " +
                 "             ORDER by campaign,code,market_id, id_structure,program,code " +

@@ -51,7 +51,6 @@ public class RecapImputationBud extends TabHelper {
             }
         });
     }
-
     @Override
     protected void setArray(JsonArray datas) {
         JsonObject program;

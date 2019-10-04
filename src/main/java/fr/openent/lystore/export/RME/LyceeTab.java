@@ -20,7 +20,7 @@ public class LyceeTab extends Investissement {
                 "              where oco.id_order_client_equipment = orders.id " +
                 "             ) + orders.\"price TTC\" " +
                 "              ) * orders.amount   ,2 ) " +
-                "             as Total, contract.name as market, contract_type.code as code,    " +
+                "             as Total, contract.name as market, contract_type.code as code,   contract_type.name as contract_name,   " +
                 "             program.name as program,         CASE WHEN orders.id_order_client_equipment is not null  " +
                 "             THEN  (select oce.name FROM " + Lystore.lystoreSchema + ".order_client_equipment oce    " +
                 "              where oce.id = orders.id_order_client_equipment limit 1)     " +
@@ -64,7 +64,7 @@ public class LyceeTab extends Investissement {
                 "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                 "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id," +
                 "               orders.isregion, action_name, " +
-                "              project.room,project.stair, project.building " +
+                "              project.room,project.stair, project.building , contract_name " +
                 "               ORDER BY             " +
                 "              program,  " +
                 "               market_id,  " +

@@ -13,7 +13,7 @@ public class DefaultLogService implements LogService {
 
     private static final int NB_OCCURRENCES_PAGE = 100;
 
-    public void list(Integer page, Handler<Either<String, JsonArray>> handler) {
+    public void list(Integer page, Handler<Either<String, JsonArray>> handler)  {
         String query = "SELECT id, date, action, context , CASE " +
                 " WHEN value is null THEN "+
                 " (SELECT value FROM " + Lystore.lystoreSchema +
@@ -28,8 +28,18 @@ public class DefaultLogService implements LogService {
             query += " ORDER BY date DESC LIMIT 100 OFFSET ?";
             params.add(NB_OCCURRENCES_PAGE * page);
         }
-
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+//TODO à retirer une fois le test de barre de chargement fait
+        String finalQuery = query;
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        Sql.getInstance().prepared(finalQuery, params, SqlResult.validResultHandler(handler));
+                        ;
+                    }
+                },
+                30*1000
+        );
     }
 
     @Override

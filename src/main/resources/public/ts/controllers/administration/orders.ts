@@ -58,8 +58,9 @@ export const orderController = ng.controller('orderController',
         };
 
         $scope.savePreference = () =>{
-            let elements = document.getElementsByClassName('scroll');
-            elements[0].scrollLeft = $(".scroll").scrollLeft() ;
+            let elements = document.getElementsByClassName('vertical-array-scroll');
+            if(elements[0])
+                elements[0].scrollLeft = $(".vertical-array-scroll").scrollLeft() ;
             Utils.safeApply($scope);
             $scope.ub.putPreferences("ordersWaitingDisplay", $scope.jsonPref($scope.tableFields));
         };
@@ -382,21 +383,25 @@ export const orderController = ng.controller('orderController',
         };
         $scope.updateOrder = (order: OrderClient) => {
             $scope.redirectTo(`/order/update/${order.id}`);
-
         };
         $scope.selectCampaignAndInitFilter = async (campaign: Campaign) =>{
             await $scope.selectCampaignShow(campaign);
             $scope.search.filterWords = [];
         };
 
-        $scope.test = () =>{
-            let elements = document.getElementsByClassName('scroll');
-            elements[0].scrollLeft = 9000000000000;
-            Utils.safeApply($scope);
-        }
+        // $scope.test = () =>{
+        //     let elements = document.getElementsByClassName('vertical-array-scroll');
+        //     if(elements[0])
+        //          elements[0].scrollLeft = 9000000000000;
+        //     Utils.safeApply($scope);
+        // };
+
         angular.element(document).ready(function(){
-            let elements = document.getElementsByClassName('scroll');
-            elements[0].scrollLeft = 9000000000000;
+            let elements = document.getElementsByClassName('vertical-array-scroll');
+            if(elements[0]) {
+                elements[0].scrollLeft = 9000000000000;
+                console.log(elements)
+            }
             Utils.safeApply($scope);
         });
     }]);

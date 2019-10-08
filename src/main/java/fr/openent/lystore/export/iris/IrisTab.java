@@ -9,7 +9,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.joda.time.chrono.IslamicChronology;
 
 import java.util.ArrayList;
 
@@ -132,7 +131,7 @@ Colonne O : cvident : Indicateur Contrat de Ville : "CVNON"*/
 
             String OBJDDOS = data.getString("name_equipment") + " / ";
             if(data.getBoolean("isregion"))
-                data.getString("comment");
+                OBJDDOS += data.getString("comment");
             excel.insertStandardText(0,1 + i,"");
             excel.insertStandardText(1,1 + i,stringWithMaxCharacter("ETAB. "+data.getString("uai") +" Opération "+ data.getString("operation"),80));
             excel.insertStandardText(2,1 + i,stringWithMaxCharacter(OBJDDOS,200));

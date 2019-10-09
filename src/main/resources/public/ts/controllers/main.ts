@@ -1,4 +1,4 @@
-import {_, $, Behaviours, idiom as lang, model, moment, ng, template, toasts} from 'entcore';
+import {_,notify, $, Behaviours, idiom as lang, model, moment, ng, template, toasts} from 'entcore';
 import {
     Agents,
     Basket,
@@ -263,6 +263,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('sendOrder.preview', 'pdf/preview');
             },
             updateOrder: async (params:any):Promise<void> => {
+                template.open('administrator-main', 'administrator/order/order-update-form');
                 let idOrder = parseInt(params.idOrder);
                 $scope.fromWaiting = true;
                 await $scope.initOrderStructures();
@@ -270,7 +271,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 await $scope.equipments.syncAll($scope.orderToUpdate.campaign.id);
                 $scope.orderToUpdate.equipment = $scope.equipments.all.find(findElement => findElement.id === $scope.orderToUpdate.equipment_key);
                 $scope.orderParent = OrderUtils.initParentOrder($scope.orderToUpdate);
-                template.open('administrator-main', 'administrator/order/order-update-form');
                 Utils.safeApply($scope);
 
             },

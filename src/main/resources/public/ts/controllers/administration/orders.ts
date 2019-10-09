@@ -400,7 +400,6 @@ export const orderController = ng.controller('orderController',
             let elements = document.getElementsByClassName('vertical-array-scroll');
             if(elements[0]) {
                 elements[0].scrollLeft = 9000000000000;
-                console.log(elements)
             }
             Utils.safeApply($scope);
         });

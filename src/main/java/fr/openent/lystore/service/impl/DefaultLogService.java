@@ -3,6 +3,7 @@ package fr.openent.lystore.service.impl;
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.LogService;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.eventbus.DeliveryOptions;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import io.vertx.core.Handler;
@@ -34,7 +35,7 @@ public class DefaultLogService implements LogService {
                 new java.util.TimerTask() {
                     @Override
                     public void run() {
-                        Sql.getInstance().prepared(finalQuery, params, SqlResult.validResultHandler(handler));
+                        Sql.getInstance().prepared(finalQuery, params,new DeliveryOptions().setSendTimeout(Lystore.timeout * 1000000000L), SqlResult.validResultHandler(handler));
                         ;
                     }
                 },

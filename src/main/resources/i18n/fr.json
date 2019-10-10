@@ -338,7 +338,7 @@
   "lystore.campaigns.sync.err": "Erreur lors de la récupération des campagnes",
   "lystore.purse.import": "Une erreur est survenue lors de l'import CSV",
   "lystore.statements.error": "Une erreur est survenue lors de l'injection des données",
-  "lystore.invalid.data.to.insert": "Une erreur est survenue lors de l'injection car le fichier envoyé est invalide",
+  "lystore.invalid.data.to.insert": "Une erreur est survenue lors de l'injection car le fichier envoyé est invalide ou incomplet",
   "lystore.statements.empty": "Les établissements présents dans le fichier d'import sont introuvables",
   "lystore.structureGroup.create.err": "Erreur lors de la création du regroupement",
   "lystore.structureGroup.update.err": "Erreur lors de la mise à jour de regroupemnt",

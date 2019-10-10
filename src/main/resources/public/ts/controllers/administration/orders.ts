@@ -153,7 +153,8 @@ export const orderController = ng.controller('orderController',
                                 : false)
                             || (order.label_program !== null && 'label_program' in order
                                 ? regex.test(order.label_program.toLowerCase())
-                                : false);
+                                : false)
+                            || ('supplier_name' in order ?  regex.test(order.supplier_name.toLowerCase()) : false );
                     });
                 });
                 $scope.displayedOrders.all = searchResult;

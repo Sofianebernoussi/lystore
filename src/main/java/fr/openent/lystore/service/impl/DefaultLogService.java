@@ -17,9 +17,7 @@ public class DefaultLogService implements LogService {
     public void list(Integer page, Handler<Either<String, JsonArray>> handler)  {
         String query = "SELECT id, date, action, context , CASE " +
                 " WHEN value is null THEN "+
-                " (SELECT value FROM " + Lystore.lystoreSchema +
-                ".logs where logs.item = LOGGER.item AND logs.context = LOGGER.context " +
-                "AND logs.value is not null  ORDER BY date DESC  LIMIT 1)::json " +
+                "'{}' " +
                 " ELSE value END, " +
                 " id_user, username, item "+
                 "FROM " + Lystore.lystoreSchema + ".logs LOGGER ";

@@ -3,6 +3,7 @@ import { Utils } from '../../model';
 
 export const loggerController = ng.controller('loggerController', [
     '$scope', async ($scope) => {
+        $scope.loadingArrayLogs = false;
         $scope.current = {
             page: 1
         };
@@ -19,8 +20,11 @@ export const loggerController = ng.controller('loggerController', [
         $scope.parseJson = (json: string) => Utils.parsePostgreSQLJson(json);
 
         $scope.loadMoreLogs = async (page: number) => {
+            $scope.loadingArrayLogs = true;
+            Utils.safeApply($scope);
             $scope.current.page = page;
             await $scope.logs.loadPage(page);
+            $scope.loadingArrayLogs = false;
             Utils.safeApply($scope);
         };
 
@@ -46,7 +50,7 @@ export const loggerController = ng.controller('loggerController', [
             return arr;
         };
 
-        await $scope.logs.loadPage($scope.current.page);
+        // await $scope.logs.loadPage($scope.current.page);
         Utils.safeApply($scope);
     }
 ]);

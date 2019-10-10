@@ -1,4 +1,4 @@
-import {_, idiom as lang, model, ng, template, toasts} from 'entcore';
+import {_, $,idiom as lang,angular, model, ng, template, toasts} from 'entcore';
 import {
     Campaign, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD, Userbook, Order,
     Utils
@@ -24,8 +24,9 @@ export const orderController = ng.controller('orderController',
         $scope.initPreferences = ()  => {
             if ($scope.preferences && $scope.preferences.preference) {
                 let loadedPreferences = JSON.parse($scope.preferences.preference);
+                if(loadedPreferences.ordersWaitingDisplay)
                 $scope.tableFields.map(table => {
-                    table.display = loadedPreferences.ordersWaiting[table.fieldName]
+                    table.display = loadedPreferences.ordersWaitingDisplay[table.fieldName]
                 })
             }
         };
@@ -57,7 +58,11 @@ export const orderController = ng.controller('orderController',
         };
 
         $scope.savePreference = () =>{
-            $scope.ub.putPreferences(({"ordersWaiting" : $scope.jsonPref($scope.tableFields)}));
+            let elements = document.getElementsByClassName('vertical-array-scroll');
+            if(elements[0])
+                elements[0].scrollLeft = $(".vertical-array-scroll").scrollLeft() ;
+            Utils.safeApply($scope);
+            $scope.ub.putPreferences("ordersWaitingDisplay", $scope.jsonPref($scope.tableFields));
         };
 
         $scope.jsonPref = (prefs) =>{
@@ -111,7 +116,6 @@ export const orderController = ng.controller('orderController',
         $scope.filterDisplayedOrders = async () => {
             let searchResult = [];
             let regex;
-
             const matchStructureGroups = (structureGroups: string[]): boolean => {
                 let bool: boolean = false;
                 if (typeof structureGroups === 'string') structureGroups = Utils.parsePostgreSQLJson(structureGroups);
@@ -379,10 +383,24 @@ export const orderController = ng.controller('orderController',
         };
         $scope.updateOrder = (order: OrderClient) => {
             $scope.redirectTo(`/order/update/${order.id}`);
-
         };
         $scope.selectCampaignAndInitFilter = async (campaign: Campaign) =>{
             await $scope.selectCampaignShow(campaign);
             $scope.search.filterWords = [];
         };
+
+        // $scope.test = () =>{
+        //     let elements = document.getElementsByClassName('vertical-array-scroll');
+        //     if(elements[0])
+        //          elements[0].scrollLeft = 9000000000000;
+        //     Utils.safeApply($scope);
+        // };
+
+        angular.element(document).ready(function(){
+            let elements = document.getElementsByClassName('vertical-array-scroll');
+            if(elements[0]) {
+                elements[0].scrollLeft = 9000000000000;
+            }
+            Utils.safeApply($scope);
+        });
     }]);

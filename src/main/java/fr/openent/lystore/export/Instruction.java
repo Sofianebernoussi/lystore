@@ -1,11 +1,9 @@
 package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.RME.*;
 import fr.openent.lystore.export.equipmentRapp.*;
-import fr.openent.lystore.export.investissement.FonctionnementTab;
-import fr.openent.lystore.export.investissement.LyceeTab;
-import fr.openent.lystore.export.investissement.RecapEPLETab;
-import fr.openent.lystore.export.investissement.RecapImputationBud;
+import fr.openent.lystore.export.iris.IrisTab;
 import fr.openent.lystore.export.notificationEquipCP.LinesBudget;
 import fr.openent.lystore.export.notificationEquipCP.NotificationLycTab;
 import fr.openent.lystore.export.notificationEquipCP.RecapMarketGestion;
@@ -26,7 +24,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.apache.poi.ss.format.CellNumberStringMod;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.entcore.common.sql.Sql;
@@ -93,21 +90,20 @@ public class Instruction {
                         Future<Boolean> Fonctionnementfuture = Future.future();
                         Future<Boolean> RecapEPLEfuture = Future.future();
                         Future<Boolean> RecapImputationBudfuture = Future.future();
-//                        futures.add(lyceeFuture);
-//                        futures.add(CMRFuture);
-//                        futures.add(CMDfuture);
-//                        futures.add(Fonctionnementfuture);
-//                        futures.add(RecapEPLEfuture);
+                        futures.add(lyceeFuture);
+                        futures.add(CMRFuture);
+                        futures.add(CMDfuture);
+                        futures.add(Fonctionnementfuture);
+                        futures.add(RecapEPLEfuture);
                         futures.add(RecapImputationBudfuture);
-//
                         futureHandler(handler, workbook, futures);
 
-//                        new LyceeTab(workbook, instruction).create(getHandler(lyceeFuture));
-//                        new CMRTab(workbook, instruction).create(getHandler(CMRFuture));
-//                        new CMDTab(workbook, instruction).create(getHandler(CMDfuture));
-//                        new FonctionnementTab(workbook, instruction).create(getHandler(Fonctionnementfuture));
-//                        new RecapEPLETab(workbook, instruction).create(getHandler(RecapEPLEfuture));
-                        new RecapImputationBud(workbook, instruction).create(getHandler(RecapImputationBudfuture));
+                        new LyceeTab(workbook, instruction).create(getHandler(lyceeFuture));
+                        new CMRTab(workbook, instruction).create(getHandler(CMRFuture));
+                        new CMDTab(workbook, instruction).create(getHandler(CMDfuture));
+                        new FonctionnementTab(workbook, instruction).create(getHandler(Fonctionnementfuture));
+                        new RecapEPLETab(workbook, instruction).create(getHandler(RecapEPLEfuture));
+                       new RecapImputationBud(workbook, instruction).create(getHandler(RecapImputationBudfuture));
                     } catch (IOException e) {
                         ExcelHelper.catchError(exportService, idFile, "Xlsx Failed to read template");
                         handler.handle(new Either.Left<>("Xlsx Failed to read template"));
@@ -286,6 +282,38 @@ public class Instruction {
         }));
     }
 
+    public void exportIris(Handler<Either<String, Buffer>> handler) {
+        if (this.id == null) {
+            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
+            handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
+        }
+        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
+            if (either.isLeft()) {
+                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
+                handler.handle(new Either.Left<>("Error when getting sql datas "));
+            } else {
+
+                JsonObject instruction = either.right().getValue();
+                String operationStr = "operations";
+                if (!instruction.containsKey(operationStr)) {
+                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
+                    handler.handle(new Either.Left<>("Error when getting operations"));
+                } else {
+                    instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
+
+                    Workbook workbook = new XSSFWorkbook();
+                    List<Future> futures = new ArrayList<>();
+                    Future<Boolean> IrisFuture = Future.future();
+
+                    futures.add(IrisFuture);
+                    futureHandler(handler, workbook, futures);
+                    new IrisTab(workbook, instruction).create(getHandler(IrisFuture));
+
+                }
+            }
+        }));
+
+    }
     private void futureHandler(Handler<Either<String, Buffer>> handler, Workbook workbook, List<Future> futures) {
         CompositeFuture.all(futures).setHandler(event -> {
             if (event.succeeded()) {

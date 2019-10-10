@@ -67,6 +67,9 @@ routes.define(($routeProvider) => {
             .when('/campaigns/:idCampaign/titles', {
                 action: 'manageTitles'
             })
+            .when('/order/update/:idOrder', {
+                action: 'updateOrder'
+            })
             .when('/order/waiting', {
                 action: 'orderWaiting'
             })
@@ -78,9 +81,6 @@ routes.define(($routeProvider) => {
             })
             .when('/order/preview', {
                 action: 'previewOrder'
-            })
-            .when('/order/update/:idOrder', {
-                action: 'updateOrder'
             })
             .when('/order/operation/update/:idOrder/:typeOrder', {
                 action: 'updateLinkedOrder'

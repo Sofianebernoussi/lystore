@@ -83,7 +83,10 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
 
         $scope.cancelUpdate = ():void => {
-            window.history.back();
+            if ($scope.fromWaiting)
+                $scope.redirectTo('/order/waiting');
+            else
+                window.history.back();
         };
         $scope.updateOrderConfirm = async ():Promise<void> => {
             await $scope.selectOperationForOrder();
@@ -102,7 +105,7 @@ export const orderRegionController = ng.controller('orderRegionController',
             toasts.confirm('lystore.order.region.update');
         };
         $scope.isValidFormUpdate = ():boolean => {
-            return $scope.orderToUpdate.equipment_key
+            return $scope.orderToUpdate &&  $scope.orderToUpdate.equipment_key
                 &&  $scope.orderToUpdate.equipment
                 && $scope.orderToUpdate.price_single_ttc
                 && $scope.orderToUpdate.amount

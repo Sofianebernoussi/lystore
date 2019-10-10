@@ -248,7 +248,9 @@ public class ListForTextTab extends TabHelper {
         else {
             query +=
                     "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "')  " +
-                            "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    ";
+                            "     OR                    " +
+                            " (spa.structure_type = '" + LYCEE + "' AND " +
+                            "   ( specific_structures.type is null OR  specific_structures.type ='" + LYCEE + "') ))    ";
         }
 
         query +=
@@ -261,7 +263,8 @@ public class ListForTextTab extends TabHelper {
             query += "   specific_structures.type =  '" + CMR + "'   ";
         else {
             query += "  specific_structures.type !=  '" + CMR + "'   " +
-                    "  OR specific_structures.type is null   ";
+                    "  OR specific_structures.type is null " +
+                    "  OR specific_structures.type !=  '" + LYCEE + "'   " ;
         }
         query +=
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +

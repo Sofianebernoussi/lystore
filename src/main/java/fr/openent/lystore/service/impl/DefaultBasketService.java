@@ -264,7 +264,6 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 }
             }
             statements.add(getDeletionBasketsEquipmentStatments(idCampaign, idStructure, baskets_objects, purse_enabled));
-
             sql.transaction(statements, event -> {
                 JsonObject results = event.body().getJsonArray("results")
                         .getJsonObject(event.body().getJsonArray("results").size()-1);

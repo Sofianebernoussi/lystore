@@ -42,7 +42,9 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 if (i > 0) {
                     filter += "AND ";
                 }
-                filter += "(LOWER(label.label) ~ LOWER(?) OR LOWER(o.order_number) ~ LOWER(?)) ";
+                filter += "(LOWER(label.label) ~ LOWER(?) OR LOWER(o_region.order_number) ~ LOWER(?) OR  ";
+                filter += " LOWER(o_client.order_number) ~ LOWER(?)) ";
+
             }
         }
         return filter;
@@ -52,7 +54,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
         JsonArray params = new JsonArray();
         if (!filters.isEmpty()) {
             for (String filter : filters) {
-                params.add(filter).add(filter);
+                params.add(filter).add(filter).add(filter);
             }
         }
 

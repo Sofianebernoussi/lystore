@@ -5,7 +5,6 @@ export const projectController = ng.controller("projectController",
     ['$scope', '$routeParams', ($scope, $routeParams) => {
         $scope.project = new Project();
         $scope.project.eventer.on('init:start', () => {
-
         });
         $scope.project.eventer.on('init:end', () => {
             Utils.safeApply($scope);

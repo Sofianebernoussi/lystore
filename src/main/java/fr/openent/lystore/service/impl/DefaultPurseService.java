@@ -11,16 +11,22 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 public class DefaultPurseService implements PurseService {
+    private Boolean invalidDatas= false;
     @Override
     public void launchImport(Integer campaignId, JsonObject statementsValues,
                              final Handler<Either<String, JsonObject>> handler) {
         JsonArray statements = new fr.wseduc.webutils.collections.JsonArray();
         String[] fields = statementsValues.fieldNames().toArray(new String[0]);
+        invalidDatas = false;
         for (String field : fields) {
             statements.add(getImportStatement(campaignId, field,
                     statementsValues.getString(field)));
+
         }
-        if (statements.size() > 0) {
+        if(invalidDatas){
+            handler.handle(new Either.Left<String, JsonObject>
+                    ("lystore.invalid.data.to.insert"));
+        }else  if (statements.size() > 0) {
             Sql.getInstance().transaction(statements, new Handler<Message<JsonObject>>() {
                 @Override
                 public void handle(Message<JsonObject> message) {
@@ -52,22 +58,27 @@ public class DefaultPurseService implements PurseService {
     }
 
     private JsonObject getImportStatement(Integer campaignId, String structureId, String amount) {
-        String statement = "INSERT INTO " + Lystore.lystoreSchema + ".purse(id_structure, amount, id_campaign) " +
-                "VALUES (?, ?, ?) " +
+        String statement = "INSERT INTO " + Lystore.lystoreSchema + ".purse(id_structure, amount, id_campaign, initial_amount) " +
+                "VALUES (?, ?, ?,?) " +
                 "ON CONFLICT (id_structure, id_campaign) DO UPDATE " +
-                "SET amount = ? " +
+                "SET amount = ?, " +
+                " initial_amount = ? " +
                 "WHERE purse.id_structure = ? " +
                 "AND purse.id_campaign = ?;";
+        JsonArray params =  new fr.wseduc.webutils.collections.JsonArray();
+        try {
+            params.add(structureId)
+                    .add(Double.parseDouble(amount))
+                    .add(campaignId)
+                    .add(Double.parseDouble(amount))
+                    .add(Double.parseDouble(amount))
+                    .add(Double.parseDouble(amount))
+                    .add(structureId)
+                    .add(campaignId);
 
-        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
-                .add(structureId)
-                .add(Double.parseDouble(amount))
-                .add(campaignId)
-                .add(Double.parseDouble(amount))
-                .add(structureId)
-                .add(campaignId);
-
-
+        }catch (NumberFormatException e){
+            invalidDatas = true;
+        }
         return new JsonObject()
                 .put("statement", statement)
                 .put("values", params)
@@ -76,10 +87,12 @@ public class DefaultPurseService implements PurseService {
 
     public void update(Integer id, JsonObject purse, Handler<Either<String, JsonObject>> handler) {
         String query = "UPDATE " + Lystore.lystoreSchema + ".purse " +
-                "SET amount = ? WHERE id = ? RETURNING *;";
+                "SET amount = ? ,initial_amount = ?" +
+                " WHERE id = ? RETURNING *;";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
-                .add(purse.getInteger("amount"))
+                .add(purse.getDouble("amount"))
+                .add(purse.getDouble("amount"))
                 .add(id);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));

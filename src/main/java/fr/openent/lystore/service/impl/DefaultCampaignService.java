@@ -49,14 +49,22 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
 
                 for (int i = 0; i < purses.size(); i++) {
                     object = purses.getJsonObject(i);
-                    campaign = campaignMap.getJsonObject(object.getInteger("id_campaign").toString());
-                    campaign.put("purse_amount", object.getString("purse"));
+                    try {
+                        campaign = campaignMap.getJsonObject(object.getInteger("id_campaign").toString());
+                        campaign.put("purse_amount", object.getString("purse"));
+                    }catch (NullPointerException e){
+                        LOGGER.info("A purse is present on this structure but the structure is not linked to the campaign");
+                    }
                 }
 
                 for (int i = 0; i < orders.size(); i++) {
                     object = orders.getJsonObject(i);
-                    campaign = campaignMap.getJsonObject(object.getInteger("id_campaign").toString());
-                    campaign.put("nb_orders_" + object.getString("status").toLowerCase(), object.getLong("count"));
+                    try {
+                        campaign = campaignMap.getJsonObject(object.getInteger("id_campaign").toString());
+                        campaign.put("nb_orders_" + object.getString("status").toLowerCase(), object.getLong("count"));
+                    }catch (NullPointerException e){
+                        LOGGER.info("An order is present on this structure but the structure is not linked to the campaign");
+                    }
                 }
 
                 for (int i = 0; i < equipments.size(); i++) {
@@ -189,14 +197,21 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 for (int i = 0; i < purses.size(); i++) {
                     object = purses.getJsonObject(i);
                     campaign = campaignMap.getJsonObject(object.getInteger("id_campaign").toString());
-                    campaign.put("purse_amount", object.getString("amount"));
-                    campaign.put("initial_purse_amount",object.getString("initial_amount"));
+                    try {
+                        campaign.put("purse_amount", object.getString("amount"));
+                        campaign.put("initial_purse_amount",object.getString("initial_amount"));
+                    }catch (NullPointerException e){
+                        LOGGER.info("A purse is present on this structure but the structure is not linked to the campaign");
+                    }
                 }
-
                 for (int i = 0; i < orders.size(); i++) {
                     object = orders.getJsonObject(i);
-                    campaign = campaignMap.getJsonObject(object.getInteger("id_campaign").toString());
-                    campaign.put("nb_order", object.getLong("nb_order"));
+                    try {
+                        campaign = campaignMap.getJsonObject(object.getInteger("id_campaign").toString());
+                        campaign.put("nb_order", object.getLong("nb_order"));
+                    }catch (NullPointerException e){
+                        LOGGER.info("An order is present on this structure but the structure is not linked to the campaign");
+                    }
                 }
 
                 JsonArray campaignList = new JsonArray();
@@ -332,7 +347,7 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
                 .put("statement",query)
                 .put("values",values)
                 .put("action","prepared"));
-         sql.transaction(statements, jsonObjectMessage -> handler.handle(getTransactionHandler(jsonObjectMessage,projectId)));
+        sql.transaction(statements, jsonObjectMessage -> handler.handle(getTransactionHandler(jsonObjectMessage,projectId)));
     }
 
     @Override

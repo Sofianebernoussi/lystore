@@ -275,6 +275,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
             },
             updateLinkedOrder: async (params:any):Promise<void> => {
+                template.open('administrator-main', 'administrator/order/order-update-form');
                 let idOrder = parseInt(params.idOrder);
                 await $scope.initOrderStructures();
                 $scope.orderToUpdate = params.typeOrder === 'client' ?
@@ -293,7 +294,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                         $scope.orderParent = undefined;
                     }
                 }
-                template.open('administrator-main', 'administrator/order/order-update-form');
                 Utils.safeApply($scope);
             },
             instruction: async () =>{

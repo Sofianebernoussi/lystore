@@ -29,6 +29,7 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.ObjectUtils;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.email.EmailFactory;
 import org.entcore.common.http.filter.ResourceFilter;
@@ -46,6 +47,7 @@ import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultRes
 
 public class OrderController extends ControllerHelper {
 
+    private static final String NULL_DATA = "Pas d'informations";
     private Storage storage;
     private OrderService orderService;
     private StructureService structureService;
@@ -208,8 +210,8 @@ public class OrderController extends ControllerHelper {
             equipment = equipments.getJsonObject(i);
 //            if (equipment.containsKey("number_validation")) {
 //                if (numbers.containsKey(equipment.getString("number_validation"))) {
-                    equipmentList = numbers.getJsonArray(equipment.getString("number_validation"));
-                    numbers.put(equipment.getString("number_validation"), equipmentList.add(equipment));
+            equipmentList = numbers.getJsonArray(equipment.getString("number_validation"));
+            numbers.put(equipment.getString("number_validation"), equipmentList.add(equipment));
 //                }
 //            }
         }
@@ -543,9 +545,14 @@ public class OrderController extends ControllerHelper {
                                     equipment[0].put("uai", structure.getString("uai"));
                                     equipment[0].put("structure_name", structure.getString("name"));
                                     equipment[0].put("city", structure.getString("city"));
-                                    equipment[0].put("phone", structure.getString("phone"));
+                                    equipment[0].put("phone", NULL_DATA);
+                                    try{
+                                        if(structure.getString("phone").isEmpty())
+                                            equipment[0].put("phone", structure.getString("phone"));
+                                    }catch (NullPointerException ee){
+                                        equipment[0].put("phone",NULL_DATA);
+                                    }
                                 }
-
                                 renderValidOrdersCSVExport(request, equipments);
                             } else {
                                 renderError(request);

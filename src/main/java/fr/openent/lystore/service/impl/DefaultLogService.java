@@ -27,18 +27,7 @@ public class DefaultLogService implements LogService {
             query += " ORDER BY date DESC LIMIT 100 OFFSET ?";
             params.add(NB_OCCURRENCES_PAGE * page);
         }
-//TODO à retirer une fois le test de barre de chargement fait
-        String finalQuery = query;
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        Sql.getInstance().prepared(finalQuery, params,new DeliveryOptions().setSendTimeout(Lystore.timeout * 1000000000L), SqlResult.validResultHandler(handler));
-                        ;
-                    }
-                },
-                30*1000
-        );
+        Sql.getInstance().prepared(query, params,new DeliveryOptions().setSendTimeout(Lystore.timeout * 1000000000L), SqlResult.validResultHandler(handler));
     }
 
     @Override

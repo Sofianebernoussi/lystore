@@ -316,7 +316,9 @@ public abstract class TabHelper {
 
 
 
-
+    protected String makeCellWithoutNull ( String valueGet){
+        return valueGet != null? valueGet : "";
+    }
 
     protected void getStructures(JsonArray ids, Handler<Either<String, JsonArray>> handler)  {
         String query = "" +

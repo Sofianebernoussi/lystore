@@ -190,8 +190,12 @@ public class DefaultCampaignService extends SqlCrudService implements CampaignSe
 
                 for (int i = 0; i < baskets.size(); i++) {
                     object = baskets.getJsonObject(i);
+                    try {
                     campaign = campaignMap.getJsonObject(object.getInteger("id_campaign").toString());
                     campaign.put("nb_panier", object.getLong("nb_panier"));
+                    }catch (NullPointerException e){
+                        LOGGER.info("A basket is present on this structure but the structure is not linked to the campaign");
+                    }
                 }
 
                 for (int i = 0; i < purses.size(); i++) {

@@ -247,9 +247,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 Utils.safeApply($scope);
             },
             orderSent: async () => {
-                $scope.structures = new Structures();
-                $scope.initOrders('SENT');
                 template.open('administrator-main', 'administrator/order/order-sent');
+                $scope.structures = new Structures();
+               await $scope.initOrders('SENT');
                 $scope.orderToSend = null;
                 Utils.safeApply($scope);
             },
@@ -456,8 +456,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             }
         };
 
-        $scope.syncOrders = async (status: string) => {
+        $scope.syncOrders = async (status: string) =>{
+            $scope.displayedOrders.all = [];
             await $scope.ordersClient.sync(status, $scope.structures.all);
+            console.log($scope.displayedOrders.all);
             $scope.displayedOrders.all = $scope.ordersClient.all;
         };
 

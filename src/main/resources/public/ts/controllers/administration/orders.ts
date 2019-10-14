@@ -159,9 +159,12 @@ export const orderController = ng.controller('orderController',
                 });
                 $scope.displayedOrders.all = searchResult;
             } else {
-                isPageOrderWaiting?
-                    $scope.selectCampaignShow($scope.campaign):
-                    $scope.displayedOrders.all = $scope.ordersClient.all;
+                if(isPageOrderWaiting)
+                    $scope.selectCampaignShow($scope.campaign)
+                else {
+                    $scope.displayedOrders.all = $scope.ordersClient.all ; console.log("cc")
+                }
+
             }
         };
 
@@ -192,12 +195,17 @@ export const orderController = ng.controller('orderController',
         };
         $scope.windUpOrders = async (orders: OrderClient[]) => {
             let ordersToWindUp  = new OrdersClient();
+            console.log(orders)
             ordersToWindUp.all = Mix.castArrayAs(OrderClient, orders);
             let { status } = await ordersToWindUp.updateStatus('DONE');
             if (status === 200) {
                 toasts.confirm('lystore.windUp.notif');
             }
             await $scope.syncOrders('SENT');
+            $scope.ordersClient.all  =[]
+            $scope.displayedOrders.all =[]
+            console.log($scope.ordersClient.all)
+
             Utils.safeApply($scope);
         };
         $scope.isNotValidated = ( orders:OrderClient[]) =>{
@@ -220,6 +228,7 @@ export const orderController = ng.controller('orderController',
             return _.where(orders, { status : 'SENT' }).length > 0;
         };
 
+        console.log($scope.displayedOrders.all)
         $scope.prepareSendOrder = async (orders: OrderClient[]) => {
             if ($scope.validateSentOrders(orders)) {
                 try {

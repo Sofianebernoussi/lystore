@@ -131,7 +131,7 @@ Colonne O : cvident : Indicateur Contrat de Ville : "CVNON"*/
 
             String OBJDDOS = data.getString("name_equipment") + " / ";
             if(data.getBoolean("isregion"))
-                OBJDDOS += data.getString("comment");
+                OBJDDOS += makeCellWithoutNull(data.getString("comment"));
             excel.insertStandardText(0,1 + i,"");
             excel.insertStandardText(1,1 + i,stringWithMaxCharacter("ETAB. "+data.getString("uai") +" Opération "+ data.getString("operation"),80));
             excel.insertStandardText(2,1 + i,stringWithMaxCharacter(OBJDDOS,200));

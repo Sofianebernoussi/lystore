@@ -108,7 +108,7 @@
             <div class="row">
                 <button class="right-magnet"
                         ng-click="prepareSendOrder(getSelectedOrders())"
-                        ng-disabled="!validateSentOrders(getSelectedOrders())">
+                        ng-disabled=" isNotValidated(getSelectedOrders()) || !validateSentOrders(getSelectedOrders()) ">
                     <i18n>lystore.order.valided.generateBC</i18n>
                 </button>
                 <button ng-click="exportValidOrders(getSelectedOrders(), 'structure_list')"

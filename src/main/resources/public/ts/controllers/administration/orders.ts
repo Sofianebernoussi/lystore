@@ -200,6 +200,12 @@ export const orderController = ng.controller('orderController',
             await $scope.syncOrders('SENT');
             Utils.safeApply($scope);
         };
+        $scope.isNotValidated = ( orders:OrderClient[]) =>{
+
+            let order  = orders.find(order => order.status === "SENT")
+            return order != undefined
+        };
+
         $scope.validateSentOrders = (orders: OrderClient[]) => {
             if (_.where(orders, { status : 'SENT' }).length > 0) {
                 let orderNumber = orders[0].order_number;

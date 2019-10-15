@@ -191,7 +191,22 @@ export const orderController = ng.controller('orderController',
         $scope.cancelBasketDelete = () => {
             $scope.display.lightbox.validOrder = false;
             template.close('validOrder.lightbox');
+            if($scope.operationId) {
+                $scope.redirectTo(`/operation/order/${$scope.operationId}`)
+                $scope.operationId = undefined;
+            }
             Utils.safeApply($scope);
+        };
+
+
+        $scope.closedLighbtox= () =>{
+            $scope.display.lightbox.validOrder = false;
+            if($scope.operationId) {
+                $scope.redirectTo(`/operation/order/${$scope.operationId}`)
+                $scope.operationId = undefined;
+            }
+            Utils.safeApply($scope);
+
         };
         $scope.windUpOrders = async (orders: OrderClient[]) => {
             let ordersToWindUp  = new OrdersClient();
@@ -368,6 +383,7 @@ export const orderController = ng.controller('orderController',
             await $scope.ordersClient.addOperationInProgress(operation.id, idsOrder);
             await $scope.getOrderWaitingFiltered($scope.campaign);
             template.open('validOrder.lightbox', 'administrator/order/order-valid-add-operation');
+            $scope.operationId= operation.id;
         };
 
         $scope.inProgressOrders = async (orders: OrderClient[]) => {

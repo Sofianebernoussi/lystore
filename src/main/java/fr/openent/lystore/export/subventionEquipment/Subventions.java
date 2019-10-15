@@ -65,6 +65,7 @@ public class Subventions extends TabHelper {
                         if (datas.isEmpty()) {
                             handler.handle(new Either.Left<>("No data in database"));
                         } else {
+                            datas = sortByCity(datas);
                             setTitle();
                             writeArray(handler);
                         }
@@ -84,7 +85,6 @@ public class Subventions extends TabHelper {
 
         });
 
-        datas = sortByCity(datas);
     }
 
     private void setTitle() {

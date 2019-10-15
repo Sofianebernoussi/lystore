@@ -23,7 +23,7 @@
                 <select  ng-model="instruction.id_exercise" class="twelve"
                          ng-init="instruction.id_exercise = instruction.id_exercise ||
                          (exercises.all.length > 0 ? exercises.all[0].id : null)"
-                         ng-options="exercise.id as exercise.year for exercise in exercises.all"
+                         ng-options="exercise.id as getYearFromStr(exercise.year) for exercise in exercises.all"
                 >
                 </select>
             </label>

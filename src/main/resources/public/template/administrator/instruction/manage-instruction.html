@@ -87,7 +87,7 @@
             </td>
             <td >[[instruction.object]]</td>
             <td ><span ng-bind="instruction.amount | currency"></span></td>
-            <td >[[instruction.exercise.year]]</td>
+            <td >[[getYearFromStr(instruction.exercise.year)]]</td>
             <td >[[instruction.service_number]]</td>
             <td >[[instruction.cp_number]]</td>
             <td >[[formatDate(instruction.date_cp)]]</td>

@@ -68,7 +68,8 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
     public  void listOrder(String status, Handler<Either<String, JsonArray>> handler){
         String query = "SELECT oce.*, prj.id as id_project,prj.preference as preference , to_json(contract.*) contract,  to_json(ct.*) contract_type ,to_json(supplier.*) supplier, " +
                 "to_json(campaign.* ) campaign,  array_to_json(array_agg( DISTINCT oco.*)) as options, " +
-                "array_to_json(array_agg( distinct structure_group.name)) as structure_groups,to_json(prj.*) as project, to_json(  tt.*) as title, lystore.order.order_number " +
+                "array_to_json(array_agg( distinct structure_group.name)) as structure_groups,to_json(prj.*) as project, to_json(  tt.*) as title, lystore.order.order_number ," +
+                " array_to_json(array_agg(DISTINCT order_file.*)) as files " +
                 "FROM lystore.order_client_equipment oce " +
                 "LEFT JOIN lystore.order_client_options oco " +
                 "ON oco.id_order_client_equipment = oce.id " +
@@ -83,6 +84,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 "LEFT OUTER JOIN lystore.order ON (oce.id_order = lystore.order.id) " +
                 "INNER JOIN lystore.structure_group ON (rel_group_structure.id_structure_group = structure_group.id " +
                 "AND rel_group_campaign.id_structure_group = structure_group.id) " +
+                " LEFT JOIN " + Lystore.lystoreSchema + ".order_file ON oce.id = order_file.id_order_client_equipment " +
                 "WHERE oce.status = ? " +
                 "GROUP BY (prj.preference, prj.id , oce.id, contract.id, ct.id, supplier.id, campaign.id, tt.id, lystore.order.order_number) ORDER BY oce.id_project DESC;";
         sql.prepared(query, new fr.wseduc.webutils.collections.JsonArray().add(status), SqlResult.validResultHandler(handler));
@@ -90,6 +92,8 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
     @Override
     public void listOrders(List<Integer> ids, Handler<Either<String, JsonArray>> handler) {
+        LOGGER.info("2");
+
         String query = "SELECT oce.* , prj.id as id_project ,prj.preference as preference , oce.price * oce.amount as total_price , " +
                 "to_json(contract.*) contract ,to_json(supplier.*) supplier, " +
                 "to_json(campaign.* ) campaign, to_json( prj.*) as project, to_json( tt.*) as title," +

@@ -52,7 +52,7 @@ export class OrderClient implements Order  {
     cause_status?:string;
     contract_name?: string;
     description:string;
-    files: string;
+    files;
     id_campaign:number;
     id_contract:number;
     id_order:number;
@@ -205,6 +205,12 @@ export class OrdersClient extends Selection<OrderClient> {
                     order.structure = structures.length > 0 ? OrderUtils.initStructure(order.id_structure, structures) : new Structure();
                     order.price = parseFloat(status === 'VALID' ? order.price.toString().replace(',', '.') : order.price.toString());
                     order.structure_groups = Utils.parsePostgreSQLJson(order.structure_groups);
+                    order.files = order.files !== '[null]' ? Utils.parsePostgreSQLJson(order.files) : [];
+                    if(order.files.length > 1 )
+                        order.files.sort(function (a, b) {
+                            return  a.filename.localeCompare(b.filename);
+                        });
+                    console.log(order.files);
                     if (status !== 'VALID') {
                         this.makeOrderNotValid(order);
                     }

@@ -459,7 +459,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
         $scope.syncOrders = async (status: string) =>{
             $scope.displayedOrders.all = [];
             await $scope.ordersClient.sync(status, $scope.structures.all);
-            console.log($scope.displayedOrders.all);
             $scope.displayedOrders.all = $scope.ordersClient.all;
         };
 

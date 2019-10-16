@@ -50,6 +50,11 @@ export const orderWaiting = [
         display: true
     },
     {
+        name: 'files',
+        fieldName: 'files',
+        display: false,
+    },
+    {
         name:'lystore.contract.type.name',
         fieldName:'contract_type.name',
         display: true
@@ -113,5 +118,5 @@ export const orderWaiting = [
         name: 'lystore.amountTTC',
         fieldName: 'priceTTCtotal',
         display: true,
-    },
+    }
 ];

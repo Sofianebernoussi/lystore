@@ -29,7 +29,6 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.lang3.ObjectUtils;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.email.EmailFactory;
 import org.entcore.common.http.filter.ResourceFilter;

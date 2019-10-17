@@ -210,7 +210,6 @@ export class OrdersClient extends Selection<OrderClient> {
                         order.files.sort(function (a, b) {
                             return  a.filename.localeCompare(b.filename);
                         });
-                    console.log(order.files);
                     if (status !== 'VALID') {
                         this.makeOrderNotValid(order);
                     }

@@ -116,7 +116,7 @@ Colonne O : cvident : Indicateur Contrat de Ville : "CVNON"*/
         for(int i=0;i<datas.size();i++){
             JsonObject data =datas.getJsonObject(i);
 
-            String EnviligString = data.getString("school_year").substring(5,9)+  "-" +data.getString("program");
+            String EnviligString = data.getString("school_year").substring(0,4)+  "-" +data.getString("program");
             switch(data.getString("cite_mixte")){
                 case CMR:
                     EnviligString+="-2";

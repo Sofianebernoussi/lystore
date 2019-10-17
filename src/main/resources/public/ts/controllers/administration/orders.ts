@@ -162,7 +162,7 @@ export const orderController = ng.controller('orderController',
                 if(isPageOrderWaiting)
                     $scope.selectCampaignShow($scope.campaign)
                 else {
-                    $scope.displayedOrders.all = $scope.ordersClient.all ; console.log("cc")
+                    $scope.displayedOrders.all = $scope.ordersClient.all ;
                 }
 
             }
@@ -210,7 +210,6 @@ export const orderController = ng.controller('orderController',
         };
         $scope.windUpOrders = async (orders: OrderClient[]) => {
             let ordersToWindUp  = new OrdersClient();
-            console.log(orders)
             ordersToWindUp.all = Mix.castArrayAs(OrderClient, orders);
             let { status } = await ordersToWindUp.updateStatus('DONE');
             if (status === 200) {
@@ -219,7 +218,6 @@ export const orderController = ng.controller('orderController',
             await $scope.syncOrders('SENT');
             $scope.ordersClient.all  =[]
             $scope.displayedOrders.all =[]
-            console.log($scope.ordersClient.all)
 
             Utils.safeApply($scope);
         };
@@ -243,7 +241,6 @@ export const orderController = ng.controller('orderController',
             return _.where(orders, { status : 'SENT' }).length > 0;
         };
 
-        console.log($scope.displayedOrders.all)
         $scope.prepareSendOrder = async (orders: OrderClient[]) => {
             if ($scope.validateSentOrders(orders)) {
                 try {

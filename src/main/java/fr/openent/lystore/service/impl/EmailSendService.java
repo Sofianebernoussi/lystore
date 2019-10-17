@@ -44,17 +44,13 @@ public class EmailSendService {
         final int contractNameIndex = 1;
         final int agentEmailIndex = 3;
         //FIXME FIXER CETTE PARTIE. REFAIRE COMPLETEMENT LA SEQUENCE DE GESTION DES MAILS
-
         JsonArray line = rows.getJsonArray(0);
-
         String agentMailObject = "[LyStore] Commandes " + line.getString(contractNameIndex);
         String agentMailBody = getAgentBodyMail(line, user, result.getString("number_validation"), url);
-
-
-        sendMail(request, line.getString(agentEmailIndex),
-                agentMailObject,
-                agentMailBody);
-
+        Integer idCampaign = line.getInteger(5);
+//        sendMail(request, line.getString(agentEmailIndex),
+//                agentMailObject,
+//                agentMailBody);
         for (int i = 0; i < structureRows.size(); i++) {
             String mailObject = "[LyStore] Commandes ";
             JsonObject row = structureRows.getJsonObject(i);
@@ -64,11 +60,10 @@ public class EmailSendService {
                 JsonObject userMail = mailsRow.getJsonObject(j);
                 if (userMail.getString("mail") != null) {
                     String mailBody = getStructureBodyMail(mailsRow.getJsonObject(j), user,
-                            result.getString("number_validation"), url, name);
-                    sendMail(request, userMail.getString("mail"),
-                            mailObject,
-                            mailBody);
-
+                            result.getString("number_validation"), url, name,idCampaign);
+//                    sendMail(request, userMail.getString("mail"),
+//                            mailObject,
+//                            mailBody);
                 }
             }
         }
@@ -86,20 +81,20 @@ public class EmailSendService {
     }
 
     private static String getStructureBodyMail(JsonObject row, UserInfos user, String numberOrder, String url,
-                                               String name){
+                                               String name, Integer idCampaign){
         String body = "Bonjour " + row.getString("name") + ", <br/> <br/>"
                 + "Une commande sous le numéro \"" + numberOrder + "\" vient d'être validée."
                 + " Une partie de la commande concerne l'établissement " + name + ". "
                 + "Cette confirmation est visible sur l'interface de LyStore en vous rendant ici :  <br />"
-                + "<br />" + url + "/lystore#/ <br />"
+                + "<br />" + url + "/lystore#/" + idCampaign + " <br />"
                 + "<br /> Bien Cordialement, "
                 + "<br /> L'équipe LyStore. ";
+        System.out.println(body);
         return formatAccentedString(body);
 
     }
     private static String getAgentBodyMail(JsonArray row, UserInfos user, String numberOrder, String url){
         final int contractName = 2 ;
-
         String body = null;
         body = "Bonjour " + row.getString(contractName) + ", <br/> <br/>"
                 + user.getFirstName() + " " + user.getLastName() + " vient de valider une commande sous le numéro \""

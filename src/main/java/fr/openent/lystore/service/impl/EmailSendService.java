@@ -86,7 +86,7 @@ public class EmailSendService {
                 + "Une commande sous le numéro \"" + numberOrder + "\" vient d'être validée."
                 + " Une partie de la commande concerne l'établissement " + name + ". "
                 + "Cette confirmation est visible sur l'interface de LyStore en vous rendant ici :  <br />"
-                + "<br />" + url + "/lystore#/" + idCampaign + " <br />"
+                + "<br />" + url + "#/campaign/" + idCampaign + "/order <br />"
                 + "<br /> Bien Cordialement, "
                 + "<br /> L'équipe LyStore. ";
         System.out.println(body);
@@ -101,7 +101,7 @@ public class EmailSendService {
                 + numberOrder + "\"."
                 + " Une partie de la commande concerne le marché " + row.getString(1) + ". "
                 + "<br /> Pour générer le bon de commande et les CSF associés, il suffit de se rendre ici : <br />"
-                + "<br />" + url + getEncodedRedirectUri(url + "/lystore#/order/valid") + "<br />"
+                + "<br />" + url + getEncodedRedirectUri(url + "#/order/valid") + "<br />"
                 + "<br /> Bien Cordialement, "
                 + "<br /> L'équipe LyStore. ";
 

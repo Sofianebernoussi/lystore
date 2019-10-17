@@ -114,9 +114,7 @@ public class Publipostage extends TabHelper {
         excel.autoSize(lengthGlobalCols);
     }
 
-    private String makeCellWithoutNull ( String valueGet){
-        return valueGet != null? valueGet : "";
-    }
+
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {

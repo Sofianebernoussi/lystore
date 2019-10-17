@@ -21,7 +21,7 @@ public class RecapImputationBud extends TabHelper {
 
         super(workbook, instruction, TabName.IMPUTATION_BUDG.toString());
         excel.setDefaultFont();
-        excel.setCPNumber(instruction.getString("cp_number"));
+        excel.setCPNumber(makeCellWithoutNull(instruction.getString("cp_number")));
     }
 
     @Override

@@ -159,9 +159,12 @@ export const orderController = ng.controller('orderController',
                 });
                 $scope.displayedOrders.all = searchResult;
             } else {
-                isPageOrderWaiting?
-                    $scope.selectCampaignShow($scope.campaign):
-                    $scope.displayedOrders.all = $scope.ordersClient.all;
+                if(isPageOrderWaiting)
+                    $scope.selectCampaignShow($scope.campaign)
+                else {
+                    $scope.displayedOrders.all = $scope.ordersClient.all ;
+                }
+
             }
         };
 
@@ -188,7 +191,22 @@ export const orderController = ng.controller('orderController',
         $scope.cancelBasketDelete = () => {
             $scope.display.lightbox.validOrder = false;
             template.close('validOrder.lightbox');
+            if($scope.operationId) {
+                $scope.redirectTo(`/operation/order/${$scope.operationId}`)
+                $scope.operationId = undefined;
+            }
             Utils.safeApply($scope);
+        };
+
+
+        $scope.closedLighbtox= () =>{
+            $scope.display.lightbox.validOrder = false;
+            if($scope.operationId) {
+                $scope.redirectTo(`/operation/order/${$scope.operationId}`)
+                $scope.operationId = undefined;
+            }
+            Utils.safeApply($scope);
+
         };
         $scope.windUpOrders = async (orders: OrderClient[]) => {
             let ordersToWindUp  = new OrdersClient();
@@ -198,8 +216,17 @@ export const orderController = ng.controller('orderController',
                 toasts.confirm('lystore.windUp.notif');
             }
             await $scope.syncOrders('SENT');
+            $scope.ordersClient.all  =[]
+            $scope.displayedOrders.all =[]
+
             Utils.safeApply($scope);
         };
+        $scope.isNotValidated = ( orders:OrderClient[]) =>{
+
+            let order  = orders.find(order => order.status === "SENT")
+            return order != undefined
+        };
+
         $scope.validateSentOrders = (orders: OrderClient[]) => {
             if (_.where(orders, { status : 'SENT' }).length > 0) {
                 let orderNumber = orders[0].order_number;
@@ -353,6 +380,7 @@ export const orderController = ng.controller('orderController',
             await $scope.ordersClient.addOperationInProgress(operation.id, idsOrder);
             await $scope.getOrderWaitingFiltered($scope.campaign);
             template.open('validOrder.lightbox', 'administrator/order/order-valid-add-operation');
+            $scope.operationId= operation.id;
         };
 
         $scope.inProgressOrders = async (orders: OrderClient[]) => {

@@ -371,6 +371,7 @@
   "room": "Salle",
   "room.number": "N°salle(s)",
   "sites": "Site(s)",
+  "files": "Fichier(s)",
   "room.site": "Site",
   "lystore.grade": "Diplôme concerné ",
   "lystore.project.create.err": "Erreur lors de la création du projet",
@@ -438,7 +439,7 @@
   "lystore.instruction.commenter":"Commentaire",
   "lystore.instruction.official.number":"N° officiel CP",
   "lystore.instruction.service.number":"N° service",
-  "lystore.number.sub":"Nbre subventions",
+  "lystore.number.orders":"Nbre demandes",
   "lystore.instruction.operations":"Opérations associées",
   "lystore.instruction.exercise_number":"N° Exercice",
   "lystore.instruction.service_number":"N° Service",
@@ -533,6 +534,7 @@
   "lystore.project.lowerCase": "projet",
   "lystore.loading": "Chargement en cours ...",
   "lystore.campaign.purse.init": "Cagnottes initiales",
-  "lystore.campaign.amount.init":"Montant initial disponible "
+  "lystore.campaign.amount.init":"Montant initial disponible ",
+  "notify.etab": "Notifier le lycée"
 
 }

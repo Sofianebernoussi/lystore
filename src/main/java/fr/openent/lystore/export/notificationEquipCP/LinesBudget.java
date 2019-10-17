@@ -25,7 +25,7 @@ public class LinesBudget extends TabHelper {
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
-        excel.setCPNumber(instruction.getString("cp_number"), 1, 1);
+        excel.setCPNumber(makeCellWithoutNull(instruction.getString("cp_number")), 1, 1);
         getDatas(event -> handleDatasDefault(event, handler));
     }
 

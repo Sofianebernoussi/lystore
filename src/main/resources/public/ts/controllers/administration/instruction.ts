@@ -26,6 +26,9 @@ export const instructionController = ng.controller('instructionController',
         $scope.formatDate = (date) => {
             return Utils.formatDate(date)
         };
+        $scope.getYearFromStr = (str) =>{
+            return str.substr(0,4);
+        }
         $scope.switchAll = (model: boolean, collection) => {
             model ? collection.selectAll() : collection.deselectAll();
             Utils.safeApply($scope);

@@ -63,6 +63,7 @@ public class Market extends TabHelper {
                         if (datas.isEmpty()) {
                             handler.handle(new Either.Left<>("No data in database"));
                         } else {
+                            datas = sortByCity(datas);
                             setTitle();
                             writeArray(handler);
                         }
@@ -81,7 +82,6 @@ public class Market extends TabHelper {
 
         });
 
-        datas = sortByCity(datas);
     }
 
     private void setTitle() {
@@ -179,29 +179,6 @@ public class Market extends TabHelper {
 
 
 
-//    protected void setStructures(JsonArray structures) {
-//        JsonObject program, structure;
-//        JsonArray actions;
-//        for (int i = 0; i < datas.size(); i++) {
-//            JsonObject data = datas.getJsonObject(i);
-//            actions = new JsonArray(data.getString("actions"));
-//            totalSubv += Float.parseFloat(data.getString("totalprice"));
-//            for (int k = 0; k < actions.size(); k++) {
-//                JsonObject action = actions.getJsonObject(k);
-//                for (int j = 0; j < structures.size(); j++) {
-//                    structure = structures.getJsonObject(j);
-//                    if (action.getString("id_structure").equals(structure.getString("id"))) {
-//                        action.put("nameEtab", structure.getString("name"));
-//                        action.put("uai", structure.getString("uai"));
-//                        action.put("city", structure.getString("city"));
-//                        action.put("zipCode", structure.getString("zipCode"));
-//                    }
-//                }
-//            }
-//            data.put("" +
-//                    "ordersJO", actions);
-//        }
-//    }
 
 
     @Override

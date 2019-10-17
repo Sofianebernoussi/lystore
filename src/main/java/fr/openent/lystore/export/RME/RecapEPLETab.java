@@ -51,7 +51,7 @@ public class RecapEPLETab extends TabHelper {
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
-        excel.setCPNumber(instruction.getString("cp_number"));
+        excel.setCPNumber(makeCellWithoutNull(instruction.getString("cp_number")));
         getDatas(event -> {
             try {
                 if (event.isLeft()) {
@@ -79,7 +79,7 @@ public class RecapEPLETab extends TabHelper {
         JsonObject program;
         for (int i = 0; i <  datas.size(); i++) {
             program =  datas.getJsonObject(i);
-            program.getString("comment");
+            makeCellWithoutNull( program.getString("comment"));
             if (!structuresId.contains(program.getString(id_structureStr)))
                 structuresId.add(structuresId.size(), program.getString(id_structureStr));
         }
@@ -109,7 +109,7 @@ public class RecapEPLETab extends TabHelper {
             }
             sheet.createRow(yProgramLabel + 3);
             excel.insertCellTab(0, yProgramLabel + 3, program.getString("label"));
-            excel.insertCellTab(1, yProgramLabel + 3, program.getString("comment"));
+            excel.insertCellTab(1, yProgramLabel + 3, makeCellWithoutNull(program.getString("comment")));
             excel.insertCellTabInt(2, yProgramLabel + 3, Integer.parseInt(program.getInteger("amount").toString()));
             excel.insertCellTabDouble(3, yProgramLabel + 3, Double.parseDouble(program.getString("total")));
             yProgramLabel++;

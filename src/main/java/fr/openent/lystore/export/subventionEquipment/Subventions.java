@@ -65,6 +65,7 @@ public class Subventions extends TabHelper {
                         if (datas.isEmpty()) {
                             handler.handle(new Either.Left<>("No data in database"));
                         } else {
+                            datas = sortByCity(datas);
                             setTitle();
                             writeArray(handler);
                         }
@@ -84,7 +85,6 @@ public class Subventions extends TabHelper {
 
         });
 
-        datas = sortByCity(datas);
     }
 
     private void setTitle() {
@@ -122,7 +122,7 @@ public class Subventions extends TabHelper {
             for (int j = 0; j < orders.size(); j++) {
                 JsonObject order = orders.getJsonObject(j);
                 excel.insertCellTab(0, lineNumber, order.getString("name_equipment"));
-                excel.insertCellTab(1, lineNumber, order.getString("comment"));
+                excel.insertCellTab(1, lineNumber,makeCellWithoutNull( order.getString("comment")));
                 excel.insertCellTabCenter(2, lineNumber, order.getInteger("amount").toString());
                 excel.insertCellTabDoubleWithPrice(3, lineNumber, order.getDouble("total"));
                 lineNumber++;

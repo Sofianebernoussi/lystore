@@ -71,7 +71,7 @@
                 <tr class="row" ng-repeat="row in orderToCreate.rows track by $index">
 
                     <td class="one ">
-                        <div ng-if="row.display.struct" class="row ">
+                        <div ng-if="!row.display.struct" class="row ">
                             <i class="house one" ng-click="swapTypeStruct(row)"></i>
                             <select class="eleven"
                                     style="max-width: 300px;"
@@ -83,7 +83,7 @@
 
                             </select>
                         </div>
-                        <div ng-if="!row.display.struct" class="row ">
+                        <div ng-if="row.display.struct" class="row ">
                             <i class="groups one" ng-click="swapTypeStruct(row)"></i>
                             <select class="eleven"
                                     style="max-width: 300px;"

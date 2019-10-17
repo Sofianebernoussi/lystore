@@ -173,7 +173,7 @@ public class RecapMarketGestion extends TabHelper {
 
                 excel.insertCellTabCenter(2, lineNumber, CIVILITY + "\n" + address + "\n TEL: " + order.getString("phone"));
                 excel.insertCellTabCenterBold(3, lineNumber, formatterDateExcel.format(orderDate));
-                excel.insertCellTabCenter(4, lineNumber, order.getString("market") + " \nCP " + instruction.getString("cp_number"));
+                excel.insertCellTabCenter(4, lineNumber, order.getString("market") + " \nCP " + makeCellWithoutNull(instruction.getString("cp_number")));
                 if (order.getBoolean("isregion")) {
                     excel.insertCellTabCenter(5, lineNumber,
                             "OPE : " + order.getString("operation") + "\nDDE : R-" + order.getInteger("id").toString());
@@ -188,7 +188,7 @@ public class RecapMarketGestion extends TabHelper {
                 excel.insertCellTabCenter(9, lineNumber, formatStrToCell(order.getString("name_equipment"), 5));
                 excel.insertCellTabCenter(10, lineNumber, order.getString("cite_mixte"));
                 excel.insertCellTabCenter(11, lineNumber, formatStrToCell(order.getString("market"), 5));
-                excel.insertCellTabCenter(12, lineNumber, formatStrToCell(order.getString("comment"), 5));
+                excel.insertCellTabCenter(12, lineNumber,formatStrToCell( makeCellWithoutNull(order.getString("comment")), 5));
                 lineNumber++;
             }
             excel.insertHeader(0, lineNumber, zip);

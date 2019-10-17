@@ -15,19 +15,17 @@ import java.util.Collections;
 
 
 public class LinesBudget extends TabHelper {
-    private StructureService structureService;
     private ArrayList<Integer> codes = new ArrayList<>();
     private int arraylength = 5;
     private int lineNumber = 1;
     public LinesBudget(Workbook workbook, JsonObject instruction) {
         super(workbook, instruction, "Lignes Budgetaires");
-        structureService = new DefaultStructureService(Lystore.lystoreSchema);
     }
 
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
-        excel.setCPNumber(instruction.getString("cp_number"), 1, 1);
+        excel.setCPNumber(makeCellWithoutNull(instruction.getString("cp_number")), 1, 1);
         getDatas(event -> handleDatasDefault(event, handler));
     }
 
@@ -44,15 +42,24 @@ public class LinesBudget extends TabHelper {
 
             }
         }
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
+                boolean errorCatch= false;
                 if (repStructures.isRight()) {
-                    JsonArray structures = repStructures.right().getValue();
-                    setStructures(structures);
-                    setLabels();
-                    setArray(datas);
-                    handler.handle(new Either.Right<>(true));
+                    try {
+                        JsonArray structures = repStructures.right().getValue();
+                        setStructures(structures);
+                        setLabels();
+                        setArray(datas);
+                    }catch (Exception e){
+                        logger.error(e.getMessage() +" Lines");
+                        errorCatch = true;
+                    }
+                    if(errorCatch)
+                        handler.handle(new Either.Left<>("Error when writting files"));
+                    else
+                        handler.handle(new Either.Right<>(true));
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
 
@@ -61,43 +68,13 @@ public class LinesBudget extends TabHelper {
         });
     }
 
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            actions = new JsonArray(data.getString("actions"));
-            for (int k = 0; k < actions.size(); k++) {
-                JsonObject action = actions.getJsonObject(k);
-
-                for (int j = 0; j < structures.size(); j++) {
-                    structure = structures.getJsonObject(j);
-                        action.put("nameEtab", NULL_DATA);
-                        action.put("uai",NULL_DATA);
-                        action.put("city", NULL_DATA);
-                        action.put("type", NULL_DATA);
-                        action.put("zipCode","??");
-
-                    if (action.getString("id_structure").equals(structure.getString("id"))) {
-                        action.put("nameEtab", structure.getString("name"));
-                        action.put("uai", structure.getString("uai"));
-                        action.put("city", structure.getString("city"));
-                        action.put("type", structure.getString("type"));
-                        action.put("zipCode", structure.getString("zipCode"));
-                    }
-                }
-            }
-            data.put("actionsJO", actions);
-        }
-    }
 
 
     @Override
     protected void setArray(JsonArray datas) {
         int initLineNumber;
-
         for (int i = 0; i < datas.size(); i++) {
-            Float totalToInsert = 0.f;
+            Double totalToInsert = 0.d;
             String previousStructure = "";
             JsonObject operationData = datas.getJsonObject(i);
             JsonArray orders = operationData.getJsonArray("actionsJO");
@@ -117,31 +94,31 @@ public class LinesBudget extends TabHelper {
                     nbTotaux++;
                     lineNumber++;
                     if (!operationAdded) {
-                        excel.insertWhiteOnBlueTab(lineNumber, 1, labelOperation);
+                        excel.insertWhiteOnBlueTab(1, lineNumber, labelOperation);
                         operationAdded = true;
                     }
-                    totalToInsert = 0.f;
+                    totalToInsert = 0.d;
                     previousCode = "";
                     previousStructure = currentStructure;
-                    excel.insertWhiteOnBlueTab(lineNumber, 2, order.getString("uai"));
-                    excel.insertWhiteOnBlueTab(lineNumber, 3, order.getString("type"));
-                    excel.insertWhiteOnBlueTab(lineNumber, 4, order.getString("nameEtab"));
+                    excel.insertWhiteOnBlueTab(2, lineNumber, order.getString("uai"));
+                    excel.insertWhiteOnBlueTab(3, lineNumber, order.getString("type"));
+                    excel.insertWhiteOnBlueTab(4, lineNumber, order.getString("nameEtab"));
 
                 }
                 if (!previousCode.equals(code)) {
                     previousCode = code;
-                    totalToInsert = 0.f;
+                    totalToInsert = 0.d;
                 }
-                totalToInsert += safeGetFloat(order,"total", "LinesBudget");
-                excel.insertFloatYellow(lineNumber,
-                        5 + codes.indexOf(Integer.parseInt(code)), totalToInsert);
+                totalToInsert += safeGetDouble(order,"total", "LinesBudget");
+                excel.insertDoubleYellow(5 + codes.indexOf(Integer.parseInt(code)), lineNumber,
+                        totalToInsert);
             }
             //insert Total
             excel.fillTabWithStyle(1, 4, initLineNumber + 1, lineNumber + 1, excel.whiteOnBlueLabel);
-            excel.fillTabWithStyle(5, arraylength, initLineNumber + 1, lineNumber + 1, excel.floatOnYellowStyle);
+            excel.fillTabWithStyle(5, arraylength, initLineNumber + 1, lineNumber + 1, excel.doubleOnYellowStyle);
 
             lineNumber++;
-            excel.insertHeader(lineNumber, 1, excel.totalLabel + " : " + labelOperation);
+            excel.insertHeader(1, lineNumber, excel.totalLabel + " : " + labelOperation);
             for (int nbTotal = 0; nbTotal < codes.size(); nbTotal++) {
                 excel.setTotalX(initLineNumber + 1, lineNumber - 1, 5 + nbTotal, lineNumber);
             }
@@ -169,7 +146,7 @@ public class LinesBudget extends TabHelper {
         }
         Collections.sort(codes);
         for (int i = 0; i < codes.size(); i++) {
-            excel.insertLabel(1, 5 + i, codes.get(i).toString());
+            excel.insertLabel(5 + i, 1, codes.get(i).toString());
         }
         arraylength += codes.size();
     }
@@ -226,7 +203,8 @@ public class LinesBudget extends TabHelper {
         query +=
                 "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
                         "  OR (spa.structure_type = '" + CMR + "' AND specific_structures.type ='" + CMR + "') " +
-                        "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    ";
+                        "     OR                     (spa.structure_type = '" + LYCEE + "' AND" +
+                        " ( specific_structures.type is null OR  specific_structures.type ='" + LYCEE + "') ))    ";
         query +=
                 "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
                         "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           ";

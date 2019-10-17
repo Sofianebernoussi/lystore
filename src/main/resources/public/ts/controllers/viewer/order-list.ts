@@ -1,4 +1,4 @@
-import {_, moment, ng, template} from 'entcore';
+import {_, moment, ng, template, toasts} from 'entcore';
 import {Notification, OrderClient, OrdersClient, PRIORITY_FIELD, Project, Projects, Utils} from '../../model';
 
 
@@ -87,8 +87,8 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             if (status === 200) {
                 $scope.campaign.nb_order = data.nb_order;
                 $scope.campaign.purse_amount = data.amount;
-                ($scope.campaign.purse_enabled) ? $scope.notifications.push(new Notification('lystore.orderEquipment.delete.confirm', 'confirm'))
-                    : $scope.notifications.push(new Notification('lystore.requestEquipment.delete.confirm', 'confirm'));
+                ($scope.campaign.purse_enabled) ? toasts.confirm('lystore.orderEquipment.delete.confirm')
+                    : toasts.confirm('lystore.requestEquipment.delete.confirm');
             }
         };
 
@@ -147,11 +147,12 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
                 if ($scope.projectIsDeletable(projects[i])) {
                     let {status, data} = await projects[i].delete($scope.campaign.id, $scope.ordersClient.all[0].id_structure);
                     if (status == 200) {
-                        $scope.notifications.push(new Notification('lystore.project.delete.confirm', 'confirm'));
+                        toasts.confirm('lystore.project.delete.confirm');
                     }
                     if (data) {
                         $scope.campaign.nb_order = data.nb_order;
                         $scope.campaign.nb_panier = data.nb_basket;
+                        $scope.campaign.purse_amount = data.purse_amount
                     }
                 }
             }
@@ -186,7 +187,7 @@ export const orderPersonnelController = ng.controller('orderPersonnelController'
             delete $scope.projectToUpdate;
             $scope.display.lightbox.udpateProject = false;
             template.close('orderClient.updateProject');
-            $scope.notifications.push(new Notification('lystore.project.update.success', 'confirm'));
+            toasts.confirm('lystore.project.update.success');
             Utils.safeApply($scope);
         };
 

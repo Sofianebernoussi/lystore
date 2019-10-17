@@ -44,7 +44,7 @@ export const catalogController = ng.controller('catalogController',
                 && $scope.basket.amount > 0;
         };
         $scope.switchAll = (model: boolean, collection) => {
-           collection.forEach((col) => {col.selected = col.required ? false : col.selected = model; });
+            collection.forEach((col) => {col.selected = col.required ? false : col.selected = model; });
             Utils.safeApply($scope);
         };
         $scope.thereAreOptionalOptions = (equipment: Equipment) => {
@@ -53,7 +53,10 @@ export const catalogController = ng.controller('catalogController',
         $scope.addBasketItem = async (basket: Basket) => {
             let { status } = await basket.create();
             if (status === 200 && basket.amount > 0 ) {
-                $scope.campaign.nb_panier += 1;
+                if( $scope.campaign.nb_panier)
+                    $scope.campaign.nb_panier += 1;
+                else
+                    $scope.campaign.nb_panier = 1;
                 await $scope.notifyBasket('added', basket);
             }
 

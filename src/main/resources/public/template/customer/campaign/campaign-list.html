@@ -31,6 +31,11 @@
                                     <i18n>lystore.campaign.amount</i18n> : <span ng-bind="campaign.purse_amount || 0 | currency"></span>
                                 </em>
                             </p>
+                            <p class="small-text-align" ng-if="campaign.purse_enabled">
+                                <em class="small-text">
+                                    <i18n>lystore.campaign.amount.init</i18n> : <span ng-bind="campaign.initial_purse_amount || 0 | currency"></span>
+                                </em>
+                            </p>
                             <p class="small-text-align" ng-show="campaign.nb_order && campaign.nb_order !== 0">
                                 <em class="small-text">
                                     [[campaign.nb_order]]

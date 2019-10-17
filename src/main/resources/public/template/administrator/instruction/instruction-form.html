@@ -1,9 +1,9 @@
-<div class="loading-bar" ng-class="{loading: instruction.loading}"></div>
 
-<div ng-if="instruction.loading">
-    <h1> Chargement en cours ...</h1>
+<div class="loading-bar" ng-class="{loading: loadingArray}"></div>
+<div ng-if="loadingArray">
+    <h1><i18n>lystore.loading</i18n></h1>
 </div>
-<div ng-if="!instruction.loading" class="row ten centered">
+<div  ng-show="!loadingArray" class="row ten centered">
     <h1>
         <i18n ng-show="instruction.id == undefined">lystore.instruction.add</i18n>
         <i18n ng-show="instruction.id !== undefined">lystore.instruction.modify</i18n>
@@ -12,18 +12,18 @@
         <form ng-submit="sendInstruction()" >
             <label class="row twelve vertical-spacing">
                         <span class="twelve">
-                            <i18n>lystore.instruction.object</i18n>
+                            <i18n>lystore.instruction.object</i18n> *
                         </span>
                 <input type="text" class="twelve" ng-model="instruction.object" required/>
             </label>
             <label class="row twelve vertical-spacing">
                         <span class="twelve">
-                            <i18n>lystore.exercise.number</i18n>
+                            <i18n>lystore.exercise.number</i18n> *
                         </span>
                 <select  ng-model="instruction.id_exercise" class="twelve"
                          ng-init="instruction.id_exercise = instruction.id_exercise ||
                          (exercises.all.length > 0 ? exercises.all[0].id : null)"
-                         ng-options="exercise.id as exercise.year for exercise in exercises.all"
+                         ng-options="exercise.id as getYearFromStr(exercise.year) for exercise in exercises.all"
                 >
                 </select>
             </label>
@@ -41,7 +41,7 @@
             </label>
             <label class="row vertical-spacing twelve-mobile row-mobile">
                                 <span class="cell ">
-                                    <i18n>lystore.submitted.to.cp</i18n>
+                                    <i18n>lystore.submitted.to.cp</i18n> *
                                 </span>
                 <switch-toggle ng-model="instruction.submitted_to_cp"
                                class="cell">
@@ -65,7 +65,7 @@
                     <table class="twelve">
                         <thead>
                         <td class="two"><i18n>label</i18n></td>
-                        <td class="two"><i18n>lystore.number.sub</i18n></td>
+                        <td class="two"><i18n>lystore.number.orders</i18n></td>
                         <td class="two"><i18n>amount</i18n></td>
                         <td class="two"><i18n>lystore.operation.status</i18n></td>
                         <td class="one aligne-text-center">&nbsp</td>

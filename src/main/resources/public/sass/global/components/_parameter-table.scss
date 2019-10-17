@@ -32,9 +32,22 @@ parameter-table
       }
     }
   }
+
+  .parameter-table::-webkit-scrollbar{
+    width: 9px;
+    background-color: #F5F5F5;
+  }
+  .parameter-table::-webkit-scrollbar-thumb
+  {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    background-color: #aaa;
+  }
   article{
     display: block;
     width: 200px ;
+    overflow-y: auto;
+    height: 60vh;
   }
 
 }

@@ -87,7 +87,7 @@
             </td>
             <td >[[instruction.object]]</td>
             <td ><span ng-bind="instruction.amount | currency"></span></td>
-            <td >[[instruction.exercise.year]]</td>
+            <td >[[getYearFromStr(instruction.exercise.year)]]</td>
             <td >[[instruction.service_number]]</td>
             <td >[[instruction.cp_number]]</td>
             <td >[[formatDate(instruction.date_cp)]]</td>
@@ -133,7 +133,7 @@
             <button
                     ng-disabled="instructions.selected[0].operations.length === 0"
                     ng-click="exportIris(instructions.selected[0])"
-                    ng-show="false"
+                    ng-show="instructions.selected.length === 1"
             >
                 <i18n>lystore.export.airIris</i18n>
             </button>
@@ -153,8 +153,6 @@
             >
                 <i18n>lystore.exportEquipmentRapp</i18n>
             </button>
-
-
             <button
                     ng-disabled="instructions.selected[0].operations.length === 0"
                     ng-show="instructions.selected.length === 1"
@@ -162,6 +160,7 @@
                     download
             >
                 <i18n>lystore.exportNotificationCP</i18n>
+
             </button>
             <button
                     ng-disabled="instructions.selected[0].operations.length === 0"

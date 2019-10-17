@@ -42,7 +42,9 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 if (i > 0) {
                     filter += "AND ";
                 }
-                filter += "(LOWER(label.label) ~ LOWER(?) OR LOWER(o.order_number) ~ LOWER(?)) ";
+                filter += "(LOWER(label.label) ~ LOWER(?) OR LOWER(o_region.order_number) ~ LOWER(?) OR  ";
+                filter += " LOWER(o_client.order_number) ~ LOWER(?)) ";
+
             }
         }
         return filter;
@@ -52,7 +54,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
         JsonArray params = new JsonArray();
         if (!filters.isEmpty()) {
             for (String filter : filters) {
-                params.add(filter).add(filter);
+                params.add(filter).add(filter).add(filter);
             }
         }
 
@@ -285,16 +287,61 @@ public class DefaultOperationService extends SqlCrudService implements Operation
             JsonArray ordersClientsByOperation = getOrderClientByOperationFuture.result();
 
             for (int i = 0 ; i<ordersClientsByOperation.size() ; i++){
-                ordersClientsByOperation.getJsonObject(i).put("isOrderRegion", false);
+                ordersClientsByOperation.getJsonObject(i).put("typeOrder", "client");
             }
 
             for (int i = 0 ; i<ordersRegionsByOperation.size() ; i++){
-                ordersClientsByOperation.add(ordersRegionsByOperation.getJsonObject(i).put("isOrderRegion", true));
+                ordersClientsByOperation.add(ordersRegionsByOperation.getJsonObject(i).put("typeOrder", "region"));
             }
 
             handler.handle(new Either.Right<>(ordersClientsByOperation));
         });
     }
+
+    @Override
+    public void deleteOrdersOperation(JsonArray ordersIds, Handler<Either<String, JsonObject>> handler) {
+        JsonArray statements = new JsonArray();
+        JsonArray ordersRegionIds = ordersIds.getJsonObject(0).getJsonArray("ordersRegionId");
+        JsonArray ordersClientsIds = ordersIds.getJsonObject(0).getJsonArray("ordersClientId");
+
+        if(!ordersRegionIds.isEmpty())
+            statements.add(getDeletionRegion(ordersRegionIds));
+        if(!ordersClientsIds.isEmpty())
+            statements.add(getClientsChangement(ordersClientsIds));
+
+        if (!statements.isEmpty()) {
+            Sql.getInstance().transaction(statements, message -> {
+                if ("ok".equals(message.body().getString("status"))) {
+                    handler.handle(new Either.Right<>(message.body()));
+                } else {
+                    handler.handle(new Either.Left<>(message.body().getString("message")));
+                }
+            });
+        } else {
+            handler.handle(new Either.Right<>(new JsonObject().put("status", "ok")));
+        }
+    }
+
+    private JsonObject getClientsChangement(JsonArray ordersClientsIds) {
+        String query= "UPDATE "+Lystore.lystoreSchema+".order_client_equipment " +
+                " SET status='WAITING'," +
+                "id_operation = NULL " +
+                " WHERE id in " + Sql.listPrepared(ordersClientsIds.getList());
+        return new JsonObject()
+                .put("statement", query)
+                .put("values", ordersClientsIds)
+                .put("action", "prepared");
+    }
+
+    private JsonObject getDeletionRegion(JsonArray ordersRegionIds) {
+        String query = "DELETE from "+Lystore.lystoreSchema+".\"order-region-equipment\" " +
+                " WHERE id in"+Sql.listPrepared(ordersRegionIds.getList()) ;
+        return new JsonObject()
+                .put("statement", query)
+                .put("values", ordersRegionIds)
+                .put("action", "prepared");
+    }
+
     private void getOrderRegionByOperation(int idOperation, Handler<Either<String, JsonArray>> handler){
         String queryGetOrderRegion = "" +
                 "SELECT ore.id, " +

@@ -38,5 +38,5 @@ public interface PurseService {
      * @param operation "+" or "-"
      * @return Statment
      */
-     JsonObject updatePurseAmountStatement(Float price,Integer idCampaign, String idStructure, String operation);
+     JsonObject updatePurseAmountStatement(Double price,Integer idCampaign, String idStructure, String operation);
 }

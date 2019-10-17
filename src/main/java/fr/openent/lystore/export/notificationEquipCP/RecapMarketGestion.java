@@ -62,18 +62,27 @@ public class RecapMarketGestion extends TabHelper {
 
             }
         }
-        StructureService structureService = new DefaultStructureService(Lystore.lystoreSchema);
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
+                boolean errorCatch= false;
                 if (repStructures.isRight()) {
-                    JsonArray structures = repStructures.right().getValue();
-                    setStructures(structures);
-                    if (datas.isEmpty()) {
-                        handler.handle(new Either.Left<>("No data in database"));
-                    } else {
-                        writeArray(handler);
+                    try {
+                        JsonArray structures = repStructures.right().getValue();
+                        setStructures(structures);
+                        if (datas.isEmpty()) {
+                            handler.handle(new Either.Left<>("No data in database"));
+                        } else {
+                            writeArray(handler);
+                        }
+                    }catch (Exception e){
+                        errorCatch = true;
+                        logger.error(e.getMessage()+" Recap");
                     }
+                    if(errorCatch)
+                        handler.handle(new Either.Left<>("Error when writting files"));
+                    else
+                        handler.handle(new Either.Right<>(true));
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
 
@@ -122,7 +131,7 @@ public class RecapMarketGestion extends TabHelper {
 
                 if (!previousCampaign.equals(campaign)) {
                     if (j != 0) {
-                        excel.insertHeader(lineNumber, 0, previousZip);
+                        excel.insertHeader(0, lineNumber, previousZip);
                         previousZip = zip;
                         excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
                         lineNumber++;
@@ -141,7 +150,7 @@ public class RecapMarketGestion extends TabHelper {
                 if (!previousCode.equals(code)) {
                     lineNumber++;
                     previousCode = code;
-                    excel.insertHeader(lineNumber, 0, code);
+                    excel.insertHeader(0, lineNumber, code);
                     mergeCurrentLine(false);
                     lineNumber++;
                     insertHeaders();
@@ -150,7 +159,7 @@ public class RecapMarketGestion extends TabHelper {
                 }
 
                 if (!previousZip.equals(zip)) {
-                    excel.insertHeader(lineNumber, 0, previousZip);
+                    excel.insertHeader(0, lineNumber, previousZip);
                     previousZip = zip;
                     excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
                     lineNumber++;
@@ -164,7 +173,7 @@ public class RecapMarketGestion extends TabHelper {
 
                 excel.insertCellTabCenter(2, lineNumber, CIVILITY + "\n" + address + "\n TEL: " + order.getString("phone"));
                 excel.insertCellTabCenterBold(3, lineNumber, formatterDateExcel.format(orderDate));
-                excel.insertCellTabCenter(4, lineNumber, order.getString("market") + " \nCP " + instruction.getString("cp_number"));
+                excel.insertCellTabCenter(4, lineNumber, order.getString("market") + " \nCP " + makeCellWithoutNull(instruction.getString("cp_number")));
                 if (order.getBoolean("isregion")) {
                     excel.insertCellTabCenter(5, lineNumber,
                             "OPE : " + order.getString("operation") + "\nDDE : R-" + order.getInteger("id").toString());
@@ -175,21 +184,19 @@ public class RecapMarketGestion extends TabHelper {
 
                 excel.insertCellTabCenter(6, lineNumber, formatStrToCell(campaign, 5));
                 excel.insertCellTabCenter(7, lineNumber, formatStrToCell(order.getInteger("amount").toString(), 5));
-                excel.insertCellTabFloat(8, lineNumber, safeGetFloat(order,"total", "RecapMarketGestion"));
+                excel.insertCellTabDouble(8, lineNumber, safeGetDouble(order, "total", "RecapMarketGestion"));
                 excel.insertCellTabCenter(9, lineNumber, formatStrToCell(order.getString("name_equipment"), 5));
                 excel.insertCellTabCenter(10, lineNumber, order.getString("cite_mixte"));
                 excel.insertCellTabCenter(11, lineNumber, formatStrToCell(order.getString("market"), 5));
-                excel.insertCellTabCenter(12, lineNumber, formatStrToCell(order.getString("comment"), 5));
+                excel.insertCellTabCenter(12, lineNumber,formatStrToCell( makeCellWithoutNull(order.getString("comment")), 5));
                 lineNumber++;
             }
-            excel.insertHeader(lineNumber, 0, zip);
+            excel.insertHeader(0, lineNumber, zip);
             excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
             lineNumber++;
 
         }
         excel.autoSize(13);
-        handler.handle(new Either.Right<>(true));
-
     }
 
 
@@ -210,64 +217,31 @@ public class RecapMarketGestion extends TabHelper {
     private void insertHeaders() {
 
 
-        excel.insertHeader(lineNumber, 0, DPT);
-        excel.insertHeader(lineNumber, 1, RNE_lYC);
+        excel.insertHeader(0, lineNumber, DPT);
+        excel.insertHeader(1, lineNumber, RNE_lYC);
 
-        excel.insertHeader(lineNumber, 2, ADDR);
-        excel.insertHeader(lineNumber, 3, CPDATE);
-        excel.insertHeader(lineNumber, 4, MARKET_CP);
-        excel.insertHeader(lineNumber, 5, OP_DDE_NUMBER);
-        excel.insertHeader(lineNumber, 6, CAMPAIGN);
-        excel.insertHeader(lineNumber, 7, AMOUNT);
-        excel.insertHeader(lineNumber, 8, TOTAL_PRICE);
-        excel.insertHeader(lineNumber, 9, EQUIPMENT_NAME);
-        excel.insertHeader(lineNumber, 10, TYPE);
-        excel.insertHeader(lineNumber, 11, MARKET_NUMBER);
-        excel.insertHeader(lineNumber, 12, REGION_COMMENT);
+        excel.insertHeader(2, lineNumber, ADDR);
+        excel.insertHeader(3, lineNumber, CPDATE);
+        excel.insertHeader(4, lineNumber, MARKET_CP);
+        excel.insertHeader(5, lineNumber, OP_DDE_NUMBER);
+        excel.insertHeader(6, lineNumber, CAMPAIGN);
+        excel.insertHeader(7, lineNumber, AMOUNT);
+        excel.insertHeader(8, lineNumber, TOTAL_PRICE);
+        excel.insertHeader(9, lineNumber, EQUIPMENT_NAME);
+        excel.insertHeader(10, lineNumber, TYPE);
+        excel.insertHeader(11, lineNumber, MARKET_NUMBER);
+        excel.insertHeader(12, lineNumber, REGION_COMMENT);
         lineNumber++;
     }
 
     private void setLabel(String market) {
-        excel.insertBlackOnGreenHeader(lineNumber, 0, market);
+        excel.insertBlackOnGreenHeader(0, lineNumber, market);
         sizeMergeRegion(lineNumber, 0, 12);
         lineNumber += 2;
 
     }
 
 
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            actions = new JsonArray(data.getString("actions"));
-            for (int k = 0; k < actions.size(); k++) {
-                JsonObject action = actions.getJsonObject(k);
-                for (int j = 0; j < structures.size(); j++) {
-                    structure = structures.getJsonObject(j);
-                    action.put("nameEtab", NULL_DATA);
-                    action.put("uai",NULL_DATA);
-                    action.put("city", NULL_DATA);
-                    action.put("type", NULL_DATA);
-                    action.put("address", NULL_DATA);
-                    action.put("zipCode","??");
-                    action.put("phone", NULL_DATA);
-
-                    if (action.getString("id_structure").equals(structure.getString("id"))) {
-                        action.put("nameEtab", structure.getString("name"));
-                        action.put("uai", structure.getString("uai"));
-                        action.put("city", structure.getString("city"));
-                        action.put("address", structure.getString("address"));
-                        action.put("zipCode", structure.getString("zipCode"));
-                        action.put("phone", structure.getString("phone"));
-
-
-                    }
-                }
-            }
-            data.put("actionsJO", actions);
-        }
-    }
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
@@ -320,7 +294,8 @@ public class RecapMarketGestion extends TabHelper {
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         " +
                 "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
                 "  OR (spa.structure_type = '" + CMR + "' AND specific_structures.type ='" + CMR + "') " +
-                "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    " +
+                "     OR                     (spa.structure_type = '" + LYCEE + "' AND" +
+                " ( specific_structures.type is null OR  specific_structures.type ='" + LYCEE + "') ))    "+
                 "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
                 "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
 

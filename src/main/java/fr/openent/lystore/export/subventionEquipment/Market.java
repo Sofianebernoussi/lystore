@@ -23,7 +23,7 @@ public class Market extends TabHelper {
     private final String ANNEXE_TEXT = "ANNEXE au rapport";
     private final String TOTAL_TITLE = "Montant total dotations financières au titre du présent rapport";
     private boolean isCMR;
-    Float totalSubv = 0.f;
+    Double totalSubv = 0.d;
 
 
     public Market(Workbook workbook, JsonObject instruction, boolean isCMR) {
@@ -52,19 +52,28 @@ public class Market extends TabHelper {
 
             }
         }
-        StructureService structureService = new DefaultStructureService(Lystore.lystoreSchema);
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
+                boolean errorCatch= false;
                 if (repStructures.isRight()) {
-                    JsonArray structures = repStructures.right().getValue();
-                    setStructures(structures);
-                    if (datas.isEmpty()) {
-                        handler.handle(new Either.Left<>("No data in database"));
-                    } else {
-                        setTitle();
-                        writeArray(handler);
+                    try {
+                        JsonArray structures = repStructures.right().getValue();
+                        setStructures(structures);
+                        if (datas.isEmpty()) {
+                            handler.handle(new Either.Left<>("No data in database"));
+                        } else {
+                            datas = sortByCity(datas);
+                            setTitle();
+                            writeArray(handler);
+                        }
+                    }catch (Exception e){
+                        errorCatch = true;
                     }
+                    if(errorCatch)
+                        handler.handle(new Either.Left<>("Error when writting files"));
+                    else
+                        handler.handle(new Either.Right<>(true));
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
                 }
@@ -73,17 +82,20 @@ public class Market extends TabHelper {
 
         });
 
-        datas = sortByCity(datas);
     }
 
     private void setTitle() {
+        for (int i = 0; i < datas.size(); i++) {
+            JsonObject data = datas.getJsonObject(i);
+            totalSubv += Double.parseDouble(data.getString("totalprice"));
+        }
         excel.insertBlackTitleHeaderBorderlessCenter(0, lineNumber, ANNEXE_TEXT);
         sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber++;
         excel.insertBlackTitleHeaderBorderlessCenter(0, lineNumber, TOTAL_TITLE);
         sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber++;
-        excel.insertBlueTitleHeaderBorderlessCenterFloatCurrency(0, lineNumber, totalSubv);
+        excel.insertBlueTitleHeaderBorderlessCenterDoubleCurrency(0, lineNumber, totalSubv);
         sizeMergeRegionWithStyle(lineNumber, 0, 2, excel.blackTitleHeaderBorderlessCenteredStyle);
         lineNumber += 2;
 
@@ -92,7 +104,7 @@ public class Market extends TabHelper {
     private void writeArray(Handler<Either<String, Boolean>> handler) {
         for (int i = 0; i < datas.size(); i++) {
             JsonObject campaignData = datas.getJsonObject(i);
-            JsonArray orders = campaignData.getJsonArray("ordersJO");
+            JsonArray orders = campaignData.getJsonArray("actionsJO");
             String campaign = campaignData.getString("campaign");
             lineNumber++;
             excel.insertUnderscoreHeader(0, lineNumber, campaign);
@@ -110,7 +122,7 @@ public class Market extends TabHelper {
 
                 if (!idStructure.equals(previousIdStruct)) {
                     if (j != 0) {
-                        excel.insertLabelBold(lineNumber, 0, previousMarket);
+                        excel.insertLabelBold(0, lineNumber, previousMarket);
                         excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
                         excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
                         initLine = lineNumber + 1;
@@ -121,7 +133,7 @@ public class Market extends TabHelper {
                     String zip = order.getString("zipCode").substring(0, 2);
                     String structString = zip + " - " +
                             order.getString("city") + " - " + order.getString("nameEtab") + "(" + order.getString("uai") + ")";
-                    excel.insertHeader(lineNumber, 0, structString);
+                    excel.insertHeader(0, lineNumber, structString);
                     sizeMergeRegion(lineNumber, 0, 2);
                     previousIdStruct = idStructure;
                     lineNumber++;
@@ -129,7 +141,7 @@ public class Market extends TabHelper {
                 }
 
                 if (previousMarketId != marketId) {
-                    excel.insertLabelBold(lineNumber, 0, previousMarket);
+                    excel.insertLabelBold(0, lineNumber, previousMarket);
                     excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
                     excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
                     initLine = lineNumber + 1;
@@ -138,59 +150,35 @@ public class Market extends TabHelper {
                     lineNumber++;
                 }
                 excel.insertCellTab(0, lineNumber, formatStrToCell(order.getString("name_equipment"), 10));
-                excel.insertCellTabFloat(1, lineNumber, order.getInteger("amount"));
-                excel.insertCellTabFloat(2, lineNumber, safeGetFloat(order,"total", "Market"));
+                excel.insertCellTabDouble(1, lineNumber, order.getInteger("amount")*1.d);
+                excel.insertCellTabDouble(2, lineNumber, safeGetDouble(order,"total", "Market"));
                 lineNumber++;
             }
-            excel.insertLabelBold(lineNumber, 0, market);
+            excel.insertLabelBold(0, lineNumber, market);
             excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
             excel.setTotalX(initLine, lineNumber - 1, 2, lineNumber);
             initLine = lineNumber + 2;
-//            excel.insertCellTabFloatWithPrice(3, lineNumber, Float.parseFloat(campaignData.getString("totalprice")));
+//            excel.insertCellTabDoubleWithPrice(3, lineNumber, Double.parseDouble(campaignData.getString("totalprice")));
             lineNumber += 2;
 
 
         }
 
         excel.autoSize(4);
-        handler.handle(new Either.Right<>(true));
 
     }
 
 
     @Override
     protected void setLabels() {
-        excel.insertHeader(lineNumber, 0, MARKET_LABEL);
-        excel.insertHeader(lineNumber, 1, AMOUNT);
-        excel.insertHeader(lineNumber, 2, TOTAL);
+        excel.insertHeader(0, lineNumber, MARKET_LABEL);
+        excel.insertHeader(1, lineNumber, AMOUNT);
+        excel.insertHeader(2, lineNumber, TOTAL);
         lineNumber++;
     }
 
 
 
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            actions = new JsonArray(data.getString("actions"));
-            totalSubv += Float.parseFloat(data.getString("totalprice"));
-            for (int k = 0; k < actions.size(); k++) {
-                JsonObject action = actions.getJsonObject(k);
-                for (int j = 0; j < structures.size(); j++) {
-                    structure = structures.getJsonObject(j);
-                    if (action.getString("id_structure").equals(structure.getString("id"))) {
-                        action.put("nameEtab", structure.getString("name"));
-                        action.put("uai", structure.getString("uai"));
-                        action.put("city", structure.getString("city"));
-                        action.put("zipCode", structure.getString("zipCode"));
-                    }
-                }
-            }
-            data.put("" +
-                    "ordersJO", actions);
-        }
-    }
 
 
     @Override
@@ -247,9 +235,13 @@ public class Market extends TabHelper {
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         ";
         if (isCMR)
             query += "   AND (spa.structure_type = '" + CMR + "' AND specific_structures.type ='" + CMR + "')  ";
-        else
-            query += "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
-                    "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    ";
+        else {
+            query +=
+                    "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "')  " +
+                            "     OR                    " +
+                            " (spa.structure_type = '" + LYCEE + "' AND " +
+                            "   ( specific_structures.type is null OR  specific_structures.type ='" + LYCEE + "') ))    ";
+        }
         query += "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
                 "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +

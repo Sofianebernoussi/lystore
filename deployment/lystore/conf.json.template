@@ -1,5 +1,5 @@
     {
-      "name": "fr.openent~lystore~1.6.12",
+      "name": "fr.openent~lystore~1.7.0",
       "config": {
         "main" : "fr.openent.lystore.Lystore",
         "port" : 8140,
@@ -17,6 +17,7 @@
         "entcore.port" : 8009,
         "sql": true,
         "db-schema": "lystore",
+        "iteration-worker": ${lystoreIterationWorker},
         "exports" : {
             "template-path" : "./public/template/pdf/",
             "logo-path": "./public/img/ile_de_france.png"

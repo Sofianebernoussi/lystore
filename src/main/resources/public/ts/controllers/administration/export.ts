@@ -1,5 +1,5 @@
-import {moment, ng, template} from "entcore";
-import {Export, Notification, Utils, STATUS} from "../../model";
+import {moment, ng, template, toasts} from "entcore";
+import {Export, Notification, Utils, STATUS, Userbook} from "../../model";
 
 declare let window: any;
 
@@ -18,7 +18,7 @@ export const exportCtrl = ng.controller('exportCtrl', [
 
         $scope.getExport = (exportTemp: Export) => {
             if(exportTemp.status === STATUS.SUCCESS){
-                window.location = `lystore/export/${exportTemp.fileid}`;
+                window.location = `lystore/export/${exportTemp.fileId}`;
             }
         };
 
@@ -38,13 +38,13 @@ export const exportCtrl = ng.controller('exportCtrl', [
 
         $scope.deleteExport = async ():Promise<void> => {
             await $scope.exports.delete( $scope.exportsToDelete
-                    .map(exportMap => exportMap.id),
+                    .map(exportMap => exportMap._id),
                 $scope.exportsToDelete
-                    .map(exportMap => exportMap.fileid));
+                    .map(exportMap => exportMap.fileId));
             $scope.isAllExportSelected = false;
             $scope.display.delete = false;
             template.close('export.delete.lightbox');
-            $scope.notifications.push(new Notification('lystore.delete.notif', 'confirm'));
+            toasts.confirm('lystore.delete.notif');
             $scope.exportToDelete = [];
             await $scope.exports.getExports();
 

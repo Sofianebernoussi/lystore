@@ -6,12 +6,13 @@ import {Utils} from "./Utils";
 export class Export implements Selectable {
     selected: boolean;
     filename: string;
-    fileid: string;
+    fileId: string;
     ownerid: string;
-    id: Number;
+    _id: string;
     instruction_name:string;
     instruction_id:Number;
     status: STATUS;
+    created?;
     constructor(){
         this.status = STATUS.WAITING;
     }

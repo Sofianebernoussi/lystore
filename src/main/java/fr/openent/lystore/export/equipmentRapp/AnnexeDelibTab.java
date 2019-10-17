@@ -10,15 +10,12 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 public class AnnexeDelibTab extends TabHelper {
     private String type;
-    private StructureService structureService;
     private JsonObject programMarket;
 
     /**
@@ -30,14 +27,13 @@ public class AnnexeDelibTab extends TabHelper {
     public AnnexeDelibTab(Workbook wb, JsonObject instruction, String type) {
         super(wb, instruction, "ANNEXE DELIB");
         this.type = type;
-        structureService = new DefaultStructureService(Lystore.lystoreSchema);
         programMarket = new JsonObject();
     }
 
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
-            excel.setDefaultFont();
-            getDatas(event -> handleDatasDefault(event, handler));
+        excel.setDefaultFont();
+        getDatas(event -> handleDatasDefault(event, handler));
     }
 
     @Override
@@ -49,14 +45,24 @@ public class AnnexeDelibTab extends TabHelper {
                 structuresId.add(structuresId.size(), data.getString("id_structure"));
 
         }
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        logger.info("structid add");
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
+                boolean errorCatch= false;
                 if (repStructures.isRight()) {
-                    JsonArray structures = repStructures.right().getValue();
-                    setStructures(structures);
-                    setArray(datas);
-                    handler.handle(new Either.Right<>(true));
+                    try {
+                        JsonArray structures = repStructures.right().getValue();
+                        setStructuresFromDatas(structures);
+                        setArray(datas);
+                    }catch (Exception e){
+                        errorCatch = true;
+                        log.error(e.getMessage());
+                    }
+                    if(errorCatch)
+                        handler.handle(new Either.Left<>("Error when writting files"));
+                    else
+                        handler.handle(new Either.Right<>(true));
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
 
@@ -74,7 +80,7 @@ public class AnnexeDelibTab extends TabHelper {
         int lineToInsert = 5;
         JsonObject idPassed = new JsonObject();
         String key = "", oldkey = "";
-        Float oldTotal = 0.f;
+        Double oldTotal = 0.d;
         for (int i = 0; i < datas.size(); i++) {
             JsonObject action = datas.getJsonObject(i);
             key = action.getString("program") + " - " + action.getString("code");
@@ -89,12 +95,12 @@ public class AnnexeDelibTab extends TabHelper {
                 oldkey = "";
             }
             if (!oldkey.equals(key)) {
-                oldTotal = 0.f;
+                oldTotal = 0.d;
             }
             oldkey = key;
-            oldTotal += Float.parseFloat(action.getString("total"));
+            oldTotal += Double.parseDouble(action.getString("total"));
 
-            excel.insertCellTabFloat(columnToInsert + 4, lineToInsert, oldTotal);
+            excel.insertCellTabDouble(columnToInsert + 4, lineToInsert, oldTotal);
 
         }
 
@@ -104,7 +110,7 @@ public class AnnexeDelibTab extends TabHelper {
         }
 
         for (int i = 0; i <= programMarket.size(); i++) {
-            excel.insertHeader(lineToInsert + 1, 3, excel.totalLabel);
+            excel.insertHeader(3, lineToInsert + 1, excel.totalLabel);
             excel.setTotalX(6, lineToInsert, 4 + i, lineToInsert + 1);
 
         }
@@ -126,13 +132,13 @@ public class AnnexeDelibTab extends TabHelper {
         sheet.addMergedRegion(merge);
         excel.setRegionHeader(merge, sheet);
 
-        excel.insertHeader(4, 1, "COMMUNE");
-        excel.insertHeader(5, 1, "");
+        excel.insertHeader(1, 4, "COMMUNE");
+        excel.insertHeader(1, 5, "");
 
-        excel.insertHeader(4, 2, "LYCEE");
-        excel.insertHeader(5, 2, "");
-        excel.insertHeader(4, 3, "UAI");
-        excel.insertHeader(5, 3, "");
+        excel.insertHeader(2, 4, "LYCEE");
+        excel.insertHeader(2, 5, "");
+        excel.insertHeader(3, 4, "UAI");
+        excel.insertHeader(3, 5, "");
 
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
@@ -159,9 +165,9 @@ public class AnnexeDelibTab extends TabHelper {
                     excel.setRegionHeader(merge, sheet);
                 }
                 initProgramX = 4 + programMarket.size();
-                excel.insertHeader(4, 4 + programMarket.size(), segments[0]);
+                excel.insertHeader(4 + programMarket.size(), 4, segments[0]);
             }
-            excel.insertHeader(5, 4 + programMarket.size(), segments[1]);
+            excel.insertHeader(4 + programMarket.size(), 5, segments[1]);
             programMarket.put(progM, i);
         }
 
@@ -172,27 +178,12 @@ public class AnnexeDelibTab extends TabHelper {
         }
 
         arrayLength += programMarket.size();
-        excel.insertHeader(4, 4 + programMarket.size(), excel.totalLabel);
-        excel.insertHeader(5, 4 + programMarket.size(), "");
+        excel.insertHeader(4 + programMarket.size(), 4, excel.totalLabel);
+        excel.insertHeader(4 + programMarket.size(), 5, "");
 
     }
 
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject action = datas.getJsonObject(i);
-            for (int j = 0; j < structures.size(); j++) {
-                structure = structures.getJsonObject(j);
-                if (action.getString("id_structure").equals(structure.getString("id"))) {
-                    action.put("nameEtab", structure.getString("name"));
-                    action.put("uai", structure.getString("uai"));
-                    action.put("city", structure.getString("city"));
-                    action.put("zipCode", structure.getString("zipCode"));
-                }
-            }
-        }
-    }
+
 
 
     @Override
@@ -250,20 +241,23 @@ public class AnnexeDelibTab extends TabHelper {
         else {
             query +=
                     "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "')  " +
-                            "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    ";
+                            "     OR                    " +
+                            " (spa.structure_type = '" + LYCEE + "' AND " +
+                            "   ( specific_structures.type is null OR  specific_structures.type ='" + LYCEE + "') ))    ";
         }
 
         query +=
                 "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
                         "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
-                        "     WHERE   ";
+                        "     WHERE    ";
 
 
         if (type.equals(CMR))
             query += "   specific_structures.type =  '" + CMR + "'   ";
         else {
             query += "  specific_structures.type !=  '" + CMR + "'   " +
-                    "  OR specific_structures.type is null   ";
+                    "  OR specific_structures.type is null " +
+                    "  OR specific_structures.type !=  '" + LYCEE + "'   " ;
         }
         query +=
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +

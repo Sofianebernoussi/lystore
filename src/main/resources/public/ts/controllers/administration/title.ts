@@ -1,4 +1,4 @@
-import {ng, template} from 'entcore';
+import {ng, template, toasts} from 'entcore';
 import {Notification, TitleImporter, Utils} from '../../model';
 
 declare let window: any;
@@ -48,10 +48,10 @@ export const titleController = ng.controller('TitleController',
                 await $scope.campaign.titles.delete(id_campaign, id, structure_id);
                 await $scope.campaign.titles.sync($scope.campaign.id);
                 $scope.lightbox.open = false;
-                $scope.notifications.push(new Notification('lystore.campaign.titles.delete.success', 'confirm'));
+                toasts.confirm('lystore.campaign.titles.delete.success');
                 Utils.safeApply($scope);
             } catch (err) {
-                $scope.notifications.push(new Notification('lystore.campaign.titles.delete.error', 'warning'));
+                toasts.warning('lystore.campaign.titles.delete.error');
             }
         };
 

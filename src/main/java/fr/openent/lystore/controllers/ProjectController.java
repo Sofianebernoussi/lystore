@@ -103,11 +103,12 @@ public class ProjectController extends ControllerHelper {
                                         if (listOrder.isRight() && listOrder.right().getValue().size() > 0) {
                                             projectService.revertOrderAndDeleteProject(listOrder.right().getValue(), id, idCampaign, idStructure, event -> {
                                                 if (event.isRight()) {
-                                                    renderJson(request, event.right().getValue());
+
                                                     UserUtils.getUserInfos(eb, request, user -> {
                                                         Logging.add(eb, request, Contexts.PROJECT.toString(),
                                                                 Actions.DELETE.toString(),
                                                                 id.toString(), null, user);
+                                                        renderJson(request, event.right().getValue());
                                                     });
                                                 } else {
                                                     renderError(request);

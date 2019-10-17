@@ -6,11 +6,8 @@ import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,9 +80,8 @@ public class RecapTab extends TabHelper {
             String actionsStrToArray = operation.getString(actionStr);
             String labelOperation = operation.getString("label");
 
-            Row operationRow = sheet.createRow(this.operationsRowNumber);
-            excel.insertLabel(operationRow, cellLabelColumn, operation.getLong("id").toString());
-            excel.insertLabel(operationRow, cellLabelColumn + 1, labelOperation);
+            excel.insertLabel(cellLabelColumn, this.operationsRowNumber, operation.getLong("id").toString());
+            excel.insertLabel(cellLabelColumn + 1, this.operationsRowNumber, labelOperation);
 
 
             JsonArray actions = new JsonArray(actionsStrToArray);
@@ -126,9 +122,9 @@ public class RecapTab extends TabHelper {
                     excel.setRegionHeader(merge, sheet);
                 }
                 initProgramX = cellColumn;
-                excel.insertHeader(programRowNumber, cellColumn, program);
+                excel.insertHeader(cellColumn, programRowNumber, program);
             }
-            excel.insertHeader(programRowNumber + 1, cellColumn, code);
+            excel.insertHeader(cellColumn, programRowNumber + 1, code);
             cellColumn++;
 
         }
@@ -154,24 +150,24 @@ public class RecapTab extends TabHelper {
                 JsonObject action = actions.getJsonObject(j);
                 String key = action.getString("program") + " - " + action.getString("code");
                 if (!oldTotals.containsKey(key)) {
-                    oldTotals.put(key,safeGetFloat(action,"total", "RecapTab") );
+                    oldTotals.put(key, safeGetDouble(action, "total", "RecapTab"));
                 } else {
-                    oldTotals.put(key,safeGetFloat(action,"total", "RecapTab")  + safeGetFloat(oldTotals,key, "RecapTab"));
+                    oldTotals.put(key, safeGetDouble(action, "total", "RecapTab") + safeGetDouble(oldTotals, key, "RecapTab"));
                 }
-                excel.insertCellTabFloat(programLabel.getInteger(key) + 2,
+                excel.insertCellTabDouble(programLabel.getInteger(key) + 2,
                         2 + i,
-                        safeGetFloat(oldTotals,key, "RecapTab"));
+                        safeGetDouble(oldTotals, key, "RecapTab"));
             }
         }
 
         excel.fillTab(2, programLabel.size() + 2, 2, operationsRowNumber);
-        excel.insertHeader(operationsRowNumber, 1, excel.totalLabel);
+        excel.insertHeader(1, operationsRowNumber, excel.totalLabel);
 
         for (int i = 0; i < programLabel.size(); i++) {
             excel.setTotalX(2, operationsRowNumber - 1, i + 2, operationsRowNumber);
         }
 
-        excel.insertHeader(1, programLabel.size() + 2, excel.totalLabel);
+        excel.insertHeader(programLabel.size() + 2, 1, excel.totalLabel);
 
         for (int i = 0; i <= datas.size(); i++) {
             excel.setTotalY(2, programLabel.size() + 1, 2 + i, programLabel.size() + 2);
@@ -233,20 +229,23 @@ public class RecapTab extends TabHelper {
         else {
             query +=
                     "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "')  " +
-                            "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    ";
+                            "     OR                    " +
+                            " (spa.structure_type = '" + LYCEE + "' AND " +
+                            "   ( specific_structures.type is null OR  specific_structures.type ='" + LYCEE + "') ))    ";
         }
 
         query +=
                 "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
                         "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
-                        "     WHERE   ";
+                        "     WHERE    ";
 
 
         if (type.equals(CMR))
-            query += "  specific_structures.type =  '" + CMR + "'   ";
+            query += "   specific_structures.type =  '" + CMR + "'   ";
         else {
             query += "  specific_structures.type !=  '" + CMR + "'   " +
-                    "  OR specific_structures.type is null   ";
+                    "  OR specific_structures.type is null " +
+                    "  OR specific_structures.type !=  '" + LYCEE + "'   " ;
         }
         query +=
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +

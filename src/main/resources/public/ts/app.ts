@@ -67,6 +67,9 @@ routes.define(($routeProvider) => {
             .when('/campaigns/:idCampaign/titles', {
                 action: 'manageTitles'
             })
+            .when('/order/update/:idOrder', {
+                action: 'updateOrder'
+            })
             .when('/order/waiting', {
                 action: 'orderWaiting'
             })
@@ -79,10 +82,7 @@ routes.define(($routeProvider) => {
             .when('/order/preview', {
                 action: 'previewOrder'
             })
-            .when('/order/update/:idOrder', {
-                action: 'updateOrder'
-            })
-            .when('/order/operation/update/:idOrder/:region', {
+            .when('/order/operation/update/:idOrder/:typeOrder', {
                 action: 'updateLinkedOrder'
             })
             .when('/order/region/create', {
@@ -94,7 +94,7 @@ routes.define(($routeProvider) => {
             .when('/instruction', {
                 action: 'instruction'
             })
-            .when('/operation/order', {
+            .when('/operation/order/:idOperation', {
                 action: 'operationOrders'
             })
             .when('/exports', {

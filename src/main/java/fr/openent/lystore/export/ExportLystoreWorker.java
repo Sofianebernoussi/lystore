@@ -2,17 +2,21 @@ package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.helpers.ExcelHelper;
+import fr.openent.lystore.helpers.MongoHelper;
 import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.storage.Storage;
 import org.vertx.java.busmods.BusModBase;
 
+import javax.print.DocFlavor;
 import java.util.Queue;
+import java.util.Timer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static fr.openent.lystore.Lystore.CONFIG;
@@ -22,9 +26,9 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
     private Instruction instruction;
     private Storage storage;
     private ExportService exportService = new DefaultExportServiceService(Lystore.lystoreSchema, "export", storage);
-    private Number idNewFile;
+    private String idNewFile;
     private boolean isWorking = false;
-    Queue<Message<JsonObject>> MessagesQueue = new ConcurrentLinkedQueue<>();
+    private boolean isSleeping = true;
 
     @Override
     public void start() {
@@ -37,11 +41,11 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
     }
 
     @Override
-    public void handle(Message<JsonObject> event) {
-        logger.info("Calling Worker");
-        MessagesQueue.add(event);
-        if(!isWorking && !MessagesQueue.isEmpty()){
-            isWorking = true;
+    public void handle(Message<JsonObject> eventMessage) {
+        eventMessage.reply(new JsonObject().put("status", "ok"));
+        if (isSleeping) {
+            logger.info("Calling Worker");
+            isSleeping = false;
             processExport();
         }
     }
@@ -50,65 +54,106 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
 
 
     private void processExport(){
-        logger.info("Process export nb Queue:" + MessagesQueue.size());
-        if(MessagesQueue.isEmpty()){
-            isWorking =  false;
-        }else {
-            Message<JsonObject> eventMessage = MessagesQueue.poll();
-            Handler<Either<String,Boolean>> exportHandler = event -> {
+
+        Handler<Either<String,Boolean>> exportHandler = event -> {
                 logger.info("exportHandler");
                 if (event.isRight()) {
-                    eventMessage.reply(new JsonObject().put("status", "ok"));
-                    logger.info("end");
+                    logger.info("export to Waiting");
                     processExport();
                 } else {
-                    eventMessage.reply(new JsonObject().put("status", "ko"));
                     ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx " + event.left().getValue());
                 }
             };
-            try{
-                logger.info("Doing export "+ MessagesQueue.size() +" in waitinglist");
-                final String action = eventMessage.body().getString("action", "");
-                String fileNamIn = eventMessage.body().getString("titleFile");
-                idNewFile = eventMessage.body().getInteger("idFile");
-                switch (action) {
-                    case "exportEQU":
-                        exportEquipment(
-                                eventMessage.body().getInteger("id"),
-                                eventMessage.body().getString("type"),
-                                fileNamIn,exportHandler );
-                        break;
-                    case "exportRME":
-                        exportRME(
-                                eventMessage.body().getInteger("id"),
-                                fileNamIn,
-                                exportHandler);
-                        break;
-                    case "exportNotificationCP":
-                        exportNotificationCp(eventMessage.body().getInteger("id"),
-                                fileNamIn,
-                                exportHandler);
-                        break;
-                    case "exportPublipostage":
-                        exportPublipostage(eventMessage.body().getInteger("id"),
-                                fileNamIn,
-                                exportHandler);
-                        break;
-                    case "exportSubvention":
-                        exportSubvention(eventMessage.body().getInteger("id"),
-                                fileNamIn,
-                                exportHandler);
-                        break;
-                    default:
-                        ExcelHelper.catchError(exportService, idNewFile, "Invalid action in worker",exportHandler);
-                        break;
+            exportService.getWaitingExport(new Handler<Either<String, JsonObject>>() {
+                @Override
+                public void handle(Either<String, JsonObject> event) {
+                    if(event.isRight()){
+                        JsonObject waitingOrder = event.right().getValue();
+                        chooseExport( waitingOrder,exportHandler);
+                    }else{
+                        isSleeping = true;
+                        new java.util.Timer().schedule(
+                                new java.util.TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        processExport();
+                                    }
+                                },
+                                3600*1000
+                        );
+                    }
                 }
-            } catch (Exception error) {
-                logger.error("Error in switch -> " + error);
-            }
+            });
+    }
+
+    private void chooseExport(JsonObject body, Handler<Either<String, Boolean>> exportHandler) {
+        final String action = body.getString("action", "");
+        String fileName = body.getString("filename");
+        idNewFile = body.getString("_id");
+        Integer instruction_id = -1;
+        try {
+            instruction_id = Integer.parseInt(body.getString("instruction_id"));
+        }catch (ClassCastException ce){
+            instruction_id =body.getInteger("instruction_id");
+        }
+        switch (action) {
+            case "exportEQU":
+                exportEquipment(
+                        instruction_id,
+                        body.getString("type"),
+                        fileName,exportHandler );
+                break;
+            case "exportRME":
+                exportRME(
+                        instruction_id,
+                        fileName,
+                        exportHandler);
+                break;
+            case "exportNotificationCP":
+                exportNotificationCp(
+                        instruction_id,
+                        fileName,
+                        exportHandler);
+                break;
+            case "exportPublipostage":
+                exportPublipostage(
+                        instruction_id,
+                        fileName,
+                        exportHandler);
+                break;
+            case "exportSubvention":
+                exportSubvention(
+                        instruction_id,
+                        fileName,
+                        exportHandler);
+                break;
+            case "exportIris":
+                    exportIris(instruction_id,
+                            fileName,
+                            exportHandler);
+                    break;
+                default:
+                    ExcelHelper.catchError(exportService, idNewFile, "Invalid action in worker",exportHandler);
+                    break;
+
+
+
+
         }
     }
 
+    private void exportIris(Integer instructionId, String titleFile, Handler<Either<String, Boolean>> handler) {
+        logger.info("Export Iris started");
+        this.instruction = new Instruction(exportService, idNewFile, instructionId);
+        this.instruction.exportIris(event1 -> {
+            if (event1.isLeft()) {
+                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
+            } else {
+                Buffer xlsx = event1.right().getValue();
+                saveBuffer(xlsx, titleFile,handler);
+            }
+        });
+    }
 
     private void exportNotificationCp(Integer instructionId, String titleFile, Handler<Either<String, Boolean>> handler) {
         logger.info("Export NotificationCP started");

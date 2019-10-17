@@ -60,18 +60,27 @@ public class NotificationLycTab extends TabHelper {
                     structuresId.add(structuresId.size(), action.getString("id_structure"));
             }
         }
-        StructureService structureService = new DefaultStructureService(Lystore.lystoreSchema);
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
+                boolean errorCatch= false;
                 if (repStructures.isRight()) {
-                    JsonArray structures = repStructures.right().getValue();
-                    setStructures(structures);
-                    if (datas.isEmpty()) {
-                        handler.handle(new Either.Left<>("No data in database"));
-                    } else {
-                        writeArray(handler);
+                    try {
+                        JsonArray structures = repStructures.right().getValue();
+                        setStructuresFromDatas(structures);
+                        if (datas.isEmpty()) {
+                            handler.handle(new Either.Left<>("No data in database"));
+                        } else {
+                            writeArray(handler);
+                        }
+                    }catch (Exception e){
+                        logger.error(e.getMessage() + " Notification");
+                        errorCatch = true;
                     }
+                    if(errorCatch)
+                        handler.handle(new Either.Left<>("Error when writting files"));
+                    else
+                        handler.handle(new Either.Right<>(true));
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
 
@@ -91,7 +100,6 @@ public class NotificationLycTab extends TabHelper {
             JsonObject structure = datas.getJsonObject(i);
             JsonArray orders = structure.getJsonArray("actionsJO");
             orders = sortByType(orders);
-            String previousMarket = "";
             String previousCode = "";
 
             if (orders.isEmpty()) {
@@ -109,7 +117,7 @@ public class NotificationLycTab extends TabHelper {
                     String equipmentNameComment = "Libellé Region : " + formatStrToCell(order.getString("name_equipment"), 10);
                     String idFormatted = "";
                     if (order.getBoolean("isregion")) {
-                        equipmentNameComment += " \nCommentaire Région :" + formatStrToCell(order.getString("comment"), 10);
+                        equipmentNameComment += " \nCommentaire Région :" + formatStrToCell(makeCellWithoutNull(order.getString("comment")), 10);
                         idFormatted += "R-" + order.getInteger("id").toString();
                     } else {
                         idFormatted += "C-" + order.getInteger("id").toString();
@@ -118,7 +126,7 @@ public class NotificationLycTab extends TabHelper {
                     if (!previousCode.equals(code)) {
                         if (code.equals(Subvention)) {
                             lineNumber += 2;
-                            excel.insertLabelOnRed(lineNumber, 0, SubventionLabel);
+                            excel.insertLabelOnRed(0, lineNumber, SubventionLabel);
                             sizeMergeRegion(lineNumber, 0, 6);
                             previousCode = Subvention;
                             lineNumber += 2;
@@ -126,7 +134,7 @@ public class NotificationLycTab extends TabHelper {
                         } else if (!previousCode.equals("NOT SUBV")) {
                             lineNumber += 2;
 
-                            excel.insertLabelOnRed(lineNumber, 0, NotSubventionLabel);
+                            excel.insertLabelOnRed(0, lineNumber, NotSubventionLabel);
                             sizeMergeRegion(lineNumber, 0, 6);
                             previousCode = "NOT SUBV";
                             lineNumber += 2;
@@ -134,28 +142,26 @@ public class NotificationLycTab extends TabHelper {
                         }
                     }
                     excel.insertCellTab(0, lineNumber,
-                                ROOM + ": " + room + "\n"
-                                        + STAIR + ": " + stair + "\n"
-                                        + BUILDING + ": " + building
-                        );
+                            ROOM + ": " + room + "\n"
+                                    + STAIR + ": " + stair + "\n"
+                                    + BUILDING + ": " + building
+                    );
 
 
-                        excel.insertCellTabCenterBold(1, lineNumber, market);
-                        excel.insertCellTabBlue(2, lineNumber, equipmentNameComment);
-                        excel.insertCellTabCenterBold(3, lineNumber, instruction.getString("cp_number") + "\n" + date);
-                        excel.insertCellTabCenter(4, lineNumber, idFormatted);
-                        excel.insertCellTabCenterBold(5, lineNumber, order.getInteger("amount").toString());
-                        excel.insertCellTabFloatWithPrice(6, lineNumber, safeGetFloat(order,"total", "NotificationLycTab"));
+                    excel.insertCellTabCenterBold(1, lineNumber, market);
+                    excel.insertCellTabBlue(2, lineNumber, equipmentNameComment);
+                    excel.insertCellTabCenterBold(3, lineNumber, makeCellWithoutNull(instruction.getString("cp_number")) + "\n" + date);
+                    excel.insertCellTabCenter(4, lineNumber, idFormatted);
+                    excel.insertCellTabCenterBold(5, lineNumber, order.getInteger("amount").toString());
+                    excel.insertCellTabDoubleWithPrice(6, lineNumber, safeGetDouble(order,"total", "NotificationLycTab"));
 
-                        lineNumber++;
+                    lineNumber++;
 
 
                 }
             }
         }
         excel.autoSize(8);
-        handler.handle(new Either.Right<>(true));
-
     }
 
 
@@ -231,34 +237,16 @@ public class NotificationLycTab extends TabHelper {
 
     @Override
     protected void setLabels() {
-        excel.insertHeader(lineNumber, 0, DESTINATION);
-        excel.insertHeader(lineNumber, 1, MARKET_CODE);
-        excel.insertHeader(lineNumber, 2, REGION_LABEL);
-        excel.insertHeader(lineNumber, 3, DATE);
-        excel.insertHeader(lineNumber, 4, NUMBER_ORDER);
-        excel.insertHeader(lineNumber, 5, AMOUNT);
+        excel.insertHeader(0, lineNumber, DESTINATION);
+        excel.insertHeader(1, lineNumber, MARKET_CODE);
+        excel.insertHeader(2, lineNumber, REGION_LABEL);
+        excel.insertHeader(3, lineNumber, DATE);
+        excel.insertHeader(4, lineNumber, NUMBER_ORDER);
+        excel.insertHeader(5, lineNumber, AMOUNT);
         lineNumber++;
     }
 
-    private void setStructures(JsonArray structures) {
-        JsonObject program, structure;
-        JsonArray actions;
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            actions = new JsonArray(data.getString("actions"));
-            for (int j = 0; j < structures.size(); j++) {
-                structure = structures.getJsonObject(j);
-                if (data.getString("id_structure").equals(structure.getString("id"))) {
-                    data.put("nameEtab", structure.getString("name"));
-                    data.put("uai", structure.getString("uai"));
-                    data.put("city", structure.getString("city"));
-                    data.put("type", structure.getString("type"));
-                    data.put("zipCode", structure.getString("zipCode"));
-                }
-            }
-            data.put("actionsJO", actions);
-        }
-    }
+
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
@@ -313,7 +301,8 @@ public class NotificationLycTab extends TabHelper {
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         " +
                 "   AND ((spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "') " +
                 "  OR (spa.structure_type = '" + CMR + "' AND specific_structures.type ='" + CMR + "') " +
-                "     OR                     (spa.structure_type = '" + LYCEE + "' AND specific_structures.type is null ))    " +
+                "     OR                     (spa.structure_type = '" + LYCEE + "' AND" +
+                " ( specific_structures.type is null OR  specific_structures.type ='" + LYCEE + "') ))    "+
                 "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    " +
                 "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
 

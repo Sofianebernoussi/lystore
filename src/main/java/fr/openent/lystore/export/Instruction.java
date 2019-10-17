@@ -1,8 +1,9 @@
 package fr.openent.lystore.export;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.RME.*;
 import fr.openent.lystore.export.equipmentRapp.*;
-import fr.openent.lystore.export.investissement.*;
+import fr.openent.lystore.export.iris.IrisTab;
 import fr.openent.lystore.export.notificationEquipCP.LinesBudget;
 import fr.openent.lystore.export.notificationEquipCP.NotificationLycTab;
 import fr.openent.lystore.export.notificationEquipCP.RecapMarketGestion;
@@ -47,11 +48,11 @@ public class Instruction {
             "WHERE instruction.id = ? " +
             "GROUP BY instruction.id";
     private Integer id;
-    private Number idFile;
+    private String idFile;
     private ExportService exportService;
     private Logger log = LoggerFactory.getLogger(DefaultProjectService.class);
 
-    public Instruction(ExportService exportService, Number idFile, Integer instructionId) {
+    public Instruction(ExportService exportService, String idFile, Integer instructionId) {
         this.idFile = idFile;
         this.exportService = exportService;
         this.id = instructionId;
@@ -95,7 +96,6 @@ public class Instruction {
                         futures.add(Fonctionnementfuture);
                         futures.add(RecapEPLEfuture);
                         futures.add(RecapImputationBudfuture);
-
                         futureHandler(handler, workbook, futures);
 
                         new LyceeTab(workbook, instruction).create(getHandler(lyceeFuture));
@@ -103,7 +103,7 @@ public class Instruction {
                         new CMDTab(workbook, instruction).create(getHandler(CMDfuture));
                         new FonctionnementTab(workbook, instruction).create(getHandler(Fonctionnementfuture));
                         new RecapEPLETab(workbook, instruction).create(getHandler(RecapEPLEfuture));
-                        new RecapImputationBud(workbook, instruction).create(getHandler(RecapImputationBudfuture));
+                       new RecapImputationBud(workbook, instruction).create(getHandler(RecapImputationBudfuture));
                     } catch (IOException e) {
                         ExcelHelper.catchError(exportService, idFile, "Xlsx Failed to read template");
                         handler.handle(new Either.Left<>("Xlsx Failed to read template"));
@@ -277,12 +277,43 @@ public class Instruction {
                     new NotificationLycTab(workbook, instruction).create(getHandler(NotifcationLyceeFuture));
                     new RecapMarketGestion(workbook, instruction).create(getHandler(RecapMarketGestionFuture));
                     new LinesBudget(workbook, instruction).create(getHandler(LinesBudgetFuture));
-
                 }
             }
         }));
     }
 
+    public void exportIris(Handler<Either<String, Buffer>> handler) {
+        if (this.id == null) {
+            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
+            handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
+        }
+        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
+            if (either.isLeft()) {
+                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
+                handler.handle(new Either.Left<>("Error when getting sql datas "));
+            } else {
+
+                JsonObject instruction = either.right().getValue();
+                String operationStr = "operations";
+                if (!instruction.containsKey(operationStr)) {
+                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
+                    handler.handle(new Either.Left<>("Error when getting operations"));
+                } else {
+                    instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
+
+                    Workbook workbook = new XSSFWorkbook();
+                    List<Future> futures = new ArrayList<>();
+                    Future<Boolean> IrisFuture = Future.future();
+
+                    futures.add(IrisFuture);
+                    futureHandler(handler, workbook, futures);
+                    new IrisTab(workbook, instruction).create(getHandler(IrisFuture));
+
+                }
+            }
+        }));
+
+    }
     private void futureHandler(Handler<Either<String, Buffer>> handler, Workbook workbook, List<Future> futures) {
         CompositeFuture.all(futures).setHandler(event -> {
             if (event.succeeded()) {

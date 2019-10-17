@@ -38,9 +38,7 @@ public class Publipostage extends TabHelper {
                         handler.handle(new Either.Right<>(true));
                     } else {
                         makeHeader();
-                        JsonArray order = dataFromRequest.right().getValue();
                         initDatas(handler);
-                        //Delete tab if empty
                     }
                 }
             }catch(Exception e){
@@ -116,9 +114,7 @@ public class Publipostage extends TabHelper {
         excel.autoSize(lengthGlobalCols);
     }
 
-    private String makeCellWithoutNull ( String valueGet){
-        return valueGet != null? valueGet : "";
-    }
+
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {

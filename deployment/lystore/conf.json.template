@@ -1,5 +1,5 @@
     {
-      "name": "fr.openent~lystore~1.6-SNAPSHOT",
+      "name": "fr.openent~lystore~1.7.0",
       "config": {
         "main" : "fr.openent.lystore.Lystore",
         "port" : 8140,

@@ -804,7 +804,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                         final String numberOrder = event.right().getValue().getString("numberorder");
                         JsonArray statements = new fr.wseduc.webutils.collections.JsonArray()
                                 //TODO remettre valide
-                                .add(getValidateStatusStatement(ids, numberOrder, "WAITING"))
+                                .add(getValidateStatusStatement(ids, numberOrder, "VALID"))
                                 .add(getAgentInformation( ids));
                         sql.transaction(statements, new Handler<Message<JsonObject>>() {
                             @Override

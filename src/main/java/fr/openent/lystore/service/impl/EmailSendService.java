@@ -44,7 +44,6 @@ public class EmailSendService {
                           JsonArray structureRows){
         final int contractNameIndex = 1;
         final int agentEmailIndex = 3;
-
         JsonObject structRow;
         JsonArray row;
         String oldIdStruct = "",currentIdStruct, nameEtab = "";
@@ -54,10 +53,9 @@ public class EmailSendService {
         String agentMailObject = "[LyStore] Commandes " + line.getString(contractNameIndex);
         String agentMailBody = getAgentBodyMail(line, user, number_validation, url);
         JsonArray mailsRow = new JsonArray();
-
-//        sendMail(request, line.getString(agentEmailIndex),
-//                agentMailObject,
-//                agentMailBody);
+        sendMail(request, line.getString(agentEmailIndex),
+                agentMailObject,
+                agentMailBody);
 
     for(int i = 0 ; i < rows.size(); i++){
         row = rows.getJsonArray(i);
@@ -67,7 +65,7 @@ public class EmailSendService {
         if(!oldIdStruct.equals(currentIdStruct)){
             oldIdStruct = currentIdStruct;
             if(i != 0){
-                mailsToClient(result, user, url, nameEtab, idsCampaign, mailsRow);
+                mailsToClient(request, result, user, url, nameEtab, idsCampaign, mailsRow);
                 idsCampaign =  new ArrayList<>();
             }
             for(int j =0; j < structureRows.size(); j++){
@@ -77,29 +75,27 @@ public class EmailSendService {
                     mailsRow = structRow.getJsonArray("mails");
                 }
             }
-
         }
         if(!idsCampaign.contains(idCampaign)){
             idsCampaign.add(idCampaign);
         }
+    }
+
+        mailsToClient(request, result, user, url, nameEtab, idsCampaign, mailsRow);
+
 
     }
 
-        mailsToClient(result, user, url, nameEtab, idsCampaign, mailsRow);
-
-
-    }
-
-    private void mailsToClient(JsonObject result, UserInfos user, String url, String nameEtab, ArrayList<Integer> idsCampaign, JsonArray mailsRow) {
+    private void mailsToClient(HttpServerRequest request,JsonObject result, UserInfos user, String url, String nameEtab, ArrayList<Integer> idsCampaign, JsonArray mailsRow) {
         for (int k = 0; k < mailsRow.size(); k++) {
             JsonObject userMail = mailsRow.getJsonObject(k);
             String mailObject = "[LyStore] Commandes ";
             if (userMail.getString("mail") != null) {
                 String mailBody = getStructureBodyMail(mailsRow.getJsonObject(k), user,
                         result.getString("number_validation"), url, nameEtab,idsCampaign);
-//                            sendMail(request, userMail.getString("mail"),
-//                                    mailObject,
-//                                    mailBody);
+                            sendMail(request, userMail.getString("mail"),
+                                    mailObject,
+                                    mailBody);
             }
         }
     }
@@ -129,7 +125,6 @@ public class EmailSendService {
                 + "<br /> Bien Cordialement, "
                 + "<br /> L'équipe LyStore. ";
 
-        LOGGER.info(body);
         return formatAccentedString(body);
 
     }

@@ -332,6 +332,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.loadingArray = true;
                 await  $scope.campaigns.sync();
                 await  $scope.operations.sync();
+                let operations = [];
+                $scope.operations.all.map((operation,index)=>{
+                    if(operation.status == 'true'){
+                        operations.push(operation);
+                    }
+                });
+                $scope.operations.all = operations;
                 await $scope.structures.sync();
                 template.open('administrator-main', 'administrator/orderRegion/order-region-create-form');
                 $scope.loadingArray = false;

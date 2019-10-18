@@ -13,6 +13,7 @@ import org.entcore.common.user.UserInfos;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 
 public class EmailSendService {
 
@@ -43,28 +44,62 @@ public class EmailSendService {
                           JsonArray structureRows){
         final int contractNameIndex = 1;
         final int agentEmailIndex = 3;
-        //FIXME FIXER CETTE PARTIE. REFAIRE COMPLETEMENT LA SEQUENCE DE GESTION DES MAILS
+
+        JsonObject structRow;
+        JsonArray row;
+        String oldIdStruct = "",currentIdStruct, nameEtab = "";
+        String number_validation = result.getString("number_validation");
+        ArrayList<Integer> idsCampaign =  new ArrayList<>();
         JsonArray line = rows.getJsonArray(0);
         String agentMailObject = "[LyStore] Commandes " + line.getString(contractNameIndex);
-        String agentMailBody = getAgentBodyMail(line, user, result.getString("number_validation"), url);
-        Integer idCampaign = line.getInteger(5);
+        String agentMailBody = getAgentBodyMail(line, user, number_validation, url);
+        JsonArray mailsRow = new JsonArray();
+
 //        sendMail(request, line.getString(agentEmailIndex),
 //                agentMailObject,
 //                agentMailBody);
-        for (int i = 0; i < structureRows.size(); i++) {
-            String mailObject = "[LyStore] Commandes ";
-            JsonObject row = structureRows.getJsonObject(i);
-            String name = row.getString("name");
-            JsonArray mailsRow = row.getJsonArray("mails");
-            for (int j = 0; j < mailsRow.size(); j++) {
-                JsonObject userMail = mailsRow.getJsonObject(j);
-                if (userMail.getString("mail") != null) {
-                    String mailBody = getStructureBodyMail(mailsRow.getJsonObject(j), user,
-                            result.getString("number_validation"), url, name,idCampaign);
-//                    sendMail(request, userMail.getString("mail"),
-//                            mailObject,
-//                            mailBody);
+
+    for(int i = 0 ; i < rows.size(); i++){
+        row = rows.getJsonArray(i);
+        currentIdStruct = row.getString(4);
+        Integer idCampaign = row.getInteger(5);
+
+        if(!oldIdStruct.equals(currentIdStruct)){
+            oldIdStruct = currentIdStruct;
+            if(i != 0){
+                mailsToClient(result, user, url, nameEtab, idsCampaign, mailsRow);
+                idsCampaign =  new ArrayList<>();
+            }
+            for(int j =0; j < structureRows.size(); j++){
+                structRow = structureRows.getJsonObject(j);
+                if(structRow.getString("id").equals(currentIdStruct)){
+                    nameEtab = structRow.getString("name");
+                    mailsRow = structRow.getJsonArray("mails");
                 }
+            }
+
+        }
+        if(!idsCampaign.contains(idCampaign)){
+            idsCampaign.add(idCampaign);
+        }
+
+    }
+
+        mailsToClient(result, user, url, nameEtab, idsCampaign, mailsRow);
+
+
+    }
+
+    private void mailsToClient(JsonObject result, UserInfos user, String url, String nameEtab, ArrayList<Integer> idsCampaign, JsonArray mailsRow) {
+        for (int k = 0; k < mailsRow.size(); k++) {
+            JsonObject userMail = mailsRow.getJsonObject(k);
+            String mailObject = "[LyStore] Commandes ";
+            if (userMail.getString("mail") != null) {
+                String mailBody = getStructureBodyMail(mailsRow.getJsonObject(k), user,
+                        result.getString("number_validation"), url, nameEtab,idsCampaign);
+//                            sendMail(request, userMail.getString("mail"),
+//                                    mailObject,
+//                                    mailBody);
             }
         }
     }
@@ -81,15 +116,20 @@ public class EmailSendService {
     }
 
     private static String getStructureBodyMail(JsonObject row, UserInfos user, String numberOrder, String url,
-                                               String name, Integer idCampaign){
+                                               String name, ArrayList<Integer> idsCampaign){
+        StringBuilder listOrders= new StringBuilder();
+        for(int i = 0;i < idsCampaign.size(); i++){
+          listOrders.append("<br />").append(url).append("#/campaign/").append(idsCampaign.get(i)).append("/order <br />");
+        }
         String body = "Bonjour " + row.getString("name") + ", <br/> <br/>"
                 + "Une commande sous le numéro \"" + numberOrder + "\" vient d'être validée."
                 + " Une partie de la commande concerne l'établissement " + name + ". "
                 + "Cette confirmation est visible sur l'interface de LyStore en vous rendant ici :  <br />"
-                + "<br />" + url + "#/campaign/" + idCampaign + "/order <br />"
+                + listOrders
                 + "<br /> Bien Cordialement, "
                 + "<br /> L'équipe LyStore. ";
-        System.out.println(body);
+
+        LOGGER.info(body);
         return formatAccentedString(body);
 
     }

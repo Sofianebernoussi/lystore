@@ -803,7 +803,8 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                     try {
                         final String numberOrder = event.right().getValue().getString("numberorder");
                         JsonArray statements = new fr.wseduc.webutils.collections.JsonArray()
-                                .add(getValidateStatusStatement(ids, numberOrder, "VALID"))
+                                //TODO remettre valide
+                                .add(getValidateStatusStatement(ids, numberOrder, "WAITING"))
                                 .add(getAgentInformation( ids));
                         sql.transaction(statements, new Handler<Message<JsonObject>>() {
                             @Override
@@ -859,7 +860,8 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 " FROM lystore.order_client_equipment oce " +
                 " INNER JOIN lystore.contract ON contract.id = oce.id_contract " +
                 " INNER JOIN lystore.agent ON contract.id_agent= agent.id " +
-                " WHERE oce.id in "+ Sql.listPrepared(ids.toArray()) +" ;  ";
+                " WHERE oce.id in "+ Sql.listPrepared(ids.toArray()) +"" +
+                " ORDER BY id_structure,id_campaign ;  ";
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
 
         for (Integer id : ids) {
@@ -874,8 +876,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
         String query = "UPDATE lystore.order_client_equipment " +
                 " SET  status = ?, number_validation = ?  " +
-                " WHERE id in "+ Sql.listPrepared(ids.toArray()) +" " +
-                " RETURNING id_campaign;  ";
+                " WHERE id in "+ Sql.listPrepared(ids.toArray()) +" ; ";
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray().add(status).add(numberOrder);
 
         for (Integer id : ids) {

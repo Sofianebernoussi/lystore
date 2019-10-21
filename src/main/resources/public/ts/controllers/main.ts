@@ -232,11 +232,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             orderWaiting: async () => {
                 await $scope.syncCampaignInputSelected();
                 $scope.preferences =  await $scope.ub.getPreferences();
-                if($scope.preferences && $scope.preferences.preference && JSON.parse($scope.preferences.preference).ordersWaitingCampaign && $scope.fromWaiting){
+                if($scope.preferences && $scope.preferences.preference && $scope.fromWaiting)
                     $scope.fromWaiting = false;
+                let preferences = JSON.parse($scope.preferences.preference);
+                if (preferences.ordersWaitingCampaign ){
                     let campaignPref;
                     $scope.campaignsForSelectInput.forEach(c=>{
-                        if(c.id === JSON.parse($scope.preferences.preference).ordersWaitingCampaign)
+                        if(c.id === preferences.ordersWaitingCampaign)
                             campaignPref = c;
                     });
                     if(campaignPref) {

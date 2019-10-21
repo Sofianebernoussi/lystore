@@ -76,7 +76,7 @@
                             <select class="eleven"
                                     style="max-width: 300px;"
                                     ng-model="row.structure"
-                                    ng-options="structure as structure.name for structure in structuresToDisplay.all"
+                                    ng-options="structure as structure.name + ' ('+structure.uai +')' for structure in structuresToDisplay.all"
                                     ng-change="switchStructure(row,row.structure)">
                                 <option value="" disabled selected>[[translate('lystore.placeholder.structure')]]
                                 </option>

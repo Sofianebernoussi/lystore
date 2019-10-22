@@ -93,9 +93,9 @@ export const operationController = ng.controller('operationController',
                 await operation.save();
 
             }
-            // $scope.cancelOperationForm();
-            // await $scope.initOperation();
-            // Utils.safeApply($scope);
+            $scope.cancelOperationForm();
+            await $scope.initOperation();
+            Utils.safeApply($scope);
 
         };
 

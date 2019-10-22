@@ -8,6 +8,7 @@ import fr.wseduc.webutils.Either;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.neo4j.Neo4j;
@@ -196,19 +197,41 @@ public class DefaultOperationService extends SqlCrudService implements Operation
         Sql.getInstance().prepared(queryGetTotalOperation, idsOperations, SqlResult.validResultHandler(handler));
     }
 
-
     public void create(JsonObject operation, Handler<Either<String, JsonObject>> handler){
         LOGGER.info(operation);
-//        String query = "INSERT INTO " +
-//                Lystore.lystoreSchema + ".operation(id_label, status, date_cp) " +
-//                "VALUES (?, ?, ?) RETURNING id;";
-//
-//        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
-//                .add(operation.getInteger("id_label"))
-//                .add(operation.getBoolean("status"))
-//                .add(operation.getString("date_cp"));
-//
-//        sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+
+        if(operation.containsKey("newLabel")){
+            String getIntegerquery = "INSERT INTO " + Lystore.lystoreSchema + ".label_operation (label) " +
+                    "VALUES (?)" +
+                    " RETURNING id";
+            JsonArray params = new JsonArray().add(operation.getString("newLabel"));
+            sql.prepared(getIntegerquery, params, new Handler<Message<JsonObject>>() {
+                @Override
+                public void handle(Message<JsonObject> event) {
+                    JsonObject bodyMessage = event.body();
+                    if (bodyMessage.getString("status").equals("ok")) {
+                        Integer id_newLabel = bodyMessage.getJsonArray("results").getJsonArray(0).getInteger(0);
+                        String query = "INSERT INTO " +
+                                Lystore.lystoreSchema + ".operation(id_label, status, date_cp) " +
+                                "VALUES (?, ?, ?) RETURNING id;";
+                        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                                .add(id_newLabel)
+                                .add(operation.getBoolean("status"))
+                                .add(operation.getString("date_cp"));
+                        sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+                    }
+                }
+            });
+        }else {
+            String query = "INSERT INTO " +
+                    Lystore.lystoreSchema + ".operation(id_label, status, date_cp) " +
+                    "VALUES (?, ?, ?) RETURNING id;";
+            JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+                    .add(operation.getInteger("id_label"))
+                    .add(operation.getBoolean("status"))
+                    .add(operation.getString("date_cp"));
+            sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+        }
     }
 
     public  void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler){

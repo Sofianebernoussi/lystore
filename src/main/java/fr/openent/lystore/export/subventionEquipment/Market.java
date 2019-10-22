@@ -63,7 +63,7 @@ public class Market extends TabHelper {
                         if (datas.isEmpty()) {
                             handler.handle(new Either.Left<>("No data in database"));
                         } else {
-                            datas = sortByCity(datas);
+//                            datas = sortByCity(datas);
                             setTitle();
                             writeArray(handler);
                         }
@@ -105,6 +105,7 @@ public class Market extends TabHelper {
         for (int i = 0; i < datas.size(); i++) {
             JsonObject campaignData = datas.getJsonObject(i);
             JsonArray orders = campaignData.getJsonArray("actionsJO");
+            orders = sortByCity(orders);
             String campaign = campaignData.getString("campaign");
             lineNumber++;
             excel.insertUnderscoreHeader(0, lineNumber, campaign);
@@ -119,7 +120,6 @@ public class Market extends TabHelper {
                 String idStructure = order.getString("id_structure");
                 market = order.getString("market");
                 Integer marketId = order.getInteger("market_id");
-
                 if (!idStructure.equals(previousIdStruct)) {
                     if (j != 0) {
                         excel.insertLabelBold(0, lineNumber, previousMarket);
@@ -139,7 +139,7 @@ public class Market extends TabHelper {
                     lineNumber++;
                     setLabels();
                 }
-
+//
                 if (previousMarketId != marketId) {
                     excel.insertLabelBold(0, lineNumber, previousMarket);
                     excel.setTotalXWithStyle(initLine, lineNumber - 1, 1, lineNumber, excel.tabIntStyleCenterBold);
@@ -160,8 +160,6 @@ public class Market extends TabHelper {
             initLine = lineNumber + 2;
 //            excel.insertCellTabDoubleWithPrice(3, lineNumber, Double.parseDouble(campaignData.getString("totalprice")));
             lineNumber += 2;
-
-
         }
 
         excel.autoSize(4);

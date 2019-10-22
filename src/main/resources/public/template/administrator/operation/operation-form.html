@@ -2,14 +2,27 @@
 
 <form ng-submit="validOperation(operation)">
     <div class="row">
-        <label class="cell twelve">
+        <label ng-show="!ownLabel" class="cell twelve">
             <span class="four cell twelve-mobile">
                 <i18n>label :</i18n>
             </span>
-            <select  ng-model="operation.id_label" class="twelve"
-                     ng-init="operation.id_label = operation.id_label || (labelOperation.all.length > 0 ? labelOperation.all[0].id : null)"
-                     ng-options="LabelOperation.id as LabelOperation.label for LabelOperation in labelOperation.all" required>
+            <select
+                    ng-model="operation.id_label" class="twelve"
+                    ng-init="operation.id_label = operation.id_label || (labelOperation.all.length > 0 ? labelOperation.all[0].id : null)"
+                    ng-options="LabelOperation.id as LabelOperation.label for LabelOperation in labelOperation.all" required>
             </select>
+
+        </label>
+        <label ng-show="ownLabel" class="cell twelve">
+            <span class="four cell twelve-mobile">
+                <i18n>new.label</i18n> :
+            </span>
+            <input class="left-magnet twelve" type="text" ng-model="newLabel" ng-change="modifyNewLabelField(newLabel)">
+
+        </label>
+        <label  class="cell twelve">
+            <input  ng-show="ownLabel" type="button" class="button" ng-click="editOwnLabel()" i18n-value="get.other.label"/>
+            <input  ng-show="!ownLabel" type="button" class="button" ng-click="editOwnLabel()" i18n-value="add.new.label"/>
         </label>
         <date-picker i18n-placeholder="lystore.instruction.date.place_holder" ng-model="operation.date_cp" ng-disaled>
         </date-picker>

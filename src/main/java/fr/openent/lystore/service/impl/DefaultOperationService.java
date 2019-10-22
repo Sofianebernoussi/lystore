@@ -198,16 +198,17 @@ public class DefaultOperationService extends SqlCrudService implements Operation
 
 
     public void create(JsonObject operation, Handler<Either<String, JsonObject>> handler){
-        String query = "INSERT INTO " +
-                Lystore.lystoreSchema + ".operation(id_label, status, date_cp) " +
-                "VALUES (?, ?, ?) RETURNING id;";
-
-        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
-                .add(operation.getInteger("id_label"))
-                .add(operation.getBoolean("status"))
-                .add(operation.getString("date_cp"));
-
-        sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+        LOGGER.info(operation);
+//        String query = "INSERT INTO " +
+//                Lystore.lystoreSchema + ".operation(id_label, status, date_cp) " +
+//                "VALUES (?, ?, ?) RETURNING id;";
+//
+//        JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
+//                .add(operation.getInteger("id_label"))
+//                .add(operation.getBoolean("status"))
+//                .add(operation.getString("date_cp"));
+//
+//        sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     public  void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler){

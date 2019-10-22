@@ -535,6 +535,9 @@
   "lystore.loading": "Chargement en cours ...",
   "lystore.campaign.purse.init": "Cagnottes initiales",
   "lystore.campaign.amount.init":"Montant initial disponible ",
-  "notify.etab": "Notifier le lycée"
+  "notify.etab": "Notifier le lycée",
+  "new.label": "Nouveau label",
+  "add.new.label" : "Ajouter un label",
+  "get.other.label": "Revenir à la liste"
 
 }

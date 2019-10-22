@@ -16,6 +16,7 @@ export const operationController = ng.controller('operationController',
                 reverse: false
             }
         };
+        $scope.ownLabel = false;
         $scope.allOrdersSelected = false;
         $scope.search = {
             filterWord : '',
@@ -70,6 +71,9 @@ export const operationController = ng.controller('operationController',
             template.open('operation.lightbox', 'administrator/operation/operation-form');
             Utils.safeApply($scope);
         };
+        $scope.modifyNewLabelField =  (newLabel) =>{
+            $scope.newLabel = newLabel
+        };
 
         $scope.validOperationForm = (operation:Operation) =>{
             return  operation.id_label;
@@ -83,10 +87,16 @@ export const operationController = ng.controller('operationController',
         };
 
         $scope.validOperation = async (operation:Operation) =>{
-            await operation.save();
-            $scope.cancelOperationForm();
-            await $scope.initOperation();
-            Utils.safeApply($scope);
+            if($scope.ownLabel){
+                await operation.save($scope.newLabel)
+            }else{
+                await operation.save();
+
+            }
+            // $scope.cancelOperationForm();
+            // await $scope.initOperation();
+            // Utils.safeApply($scope);
+
         };
 
         $scope.isAllOperationSelected = false;
@@ -223,5 +233,9 @@ export const operationController = ng.controller('operationController',
         };
         $scope.openOrders = () => {
             $scope.redirectTo(`/operation/order/${$scope.operations.selected[0].id}`)
+        }
+
+        $scope.editOwnLabel = () =>{
+            $scope.ownLabel = !$scope.ownLabel;
         }
     }]);

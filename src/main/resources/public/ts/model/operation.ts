@@ -29,17 +29,17 @@ export class Operation implements Selectable {
     constructor(){
 
     }
-    async save () {
+    async save (newLabel ?:string) {
         if (this.id) {
-            await this.update();
+            await this.update(newLabel);
         } else {
-            await this.create();
+            await this.create(newLabel);
         }
     }
 
-    async create () {
+    async create (newLabel ?:string) {
         try {
-            await http.post(`/lystore/operation`, this.toJson());
+            await http.post(`/lystore/operation`, this.toJson(newLabel));
         } catch (e) {
             notify.error('lystore.operation.create.err');
             throw e;
@@ -67,9 +67,9 @@ export class Operation implements Selectable {
             throw e;
         }
     }
-    async update () {
+    async update (newLabel ?:string) {
         try {
-            await http.put(`/lystore/operation/${this.id}`, this.toJson());
+            await http.put(`/lystore/operation/${this.id}`, this.toJson(newLabel));
         } catch (e) {
             notify.error('lystore.operation.update.err');
             throw e;
@@ -95,18 +95,20 @@ export class Operation implements Selectable {
         }
     }
 
-    toJson(){
+    toJson(newLabel?:string){
         return {
             id_label : this.id_label,
             status : this.status,
             id_instruction: this.id_instruction,
             date_cp: this.date_cp? Utils.formatDatePost(this.date_cp) : null,
+            ...(newLabel  && {newLabel: newLabel})
         };
     }
 
     displayOperation = () => {
         return this.label.title + " - " + (this.date_cp && this.date_cp === null) ? "Pas de date de CP" : this.date_cp.toDateString();
-    }
+    };
+
 
 }
 

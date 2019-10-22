@@ -17,6 +17,9 @@
     },
     "id_instruction": {
       "type": ["number", "null"]
+    },
+    "newLabel": {
+      "type": "string"
     }
   },
   "required": [ "id_label", "status"]

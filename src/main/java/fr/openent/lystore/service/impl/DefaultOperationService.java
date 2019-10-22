@@ -235,20 +235,50 @@ public class DefaultOperationService extends SqlCrudService implements Operation
     }
 
     public  void updateOperation(Integer id, JsonObject operation, Handler<Either<String, JsonObject>> handler){
-        String query = "UPDATE " + Lystore.lystoreSchema + ".operation " +
-                "SET id_label = ?, " +
-                "status = ?, " +
-                "id_instruction = ?, " +
-                "date_cp = ? " +
-                "WHERE id = ? " +
-                "RETURNING id";
-        JsonArray values = new fr.wseduc.webutils.collections.JsonArray()
-                .add(operation.getInteger("id_label"))
-                .add(operation.getBoolean("status"))
-                .add(operation.getInteger("id_instruction"))
-                .add(operation.getString("date_cp"))
-                .add(id);
-        sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
+        if(operation.containsKey("newLabel")){
+            String getIntegerquery = "INSERT INTO " + Lystore.lystoreSchema + ".label_operation (label) " +
+                    "VALUES (?)" +
+                    " RETURNING id";
+            JsonArray params = new JsonArray().add(operation.getString("newLabel"));
+            sql.prepared(getIntegerquery, params, new Handler<Message<JsonObject>>() {
+                @Override
+                public void handle(Message<JsonObject> event) {
+                    JsonObject bodyMessage = event.body();
+                    if (bodyMessage.getString("status").equals("ok")) {
+                        Integer id_newLabel = bodyMessage.getJsonArray("results").getJsonArray(0).getInteger(0);
+                        String query = "UPDATE " + Lystore.lystoreSchema + ".operation " +
+                                "SET id_label = ?, " +
+                                "status = ?, " +
+                                "id_instruction = ?, " +
+                                "date_cp = ? " +
+                                "WHERE id = ? " +
+                                "RETURNING id";
+                        JsonArray values = new fr.wseduc.webutils.collections.JsonArray()
+                                .add(id_newLabel)
+                                .add(operation.getBoolean("status"))
+                                .add(operation.getInteger("id_instruction"))
+                                .add(operation.getString("date_cp"))
+                                .add(id);
+                        sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
+                    }
+                }
+            });
+        }else {
+            String query = "UPDATE " + Lystore.lystoreSchema + ".operation " +
+                    "SET id_label = ?, " +
+                    "status = ?, " +
+                    "id_instruction = ?, " +
+                    "date_cp = ? " +
+                    "WHERE id = ? " +
+                    "RETURNING id";
+            JsonArray values = new fr.wseduc.webutils.collections.JsonArray()
+                    .add(operation.getInteger("id_label"))
+                    .add(operation.getBoolean("status"))
+                    .add(operation.getInteger("id_instruction"))
+                    .add(operation.getString("date_cp"))
+                    .add(id);
+            sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
+        }
     }
 
     public  void addInstructionId(Integer instructionId, JsonArray operationIds, Handler<Either<String, JsonObject>> handler){

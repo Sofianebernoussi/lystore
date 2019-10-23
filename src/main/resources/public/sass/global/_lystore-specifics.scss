@@ -1009,12 +1009,12 @@ input[type=number].numberWithoutArrow {
   transform: rotate(-180deg);
   transform-origin: center;
   scrollbar-color: #aaa white; //Mozilla
-  scrollbar-width: thin; //Mozilla
+  scrollbar-width: auto; //Mozilla
   padding: 0;
 }
 .vertical-array-scroll::-webkit-scrollbar{
   background-color: #F5F5F5;
-  height: 8px;
+  height: 15px;
 }
 .vertical-array-scroll::-webkit-scrollbar-thumb
 {
@@ -1028,6 +1028,14 @@ input[type=number].numberWithoutArrow {
 .vertical-array-scroll td{
   @media (max-width: 767px) {
     border-bottom: 1px solid #ddd;
+  }
+}
+.smallTabElem{
+  min-width: 20px;
+  max-width: 500px;
+  @media(max-width: 767px){
+    min-width: 100px;
+    max-width: 300px;
   }
 }
 .tabElem{

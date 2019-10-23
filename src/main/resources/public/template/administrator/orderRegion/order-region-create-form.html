@@ -71,7 +71,7 @@
                 <tr class="row" ng-repeat="row in orderToCreate.rows track by $index">
 
                     <td class="one ">
-                        <div ng-if="!row.display.struct" class="row ">
+                        <div ng-if="!row.display.struct" class="cell row ">
                             <i class="house one" ng-click="swapTypeStruct(row)"></i>
                             <select class="eleven"
                                     style="max-width: 300px;"
@@ -97,15 +97,25 @@
                         </div>
                     </td>
                     <td class="two ">
-                        <select style="max-width: 300px;"
-                                ng-disabled="!row.structure" ng-model="row.equipment"
-                                ng-class="{disabled :!row.structure}"
-                                ng-change="initEquipmentData(row)"
-                                ng-options="equipment as equipment.name for equipment in row.equipments.all">
-                            <option value="" disabled selected>[[translate('lystore.placeholder.equipment')]]
-                            </option>
+                                                <select style="max-width: 300px;"
+                                                        ng-show="!row.structure"
+                                                        class="disabled">
 
-                        </select>
+                                                </select>
+                        <div  style="min-width: 150px; max-width: 300px;"  ng-show="row.structure">
+                            <search-and-select
+                                    class="twelve cell"
+                                    options="row.equipments.all"
+                                    param1="contract_type_name"
+                                    param2="name"
+                                    ng-model="row.equipment"
+                                    search-on="name"
+                                    order-by="name"
+                                    ng-change="initEquipmentData(row)"
+                                    class="cell horizontal-margin"
+                            >
+                            </search-and-select >
+                        </div>
                     </td>
                     <td class="one ">
                         <input ng-disabled="!row.equipment" class="input-in-row" ng-model="row.price" type="number"

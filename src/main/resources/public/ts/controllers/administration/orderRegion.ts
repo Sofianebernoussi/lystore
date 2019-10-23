@@ -190,6 +190,7 @@ export const orderRegionController = ng.controller('orderRegionController',
             Utils.safeApply($scope);
         };
         $scope.initEquipmentData = (row:OrderRegion):void => {
+            console.log("ccs")
             row.price = row.equipment.priceTTC;
             row.amount = 1;
         };

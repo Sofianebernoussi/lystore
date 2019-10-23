@@ -44,8 +44,8 @@ export const orderRegionController = ng.controller('orderRegionController',
             });
             $scope.structuresToDisplay = structures;
             $scope.structuresToDisplay.all.sort((firstStructure, secondStructure) => {
-                if (firstStructure.name < secondStructure.name) return 1;
-                if (firstStructure.name > secondStructure.name) return -1;
+                if (firstStructure.uai > secondStructure.uai) return 1;
+                if (firstStructure.uai < secondStructure.uai) return -1;
                 return 0;
             });
             Utils.safeApply($scope);

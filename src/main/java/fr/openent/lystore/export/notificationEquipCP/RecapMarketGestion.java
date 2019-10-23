@@ -171,7 +171,7 @@ public class RecapMarketGestion extends TabHelper {
                 excel.insertCellTabCenter(0, lineNumber, zip);
                 excel.insertCellTabCenter(1, lineNumber, order.getString("uai") + "\n" + order.getString("nameEtab") + "\n" + order.getString("city"));
 
-                excel.insertCellTabCenter(2, lineNumber, CIVILITY + "\n" + address + "\n TEL: " + order.getString("phone"));
+                excel.insertCellTabCenter(2, lineNumber, CIVILITY + "\n" + address + "\n TEL: " + makeCellWithoutNull(order.getString("phone")));
                 excel.insertCellTabCenterBold(3, lineNumber, formatterDateExcel.format(orderDate));
                 excel.insertCellTabCenter(4, lineNumber, order.getString("market") + " \nCP " + makeCellWithoutNull(instruction.getString("cp_number")));
                 if (order.getBoolean("isregion")) {

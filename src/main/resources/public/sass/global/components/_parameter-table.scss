@@ -3,15 +3,15 @@ parameter-table
   .parameter-table{
     position: fixed;
     display: block;
-    right: -200px;
+    right: -250px;
     top: 146px;
-    width: 240px;
+    width: 290px;
     &.show{
       right: 0px;
       transition: right 250ms ease;
     }
     &.hide{
-      right: -200px;
+      right: -250px;
       transition: right 250ms ease;
     }
   }
@@ -45,7 +45,7 @@ parameter-table
   }
   article{
     display: block;
-    width: 200px ;
+    width: 250px ;
     overflow-y: auto;
     height: 60vh;
   }

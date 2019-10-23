@@ -47,6 +47,7 @@ export const exportCtrl = ng.controller('exportCtrl', [
             toasts.confirm('lystore.delete.notif');
             $scope.exportToDelete = [];
             await $scope.exports.getExports();
+            Utils.safeApply($scope);
 
         };
 

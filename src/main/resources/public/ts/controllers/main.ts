@@ -209,6 +209,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             campaignOrder: async (params) => {
                 let idCampaign = params.idCampaign;
                 $scope.idIsInteger(idCampaign);
+                if(!$scope.current.structure)
+                    await $scope.initStructures() ;
                 $scope.current.structure
                     ? await $scope.ordersClient.sync(null, [], idCampaign, $scope.current.structure.id)
                     : null;
@@ -230,11 +232,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             orderWaiting: async () => {
                 await $scope.syncCampaignInputSelected();
                 $scope.preferences =  await $scope.ub.getPreferences();
-                if($scope.preferences && $scope.preferences.preference && JSON.parse($scope.preferences.preference).ordersWaitingCampaign && $scope.fromWaiting){
+                if($scope.preferences && $scope.preferences.preference && $scope.fromWaiting)
                     $scope.fromWaiting = false;
+                let preferences = JSON.parse($scope.preferences.preference);
+                if (preferences.ordersWaitingCampaign ){
                     let campaignPref;
                     $scope.campaignsForSelectInput.forEach(c=>{
-                        if(c.id === JSON.parse($scope.preferences.preference).ordersWaitingCampaign)
+                        if(c.id === preferences.ordersWaitingCampaign)
                             campaignPref = c;
                     });
                     if(campaignPref) {
@@ -330,6 +334,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.loadingArray = true;
                 await  $scope.campaigns.sync();
                 await  $scope.operations.sync();
+                let operations = [];
+                $scope.operations.all.map((operation,index)=>{
+                    if(operation.status == 'true'){
+                        operations.push(operation);
+                    }
+                });
+                $scope.operations.all = operations;
                 await $scope.structures.sync();
                 template.open('administrator-main', 'administrator/orderRegion/order-region-create-form');
                 $scope.loadingArray = false;

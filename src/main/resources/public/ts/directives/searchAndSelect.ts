@@ -51,7 +51,6 @@ export const searchAndSelect = ng.directive('searchAndSelect', function() {
                 return item instanceof Object ? item[$scope.param1] + " - " + item[$scope.param2] : item
             };
             $scope.$watch(()=> $scope.ngModel, (newVal, oldVal)=>{
-                console.log($scope);
                 if(newVal!=oldVal){
                     $scope.ngChange();
                 }

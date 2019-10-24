@@ -79,7 +79,6 @@ export const orderController = ng.controller('orderController',
         };
 
         $scope.initPreferences = ()  => {
-            console.log("cc")
             if ($scope.preferences && $scope.preferences.preference) {
                 let loadedPreferences = JSON.parse($scope.preferences.preference);
                 if(loadedPreferences.ordersWaitingDisplay)

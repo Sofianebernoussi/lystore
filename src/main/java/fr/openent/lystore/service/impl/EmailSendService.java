@@ -101,7 +101,7 @@ public class EmailSendService {
     }
 
 
-    public void getPersonnelMailStructure(JsonArray structureIds, Handler<Either<String, JsonArray>> handler) {
+    private void getPersonnelMailStructure(JsonArray structureIds, Handler<Either<String, JsonArray>> handler) {
         String query = "MATCH (w:WorkflowAction {displayName: 'lystore.access'})--(r:Role) with r , count((r)-->(w)) as NbrRows " +
                 " Match p = ((r)<--(mg:ManualGroup)-->(s:Structure)), (mg)<-[IN]-(u:User)  " +
                 "where NbrRows=1 AND s.id IN {ids} return s.id as id, s.name as name, " +
@@ -124,7 +124,7 @@ public class EmailSendService {
                 + listOrders
                 + "<br /> Bien Cordialement, "
                 + "<br /> L'équipe LyStore. ";
-
+        LOGGER.info(formatAccentedString(body));
         return formatAccentedString(body);
 
     }
@@ -136,10 +136,10 @@ public class EmailSendService {
                 + numberOrder + "\"."
                 + " Une partie de la commande concerne le marché " + row.getString(1) + ". "
                 + "<br /> Pour générer le bon de commande et les CSF associés, il suffit de se rendre ici : <br />"
-                + "<br />" + url + getEncodedRedirectUri(url + "#/order/valid") + "<br />"
+                + "<br />" + url  + "#/order/valid" + "<br />"
                 + "<br /> Bien Cordialement, "
                 + "<br /> L'équipe LyStore. ";
-
+        LOGGER.info(formatAccentedString(body));
         return formatAccentedString(body);
     }
 

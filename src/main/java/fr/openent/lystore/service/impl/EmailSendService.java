@@ -124,7 +124,6 @@ public class EmailSendService {
                 + listOrders
                 + "<br /> Bien Cordialement, "
                 + "<br /> L'équipe LyStore. ";
-
         return formatAccentedString(body);
 
     }
@@ -136,10 +135,9 @@ public class EmailSendService {
                 + numberOrder + "\"."
                 + " Une partie de la commande concerne le marché " + row.getString(1) + ". "
                 + "<br /> Pour générer le bon de commande et les CSF associés, il suffit de se rendre ici : <br />"
-                + "<br />" + url + getEncodedRedirectUri(url + "#/order/valid") + "<br />"
+                + "<br />" + url  + "#/order/valid" + "<br />"
                 + "<br /> Bien Cordialement, "
                 + "<br /> L'équipe LyStore. ";
-
         return formatAccentedString(body);
     }
 

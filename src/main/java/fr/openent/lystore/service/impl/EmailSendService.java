@@ -101,7 +101,7 @@ public class EmailSendService {
     }
 
 
-    private void getPersonnelMailStructure(JsonArray structureIds, Handler<Either<String, JsonArray>> handler) {
+    public void getPersonnelMailStructure(JsonArray structureIds, Handler<Either<String, JsonArray>> handler) {
         String query = "MATCH (w:WorkflowAction {displayName: 'lystore.access'})--(r:Role) with r , count((r)-->(w)) as NbrRows " +
                 " Match p = ((r)<--(mg:ManualGroup)-->(s:Structure)), (mg)<-[IN]-(u:User)  " +
                 "where NbrRows=1 AND s.id IN {ids} return s.id as id, s.name as name, " +

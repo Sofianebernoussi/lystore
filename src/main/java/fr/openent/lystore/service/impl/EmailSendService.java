@@ -124,7 +124,6 @@ public class EmailSendService {
                 + listOrders
                 + "<br /> Bien Cordialement, "
                 + "<br /> L'équipe LyStore. ";
-        LOGGER.info(formatAccentedString(body));
         return formatAccentedString(body);
 
     }
@@ -139,7 +138,6 @@ public class EmailSendService {
                 + "<br />" + url  + "#/order/valid" + "<br />"
                 + "<br /> Bien Cordialement, "
                 + "<br /> L'équipe LyStore. ";
-        LOGGER.info(formatAccentedString(body));
         return formatAccentedString(body);
     }
 

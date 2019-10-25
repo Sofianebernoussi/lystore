@@ -435,6 +435,7 @@
   "lystore.instruction.modify":"Modifier un  rapport",
   "lystore.instruction.object":"Objet",
   "lystore.exercise.number":"Numéro d'exercice ",
+  "lystore.exercise.year":"Année d'exercice ",
   "lystore.submitted.to.cp":"Soumis à CP",
   "lystore.instruction.commenter":"Commentaire",
   "lystore.instruction.official.number":"N° officiel CP",

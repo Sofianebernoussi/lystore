@@ -97,14 +97,10 @@
                         </div>
                     </td>
                     <td class="two ">
-                                                <select style="max-width: 300px;"
-                                                        ng-show="!row.structure"
-                                                        class="disabled">
-
-                                                </select>
-                        <div  style="min-width: 150px; max-width: 300px;"  ng-show="row.structure">
+                        <div  style="min-width: 150px; max-width: 300px;">
                             <search-and-select
                                     class="twelve cell"
+                                    disabled="!row.structure"
                                     options="row.equipments.all"
                                     param1="contract_type_name"
                                     param2="name"

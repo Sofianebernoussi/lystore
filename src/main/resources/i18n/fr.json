@@ -469,7 +469,7 @@
   "lystore.operation.orders.sync.err": "Une erreur est survenue lors de la récupération de la liste des demandes",
   "lystore.operation.empty": "Aucune opération est créée ou est ouverte, pour les gérer cliquer ici",
   "close" : "Fermé",
-  "lystore.amountTTC": "Montant (TTC)",
+  "lystore.amountTTC": "Montant total (TTC)",
   "lystore.access.demand": "Accéder aux demandes",
   "lystore.access.catalog": "Accéder au catalogue",
   "lystore.demands.waiting": "demandes en attente",

@@ -537,6 +537,7 @@
   "lystore.loading": "Chargement en cours ...",
   "lystore.campaign.purse.init": "Cagnottes initiales",
   "lystore.campaign.amount.init":"Montant initial disponible ",
-  "notify.etab": "Notifier le lycée"
+  "notify.etab": "Notifier le lycée",
+  "max.length.instruction.object": "80 caractères maximum"
 
 }

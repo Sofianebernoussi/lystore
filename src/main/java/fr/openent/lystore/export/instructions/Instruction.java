@@ -1,15 +1,16 @@
-package fr.openent.lystore.export;
+package fr.openent.lystore.export.instructions;
 
 import fr.openent.lystore.Lystore;
-import fr.openent.lystore.export.RME.*;
-import fr.openent.lystore.export.equipmentRapp.*;
-import fr.openent.lystore.export.iris.IrisTab;
-import fr.openent.lystore.export.notificationEquipCP.LinesBudget;
-import fr.openent.lystore.export.notificationEquipCP.NotificationLycTab;
-import fr.openent.lystore.export.notificationEquipCP.RecapMarketGestion;
-import fr.openent.lystore.export.publipostage.Publipostage;
-import fr.openent.lystore.export.subventionEquipment.Market;
-import fr.openent.lystore.export.subventionEquipment.Subventions;
+import fr.openent.lystore.export.ExportObject;
+import fr.openent.lystore.export.instructions.RME.*;
+import fr.openent.lystore.export.instructions.equipmentRapp.*;
+import fr.openent.lystore.export.instructions.iris.IrisTab;
+import fr.openent.lystore.export.instructions.notificationEquipCP.LinesBudget;
+import fr.openent.lystore.export.instructions.notificationEquipCP.NotificationLycTab;
+import fr.openent.lystore.export.instructions.notificationEquipCP.RecapMarketGestion;
+import fr.openent.lystore.export.instructions.publipostage.Publipostage;
+import fr.openent.lystore.export.instructions.subventionEquipment.Market;
+import fr.openent.lystore.export.instructions.subventionEquipment.Subventions;
 import fr.openent.lystore.helpers.ExcelHelper;
 import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultProjectService;
@@ -35,8 +36,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Instruction {
-    private final String operationsId = "WITH operations AS (" +
+public class Instruction extends ExportObject {
+    private final String operationsIdQuery = "WITH operations AS (" +
             "SELECT operation.id, label_operation.label, operation.id_instruction " +
             "FROM " + Lystore.lystoreSchema + ".operation " +
             "INNER JOIN " + Lystore.lystoreSchema + ".label_operation ON (operation.id_label = label_operation.id) " +
@@ -48,13 +49,10 @@ public class Instruction {
             "WHERE instruction.id = ? " +
             "GROUP BY instruction.id";
     private Integer id;
-    private String idFile;
-    private ExportService exportService;
-    private Logger log = LoggerFactory.getLogger(DefaultProjectService.class);
+    private Logger log = LoggerFactory.getLogger(Instruction.class);
 
     public Instruction(ExportService exportService, String idFile, Integer instructionId) {
-        this.idFile = idFile;
-        this.exportService = exportService;
+        super(exportService,idFile);
         this.id = instructionId;
     }
 
@@ -65,7 +63,7 @@ public class Instruction {
         }
 
 
-        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
+        Sql.getInstance().prepared(operationsIdQuery, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
                 ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
@@ -122,7 +120,7 @@ public class Instruction {
         }
 
 
-        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
+        Sql.getInstance().prepared(operationsIdQuery, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
                 ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
@@ -171,7 +169,7 @@ public class Instruction {
             log.error("Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
-        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(eitherInstruction -> {
+        Sql.getInstance().prepared(operationsIdQuery, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(eitherInstruction -> {
             if (eitherInstruction.isLeft()) {
                 log.error("Error when getting sql datas for subvention");
                 handler.handle(new Either.Left<>("Error when getting sql datas for subvention"));
@@ -215,7 +213,7 @@ public class Instruction {
             ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
-        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(eitherInstruction -> {
+        Sql.getInstance().prepared(operationsIdQuery, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(eitherInstruction -> {
             if (eitherInstruction.isLeft()) {
                 ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
@@ -249,7 +247,7 @@ public class Instruction {
         }
 
 
-        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
+        Sql.getInstance().prepared(operationsIdQuery, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
                 ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
@@ -287,7 +285,7 @@ public class Instruction {
             ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
-        Sql.getInstance().prepared(operationsId, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
+        Sql.getInstance().prepared(operationsIdQuery, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
                 ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
@@ -314,33 +312,7 @@ public class Instruction {
         }));
 
     }
-    private void futureHandler(Handler<Either<String, Buffer>> handler, Workbook workbook, List<Future> futures) {
-        CompositeFuture.all(futures).setHandler(event -> {
-            if (event.succeeded()) {
-                try {
-                    ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
-                    workbook.write(fileOut);
-                    Buffer buff = new BufferImpl();
-                    buff.appendBytes(fileOut.toByteArray());
-                    handler.handle(new Either.Right<>(buff));
-                } catch (IOException e) {
-                    ExcelHelper.catchError(exportService, idFile, e.getMessage());
-                    handler.handle(new Either.Left<>(e.getMessage()));
-                }
-            } else {
-                ExcelHelper.catchError(exportService, idFile, "Error when resolving futures");
-                handler.handle(new Either.Left<>("Error when resolving futures"));
-            }
-        });
-    }
 
-    private Handler<Either<String, Boolean>> getHandler(Future<Boolean> future) {
-        return event -> {
-            if (event.isRight()) {
-                future.complete(event.right().getValue());
-            } else {
-                future.fail(event.left().getValue());
-            }
-        };
-    }
+
+
 }

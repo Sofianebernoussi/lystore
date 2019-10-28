@@ -1,19 +1,14 @@
-package fr.openent.lystore.export.publipostage;
+package fr.openent.lystore.export.instructions.publipostage;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.TabHelper;
 import fr.openent.lystore.service.StructureService;
-import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.openent.lystore.service.impl.DefaultStructureService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.entcore.common.neo4j.Neo4j;
-import org.entcore.common.neo4j.Neo4jResult;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 

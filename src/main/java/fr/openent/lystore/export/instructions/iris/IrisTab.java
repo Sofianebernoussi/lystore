@@ -1,9 +1,7 @@
-package fr.openent.lystore.export.iris;
+package fr.openent.lystore.export.instructions.iris;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.TabHelper;
-import fr.openent.lystore.service.StructureService;
-import fr.openent.lystore.service.impl.DefaultStructureService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;

@@ -1,4 +1,4 @@
-package fr.openent.lystore.export.RME;
+package fr.openent.lystore.export.instructions.RME;
 
 import fr.openent.lystore.Lystore;
 import io.vertx.core.json.JsonObject;

@@ -1,4 +1,4 @@
-package fr.openent.lystore.export.subventionEquipment;
+package fr.openent.lystore.export.instructions.subventionEquipment;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.TabHelper;

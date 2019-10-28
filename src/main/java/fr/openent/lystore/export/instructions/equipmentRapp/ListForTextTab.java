@@ -1,9 +1,7 @@
-package fr.openent.lystore.export.equipmentRapp;
+package fr.openent.lystore.export.instructions.equipmentRapp;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.TabHelper;
-import fr.openent.lystore.service.StructureService;
-import fr.openent.lystore.service.impl.DefaultStructureService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
@@ -12,28 +10,23 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
-public class AnnexeDelibTab extends TabHelper {
+public class ListForTextTab extends TabHelper {
     private String type;
-    private JsonObject programMarket;
+    private int yProgramLabel = 1;
 
-    /**
-     * open the tab or create it if it doesn't exists
-     *
-     * @param wb
-     * @param instruction
-     */
-    public AnnexeDelibTab(Workbook wb, JsonObject instruction, String type) {
-        super(wb, instruction, "ANNEXE DELIB");
+    public ListForTextTab(Workbook workbook, JsonObject instruction, String type) {
+        super(workbook, instruction, "liste pour texte du RAPPORT " + type);
         this.type = type;
-        programMarket = new JsonObject();
+        excel.setDefaultFont();
     }
+
 
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
         getDatas(event -> handleDatasDefault(event, handler));
+
     }
 
     @Override
@@ -41,23 +34,26 @@ public class AnnexeDelibTab extends TabHelper {
         ArrayList structuresId = new ArrayList<>();
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
-            if(!structuresId.contains(data.getString("id_structure")))
-                structuresId.add(structuresId.size(), data.getString("id_structure"));
+            JsonArray actions = new JsonArray(data.getString("actions"));
+            for (int j = 0; j < actions.size(); j++) {
+                JsonObject action = actions.getJsonObject(j);
+                if(!structuresId.contains(action.getString("id_structure")))
+                    structuresId.add(structuresId.size(), action.getString("id_structure"));
 
+            }
         }
-        logger.info("structid add");
         getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
+
                 boolean errorCatch= false;
                 if (repStructures.isRight()) {
                     try {
                         JsonArray structures = repStructures.right().getValue();
-                        setStructuresFromDatas(structures);
-                        setArray(datas);
+                        setStructures(structures);
+                        setLabels();
                     }catch (Exception e){
                         errorCatch = true;
-                        log.error(e.getMessage());
                     }
                     if(errorCatch)
                         handler.handle(new Either.Left<>("Error when writting files"));
@@ -71,120 +67,129 @@ public class AnnexeDelibTab extends TabHelper {
         });
     }
 
+
+
     @Override
-    protected void setArray(JsonArray datas) {
-        setLabels();
-        if (datas.isEmpty()) {
-            return;
-        }
-        int lineToInsert = 5;
-        JsonObject idPassed = new JsonObject();
-        String key = "", oldkey = "";
-        Double oldTotal = 0.d;
+    protected void setLabels() {
+        int initYProgramLabel = 2;
         for (int i = 0; i < datas.size(); i++) {
-            JsonObject action = datas.getJsonObject(i);
-            key = action.getString("program") + " - " + action.getString("code");
-            int columnToInsert = programMarket.getInteger(key);
-            if (!checkIdPassed(idPassed, action.getString("id_structure"))) {
-                idPassed.put(action.getString("id_structure"), 1);
-                lineToInsert++;
-                excel.insertCellTab(0, lineToInsert, action.getString("zipCode"));
-                excel.insertCellTab(1, lineToInsert, action.getString("city"));
-                excel.insertCellTab(2, lineToInsert, action.getString("nameEtab"));
-                excel.insertCellTab(3, lineToInsert, action.getString("uai"));
-                oldkey = "";
+            JsonObject programLabel = new JsonObject();
+            //creating label
+            int columnTotal = 4;
+            JsonObject campaign = datas.getJsonObject(i);
+            int currentY = yProgramLabel;
+            yProgramLabel += 2;
+            setTitle(currentY, campaign);
+            JsonArray actions = campaign.getJsonArray("actionsJO");
+            JsonObject idPassed = new JsonObject();
+            initYProgramLabel = yProgramLabel;
+            yProgramLabel += 2;
+            String operation = "";
+//            //Insert datas
+            String key = "", oldkey = "";
+            Double oldTotal = 0.d;
+//
+            for (int j = 0; j < actions.size(); j++) {
+                JsonObject action = actions.getJsonObject(j);
+                if (!action.getString("operation").equals(operation)) {
+                    if (j != 0) {
+                        setTotal(programLabel.size() + 4, initYProgramLabel);
+                    }
+                    operation = action.getString("operation");
+                    yProgramLabel += 2;
+                    setOperation(operation, yProgramLabel);
+                    yProgramLabel += 2;
+                    initYProgramLabel = yProgramLabel;
+                    yProgramLabel += 2;
+                    if (arrayLength - 4 < columnTotal) {
+                        arrayLength += columnTotal;
+                    }
+                    columnTotal = 4;
+                    idPassed = new JsonObject();
+                    programLabel = new JsonObject();
+                }
+                key = action.getString("program") + " - " + action.getString("code");
+                if (!programLabel.containsKey(key)) {
+                    programLabel.put(key, programLabel.size());
+                    excel.insertHeader(4 + programLabel.getInteger(key), initYProgramLabel,
+                            action.getString("program"));
+                    excel.insertHeader(4 + programLabel.getInteger(key), initYProgramLabel + 1,
+                            action.getString("code"));
+                }
+
+
+                if (!checkIdPassed(idPassed, action.getString("id_structure"))) {
+                    columnTotal = 4;
+                    idPassed.put(action.getString("id_structure"), true);
+                    try {
+                        excel.insertLabel(0, yProgramLabel, action.getString("zipCode").substring(0, 2));
+
+                    } catch (NullPointerException e) {
+                        excel.insertLabel(0, yProgramLabel, action.getString("zipCode"));
+                    }
+                    excel.insertLabel(1, yProgramLabel, action.getString("city"));
+                    excel.insertLabel(2, yProgramLabel, action.getString("nameEtab"));
+                    excel.insertLabel(3, yProgramLabel, action.getString("uai"));
+
+                    oldTotal = 0.d;
+                    oldkey = key;
+                    oldTotal += safeGetDouble(action, "total", "ListForTextTab");
+                    excel.insertCellTabDouble(4 + programLabel.getInteger(key),
+                            yProgramLabel, oldTotal);
+                } else {
+                    yProgramLabel--;
+                    if (!oldkey.equals(key)) {
+                        oldTotal = 0.d;
+                    }
+                    oldkey = key;
+                    oldTotal += safeGetDouble(action, "total", "ListForTextTab");
+                    excel.insertCellTabDouble(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")), yProgramLabel
+                            , oldTotal);
+                }
+
+                columnTotal++;
+
+                yProgramLabel++;
+
             }
-            if (!oldkey.equals(key)) {
-                oldTotal = 0.d;
+            if (arrayLength - 4 < columnTotal) {
+                arrayLength += columnTotal;
             }
-            oldkey = key;
-            oldTotal += Double.parseDouble(action.getString("total"));
-
-            excel.insertCellTabDouble(columnToInsert + 4, lineToInsert, oldTotal);
-
+            setTotal(programLabel.size() + 4, initYProgramLabel);
+            yProgramLabel += 2;
         }
+        excel.autoSize(arrayLength);
+    }
 
-        excel.fillTab(0, arrayLength, 6, lineToInsert + 1);
-        for (int i = 6; i <= lineToInsert; i++) {
-            excel.setTotalY(4, 4 + programMarket.size() - 1, i, 4 + programMarket.size());
+    private void setOperation(String operation, int y) {
+        CellRangeAddress merge = new CellRangeAddress(y, y, 0, 6);
+        sheet.addMergedRegion(merge);
+        excel.setRegionHeader(merge, sheet);
+        excel.insertTitleHeader(0, y, " Lycées concernés par: " + operation);
+    }
+
+    private void setTitle(int currentY, JsonObject campaign) {
+        CellRangeAddress merge = new CellRangeAddress(currentY, currentY, 0, 6);
+        sheet.addMergedRegion(merge);
+        excel.setRegionUnderscoreHeader(merge, sheet);
+        excel.insertUnderscoreHeader(0, currentY, campaign.getString("campaign"));
+    }
+
+    private void setTotal(int nbTotaux, int initYProgramLabel) {
+        excel.fillTab(4, nbTotaux, initYProgramLabel + 2, yProgramLabel);
+        excel.insertHeader(3, yProgramLabel, excel.totalLabel);
+        for (int nbTotal = 4; nbTotal < nbTotaux; nbTotal++) {
+            excel.setTotalX(initYProgramLabel + 1, yProgramLabel - 1, nbTotal, yProgramLabel);
         }
-
-        for (int i = 0; i <= programMarket.size(); i++) {
-            excel.insertHeader(3, lineToInsert + 1, excel.totalLabel);
-            excel.setTotalX(6, lineToInsert, 4 + i, lineToInsert + 1);
-
+        excel.insertHeader(nbTotaux, initYProgramLabel + 1, excel.totalLabel);
+        for (int y = initYProgramLabel + 2; y <= yProgramLabel; y++) {
+            excel.setTotalY(4, nbTotaux - 1, y, nbTotaux);
         }
-        excel.autoSize(arrayLength + 1);
     }
 
     private boolean checkIdPassed(JsonObject idPassed, String id) {
         return idPassed.containsKey(id);
     }
-
-    @Override
-    protected void setLabels() {
-        ArrayList<String> programsActionList = new ArrayList<>();
-        int initProgramX = 0;
-        int endProgramX = 0;
-        String previousProgram = "";
-        excel.insertHeader(1, 1, "ANNEXE A LA DELIBERATION");
-        CellRangeAddress merge = new CellRangeAddress(1, 1, 1, 6);
-        sheet.addMergedRegion(merge);
-        excel.setRegionHeader(merge, sheet);
-
-        excel.insertHeader(1, 4, "COMMUNE");
-        excel.insertHeader(1, 5, "");
-
-        excel.insertHeader(2, 4, "LYCEE");
-        excel.insertHeader(2, 5, "");
-        excel.insertHeader(3, 4, "UAI");
-        excel.insertHeader(3, 5, "");
-
-        for (int i = 0; i < datas.size(); i++) {
-            JsonObject data = datas.getJsonObject(i);
-            String programMarketStr = data.getString("program") + " - " + data.getString("code");
-            if (!programsActionList.contains(programMarketStr))
-                programsActionList.add(programMarketStr);
-        }
-        Collections.sort(programsActionList);
-        // Getting merged region
-        for (int i = 0; i < programsActionList.size(); i++) {
-            String progM = programsActionList.get(i);
-            //getting program and code separated
-            String segments[] = progM.split(" - ");
-
-            //merge region if same program
-            if (previousProgram.equals(segments[0])) {
-                endProgramX = 4 + programMarket.size();
-
-            } else {
-                previousProgram = segments[0];
-                if (initProgramX < endProgramX) {
-                    merge = new CellRangeAddress(4, 4, initProgramX, endProgramX);
-                    sheet.addMergedRegion(merge);
-                    excel.setRegionHeader(merge, sheet);
-                }
-                initProgramX = 4 + programMarket.size();
-                excel.insertHeader(4 + programMarket.size(), 4, segments[0]);
-            }
-            excel.insertHeader(4 + programMarket.size(), 5, segments[1]);
-            programMarket.put(progM, i);
-        }
-
-        if (initProgramX < endProgramX) {
-            merge = new CellRangeAddress(4, 4, initProgramX, endProgramX);
-            sheet.addMergedRegion(merge);
-            excel.setRegionHeader(merge, sheet);
-        }
-
-        arrayLength += programMarket.size();
-        excel.insertHeader(4 + programMarket.size(), 4, excel.totalLabel);
-        excel.insertHeader(4 + programMarket.size(), 5, "");
-
-    }
-
-
-
 
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {
@@ -227,11 +232,11 @@ public class AnnexeDelibTab extends TabHelper {
                 "             id_order, comment, rank as \"prio\", price_proposal, id_project, null as id_order_client_equipment,  program, action,  " +
                 "             id_operation, override_region           from " + Lystore.lystoreSchema + ".order_client_equipment  oce) " +
                 "             ) as orders       " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (orders.id_operation = operation.id  and (orders.override_region != true OR orders.override_region is NULL))               " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (orders.id_operation = operation.id   and (orders.override_region != true OR orders.override_region is NULL))               " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)      " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id  AND instruction.id = ?)    " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id )                  " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)      " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id AND instruction.id = ?)    " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id)                  " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id )      " +
                 "             INNER JOIN " + Lystore.lystoreSchema + ".campaign ON orders.id_campaign = campaign.id  " +
                 "             LEFT JOIN " + Lystore.lystoreSchema + ".specific_structures ON orders.id_structure = specific_structures.id    " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         ";
@@ -263,14 +268,14 @@ public class AnnexeDelibTab extends TabHelper {
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                         "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                         "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region ,campaign" +
-                        "             order by orders.id_structure    )        " +
-                        "  SELECT values.*    " +
-                        " from values  " +
-                        " order by id_structure,program  " +
-                        " ;  ";
+                        "             order by  orders.id_operation,program,code ,orders.id_structure    )        " +
+                        "SELECT values.campaign , array_to_json(array_agg(values))as actions " +
+                        " from values   " +
+                        " Group by campaign " +
+                        "  ; ";
 
 
         sqlHandler(handler);
-
     }
 }
+

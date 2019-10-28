@@ -1,4 +1,4 @@
-package fr.openent.lystore.export.RME;
+package fr.openent.lystore.export.instructions.RME;
 
 import fr.openent.lystore.export.TabHelper;
 import fr.wseduc.webutils.Either;
@@ -8,8 +8,6 @@ import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.entcore.common.sql.Sql;
-import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 

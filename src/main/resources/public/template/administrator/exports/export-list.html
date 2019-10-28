@@ -32,11 +32,11 @@
                     <i class="up-open" ng-show="sort.export.type === 'created' && !sort.export.reverse"></i>
                     <i class="down-open" ng-show="sort.export.type === 'created' && sort.export.reverse"></i>
                 </td>
-                <td ng-click="sort.export.type = 'instruction_name';
+                <td ng-click="sort.export.type = 'object_name';
                     sort.export.reverse = !sort.export.reverse">
-                    <i18n>lystore.instruction.name</i18n>
-                    <i class="up-open" ng-show="sort.export.type === 'instruction_name' && !sort.export.reverse"></i>
-                    <i class="down-open" ng-show="sort.export.type === 'instruction_name' && sort.export.reverse"></i>
+                    <i18n>lystore.export.object.name</i18n>
+                    <i class="up-open" ng-show="sort.export.type === 'object_name' && !sort.export.reverse"></i>
+                    <i class="down-open" ng-show="sort.export.type === 'object_name' && sort.export.reverse"></i>
                 </td>
                 <td>
 
@@ -62,7 +62,7 @@
                     [[export.created]]
                 </td>
                 <td>
-                    [[export.instruction_name]]_[[export.instruction_id]]
+                    [[export.object_name]]_[[export.object_id]]
                 </td>
                 <td
                         ng-click="getExport(export)"

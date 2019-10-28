@@ -6,7 +6,6 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
-import org.apache.poi.ss.formula.functions.Even;
 import org.entcore.common.http.BaseServer;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.storage.StorageFactory;

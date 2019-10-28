@@ -1,9 +1,8 @@
-package fr.openent.lystore.export.equipmentRapp;
+package fr.openent.lystore.export.instructions.equipmentRapp;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.TabHelper;
 import fr.openent.lystore.service.StructureService;
-import fr.openent.lystore.service.impl.DefaultStructureService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
@@ -13,12 +12,13 @@ import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.util.ArrayList;
 
-public class ListForTextTab extends TabHelper {
+public class ComptaTab extends TabHelper {
     private String type;
-    private int yProgramLabel = 1;
+    private int yProgramLabel = 0;
+    private StructureService structureService;
 
-    public ListForTextTab(Workbook workbook, JsonObject instruction, String type) {
-        super(workbook, instruction, "liste pour texte du RAPPORT " + type);
+    public ComptaTab(Workbook workbook, JsonObject instruction, String type) {
+        super(workbook, instruction, "COMPTA du rapport  " + type);
         this.type = type;
         excel.setDefaultFont();
     }
@@ -28,12 +28,11 @@ public class ListForTextTab extends TabHelper {
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
         getDatas(event -> handleDatasDefault(event, handler));
-
     }
 
     @Override
     protected void initDatas(Handler<Either<String, Boolean>> handler) {
-        ArrayList structuresId = new ArrayList<>();
+        ArrayList structuresId = new ArrayList();
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
             JsonArray actions = new JsonArray(data.getString("actions"));
@@ -47,7 +46,6 @@ public class ListForTextTab extends TabHelper {
         getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
-
                 boolean errorCatch= false;
                 if (repStructures.isRight()) {
                     try {
@@ -78,28 +76,28 @@ public class ListForTextTab extends TabHelper {
             JsonObject programLabel = new JsonObject();
             //creating label
             int columnTotal = 4;
-            JsonObject campaign = datas.getJsonObject(i);
+            JsonObject operation = datas.getJsonObject(i);
             int currentY = yProgramLabel;
             yProgramLabel += 2;
-            setTitle(currentY, campaign);
-            JsonArray actions = campaign.getJsonArray("actionsJO");
+            setTitle(currentY, operation);
+            JsonArray actions = operation.getJsonArray("actionsJO");
             JsonObject idPassed = new JsonObject();
             initYProgramLabel = yProgramLabel;
             yProgramLabel += 2;
-            String operation = "";
-//            //Insert datas
-            String key = "", oldkey = "";
+            String campaign = "", key = "", oldkey = "";
             Double oldTotal = 0.d;
+
+//            //Insert datas
 //
             for (int j = 0; j < actions.size(); j++) {
                 JsonObject action = actions.getJsonObject(j);
-                if (!action.getString("operation").equals(operation)) {
+                if (!action.getString("campaign").equals(campaign)) {
                     if (j != 0) {
                         setTotal(programLabel.size() + 4, initYProgramLabel);
                     }
-                    operation = action.getString("operation");
+                    campaign = action.getString("campaign");
                     yProgramLabel += 2;
-                    setOperation(operation, yProgramLabel);
+                    setCampaign(campaign, yProgramLabel);
                     yProgramLabel += 2;
                     initYProgramLabel = yProgramLabel;
                     yProgramLabel += 2;
@@ -123,6 +121,7 @@ public class ListForTextTab extends TabHelper {
                 if (!checkIdPassed(idPassed, action.getString("id_structure"))) {
                     columnTotal = 4;
                     idPassed.put(action.getString("id_structure"), true);
+
                     try {
                         excel.insertLabel(0, yProgramLabel, action.getString("zipCode").substring(0, 2));
 
@@ -135,7 +134,8 @@ public class ListForTextTab extends TabHelper {
 
                     oldTotal = 0.d;
                     oldkey = key;
-                    oldTotal += safeGetDouble(action, "total", "ListForTextTab");
+
+                    oldTotal += safeGetDouble(action, "total", "ComptaTab");
                     excel.insertCellTabDouble(4 + programLabel.getInteger(key),
                             yProgramLabel, oldTotal);
                 } else {
@@ -144,13 +144,12 @@ public class ListForTextTab extends TabHelper {
                         oldTotal = 0.d;
                     }
                     oldkey = key;
-                    oldTotal += safeGetDouble(action, "total", "ListForTextTab");
+                    oldTotal += safeGetDouble(action, "total", "ComptaTab");
                     excel.insertCellTabDouble(4 + programLabel.getInteger(action.getString("program") + " - " + action.getString("code")), yProgramLabel
                             , oldTotal);
                 }
 
                 columnTotal++;
-
                 yProgramLabel++;
 
             }
@@ -163,18 +162,18 @@ public class ListForTextTab extends TabHelper {
         excel.autoSize(arrayLength);
     }
 
-    private void setOperation(String operation, int y) {
+    private void setCampaign(String campaign, int y) {
         CellRangeAddress merge = new CellRangeAddress(y, y, 0, 6);
         sheet.addMergedRegion(merge);
         excel.setRegionHeader(merge, sheet);
-        excel.insertTitleHeader(0, y, " Lycées concernés par: " + operation);
+        excel.insertYellowHeader(0, y, campaign);
     }
 
-    private void setTitle(int currentY, JsonObject campaign) {
+    private void setTitle(int currentY, JsonObject operation) {
         CellRangeAddress merge = new CellRangeAddress(currentY, currentY, 0, 6);
         sheet.addMergedRegion(merge);
-        excel.setRegionUnderscoreHeader(merge, sheet);
-        excel.insertUnderscoreHeader(0, currentY, campaign.getString("campaign"));
+        excel.setRegionHeader(merge, sheet);
+        excel.insertTitleHeader(0, currentY, "Lycées concernés par: " + operation.getString("label"));
     }
 
     private void setTotal(int nbTotaux, int initYProgramLabel) {
@@ -236,9 +235,9 @@ public class ListForTextTab extends TabHelper {
                 "             ) as orders       " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".operation ON (orders.id_operation = operation.id   and (orders.override_region != true OR orders.override_region is NULL))               " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".label_operation as label ON (operation.id_label = label.id)      " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id AND instruction.id = ?)    " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id)                  " +
-                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id )      " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".instruction ON (operation.id_instruction = instruction.id  AND instruction.id = ?)    " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract ON (orders.id_contract = contract.id )                  " +
+                "             INNER JOIN  " + Lystore.lystoreSchema + ".contract_type ON (contract.id_contract_type = contract_type.id)      " +
                 "             INNER JOIN " + Lystore.lystoreSchema + ".campaign ON orders.id_campaign = campaign.id  " +
                 "             LEFT JOIN " + Lystore.lystoreSchema + ".specific_structures ON orders.id_structure = specific_structures.id    " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         ";
@@ -270,14 +269,14 @@ public class ListForTextTab extends TabHelper {
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                         "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
                         "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region ,campaign" +
-                        "             order by  orders.id_operation,program,code ,orders.id_structure    )        " +
-                        "SELECT values.campaign , array_to_json(array_agg(values))as actions " +
-                        " from values   " +
-                        " Group by campaign " +
-                        "  ; ";
+                        "             order by  campaign,program,code ,orders.id_structure    )        " +
+                        " SELECT values.operation as label , array_to_json(array_agg(values)) as actions   " +
+                        " from values  " +
+                        " Group by label ; ";
 
 
         sqlHandler(handler);
+
     }
 }
 

@@ -1,17 +1,17 @@
-package fr.openent.lystore.export.RME;
+package fr.openent.lystore.export.instructions.RME;
 
 import fr.openent.lystore.Lystore;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
 
-public class CMRTab extends Investissement {
+public class CMDTab extends Investissement {
 
     /**
      * Format : H-code
      */
 
-    public CMRTab(Workbook wb, JsonObject instruction) {
-        super(wb, instruction, TabName.CMR.toString());
+    public CMDTab(Workbook wb, JsonObject instruction) {
+        super(wb, instruction, TabName.CMD.toString());
         query = "       With values as  (             " +
                 "     SELECT  orders.id ,orders.\"price TTC\",  " +
                 "             ROUND((( SELECT CASE          " +
@@ -31,8 +31,8 @@ public class CMRTab extends Investissement {
                 "             ELSE ''      " +
                 "             END as old_name,     " +
                 "             orders.id_structure,orders.id_operation as id_operation, label.label as operation ,     " +
-                "             orders.equipment_key as key, orders.name as name_equipment, true as region,  orders.id as id,  contract_type.name as contract_name,  " +
-                "             program_action.id_program,program_action.description as action_name, orders.amount ,contract.id as market_id,   campaign.name as campaign, orders.comment, project.room, orders.isregion, " +
+                "             orders.equipment_key as key, orders.name as name_equipment, true as region,  orders.id as id,  " +
+                "             program_action.id_program,program_action.description as action_name, orders.amount ,contract.id as market_id,  contract_type.name as contract_name,   campaign.name as campaign, orders.comment, project.room, orders.isregion, " +
                 "             project.stair,project.building,    " +
                 "             case when specific_structures.type is null      " +
                 "             then '" + LYCEE + "'          " +
@@ -61,13 +61,13 @@ public class CMRTab extends Investissement {
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".project ON orders.id_project = project.id  " +
                 "             LEFT JOIN " + Lystore.lystoreSchema + ".specific_structures ON orders.id_structure = specific_structures.id    " +
                 "             INNER JOIN  " + Lystore.lystoreSchema + ".structure_program_action spa ON (spa.contract_type_id = contract_type.id)         " +
-                "   AND (spa.structure_type = '" + CMR + "' AND specific_structures.type ='" + CMR + "')  " +
-        "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    "  +
+                "   AND (spa.structure_type = '" + CMD + "' AND specific_structures.type ='" + CMD + "')  " +
+                "     INNER JOIN  " + Lystore.lystoreSchema + ".program_action ON (spa.program_action_id = program_action.id)    "  +
                 "     INNER JOIN " + Lystore.lystoreSchema + ".program on program_action.id_program = program.id           " +
                 "             Group by program.name,code,specific_structures.type , orders.amount , orders.name, orders.equipment_key , " +
                 "             orders.id_operation,orders.id_structure  ,orders.id, contract.id ,label.label  ,program_action.id_program ,  " +
-                "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , contract_name,orders.id," +
-                "               orders.isregion, action_name, " +
+                "             orders.id_order_client_equipment,orders.\"price TTC\",orders.price_proposal,orders.override_region , orders.comment,campaign.name , orders.id," +
+                "               orders.isregion, action_name,contract_name, " +
                 "              project.room,project.stair, project.building " +
                 "             ORDER by campaign,code,market_id, id_structure,program,code " +
                 "  )          SELECT program.*, array_to_json(array_agg(values)) AS actions " +
@@ -75,7 +75,6 @@ public class CMRTab extends Investissement {
                 " INNER JOIN values ON (values.id_program = program.id) " +
                 " WHERE program.section =  '" + INVESTISSEMENT + "'" +
                 " GROUP BY program.id;";
-
 
     }
 }

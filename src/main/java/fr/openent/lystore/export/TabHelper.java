@@ -230,7 +230,7 @@ public abstract class TabHelper {
     }
 
     protected void sqlHandler(Handler<Either<String,JsonArray>> handler, JsonArray params){
-        Sql.getInstance().prepared(query, new JsonArray().add(params), new DeliveryOptions().setSendTimeout(Lystore.timeout * 1000000000L),SqlResult.validResultHandler(event -> {
+        Sql.getInstance().prepared(query, params, new DeliveryOptions().setSendTimeout(Lystore.timeout * 1000000000L),SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
                 handler.handle(event.left());
             } else {
@@ -333,7 +333,7 @@ public abstract class TabHelper {
 
 
     protected String makeCellWithoutNull ( String valueGet){
-        return valueGet != null? valueGet : "";
+        return valueGet != null? valueGet : "Pas d'informations";
     }
 
     protected void getStructures(JsonArray ids, Handler<Either<String, JsonArray>> handler)  {

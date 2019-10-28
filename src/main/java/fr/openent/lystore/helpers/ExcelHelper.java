@@ -1068,12 +1068,15 @@ public class ExcelHelper {
         return formatter.format(date);
     }
 
-    public static void makeExportExcel(HttpServerRequest request, EventBus eb, ExportService exportService, String
+    public static void makeExportExcel(HttpServerRequest request, EventBus eb, ExportService exportService, String typeObject, String
             action, String name) {
-        Integer id=-1;
+        String id="-1";
         boolean withType = request.getParam("type") != null;
-        if(request.getParam("id")!=null)
-            id = Integer.parseInt(request.getParam("id"));
+        if(request.getParam("id")!=null && typeObject.equals(Lystore.INSTRUCTIONS))
+            id = request.getParam("id");
+        if(request.params().getAll("number_validation") != null && !request.params().getAll("number_validation").isEmpty() ){
+            id = request.params().getAll("number_validation").get(0);
+        }
         String type = "";
         JsonObject infoFile = new JsonObject();
         if (withType) {
@@ -1082,9 +1085,13 @@ public class ExcelHelper {
         }
         String titleFile = withType ? ExcelHelper.makeTheNameExcelExport(name, type) : ExcelHelper.makeTheNameExcelExport(name);
         log.info("makeExportExcel");
-        Integer finalId = id;
+        String finalId = id;
+
+
+
+
         UserUtils.getUserInfos(eb, request, user -> {
-            exportService.createWhenStart(infoFile,finalId,titleFile,user.getUserId(), action, newExport -> {
+            exportService.createWhenStart(typeObject, infoFile, finalId, titleFile, user.getUserId(), action, newExport -> {
                 if (newExport.isRight()) {
                     String idExport = newExport.right().getValue().getString("id");
                     try {

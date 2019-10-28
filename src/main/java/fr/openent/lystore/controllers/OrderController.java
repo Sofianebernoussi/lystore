@@ -1,6 +1,7 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.helpers.ExcelHelper;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
@@ -29,7 +30,6 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.lang3.ObjectUtils;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.email.EmailFactory;
 import org.entcore.common.http.filter.ResourceFilter;
@@ -56,6 +56,7 @@ public class OrderController extends ControllerHelper {
     private ContractService contractService;
     private AgentService agentService;
     private ProgramService programService;
+    private ExportService exportService;
 
     public static final String UTF8_BOM = "\uFEFF";
 
@@ -72,6 +73,7 @@ public class OrderController extends ControllerHelper {
         this.contractService = new DefaultContractService(Lystore.lystoreSchema, "contract");
         this.agentService = new DefaultAgentService(Lystore.lystoreSchema, "agent");
         this.programService = new DefaultProgramService(Lystore.lystoreSchema, "program");
+        exportService = new DefaultExportServiceService(storage);
     }
 
     @Get("/orders/:idCampaign/:idStructure")
@@ -519,46 +521,46 @@ public class OrderController extends ControllerHelper {
                     final JsonArray equipments = event.right().getValue();
                     JsonArray structures = new fr.wseduc.webutils.collections.JsonArray();
                     final JsonObject[] equipment = new JsonObject[1];
-                    for (int i = 0; i < equipments.size(); i++) {
-                        equipment[0] = equipments.getJsonObject(i);
-                        if (!structures.contains(equipment[0].getString("id_structure"))) {
-                            structures.add(equipment[0].getString("id_structure"));
-                        }
+//                    for (int i = 0; i < equipments.size(); i++) {
+//                        equipment[0] = equipments.getJsonObject(i);
+//                        if (!structures.contains(equipment[0].getString("id_structure"))) {
+//                            structures.add(equipment[0].getString("id_structure"));
+//                        }
 
-                    }
-
-                    structureService.getStructureById(structures, new Handler<Either<String, JsonArray>>() {
-                        @Override
-                        public void handle(Either<String, JsonArray> event) {
-                            if (event.isRight()) {
-                                JsonObject structureMap = new JsonObject(), structure;
-                                JsonArray structures = event.right().getValue();
-                                for (int i = 0; i < structures.size(); i++) {
-                                    structure = structures.getJsonObject(i);
-                                    structureMap.put(structure.getString("id"),
-                                            structure);
-                                }
-
-                                for (int e = 0; e < equipments.size(); e++) {
-                                    equipment[0] = equipments.getJsonObject(e);
-                                    structure = structureMap.getJsonObject(equipment[0].getString("id_structure"));
-                                    equipment[0].put("uai", structure.getString("uai"));
-                                    equipment[0].put("structure_name", structure.getString("name"));
-                                    equipment[0].put("city", structure.getString("city"));
-                                    equipment[0].put("phone", NULL_DATA);
-                                    try{
-                                        if(structure.getString("phone").isEmpty())
-                                            equipment[0].put("phone", structure.getString("phone"));
-                                    }catch (NullPointerException ee){
-                                        equipment[0].put("phone",NULL_DATA);
-                                    }
-                                }
-                                renderValidOrdersCSVExport(request, equipments);
-                            } else {
-                                renderError(request);
-                            }
-                        }
-                    });
+//                    }
+                    ExcelHelper.makeExportExcel(request, eb, exportService,Lystore.ORDERS, "exportListLycOrders", "_list_bdc");
+//                    structureService.getStructureById(structures, new Handler<Either<String, JsonArray>>() {
+//                        @Override
+//                        public void handle(Either<String, JsonArray> event) {
+//                            if (event.isRight()) {
+//                                JsonObject structureMap = new JsonObject(), structure;
+//                                JsonArray structures = event.right().getValue();
+//                                for (int i = 0; i < structures.size(); i++) {
+//                                    structure = structures.getJsonObject(i);
+//                                    structureMap.put(structure.getString("id"),
+//                                            structure);
+//                                }
+//
+//                                for (int e = 0; e < equipments.size(); e++) {
+//                                    equipment[0] = equipments.getJsonObject(e);
+//                                    structure = structureMap.getJsonObject(equipment[0].getString("id_structure"));
+//                                    equipment[0].put("uai", structure.getString("uai"));
+//                                    equipment[0].put("structure_name", structure.getString("name"));
+//                                    equipment[0].put("city", structure.getString("city"));
+//                                    equipment[0].put("phone", NULL_DATA);
+//                                    try{
+//                                        if(structure.getString("phone").isEmpty())
+//                                            equipment[0].put("phone", structure.getString("phone"));
+//                                    }catch (NullPointerException ee){
+//                                        equipment[0].put("phone",NULL_DATA);
+//                                    }
+//                                }
+//                                renderValidOrdersCSVExport(request, equipments);
+//                            } else {
+//                                renderError(request);
+//                            }
+//                        }
+//                    });
                 } else {
                     renderError(request);
                 }

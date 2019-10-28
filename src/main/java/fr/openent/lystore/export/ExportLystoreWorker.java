@@ -25,7 +25,7 @@ import static fr.openent.lystore.Lystore.STORAGE;
 public class ExportLystoreWorker extends BusModBase implements Handler<Message<JsonObject>> {
     private Instruction instruction;
     private Storage storage;
-    private ExportService exportService = new DefaultExportServiceService(Lystore.lystoreSchema, "export", storage);
+    private ExportService exportService = new DefaultExportServiceService(storage);
     private String idNewFile;
     private boolean isWorking = false;
     private boolean isSleeping = true;
@@ -90,55 +90,54 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         final String action = body.getString("action", "");
         String fileName = body.getString("filename");
         idNewFile = body.getString("_id");
-        Integer instruction_id = -1;
+        Integer object_id = -1;
+        String string_object_id;
         try {
-            instruction_id = Integer.parseInt(body.getString("instruction_id"));
+            object_id = Integer.parseInt(body.getString("object_id"));
         }catch (ClassCastException ce){
-            instruction_id =body.getInteger("instruction_id");
+            object_id = body.getInteger("object_id");
+        }catch (NumberFormatException ce){
+            string_object_id = body.getString("object_id");
         }
         switch (action) {
             case "exportEQU":
                 exportEquipment(
-                        instruction_id,
+                        object_id,
                         body.getString("type"),
                         fileName,exportHandler );
                 break;
             case "exportRME":
                 exportRME(
-                        instruction_id,
+                        object_id,
                         fileName,
                         exportHandler);
                 break;
             case "exportNotificationCP":
                 exportNotificationCp(
-                        instruction_id,
+                        object_id,
                         fileName,
                         exportHandler);
                 break;
             case "exportPublipostage":
                 exportPublipostage(
-                        instruction_id,
+                        object_id,
                         fileName,
                         exportHandler);
                 break;
             case "exportSubvention":
                 exportSubvention(
-                        instruction_id,
+                        object_id,
                         fileName,
                         exportHandler);
                 break;
             case "exportIris":
-                    exportIris(instruction_id,
+                    exportIris(object_id,
                             fileName,
                             exportHandler);
                     break;
                 default:
                     ExcelHelper.catchError(exportService, idNewFile, "Invalid action in worker",exportHandler);
                     break;
-
-
-
-
         }
     }
 

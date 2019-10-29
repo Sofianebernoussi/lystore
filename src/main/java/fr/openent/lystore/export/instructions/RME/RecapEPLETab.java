@@ -173,21 +173,20 @@ public class RecapEPLETab extends TabHelper {
     }
 
     private void addTotalLabelInt(String s) {
-        int limitFormulaSize = 8000;
         String cellToAdd = excel.getCellReference(yProgramLabel + 3, 3) + " +";
         cellToAdd = cellToAdd.replace("'Récap. EPLE'!", "");
-        if (totalLabelInt.length() + cellToAdd.length() < limitFormulaSize) {
+        if (totalLabelInt.length() + cellToAdd.length() < LIMIT_FORMULA_SIZE) {
             totalLabelInt += cellToAdd;
         } else {
             totalLabelInt = totalLabelInt.substring(0, totalLabelInt.length() - 1);
-            excel.insertFormula(yProgramLabel + 3, 1589, totalLabelInt);
+            excel.insertFormula(yProgramLabel + 3,1589,  totalLabelInt);
             totalLabelInt = excel.getCellReference(yProgramLabel + 3, 1589) + " +" + cellToAdd;
         }
     }
 
     private void settingSumLabel() {
         totalLabelInt = totalLabelInt.substring(0, totalLabelInt.length() - 1);
-        excel.insertFormula(yTotalLabel,xlabel,  totalLabelInt);
+        excel.insertFormula(xlabel, yTotalLabel, totalLabelInt);
         totalLabelInt = "";
     }
 

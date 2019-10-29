@@ -573,18 +573,22 @@ public class ExcelHelper {
     }
 
 
-    public void insertFormula(int cellColumn,int line, String data) {
+    public void insertFormula(int line, int cellColumn, String data) {
+      insertFormulaWithStyle(line,cellColumn,data,this.currencyStyle);
+    }
+
+    public  void insertFormulaWithStyle(int line, int cellColumn, String data,CellStyle style) {
         Row tab;
         try {
             tab = sheet.getRow(line);
             Cell cell = tab.createCell(cellColumn);
             cell.setCellFormula(data);
-            cell.setCellStyle(this.currencyStyle);
+            cell.setCellStyle(style);
         } catch (NullPointerException e) {
             tab = sheet.createRow(line);
             Cell cell = tab.createCell(cellColumn);
             cell.setCellFormula(data);
-            cell.setCellStyle(this.currencyStyle);
+            cell.setCellStyle(style);
         }
     }
 
@@ -968,8 +972,6 @@ public class ExcelHelper {
      */
     public void setTotalX(int lineStart, int lineEnd, int column, int lineInsert, int columnInsert) {
         setTotalXWithStyle(lineStart, lineEnd, column, lineInsert, columnInsert, tabCurrencyStyle);
-
-
     }
 
     public void setTotalXWithStyle(int lineStart, int lineEnd, int column, int lineInsert,

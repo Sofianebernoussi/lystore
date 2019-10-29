@@ -48,6 +48,7 @@ public abstract class TabHelper {
     protected int arrayLength = 4;
     protected long timeout = 999999999;
     protected JsonArray datas;
+    protected final int LIMIT_FORMULA_SIZE = 8000;
 
 
     /**

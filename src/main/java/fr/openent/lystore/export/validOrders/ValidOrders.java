@@ -34,13 +34,16 @@ public class ValidOrders extends ExportObject {
             ExcelHelper.catchError(exportService, idFile, "number validation is not nullable");
             handler.handle(new Either.Left<>("number validation is not nullable"));
         }
-            Workbook workbook = new XSSFWorkbook();
-            List<Future> futures = new ArrayList<>();
-            Future<Boolean> IrisFuture = Future.future();
+        Workbook workbook = new XSSFWorkbook();
+        List<Future> futures = new ArrayList<>();
+        Future<Boolean> ListLyceeFuture = Future.future();
+        Future<Boolean> RecapListLyceeFuture = Future.future();
 
-            futures.add(IrisFuture);
-            futureHandler(handler, workbook, futures);
-            new ListLycee(workbook, this.numberValidation).create(getHandler(IrisFuture));
+        futures.add(ListLyceeFuture);
+        futures.add(RecapListLyceeFuture);
+        futureHandler(handler, workbook, futures);
+        new ListLycee(workbook, this.numberValidation).create(getHandler(ListLyceeFuture));
+        new RecapListLycee(workbook, this.numberValidation).create(getHandler(RecapListLyceeFuture));
 
-        }
     }
+}

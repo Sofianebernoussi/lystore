@@ -55,7 +55,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 "LEFT JOIN " + Lystore.lystoreSchema + ".basket_option ON basket_option.id_basket_equipment = basket.id " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".basket_file ON basket.id = basket_file.id_basket_equipment " +
                 "LEFT JOIN (" +
-                "SELECT equipment_option.amount, equipment_option.required, equipment_option.id, tax.value as tax_amount, equipment_option.id_equipment, equipment.name, equipment.price " +
+                "SELECT equipment_option.amount, equipment_option.required, equipment_option.id, tax.value as tax_amount, equipment_option.id_equipment, equipment.name, equipment.price , equipment.id_type " +
                 "FROM " + Lystore.lystoreSchema + ".equipment_option " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".equipment ON equipment_option.id_option = equipment.id " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".tax on tax.id = equipment.id_tax " +
@@ -174,7 +174,7 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                 "LEFT JOIN " + Lystore.lystoreSchema + ".basket_option ON basket_option.id_basket_equipment = basket.id " +
                 "LEFT JOIN " + Lystore.lystoreSchema + ".basket_file ON basket.id = basket_file.id_basket_equipment " +
                 "LEFT JOIN (" +
-                "SELECT equipment_option.*, equipment.name, equipment.price, tax.value tax_amount, ROUND(equipment.price + ((equipment.price * tax.value)/100), 2) as total_option_price " +
+                "SELECT equipment_option.*, equipment.name, equipment.price, tax.value tax_amount, ROUND(equipment.price + ((equipment.price * tax.value)/100), 2) as total_option_price ,equipment.id_type " +
                 "FROM " + Lystore.lystoreSchema + ".equipment_option " +
                 "INNER JOIN " + Lystore.lystoreSchema + ".equipment ON equipment_option.id_option = equipment.id " +
                 "INNER JOIN  " + Lystore.lystoreSchema + ".tax ON tax.id = equipment.id_tax " +
@@ -477,12 +477,13 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
     }
     private static JsonObject getInsertEquipmentOptionsStatement (JsonObject basket){
         JsonArray options = new fr.wseduc.webutils.collections.JsonArray(basket.getString("options"))  ;
+        LOGGER.info(options);
         StringBuilder queryEOptionEquipmentOrder = new StringBuilder()
                 .append( " INSERT INTO " + Lystore.lystoreSchema + ".order_client_options " )
-                .append(" ( tax_amount, price, id_order_client_equipment, name, amount, required) VALUES ");
+                .append(" ( tax_amount, price, id_order_client_equipment, name, amount, required, id_type) VALUES ");
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
         for (int i=0; i<options.size(); i++){
-            queryEOptionEquipmentOrder.append("( ?, ?, ?, ?, ?, ?)");
+            queryEOptionEquipmentOrder.append("( ?, ?, ?, ?, ?, ?, ?)");
             queryEOptionEquipmentOrder.append( i == options.size()-1 ? "; " : ", ");
             JsonObject option = options.getJsonObject(i);
             params.add( option.getDouble("tax_amount"))
@@ -490,7 +491,8 @@ public class DefaultBasketService extends SqlCrudService implements BasketServic
                     .add( basket.getInteger("id_order"))
                     .add(option.getString("name"))
                     .add(option.getInteger("amount"))
-                    .add(option.getBoolean("required"));
+                    .add(option.getBoolean("required"))
+                    .add(option.getInteger("id_type"));
         }
         return new JsonObject()
                 .put("statement", queryEOptionEquipmentOrder.toString())

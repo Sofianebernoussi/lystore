@@ -887,13 +887,16 @@ public class ExcelHelper {
     /**
      * Set total column and  line of a tab
      *
-     * @param columnEnd
+     * @param lineStart
      * @param lineEnd
      * @param columnStart
-     * @param lineStart
+     * @param columnEnd
      */
-    public void setTotal(int columnEnd, int lineEnd, int columnStart, int lineStart) {
-        Row tab, tabStart, tabEnd;
+    public void setTotal(int lineStart, int lineEnd, int columnStart, int columnEnd) {
+       setTotal(lineStart,lineEnd,columnStart,columnEnd,lineEnd,columnEnd,this.tabCurrencyStyle);
+    }
+    public void setTotal(int lineStart, int lineEnd, int columnStart, int columnEnd,int lineInsert,int columnInsert,CellStyle style) {
+        Row tab,tabInsert, tabStart, tabEnd;
         Cell cell, cellStartSum, cellEndSum;
         // totalY
         tabStart = sheet.getRow(lineStart);
@@ -904,7 +907,7 @@ public class ExcelHelper {
             cell = tab.createCell(columnEnd);
             cellStartSum = tab.getCell(columnStart);
             cellEndSum = tab.getCell(columnEnd - 1);
-            cell.setCellStyle(this.tabCurrencyStyle);
+            cell.setCellStyle(style);
             cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
         }
         //totalX
@@ -912,23 +915,31 @@ public class ExcelHelper {
 
         for (int i = columnStart; i < columnEnd; i++) {
             cell = tab.createCell(i);
-            cell.setCellStyle(this.tabCurrencyStyle);
+            cell.setCellStyle(style);
             cell.setCellValue("total");
 
             cellStartSum = tabStart.getCell(i);
             cellEndSum = tabEnd.getCell(i);
 
 
-            cell.setCellStyle(this.tabCurrencyStyle);
+            cell.setCellStyle(style);
             cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
         }
         cellStartSum = tabStart.getCell(columnEnd);
         cellEndSum = tabEnd.getCell(columnEnd);
 
+        try{
+            tabInsert = sheet.getRow(lineInsert);
+            cell = tabInsert.createCell(columnInsert);
+            cell.setCellStyle(style);
+            cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
+        }catch (Exception e){
+            tabInsert = sheet.createRow(lineInsert);
+            cell = tabInsert.createCell(columnInsert);
+            cell.setCellStyle(style);
+            cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
+        }
 
-        cell = tab.createCell(columnEnd);
-        cell.setCellStyle(this.tabCurrencyStyle);
-        cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
 
     }
 

@@ -12,12 +12,10 @@ import java.util.ArrayList;
 
 public class RecapListLycee extends TabHelper {
     private String numberValidation;
-    private String formula = "";
-    private ArrayList<Integer> totalsX = new ArrayList<>();
+    private ArrayList<Integer> totalsXQty = new ArrayList<>();
     RecapListLycee(Workbook workbook, String numberValidation) {
         super(workbook,"Liste Commandes avec Prix");
         this.numberValidation = numberValidation;
-
     }
 
     @Override
@@ -40,7 +38,6 @@ public class RecapListLycee extends TabHelper {
         getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
-//
                 boolean errorCatch= false;
                 if (repStructures.isRight()) {
                     try {
@@ -61,11 +58,8 @@ public class RecapListLycee extends TabHelper {
                         handler.handle(new Either.Right<>(true));
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
-//
                 }
             }
-//
-//
         });
 
     }
@@ -93,52 +87,103 @@ public class RecapListLycee extends TabHelper {
             excel.insertCellTab(3,currentI,makeCellWithoutNull(data.getString("city")));
             excel.insertCellTab(4,currentI,makeCellWithoutNull(data.getString("phone")));
             excel.insertCellTab(5,currentI,makeCellWithoutNull(data.getString("name")));
-            excel.insertWithStyle(6,currentI, Integer.parseInt(data.getString("amount")),excel.totalStyle);
-
+            excel.insertWithStyle(6,currentI, Integer.parseInt(data.getString("amount")),excel.tabStringStyleRight);
             typeEquipment = data.getString("typeequipment");
-
+            Double priceAmount = Double.parseDouble(data.getString("price")) * Double.parseDouble(data.getString("amount"));
             if(typeEquipment.equals("EQUIPEMENT")) {
-                excel.insertWithStyle(7,currentI, Double.parseDouble(data.getString("price")),excel.tabStringStyleRight);
+                excel.insertWithStyle(7,currentI,priceAmount ,excel.tabStringStyleRight);
             }else{
-                logger.info(typeEquipment);
-                excel.insertWithStyle(8,currentI, Double.parseDouble(data.getString("price")),excel.tabStringStyleRight);
+                excel.insertWithStyle(8,currentI,priceAmount,excel.tabStringStyleRight);
             }
+            excel.insertWithStyle(10,currentI,priceAmount + (priceAmount * Double.parseDouble(data.getString("tax_amount"))/100),excel.tabStringStyleRight);
             oldUai = data.getString("uai");
             currentI ++;
         }
-
         //handle last struct
         excel.insertWithStyle(0,currentI ,"Total " + oldUai,excel.labelHeadStyle);
         inserTotal(initx,currentI);
-        insertFinalTotal(currentI+1);
+        insertFinalTotal(currentI+2);
         excel.autoSize(18);
     }
 
 
 
     private void insertFinalTotal(int line) {
-        for(int i=0;i<totalsX.size();i++){
-            int x = totalsX.get(i);
-            String cellRef =  excel.getCellReference(x,6);
-            cellRef = cellRef.replace("'Liste Commandes avec Prix'!", "");
+        String formulaQty = "";
+        String formulaEquipmentHT = "";
+        String formulaPrestaHT = "";
+        String formulaTotalHT = "";
+        String formulaTotalTTC = "";
 
-            if (formula.length() + cellRef.length() < LIMIT_FORMULA_SIZE) {
-                formula += cellRef + "+";
 
-            } else {
-                formula = formula.substring(0, formula.length() - 1);
-                excel.insertFormula( 40,1589 + i, formula);
-                formula = excel.getCellReference(40,1589 + i ) + " +" + cellRef +"+";
+
+        excel.insertWithStyle(0,line ,"Total général  ",excel.labelHeadStyle);
+
+        for(int i = 0; i< totalsXQty.size(); i++){
+            int x = totalsXQty.get(i);
+            String qtyRef =  excel.getCellReference(x,6);
+            String priceEquipmentHTRef =  excel.getCellReference(x,7);
+            String pricePrestaHTRef =  excel.getCellReference(x,8);
+            String priceHTCellRef =  excel.getCellReference(x,9);
+            String priceTTCCellRef =  excel.getCellReference(x,10);
+
+            qtyRef = qtyRef.replace("'Liste Commandes avec Prix'!", "");
+            priceEquipmentHTRef = priceEquipmentHTRef.replace("'Liste Commandes avec Prix'!", "");
+            pricePrestaHTRef = pricePrestaHTRef.replace("'Liste Commandes avec Prix'!", "");
+            priceHTCellRef = priceHTCellRef.replace("'Liste Commandes avec Prix'!", "");
+            priceTTCCellRef = priceTTCCellRef.replace("'Liste Commandes avec Prix'!", "");
+
+            if (formulaTotalTTC.length() + priceTTCCellRef.length() < LIMIT_FORMULA_SIZE) {
+                formulaQty += qtyRef + "+";
+                formulaPrestaHT += pricePrestaHTRef + "+";
+                formulaEquipmentHT += priceEquipmentHTRef + "+";
+                formulaTotalHT += priceHTCellRef + "+";
+                formulaTotalTTC += priceTTCCellRef + "+";
+
+            } else { //Substring
+                formulaQty = formulaQty.substring(0, formulaQty.length() - 1);
+                excel.insertFormula( 40,1589 + i, formulaQty);
+                formulaQty = excel.getCellReference(40,1589 + i ) + " +" + qtyRef +"+";
+
+                formulaEquipmentHT = formulaEquipmentHT.substring(0, formulaEquipmentHT.length() - 1);
+                excel.insertFormula( 41,1589 + i, formulaEquipmentHT);
+                formulaEquipmentHT = excel.getCellReference(41,1589 + i ) + " +" + priceEquipmentHTRef +"+";
+
+                formulaPrestaHT = formulaPrestaHT.substring(0, formulaPrestaHT.length() - 1);
+                excel.insertFormula( 42,1589 + i, formulaPrestaHT);
+                formulaPrestaHT = excel.getCellReference(42,1589 + i ) + " +" + pricePrestaHTRef +"+";
+
+                formulaTotalHT = formulaTotalHT.substring(0, formulaTotalHT.length() - 1);
+                excel.insertFormula( 43,1589 + i, formulaTotalHT);
+                formulaTotalHT = excel.getCellReference(43,1589 + i ) + " +" + priceHTCellRef +"+";
+
+                formulaTotalTTC = formulaTotalTTC.substring(0, formulaTotalTTC.length() - 1);
+                excel.insertFormula( 44,1589 + i, formulaTotalTTC);
+                formulaTotalTTC = excel.getCellReference(44,1589 + i ) + " +" + priceTTCCellRef +"+";
             }
         }
-        formula = formula.substring(0, formula.length() - 1);
-        excel.insertFormulaWithStyle(line,6,formula,excel.totalStyle);
+        formulaQty = formulaQty.substring(0, formulaQty.length() - 1);
+        formulaEquipmentHT = formulaEquipmentHT.substring(0, formulaEquipmentHT.length() - 1);
+        formulaPrestaHT = formulaPrestaHT.substring(0, formulaPrestaHT.length() - 1);
+        formulaTotalHT = formulaTotalHT.substring(0, formulaTotalHT.length() - 1);
+        formulaTotalTTC = formulaTotalTTC.substring(0, formulaTotalTTC.length() - 1);
+
+        excel.insertFormulaWithStyle(line,6, formulaQty,excel.labelHeadStyle);
+        excel.insertFormula(line,7, formulaEquipmentHT);
+        excel.insertFormula(line,8, formulaPrestaHT);
+        excel.insertFormula(line,9, formulaTotalHT);
+        excel.insertFormula(line,10, formulaTotalTTC);
+
     }
 
     private int inserTotal(int initx, int currentI) {
+        //faire le TTC
+        excel.fillTab(6,10, initx,currentI );
         excel.setTotalXWithStyle(initx,currentI - 1,6,currentI,excel.totalStyle);
-        totalsX.add(currentI);
-        return currentI;
+        excel.setTotal(initx, currentI , 7, 9,currentI,9,excel.tabCurrencyStyle);
+        excel.setTotalX(initx,currentI-1,10,currentI);
+        totalsXQty.add(currentI);
+        return currentI + 1;
     }
 
 

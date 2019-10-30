@@ -1,6 +1,9 @@
 ALTER TABLE lystore.order_client_options
 ADD COLUMN id_type bigint;
 
+ALTER TABLE lystore.order_client_equipment
+ADD COLUMN id_type bigint;
+
 UPDATE lystore.order_client_options
 SET    id_type = subquery.id_type
 FROM   (SELECT id_type,

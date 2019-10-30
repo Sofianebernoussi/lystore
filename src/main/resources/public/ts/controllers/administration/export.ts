@@ -1,5 +1,5 @@
-import {moment, ng, template, toasts} from "entcore";
-import {Export, Notification, Utils, STATUS, Userbook} from "../../model";
+import {moment, ng,_,idiom as lang, template, toasts} from "entcore";
+import {Export, Notification, Utils, STATUS, Userbook, OrderClient} from "../../model";
 
 declare let window: any;
 
@@ -8,12 +8,19 @@ export const exportCtrl = ng.controller('exportCtrl', [
         $scope.display = {
             delete: false
         };
+        $scope.search = {
+            filterWord : '',
+            filterWords : []
+        };
         $scope.sort = {
             export : {
                 type: 'created',
                 reverse: true
             }
         };
+        $scope.displayExports = [];
+        $scope.displayExports = $scope.exports.all;
+        console.log("plop")
         $scope.STATUS = STATUS;
 
         $scope.getExport = (exportTemp: Export) => {
@@ -62,9 +69,65 @@ export const exportCtrl = ng.controller('exportCtrl', [
             Utils.safeApply($scope);
         };
 
+
+
+        function generateRegexp (words: string[]): RegExp {
+            function escapeRegExp(str: string) {
+                return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+            }
+            let reg;
+            if (words.length > 0) {
+                reg = '.*(';
+                words.map((word: string) => reg += `${escapeRegExp(word.toLowerCase())}|`);
+                reg = reg.slice(0, -1);
+                reg += ').*';
+            } else {
+                reg = '.*';
+            }
+            return new RegExp(reg);
+        }
+
+
+        $scope.filterDisplayedExports = () => {
+            let searchResult = [];
+            let regex;
+            $scope.search.filterWords.map((searchTerm: string, index: number): void => {
+                let searchItems: Export[] = index === 0 ? $scope.displayExports : searchResult;
+                regex = generateRegexp([searchTerm]);
+
+                searchResult = _.filter(searchItems, (exportToHandle: Export) => {
+                    return ('object_name' in exportToHandle ? regex.test(exportToHandle.object_name.toLowerCase()) : false)
+                        || ('typeObject' in exportToHandle ? regex.test(lang.translate(exportToHandle.typeObject).toLowerCase()) : false)
+                        || ('created' in exportToHandle ? regex.test(exportToHandle.created.toLowerCase()) : false)
+                        || ('filename' in exportToHandle ? regex.test(exportToHandle.filename.toLowerCase()) : false)
+                });
+            });
+            $scope.displayExports = searchResult;
+            Utils.safeApply($scope);
+        };
+
+        $scope.pullFilterWord = (filterWord) => {
+            $scope.search.filterWords = _.without( $scope.search.filterWords , filterWord);
+            $scope.filterDisplayedExports();
+        };
+
         $scope.controlDeleteExport = ():Boolean => {
             return $scope.exports.selected.some(exportSome => exportSome.status === STATUS.WAITING)
         };
 
+        $scope.addFilterWords = (filterWord) => {
+            if (filterWord !== '') {
+                $scope.search.filterWords = _.union($scope.search.filterWords, [filterWord]);
+                $scope.search.filterWord = '';
+                Utils.safeApply($scope);
+            }
+        };
+
+        $scope.addFilter = (filterWord: string, event?) => {
+            if (event && (event.which === 13 || event.keyCode === 13 )) {
+                $scope.addFilterWords(filterWord);
+                $scope.filterDisplayedExports();
+            }
+        };
     }
 ]);

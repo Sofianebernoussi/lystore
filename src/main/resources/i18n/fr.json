@@ -539,6 +539,9 @@
   "lystore.campaign.amount.init":"Montant initial disponible ",
   "notify.etab": "Notifier le lycée",
   "max.length.instruction.object": "80 caractères maximum",
-  "lystore.export.object.name": "Nom de l'objet"
+  "lystore.export.object.name": "Nom de l'objet",
+  "lystore.export.type": "Catégorie",
+  "ORDERS": "Commandes/Demandes",
+  "INSTRUCTION": "Rapport"
 
 }

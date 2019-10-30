@@ -9,6 +9,7 @@ export class Export implements Selectable {
     fileId: string;
     ownerid: string;
     _id: string;
+    typeObject: string;
     instruction_name:string;
     instruction_id:Number;
     status: STATUS;
@@ -23,7 +24,8 @@ export class Exports extends Selection<Export> {
         try {
             let {data} = await http.get(`/lystore/exports`);
             let response = data.map( exportResponse => {
-                let exportEdit = {...exportResponse};
+                let exportEdit = {
+                    ...exportResponse};
                 switch(exportResponse.status) {
                     case STATUS.WAITING:
                         exportEdit.classStatus =  "disableRow";
@@ -38,6 +40,8 @@ export class Exports extends Selection<Export> {
                         exportEdit.tooltip = lang.translate("lystore.export.error");
                 }
                 exportEdit.created = moment(exportResponse.created).format("YYYY-MM-DD HH:mm:ss");
+                if(!exportEdit.typeObject)
+                    exportEdit.typeObject = "INSTRUCTION";
                 return exportEdit;
             });
             this.all = Mix.castArrayAs(Export, response);

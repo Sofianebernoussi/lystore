@@ -332,13 +332,20 @@ export const orderController = ng.controller('orderController',
             }
         };
 
-        $scope.exportValidOrders = (orders: OrderClient[], fileType: string) => {
+        $scope.exportValidOrders = async  (orders: OrderClient[], fileType: string) => {
             let params = '';
             orders.map((order: OrderClient) => {
                 params += `number_validation=${order.number_validation}&`;
             });
             params = params.slice(0, -1);
-            window.location = `/lystore/orders/valid/export/${fileType}?${params}`;
+            if(fileType ==='structure_list'){
+                toasts.info('lystore.export.notif');
+                await orders[0].exportListLycee(params);
+                $scope.displayedOrders.selected[0].selected = false;
+                Utils.safeApply($scope);
+            }else{
+                window.location = `/lystore/orders/valid/export/${fileType}?${params}`;
+            }
         };
 
         $scope.cancelValidation = async (orders: OrderClient[]) => {

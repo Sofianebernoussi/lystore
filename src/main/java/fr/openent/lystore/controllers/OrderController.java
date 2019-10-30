@@ -447,7 +447,7 @@ public class OrderController extends ControllerHelper {
             List<String> validationNumbers = request.params().getAll("number_validation");
             switch (request.params().get("file")) {
                 case "structure_list": {
-                    exportStructuresList(request, validationNumbers);
+                    exportStructuresList(request);
                     break;
                 }
                 case "certificates": {
@@ -513,59 +513,8 @@ public class OrderController extends ControllerHelper {
         return exportName;
     }
 
-    private void exportStructuresList(final HttpServerRequest request, List<String> validationNumbers) {
-        orderService.getOrders(new fr.wseduc.webutils.collections.JsonArray(validationNumbers), null, true, true, new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> event) {
-                if (event.isRight()) {
-                    final JsonArray equipments = event.right().getValue();
-                    JsonArray structures = new fr.wseduc.webutils.collections.JsonArray();
-                    final JsonObject[] equipment = new JsonObject[1];
-//                    for (int i = 0; i < equipments.size(); i++) {
-//                        equipment[0] = equipments.getJsonObject(i);
-//                        if (!structures.contains(equipment[0].getString("id_structure"))) {
-//                            structures.add(equipment[0].getString("id_structure"));
-//                        }
-
-//                    }
+    private void exportStructuresList(final HttpServerRequest request) {
                     ExcelHelper.makeExportExcel(request, eb, exportService,Lystore.ORDERS, "exportListLycOrders", "_list_bdc");
-//                    structureService.getStructureById(structures, new Handler<Either<String, JsonArray>>() {
-//                        @Override
-//                        public void handle(Either<String, JsonArray> event) {
-//                            if (event.isRight()) {
-//                                JsonObject structureMap = new JsonObject(), structure;
-//                                JsonArray structures = event.right().getValue();
-//                                for (int i = 0; i < structures.size(); i++) {
-//                                    structure = structures.getJsonObject(i);
-//                                    structureMap.put(structure.getString("id"),
-//                                            structure);
-//                                }
-//
-//                                for (int e = 0; e < equipments.size(); e++) {
-//                                    equipment[0] = equipments.getJsonObject(e);
-//                                    structure = structureMap.getJsonObject(equipment[0].getString("id_structure"));
-//                                    equipment[0].put("uai", structure.getString("uai"));
-//                                    equipment[0].put("structure_name", structure.getString("name"));
-//                                    equipment[0].put("city", structure.getString("city"));
-//                                    equipment[0].put("phone", NULL_DATA);
-//                                    try{
-//                                        if(structure.getString("phone").isEmpty())
-//                                            equipment[0].put("phone", structure.getString("phone"));
-//                                    }catch (NullPointerException ee){
-//                                        equipment[0].put("phone",NULL_DATA);
-//                                    }
-//                                }
-//                                renderValidOrdersCSVExport(request, equipments);
-//                            } else {
-//                                renderError(request);
-//                            }
-//                        }
-//                    });
-                } else {
-                    renderError(request);
-                }
-            }
-        });
     }
 
     @Delete("/orders/valid")

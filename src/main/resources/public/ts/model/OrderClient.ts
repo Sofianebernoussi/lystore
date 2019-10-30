@@ -158,6 +158,14 @@ export class OrderClient implements Order  {
             throw e;
         }
     }
+
+    async exportListLycee(params: string) {
+        try {
+           await http.get( `/lystore/orders/valid/export/structure_list?${params}`);
+        } catch (e) {
+            notify.error("lystore.order.get.err")
+        }
+    }
 }
 export class OrdersClient extends Selection<OrderClient> {
 
@@ -188,6 +196,7 @@ export class OrdersClient extends Selection<OrderClient> {
             notify.error('lystore.project.update.err');
         }
     }
+
 
     async sync (status: string, structures: Structures = new Structures(), idCampaign?: number, idStructure?: string):Promise<void> {
         try {

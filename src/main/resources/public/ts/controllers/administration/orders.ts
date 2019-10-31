@@ -221,9 +221,6 @@ export const orderController = ng.controller('orderController',
                 toasts.confirm('lystore.windUp.notif');
             }
             await $scope.syncOrders('SENT');
-            $scope.ordersClient.all  =[]
-            $scope.displayedOrders.all =[]
-
             Utils.safeApply($scope);
         };
         $scope.isNotValidated = ( orders:OrderClient[]) =>{

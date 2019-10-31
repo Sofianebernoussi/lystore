@@ -48,6 +48,7 @@ public abstract class TabHelper {
     protected int arrayLength = 4;
     protected long timeout = 999999999;
     protected JsonArray datas;
+    protected final int LIMIT_FORMULA_SIZE = 8000;
 
 
     /**
@@ -69,6 +70,19 @@ public abstract class TabHelper {
         this.tabx = new JsonObject();
         this.taby = new JsonArray();
         this.instruction = instruction;
+        this.sheet = wb.getSheet(TabName);
+        if (wb.getSheetIndex(this.sheet) == -1) {
+            this.sheet = wb.createSheet(TabName);
+        }
+        this.excel = new ExcelHelper(wb, sheet);
+        priceTab = new ArrayList<ArrayList<Double>>();
+        log.info("Initialize tab : " + TabName);
+    }
+
+    public TabHelper(Workbook wb, String TabName) {
+        this.wb = wb;
+        this.tabx = new JsonObject();
+        this.taby = new JsonArray();
         this.sheet = wb.getSheet(TabName);
         if (wb.getSheetIndex(this.sheet) == -1) {
             this.sheet = wb.createSheet(TabName);
@@ -212,8 +226,12 @@ public abstract class TabHelper {
         return datas.isEmpty();
     }
 
-    public void sqlHandler(Handler<Either<String, JsonArray>> handler) {
-        Sql.getInstance().prepared(query, new JsonArray().add(instruction.getInteger("id")), new DeliveryOptions().setSendTimeout(Lystore.timeout * 1000000000L),SqlResult.validResultHandler(event -> {
+    protected void sqlHandler(Handler<Either<String, JsonArray>> handler) {
+        sqlHandler(handler, new JsonArray().add(instruction.getInteger("id")));
+    }
+
+    protected void sqlHandler(Handler<Either<String,JsonArray>> handler, JsonArray params){
+        Sql.getInstance().prepared(query, params, new DeliveryOptions().setSendTimeout(Lystore.timeout * 1000000000L),SqlResult.validResultHandler(event -> {
             if (event.isLeft()) {
                 handler.handle(event.left());
             } else {
@@ -221,7 +239,6 @@ public abstract class TabHelper {
                 handler.handle(new Either.Right<>(datas));
             }
         }));
-
     }
 
     public void handleDatasDefault(Either<String, JsonArray> event, Handler<Either<String, Boolean>> handler) {
@@ -317,7 +334,7 @@ public abstract class TabHelper {
 
 
     protected String makeCellWithoutNull ( String valueGet){
-        return valueGet != null? valueGet : "";
+        return valueGet != null? valueGet : "Pas d'informations";
     }
 
     protected void getStructures(JsonArray ids, Handler<Either<String, JsonArray>> handler)  {

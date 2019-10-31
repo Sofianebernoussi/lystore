@@ -1051,3 +1051,7 @@ input[type=number].numberWithoutArrow {
 tfoot .tabElem{
   padding: 10px;
 }
+
+thead > tr > td > label input[type=checkbox]:checked+span::before, thead > tr > td > label input[type=checkbox]:checked+i18n::before {
+  border-color: #fff;
+}

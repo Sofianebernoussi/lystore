@@ -1,4 +1,4 @@
-package fr.openent.lystore.export.validOrders;
+package fr.openent.lystore.export.validOrders.lisyLycee;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.TabHelper;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class RecapListLycee extends TabHelper {
     private String numberValidation;
     private ArrayList<Integer> totalsXQty = new ArrayList<>();
-    RecapListLycee(Workbook workbook, String numberValidation) {
+    public RecapListLycee(Workbook workbook, String numberValidation) {
         super(workbook,"Liste Commandes avec Prix");
         this.numberValidation = numberValidation;
     }
@@ -218,10 +218,8 @@ public class RecapListLycee extends TabHelper {
                 "       oce.id_structure,  " +
                 "       et.NAME  as typeequipment" +
                 "   FROM   "+ Lystore.lystoreSchema +".order_client_equipment oce  " +
-                "       LEFT JOIN "+ Lystore.lystoreSchema +".equipment  " +
-                "              ON oce.equipment_key = equipment.id  " +
                 "       INNER JOIN "+ Lystore.lystoreSchema +".equipment_type et  " +
-                "               ON equipment.id_type = et.id  " +
+                "               ON oce.id_type = et.id  " +
                 "WHERE  number_validation = ?  " +
                 "GROUP  BY oce.equipment_key,  " +
                 "          oce.price,  " +

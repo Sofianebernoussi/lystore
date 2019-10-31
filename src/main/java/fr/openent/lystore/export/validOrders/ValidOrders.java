@@ -2,6 +2,7 @@ package fr.openent.lystore.export.validOrders;
 
 import fr.openent.lystore.export.ExportObject;
 import fr.openent.lystore.export.validOrders.lisyLycee.ListLycee;
+import fr.openent.lystore.export.validOrders.lisyLycee.RecapListLycee;
 import fr.openent.lystore.helpers.ExcelHelper;
 import fr.openent.lystore.service.ExportService;
 import fr.wseduc.webutils.Either;

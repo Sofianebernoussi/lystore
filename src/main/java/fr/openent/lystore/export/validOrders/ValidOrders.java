@@ -4,6 +4,7 @@ import fr.openent.lystore.export.ExportObject;
 import fr.openent.lystore.export.validOrders.lisyLycee.ListLycee;
 import fr.openent.lystore.export.validOrders.lisyLycee.RecapListLycee;
 import fr.openent.lystore.helpers.ExcelHelper;
+import fr.openent.lystore.helpers.ExportHelper;
 import fr.openent.lystore.service.ExportService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
@@ -32,7 +33,7 @@ public class ValidOrders extends ExportObject {
 
     public void exportListLycee(Handler<Either<String, Buffer>> handler) {
         if (this.numberValidation == null || this.numberValidation.equals("")) {
-            ExcelHelper.catchError(exportService, idFile, "number validation is not nullable");
+            ExportHelper.catchError(exportService, idFile, "number validation is not nullable");
             handler.handle(new Either.Left<>("number validation is not nullable"));
         }
         Workbook workbook = new XSSFWorkbook();

@@ -3,6 +3,7 @@ package fr.openent.lystore.export;
 import fr.openent.lystore.export.instructions.Instruction;
 import fr.openent.lystore.export.validOrders.ValidOrders;
 import fr.openent.lystore.helpers.ExcelHelper;
+import fr.openent.lystore.helpers.ExportHelper;
 import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import fr.wseduc.webutils.Either;
@@ -56,7 +57,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                 logger.info("export to Waiting");
                 processExport();
             } else {
-                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx " + event.left().getValue());
+                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx " + event.left().getValue());
             }
         };
         exportService.getWaitingExport(new Handler<Either<String, JsonObject>>() {
@@ -136,7 +137,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                         exportHandler);
                 break;
             default:
-                ExcelHelper.catchError(exportService, idNewFile, "Invalid action in worker",exportHandler);
+                ExportHelper.catchError(exportService, idNewFile, "Invalid action in worker",exportHandler);
                 break;
         }
     }
@@ -146,7 +147,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         this.validOrders = new ValidOrders(exportService,object_id,idNewFile);
         this.validOrders.exportListLycee(event1 -> {
             if (event1.isLeft()) {
-                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
+                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
             } else {
                 Buffer xlsx = event1.right().getValue();
                 saveBuffer(xlsx, titleFile,handler);
@@ -160,7 +161,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportIris(event1 -> {
             if (event1.isLeft()) {
-                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
+                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
             } else {
                 Buffer xlsx = event1.right().getValue();
                 saveBuffer(xlsx, titleFile,handler);
@@ -174,7 +175,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportNotficationCp(event1 -> {
             if (event1.isLeft()) {
-                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
+                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
             } else {
                 logger.info("Export NotificationCP ended");
 
@@ -191,7 +192,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportSubvention(event1 -> {
             if (event1.isLeft()) {
-                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
+                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
             } else {
                 logger.info("Export Subvention ended");
 
@@ -208,7 +209,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportPublipostage(file -> {
             if (file.isLeft()) {
-                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + file.left(),handler);
+                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + file.left(),handler);
             } else {
                 logger.info("Export Publipostage ended");
 
@@ -225,7 +226,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportInvestissement(event -> {
             if (event.isLeft()) {
-                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event.left(),handler);
+                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event.left(),handler);
             } else {
                 logger.info("Export RME ended");
 
@@ -239,7 +240,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
     private void saveBuffer(Buffer xlsx, String fileName,Handler<Either<String,Boolean>> handler) {
         storage.writeBuffer(xlsx, "application/vnd.ms-excel", fileName, file -> {
             if (!"ok".equals(file.getString("status"))) {
-                ExcelHelper.catchError(exportService, idNewFile, "An error occurred when inserting xlsx ",handler);
+                ExportHelper.catchError(exportService, idNewFile, "An error occurred when inserting xlsx ",handler);
                 handler.handle(new Either.Left<>("An error occurred when inserting xlsx"));
             } else {
                 logger.info("Xlsx insert in storage");
@@ -253,7 +254,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportEquipmentRapp(event1 -> {
             if (event1.isLeft()) {
-                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx",handler);
+                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx",handler);
                 handler.handle(new Either.Left<>("An error occurred when creating xlsx"));
             } else {
                 Buffer xlsx = event1.right().getValue();

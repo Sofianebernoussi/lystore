@@ -2,6 +2,7 @@ package fr.openent.lystore.export;
 
 import fr.openent.lystore.export.instructions.Instruction;
 import fr.openent.lystore.helpers.ExcelHelper;
+import fr.openent.lystore.helpers.ExportHelper;
 import fr.openent.lystore.service.ExportService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.CompositeFuture;
@@ -36,11 +37,11 @@ public class ExportObject {
                     buff.appendBytes(fileOut.toByteArray());
                     handler.handle(new Either.Right<>(buff));
                 } catch (IOException e) {
-                    ExcelHelper.catchError(exportService, idFile, e.getMessage());
+                    ExportHelper.catchError(exportService, idFile, e.getMessage());
                     handler.handle(new Either.Left<>(e.getMessage()));
                 }
             } else {
-                ExcelHelper.catchError(exportService, idFile, "Error when resolving futures");
+                ExportHelper.catchError(exportService, idFile, "Error when resolving futures");
                 handler.handle(new Either.Left<>("Error when resolving futures"));
             }
         });

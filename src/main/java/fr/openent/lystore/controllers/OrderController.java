@@ -2,6 +2,7 @@ package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.helpers.ExcelHelper;
+import fr.openent.lystore.helpers.ExportHelper;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
@@ -514,7 +515,7 @@ public class OrderController extends ControllerHelper {
     }
 
     private void exportStructuresList(final HttpServerRequest request) {
-                    ExcelHelper.makeExportExcel(request, eb, exportService,Lystore.ORDERS,  Lystore.XLSX,"exportListLycOrders", "_list_bdc");
+          ExportHelper.makeExportExcel(request, eb, exportService,Lystore.ORDERS,  Lystore.XLSX,"exportListLycOrders", "_list_bdc");
     }
 
     @Delete("/orders/valid")

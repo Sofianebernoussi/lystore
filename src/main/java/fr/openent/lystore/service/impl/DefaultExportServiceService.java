@@ -62,7 +62,7 @@ public class DefaultExportServiceService implements ExportService {
         }
         mongo.deleteExports(values,handler);
     }
-    public void createWhenStart (String typeObject, JsonObject infoFile, String object_id, String nameFile, String userId, String action, Handler<Either<String, JsonObject>> handler){
+    public void createWhenStart (String typeObject, String extension, JsonObject infoFile, String object_id, String nameFile, String userId, String action, Handler<Either<String, JsonObject>> handler){
         try {
             JsonArray params = new JsonArray();
             String  nameQuery = getQueryAndParams(typeObject,params,object_id);
@@ -82,6 +82,7 @@ public class DefaultExportServiceService implements ExportService {
                                 .put("created",dtf.format(now))
                                 .put("action",action)
                                 .put("typeObject",typeObject)
+                                .put("extension",extension)
                                 .put("NbIterationsLeft",Lystore.iterationWorker);
 
                         if(infoFile.containsKey("type"))

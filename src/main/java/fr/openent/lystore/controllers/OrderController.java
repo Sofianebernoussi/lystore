@@ -514,7 +514,7 @@ public class OrderController extends ControllerHelper {
     }
 
     private void exportStructuresList(final HttpServerRequest request) {
-                    ExcelHelper.makeExportExcel(request, eb, exportService,Lystore.ORDERS, "exportListLycOrders", "_list_bdc");
+                    ExcelHelper.makeExportExcel(request, eb, exportService,Lystore.ORDERS,  Lystore.XLSX,"exportListLycOrders", "_list_bdc");
     }
 
     @Delete("/orders/valid")

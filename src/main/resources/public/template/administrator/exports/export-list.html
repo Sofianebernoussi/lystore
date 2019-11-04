@@ -68,6 +68,12 @@
                     <i class="up-open" ng-show="sort.export.type === 'typeObject' && !sort.export.reverse"></i>
                     <i class="down-open" ng-show="sort.export.type === 'typeObject' && sort.export.reverse"></i>
                 </td>
+                <td ng-click="sort.export.type = 'extension';
+                    sort.export.reverse = !sort.export.reverse">
+                    <i18n>lystore.export.extension</i18n>
+                    <i class="up-open" ng-show="sort.export.type === 'extension' && !sort.export.reverse"></i>
+                    <i class="down-open" ng-show="sort.export.type === 'extension' && sort.export.reverse"></i>
+                </td>
                 <td>
                 </td>
             </tr>
@@ -95,6 +101,9 @@
                 </td>
                 <td>
                     [[lang.translate(export.typeObject)]]
+                </td>
+                <td>
+                    [[lang.translate(export.extension)]]
                 </td>
                 <td
                         ng-click="getExport(export)"

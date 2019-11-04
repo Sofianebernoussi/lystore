@@ -1046,12 +1046,12 @@ public class ExcelHelper {
         }
     }
 
-    public static String makeTheNameExcelExport(String nameFile) {
-        return getDate() + nameFile + ".xlsx";
+    public static String makeTheNameExport(String nameFile,String extension) {
+        return getDate() + nameFile + "." +extension;
     }
 
-    public static String makeTheNameExcelExport(String nameFile, String type) {
-        return getDate() + nameFile + type + ".xlsx";
+    public static String makeTheNameExport(String nameFile,String extension, String type) {
+        return getDate() + nameFile + type + "." +extension;
     }
 
     public static void catchError(ExportService exportService, String idFile, Exception errorCatch) {
@@ -1081,7 +1081,7 @@ public class ExcelHelper {
         return formatter.format(date);
     }
 
-    public static void makeExportExcel(HttpServerRequest request, EventBus eb, ExportService exportService, String typeObject, String
+    public static void makeExportExcel(HttpServerRequest request, EventBus eb, ExportService exportService, String typeObject, String extension, String
             action, String name) {
         String id="-1";
         boolean withType = request.getParam("type") != null;
@@ -1096,7 +1096,8 @@ public class ExcelHelper {
             type = request.getParam("type");
             infoFile.put("type", type);
         }
-        String titleFile = withType ? ExcelHelper.makeTheNameExcelExport(name, type) : ExcelHelper.makeTheNameExcelExport(name);
+
+        String titleFile = withType ? ExcelHelper.makeTheNameExport(name,extension, type) : ExcelHelper.makeTheNameExport(name,extension);
         log.info("makeExportExcel");
         String finalId = id;
 
@@ -1104,7 +1105,7 @@ public class ExcelHelper {
 
 
         UserUtils.getUserInfos(eb, request, user -> {
-            exportService.createWhenStart(typeObject, infoFile, finalId, titleFile, user.getUserId(), action, newExport -> {
+            exportService.createWhenStart(typeObject,extension, infoFile, finalId, titleFile, user.getUserId(), action, newExport -> {
                 if (newExport.isRight()) {
                     String idExport = newExport.right().getValue().getString("id");
                     try {

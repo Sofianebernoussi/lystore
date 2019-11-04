@@ -23,8 +23,11 @@ public class Lystore extends BaseServer {
     public static final String ADMINISTRATOR_RIGHT = "lystore.administrator";
     public static final String MANAGER_RIGHT = "lystore.manager";
     public static long timeout = 99999999999L;
-    public static String ORDERS = "ORDERS";
-    public static String INSTRUCTIONS = "INSTRUCTION";
+    public static final String ORDERS = "ORDERS";
+    public static final String INSTRUCTIONS = "INSTRUCTION";
+    public static final String XLSX = "xlsx";
+    public static final String PDF = "pdf";
+
     @Override
     public void start() throws Exception {
         super.start();

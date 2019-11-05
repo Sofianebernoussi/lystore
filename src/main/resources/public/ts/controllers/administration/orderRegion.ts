@@ -64,6 +64,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                 if (status === 200) {
                     toasts.confirm('lystore.order.region.update');
                     await $scope.ordersClient.addOperationInProgress(operation.id, [$routeParams.idOrder]);
+                    $scope.operationId =  $scope.operation.id
                     $scope.cancelUpdate();
                 }
                 else {
@@ -83,7 +84,11 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
 
         $scope.cancelUpdate = ():void => {
-            if ($scope.fromWaiting)
+            if($scope.operationId) {
+                $scope.redirectTo(`/operation/order/${$scope.operationId}`)
+                $scope.operationId = undefined;
+            }
+            else if ($scope.fromWaiting)
                 $scope.redirectTo('/order/waiting');
             else
                 window.history.back();
@@ -110,7 +115,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                 && $scope.orderToUpdate.price_single_ttc
                 && $scope.orderToUpdate.amount
                 && ((($scope.orderToUpdate.rank>0 &&
-                    $scope.orderToUpdate.rank<11  ||
+                    $scope.orderToUpdate.rank > 0  ||
                     $scope.orderToUpdate.rank === null)) ||
                     !$scope.orderToUpdate.campaign.orderPriorityEnable())
         };

@@ -31,7 +31,7 @@ public class InstructionController extends ControllerHelper {
         super();
         this.storage = storage;
         this.instructionService = new DefaultInstructionService(Lystore.lystoreSchema, "instruction");
-        this.exportService = new DefaultExportServiceService(Lystore.lystoreSchema, "export", storage);
+        this.exportService = new DefaultExportServiceService(storage);
     }
 
     @Get("/exercises")
@@ -101,7 +101,7 @@ public class InstructionController extends ControllerHelper {
     @Get("/instructions/:id/export")
     @ApiDoc("Export given instruction")
     public void exportInstruction(HttpServerRequest request) {
-        ExcelHelper.makeExportExcel(request, eb, exportService, "exportRME", "_Récapitulatif_mesures_engagées");
+        ExcelHelper.makeExportExcel(request, eb, exportService, Lystore.INSTRUCTIONS, "exportRME", "_Récapitulatif_mesures_engagées");
     }
 
     @Get("/instructions/export/equipment/rapport/:id/:type")
@@ -109,7 +109,7 @@ public class InstructionController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void exportRapportEquipment(HttpServerRequest request) {
-        ExcelHelper.makeExportExcel(request, eb, exportService, "exportEQU", "_EQUIPEMENT_RAPPORT_");//type
+        ExcelHelper.makeExportExcel(request, eb, exportService, Lystore.INSTRUCTIONS, "exportEQU", "_EQUIPEMENT_RAPPORT_");//type
     }
 
     @Get("/instruction/:id/operations")
@@ -125,7 +125,7 @@ public class InstructionController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void exportNotificationEquipment(HttpServerRequest request) {
-        ExcelHelper.makeExportExcel(request, eb, exportService, "exportNotificationCP", "_Notification_Equipement_CP");
+        ExcelHelper.makeExportExcel(request, eb, exportService, Lystore.INSTRUCTIONS, "exportNotificationCP", "_Notification_Equipement_CP");
     }
 
     @Get("/instructions/export/publipostage/equipment/:id")
@@ -133,7 +133,7 @@ public class InstructionController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void exportPublipostageExcel(HttpServerRequest request) {
-        ExcelHelper.makeExportExcel(request, eb, exportService, "exportPublipostage", "_Liste_Etablissements_Publipostage_Notification");
+        ExcelHelper.makeExportExcel(request, eb, exportService, Lystore.INSTRUCTIONS, "exportPublipostage", "_Liste_Etablissements_Publipostage_Notification");
     }
 
     ;
@@ -144,7 +144,7 @@ public class InstructionController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void exportSubventionEquipment(HttpServerRequest request) {
-        ExcelHelper.makeExportExcel(request, eb, exportService, "exportSubvention", "_subvention_equipement");
+        ExcelHelper.makeExportExcel(request, eb, exportService, Lystore.INSTRUCTIONS, "exportSubvention", "_subvention_equipement");
     }
 
     @Get("/instructions/export/iris/:id")
@@ -152,6 +152,6 @@ public class InstructionController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void exportIris(HttpServerRequest request) {
-        ExcelHelper.makeExportExcel(request, eb, exportService, "exportIris", "_Iris");
+        ExcelHelper.makeExportExcel(request, eb, exportService, Lystore.INSTRUCTIONS, "exportIris", "_Iris");
     }
 }

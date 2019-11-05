@@ -11,7 +11,7 @@ export const searchAndSelect = ng.directive('searchAndSelect', function() {
             param2: '@',
             searchOn: '@',
             orderBy: '@',
-            disable: '&',
+            disabled: '=',
             ngChange: '&'
         },
         templateUrl: '/lystore/public/template/directives/search-and-select/main.html',
@@ -25,25 +25,27 @@ export const searchAndSelect = ng.directive('searchAndSelect', function() {
             /* Combo box visibility */
             $scope.show = false;
             $scope.toggleVisibility = function() {
-                $scope.show = !$scope.show;
-                if ($scope.show) {
-                    $scope.addClickEvent();
-                    $scope.search.reset();
-                    $timeout(function() {
-                        $scope.setComboPosition()
-                    }, 1)
+                if(!$scope.disabled){
+                    $scope.show = !$scope.show;
+                    if ($scope.show) {
+                        $scope.addClickEvent();
+                        $scope.search.reset();
+                        $timeout(function() {
+                            $scope.setComboPosition()
+                        }, 1)
+                    }
                 }
             };
             $scope.toggleItem = function(item) {
-               $scope.ngModel = item;
+                $scope.ngModel = item;
                 $scope.show = false;
             };
             $scope.fsearch = (item) => {
-              if ($scope.search.input){
-                  return (item[$scope.param2] ? (item[$scope.param2].toLowerCase()).includes($scope.search.input.toLowerCase()) : false)
-                      || (item[$scope.param1] ? (item[$scope.param1].toLowerCase()).includes($scope.search.input.toLowerCase()) : false)
-              }else
-                  return true
+                if ($scope.search.input){
+                    return (item[$scope.param2] ? (item[$scope.param2].toLowerCase()).includes($scope.search.input.toLowerCase()) : false)
+                        || (item[$scope.param1] ? (item[$scope.param1].toLowerCase()).includes($scope.search.input.toLowerCase()) : false)
+                }else
+                    return true
             };
 
             /* Item display */
@@ -51,7 +53,6 @@ export const searchAndSelect = ng.directive('searchAndSelect', function() {
                 return item instanceof Object ? item[$scope.param1] + " - " + item[$scope.param2] : item
             };
             $scope.$watch(()=> $scope.ngModel, (newVal, oldVal)=>{
-                console.log($scope);
                 if(newVal!=oldVal){
                     $scope.ngChange();
                 }

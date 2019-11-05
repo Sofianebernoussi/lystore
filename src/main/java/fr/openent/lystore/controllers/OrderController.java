@@ -1,7 +1,6 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
-import fr.openent.lystore.helpers.ExcelHelper;
 import fr.openent.lystore.helpers.ExportHelper;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
@@ -163,6 +162,7 @@ public class OrderController extends ControllerHelper {
     @ResourceFilter(ManagerRight.class)
     public void getOrderPDF (final HttpServerRequest request) {
         final String orderNumber = request.params().get("number");
+        System.out.println("get");
         orderService.getOrderFileId(orderNumber, new Handler<Either<String, JsonObject>>() {
             @Override
             public void handle(Either<String, JsonObject> event) {
@@ -395,6 +395,8 @@ public class OrderController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void sendOrders (final HttpServerRequest request){
+//        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrders", "_BC");
+
         RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {
             @Override
             public void handle(final JsonObject orders) {
@@ -470,39 +472,44 @@ public class OrderController extends ControllerHelper {
 
     private void exportDocuments(final HttpServerRequest request, final Boolean printOrder,
                                  final Boolean printCertificates, final List<String> validationNumbers) {
-        supplierService.getSupplierByValidationNumbers(new fr.wseduc.webutils.collections.JsonArray(validationNumbers), new Handler<Either<String, JsonObject>>() {
-            @Override
-            public void handle(Either<String, JsonObject> event) {
-                if (event.isRight()) {
-                    JsonObject supplier = event.right().getValue();
-                    getOrdersData(request, "", "", "", supplier.getInteger("id"), new fr.wseduc.webutils.collections.JsonArray(validationNumbers),
-                            new Handler<JsonObject>() {
-                                @Override
-                                public void handle(JsonObject data) {
-                                    data.put("print_order", printOrder);
-                                    data.put("print_certificates", printCertificates);
-                                    exportPDFService.generatePDF(request, data,
-                                            "BC.xhtml", "CSF_",
-                                            new Handler<Buffer>() {
-                                                @Override
-                                                public void handle(final Buffer pdf) {
-                                                    request.response()
-                                                            .putHeader("Content-Type", "application/pdf; charset=utf-8")
-                                                            .putHeader("Content-Disposition", "attachment; filename="
-                                                                    + generateExportName(validationNumbers, "" +
-                                                                    (printOrder ? "BC" : "") + (printCertificates ? "CSF" : "")) + ".pdf")
-                                                            .end(pdf);
+        System.out.println(printOrder);
+        if(printOrder){
+            ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrders", "_BC");
+        }else {
+            supplierService.getSupplierByValidationNumbers(new fr.wseduc.webutils.collections.JsonArray(validationNumbers), new Handler<Either<String, JsonObject>>() {
+                @Override
+                public void handle(Either<String, JsonObject> event) {
+                    if (event.isRight()) {
+                        JsonObject supplier = event.right().getValue();
+                        getOrdersData(request, "", "", "", supplier.getInteger("id"), new fr.wseduc.webutils.collections.JsonArray(validationNumbers),
+                                new Handler<JsonObject>() {
+                                    @Override
+                                    public void handle(JsonObject data) {
+                                        data.put("print_order", printOrder);
+                                        data.put("print_certificates", printCertificates);
+                                        exportPDFService.generatePDF(request, data,
+                                                "BC.xhtml", "CSF_",
+                                                new Handler<Buffer>() {
+                                                    @Override
+                                                    public void handle(final Buffer pdf) {
+                                                        request.response()
+                                                                .putHeader("Content-Type", "application/pdf; charset=utf-8")
+                                                                .putHeader("Content-Disposition", "attachment; filename="
+                                                                        + generateExportName(validationNumbers, "" +
+                                                                        (printOrder ? "BC" : "") + (printCertificates ? "CSF" : "")) + ".pdf")
+                                                                .end(pdf);
+                                                    }
                                                 }
-                                            }
-                                    );
-                                }
-                            });
-                } else {
-                    log.error("An error occurred when collecting supplier Id", new Throwable(event.left().getValue()));
-                    badRequest(request);
+                                        );
+                                    }
+                                });
+                    } else {
+                        log.error("An error occurred when collecting supplier Id", new Throwable(event.left().getValue()));
+                        badRequest(request);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private String generateExportName(List<String> validationNumbers, String prefix) {
@@ -515,7 +522,7 @@ public class OrderController extends ControllerHelper {
     }
 
     private void exportStructuresList(final HttpServerRequest request) {
-          ExportHelper.makeExportExcel(request, eb, exportService,Lystore.ORDERS,  Lystore.XLSX,"exportListLycOrders", "_list_bdc");
+          ExportHelper.makeExport(request, eb, exportService,Lystore.ORDERS,  Lystore.XLSX,"exportListLycOrders", "_list_bdc");
     }
 
     @Delete("/orders/valid")

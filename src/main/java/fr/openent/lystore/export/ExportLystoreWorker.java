@@ -136,10 +136,29 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                         fileName,
                         exportHandler);
                 break;
+            case "exportBCOrders":
+                exportBCOrders(string_object_id,
+                        fileName,
+                        exportHandler);
+                break;
+
             default:
                 ExportHelper.catchError(exportService, idNewFile, "Invalid action in worker",exportHandler);
                 break;
         }
+    }
+
+    private void exportBCOrders(String object_id, String titleFile, Handler<Either<String, Boolean>> handler) {
+        logger.info("Export list lycee from Orders started");
+        this.validOrders = new ValidOrders(exportService,object_id,idNewFile);
+        this.validOrders.exportListLycee(event1 -> {
+            if (event1.isLeft()) {
+                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
+            } else {
+                Buffer xlsx = event1.right().getValue();
+                saveBuffer(xlsx, titleFile,handler);
+            }
+        });
     }
 
     private void exportListLycOrders(String object_id, String titleFile, Handler<Either<String, Boolean>> handler) {

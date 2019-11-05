@@ -56,7 +56,7 @@ public class ExportHelper {
         return formatter.format(date);
     }
 
-    public static void makeExportExcel(HttpServerRequest request, EventBus eb, ExportService exportService, String typeObject, String extension, String
+    public static void makeExport(HttpServerRequest request, EventBus eb, ExportService exportService, String typeObject, String extension, String
             action, String name) {
         String id="-1";
         boolean withType = request.getParam("type") != null;

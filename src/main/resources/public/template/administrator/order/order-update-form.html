@@ -160,15 +160,12 @@
             >
                 [[orderParent.rank]]
             </span>
-            <input
-                    ng-model="orderToUpdate.rank"
-                    type="number"
-                    min="1"
-                    step="1"
-                    max="10"
-                    class="cell horizontal-margin"
-                    ng-class="{'two': orderParent}"
-            />
+            <span
+                    class="four cell horizontal-margin"
+                    ng-if="orderParent"
+            >
+                [[orderParent.rank]]
+            </span>
         </div>
 
         <div class="row vertical-spacing-four">

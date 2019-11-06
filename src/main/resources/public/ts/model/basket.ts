@@ -38,7 +38,8 @@ export class Basket implements Selectable {
             equipment : this.equipment.id,
             options: options.length > 0 ?  _.pluck( options , 'id') : null ,
             id_campaign : this.id_campaign,
-            id_structure : this.id_structure
+            id_structure : this.id_structure,
+            id_type : this.equipment.id_type
         };
     }
 

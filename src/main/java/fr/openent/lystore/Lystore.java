@@ -6,7 +6,6 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
-import org.apache.poi.ss.formula.functions.Even;
 import org.entcore.common.http.BaseServer;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.storage.StorageFactory;
@@ -24,7 +23,8 @@ public class Lystore extends BaseServer {
     public static final String ADMINISTRATOR_RIGHT = "lystore.administrator";
     public static final String MANAGER_RIGHT = "lystore.manager";
     public static long timeout = 99999999999L;
-
+    public static String ORDERS = "ORDERS";
+    public static String INSTRUCTIONS = "INSTRUCTION";
     @Override
     public void start() throws Exception {
         super.start();

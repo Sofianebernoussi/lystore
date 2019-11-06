@@ -20,6 +20,9 @@
     },
     "id_structure":{
       "type": "string"
+    },
+    "id_type": {
+      "type": "number"
     }
   },
   "required": [ "amount", "equipment", "id_campaign", "id_structure" ]

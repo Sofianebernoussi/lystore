@@ -197,9 +197,13 @@ public class DefaultInstructionService  extends SqlCrudService implements Instru
                 "VALUES (? ,? ,? ,? ,? ,? ,? ) " +
                 "RETURNING id; ";
 
+        String object = instruction.getString("object");
+        if(object.length() > 80){
+            object = object.substring(0,79);
+        }
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(instruction.getInteger("id_exercise"))
-                .add(instruction.getString("object"))
+                .add(object)
                 .add(instruction.getString("service_number"))
                 .add(instruction.getString("cp_number"))
                 .add(instruction.getBoolean("submitted_to_cp"))

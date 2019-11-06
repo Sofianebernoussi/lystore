@@ -573,18 +573,22 @@ public class ExcelHelper {
     }
 
 
-    public void insertFormula(int cellColumn,int line, String data) {
+    public void insertFormula(int line, int cellColumn, String data) {
+      insertFormulaWithStyle(line,cellColumn,data,this.currencyStyle);
+    }
+
+    public  void insertFormulaWithStyle(int line, int cellColumn, String data,CellStyle style) {
         Row tab;
         try {
             tab = sheet.getRow(line);
             Cell cell = tab.createCell(cellColumn);
             cell.setCellFormula(data);
-            cell.setCellStyle(this.currencyStyle);
+            cell.setCellStyle(style);
         } catch (NullPointerException e) {
             tab = sheet.createRow(line);
             Cell cell = tab.createCell(cellColumn);
             cell.setCellFormula(data);
-            cell.setCellStyle(this.currencyStyle);
+            cell.setCellStyle(style);
         }
     }
 
@@ -883,13 +887,16 @@ public class ExcelHelper {
     /**
      * Set total column and  line of a tab
      *
-     * @param columnEnd
+     * @param lineStart
      * @param lineEnd
      * @param columnStart
-     * @param lineStart
+     * @param columnEnd
      */
-    public void setTotal(int columnEnd, int lineEnd, int columnStart, int lineStart) {
-        Row tab, tabStart, tabEnd;
+    public void setTotal(int lineStart, int lineEnd, int columnStart, int columnEnd) {
+       setTotal(lineStart,lineEnd,columnStart,columnEnd,lineEnd,columnEnd,this.tabCurrencyStyle);
+    }
+    public void setTotal(int lineStart, int lineEnd, int columnStart, int columnEnd,int lineInsert,int columnInsert,CellStyle style) {
+        Row tab,tabInsert, tabStart, tabEnd;
         Cell cell, cellStartSum, cellEndSum;
         // totalY
         tabStart = sheet.getRow(lineStart);
@@ -900,7 +907,7 @@ public class ExcelHelper {
             cell = tab.createCell(columnEnd);
             cellStartSum = tab.getCell(columnStart);
             cellEndSum = tab.getCell(columnEnd - 1);
-            cell.setCellStyle(this.tabCurrencyStyle);
+            cell.setCellStyle(style);
             cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
         }
         //totalX
@@ -908,23 +915,31 @@ public class ExcelHelper {
 
         for (int i = columnStart; i < columnEnd; i++) {
             cell = tab.createCell(i);
-            cell.setCellStyle(this.tabCurrencyStyle);
+            cell.setCellStyle(style);
             cell.setCellValue("total");
 
             cellStartSum = tabStart.getCell(i);
             cellEndSum = tabEnd.getCell(i);
 
 
-            cell.setCellStyle(this.tabCurrencyStyle);
+            cell.setCellStyle(style);
             cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
         }
         cellStartSum = tabStart.getCell(columnEnd);
         cellEndSum = tabEnd.getCell(columnEnd);
 
+        try{
+            tabInsert = sheet.getRow(lineInsert);
+            cell = tabInsert.createCell(columnInsert);
+            cell.setCellStyle(style);
+            cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
+        }catch (Exception e){
+            tabInsert = sheet.createRow(lineInsert);
+            cell = tabInsert.createCell(columnInsert);
+            cell.setCellStyle(style);
+            cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
+        }
 
-        cell = tab.createCell(columnEnd);
-        cell.setCellStyle(this.tabCurrencyStyle);
-        cell.setCellFormula("SUM(" + (new CellReference(cellStartSum)).formatAsString() + ":" + (new CellReference(cellEndSum)).formatAsString() + ")");
 
     }
 
@@ -968,8 +983,6 @@ public class ExcelHelper {
      */
     public void setTotalX(int lineStart, int lineEnd, int column, int lineInsert, int columnInsert) {
         setTotalXWithStyle(lineStart, lineEnd, column, lineInsert, columnInsert, tabCurrencyStyle);
-
-
     }
 
     public void setTotalXWithStyle(int lineStart, int lineEnd, int column, int lineInsert,
@@ -1068,12 +1081,15 @@ public class ExcelHelper {
         return formatter.format(date);
     }
 
-    public static void makeExportExcel(HttpServerRequest request, EventBus eb, ExportService exportService, String
+    public static void makeExportExcel(HttpServerRequest request, EventBus eb, ExportService exportService, String typeObject, String
             action, String name) {
-        Integer id=-1;
+        String id="-1";
         boolean withType = request.getParam("type") != null;
-        if(request.getParam("id")!=null)
-            id = Integer.parseInt(request.getParam("id"));
+        if(request.getParam("id")!=null && typeObject.equals(Lystore.INSTRUCTIONS))
+            id = request.getParam("id");
+        if(request.params().getAll("number_validation") != null && !request.params().getAll("number_validation").isEmpty() ){
+            id = request.params().getAll("number_validation").get(0);
+        }
         String type = "";
         JsonObject infoFile = new JsonObject();
         if (withType) {
@@ -1082,9 +1098,13 @@ public class ExcelHelper {
         }
         String titleFile = withType ? ExcelHelper.makeTheNameExcelExport(name, type) : ExcelHelper.makeTheNameExcelExport(name);
         log.info("makeExportExcel");
-        Integer finalId = id;
+        String finalId = id;
+
+
+
+
         UserUtils.getUserInfos(eb, request, user -> {
-            exportService.createWhenStart(infoFile,finalId,titleFile,user.getUserId(), action, newExport -> {
+            exportService.createWhenStart(typeObject, infoFile, finalId, titleFile, user.getUserId(), action, newExport -> {
                 if (newExport.isRight()) {
                     String idExport = newExport.right().getValue().getString("id");
                     try {

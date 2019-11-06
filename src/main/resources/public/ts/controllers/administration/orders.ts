@@ -13,29 +13,92 @@ export const orderController = ng.controller('orderController',
         $scope.allOrdersSelected = false;
         $scope.tableFields = orderWaiting;
         let isPageOrderWaiting = $location.path() === "/order/waiting";
+        let isPageOrderSent = $location.path() === "/order/sent";
+
+        if(isPageOrderSent)
+            $scope.displayedOrdersSent = $scope.displayedOrders;
         $scope.sort = {
             order : {
                 type: 'name_structure',
                 reverse: false
             }
         };
-
-
-        $scope.initPreferences = ()  => {
-            if ($scope.preferences && $scope.preferences.preference) {
-                let loadedPreferences = JSON.parse($scope.preferences.preference);
-                if(loadedPreferences.ordersWaitingDisplay)
-                $scope.tableFields.map(table => {
-                    table.display = loadedPreferences.ordersWaitingDisplay[table.fieldName]
-                })
-            }
-        };
-
-        $scope.initPreferences();
         $scope.search = {
             filterWord : '',
             filterWords : []
         };
+        $scope.filterDisplayedOrders = async () => {
+            let searchResult = [];
+            let regex;
+            const matchStructureGroups = (structureGroups: string[]): boolean => {
+                let bool: boolean = false;
+                if (typeof structureGroups === 'string') structureGroups = Utils.parsePostgreSQLJson(structureGroups);
+                structureGroups.map((groupName) => bool = bool || regex.test(groupName.toLowerCase()));
+                return bool;
+            };
+            if($scope.search.filterWords.length > 0){
+                if(isPageOrderWaiting)await $scope.selectCampaignShow($scope.campaign);
+                $scope.search.filterWords.map((searchTerm: string, index: number): void => {
+                    let searchItems: OrderClient[] = index === 0 ? $scope.displayedOrders.all : searchResult;
+                    regex = generateRegexp([searchTerm]);
+
+                    searchResult = _.filter(searchItems, (order: OrderClient) => {
+                        return ('name_structure' in order ? regex.test(order.name_structure.toLowerCase()) : false)
+                            || ('structure' in order && order.structure['name'] ? regex.test(order.structure.name.toLowerCase()): false)
+                            || ('structure' in order && order.structure['city'] ? regex.test(order.structure.city.toLocaleLowerCase()) : false)
+                            || ('structure' in order && order.structure['academy'] ? regex.test(order.structure.academy.toLowerCase()) : false)
+                            || ('structure' in order && order.structure['type'] ? regex.test(order.structure.type.toLowerCase()) : false)
+                            || ('project' in order ? regex.test(order.project.title['name'].toLowerCase()) : false)
+                            || ('contract_type' in order ? regex.test(order.contract_type.name.toLowerCase()) : false)
+                            || regex.test('contract' in (order as OrderClient)
+                                ? order.contract.name.toLowerCase()
+                                : order.contract_name)
+                            || regex.test('supplier' in (order as OrderClient)
+                                ? order.supplier.name.toLowerCase()
+                                : order.supplier_name)
+                            || ('campaign' in order ? regex.test(order.campaign.name.toLowerCase()) : false)
+                            || ('name' in order ? regex.test(order.name.toLowerCase()) : false)
+                            || matchStructureGroups(order.structure_groups)
+                            || (order.number_validation !== null
+                                ? regex.test(order.number_validation.toLowerCase())
+                                : false)
+                            || (order.order_number !== null && 'order_number' in order
+                                ? regex.test(order.order_number.toLowerCase())
+                                : false)
+                            || (order.label_program !== null && 'label_program' in order
+                                ? regex.test(order.label_program.toLowerCase())
+                                : false)
+                            || ('supplier_name' in order ?  regex.test(order.supplier_name.toLowerCase()) : false );
+                    });
+                });
+                $scope.displayedOrders.all = searchResult;
+            } else {
+                if(isPageOrderWaiting)
+                    $scope.selectCampaignShow($scope.campaign)
+                else {
+                    $scope.displayedOrders.all = $scope.ordersClient.all ;
+                }
+
+            }
+        };
+
+        $scope.initPreferences = ()  => {
+            if(isPageOrderWaiting)
+                if ($scope.preferences && $scope.preferences.preference) {
+                    let loadedPreferences = JSON.parse($scope.preferences.preference);
+                    if(loadedPreferences.ordersWaitingDisplay)
+                        $scope.tableFields.map(table => {
+                            table.display = loadedPreferences.ordersWaitingDisplay[table.fieldName]
+                        });
+                    if(loadedPreferences.searchFields){
+                        $scope.search.filterWords = loadedPreferences.searchFields;
+                        $scope.filterDisplayedOrders();
+                    }
+                    $scope.ub.putPreferences("searchFields", []);
+                }
+        };
+
+        $scope.initPreferences();
         $scope.display = {
             ordersClientOptionOption : [],
             lightbox : {
@@ -113,60 +176,7 @@ export const orderController = ng.controller('orderController',
             return new RegExp(reg);
         }
 
-        $scope.filterDisplayedOrders = async () => {
-            let searchResult = [];
-            let regex;
-            const matchStructureGroups = (structureGroups: string[]): boolean => {
-                let bool: boolean = false;
-                if (typeof structureGroups === 'string') structureGroups = Utils.parsePostgreSQLJson(structureGroups);
-                structureGroups.map((groupName) => bool = bool || regex.test(groupName.toLowerCase()));
-                return bool;
-            };
-            if($scope.search.filterWords.length > 0){
-                if(isPageOrderWaiting)await $scope.selectCampaignShow($scope.campaign);
-                $scope.search.filterWords.map((searchTerm: string, index: number): void => {
-                    let searchItems: OrderClient[] = index === 0 ? $scope.displayedOrders.all : searchResult;
-                    regex = generateRegexp([searchTerm]);
 
-                    searchResult = _.filter(searchItems, (order: OrderClient) => {
-                        return ('name_structure' in order ? regex.test(order.name_structure.toLowerCase()) : false)
-                            || ('structure' in order && order.structure['name'] ? regex.test(order.structure.name.toLowerCase()): false)
-                            || ('structure' in order && order.structure['city'] ? regex.test(order.structure.city.toLocaleLowerCase()) : false)
-                            || ('structure' in order && order.structure['academy'] ? regex.test(order.structure.academy.toLowerCase()) : false)
-                            || ('structure' in order && order.structure['type'] ? regex.test(order.structure.type.toLowerCase()) : false)
-                            || ('project' in order ? regex.test(order.project.title['name'].toLowerCase()) : false)
-                            || ('contract_type' in order ? regex.test(order.contract_type.name.toLowerCase()) : false)
-                            || regex.test('contract' in (order as OrderClient)
-                                ? order.contract.name.toLowerCase()
-                                : order.contract_name)
-                            || regex.test('supplier' in (order as OrderClient)
-                                ? order.supplier.name.toLowerCase()
-                                : order.supplier_name)
-                            || ('campaign' in order ? regex.test(order.campaign.name.toLowerCase()) : false)
-                            || ('name' in order ? regex.test(order.name.toLowerCase()) : false)
-                            || matchStructureGroups(order.structure_groups)
-                            || (order.number_validation !== null
-                                ? regex.test(order.number_validation.toLowerCase())
-                                : false)
-                            || (order.order_number !== null && 'order_number' in order
-                                ? regex.test(order.order_number.toLowerCase())
-                                : false)
-                            || (order.label_program !== null && 'label_program' in order
-                                ? regex.test(order.label_program.toLowerCase())
-                                : false)
-                            || ('supplier_name' in order ?  regex.test(order.supplier_name.toLowerCase()) : false );
-                    });
-                });
-                $scope.displayedOrders.all = searchResult;
-            } else {
-                if(isPageOrderWaiting)
-                    $scope.selectCampaignShow($scope.campaign)
-                else {
-                    $scope.displayedOrders.all = $scope.ordersClient.all ;
-                }
-
-            }
-        };
 
         $scope.pullFilterWord = (filterWord) => {
             $scope.search.filterWords = _.without( $scope.search.filterWords , filterWord);
@@ -208,18 +218,30 @@ export const orderController = ng.controller('orderController',
             Utils.safeApply($scope);
 
         };
+        $scope.syncOrders = async (status: string) =>{
+            $scope.displayedOrders.all = [];
+            await $scope.ordersClient.sync(status, $scope.structures.all);
+            $scope.displayedOrders.all = $scope.ordersClient.all;
+            $scope.displayedOrders.all.map(order => {
+                    order.selected = false;
+                }
+            );
+
+        };
+
         $scope.windUpOrders = async (orders: OrderClient[]) => {
             let ordersToWindUp  = new OrdersClient();
+            // console.log($scope.displayedOrders.all);
             ordersToWindUp.all = Mix.castArrayAs(OrderClient, orders);
             let { status } = await ordersToWindUp.updateStatus('DONE');
             if (status === 200) {
                 toasts.confirm('lystore.windUp.notif');
             }
             await $scope.syncOrders('SENT');
-            $scope.ordersClient.all  =[]
-            $scope.displayedOrders.all =[]
-
+            while ($scope.displayedOrders.selected.length > 0){
+            }
             Utils.safeApply($scope);
+
         };
         $scope.isNotValidated = ( orders:OrderClient[]) =>{
 
@@ -327,13 +349,20 @@ export const orderController = ng.controller('orderController',
             }
         };
 
-        $scope.exportValidOrders = (orders: OrderClient[], fileType: string) => {
+        $scope.exportValidOrders = async  (orders: OrderClient[], fileType: string) => {
             let params = '';
             orders.map((order: OrderClient) => {
                 params += `number_validation=${order.number_validation}&`;
             });
             params = params.slice(0, -1);
-            window.location = `/lystore/orders/valid/export/${fileType}?${params}`;
+            if(fileType ==='structure_list'){
+                toasts.info('lystore.export.notif');
+                await orders[0].exportListLycee(params);
+                $scope.displayedOrders.selected[0].selected = false;
+                Utils.safeApply($scope);
+            }else{
+                window.location = `/lystore/orders/valid/export/${fileType}?${params}`;
+            }
         };
 
         $scope.cancelValidation = async (orders: OrderClient[]) => {
@@ -411,6 +440,7 @@ export const orderController = ng.controller('orderController',
             return order.rank = lang.translate("lystore.order.not.prioritized");
         };
         $scope.updateOrder = (order: OrderClient) => {
+            $scope.ub.putPreferences("searchFields", $scope.search.filterWords);
             $scope.redirectTo(`/order/update/${order.id}`);
         };
         $scope.selectCampaignAndInitFilter = async (campaign: Campaign) =>{

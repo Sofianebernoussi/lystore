@@ -25,7 +25,7 @@ public class DefaultExportServiceService implements ExportService {
     private EventBus eb;
     MongoHelper mongo;
 
-    public DefaultExportServiceService(String lystoreSchema, String instruction, Storage storage) {
+    public DefaultExportServiceService(Storage storage) {
         this.storage = storage;
         mongo = new MongoHelper(Lystore.LYSTORE_COLLECTION);
 
@@ -62,10 +62,11 @@ public class DefaultExportServiceService implements ExportService {
         }
         mongo.deleteExports(values,handler);
     }
-    public void createWhenStart (JsonObject infoFile,Integer instruction_id,String nameFile, String userId,String action, Handler<Either<String, JsonObject>> handler){
+    public void createWhenStart (String typeObject, JsonObject infoFile, String object_id, String nameFile, String userId, String action, Handler<Either<String, JsonObject>> handler){
         try {
-            String nameQuery= "SELECT object from "+Lystore.lystoreSchema+".instruction where id= ?";
-            Sql.getInstance().prepared(nameQuery,new JsonArray().add(instruction_id), SqlResult.validResultHandler(new Handler<Either<String, JsonArray>>() {
+            JsonArray params = new JsonArray();
+            String  nameQuery = getQueryAndParams(typeObject,params,object_id);
+            Sql.getInstance().prepared(nameQuery,params, SqlResult.validResultHandler(new Handler<Either<String, JsonArray>>() {
                 @Override
                 public void handle(Either<String, JsonArray> event) {
                     if(event.isRight()){
@@ -75,11 +76,12 @@ public class DefaultExportServiceService implements ExportService {
                         JsonObject params = new JsonObject()
                                 .put("filename",nameFile)
                                 .put("userId",userId)
-                                .put("instruction_id",instruction_id)
-                                .put("instruction_name",results.getJsonObject(0).getString("object"))
+                                .put("object_id",object_id)
+                                .put("object_name",results.getJsonObject(0).getString("object"))
                                 .put("status","WAITING")
                                 .put("created",dtf.format(now))
                                 .put("action",action)
+                                .put("typeObject",typeObject)
                                 .put("NbIterationsLeft",Lystore.iterationWorker);
 
                         if(infoFile.containsKey("type"))
@@ -104,6 +106,17 @@ public class DefaultExportServiceService implements ExportService {
         } catch (Exception error){
             logger.error("error when create export" + error);
         }
+    }
+
+    private String getQueryAndParams(String typeObject, JsonArray params, String object_id) {
+        String nameQuery= "";
+        if (typeObject.equals(Lystore.INSTRUCTIONS)) {
+            nameQuery = "SELECT object from "+Lystore.lystoreSchema+".instruction where id= ?";
+            params.add(Integer.parseInt(object_id));
+        }else{
+            nameQuery = "SELECT 'numéro de validation' as object";
+        }
+        return nameQuery;
     }
 
     public void updateWhenError (String idExport, Handler<Either<String, Boolean>> handler){

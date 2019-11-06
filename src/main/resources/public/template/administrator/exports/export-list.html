@@ -2,12 +2,36 @@
     <h1>
         <i18n>lystore.list.export.title</i18n>
     </h1>
-    <article class="responsive-table">
+    <div class="row">
+        <div class="cell twelve-mobile horizontal-spacing search-pagination four">
+            <div class="row twelve vertical-spacing">
+                <input  class="row"
+                        type="text"
+                        ng-model="search.filterWord"
+                        ng-change="filterByTag(search.filterWord)"
+                        ng-keydown="addFilter(search.filterWord, $event)"
+                        i18n-placeholder="add.a.filter" />
+
+                <i class="search flex-row" ng-click="addFilter(search.filterWord)"></i>
+            </div>
+            <div class="row horizontal-spacing">
+                <div class="select-blocks">
+                    <div ng-repeat="filterWord in search.filterWords"
+                         ng-click="pullFilterWord(filterWord)"
+                         class="labels-in-ligne">
+                        <div > [[ filterWord ]] </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <article class="responsive-table ">
         <div>
             <h2>
                 <i18n>lystore.list.export.text</i18n>
             </h2>
         </div>
+        <div class="vertical-array-scroll">
         <table class="twelve">
             <thead>
             <tr>
@@ -32,20 +56,25 @@
                     <i class="up-open" ng-show="sort.export.type === 'created' && !sort.export.reverse"></i>
                     <i class="down-open" ng-show="sort.export.type === 'created' && sort.export.reverse"></i>
                 </td>
-                <td ng-click="sort.export.type = 'instruction_name';
+                <td ng-click="sort.export.type = 'object_name';
                     sort.export.reverse = !sort.export.reverse">
-                    <i18n>lystore.instruction.name</i18n>
-                    <i class="up-open" ng-show="sort.export.type === 'instruction_name' && !sort.export.reverse"></i>
-                    <i class="down-open" ng-show="sort.export.type === 'instruction_name' && sort.export.reverse"></i>
+                    <i18n>lystore.export.object.name</i18n>
+                    <i class="up-open" ng-show="sort.export.type === 'object_name' && !sort.export.reverse"></i>
+                    <i class="down-open" ng-show="sort.export.type === 'object_name' && sort.export.reverse"></i>
+                </td>
+                <td ng-click="sort.export.type = 'typeObject';
+                    sort.export.reverse = !sort.export.reverse">
+                    <i18n>lystore.export.type</i18n>
+                    <i class="up-open" ng-show="sort.export.type === 'typeObject' && !sort.export.reverse"></i>
+                    <i class="down-open" ng-show="sort.export.type === 'typeObject' && sort.export.reverse"></i>
                 </td>
                 <td>
-
                 </td>
             </tr>
             </thead>
             <tbody>
             <tr
-                    ng-repeat="export in exports.all | orderBy:sort.export.type:sort.export.reverse"
+                    ng-repeat="export in displayExports | orderBy:sort.export.type:sort.export.reverse"
                     class=[[export.classStatus]]
                     tooltip=[[export.tooltip]]
             >
@@ -62,7 +91,10 @@
                     [[export.created]]
                 </td>
                 <td>
-                    [[export.instruction_name]]_[[export.instruction_id]]
+                    [[export.object_name]]_[[export.object_id]]
+                </td>
+                <td>
+                    [[lang.translate(export.typeObject)]]
                 </td>
                 <td
                         ng-click="getExport(export)"
@@ -75,6 +107,7 @@
             </tr>
             </tbody>
         </table>
+        </div>
     </article>
 
     <section class="toggle-buttons" ng-class="{ hide:exports.selected.length === 0 }">

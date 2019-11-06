@@ -34,7 +34,7 @@ public class ExportController extends ControllerHelper {
     public ExportController(Storage storage) {
         super();
         this.storage = storage;
-        this.exportService = new DefaultExportServiceService(Lystore.lystoreSchema, "export", storage);
+        this.exportService = new DefaultExportServiceService(storage);
     }
 
     @Get("/exports")

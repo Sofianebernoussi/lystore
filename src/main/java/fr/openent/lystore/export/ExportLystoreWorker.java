@@ -1,31 +1,26 @@
 package fr.openent.lystore.export;
 
-import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.instructions.Instruction;
+import fr.openent.lystore.export.validOrders.ValidOrders;
 import fr.openent.lystore.helpers.ExcelHelper;
-import fr.openent.lystore.helpers.MongoHelper;
 import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultExportServiceService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.storage.Storage;
 import org.vertx.java.busmods.BusModBase;
-
-import javax.print.DocFlavor;
-import java.util.Queue;
-import java.util.Timer;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static fr.openent.lystore.Lystore.CONFIG;
 import static fr.openent.lystore.Lystore.STORAGE;
 
 public class ExportLystoreWorker extends BusModBase implements Handler<Message<JsonObject>> {
     private Instruction instruction;
+    private ValidOrders validOrders;
     private Storage storage;
-    private ExportService exportService = new DefaultExportServiceService(Lystore.lystoreSchema, "export", storage);
+    private ExportService exportService = new DefaultExportServiceService(storage);
     private String idNewFile;
     private boolean isWorking = false;
     private boolean isSleeping = true;
@@ -56,90 +51,108 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
     private void processExport(){
 
         Handler<Either<String,Boolean>> exportHandler = event -> {
-                logger.info("exportHandler");
-                if (event.isRight()) {
-                    logger.info("export to Waiting");
-                    processExport();
-                } else {
-                    ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx " + event.left().getValue());
+            logger.info("exportHandler");
+            if (event.isRight()) {
+                logger.info("export to Waiting");
+                processExport();
+            } else {
+                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx " + event.left().getValue());
+            }
+        };
+        exportService.getWaitingExport(new Handler<Either<String, JsonObject>>() {
+            @Override
+            public void handle(Either<String, JsonObject> event) {
+                if(event.isRight()){
+                    JsonObject waitingOrder = event.right().getValue();
+                    chooseExport( waitingOrder,exportHandler);
+                }else{
+                    isSleeping = true;
+                    new java.util.Timer().schedule(
+                            new java.util.TimerTask() {
+                                @Override
+                                public void run() {
+                                    processExport();
+                                }
+                            },
+                            3600*1000
+                    );
                 }
-            };
-            exportService.getWaitingExport(new Handler<Either<String, JsonObject>>() {
-                @Override
-                public void handle(Either<String, JsonObject> event) {
-                    if(event.isRight()){
-                        JsonObject waitingOrder = event.right().getValue();
-                        chooseExport( waitingOrder,exportHandler);
-                    }else{
-                        isSleeping = true;
-                        new java.util.Timer().schedule(
-                                new java.util.TimerTask() {
-                                    @Override
-                                    public void run() {
-                                        processExport();
-                                    }
-                                },
-                                3600*1000
-                        );
-                    }
-                }
-            });
+            }
+        });
     }
 
     private void chooseExport(JsonObject body, Handler<Either<String, Boolean>> exportHandler) {
         final String action = body.getString("action", "");
         String fileName = body.getString("filename");
         idNewFile = body.getString("_id");
-        Integer instruction_id = -1;
+        Integer object_id = -1;
+        String string_object_id ="";
         try {
-            instruction_id = Integer.parseInt(body.getString("instruction_id"));
+            object_id = Integer.parseInt(body.getString("object_id"));
         }catch (ClassCastException ce){
-            instruction_id =body.getInteger("instruction_id");
+            object_id = body.getInteger("object_id");
+        }catch (NumberFormatException ce){
+            string_object_id = body.getString("object_id");
         }
         switch (action) {
             case "exportEQU":
                 exportEquipment(
-                        instruction_id,
+                        object_id,
                         body.getString("type"),
                         fileName,exportHandler );
                 break;
             case "exportRME":
                 exportRME(
-                        instruction_id,
+                        object_id,
                         fileName,
                         exportHandler);
                 break;
             case "exportNotificationCP":
                 exportNotificationCp(
-                        instruction_id,
+                        object_id,
                         fileName,
                         exportHandler);
                 break;
             case "exportPublipostage":
                 exportPublipostage(
-                        instruction_id,
+                        object_id,
                         fileName,
                         exportHandler);
                 break;
             case "exportSubvention":
                 exportSubvention(
-                        instruction_id,
+                        object_id,
                         fileName,
                         exportHandler);
                 break;
             case "exportIris":
-                    exportIris(instruction_id,
-                            fileName,
-                            exportHandler);
-                    break;
-                default:
-                    ExcelHelper.catchError(exportService, idNewFile, "Invalid action in worker",exportHandler);
-                    break;
-
-
-
-
+                exportIris(object_id,
+                        fileName,
+                        exportHandler);
+                break;
+            case "exportListLycOrders":
+                exportListLycOrders(string_object_id,
+                        fileName,
+                        exportHandler);
+                break;
+            default:
+                ExcelHelper.catchError(exportService, idNewFile, "Invalid action in worker",exportHandler);
+                break;
         }
+    }
+
+    private void exportListLycOrders(String object_id, String titleFile, Handler<Either<String, Boolean>> handler) {
+        logger.info("Export list lycee from Orders started");
+        this.validOrders = new ValidOrders(exportService,object_id,idNewFile);
+        this.validOrders.exportListLycee(event1 -> {
+            if (event1.isLeft()) {
+                ExcelHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
+            } else {
+                Buffer xlsx = event1.right().getValue();
+                saveBuffer(xlsx, titleFile,handler);
+            }
+        });
+
     }
 
     private void exportIris(Integer instructionId, String titleFile, Handler<Either<String, Boolean>> handler) {

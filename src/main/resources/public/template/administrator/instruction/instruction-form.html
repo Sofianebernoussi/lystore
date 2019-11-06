@@ -12,13 +12,13 @@
         <form ng-submit="sendInstruction()" >
             <label class="row twelve vertical-spacing">
                         <span class="twelve">
-                            <i18n>lystore.instruction.object</i18n> *
+                            <i18n>lystore.instruction.object</i18n> * <b>(<i18n>max.length.instruction.object</i18n>)</b>
                         </span>
-                <input type="text" class="twelve" ng-model="instruction.object" required/>
+                <input type="text" class="twelve" ng-model="instruction.object" maxlength="80" required/>
             </label>
             <label class="row twelve vertical-spacing">
                         <span class="twelve">
-                            <i18n>lystore.exercise.number</i18n> *
+                            <i18n>lystore.exercise.year</i18n> *
                         </span>
                 <select  ng-model="instruction.id_exercise" class="twelve"
                          ng-init="instruction.id_exercise = instruction.id_exercise ||
@@ -66,6 +66,7 @@
                         <thead>
                         <td class="two"><i18n>label</i18n></td>
                         <td class="two"><i18n>lystore.number.orders</i18n></td>
+                        <td class="two"><i18n>lystore.number.sub</i18n></td>
                         <td class="two"><i18n>amount</i18n></td>
                         <td class="two"><i18n>lystore.operation.status</i18n></td>
                         <td class="one aligne-text-center">&nbsp</td>
@@ -73,6 +74,7 @@
                         <tbody>
                         <tr ng-repeat="operationAdd in instruction.operations">
                             <td>[[operationAdd.label.label]]</td>
+                            <td>[[operationAdd.nb_orders]]</td>
                             <td>[[operationAdd.nbOrberSub]]</td>
                             <td ><span ng-bind="operationAdd.amount | currency"></span></td>
                             <td>
@@ -119,7 +121,7 @@
             </div>
             <div class="right-magnet vertical-spacing">
                 <input type="button" class="cancel" ng-click="cancelInstructionForm()" i18n-value="cancel"/>
-                <input type="submit" class="button" ng-disabled="!(instruction.object && instruction.date_cp)"/>
+                <input type="submit" class="button" ng-disabled="!(instruction.object && instruction.object.length <= 80 && instruction.date_cp)"/>
             </div>
         </form>
     </article>

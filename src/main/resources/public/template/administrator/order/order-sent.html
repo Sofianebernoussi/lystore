@@ -94,7 +94,7 @@
     <section class="toggle-buttons" ng-class="{ hide: ordersClient.selected.length === 0 }">
         <div class="toggle">
             <div class="row">
-                <button ng-click="windUpOrders(getSelectedOrders())">
+                <button ng-click="windUpOrders(displayedOrders.selected)">
                     <i18n>windUp</i18n>
                 </button>
             </div>

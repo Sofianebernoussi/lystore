@@ -13,6 +13,10 @@ export const orderController = ng.controller('orderController',
         $scope.allOrdersSelected = false;
         $scope.tableFields = orderWaiting;
         let isPageOrderWaiting = $location.path() === "/order/waiting";
+        let isPageOrderSent = $location.path() === "/order/sent";
+
+        if(isPageOrderSent)
+            $scope.displayedOrdersSent = $scope.displayedOrders;
         $scope.sort = {
             order : {
                 type: 'name_structure',
@@ -79,18 +83,19 @@ export const orderController = ng.controller('orderController',
         };
 
         $scope.initPreferences = ()  => {
-            if ($scope.preferences && $scope.preferences.preference) {
-                let loadedPreferences = JSON.parse($scope.preferences.preference);
-                if(loadedPreferences.ordersWaitingDisplay)
-                $scope.tableFields.map(table => {
-                    table.display = loadedPreferences.ordersWaitingDisplay[table.fieldName]
-                });
-                if(loadedPreferences.searchFields){
-                     $scope.search.filterWords = loadedPreferences.searchFields;
-                    $scope.filterDisplayedOrders();
+            if(isPageOrderWaiting)
+                if ($scope.preferences && $scope.preferences.preference) {
+                    let loadedPreferences = JSON.parse($scope.preferences.preference);
+                    if(loadedPreferences.ordersWaitingDisplay)
+                        $scope.tableFields.map(table => {
+                            table.display = loadedPreferences.ordersWaitingDisplay[table.fieldName]
+                        });
+                    if(loadedPreferences.searchFields){
+                        $scope.search.filterWords = loadedPreferences.searchFields;
+                        $scope.filterDisplayedOrders();
+                    }
+                    $scope.ub.putPreferences("searchFields", []);
                 }
-                $scope.ub.putPreferences("searchFields", []);
-            }
         };
 
         $scope.initPreferences();
@@ -213,15 +218,30 @@ export const orderController = ng.controller('orderController',
             Utils.safeApply($scope);
 
         };
+        $scope.syncOrders = async (status: string) =>{
+            $scope.displayedOrders.all = [];
+            await $scope.ordersClient.sync(status, $scope.structures.all);
+            $scope.displayedOrders.all = $scope.ordersClient.all;
+            $scope.displayedOrders.all.map(order => {
+                    order.selected = false;
+                }
+            );
+
+        };
+
         $scope.windUpOrders = async (orders: OrderClient[]) => {
             let ordersToWindUp  = new OrdersClient();
+            // console.log($scope.displayedOrders.all);
             ordersToWindUp.all = Mix.castArrayAs(OrderClient, orders);
             let { status } = await ordersToWindUp.updateStatus('DONE');
             if (status === 200) {
                 toasts.confirm('lystore.windUp.notif');
             }
             await $scope.syncOrders('SENT');
+            while ($scope.displayedOrders.selected.length > 0){
+            }
             Utils.safeApply($scope);
+
         };
         $scope.isNotValidated = ( orders:OrderClient[]) =>{
 

@@ -326,7 +326,8 @@ export const configurationController = ng.controller('configurationController',
                 && equipment.id_tax !== undefined
                 && equipment.tags.length > 0
                 && $scope.validEquipmentOptions(equipment.options)
-                && equipment.warranty
+                && equipment.warranty !== undefined
+                && equipment.warranty >= 0
                 && (!equipment.id || equipment.reference)
         };
 

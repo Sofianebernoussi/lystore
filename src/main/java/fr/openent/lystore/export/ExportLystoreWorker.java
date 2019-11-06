@@ -88,6 +88,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         idNewFile = body.getString("_id");
         Integer object_id = -1;
         String string_object_id ="";
+        JsonObject params = body.getJsonObject("externalParams");
         try {
             object_id = Integer.parseInt(body.getString("object_id"));
         }catch (ClassCastException ce){
@@ -137,7 +138,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                         exportHandler);
                 break;
             case "exportBCOrders":
-                exportBCOrders(string_object_id,
+                exportBCOrders(params,
                         fileName,
                         exportHandler);
                 break;
@@ -148,10 +149,10 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         }
     }
 
-    private void exportBCOrders(String object_id, String titleFile, Handler<Either<String, Boolean>> handler) {
+    private void exportBCOrders(JsonObject params, String titleFile, Handler<Either<String, Boolean>> handler) {
         logger.info("Export list lycee from Orders started");
-        this.validOrders = new ValidOrders(exportService,object_id,idNewFile);
-        this.validOrders.exportListLycee(event1 -> {
+        this.validOrders = new ValidOrders(exportService,params,idNewFile);
+        this.validOrders.exportBC(event1 -> {
             if (event1.isLeft()) {
                 ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
             } else {

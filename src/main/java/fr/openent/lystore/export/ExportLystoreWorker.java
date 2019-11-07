@@ -14,8 +14,7 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.storage.Storage;
 import org.vertx.java.busmods.BusModBase;
 
-import static fr.openent.lystore.Lystore.CONFIG;
-import static fr.openent.lystore.Lystore.STORAGE;
+import static fr.openent.lystore.Lystore.*;
 
 public class ExportLystoreWorker extends BusModBase implements Handler<Message<JsonObject>> {
     private Instruction instruction;
@@ -25,6 +24,8 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
     private String idNewFile;
     private boolean isWorking = false;
     private boolean isSleeping = true;
+    private final String XLSXHEADER= "application/vnd.ms-excel";
+    private final String PDFHEADER = "application/pdf";
 
     @Override
     public void start() {
@@ -151,26 +152,26 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
 
     private void exportBCOrders(JsonObject params, String titleFile, Handler<Either<String, Boolean>> handler) {
         logger.info("Export list lycee from Orders started");
-        this.validOrders = new ValidOrders(exportService,params,idNewFile);
+        this.validOrders = new ValidOrders(exportService,params,idNewFile,this.eb,this.vertx,this.config);
         this.validOrders.exportBC(event1 -> {
             if (event1.isLeft()) {
-                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
+                ExportHelper.catchError(exportService, idNewFile, "error when creating PDF" + event1.left(),handler);
             } else {
                 Buffer xlsx = event1.right().getValue();
-                saveBuffer(xlsx, titleFile,handler);
+                saveBuffer(xlsx, titleFile,handler,PDFHEADER);
             }
         });
     }
 
     private void exportListLycOrders(String object_id, String titleFile, Handler<Either<String, Boolean>> handler) {
         logger.info("Export list lycee from Orders started");
-        this.validOrders = new ValidOrders(exportService,object_id,idNewFile);
+        this.validOrders = new ValidOrders(exportService,object_id,idNewFile,this.eb,this.vertx,this.config);
         this.validOrders.exportListLycee(event1 -> {
             if (event1.isLeft()) {
                 ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
             } else {
                 Buffer xlsx = event1.right().getValue();
-                saveBuffer(xlsx, titleFile,handler);
+                saveBuffer(xlsx, titleFile,handler,XLSXHEADER);
             }
         });
 
@@ -184,7 +185,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                 ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
             } else {
                 Buffer xlsx = event1.right().getValue();
-                saveBuffer(xlsx, titleFile,handler);
+                saveBuffer(xlsx, titleFile,handler,XLSXHEADER);
             }
         });
     }
@@ -200,7 +201,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                 logger.info("Export NotificationCP ended");
 
                 Buffer xlsx = event1.right().getValue();
-                saveBuffer(xlsx, titleFile,handler);
+                saveBuffer(xlsx, titleFile,handler,XLSXHEADER);
 
             }
         });
@@ -217,7 +218,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                 logger.info("Export Subvention ended");
 
                 Buffer xlsx = event1.right().getValue();
-                saveBuffer(xlsx, titleFile,handler);
+                saveBuffer(xlsx, titleFile,handler,XLSXHEADER);
 
             }
         });
@@ -234,7 +235,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                 logger.info("Export Publipostage ended");
 
                 Buffer xlsx = file.right().getValue();
-                saveBuffer(xlsx, titleFile,handler);
+                saveBuffer(xlsx, titleFile,handler,XLSXHEADER);
 
             }
         });
@@ -251,14 +252,14 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                 logger.info("Export RME ended");
 
                 Buffer xlsx = event.right().getValue();
-                saveBuffer(xlsx, titleFile,handler);
+                saveBuffer(xlsx, titleFile,handler,XLSXHEADER);
 
             }
         });
     }
 
-    private void saveBuffer(Buffer xlsx, String fileName,Handler<Either<String,Boolean>> handler) {
-        storage.writeBuffer(xlsx, "application/vnd.ms-excel", fileName, file -> {
+    private void saveBuffer(Buffer buff, String fileName,Handler<Either<String,Boolean>> handler,String fileType) {
+        storage.writeBuffer(buff, fileType, fileName, file -> {
             if (!"ok".equals(file.getString("status"))) {
                 ExportHelper.catchError(exportService, idNewFile, "An error occurred when inserting xlsx ",handler);
                 handler.handle(new Either.Left<>("An error occurred when inserting xlsx"));
@@ -279,7 +280,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
             } else {
                 Buffer xlsx = event1.right().getValue();
                 logger.info("Export Equipment ended");
-                saveBuffer(xlsx, titleFile,handler);
+                saveBuffer(xlsx, titleFile,handler,XLSXHEADER);
             }
         }, type);
     }

@@ -2,6 +2,7 @@ package fr.openent.lystore.export.validOrders;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.ExportObject;
+import fr.openent.lystore.export.validOrders.BC.BCExport;
 import fr.openent.lystore.export.validOrders.listLycee.ListLycee;
 import fr.openent.lystore.export.validOrders.listLycee.RecapListLycee;
 import fr.openent.lystore.helpers.ExportHelper;
@@ -50,7 +51,6 @@ public class ValidOrders extends ExportObject {
     private JsonObject config;
     private Vertx vertx;
     private EventBus eb;
-    private String node;
 
     public ValidOrders(ExportService exportService, String idNewFile,EventBus eb, Vertx vertx, JsonObject config){
         super(exportService,idNewFile);
@@ -90,48 +90,6 @@ public class ValidOrders extends ExportObject {
 
 
 
-    public void generatePDF(final JsonObject templateProps, final String templateName,
-                            final String prefixPdfName,  final Handler<Buffer> handler) {
-
-        final JsonObject exportConfig = config.getJsonObject("exports");
-        final String templatePath = exportConfig.getString("template-path");
-        final String baseUrl = config.getString("host") +
-                config.getString("app-address") + "/public/";
-      final String logo = exportConfig.getString("logo-path");
-
-        node = (String) vertx.sharedData().getLocalMap("server").get("node");
-        if (node == null) {
-            node = "";
-        }
-
-        final String path = FileResolver.absolutePath(templatePath + templateName);
-        final String logoPath = FileResolver.absolutePath(logo);
-
-        vertx.fileSystem().readFile(path, new Handler<AsyncResult<Buffer>>() {
-
-            @Override
-            public void handle(AsyncResult<Buffer> result) {
-                if (!result.succeeded()) {
-                    return;
-                }
-                System.out.println("yeah");
-
-                Buffer logoBuffer = vertx.fileSystem().readFileBlocking(logoPath);
-                handler.handle(logoBuffer);
-//                String encodedLogo = "";
-//                try {
-//                    encodedLogo = new String(Base64.getMimeEncoder().encode(logoBuffer.getBytes()), "UTF-8");
-//                } catch (UnsupportedEncodingException e) {
-//                    e.printStackTrace();
-//                    log.error("[DefaultExportPDFService@generatePDF] An error occurred while encoding logo to base 64");
-//                }
-//                templateProps.put("logo-data", encodedLogo);
-
-
-            }
-        });
-
-    }
 
 
     public void exportBC(Handler<Either<String, Buffer>> handler) {
@@ -139,13 +97,7 @@ public class ValidOrders extends ExportObject {
             ExportHelper.catchError(exportService, idFile, "number validations is not nullable");
             handler.handle(new Either.Left<>("number validations is not nullable"));
         }else{
-            generatePDF(new JsonObject(), "BC.xhtml", "Bon_Commande_", new Handler<Buffer>() {
-                @Override
-                public void handle(Buffer event) {
-                    handler.handle(new Either.Right<>(event));
-                }
-            });
-            log.info("good");
+            new BCExport(eb,vertx,config).create(params.getJsonArray("numberValidations"),handler);
         }
     }
 }

@@ -764,7 +764,7 @@ public class OrderController extends ControllerHelper {
         });
     }
 
-    private static String getReadableNumber(Double number) {
+    public static String getReadableNumber(Double number) {
         DecimalFormat instance = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.FRENCH);
         DecimalFormatSymbols symbols = instance.getDecimalFormatSymbols();
         symbols.setCurrencySymbol("");
@@ -807,7 +807,7 @@ public class OrderController extends ControllerHelper {
         return sum;
     }
 
-    private static JsonArray formatOrders(JsonArray orders) {
+    public static JsonArray formatOrders(JsonArray orders) {
         JsonObject order;
         for (int i = 0; i < orders.size(); i++) {
             order = orders.getJsonObject(i);
@@ -831,16 +831,16 @@ public class OrderController extends ControllerHelper {
         return orders;
     }
 
-    private static Double getTotalPrice(Double price, Double amount) {
+    public static Double getTotalPrice(Double price, Double amount) {
         return price * amount;
     }
 
-    private static Double getTaxIncludedPrice(Double price, Double taxAmount) {
+    public static Double getTaxIncludedPrice(Double price, Double taxAmount) {
         Double multiplier = taxAmount / 100 + 1;
         return roundWith2Decimals(price) * multiplier;
     }
 
-    private static Double roundWith2Decimals(Double numberToRound) {
+    public static Double roundWith2Decimals(Double numberToRound) {
         BigDecimal bd = new BigDecimal(numberToRound);
         return bd.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }

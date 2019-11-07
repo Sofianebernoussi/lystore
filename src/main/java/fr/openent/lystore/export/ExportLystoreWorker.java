@@ -264,7 +264,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                 ExportHelper.catchError(exportService, idNewFile, "An error occurred when inserting xlsx ",handler);
                 handler.handle(new Either.Left<>("An error occurred when inserting xlsx"));
             } else {
-                logger.info("Xlsx insert in storage");
+                logger.info(fileName + " insert in storage");
                 exportService.updateWhenSuccess(file.getString("_id"), idNewFile,handler);
             }
         });

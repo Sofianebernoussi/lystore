@@ -2,6 +2,8 @@ package fr.openent.lystore.export.validOrders.BC;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.controllers.OrderController;
+//import fr.openent.lystore.helpers.RendersHelper;
+import fr.openent.lystore.helpers.RendersHelper;
 import fr.openent.lystore.service.AgentService;
 import fr.openent.lystore.service.OrderService;
 import fr.openent.lystore.service.StructureService;
@@ -45,7 +47,7 @@ public class BCExport {
     private DefaultContractService contractService;
     private StructureService structureService;
     private AgentService agentService;
-    private Renders renders ;
+    private RendersHelper renders ;
 
     public BCExport(EventBus eb, Vertx vertx, JsonObject config){
         this.vertx = vertx;
@@ -59,7 +61,7 @@ public class BCExport {
         this.supplierService = new DefaultSupplierService(Lystore.lystoreSchema, "supplier");
         this.contractService = new DefaultContractService(Lystore.lystoreSchema, "contract");
         this.agentService = new DefaultAgentService(Lystore.lystoreSchema, "agent");
-        this.renders = new Renders(this.vertx, config);
+        this.renders = new RendersHelper(this.vertx, config);
 
     }
 
@@ -396,43 +398,44 @@ public class BCExport {
                 exportHandler.handle(new Either.Left<>("dd"));
 
                 StringReader reader = new StringReader(result.result().toString("UTF-8"));
-
-//                renders.processTemplate(request, templateProps, templateName, reader, new Handler<Writer>() {
+                log.info(config.getString("host"));
+                log.info(config.getString("host").split("//")[1]);
+                renders.processTemplate(exportHandler, templateProps, templateName, reader, new Handler<Writer>() {
 //
-//                    @Override
-//                    public void handle(Writer writer) {
-//                        String processedTemplate = ((StringWriter) writer).getBuffer().toString();
-//                        if (processedTemplate == null) {
-//                            exportHandler.handle(new Either.Left<>("processed template is null"));
-//                            return;
-//                        }
-//                        JsonObject actionObject = new JsonObject();
-//                        byte[] bytes;
-//                        try {
-//                            bytes = processedTemplate.getBytes("UTF-8");
-//                        } catch (UnsupportedEncodingException e) {
-//                            bytes = processedTemplate.getBytes();
-//                            log.error(e.getMessage(), e);
-//                        }
+                    @Override
+                    public void handle(Writer writer) {
+                        String processedTemplate = ((StringWriter) writer).getBuffer().toString();
+                        if (processedTemplate == null) {
+                            exportHandler.handle(new Either.Left<>("processed template is null"));
+                            return;
+                        }
+                        JsonObject actionObject = new JsonObject();
+                        byte[] bytes;
+                        try {
+                            bytes = processedTemplate.getBytes("UTF-8");
+                        } catch (UnsupportedEncodingException e) {
+                            bytes = processedTemplate.getBytes();
+                            log.error(e.getMessage(), e);
+                        }
 
-//                        actionObject
-//                                .put("content", bytes)
-//                                .put("baseUrl", baseUrl);
-//                        eb.send(node + "entcore.pdf.generator", actionObject, new Handler<AsyncResult<Message<JsonObject>>>() {
-//                            @Override
-//                            public void handle(AsyncResult<Message<JsonObject>> reply) {
-//                                JsonObject pdfResponse = reply.result().body();
-//                                if (!"ok".equals(pdfResponse.getString("status"))) {
-//                                    exportHandler.handle(new Either.Left<>("wrong status when calling bus (pdf) "));
-//                                    return;
-//                                }
-//                                byte[] pdf = pdfResponse.getBinary("content");
-//                                Buffer either = Buffer.buffer(pdf);
-//                                handler.handle(either);
-//                            }
-//                        });
-//                    }
-//                });
+                        actionObject
+                                .put("content", bytes)
+                                .put("baseUrl", baseUrl);
+                        eb.send(node + "entcore.pdf.generator", actionObject, new Handler<AsyncResult<Message<JsonObject>>>() {
+                            @Override
+                            public void handle(AsyncResult<Message<JsonObject>> reply) {
+                                JsonObject pdfResponse = reply.result().body();
+                                if (!"ok".equals(pdfResponse.getString("status"))) {
+                                    exportHandler.handle(new Either.Left<>("wrong status when calling bus (pdf) "));
+                                    return;
+                                }
+                                byte[] pdf = pdfResponse.getBinary("content");
+                                Buffer either = Buffer.buffer(pdf);
+                                handler.handle(either);
+                            }
+                        });
+                    }
+                });
             }
         });
 

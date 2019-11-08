@@ -397,34 +397,34 @@ public class OrderController extends ControllerHelper {
     public void sendOrders (final HttpServerRequest request){
 //        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrders", "_BC");
 
-        RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {
-            @Override
-            public void handle(final JsonObject orders) {
-                final JsonArray ids = orders.getJsonArray("ids");
-                final String nbrBc = orders.getString("bc_number");
-                final String nbrEngagement = orders.getString("engagement_number");
-                final String dateGeneration = orders.getString("dateGeneration");
-                Number supplierId = orders.getInteger("supplierId");
-                final Number programId = orders.getInteger("id_program");
+//        RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {
+//            @Override
+//            public void handle(final JsonObject orders) {
+//                final JsonArray ids = orders.getJsonArray("ids");
+//                final String nbrBc = orders.getString("bc_number");
+//                final String nbrEngagement = orders.getString("engagement_number");
+//                final String dateGeneration = orders.getString("dateGeneration");
+//                Number supplierId = orders.getInteger("supplierId");
+//                final Number programId = orders.getInteger("id_program");
 
-                getOrdersData(request, nbrBc, nbrEngagement, dateGeneration, supplierId, ids,
-                        new Handler<JsonObject>() {
-                            @Override
-                            public void handle(JsonObject data) {
-                                data.put("print_order", true);
-                                exportPDFService.generatePDF(request, data,
-                                        "BC.xhtml", "Bon_Commande_",
-                                        new Handler<Buffer>() {
-                                            @Override
-                                            public void handle(final Buffer pdf) {
-                                                manageFileAndUpdateStatus(request, pdf, ids, nbrEngagement, programId, dateGeneration, nbrBc);
-                                            }
-                                        }
-                                );
-                            }
-                        });
-            }
-        });
+//                getOrdersData(request, nbrBc, nbrEngagement, dateGeneration, supplierId, ids,
+//                        new Handler<JsonObject>() {
+//                            @Override
+//                            public void handle(JsonObject data) {
+//                                data.put("print_order", true);
+//                                exportPDFService.generatePDF(request, data,
+//                                        "BC.xhtml", "Bon_Commande_",
+//                                        new Handler<Buffer>() {
+//                                            @Override
+//                                            public void handle(final Buffer pdf) {
+//                                                manageFileAndUpdateStatus(request, pdf, ids, nbrEngagement, programId, dateGeneration, nbrBc);
+//                                            }
+//                                        }
+//                                );
+//                            }
+//                        });
+//            }
+//        });
     }
 
     @Put("/orders/inprogress")
@@ -472,7 +472,6 @@ public class OrderController extends ControllerHelper {
 
     private void exportDocuments(final HttpServerRequest request, final Boolean printOrder,
                                  final Boolean printCertificates, final List<String> validationNumbers) {
-        System.out.println(printOrder);
         if(printOrder){
             ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrders", "_BC_"+ validationNumbers.get(0));
         }else {
@@ -496,7 +495,7 @@ public class OrderController extends ControllerHelper {
                                                                 .putHeader("Content-Type", "application/pdf; charset=utf-8")
                                                                 .putHeader("Content-Disposition", "attachment; filename="
                                                                         + generateExportName(validationNumbers, "" +
-                                                                        (printOrder ? "BC" : "") + (printCertificates ? "CSF" : "")) + ".pdf")
+                                                                        (printCertificates ? "CSF" : "")) + ".pdf")
                                                                 .end(pdf);
                                                     }
                                                 }

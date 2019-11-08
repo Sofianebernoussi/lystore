@@ -83,7 +83,6 @@ public class ExportHelper {
             infoFile.put("type", type);
         }
 
-        String titleFile = withType ? makeTheNameExport(name,extension, type) : makeTheNameExport(name,extension);
         log.info("makeExportExcel");
         String finalId = id;
 
@@ -92,9 +91,11 @@ public class ExportHelper {
 
 
         if(action.equals("exportBCOrdersDuringValidation")){
-            getParamsDuringBCValidation(eb,request,exportService,typeObject,extension,action,infoFile,finalId,titleFile);
+            getParamsDuringBCValidation(eb,request,exportService,typeObject,extension,action,infoFile,finalId);
         }
         else{
+            String titleFile = withType ? makeTheNameExport(name,extension, type) : makeTheNameExport(name,extension);
+
             sendExportRequest(eb,request,exportService,typeObject,extension,action,infoFile,finalId,titleFile,finalParams);
         }
     }
@@ -128,7 +129,7 @@ public class ExportHelper {
     }
 
     private static void getParamsDuringBCValidation(EventBus eb, HttpServerRequest request, ExportService exportService, String typeObject, String extension, String
-            action,JsonObject infoFile, String finalId,String titleFile) {
+            action,JsonObject infoFile, String finalId) {
         JsonObject params = new JsonObject();
         log.info(request.getParam("ids"));
         RequestUtils.bodyToJson(request,  Server.getPathPrefix(Lystore.CONFIG) + "orderIds", new Handler<JsonObject>() {
@@ -150,6 +151,7 @@ public class ExportHelper {
 
 
                 ;
+                String titleFile = makeTheNameExport("_BC_" + nbrBc,extension);
                 sendExportRequest(eb,request,exportService,typeObject,extension,action,infoFile,finalId, titleFile,params);
 
             }

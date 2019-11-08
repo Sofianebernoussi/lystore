@@ -6,6 +6,7 @@ import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
 import fr.openent.lystore.service.ExportService;
 import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.Server;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
@@ -69,10 +70,12 @@ public class ExportHelper {
         boolean withType = request.getParam("type") != null;
         if(request.getParam("id")!=null && typeObject.equals(Lystore.INSTRUCTIONS))
             id = request.getParam("id");
+
         if(request.params().getAll("number_validation") != null && !request.params().getAll("number_validation").isEmpty() ){
             id = request.params().getAll("number_validation").get(0);
             params.put("numberValidations",new JsonArray(request.params().getAll("number_validation")));
         }
+
         String type = "";
         JsonObject infoFile = new JsonObject();
         if (withType) {
@@ -85,10 +88,23 @@ public class ExportHelper {
         String finalId = id;
 
 
+        JsonObject finalParams = params;
 
 
+        if(action.equals("exportBCOrdersDuringValidation")){
+            getParamsDuringBCValidation(eb,request,exportService,typeObject,extension,action,infoFile,finalId,titleFile);
+        }
+        else{
+            sendExportRequest(eb,request,exportService,typeObject,extension,action,infoFile,finalId,titleFile,finalParams);
+        }
+    }
+
+
+
+    private static void sendExportRequest(EventBus eb, HttpServerRequest request, ExportService exportService, String typeObject, String extension, String
+            action,JsonObject infoFile, String finalId,String titleFile, JsonObject finalParams){
         UserUtils.getUserInfos(eb, request, user -> {
-            exportService.createWhenStart(typeObject,extension, infoFile, finalId, titleFile, user.getUserId(), action,params, newExport -> {
+            exportService.createWhenStart(typeObject, extension, infoFile, finalId, titleFile, user.getUserId(), action, finalParams, newExport -> {
                 if (newExport.isRight()) {
                     String idExport = newExport.right().getValue().getString("id");
                     try {
@@ -111,8 +127,32 @@ public class ExportHelper {
         });
     }
 
-    ;
+    private static void getParamsDuringBCValidation(EventBus eb, HttpServerRequest request, ExportService exportService, String typeObject, String extension, String
+            action,JsonObject infoFile, String finalId,String titleFile) {
+        JsonObject params = new JsonObject();
+        log.info(request.getParam("ids"));
+        RequestUtils.bodyToJson(request,  Server.getPathPrefix(Lystore.CONFIG) + "orderIds", new Handler<JsonObject>() {
+            @Override
+            public void handle(final JsonObject orders) {
+                final JsonArray ids = orders.getJsonArray("ids");
+                final String nbrBc = orders.getString("bc_number");
+                final String nbrEngagement = orders.getString("engagement_number");
+                final String dateGeneration = orders.getString("dateGeneration");
+                Number supplierId = orders.getInteger("supplierId");
+                final Number programId = orders.getInteger("id_program");
+
+                params.put("ids",ids)
+                      .put("nbrBc",nbrBc)
+                      .put("nbrEngagement",nbrEngagement)
+                      .put("dateGeneration",dateGeneration)
+                      .put("supplierId",supplierId)
+                      .put("programId",programId)
 
 
+                ;
+                sendExportRequest(eb,request,exportService,typeObject,extension,action,infoFile,finalId,"_" + nbrBc + titleFile,params);
 
+            }
+        });
+    }
 }

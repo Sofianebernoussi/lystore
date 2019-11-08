@@ -155,14 +155,13 @@ public class OrderController extends ControllerHelper {
         }
     }
 
-
+//ignorer?
     @Get("/order")
     @ApiDoc("Get the list of orders")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void getOrderPDF (final HttpServerRequest request) {
         final String orderNumber = request.params().get("number");
-        System.out.println("get");
         orderService.getOrderFileId(orderNumber, new Handler<Either<String, JsonObject>>() {
             @Override
             public void handle(Either<String, JsonObject> event) {
@@ -397,6 +396,8 @@ public class OrderController extends ControllerHelper {
     public void sendOrders (final HttpServerRequest request){
 //        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrders", "_BC");
 
+        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrdersDuringValidation", "_BC");
+//
 //        RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {
 //            @Override
 //            public void handle(final JsonObject orders) {
@@ -406,7 +407,6 @@ public class OrderController extends ControllerHelper {
 //                final String dateGeneration = orders.getString("dateGeneration");
 //                Number supplierId = orders.getInteger("supplierId");
 //                final Number programId = orders.getInteger("id_program");
-
 //                getOrdersData(request, nbrBc, nbrEngagement, dateGeneration, supplierId, ids,
 //                        new Handler<JsonObject>() {
 //                            @Override
@@ -473,7 +473,7 @@ public class OrderController extends ControllerHelper {
     private void exportDocuments(final HttpServerRequest request, final Boolean printOrder,
                                  final Boolean printCertificates, final List<String> validationNumbers) {
         if(printOrder){
-            ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrders", "_BC_"+ validationNumbers.get(0));
+            ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrders", "_BC");
         }else {
             supplierService.getSupplierByValidationNumbers(new fr.wseduc.webutils.collections.JsonArray(validationNumbers), new Handler<Either<String, JsonObject>>() {
                 @Override

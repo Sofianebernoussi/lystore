@@ -3,6 +3,7 @@ package fr.openent.lystore.export.validOrders;
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.ExportObject;
 import fr.openent.lystore.export.validOrders.BC.BCExport;
+import fr.openent.lystore.export.validOrders.BC.BCExportDuringValidation;
 import fr.openent.lystore.export.validOrders.listLycee.ListLycee;
 import fr.openent.lystore.export.validOrders.listLycee.RecapListLycee;
 import fr.openent.lystore.helpers.ExportHelper;
@@ -81,6 +82,19 @@ public class ValidOrders extends ExportObject {
             handler.handle(new Either.Left<>("number validations is not nullable"));
         }else{
             new BCExport(eb,vertx,config).create(params.getJsonArray("numberValidations"),handler);
+        }
+    }
+
+
+
+
+
+    public void exportBCDuringValidation(Handler<Either<String, Buffer>> handler) {
+        if (this.params == null || this.params.isEmpty()) {
+            ExportHelper.catchError(exportService, idFile, "number validations is not nullable");
+            handler.handle(new Either.Left<>("number validations is not nullable"));
+        }else{
+            new BCExportDuringValidation(eb,vertx,config).create(params,handler);
         }
     }
 }

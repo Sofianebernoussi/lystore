@@ -155,10 +155,10 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         this.validOrders = new ValidOrders(exportService,params,idNewFile,this.eb,this.vertx,this.config);
         this.validOrders.exportBC(event1 -> {
             if (event1.isLeft()) {
-                ExportHelper.catchError(exportService, idNewFile, "error when creating PDF" + event1.left(),handler);
+                ExportHelper.catchError(exportService, idNewFile, "error when creating PDF " + event1.left().getValue(),handler);
             } else {
                 Buffer xlsx = event1.right().getValue();
-                saveBuffer(xlsx, titleFile,handler,PDFHEADER);
+                saveBuffer(xlsx,  titleFile ,handler,PDFHEADER);
             }
         });
     }

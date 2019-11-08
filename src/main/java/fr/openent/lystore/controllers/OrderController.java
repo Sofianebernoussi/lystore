@@ -474,7 +474,7 @@ public class OrderController extends ControllerHelper {
                                  final Boolean printCertificates, final List<String> validationNumbers) {
         System.out.println(printOrder);
         if(printOrder){
-            ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrders", "_BC");
+            ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrders", "_BC_"+ validationNumbers.get(0));
         }else {
             supplierService.getSupplierByValidationNumbers(new fr.wseduc.webutils.collections.JsonArray(validationNumbers), new Handler<Either<String, JsonObject>>() {
                 @Override

@@ -395,8 +395,6 @@ public class BCExport {
                 }
                 templateProps.put("logo-data", encodedLogo);
 
-                exportHandler.handle(new Either.Left<>("dd"));
-
                 StringReader reader = new StringReader(result.result().toString("UTF-8"));
                 log.info(config.getString("host"));
                 log.info(config.getString("host").split("//")[1]);

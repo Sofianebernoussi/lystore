@@ -287,9 +287,8 @@ export const orderController = ng.controller('orderController',
         };
         $scope.sendOrders = async (orders: OrdersClient) => {
             let { status, data } = await orders.updateStatus('SENT');
-            $scope.saveByteArray(`BC_${orders.bc_number}`, data);
-            if (status === 200) {
-                toasts.confirm( 'lystore.sent.notif');
+            if (status === 201) {
+                toasts.info( 'lystore.export.notif'); // a modifier peut etre
             }
             $scope.redirectTo('/order/valid');
             Utils.safeApply($scope);

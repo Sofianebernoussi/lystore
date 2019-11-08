@@ -4,10 +4,7 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.controllers.OrderController;
 import fr.openent.lystore.export.validOrders.BC.BCExport;
 import fr.openent.lystore.helpers.RendersHelper;
-import fr.openent.lystore.service.AgentService;
-import fr.openent.lystore.service.OrderService;
-import fr.openent.lystore.service.StructureService;
-import fr.openent.lystore.service.SupplierService;
+import fr.openent.lystore.service.*;
 import fr.openent.lystore.service.impl.*;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.data.FileResolver;
@@ -41,7 +38,9 @@ public class PDF_OrderHElper {
     private EventBus eb;
     private String node;
     private Logger log = LoggerFactory.getLogger(BCExport.class);
-    private OrderService orderService;
+    protected OrderService orderService;
+    protected ProgramService programService;
+
     private DefaultContractService contractService;
     private StructureService structureService;
     private AgentService agentService;
@@ -60,6 +59,8 @@ public class PDF_OrderHElper {
         this.contractService = new DefaultContractService(Lystore.lystoreSchema, "contract");
         this.agentService = new DefaultAgentService(Lystore.lystoreSchema, "agent");
         this.renders = new RendersHelper(this.vertx, config);
+        programService = new DefaultProgramService(Lystore.lystoreSchema,"program");
+
 
     }
 

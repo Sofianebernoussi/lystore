@@ -150,7 +150,7 @@ public class ExportHelper {
 
 
                 ;
-                sendExportRequest(eb,request,exportService,typeObject,extension,action,infoFile,finalId,"_" + nbrBc + titleFile,params);
+                sendExportRequest(eb,request,exportService,typeObject,extension,action,infoFile,finalId, titleFile,params);
 
             }
         });

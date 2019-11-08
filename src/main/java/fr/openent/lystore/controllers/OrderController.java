@@ -155,7 +155,6 @@ public class OrderController extends ControllerHelper {
         }
     }
 
-//ignorer?
     @Get("/order")
     @ApiDoc("Get the list of orders")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
@@ -389,14 +388,77 @@ public class OrderController extends ControllerHelper {
 
     }
 
+
+    private void logSendingOrder(JsonArray ids, final HttpServerRequest request) {
+        orderService.getOrderByValidatioNumber(ids, new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(Either<String, JsonArray> event) {
+                if (event.isRight()) {
+                    JsonArray orders = event.right().getValue();
+                    JsonObject order;
+                    for (int i = 0; i < orders.size(); i++) {
+                        order = orders.getJsonObject(i);
+                        Logging.insert(eb, request, Contexts.ORDER.toString(), Actions.UPDATE.toString(),
+                                order.getInteger("id").toString(), order);
+                    }
+                }
+            }
+        });
+    }
+
+
+
+    private void sentOrders(HttpServerRequest request,
+                            final JsonArray ids, final String engagementNumber, final Number programId, final String dateCreation,
+                            final String orderNumber) {
+        programService.getProgramById(programId, new Handler<Either<String, JsonObject>>() {
+            @Override
+            public void handle(Either<String, JsonObject> programEvent) {
+                if (programEvent.isRight()) {
+                    JsonObject program = programEvent.right().getValue();
+                    orderService.updateStatusToSent(ids.getList(), "SENT", engagementNumber, program.getString("name"),
+                            dateCreation, orderNumber,  new Handler<Either<String, JsonObject>>() {
+                                @Override
+                                public void handle(Either<String, JsonObject> event) {
+                                    if (event.isRight()) {
+                                        logSendingOrder(ids,request);
+                                        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrdersDuringValidation", "_BC");
+                                    } else {
+                                        badRequest(request);
+                                    }
+                                }
+                            });
+                } else {
+                    badRequest(request);
+                }
+            }
+        });
+    }
     @Put("/orders/sent")
     @ApiDoc("send orders")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void sendOrders (final HttpServerRequest request){
 //        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrders", "_BC");
-
-        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrdersDuringValidation", "_BC");
+        RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {
+            @Override
+            public void handle(final JsonObject orders) {
+                final JsonArray ids = orders.getJsonArray("ids");
+                final String nbrBc = orders.getString("bc_number");
+                final String nbrEngagement = orders.getString("engagement_number");
+                final String dateGeneration = orders.getString("dateGeneration");
+                Number supplierId = orders.getInteger("supplierId");
+                final Number programId = orders.getInteger("id_program");
+                getOrdersData(request, nbrBc, nbrEngagement, dateGeneration, supplierId, ids,
+                        new Handler<JsonObject>() {
+                            @Override
+                            public void handle(JsonObject data) {
+                                data.put("print_order", true);
+                                sentOrders(request,ids,nbrEngagement,programId,dateGeneration,nbrBc);
+                            }
+                        });
+            }
+        });
 //
 //        RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {
 //            @Override
@@ -521,7 +583,7 @@ public class OrderController extends ControllerHelper {
     }
 
     private void exportStructuresList(final HttpServerRequest request) {
-          ExportHelper.makeExport(request, eb, exportService,Lystore.ORDERS,  Lystore.XLSX,"exportListLycOrders", "_list_bdc");
+        ExportHelper.makeExport(request, eb, exportService,Lystore.ORDERS,  Lystore.XLSX,"exportListLycOrders", "_list_bdc");
     }
 
     @Delete("/orders/valid")
@@ -609,67 +671,6 @@ public class OrderController extends ControllerHelper {
                 "\n";
     }
 
-
-    private void manageFileAndUpdateStatus(final HttpServerRequest request, final Buffer pdf,
-                                           final JsonArray ids, final String engagementNumber, final Number programId, final String dateCreation,
-                                           final String orderNumber) {
-        final String id = UUID.randomUUID().toString();
-        storage.writeBuffer(id, pdf, "application/pdf",
-                "BC_" + orderNumber, new Handler<JsonObject>() {
-                    @Override
-                    public void handle(final JsonObject file) {
-                        if ("ok".equals(file.getString("status"))) {
-                            UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-                                @Override
-                                public void handle(final UserInfos user) {
-                                    programService.getProgramById(programId, new Handler<Either<String, JsonObject>>() {
-                                        @Override
-                                        public void handle(Either<String, JsonObject> programEvent) {
-                                            if (programEvent.isRight()) {
-                                                JsonObject program = programEvent.right().getValue();
-                                                orderService.updateStatusToSent(ids.getList(), "SENT", engagementNumber, program.getString("name"),
-                                                        dateCreation, orderNumber, id, user.getUsername(), new Handler<Either<String, JsonObject>>() {
-                                                            @Override
-                                                            public void handle(Either<String, JsonObject> event) {
-                                                                if (event.isRight()) {
-                                                                    request.response().end(pdf);
-                                                                    logSendingOrder(ids, request);
-                                                                } else {
-                                                                    badRequest(request);
-                                                                }
-                                                            }
-                                                        });
-                                            } else {
-                                                renderError(request);
-                                            }
-                                        }
-                                    });
-                                }
-                            });
-                        } else {
-                            log.error("An error occurred when inserting pdf in mongo");
-                            badRequest(request);
-                        }
-                    }
-                });
-    }
-
-    private void logSendingOrder(JsonArray ids, final HttpServerRequest request) {
-        orderService.getOrderByValidatioNumber(ids, new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> event) {
-                if (event.isRight()) {
-                    JsonArray orders = event.right().getValue();
-                    JsonObject order;
-                    for (int i = 0; i < orders.size(); i++) {
-                        order = orders.getJsonObject(i);
-                        Logging.insert(eb, request, Contexts.ORDER.toString(), Actions.UPDATE.toString(),
-                                order.getInteger("id").toString(), order);
-                    }
-                }
-            }
-        });
-    }
 
     private void retrieveContract(final HttpServerRequest request, JsonArray ids,
                                   final Handler<JsonObject> handler) {

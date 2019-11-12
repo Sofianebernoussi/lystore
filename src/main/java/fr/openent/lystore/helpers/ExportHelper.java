@@ -75,7 +75,9 @@ public class ExportHelper {
             id = request.params().getAll("number_validation").get(0);
             params.put("numberValidations",new JsonArray(request.params().getAll("number_validation")));
         }
-
+        if(action.equals("exportBCOrdersAfterValidation")) {
+             id = request.params().get("bc_number");
+        }
         String type = "";
         JsonObject infoFile = new JsonObject();
         if (withType) {
@@ -131,7 +133,6 @@ public class ExportHelper {
     private static void getParamsDuringBCValidation(EventBus eb, HttpServerRequest request, ExportService exportService, String typeObject, String extension, String
             action,JsonObject infoFile, String finalId) {
         JsonObject params = new JsonObject();
-        log.info(request.getParam("ids"));
         RequestUtils.bodyToJson(request,  Server.getPathPrefix(Lystore.CONFIG) + "orderIds", new Handler<JsonObject>() {
             @Override
             public void handle(final JsonObject orders) {
@@ -152,7 +153,7 @@ public class ExportHelper {
 
                 ;
                 String titleFile = makeTheNameExport("_BC_" + nbrBc,extension);
-                sendExportRequest(eb,request,exportService,typeObject,extension,action,infoFile,finalId, titleFile,params);
+                sendExportRequest(eb,request,exportService,typeObject,extension,action,infoFile,nbrBc, titleFile,params);
 
             }
         });

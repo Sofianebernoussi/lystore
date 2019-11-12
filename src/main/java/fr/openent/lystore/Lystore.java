@@ -14,6 +14,7 @@ import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 
 public class Lystore extends BaseServer {
 
+    public static final String ORDERSSENT ="ORDERSSENT" ;
     public static String lystoreSchema;
     public static Integer iterationWorker;
     public static JsonObject CONFIG;

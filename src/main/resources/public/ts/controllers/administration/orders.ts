@@ -1,4 +1,5 @@
 import {_, $,idiom as lang,angular, model, ng, template, toasts} from 'entcore';
+import http from "axios";
 import {
     Campaign, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD, Userbook, Order,
     Utils
@@ -288,7 +289,7 @@ export const orderController = ng.controller('orderController',
         $scope.sendOrders = async (orders: OrdersClient) => {
             let { status, data } = await orders.updateStatus('SENT');
             if (status === 201) {
-                toasts.info( 'lystore.export.notif'); // a modifier peut etre
+                toasts.info( 'lystore.export.notif');
             }
             $scope.redirectTo('/order/valid');
             Utils.safeApply($scope);
@@ -339,13 +340,14 @@ export const orderController = ng.controller('orderController',
             }
         };
 
-        $scope.exportOrder = (orders: OrderClient[]) => {
+        $scope.exportOrder = async (orders: OrderClient[]) => {
             if (_.where(orders, { status : 'SENT' }).length === orders.length && $scope.validateSentOrders(orders)) {
                 let orderNumber = _.uniq(_.pluck(orders, 'order_number'));
-                window.location = `/lystore/order?number=${orderNumber}`;
+               await http.get(`/lystore/order?bc_number=${orderNumber}`);
             } else {
                 $scope.exportValidOrders(orders, 'order');
             }
+            $scope.displayedOrders.selected[0].selected = false;
         };
 
         $scope.exportValidOrders = async  (orders: OrderClient[], fileType: string) => {
@@ -360,7 +362,7 @@ export const orderController = ng.controller('orderController',
                 $scope.displayedOrders.selected[0].selected = false;
                 Utils.safeApply($scope);
             }else{
-                window.location = `/lystore/orders/valid/export/${fileType}?${params}`;
+                await http.get(`/lystore/orders/valid/export/${fileType}?${params}`);
             }
         };
 

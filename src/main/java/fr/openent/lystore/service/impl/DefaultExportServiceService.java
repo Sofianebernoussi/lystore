@@ -33,7 +33,7 @@ public class DefaultExportServiceService implements ExportService {
 
     @Override
     public void getExports(Handler<Either<String, JsonArray>> handler, UserInfos user) {
-      mongo.getExports(handler,user.getUserId());
+        mongo.getExports(handler,user.getUserId());
     }
 
 
@@ -113,11 +113,18 @@ public class DefaultExportServiceService implements ExportService {
 
     private String getQueryAndParams(String typeObject, JsonArray params, String object_id) {
         String nameQuery= "";
-        if (typeObject.equals(Lystore.INSTRUCTIONS)) {
-            nameQuery = "SELECT object from "+Lystore.lystoreSchema+".instruction where id= ?";
-            params.add(Integer.parseInt(object_id));
-        }else{
-            nameQuery = "SELECT 'numéro de validation' as object";
+        switch (typeObject) {
+            case Lystore.INSTRUCTIONS:
+                nameQuery = "SELECT object from " + Lystore.lystoreSchema + ".instruction where id= ?";
+                params.add(Integer.parseInt(object_id));
+                break;
+            case Lystore.ORDERSSENT:
+                nameQuery = "SELECT 'Bon de commande' as object from  " + Lystore.lystoreSchema + ".order_client_equipment LIMIT 1";
+
+                break;
+            case Lystore.ORDERS:
+                nameQuery = "SELECT 'numéro de validation' as object from " + Lystore.lystoreSchema + ".order_client_equipment LIMIT 1";
+                break;
         }
         return nameQuery;
     }

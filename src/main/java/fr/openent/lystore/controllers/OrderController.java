@@ -107,6 +107,7 @@ public class OrderController extends ControllerHelper {
             }
         });
     }
+
     @Get("/orders")
     @ApiDoc("Get the list of orders")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
@@ -156,31 +157,32 @@ public class OrderController extends ControllerHelper {
     }
 
     @Get("/order")
-    @ApiDoc("Get the list of orders")
+    @ApiDoc("Get the pdf of orders")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void getOrderPDF (final HttpServerRequest request) {
-        final String orderNumber = request.params().get("number");
-        orderService.getOrderFileId(orderNumber, new Handler<Either<String, JsonObject>>() {
-            @Override
-            public void handle(Either<String, JsonObject> event) {
-                if (event.isRight()) {
-                    JsonObject objRes = event.right().getValue();
-                    String fileId = objRes.getString("id_mongo");
-                    storage.readFile(fileId, new Handler<Buffer>() {
-                        @Override
-                        public void handle(Buffer buffer) {
-                            request.response()
-                                    .putHeader("Content-Type", "application/pdf; charset=utf-8")
-                                    .putHeader("Content-Disposition", "attachment; filename=BC_" + orderNumber + ".pdf")
-                                    .end(buffer);
-                        }
-                    });
-                } else {
-                    badRequest(request);
-                }
-            }
-        });
+        final String orderNumber = request.params().get("bc_number");
+//        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,"exportBCOrdersAfterValidation", "_BC_" + orderNumber);
+//        orderService.getOrderFileId(orderNumber, new Handler<Either<String, JsonObject>>() {
+//            @Override
+//            public void handle(Either<String, JsonObject> event) {
+//                if (event.isRight()) {
+//                    JsonObject objRes = event.right().getValue();
+//                    String fileId = objRes.getString("id_mongo");
+//                    storage.readFile(fileId, new Handler<Buffer>() {
+//                        @Override
+//                        public void handle(Buffer buffer) {
+//                            request.response()
+//                                    .putHeader("Content-Type", "application/pdf; charset=utf-8")
+//                                    .putHeader("Content-Disposition", "attachment; filename=BC_" + orderNumber + ".pdf")
+//                                    .end(buffer);
+//                        }
+//                    });
+//                } else {
+//                    badRequest(request);
+//                }
+//            }
+//        });
     }
 
     /**
@@ -422,7 +424,7 @@ public class OrderController extends ControllerHelper {
                                 public void handle(Either<String, JsonObject> event) {
                                     if (event.isRight()) {
                                         logSendingOrder(ids,request);
-                                        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrdersDuringValidation", "_BC");
+                                        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,"exportBCOrdersDuringValidation", "_BC");
                                     } else {
                                         badRequest(request);
                                     }

@@ -92,10 +92,13 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         JsonObject params = body.getJsonObject("externalParams");
         try {
             object_id = Integer.parseInt(body.getString("object_id"));
+            string_object_id = object_id.toString();
         }catch (ClassCastException ce){
             object_id = body.getInteger("object_id");
+            string_object_id = object_id.toString();
         }catch (NumberFormatException ce){
             string_object_id = body.getString("object_id");
+
         }
         switch (action) {
             case "exportEQU":
@@ -148,6 +151,11 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                         fileName,
                         exportHandler);
                 break;
+            case "exportBCOrdersAfterValidation":
+                exportBCOrdersAfterValidation(string_object_id,
+                        fileName,
+                        exportHandler);
+                break;
 
             default:
                 ExportHelper.catchError(exportService, idNewFile, "Invalid action in worker",exportHandler);
@@ -155,8 +163,22 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         }
     }
 
+    private void exportBCOrdersAfterValidation(String object_id, String titleFile, Handler<Either<String, Boolean>> handler) {
+        logger.info("Export list lycee from Orders after validation started "+ object_id);
+
+        this.validOrders = new ValidOrders(exportService,object_id,idNewFile,this.eb,this.vertx,this.config,false);
+        this.validOrders.exportBCAfterValidation(event1 -> {
+            if (event1.isLeft()) {
+                ExportHelper.catchError(exportService, idNewFile, "error when creating PDF " + event1.left().getValue(),handler);
+            } else {
+                Buffer xlsx = event1.right().getValue();
+                saveBuffer(xlsx,  titleFile ,handler,PDFHEADER);
+            }
+        });
+    }
+
     private void exportBCOrdersDuringValidation(JsonObject params, String titleFile, Handler<Either<String, Boolean>> handler) {
-        logger.info("Export list lycee from Orders after validation started");
+        logger.info("Export list lycee from Orders during validation started");
         this.validOrders = new ValidOrders(exportService,params,idNewFile,this.eb,this.vertx,this.config);
         this.validOrders.exportBCDuringValidation(event1 -> {
             if (event1.isLeft()) {
@@ -183,7 +205,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
 
     private void exportListLycOrders(String object_id, String titleFile, Handler<Either<String, Boolean>> handler) {
         logger.info("Export list lycee from Orders started");
-        this.validOrders = new ValidOrders(exportService,object_id,idNewFile,this.eb,this.vertx,this.config);
+        this.validOrders = new ValidOrders(exportService,object_id,idNewFile,this.eb,this.vertx,this.config,true);
         this.validOrders.exportListLycee(event1 -> {
             if (event1.isLeft()) {
                 ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);

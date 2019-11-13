@@ -75,8 +75,9 @@ public class ExportHelper {
             id = request.params().getAll("number_validation").get(0);
             params.put("numberValidations",new JsonArray(request.params().getAll("number_validation")));
         }
-        if(action.equals("exportBCOrdersAfterValidation")) {
-             id = request.params().get("bc_number");
+        if(request.params().getAll("bc_number") != null && !request.params().getAll("bc_number").isEmpty() ){
+            id = request.params().getAll("bc_number").get(0);
+            params.put("bc_number",new JsonArray(request.params().getAll("bc_number")));
         }
         String type = "";
         JsonObject infoFile = new JsonObject();

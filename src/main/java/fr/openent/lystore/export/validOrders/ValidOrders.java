@@ -3,6 +3,7 @@ package fr.openent.lystore.export.validOrders;
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.ExportObject;
 import fr.openent.lystore.export.validOrders.BC.BCExport;
+import fr.openent.lystore.export.validOrders.BC.BCExportAfterValidation;
 import fr.openent.lystore.export.validOrders.BC.BCExportDuringValidation;
 import fr.openent.lystore.export.validOrders.listLycee.ListLycee;
 import fr.openent.lystore.export.validOrders.listLycee.RecapListLycee;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ValidOrders extends ExportObject {
+    private String bcNumber;
     private String numberValidation="";
     private JsonObject params;
     private ExportService exportService;
@@ -44,9 +46,12 @@ public class ValidOrders extends ExportObject {
         this.supplierService = new DefaultSupplierService(Lystore.lystoreSchema, "supplier");
 
     }
-    public ValidOrders(ExportService exportService, String numberValidation, String idNewFile,EventBus eb, Vertx vertx, JsonObject config) {
-       this(exportService,idNewFile,eb,vertx,config);
-        this.numberValidation = numberValidation;
+    public ValidOrders(ExportService exportService, String param, String idNewFile,EventBus eb, Vertx vertx, JsonObject config,boolean HasNumberValidation) {
+        this(exportService,idNewFile,eb,vertx,config);
+        if(HasNumberValidation)
+            this.numberValidation = param;
+        else
+            this.bcNumber = param;
 
     }
     public ValidOrders(ExportService exportService, JsonObject params, String idNewFile,EventBus eb, Vertx vertx, JsonObject config) {
@@ -95,6 +100,16 @@ public class ValidOrders extends ExportObject {
             handler.handle(new Either.Left<>("number validations is not nullable"));
         }else{
             new BCExportDuringValidation(eb,vertx,config).create(params,handler);
+        }
+
+    }
+
+    public void exportBCAfterValidation(Handler<Either<String, Buffer>> handler) {
+        if (this.bcNumber == null || this.bcNumber.isEmpty()) {
+            ExportHelper.catchError(exportService, idFile, "number validations is not nullable");
+            handler.handle(new Either.Left<>("number validations is not nullable"));
+        }else{
+            new BCExportAfterValidation(eb,vertx,config).create(bcNumber,handler);
         }
     }
 }

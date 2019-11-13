@@ -166,7 +166,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 params.add(structureId);
             }
         }
-
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 

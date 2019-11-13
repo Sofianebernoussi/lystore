@@ -79,6 +79,9 @@ public class PDF_OrderHElper {
         String structureId;
         Iterator<String> structureIds = structures.fieldNames().iterator();
         final JsonArray result = new fr.wseduc.webutils.collections.JsonArray();
+        if(!structureIds.hasNext()){
+//            exportHandler.handle(new Either.Left<>("no structure get"));
+        }
         while (structureIds.hasNext()) {
             structureId = structureIds.next();
             structure = structures.getJsonObject(structureId);
@@ -231,6 +234,7 @@ public class PDF_OrderHElper {
                     order.put("totalPriceTaxeIncludedLocal",
                             OrderController.getReadableNumber(OrderController.roundWith2Decimals(taxTotal + sumWithoutTaxes)));
                     handler.handle(order);
+
                 } else {
                     log.error("An error occurred when retrieving order data");
                     exportHandler.handle(new Either.Left<>("An error occurred when retrieving order data"));
@@ -309,7 +313,6 @@ public class PDF_OrderHElper {
                                                         .put("nbr_bc", nbrBc)
                                                         .put("nbr_engagement", nbrEngagement)
                                                         .put("date_generation", dateGeneration);
-
                                                 handler.handle(data);
                                             }
                                         });
@@ -363,8 +366,6 @@ public class PDF_OrderHElper {
                 templateProps.put("logo-data", encodedLogo);
 
                 StringReader reader = new StringReader(result.result().toString("UTF-8"));
-                log.info(config.getString("host"));
-                log.info(config.getString("host").split("//")[1]);
                 renders.processTemplate(exportHandler, templateProps, templateName, reader, new Handler<Writer>() {
                     //
                     @Override

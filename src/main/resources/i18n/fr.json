@@ -543,6 +543,7 @@
   "lystore.export.type": "Catégorie",
   "lystore.export.extension" : "Type de fichier",
   "ORDERS": "Commandes/Demandes",
-  "INSTRUCTION": "Rapport"
+  "INSTRUCTION": "Rapport",
+  "ORDERSSENT": "Commandes/Demandes validées"
 
 }

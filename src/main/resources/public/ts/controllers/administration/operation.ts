@@ -208,8 +208,20 @@ export const operationController = ng.controller('operationController',
         };
         $scope.operationSelected = async (operation:Operation) => {
             template.close('operation.lightbox');
-            let idsOrdersClient = $scope.ordersClientByOperation.filter(order => order.selected && !(order.typeOrder === "client")).map(order => order.id);
-            let idsOrdersRegion = $scope.ordersClientByOperation.filter(order => order.selected && (order.typeOrder === "region")).map(order => order.id);
+            let idsOrdersClient = [];
+            let idsOrdersRegion = [];
+            $scope.ordersClientByOperation.map(order=>{
+                if(order.selected){
+                    if(order.typeOrder === "client")
+                    {
+                        idsOrdersClient.push(order.id)
+                    }
+                    if(order.typeOrder === "region"){
+                        idsOrdersRegion.push(order.id)
+                    }
+                }
+            });
+
             if(idsOrdersClient.length !== 0){
                 await $scope.ordersClient.addOperation(operation.id, idsOrdersClient);
             }
@@ -219,6 +231,7 @@ export const operationController = ng.controller('operationController',
             $scope.ordersClientByOperation = await $scope.operation.getOrders();
             $scope.display.lightbox.operation = false;
             toasts.info('lystore.operation.order.affect');
+            $scope.redirectTo(`/operation/order/${operation.id}`)
             Utils.safeApply($scope);
         };
         $scope.openOrders = () => {

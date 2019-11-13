@@ -341,13 +341,18 @@ export const orderController = ng.controller('orderController',
         };
 
         $scope.exportOrder = async (orders: OrderClient[]) => {
-            if (_.where(orders, { status : 'SENT' }).length === orders.length && $scope.validateSentOrders(orders)) {
+
+            if ((_.where(orders, { status : 'SENT' }).length === orders.length || (_.where(orders, { status : 'DONE' }).length === orders.length ) && $scope.validateSentOrders(orders)) {
                 let orderNumber = _.uniq(_.pluck(orders, 'order_number'));
-               await http.get(`/lystore/order?bc_number=${orderNumber}`);
+                let  {status, data} =  await http.get(`/lystore/order?bc_number=${orderNumber}`);
+                if(status === 201){
+                    toasts.info('lystore.export.notif');
+                }
             } else {
                 $scope.exportValidOrders(orders, 'order');
             }
             $scope.displayedOrders.selected[0].selected = false;
+            Utils.safeApply($scope);
         };
 
         $scope.exportValidOrders = async  (orders: OrderClient[], fileType: string) => {

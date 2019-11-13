@@ -161,7 +161,8 @@ public class OrderController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void getOrderPDF (final HttpServerRequest request) {
-        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,"exportBCOrdersAfterValidation", "_BC");
+        final String orderNumber = request.params().get("bc_number");
+        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,"exportBCOrdersAfterValidation", "_BC_" + orderNumber);
 //        orderService.getOrderFileId(orderNumber, new Handler<Either<String, JsonObject>>() {
 //            @Override
 //            public void handle(Either<String, JsonObject> event) {

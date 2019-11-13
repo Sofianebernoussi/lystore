@@ -52,6 +52,7 @@ export const instructionController = ng.controller('instructionController',
                 $scope.operations.all = $scope.operations.all
                     .filter(operation => operation.id_instruction !== $scope.instruction.id);
             }
+            console.log($scope.operations.all)
             $scope.knowOperationIsEmpty();
             $scope.loadingArray = false;
             Utils.safeApply($scope);
@@ -68,6 +69,7 @@ export const instructionController = ng.controller('instructionController',
             $scope.operation.id = $scope.operationAdd.id;
             $scope.operation.label = $scope.operationAdd.label;
             $scope.operation.nbOrberSub = $scope.operationAdd.nbOrberSub;
+            $scope.operation.nb_orders = $scope.operationAdd.nb_orders;
             $scope.operation.id_label = $scope.operationAdd.id_label;
             $scope.operation.amount = $scope.operationAdd.amount;
             $scope.operation.status = true;

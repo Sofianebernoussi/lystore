@@ -25,10 +25,9 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class PDF_OrderHElper {
 
@@ -80,7 +79,7 @@ public class PDF_OrderHElper {
         Iterator<String> structureIds = structures.fieldNames().iterator();
         final JsonArray result = new fr.wseduc.webutils.collections.JsonArray();
         if(!structureIds.hasNext()){
-//            exportHandler.handle(new Either.Left<>("no structure get"));
+            exportHandler.handle(new Either.Left<>("no structure get"));
         }
         while (structureIds.hasNext()) {
             structureId = structureIds.next();
@@ -280,7 +279,10 @@ public class PDF_OrderHElper {
                                  final String nbrEngagement, final String dateGeneration,
                                  final Number supplierId, final JsonArray ids,
                                  final Handler<JsonObject> handler) {
+        SimpleDateFormat formatterDatePDF = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat formatterDate = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
         final JsonObject data = new JsonObject();
+
         retrieveManagementInfo(exportHandler, ids, supplierId, new Handler<JsonObject>() {
             @Override
             public void handle(final JsonObject managmentInfo) {
@@ -305,6 +307,20 @@ public class PDF_OrderHElper {
                                                     addStructureToOrders(certificate.getJsonArray("orders"),
                                                             certificate.getJsonObject("structure"));
                                                 }
+                                                Date orderDate = null;
+
+                                                try {
+                                                    System.out.println(dateGeneration);
+                                                    orderDate = formatterDate.parse(dateGeneration);
+                                                } catch (ParseException e) {
+                                                    log.error("Incorrect date format");
+                                                }
+                                                String date ;
+                                                try{
+                                                    date =  formatterDatePDF.format(orderDate);
+                                                }catch (java.lang.NullPointerException e){
+                                                    date = dateGeneration;
+                                                }
                                                 data.put("supplier", managmentInfo.getJsonObject("supplierInfo"))
                                                         .put("agent", managmentInfo.getJsonObject("userInfo"))
                                                         .put("order", order)
@@ -312,7 +328,7 @@ public class PDF_OrderHElper {
                                                         .put("contract", contract)
                                                         .put("nbr_bc", nbrBc)
                                                         .put("nbr_engagement", nbrEngagement)
-                                                        .put("date_generation", dateGeneration);
+                                                        .put("date_generation",date);
                                                 handler.handle(data);
                                             }
                                         });

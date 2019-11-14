@@ -289,7 +289,8 @@ export const orderController = ng.controller('orderController',
         $scope.sendOrders = async (orders: OrdersClient) => {
             let { status, data } = await orders.updateStatus('SENT');
             if (status === 201) {
-                toasts.info( 'lystore.export.notif');
+                toasts.confirm( 'lystore.sent.order');
+                toasts.info( 'lystore.sent.export.BC');
             }
             $scope.redirectTo('/order/valid');
             Utils.safeApply($scope);
@@ -346,7 +347,7 @@ export const orderController = ng.controller('orderController',
                 let orderNumber = _.uniq(_.pluck(orders, 'order_number'));
                 let  {status, data} =  await http.get(`/lystore/order?bc_number=${orderNumber}`);
                 if(status === 201){
-                    toasts.info('lystore.export.notif');
+                    toasts.info('lystore.sent.export.BC');
                 }
             } else {
                 $scope.exportValidOrders(orders, 'order');
@@ -362,12 +363,15 @@ export const orderController = ng.controller('orderController',
             });
             params = params.slice(0, -1);
             if(fileType ==='structure_list'){
-                toasts.info('lystore.export.notif');
+                toasts.info('lystore.sent.export.BC');
                 await orders[0].exportListLycee(params);
                 $scope.displayedOrders.selected[0].selected = false;
                 Utils.safeApply($scope);
             }else{
-                await http.get(`/lystore/orders/valid/export/${fileType}?${params}`);
+                let  {status, data} = await http.get(`/lystore/orders/valid/export/${fileType}?${params}`);
+                if(status === 201){
+                    toasts.info('lystore.sent.export.BC');
+                }
             }
         };
 

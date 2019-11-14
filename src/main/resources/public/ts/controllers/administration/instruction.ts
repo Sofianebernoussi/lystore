@@ -43,6 +43,10 @@ export const instructionController = ng.controller('instructionController',
             $scope.operationEditRemoveInstructionIds = [];
             $scope.operations.all = $scope.operations.all
                 .filter(operation => operation.instruction === null && operation.status === 'false');
+            $scope.operations.all.sort(function (a, b) {
+                return  a.label.label.localeCompare(b.label.label);
+            });
+
             if(action === 'create'){
                 $scope.instruction.operations = [];
             } else if (action === 'edit'){
@@ -51,8 +55,10 @@ export const instructionController = ng.controller('instructionController',
                 $scope.isOperationEdit = true;
                 $scope.operations.all = $scope.operations.all
                     .filter(operation => operation.id_instruction !== $scope.instruction.id);
+                $scope.operations.all.sort(function (a, b) {
+                    return  a.label.label.localeCompare(b.label.label);
+                });
             }
-            console.log($scope.operations.all)
             $scope.knowOperationIsEmpty();
             $scope.loadingArray = false;
             Utils.safeApply($scope);
@@ -80,7 +86,9 @@ export const instructionController = ng.controller('instructionController',
                 $scope.operationEditRemoveInstructionIds = $scope.operationEditRemoveInstructionIds
                     .filter( id => id !== $scope.operation.id);
             }
+            $scope.instruction.operation = undefined;
             $scope.knowOperationIsEmpty();
+
         };
         $scope.knowOperationIsEmpty =() => {
             $scope.isOperationsIsEmpty =  $scope.operations.all.length === 0 ?  true : false;
@@ -90,6 +98,10 @@ export const instructionController = ng.controller('instructionController',
             $scope.instruction.operations = $scope.instruction.operations
                 .filter((operation, index) => index !== indexSelect);
             $scope.operations.all.push(operation);
+            $scope.operations.all.sort(function (a, b) {
+                return  a.label.label.localeCompare(b.label.label);
+            });
+
             $scope.knowOperationIsEmpty();
             Utils.safeApply($scope);
         };

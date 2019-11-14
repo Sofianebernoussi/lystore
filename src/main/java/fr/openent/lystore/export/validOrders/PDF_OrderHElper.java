@@ -310,7 +310,6 @@ public class PDF_OrderHElper {
                                                 Date orderDate = null;
 
                                                 try {
-                                                    System.out.println(dateGeneration);
                                                     orderDate = formatterDate.parse(dateGeneration);
                                                 } catch (ParseException e) {
                                                     log.error("Incorrect date format");

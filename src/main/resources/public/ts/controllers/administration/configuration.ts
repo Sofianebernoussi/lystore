@@ -438,13 +438,17 @@ export const configurationController = ng.controller('configurationController',
             $scope.display.lightbox.campaign = true;
         };
 
+        $scope.checkTags = () =>{
+           return _.every(_.where($scope.structureGroups.all, {selected: true}), (structureGroup) => {
+                return structureGroup.tags.length > 0;
+            })
+        };
         $scope.validCampaignForm = (campaign: Campaign) => {
             return campaign.name !== undefined
             && campaign.name.trim() !== ''
             && _.findWhere($scope.structureGroups.all, {selected: true}) !== undefined
-            && (_.where($scope.structureGroups.all, {selected: true}).length > 0) ? _.every(_.where($scope.structureGroups.all, {selected: true}), (structureGroup) => {
-                return structureGroup.tags.length > 0;
-            }) : false;
+            && (_.where($scope.structureGroups.all, {selected: true}).length > 0) ? $scope.checkTags()
+             : false;
 
         };
 

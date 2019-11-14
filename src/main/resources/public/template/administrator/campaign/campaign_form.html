@@ -118,7 +118,9 @@
                 </div>
             </div>
         </article>
-
+        <div class="right-magnet warning" ng-show="!checkTags()">
+            <i18n>error.tags.structure</i18n>
+        </div>
         <div class="row">
             <div class="right-magnet">
                 <input type="button" class="cancel" ng-click="redirectTo('/campaigns')" i18n-value="cancel"/>

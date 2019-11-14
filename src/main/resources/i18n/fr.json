@@ -542,6 +542,7 @@
   "lystore.export.object.name": "Nom de l'objet",
   "lystore.export.type": "Catégorie",
   "ORDERS": "Commandes/Demandes",
-  "INSTRUCTION": "Rapport"
+  "INSTRUCTION": "Rapport",
+  "error.tags.structure": "Il faut au moins un type d'équipement visible par regroupement"
 
 }

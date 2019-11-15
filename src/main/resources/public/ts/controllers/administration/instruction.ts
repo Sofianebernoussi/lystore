@@ -43,6 +43,11 @@ export const instructionController = ng.controller('instructionController',
             $scope.operationEditRemoveInstructionIds = [];
             $scope.operations.all = $scope.operations.all
                 .filter(operation => operation.instruction === null && operation.status === 'false');
+            $scope.instructions.all.map(instruction => {
+                instruction.operations.map(idOperation => {
+                    $scope.operations.all.filter(operation => operation.id !== idOperation)
+                });
+            });
             $scope.operations.all.sort(function (a, b) {
                 return  a.label.label.localeCompare(b.label.label);
             });

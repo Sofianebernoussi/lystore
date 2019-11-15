@@ -543,7 +543,7 @@
   "lystore.export.type": "Catégorie",
   "ORDERS": "Commandes/Demandes",
   "INSTRUCTION": "Rapport",
-  "error.tags.structure": "Il faut au moins un type d'équipement visible par regroupement",
-  "Select": "Selectionner"
+  "Select": "Selectionner",
+  "not.valid.campaign.form": "Il faut un nom de campagne et au moins un type d'équipement visible par regroupement"
 
 }

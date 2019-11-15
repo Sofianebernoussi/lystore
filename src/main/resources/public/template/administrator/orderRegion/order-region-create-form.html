@@ -45,6 +45,9 @@
             <table class="twelve">
                 <thead>
                 <tr class="row">
+                    <td class="one">
+
+                    </td>
                     <td class="two">
                         [[translate('lystore.structure.label')]] / [[translate('lystore.structureGroup.management')]]
                     </td>
@@ -60,7 +63,7 @@
                     <td class="two" ng-if="orderToCreate.campaign.orderPriorityEnable()">
                         [[translate('lystore.project.priority.order')]]
                     </td>
-                    <td class="four">
+                    <td class="three">
                         [[translate('comment')]]
                     </td>
                     <td class="one">
@@ -69,44 +72,58 @@
                 </thead>
                 <tbody>
                 <tr class="row" ng-repeat="row in orderToCreate.rows track by $index">
-
-                    <td class="one ">
+                    <td class="one">
                         <div ng-if="!row.display.struct" class="cell row ">
-                            <i class="house one" ng-click="swapTypeStruct(row)"></i>
-                            <select class="eleven"
-                                    style="max-width: 300px;"
-                                    ng-model="row.structure"
-                                    ng-options="structure as structure.name + ' ('+structure.uai +')' for structure in structuresToDisplay.all"
-                                    ng-change="switchStructure(row,row.structure)">
-                                <option value="" disabled selected>[[translate('lystore.placeholder.structure')]]
-                                </option>
-
-                            </select>
+                            <i class="house" ng-click="swapTypeStruct(row)"></i>
                         </div>
                         <div ng-if="row.display.struct" class="row ">
                             <i class="groups one" ng-click="swapTypeStruct(row)"></i>
-                            <select class="eleven"
-                                    style="max-width: 300px;"
+                        </div>
+                    </td>
+                    <td class="one ">
+                        <div style="min-width: 150px; max-width: 400px;" ng-if="!row.display.struct" class="cell row ">
+                            <search-and-select
+                                    class="twelve cell"
+                                    options="structuresToDisplay.all"
+                                    param1="name"
+                                    param2="uai"
                                     ng-model="row.structure"
-                                    ng-options="structure as structure.name for structure in structure_groups.all"
-                                    ng-change="switchStructure(row)">
-                                <option value="" disabled selected>[[translate('lystore.placeholder.structureGroup')]]
-                                </option>
-
-                            </select>
+                                    search-on="name"
+                                    order-by="uai"
+                                    placeholder="lystore.placeholder.structure"
+                                    ng-change="switchStructure(row,row.structure)"
+                                    class="cell horizontal-margin"
+                            >
+                            </search-and-select >
+                        </div>
+                        <div style="min-width: 150px; max-width: 400px;" ng-if="row.display.struct" class="row ">
+                            <search-and-select
+                                    class="twelve cell"
+                                    options="structure_groups.all"
+                                    param1="name"
+                                    ng-model="row.structure"
+                                    placeholder="lystore.placeholder.structureGroup"
+                                    search-on="name"
+                                    order-by="uai"
+                                    ng-change="switchStructure(row)"
+                                    class="cell horizontal-margin"
+                            >
+                            </search-and-select >
                         </div>
                     </td>
                     <td class="two ">
-                        <div  style="min-width: 150px; max-width: 300px;">
+                        <div  style="min-width: 150px; max-width: 400px;">
+
                             <search-and-select
                                     class="twelve cell"
-                                    disabled="!row.structure"
+                                    disabled="!row.structure || row.structure === undefined"
                                     options="row.equipments.all"
                                     param1="contract_type_name"
                                     param2="name"
                                     ng-model="row.equipment"
                                     search-on="name"
                                     order-by="name"
+                                    placeholder="lystore.placeholder.equipment"
                                     ng-change="initEquipmentData(row)"
                                     class="cell horizontal-margin"
                             >
@@ -128,7 +145,7 @@
                         <input class="input-in-row" ng-init="row.rank = 1" ng-model="row.rank" type="number"
                                min="1" step="1" max="10"/>
                     </td>
-                    <td class="three">
+                    <td class="two">
                         <input ng-model="row.comment" type="text"/>
                     </td>
                     <td class="one">

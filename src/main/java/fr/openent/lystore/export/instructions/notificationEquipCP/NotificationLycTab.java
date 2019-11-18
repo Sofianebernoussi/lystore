@@ -91,6 +91,7 @@ public class NotificationLycTab extends TabHelper {
 
     private void writeArray(Handler<Either<String, Boolean>> handler) {
         for (int i = 0; i < datas.size(); i++) {
+            excel.setRowBreak(lineNumber + 1);
             lineNumber += 3;
             excel.insertBlackTitleHeaderBorderless(0, lineNumber, datas.getJsonObject(i).getString("city"));
             excel.insertBlackTitleHeaderBorderless(2, lineNumber, datas.getJsonObject(i).getString("nameEtab"));

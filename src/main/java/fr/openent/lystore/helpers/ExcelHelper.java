@@ -1015,6 +1015,9 @@ public class ExcelHelper {
         setTotalXWithStyle(lineStart, lineEnd, column, lineInsert, column, style);
     }
 
+    public void setRowBreak(int line){
+        sheet.setRowBreak(line);
+    }
 
     /**
      * Set total of a line

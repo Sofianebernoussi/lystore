@@ -336,10 +336,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 await  $scope.operations.sync();
                 let operations = [];
                 $scope.operations.all.map((operation,index)=>{
-                    if(operation.status == 'true'){
+                    if(operation.status == 'true' && !operation.instruction) {
                         operations.push(operation);
                     }
                 });
+
                 $scope.operations.all = operations;
                 await $scope.structures.sync();
                 template.open('administrator-main', 'administrator/orderRegion/order-region-create-form');

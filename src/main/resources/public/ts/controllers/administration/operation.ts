@@ -65,6 +65,7 @@ export const operationController = ng.controller('operationController',
             } else if (action === 'edit'){
                 $scope.operation = $scope.operations.selected[0];
                 $scope.operation.status = ($scope.operation.status === 'true');
+                $scope.labelOperation.all.push($scope.operation.label);
             }
             $scope.display.lightbox.operation = true;
             template.open('operation.lightbox', 'administrator/operation/operation-form');
@@ -75,7 +76,7 @@ export const operationController = ng.controller('operationController',
             let operationMomentDate = moment(operation.date_cp);
             let isValid = true;
             $scope.operations.all.forEach(operationn => {
-                if(moment(operationMomentDate).format("dd/MM/YYYY") === moment(operationn.date_cp).format("dd/MM/YYYY")){
+                if(moment(operationMomentDate).format("dd/MM/YYYY") === moment(operationn.date_cp).format("dd/MM/YYYY") && operationn.id != operation.id){
                     isValid = false;
                 }
             });

@@ -21,6 +21,9 @@
         <switch-toggle ng-model="operation.status" class="cell">
         </switch-toggle>
     </label>
+    <div class="warning" ng-show="!validOperationForm(operation)">
+        <i18n>operation.form.warning</i18n>
+    </div>
     <div class="right-magnet vertical-spacing">
         <input type="button" class="cancel" ng-click="cancelOperationForm()" i18n-value="cancel"/>
         <input type="submit" class="button" ng-disabled="!validOperationForm(operation)"/>

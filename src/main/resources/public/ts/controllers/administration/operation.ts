@@ -1,4 +1,4 @@
-import {_, ng, template, idiom as lang, toasts} from 'entcore';
+import {_, ng, template,moment, idiom as lang, toasts} from 'entcore';
 import {Notification, Operation, OrderClient, OrderRegion, OrdersRegion, Utils} from "../../model";
 import {Mix} from 'entcore-toolkit';
 
@@ -71,8 +71,18 @@ export const operationController = ng.controller('operationController',
             Utils.safeApply($scope);
         };
 
+        $scope.isValidOperationDate = (operation:Operation) =>{
+            let operationMomentDate = moment(operation.date_cp);
+            let isValid = true;
+            $scope.operations.all.forEach(operationn => {
+                if(moment(operationMomentDate).format("dd/MM/YYYY") === moment(operationn.date_cp).format("dd/MM/YYYY")){
+                    isValid = false;
+                }
+            });
+            return isValid
+        };
         $scope.validOperationForm = (operation:Operation) =>{
-            return  operation.id_label;
+            return  operation.id_label && $scope.isValidOperationDate(operation);
         };
 
         $scope.cancelOperationForm = async () =>{

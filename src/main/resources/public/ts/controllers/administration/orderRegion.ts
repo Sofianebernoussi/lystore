@@ -64,7 +64,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                 if (status === 200) {
                     toasts.confirm('lystore.order.region.update');
                     await $scope.ordersClient.addOperationInProgress(operation.id, [$routeParams.idOrder]);
-                    $scope.operationId =  $scope.operation.id
+                    // $scope.operationId =  $scope.operation.id
                     $scope.cancelUpdate();
                 }
                 else {

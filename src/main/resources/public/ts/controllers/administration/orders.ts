@@ -354,10 +354,29 @@ export const orderController = ng.controller('orderController',
             } else {
                 $scope.exportValidOrders(orders, 'order');
             }
-            $scope.displayedOrders.selected[0].selected = false;
+            $scope.displayedOrders.selected.map(order => {
+                order.selected = false;
+            });
             Utils.safeApply($scope);
         };
 
+        $scope.exportOrderStruct = async (orders: OrderClient[]) => {
+
+            if ((_.where(orders, { status : 'SENT' }).length === orders.length || (_.where(orders, { status : 'DONE' }).length === orders.length ) && $scope.validateSentOrders(orders))) {
+                let orderNumber = _.uniq(_.pluck(orders, 'order_number'));
+                let  {status, data} =  await http.get(`/lystore/order/struct?bc_number=${orderNumber}`);
+                if(status === 201){
+                    toasts.info('lystore.sent.export.BC');
+                }
+            } else {
+                // let  {status, data} = await http.get(`/lystore/orders/valid/export/$${order.number_validation}`);
+                // if(status === 201){
+                //     toasts.info('lystore.sent.export.BC');
+                // }
+            }
+            $scope.displayedOrders.selected[0].selected = false;
+            Utils.safeApply($scope);
+        };
         $scope.exportValidOrders = async  (orders: OrderClient[], fileType: string) => {
             let params = '';
             orders.map((order: OrderClient) => {

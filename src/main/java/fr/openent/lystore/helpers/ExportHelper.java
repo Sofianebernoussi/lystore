@@ -20,7 +20,6 @@ import org.entcore.common.user.UserUtils;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.List;
 
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
 
@@ -66,19 +65,33 @@ public class ExportHelper {
             action, String name) {
         String id="-1";
         JsonObject params = new JsonObject();
-
+        boolean multipleExport = false;
         boolean withType = request.getParam("type") != null;
         if(request.getParam("id")!=null && typeObject.equals(Lystore.INSTRUCTIONS))
             id = request.getParam("id");
 
         if(request.params().getAll("number_validation") != null && !request.params().getAll("number_validation").isEmpty() ){
-            id = request.params().getAll("number_validation").get(0);
+            if( request.params().getAll("number_validation").size() == 1)
+                id = request.params().getAll("number_validation").get(0);
+            if(request.params().getAll("number_validation").size()> 1){
+                multipleExport = true;
+                id = "";
+                for (String  number : request.params().getAll("number_validation")){
+                    id += number +",";
+                }
+                id =  id.substring(0,id.length()-1);
+            }
             params.put("numberValidations",new JsonArray(request.params().getAll("number_validation")));
         }
+
         if(request.params().getAll("bc_number") != null && !request.params().getAll("bc_number").isEmpty() ){
             id = request.params().getAll("bc_number").get(0);
+            System.out.println(id);
+            if(id.contains(","))
+                multipleExport = true;
             params.put("bc_number",new JsonArray(request.params().getAll("bc_number")));
         }
+
         String type = "";
         JsonObject infoFile = new JsonObject();
         if (withType) {
@@ -98,36 +111,72 @@ public class ExportHelper {
         }
         else{
             String titleFile = withType ? makeTheNameExport(name,extension, type) : makeTheNameExport(name,extension);
-
-            sendExportRequest(eb,request,exportService,typeObject,extension,action,infoFile,finalId,titleFile,finalParams);
+            if(multipleExport){
+                titleFile = name;
+            }
+            sendExportRequest(eb,request,exportService,typeObject,extension,action,infoFile,finalId,titleFile,finalParams,multipleExport);
         }
     }
 
 
 
     private static void sendExportRequest(EventBus eb, HttpServerRequest request, ExportService exportService, String typeObject, String extension, String
-            action,JsonObject infoFile, String finalId,String titleFile, JsonObject finalParams){
+            action, JsonObject infoFile, String finalId, String titleFile, JsonObject finalParams, boolean multipleExport){
         UserUtils.getUserInfos(eb, request, user -> {
-            exportService.createWhenStart(typeObject, extension, infoFile, finalId, titleFile, user.getUserId(), action, finalParams, newExport -> {
-                if (newExport.isRight()) {
-                    String idExport = newExport.right().getValue().getString("id");
-                    try {
-                        Logging.insert(eb,
-                                request,
-                                Contexts.EXPORT.toString(),
-                                Actions.CREATE.toString(),
-                                idExport.toString(),
-                                new JsonObject().put("ids", idExport).put("fileName", titleFile));
-                        log.info("J'envoie la demande d export");
-                        Lystore.launchWorker(eb);
-                        request.response().setStatusCode(201).end("Import started " + idExport);
-                    } catch (Exception error) {
-                        catchError(exportService, idExport, error);
+            if (!multipleExport){
+                exportService.createWhenStart(typeObject, extension, infoFile, finalId, titleFile, user.getUserId(), action, finalParams, newExport -> {
+                    if (newExport.isRight()) {
+                        String idExport = newExport.right().getValue().getString("id");
+                        try {
+                            Logging.insert(eb,
+                                    request,
+                                    Contexts.EXPORT.toString(),
+                                    Actions.CREATE.toString(),
+                                    idExport.toString(),
+                                    new JsonObject().put("ids", idExport).put("fileName", titleFile));
+                            log.info("J'envoie la demande d export");
+                            Lystore.launchWorker(eb);
+                            request.response().setStatusCode(201).end("Import started " + idExport);
+                        } catch (Exception error) {
+                            catchError(exportService, idExport, error);
+                        }
+                    } else {
+                        log.error("Fail to insert file in SQL " + newExport.left());
                     }
-                } else {
-                    log.error("Fail to insert file in SQL " + newExport.left());
+                });
+            }else{
+                String [] objectsId = finalId.split(",");
+                for (String currentId : objectsId) {
+                    String nameFile = "";
+                    if(action.equals("exportBCOrders"))
+                        nameFile= makeTheNameExport("_BC"  ,extension);
+                    else if(action.equals("exportBCOrdersAfterValidation"))
+                         nameFile  = makeTheNameExport("_BC_" + currentId ,extension);
+                    else{
+                         nameFile  = makeTheNameExport("_default_",extension);
+                    }
+                    exportService.createWhenStart(typeObject, extension, infoFile, currentId, nameFile, user.getUserId(), action, finalParams, newExport -> {
+                        if (newExport.isRight()) {
+                            String idExport = newExport.right().getValue().getString("id");
+                            try {
+                                Logging.insert(eb,
+                                        request,
+                                        Contexts.EXPORT.toString(),
+                                        Actions.CREATE.toString(),
+                                        idExport.toString(),
+                                        new JsonObject().put("ids", idExport).put("fileName", titleFile));
+                                log.info("J'envoie la demande d export");
+                                Lystore.launchWorker(eb);
+                            } catch (Exception error) {
+                                catchError(exportService, idExport, error);
+                            }
+                        } else {
+                            log.error("Fail to insert file in SQL " + newExport.left());
+                        }
+                    });
                 }
-            });
+                request.response().setStatusCode(201).end("Multi Import started ");
+            }
         });
     }
 
@@ -145,16 +194,16 @@ public class ExportHelper {
                 final Number programId = orders.getInteger("id_program");
 
                 params.put("ids",ids)
-                      .put("nbrBc",nbrBc)
-                      .put("nbrEngagement",nbrEngagement)
-                      .put("dateGeneration",dateGeneration)
-                      .put("supplierId",supplierId)
-                      .put("programId",programId)
+                        .put("nbrBc",nbrBc)
+                        .put("nbrEngagement",nbrEngagement)
+                        .put("dateGeneration",dateGeneration)
+                        .put("supplierId",supplierId)
+                        .put("programId",programId)
 
 
                 ;
                 String titleFile = makeTheNameExport("_BC_" + nbrBc,extension);
-                sendExportRequest(eb,request,exportService,typeObject,extension,action,infoFile,nbrBc, titleFile,params);
+                sendExportRequest(eb,request,exportService,typeObject,extension,action,infoFile,nbrBc, titleFile,params, false);
 
             }
         });

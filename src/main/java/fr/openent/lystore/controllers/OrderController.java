@@ -163,26 +163,7 @@ public class OrderController extends ControllerHelper {
     public void getOrderPDF (final HttpServerRequest request) {
         final String orderNumber = request.params().get("bc_number");
         ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,"exportBCOrdersAfterValidation", "_BC_" + orderNumber);
-//        orderService.getOrderFileId(orderNumber, new Handler<Either<String, JsonObject>>() {
-//            @Override
-//            public void handle(Either<String, JsonObject> event) {
-//                if (event.isRight()) {
-//                    JsonObject objRes = event.right().getValue();
-//                    String fileId = objRes.getString("id_mongo");
-//                    storage.readFile(fileId, new Handler<Buffer>() {
-//                        @Override
-//                        public void handle(Buffer buffer) {
-//                            request.response()
-//                                    .putHeader("Content-Type", "application/pdf; charset=utf-8")
-//                                    .putHeader("Content-Disposition", "attachment; filename=BC_" + orderNumber + ".pdf")
-//                                    .end(buffer);
-//                        }
-//                    });
-//                } else {
-//                    badRequest(request);
-//                }
-//            }
-//        });
+//
     }
 
     /**

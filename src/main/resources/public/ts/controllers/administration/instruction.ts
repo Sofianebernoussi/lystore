@@ -83,7 +83,7 @@ export const instructionController = ng.controller('instructionController',
             $scope.operation.nb_orders = $scope.operationAdd.nb_orders;
             $scope.operation.id_label = $scope.operationAdd.id_label;
             $scope.operation.amount = $scope.operationAdd.amount;
-            $scope.operation.status = true;
+            $scope.operation.status = $scope.operationAdd.status;
             $scope.operations.all = $scope.operations.all.filter( operation => operation.id !== $scope.operation.id);
             $scope.instruction.operations.push($scope.operation);
             $scope.isNewOperation = false;

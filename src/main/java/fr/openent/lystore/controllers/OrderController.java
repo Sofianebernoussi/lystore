@@ -163,9 +163,16 @@ public class OrderController extends ControllerHelper {
     public void getOrderPDF (final HttpServerRequest request) {
         final String orderNumber = request.params().get("bc_number");
         ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,"exportBCOrdersAfterValidation", "_BC_" + orderNumber);
-//
     }
 
+    @Get("/order/struct")
+    @ApiDoc("Get the pdf of orders by structure")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void getOrderPDFStruct (final HttpServerRequest request) {
+        final String orderNumber = request.params().get("bc_number");
+        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,"exportBCOrdersAfterValidationStruct", "_STRUCTURES_BC_" + orderNumber);
+    }
     /**
      * Init map with numbers validation
      * @param orders order list containing numbers

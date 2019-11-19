@@ -117,7 +117,7 @@
                     <i18n>lystore.orders.valid.structure.list.export</i18n>
                 </button>
                 <button ng-click="exportOrderStruct(getSelectedOrders()) "
-                        ng-disabled=" isNotValidated(getSelectedOrders()) || !validateSentOrders(getSelectedOrders()) || true ">
+                        ng-disabled=" isNotValidated(getSelectedOrders()) || !validateSentOrders(getSelectedOrders()) ">
                     <i18n>lystore.order.valided.generateBC.struct</i18n>
                 </button>
                 <button ng-click="exportOrder(getSelectedOrders())"

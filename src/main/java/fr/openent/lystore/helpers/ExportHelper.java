@@ -86,7 +86,6 @@ public class ExportHelper {
 
         if(request.params().getAll("bc_number") != null && !request.params().getAll("bc_number").isEmpty() ){
             id = request.params().getAll("bc_number").get(0);
-            System.out.println(id);
             if(id.contains(","))
                 multipleExport = true;
             params.put("bc_number",new JsonArray(request.params().getAll("bc_number")));

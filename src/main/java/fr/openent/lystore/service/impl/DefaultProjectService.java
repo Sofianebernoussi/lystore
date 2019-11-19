@@ -140,7 +140,6 @@ public class DefaultProjectService extends SqlCrudService implements ProjectServ
                                                                            handler.handle(new Either.Left<>(message));
                                                                        } else {
                                                                            JsonArray results = event.body().getJsonArray("results");
-                                                                           log.info(results.getJsonObject(results.size()-1));
                                                                            Double purse_amount = Double.parseDouble(results.getJsonObject(results.size()-1).getJsonArray("results").getJsonArray(0).getString(0));
                                                                            JsonObject res;
                                                                            Integer nb_order = -1;

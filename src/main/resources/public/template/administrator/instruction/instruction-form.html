@@ -78,7 +78,12 @@
                             <td>[[operationAdd.nbOrberSub]]</td>
                             <td ><span ng-bind="operationAdd.amount | currency"></span></td>
                             <td>
-                                <i18n>close</i18n>
+                                <span ng-show="operationAdd.status === true">
+                                    <i18n>open</i18n>
+                                </span>
+                                <span ng-show="operationAdd.status === false">
+                                    <i18n>close</i18n>
+                                </span>
                             </td>
                             <td class="one aligne-text-center" ng-click="dropOperation($index, operationAdd)">
                                 <i  class="trash"></i>

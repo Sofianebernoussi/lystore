@@ -336,10 +336,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 await  $scope.operations.sync();
                 let operations = [];
                 $scope.operations.all.map((operation,index)=>{
-                    if(operation.status == 'true'){
+                    if(operation.status == 'true' && !operation.instruction) {
                         operations.push(operation);
                     }
                 });
+
                 $scope.operations.all = operations;
                 await $scope.structures.sync();
                 template.open('administrator-main', 'administrator/orderRegion/order-region-create-form');
@@ -367,10 +368,17 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('order-list', 'customer/campaign/order/orders-by-project');
             }
         };
+        $scope.filterLabelUsed = () =>{
+            //MAP pour save dates 
+            $scope.operations.all.map(operation => {
+                $scope.labelOperation.all =  $scope.labelOperation.all.filter(label => label.id !== operation.label.id)
+            })
+        };
         $scope.initOperation = async () =>{
             $scope.labelOperation = new labels();
             $scope.labelOperation.sync();
             await $scope.operations.sync();
+            $scope.filterLabelUsed();
         };
         $scope.initBasketItem = async (idEquipment: number, idCampaign: number, structure) => {
             $scope.equipment = _.findWhere($scope.equipments.all, {id: idEquipment});

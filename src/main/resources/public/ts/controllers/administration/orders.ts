@@ -240,7 +240,9 @@ export const orderController = ng.controller('orderController',
             }
             await $scope.syncOrders('SENT');
             while ($scope.displayedOrders.selected.length > 0){
+                Utils.safeApply($scope);
             }
+            $scope.allOrdersSelected = false;
             Utils.safeApply($scope);
 
         };

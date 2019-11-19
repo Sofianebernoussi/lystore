@@ -231,29 +231,33 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
             orderWaiting: async () => {
                 await $scope.syncCampaignInputSelected();
-                $scope.preferences =  await $scope.ub.getPreferences();
-                if($scope.preferences && $scope.preferences.preference && $scope.fromWaiting)
-                    $scope.fromWaiting = false;
-                let preferences = JSON.parse($scope.preferences.preference);
-                if (preferences.ordersWaitingCampaign ){
-                    let campaignPref;
-                    $scope.campaignsForSelectInput.forEach(c=>{
-                        if(c.id === preferences.ordersWaitingCampaign)
-                            campaignPref = c;
-                    });
-                    if(campaignPref) {
-                        await $scope.initOrders('WAITING');
-                        $scope.selectCampaignShow(campaignPref);
-                    }else
+                $scope.preferences = await $scope.ub.getPreferences();
+                if ($scope.preferences && $scope.preferences.preference){
+                    if ($scope.fromWaiting)
+                        $scope.fromWaiting = false;
+                    let preferences = JSON.parse($scope.preferences.preference);
+                    if (preferences.ordersWaitingCampaign) {
+                        let campaignPref;
+                        $scope.campaignsForSelectInput.forEach(c => {
+                            if (c.id === preferences.ordersWaitingCampaign)
+                                campaignPref = c;
+                        });
+                        if (campaignPref) {
+                            await $scope.initOrders('WAITING');
+                            $scope.selectCampaignShow(campaignPref);
+                        } else
+                            await $scope.openLightSelectCampaign();
+                    } else
                         await $scope.openLightSelectCampaign();
                 }else
                     await $scope.openLightSelectCampaign();
+
                 Utils.safeApply($scope);
             },
             orderSent: async () => {
                 template.open('administrator-main', 'administrator/order/order-sent');
                 $scope.structures = new Structures();
-               await $scope.initOrders('SENT');
+                await $scope.initOrders('SENT');
                 $scope.orderToSend = null;
                 Utils.safeApply($scope);
             },
@@ -316,7 +320,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             },
 
             operationOrders: async (params) =>{
-            $scope.loadingArray = true;
+                $scope.loadingArray = true;
                 template.close('administrator-main');
                 template.close('operation-main');
                 $scope.operations = new Operations();
@@ -369,7 +373,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             }
         };
         $scope.filterLabelUsed = () =>{
-            //MAP pour save dates 
+            //MAP pour save dates
             $scope.operations.all.map(operation => {
                 $scope.labelOperation.all =  $scope.labelOperation.all.filter(label => label.id !== operation.label.id)
             })

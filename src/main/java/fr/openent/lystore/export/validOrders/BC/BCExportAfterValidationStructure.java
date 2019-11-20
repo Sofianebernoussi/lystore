@@ -8,6 +8,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -38,7 +39,7 @@ public class BCExportAfterValidationStructure extends PDF_OrderHElper {
                             final String nbrEngagement = params.getString("nbr_engagement");
                             final String dateGeneration = params.getString("date_generation");
                             Number supplierId = params.getInteger("supplier_id");
-                            getOrdersData(exportHandler, nbrBc, nbrEngagement, dateGeneration, supplierId, ids,
+                            getOrdersData(exportHandler, nbrBc, nbrEngagement, dateGeneration, supplierId, ids,true,
                                     new Handler<JsonObject>() {
                                         @Override
                                         public void handle(JsonObject data) {

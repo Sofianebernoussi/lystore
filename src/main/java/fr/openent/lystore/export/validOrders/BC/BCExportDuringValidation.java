@@ -41,7 +41,7 @@ public class BCExportDuringValidation extends PDF_OrderHElper {
         final String dateGeneration = params.getString("dateGeneration");
         Number supplierId = params.getInteger("supplierId");
         final Number programId = params.getInteger("programId");
-        getOrdersData(exportHandler,nbrBc, nbrEngagement, dateGeneration, supplierId, ids,
+        getOrdersData(exportHandler,nbrBc, nbrEngagement, dateGeneration, supplierId, ids,false,
                 new Handler<JsonObject>() {
                     @Override
                     public void handle(JsonObject data) {

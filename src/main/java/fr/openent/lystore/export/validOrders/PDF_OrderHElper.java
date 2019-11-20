@@ -32,18 +32,18 @@ import java.util.*;
 public class PDF_OrderHElper {
 
     protected SupplierService supplierService;
-    private JsonObject config;
-    private Vertx vertx;
-    private EventBus eb;
-    private String node;
-    private Logger log = LoggerFactory.getLogger(BCExport.class);
+    protected JsonObject config;
+    protected Vertx vertx;
+    protected EventBus eb;
+    protected String node;
+    protected Logger log = LoggerFactory.getLogger(BCExport.class);
     protected OrderService orderService;
     protected ProgramService programService;
 
-    private DefaultContractService contractService;
-    private StructureService structureService;
-    private AgentService agentService;
-    private RendersHelper renders ;
+    protected DefaultContractService contractService;
+    protected StructureService structureService;
+    protected AgentService agentService;
+    protected RendersHelper renders ;
 
     public PDF_OrderHElper(EventBus eb, Vertx vertx, JsonObject config){
         this.vertx = vertx;
@@ -64,7 +64,7 @@ public class PDF_OrderHElper {
     }
 
 
-    private void addStructureToOrders(JsonArray orders, JsonObject structure) {
+    protected void addStructureToOrders(JsonArray orders, JsonObject structure) {
         JsonObject order;
         for (int i = 0; i < orders.size(); i++) {
             order = orders.getJsonObject(i);
@@ -72,7 +72,7 @@ public class PDF_OrderHElper {
         }
     }
 
-    private void retrieveOrderDataForCertificate(final Handler<Either<String, Buffer>> exportHandler, final JsonObject structures,
+    protected void retrieveOrderDataForCertificate(final Handler<Either<String, Buffer>> exportHandler, final JsonObject structures,
                                                  final Handler<JsonArray> handler) {
         JsonObject structure;
         String structureId;
@@ -111,7 +111,7 @@ public class PDF_OrderHElper {
         }
     }
 
-    private Map<String, String> retrieveUaiNameStructure(JsonArray structures) {
+    protected Map<String, String> retrieveUaiNameStructure(JsonArray structures) {
         final Map<String, String> structureMap = new HashMap<String, String>();
 
         for (int i = 0; i < structures.size(); i++) {
@@ -123,7 +123,7 @@ public class PDF_OrderHElper {
         return structureMap;
     }
 
-    private void retrieveContract(final Handler<Either<String, Buffer>> exportHandler, JsonArray ids,
+    protected void retrieveContract(final Handler<Either<String, Buffer>> exportHandler, JsonArray ids,
                                   final Handler<JsonObject> handler) {
         contractService.getContract(ids, new Handler<Either<String, JsonArray>>() {
             @Override
@@ -138,7 +138,7 @@ public class PDF_OrderHElper {
         });
     }
 
-    private void retrieveStructures(final Handler<Either<String, Buffer>> exportHandler, JsonArray ids,
+    protected void retrieveStructures(final Handler<Either<String, Buffer>> exportHandler, JsonArray ids,
                                     final Handler<JsonObject> handler) {
         orderService.getStructuresId(ids, new Handler<Either<String, JsonArray>>() {
 
@@ -193,7 +193,7 @@ public class PDF_OrderHElper {
     }
 
 
-    private Double getTaxesTotal(JsonArray orders) {
+    protected Double getTaxesTotal(JsonArray orders) {
         Double sum = 0D;
         JsonObject order;
         for (int i = 0; i < orders.size(); i++) {
@@ -205,7 +205,7 @@ public class PDF_OrderHElper {
         return sum;
     }
 
-    private Double getSumWithoutTaxes(JsonArray orders) {
+    protected Double getSumWithoutTaxes(JsonArray orders) {
         JsonObject order;
         Double sum = 0D;
         for (int i = 0; i < orders.size(); i++) {
@@ -215,9 +215,9 @@ public class PDF_OrderHElper {
 
         return sum;
     }
-    private void retrieveOrderData(final Handler<Either<String, Buffer>> exportHandler, JsonArray ids,
+    protected void retrieveOrderData(final Handler<Either<String, Buffer>> exportHandler, JsonArray ids,boolean groupByStructure,
                                    final Handler<JsonObject> handler) {
-        orderService.getOrders(ids, null, true, false, new Handler<Either<String, JsonArray>>() {
+        orderService.getOrders(ids, null, true, groupByStructure, new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> event) {
                 if (event.isRight()) {
@@ -241,7 +241,7 @@ public class PDF_OrderHElper {
             }
         });
     }
-    private void retrieveManagementInfo(final Handler<Either<String, Buffer>> exportHandler, JsonArray ids,
+    protected void retrieveManagementInfo(final Handler<Either<String, Buffer>> exportHandler, JsonArray ids,
                                         final Number supplierId, final Handler<JsonObject> handler) {
         agentService.getAgentByOrderIds(ids, new Handler<Either<String, JsonObject>>() {
             @Override
@@ -277,7 +277,7 @@ public class PDF_OrderHElper {
     }
     protected void getOrdersData(final Handler<Either<String, Buffer>> exportHandler, final String nbrBc,
                                  final String nbrEngagement, final String dateGeneration,
-                                 final Number supplierId, final JsonArray ids,
+                                 final Number supplierId, final JsonArray ids, boolean groupByStructure,
                                  final Handler<JsonObject> handler) {
         SimpleDateFormat formatterDatePDF = new SimpleDateFormat("dd/MM/yyyy");
         SimpleDateFormat formatterDate = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
@@ -289,7 +289,7 @@ public class PDF_OrderHElper {
                 retrieveStructures(exportHandler, ids, new Handler<JsonObject>() {
                     @Override
                     public void handle(final JsonObject structures) {
-                        retrieveOrderData(exportHandler, ids, new Handler<JsonObject>() {
+                        retrieveOrderData(exportHandler, ids,groupByStructure, new Handler<JsonObject>() {
                             @Override
                             public void handle(final JsonObject order) {
                                 retrieveOrderDataForCertificate(exportHandler, structures, new Handler<JsonArray>() {

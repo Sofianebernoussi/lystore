@@ -57,7 +57,7 @@ public class BCExport extends PDF_OrderHElper {
             public void handle(Either<String, JsonObject> event) {
                 if (event.isRight()) {
                     JsonObject supplier = event.right().getValue();
-                    getOrdersData( exportHandler,"", "", "", supplier.getInteger("id"), new fr.wseduc.webutils.collections.JsonArray(validationNumbers),
+                    getOrdersData( exportHandler,"", "", "", supplier.getInteger("id"), new fr.wseduc.webutils.collections.JsonArray(validationNumbers),false,
                             new Handler<JsonObject>() {
                                 @Override
                                 public void handle(JsonObject data) {

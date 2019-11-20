@@ -184,7 +184,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         logger.info("Export BC per structures from Orders after validation started "+ object_id);
 
         this.validOrders = new ValidOrders(exportService,object_id,idNewFile,this.eb,this.vertx,this.config,false);
-        this.validOrders.exportBCAfterValidation(event1 -> {
+        this.validOrders.exportBCAfterValidationByStructures(event1 -> {
             if (event1.isLeft()) {
                 ExportHelper.catchError(exportService, idNewFile, "error when creating PDF " + event1.left().getValue(),handler);
             } else {

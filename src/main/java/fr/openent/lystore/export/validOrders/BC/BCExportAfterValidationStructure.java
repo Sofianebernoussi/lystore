@@ -80,33 +80,12 @@ public class BCExportAfterValidationStructure extends PDF_OrderHElper {
                 if (event.isRight()) {
                     JsonObject order = new JsonObject();
                     ArrayList <String> listStruct = new ArrayList<>();
-                    JsonArray ordersStructured = new JsonArray();
                     JsonArray orders = OrderController.formatOrders(event.right().getValue());
                     orders = sortByUai(orders);
-                    for(int i=0;i<orders.size();i++){
-                    JsonObject orderSorted = orders.getJsonObject(i);
-                    String idStruct = orderSorted.getString("id_structure");
-                        if(order.containsKey(idStruct)){
-                            JsonArray tempOrders = order.getJsonObject(idStruct).getJsonArray("orders").add(orderSorted);
-                            order.put(orderSorted.getString("id_structure"),new JsonObject().put("orders",tempOrders));
-                        }else{
-                            listStruct.add(idStruct);
-                            order.put(orderSorted.getString("id_structure"),new JsonObject().put("orders", new JsonArray().add(orderSorted)));
-                        }
-                    }
-                    for (String s : listStruct) {
-                        JsonObject ordersByStructure = order.getJsonObject(s);
-                        Double sumWithoutTaxes = getSumWithoutTaxes(ordersByStructure.getJsonArray("orders"));
-                        Double taxTotal = getTaxesTotal(ordersByStructure.getJsonArray("orders"));
 
-                        ordersByStructure.put("sumLocale",
-                                OrderController.getReadableNumber(OrderController.roundWith2Decimals(sumWithoutTaxes)));
-                        ordersByStructure.put("totalTaxesLocale",
-                                OrderController.getReadableNumber(OrderController.roundWith2Decimals(taxTotal)));
-                        ordersByStructure.put("totalPriceTaxeIncludedLocal",
-                                OrderController.getReadableNumber(OrderController.roundWith2Decimals(taxTotal + sumWithoutTaxes)));
-                        order.put(s, ordersByStructure);
-                    }
+                    sortOrdersBySturcuture(order, listStruct, orders);
+
+                    getSubtotalByStructure(order, listStruct);
 
                     structureService.getStructureById(new JsonArray(listStruct), new Handler<Either<String, JsonArray>>() {
                         @Override
@@ -124,14 +103,8 @@ public class BCExportAfterValidationStructure extends PDF_OrderHElper {
                                     order.put(structure.getString("id"),ordersByStructure);
 
                                 }
-
                                 JsonArray ordersArray = new JsonArray();
-                                for (String idStruct : listStruct) {
-                                    JsonObject ordersJsonObject = order.getJsonObject(idStruct);
-                                    ordersArray.add(ordersJsonObject);
-                                    order.remove(idStruct);
-                                }
-                                order.put("orderArray",ordersArray);
+                                setOrdersToArray(ordersArray, listStruct, order);
                                 handler.handle(order);
                             } else {
                                 log.error("An error occurred when collecting structures based on ids");
@@ -141,14 +114,51 @@ public class BCExportAfterValidationStructure extends PDF_OrderHElper {
                         }
                     });
 
-
-
                 } else {
                     log.error("An error occurred when retrieving order data");
                     exportHandler.handle(new Either.Left<>("An error occurred when retrieving order data"));
                 }
             }
         });
+    }
+
+    private void sortOrdersBySturcuture(JsonObject order, ArrayList<String> listStruct, JsonArray orders) {
+        for(int i=0;i<orders.size();i++){
+        JsonObject orderSorted = orders.getJsonObject(i);
+        String idStruct = orderSorted.getString("id_structure");
+            if(order.containsKey(idStruct)){
+                JsonArray tempOrders = order.getJsonObject(idStruct).getJsonArray("orders").add(orderSorted);
+                order.put(orderSorted.getString("id_structure"),new JsonObject().put("orders",tempOrders));
+            }else{
+                listStruct.add(idStruct);
+                order.put(orderSorted.getString("id_structure"),new JsonObject().put("orders", new JsonArray().add(orderSorted)));
+            }
+        }
+    }
+
+    private void getSubtotalByStructure(JsonObject order, ArrayList<String> listStruct) {
+        for (String s : listStruct) {
+            JsonObject ordersByStructure = order.getJsonObject(s);
+            Double sumWithoutTaxes = getSumWithoutTaxes(ordersByStructure.getJsonArray("orders"));
+            Double taxTotal = getTaxesTotal(ordersByStructure.getJsonArray("orders"));
+
+            ordersByStructure.put("sumLocale",
+                    OrderController.getReadableNumber(OrderController.roundWith2Decimals(sumWithoutTaxes)));
+            ordersByStructure.put("totalTaxesLocale",
+                    OrderController.getReadableNumber(OrderController.roundWith2Decimals(taxTotal)));
+            ordersByStructure.put("totalPriceTaxeIncludedLocal",
+                    OrderController.getReadableNumber(OrderController.roundWith2Decimals(taxTotal + sumWithoutTaxes)));
+            order.put(s, ordersByStructure);
+        }
+    }
+
+    private void setOrdersToArray(JsonArray ordersArray, ArrayList<String> listStruct, JsonObject order) {
+        for (String idStruct : listStruct) {
+            JsonObject ordersJsonObject = order.getJsonObject(idStruct);
+            ordersArray.add(ordersJsonObject);
+            order.remove(idStruct);
+        }
+        order.put("orderArray",ordersArray);
     }
 
     private JsonArray sortByUai(JsonArray values) {

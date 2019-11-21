@@ -156,9 +156,11 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
                         fileName,
                         exportHandler);
                 break;
-
             case ExportTypes.BC_AFTER_VALIDATION_STRUCT:
                 exportBCOrdersAfterValidationStruct(string_object_id,fileName,exportHandler);
+                break;
+            case ExportTypes.BC_BEFORE_VALIDATION_STRUCT:
+                exportBCOrdersBeforeValidationStruct(params,fileName,exportHandler);
                 break;
             default:
                 ExportHelper.catchError(exportService, idNewFile, "Invalid action in worker : " + action,exportHandler);
@@ -166,6 +168,20 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         }
     }
 
+    private void exportBCOrdersBeforeValidationStruct(JsonObject params, String titleFile, Handler<Either<String, Boolean>> exportHandler) {
+
+        logger.info("Export BC per structures from Orders before validation started : ");
+
+        this.validOrders = new ValidOrders(exportService,params,idNewFile,this.eb,this.vertx,this.config);
+        this.validOrders.exportBCBeforeValidationByStructures(event1 -> {
+            if (event1.isLeft()) {
+                ExportHelper.catchError(exportService, idNewFile, "error when creating PDF " + event1.left().getValue(),exportHandler);
+            } else {
+                Buffer xlsx = event1.right().getValue();
+                saveBuffer(xlsx,  titleFile ,exportHandler,PDFHEADER);
+            }
+        });
+    }
     private void exportBCOrdersAfterValidationStruct(String object_id, String titleFile, Handler<Either<String, Boolean>> exportHandler) {
 
         logger.info("Export BC per structures from Orders after validation started BC : "+ object_id);

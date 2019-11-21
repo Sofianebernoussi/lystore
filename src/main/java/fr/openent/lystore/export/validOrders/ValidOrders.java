@@ -2,10 +2,7 @@ package fr.openent.lystore.export.validOrders;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.ExportObject;
-import fr.openent.lystore.export.validOrders.BC.BCExport;
-import fr.openent.lystore.export.validOrders.BC.BCExportAfterValidation;
-import fr.openent.lystore.export.validOrders.BC.BCExportAfterValidationStructure;
-import fr.openent.lystore.export.validOrders.BC.BCExportDuringValidation;
+import fr.openent.lystore.export.validOrders.BC.*;
 import fr.openent.lystore.export.validOrders.listLycee.ListLycee;
 import fr.openent.lystore.export.validOrders.listLycee.RecapListLycee;
 import fr.openent.lystore.helpers.ExportHelper;
@@ -114,7 +111,14 @@ public class ValidOrders extends ExportObject {
             new BCExportAfterValidationStructure(eb,vertx,config).create(bcNumber,handler);
         }
     }
-
+    public void exportBCBeforeValidationByStructures(Handler<Either<String, Buffer>> handler) {
+        if (this.params == null || this.params.isEmpty()) {
+            ExportHelper.catchError(exportService, idFile, "number validations is not nullable");
+            handler.handle(new Either.Left<>("number validations is not nullable"));
+        }else{
+            new BCExportBeforeValidationStructure(eb,vertx,config).create(params.getJsonArray("numberValidations"),handler);
+        }
+    }
     public void exportBCAfterValidation(Handler<Either<String, Buffer>> handler) {
         if (this.bcNumber == null || this.bcNumber.isEmpty()) {
             ExportHelper.catchError(exportService, idFile, "number validations is not nullable");

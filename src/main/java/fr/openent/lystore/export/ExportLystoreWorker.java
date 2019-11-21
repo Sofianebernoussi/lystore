@@ -101,63 +101,63 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
 
         }
         switch (action) {
-            case "exportEQU":
+            case ExportTypes.EQUIPMENT_INSTRUCTION:
                 exportEquipment(
                         object_id,
                         body.getString("type"),
                         fileName,exportHandler );
                 break;
-            case "exportRME":
+            case ExportTypes.RME:
                 exportRME(
                         object_id,
                         fileName,
                         exportHandler);
                 break;
-            case "exportNotificationCP":
+            case ExportTypes.NOTIFICATION_CP:
                 exportNotificationCp(
                         object_id,
                         fileName,
                         exportHandler);
                 break;
-            case "exportPublipostage":
+            case ExportTypes.PUBLIPOSTAGE:
                 exportPublipostage(
                         object_id,
                         fileName,
                         exportHandler);
                 break;
-            case "exportSubvention":
+            case ExportTypes.SUBVENTION:
                 exportSubvention(
                         object_id,
                         fileName,
                         exportHandler);
                 break;
-            case "exportIris":
+            case ExportTypes.IRIS:
                 exportIris(object_id,
                         fileName,
                         exportHandler);
                 break;
-            case "exportListLycOrders":
+            case ExportTypes.LIST_LYCEE:
                 exportListLycOrders(string_object_id,
                         fileName,
                         exportHandler);
                 break;
-            case "exportBCOrders":
+            case ExportTypes.BC_BEFORE_VALIDATION:
                 exportBCOrders(params,
                         fileName,
                         exportHandler);
                 break;
-            case "exportBCOrdersDuringValidation":
+            case ExportTypes.BC_DURING_VALIDATION:
                 exportBCOrdersDuringValidation(params,
                         fileName,
                         exportHandler);
                 break;
-            case "exportBCOrdersAfterValidation":
+            case ExportTypes.BC_AFTER_VALIDATION:
                 exportBCOrdersAfterValidation(string_object_id,
                         fileName,
                         exportHandler);
                 break;
 
-            case "exportBCOrdersAfterValidationStruct":
+            case ExportTypes.BC_AFTER_VALIDATION_STRUCT:
                 exportBCOrdersAfterValidationStruct(string_object_id,fileName,exportHandler);
                 break;
             default:

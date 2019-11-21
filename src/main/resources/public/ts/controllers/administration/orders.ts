@@ -369,10 +369,15 @@ export const orderController = ng.controller('orderController',
                     toasts.info('lystore.sent.export.BC');
                 }
             } else {
-                // let  {status, data} = await http.get(`/lystore/orders/valid/export/$${order.number_validation}`);
-                // if(status === 201){
-                //     toasts.info('lystore.sent.export.BC');
-                // }
+                let filter = "";
+                orders.forEach(order => {
+                    filter +="number_validation=" +  order.number_validation + "&";
+                });
+                filter = filter.substring(filter.length-1,0);
+                let  {status, data} = await http.get(`/lystore/order/struct?${filter}`);
+                if(status === 201){
+                    toasts.info('lystore.sent.export.BC');
+                }
             }
             $scope.displayedOrders.selected[0].selected = false;
             Utils.safeApply($scope);

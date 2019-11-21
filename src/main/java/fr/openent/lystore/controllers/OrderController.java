@@ -1,6 +1,7 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.ExportTypes;
 import fr.openent.lystore.helpers.ExportHelper;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
@@ -162,7 +163,7 @@ public class OrderController extends ControllerHelper {
     @ResourceFilter(ManagerRight.class)
     public void getOrderPDF (final HttpServerRequest request) {
         final String orderNumber = request.params().get("bc_number");
-        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,"exportBCOrdersAfterValidation", "_BC_" + orderNumber);
+        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,ExportTypes.BC_AFTER_VALIDATION, "_BC_" + orderNumber);
     }
 
     @Get("/order/struct")
@@ -171,7 +172,14 @@ public class OrderController extends ControllerHelper {
     @ResourceFilter(ManagerRight.class)
     public void getOrderPDFStruct (final HttpServerRequest request) {
         final String orderNumber = request.params().get("bc_number");
-        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,"exportBCOrdersAfterValidationStruct", "_STRUCTURES_BC_" + orderNumber);
+        try {
+            if(!request.getParam("bc_number").isEmpty())
+                ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,ExportTypes.BC_AFTER_VALIDATION_STRUCT, "_STRUCTURES_BC_" + orderNumber);
+
+        }catch (NullPointerException e){
+            ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,ExportTypes.BC_BEFORE_VALIDATION_STRUCT, "_STRUCTURES_BC_" + orderNumber);
+        }
+//
     }
     /**
      * Init map with numbers validation
@@ -412,7 +420,7 @@ public class OrderController extends ControllerHelper {
                                 public void handle(Either<String, JsonObject> event) {
                                     if (event.isRight()) {
                                         logSendingOrder(ids,request);
-                                        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,"exportBCOrdersDuringValidation", "_BC");
+                                        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,ExportTypes.BC_DURING_VALIDATION, "_BC");
                                     } else {
                                         badRequest(request);
                                     }
@@ -525,7 +533,7 @@ public class OrderController extends ControllerHelper {
     private void exportDocuments(final HttpServerRequest request, final Boolean printOrder,
                                  final Boolean printCertificates, final List<String> validationNumbers) {
         if(printOrder){
-            ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrders", "_BC");
+            ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF, ExportTypes.BC_BEFORE_VALIDATION, "_BC");
         }else {
             supplierService.getSupplierByValidationNumbers(new fr.wseduc.webutils.collections.JsonArray(validationNumbers), new Handler<Either<String, JsonObject>>() {
                 @Override
@@ -573,7 +581,7 @@ public class OrderController extends ControllerHelper {
     }
 
     private void exportStructuresList(final HttpServerRequest request) {
-        ExportHelper.makeExport(request, eb, exportService,Lystore.ORDERS,  Lystore.XLSX,"exportListLycOrders", "_list_bdc");
+        ExportHelper.makeExport(request, eb, exportService,Lystore.ORDERS,  Lystore.XLSX,ExportTypes.LIST_LYCEE, "_list_bdc");
     }
 
     @Delete("/orders/valid")

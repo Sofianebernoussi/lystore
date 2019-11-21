@@ -1,6 +1,7 @@
 package fr.openent.lystore.helpers;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.ExportTypes;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
@@ -146,14 +147,8 @@ public class ExportHelper {
             }else{
                 String [] objectsId = finalId.split(",");
                 for (String currentId : objectsId) {
-                    String nameFile = "";
-                    if(action.equals("exportBCOrders"))
-                        nameFile= makeTheNameExport("_BC"  ,extension);
-                    else if(action.equals("exportBCOrdersAfterValidation"))
-                         nameFile  = makeTheNameExport("_BC_" + currentId ,extension);
-                    else{
-                         nameFile  = makeTheNameExport("_default_",extension);
-                    }
+                    String nameFile = getFileNameMultiExport(extension, action, currentId);
+
                     exportService.createWhenStart(typeObject, extension, infoFile, currentId, nameFile, user.getUserId(), action, finalParams, newExport -> {
                         if (newExport.isRight()) {
                             String idExport = newExport.right().getValue().getString("id");
@@ -177,6 +172,29 @@ public class ExportHelper {
                 request.response().setStatusCode(201).end("Multi Import started ");
             }
         });
+    }
+
+    private static String getFileNameMultiExport(String extension, String action, String currentId) {
+        String nameFile;
+        switch (action){
+            case ExportTypes.BC_BEFORE_VALIDATION:
+                nameFile= makeTheNameExport("_BC"  ,extension);
+                break;
+            case ExportTypes.BC_AFTER_VALIDATION:
+                nameFile  = makeTheNameExport("_BC_" + currentId ,extension);
+                break;
+            case ExportTypes.BC_AFTER_VALIDATION_STRUCT:
+                nameFile  = makeTheNameExport("_STRUCT_BC_" + currentId ,extension);
+                break;
+            case ExportTypes.BC_BEFORE_VALIDATION_STRUCT:
+                nameFile  = makeTheNameExport("_STRUCT_BC_" + currentId ,extension);
+                break;
+            default:
+                nameFile  = makeTheNameExport("_default_",extension);
+
+                break;
+        }
+        return nameFile;
     }
 
     private static void getParamsDuringBCValidation(EventBus eb, HttpServerRequest request, ExportService exportService, String typeObject, String extension, String

@@ -173,11 +173,12 @@ public class OrderController extends ControllerHelper {
     public void getOrderPDFStruct (final HttpServerRequest request) {
         final String orderNumber = request.params().get("bc_number");
         try {
-            if(!request.getParam("bc_number").isEmpty())
-                ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,ExportTypes.BC_AFTER_VALIDATION_STRUCT, "_STRUCTURES_BC_" + orderNumber);
+            if(!request.getParam("bc_number").isEmpty()) {
+                ExportHelper.makeExport(request, eb, exportService, Lystore.ORDERSSENT, Lystore.PDF, ExportTypes.BC_AFTER_VALIDATION_STRUCT, "_STRUCTURES_BC_" + orderNumber);
+            }
 
         }catch (NullPointerException e){
-            ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,ExportTypes.BC_BEFORE_VALIDATION_STRUCT, "_STRUCTURES_BC_" + orderNumber);
+            ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,ExportTypes.BC_BEFORE_VALIDATION_STRUCT, "_STRUCTURES_BC" );
         }
 //
     }

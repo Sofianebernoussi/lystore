@@ -184,10 +184,10 @@ public class ExportHelper {
                 nameFile  = makeTheNameExport("_BC_" + currentId ,extension);
                 break;
             case ExportTypes.BC_AFTER_VALIDATION_STRUCT:
-                nameFile  = makeTheNameExport("_STRUCT_BC_" + currentId ,extension);
+                nameFile  = makeTheNameExport("_STRUCTURES_BC_" + currentId ,extension);
                 break;
             case ExportTypes.BC_BEFORE_VALIDATION_STRUCT:
-                nameFile  = makeTheNameExport("_STRUCT_BC" ,extension);
+                nameFile  = makeTheNameExport("_STRUCTURES_BC" ,extension);
                 break;
             default:
                 nameFile  = makeTheNameExport("_default_",extension);

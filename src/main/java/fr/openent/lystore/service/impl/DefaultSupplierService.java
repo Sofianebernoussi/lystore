@@ -65,7 +65,8 @@ public class DefaultSupplierService extends SqlCrudService implements SupplierSe
                 "FROM lystore.order_client_equipment " +
                 "INNER JOIN lystore.contract ON (order_client_equipment.id_contract = contract.id) " +
                 "INNER JOIN lystore.supplier ON (contract.id_supplier = supplier.id) " +
-                "WHERE order_client_equipment.number_validation IN " + Sql.listPrepared(validationNumbers.getList());
+                "WHERE order_client_equipment.number_validation IN " + Sql.listPrepared(validationNumbers.getList())+
+                " LIMIT 1";
 
         this.sql.prepared(query, validationNumbers, SqlResult.validUniqueResultHandler(handler, new String[0]));
     }

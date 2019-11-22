@@ -103,7 +103,8 @@ public class DefaultContractService extends SqlCrudService implements ContractSe
                 "INNER JOIN " + Lystore.lystoreSchema + ".contract " +
                 "ON (order_client_equipment.id_contract = contract.id) " +
                 "WHERE order_client_equipment.number_validation IN " + Sql.listPrepared(ids.getList()) +
-                " GROUP BY contract.id";
+                " GROUP BY contract.id " +
+                " LIMIT 1";
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
 
         for (int i = 0; i < ids.size(); i++) {

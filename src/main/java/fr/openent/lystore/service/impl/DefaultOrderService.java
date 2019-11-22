@@ -249,7 +249,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
     @Override
     public void cancelValidation(JsonArray validationNumbers, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE lystore.order_client_equipment SET number_validation = '', status = 'WAITING' " +
+        String query = "UPDATE lystore.order_client_equipment SET number_validation = '', status = 'WAITING' ,id_order = NULL " +
                 "WHERE number_validation IN " + Sql.listPrepared(validationNumbers.getList());
 
         this.sql.prepared(query, validationNumbers, SqlResult.validUniqueResultHandler(handler));

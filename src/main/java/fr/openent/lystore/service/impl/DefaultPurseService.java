@@ -116,4 +116,23 @@ public class DefaultPurseService implements PurseService {
                 .put("values", params)
                 .put("action", "prepared");
     }
+
+    @Override
+    public void checkPurses(Integer id, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT id_structure," +
+                "initial_amount - (amount + (" +
+                "  Round((  " +
+                "                      (  " +
+                "                      SELECT  " +
+                "                             CASE  " +
+                "                                    WHEN orders.price_proposal IS NOT NULL THEN 0  " +
+                "                                    WHEN orders.override_region IS NULL THEN 0  " +
+                "                                    WHEN Sum(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount) IS NULL THEN 0 " +
+                "                                    ELSE Sum(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount) " +
+                "                             END  " +
+                "                      FROM   lystore.order_client_options oco  " +
+                "                      WHERE  oco.id_order_client_equipment = orders.id ) + orders.\"price TTC\" ) * orders.amount ,2 ) AS total) from lystore.orders_client_equipment orders" +
+                "from "+Lystore.lystoreSchema + ".purse where id_campaign = ?";
+        Sql.getInstance().prepared(query,new JsonArray().add(id),SqlResult.validResultHandler(handler));
+    }
 }

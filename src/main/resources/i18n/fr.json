@@ -545,7 +545,7 @@
   "ORDERS": "Commandes/Demandes",
   "INSTRUCTION": "Rapport",
   "Select": "Selectionner",
-  "not.valid.campaign.form": "Il faut un nom de campagne et au moins un type d'équipement visible par regroupement",
+  "not.valid.campaign.form": "Saisir le nom de la campagne et au moins un type d'équipements visible par regroupement.",
   "operation.form.warning": "Une opération ne peut pas être créée sur une date déjà utilisée par une autre opération",
   "open" : "Ouvert",
   "INSTRUCTION": "Rapport",

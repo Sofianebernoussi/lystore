@@ -101,7 +101,7 @@ public class DefaultPurseService implements PurseService {
     @Override
     public JsonObject updatePurseAmountStatement(Double price, Integer idCampaign, String idStructure,String operation) {
         final double cons = 100.0;
-        String updateQuery = "UPDATE lystore.purse " +
+        String updateQuery = "UPDATE  " + Lystore.lystoreSchema + ".purse " +
                 "SET amount = amount " +  operation + " ?  " +
                 "WHERE id_campaign = ? " +
                 "AND id_structure = ? ;";
@@ -119,20 +119,125 @@ public class DefaultPurseService implements PurseService {
 
     @Override
     public void checkPurses(Integer id, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT id_structure," +
-                "initial_amount - (amount + (" +
-                "  Round((  " +
-                "                      (  " +
-                "                      SELECT  " +
-                "                             CASE  " +
-                "                                    WHEN orders.price_proposal IS NOT NULL THEN 0  " +
-                "                                    WHEN orders.override_region IS NULL THEN 0  " +
-                "                                    WHEN Sum(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount) IS NULL THEN 0 " +
-                "                                    ELSE Sum(oco.price + ((oco.price * oco.tax_amount) /100) * oco.amount) " +
-                "                             END  " +
-                "                      FROM   lystore.order_client_options oco  " +
-                "                      WHERE  oco.id_order_client_equipment = orders.id ) + orders.\"price TTC\" ) * orders.amount ,2 ) AS total) from lystore.orders_client_equipment orders" +
-                "from "+Lystore.lystoreSchema + ".purse where id_campaign = ?";
-        Sql.getInstance().prepared(query,new JsonArray().add(id),SqlResult.validResultHandler(handler));
+        String query = "WITH values  " +
+                "     AS (SELECT orders.id,  " +
+                "                orders.id_campaign,  " +
+                "                orders.\"price TTC\",  " +
+                "                Round(( (SELECT CASE  " +
+                "                                  WHEN orders.price_proposal IS NOT NULL THEN 0  " +
+                "                                  WHEN orders.override_region IS NULL THEN 0  " +
+                "                                  WHEN Sum(oco.price + ( ( oco.price *  " +
+                "                                                         oco.tax_amount )  " +
+                "                                                         / 100 )  " +
+                "                                                       *  " +
+                "                                                       oco.amount) IS  " +
+                "                                       NULL THEN 0  " +
+                "                                  ELSE Sum(oco.price + ( ( oco.price *  " +
+                "                                                         oco.tax_amount )  " +
+                "                                                         / 100 )  " +
+                "                                                       *  " +
+                "                                                       oco.amount)  " +
+                "                                END  " +
+                "                         FROM    " + Lystore.lystoreSchema + ".order_client_options oco  " +
+                "                         WHERE  oco.id_order_client_equipment = orders.id)  " +
+                "                        + orders.\"price TTC\" ) * orders.amount, 2) AS total,  " +
+                "                orders.id_structure,  " +
+                "                orders.id_operation                                AS  " +
+                "                id_operation  " +
+                "         FROM   ((SELECT ore.id,  " +
+                "                         true      AS isregion,  " +
+                "                         ore.price AS \"price TTC\",  " +
+                "                         ore.amount,  " +
+                "                         ore.creation_date,  " +
+                "                         ore.modification_date,  " +
+                "                         ore.NAME,  " +
+                "                         ore.summary,  " +
+                "                         ore.description,  " +
+                "                         ore.image,  " +
+                "                         ore.status,  " +
+                "                         ore.id_contract,  " +
+                "                         ore.equipment_key,  " +
+                "                         ore.id_campaign,  " +
+                "                         ore.id_structure,  " +
+                "                         ore.cause_status,  " +
+                "                         ore.number_validation,  " +
+                "                         ore.id_order,  " +
+                "                         ore.comment,  " +
+                "                         ore.rank  AS \"prio\",  " +
+                "                         NULL      AS price_proposal,  " +
+                "                         ore.id_project,  " +
+                "                         ore.id_order_client_equipment,  " +
+                "                         NULL      AS program,  " +
+                "                         NULL      AS action,  " +
+                "                         ore.id_operation,  " +
+                "                         NULL      AS override_region  " +
+                "                  FROM    " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore)  " +
+                "                 UNION  " +
+                "                 (SELECT oce.id,  " +
+                "                         false AS isregion,  " +
+                "                         CASE  " +
+                "                           WHEN price_proposal IS NULL THEN price +  " +
+                "                           ( price * tax_amount  " +
+                "                             / 100 )  " +
+                "                           ELSE price_proposal  " +
+                "                         END   AS \"price TTC\",  " +
+                "                         amount,  " +
+                "                         creation_date,  " +
+                "                         NULL  AS modification_date,  " +
+                "                         NAME,  " +
+                "                         summary,  " +
+                "                         description,  " +
+                "                         image,  " +
+                "                         status,  " +
+                "                         id_contract,  " +
+                "                         equipment_key,  " +
+                "                         id_campaign,  " +
+                "                         id_structure,  " +
+                "                         cause_status,  " +
+                "                         number_validation,  " +
+                "                         id_order,  " +
+                "                         comment,  " +
+                "                         rank  AS \"prio\",  " +
+                "                         price_proposal,  " +
+                "                         id_project,  " +
+                "                         NULL  AS id_order_client_equipment,  " +
+                "                         program,  " +
+                "                         action,  " +
+                "                         id_operation,  " +
+                "                         override_region  " +
+                "                  FROM    " + Lystore.lystoreSchema + ".order_client_equipment oce)) AS orders  " +
+                "         WHERE  orders.id_campaign = ?)  " +
+                "SELECT Array_to_json(Array_agg(values.*))                               AS  " +
+                "       orders,  " +
+                "       ( purse.initial_amount - ( Sum(values.total ) + purse.amount ) ) AS total  " +
+                "       ,  " +
+                "       purse.id_structure,  " +
+                "       purse.id_campaign  " +
+                "FROM    " + Lystore.lystoreSchema + ".purse  " +
+                "       LEFT JOIN values  " +
+                "              ON purse.id_campaign = values.id_campaign  " +
+                "                 AND purse.id_structure = values.id_structure  " +
+                "WHERE  purse.id_campaign = ? " +
+                "GROUP  BY purse.id_structure,  " +
+                "          purse.initial_amount,  " +
+                "          purse.amount,  " +
+                "          purse.id_campaign ";
+        Sql.getInstance().prepared(query,new JsonArray().add(id).add(id),SqlResult.validResultHandler(new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(Either<String, JsonArray> event) {
+                if (event.isRight())
+                {
+                    JsonArray results = event.right().getValue();
+                    for(int i =0;i<results.size();i++){
+                       JsonObject result = results.getJsonObject(i);
+
+
+                    }
+                    handler.handle(new Either.Right<>(results));
+                }else {
+                    handler.handle(new Either.Left<>("Error in SQL when checking purse"));
+                }
+            }
+        }));
     }
 }

@@ -297,7 +297,15 @@ public class PurseController extends ControllerHelper {
     public void checkPurse(final HttpServerRequest request) {
         try {
             Integer idCampaign = Integer.parseInt(request.params().get("id"));
-            purseService.checkPurses(idCampaign, arrayResponseHandler(request));
+            purseService.checkPurses(idCampaign, new Handler<Either<String, JsonArray>>() {
+                @Override
+                public void handle(Either<String, JsonArray> event) {
+                    if(event.isRight())
+                    {
+                    }
+                    request.response().setStatusCode(201).end(event.right().getValue().toString());
+                }
+            });
 
         } catch (NumberFormatException e) {
             log.error("[Lystore@purses] : An error occurred when casting campaign id", e);

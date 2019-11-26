@@ -70,7 +70,7 @@ public class ExportController extends ControllerHelper {
                     }else {
                         exportService.getExport(fileId, file ->
                                 request.response()
-                                        .putHeader("Content-type", "application/vnd.ms-excel; charset=utf-8")
+                                        .putHeader("Content-type", "application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=utf-8")
                                         .putHeader("Content-Length", file.length() + "")
                                         .putHeader("Content-Disposition", "filename=" + event.right().getValue().getJsonObject(0).getString("filename"))
                                         .end(file));

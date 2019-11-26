@@ -76,7 +76,7 @@ export const operationController = ng.controller('operationController',
             let operationMomentDate = moment(operation.date_cp);
             let isValid = true;
             $scope.operations.all.forEach(operationn => {
-                if(moment(operationMomentDate).format("dd/MM/YYYY") === moment(operationn.date_cp).format("dd/MM/YYYY") && operationn.id != operation.id){
+                if(moment(operationMomentDate).format("DD/MM/YYYY") === moment(operationn.date_cp).format("DD/MM/YYYY") && operationn.id != operation.id){
                     isValid = false;
                 }
             });

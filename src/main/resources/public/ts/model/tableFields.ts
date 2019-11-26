@@ -116,7 +116,7 @@ export const orderWaiting = [
     },
     {
         name: 'lystore.amountTTC',
-        fieldName: 'priceTTCtotal',
+        fieldName: 'price',
         display: true,
     }
 ];

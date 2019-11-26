@@ -18,7 +18,7 @@ public interface ExportService {
 
     void deleteExportMongo(JsonArray idsExports, Handler<Either<String, JsonObject>> handler);
 
-    void createWhenStart(String typeObject, JsonObject infoFile, String instruction_id, String nameFile, String userId, String action, Handler<Either<String, JsonObject>> handler);
+    void createWhenStart(String typeObject,String extension , JsonObject infoFile, String instruction_id, String nameFile, String userId, String action,JsonObject params, Handler<Either<String, JsonObject>> handler);
 
     void updateWhenError(String idExport, Handler<Either<String, Boolean>> handler);
 

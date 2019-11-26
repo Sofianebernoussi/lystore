@@ -12,6 +12,7 @@ import fr.openent.lystore.export.instructions.publipostage.Publipostage;
 import fr.openent.lystore.export.instructions.subventionEquipment.Market;
 import fr.openent.lystore.export.instructions.subventionEquipment.Subventions;
 import fr.openent.lystore.helpers.ExcelHelper;
+import fr.openent.lystore.helpers.ExportHelper;
 import fr.openent.lystore.service.ExportService;
 import fr.openent.lystore.service.impl.DefaultProjectService;
 import fr.wseduc.webutils.Either;
@@ -58,21 +59,21 @@ public class Instruction extends ExportObject {
 
     public void exportInvestissement(Handler<Either<String, Buffer>> handler) {
         if (this.id == null) {
-            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
+            ExportHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
 
 
         Sql.getInstance().prepared(operationsIdQuery, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
-                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
+                ExportHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
             } else {
 
                 JsonObject instruction = either.right().getValue();
                 String operationStr = "operations";
                 if (!instruction.containsKey(operationStr)) {
-                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
+                    ExportHelper.catchError(exportService, idFile, "Error when getting operations");
                     handler.handle(new Either.Left<>("Error when getting operations"));
                 } else {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
@@ -103,7 +104,7 @@ public class Instruction extends ExportObject {
                         new RecapEPLETab(workbook, instruction).create(getHandler(RecapEPLEfuture));
                        new RecapImputationBud(workbook, instruction).create(getHandler(RecapImputationBudfuture));
                     } catch (IOException e) {
-                        ExcelHelper.catchError(exportService, idFile, "Xlsx Failed to read template");
+                        ExportHelper.catchError(exportService, idFile, "Xlsx Failed to read template");
                         handler.handle(new Either.Left<>("Xlsx Failed to read template"));
                     }
                 }
@@ -115,21 +116,21 @@ public class Instruction extends ExportObject {
 
     public void exportEquipmentRapp(Handler<Either<String, Buffer>> handler, String type) {
         if (this.id == null) {
-            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
+            ExportHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
 
 
         Sql.getInstance().prepared(operationsIdQuery, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
-                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
+                ExportHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
             } else {
 
                 JsonObject instruction = either.right().getValue();
                 String operationStr = "operations";
                 if (!instruction.containsKey(operationStr)) {
-                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
+                    ExportHelper.catchError(exportService, idFile, "Error when getting operations");
                     handler.handle(new Either.Left<>("Error when getting operations"));
                 } else {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
@@ -210,18 +211,18 @@ public class Instruction extends ExportObject {
 
     public void exportPublipostage(Handler<Either<String, Buffer>> handler) {
         if (this.id == null) {
-            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
+            ExportHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
         Sql.getInstance().prepared(operationsIdQuery, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(eitherInstruction -> {
             if (eitherInstruction.isLeft()) {
-                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
+                ExportHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
             } else {
                 JsonObject instruction = eitherInstruction.right().getValue();
                 String operationStr = "operations";
                 if (!instruction.containsKey(operationStr)) {
-                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
+                    ExportHelper.catchError(exportService, idFile, "Error when getting operations");
                     handler.handle(new Either.Left<>("Error when getting operations"));
                 } else {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
@@ -242,21 +243,21 @@ public class Instruction extends ExportObject {
 
     public void exportNotficationCp(Handler<Either<String, Buffer>> handler) {
         if (this.id == null) {
-            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
+            ExportHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
 
 
         Sql.getInstance().prepared(operationsIdQuery, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
-                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
+                ExportHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
             } else {
 
                 JsonObject instruction = either.right().getValue();
                 String operationStr = "operations";
                 if (!instruction.containsKey(operationStr)) {
-                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
+                    ExportHelper.catchError(exportService, idFile, "Error when getting operations");
                     handler.handle(new Either.Left<>("Error when getting operations"));
                 } else {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));
@@ -282,19 +283,19 @@ public class Instruction extends ExportObject {
 
     public void exportIris(Handler<Either<String, Buffer>> handler) {
         if (this.id == null) {
-            ExcelHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
+            ExportHelper.catchError(exportService, idFile, "Instruction identifier is not nullable");
             handler.handle(new Either.Left<>("Instruction identifier is not nullable"));
         }
         Sql.getInstance().prepared(operationsIdQuery, new JsonArray().add(this.id).add(this.id), SqlResult.validUniqueResultHandler(either -> {
             if (either.isLeft()) {
-                ExcelHelper.catchError(exportService, idFile, "Error when getting sql datas ");
+                ExportHelper.catchError(exportService, idFile, "Error when getting sql datas ");
                 handler.handle(new Either.Left<>("Error when getting sql datas "));
             } else {
 
                 JsonObject instruction = either.right().getValue();
                 String operationStr = "operations";
                 if (!instruction.containsKey(operationStr)) {
-                    ExcelHelper.catchError(exportService, idFile, "Error when getting operations");
+                    ExportHelper.catchError(exportService, idFile, "Error when getting operations");
                     handler.handle(new Either.Left<>("Error when getting operations"));
                 } else {
                     instruction.put(operationStr, new JsonArray(instruction.getString(operationStr)));

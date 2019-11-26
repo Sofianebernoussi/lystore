@@ -90,8 +90,11 @@ search-and-select{
       }
     }
   }
+  button.search-and-select-button.disabled{
+    background-color: #ebebe4 !important;
+  }
   button.search-and-select-button.ng-binding.disabled{
-    background-color: rgb(235, 235, 228);;
+    background-color: #ebebe4;
   }
   .search-and-select-bar{
     width: 100%;

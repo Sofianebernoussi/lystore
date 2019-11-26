@@ -90,14 +90,12 @@ public interface OrderService {
      * @param status status to update
      * @param engagementNumber engagement number
      * @param labelProgram Program label
-     * @param fileId Mongo file id
-     * @param owner Owner username
      * @param dateCreation Creation date
      * @param orderNumber Order number
      * @param handler Function handler returning data
      */
-    void updateStatusToSent(List<String> ids, String status, String engagementNumber, String labelProgram, String dateCreation,
-                      String orderNumber, String fileId, String owner, Handler<Either<String, JsonObject>> handler);
+    void updateStatusToSent(final List<String> ids, String status, final String engagementNumber, final String labelProgram, final String dateCreation,
+                            final String orderNumber, final Handler<Either<String, JsonObject>> handler);
 
     /**
      * List orders based on ids

@@ -102,6 +102,7 @@ export const exportCtrl = ng.controller('exportCtrl', [
                             || ('typeObject' in exportToHandle ? regex.test(lang.translate(exportToHandle.typeObject).toLowerCase()) : false)
                             || ('created' in exportToHandle ? regex.test(exportToHandle.created.toLowerCase()) : false)
                             || ('filename' in exportToHandle ? regex.test(exportToHandle.filename.toLowerCase()) : false)
+                            || ('extension' in exportToHandle ? regex.test(lang.translate(exportToHandle.extension.toLowerCase())) : false)
                     });
                 });
                 $scope.displayExports = searchResult;

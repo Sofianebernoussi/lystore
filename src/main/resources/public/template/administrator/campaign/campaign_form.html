@@ -18,7 +18,7 @@
                     <h2><i18n>lystore.information</i18n></h2>
                     <label class="row twelve vertical-spacing">
                         <span class="twelve">
-                            <i18n>lystore.campaigns.name</i18n>
+                            <i18n>lystore.campaigns.name</i18n> *
                         </span>
                         <input type="text" class="twelve" ng-model="campaign.name" required>
                     </label>
@@ -118,7 +118,9 @@
                 </div>
             </div>
         </article>
-
+        <div class="right-magnet warning" ng-show="!validCampaignForm(campaign)">
+            <i18n>not.valid.campaign.form</i18n>
+        </div>
         <div class="row">
             <div class="right-magnet">
                 <input type="button" class="cancel" ng-click="redirectTo('/campaigns')" i18n-value="cancel"/>

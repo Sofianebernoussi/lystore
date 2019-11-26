@@ -12,6 +12,7 @@ export class Export implements Selectable {
     typeObject: string;
     instruction_name:string;
     instruction_id:Number;
+    extension:string
     status: STATUS;
     created?;
     object_name: string;
@@ -43,6 +44,8 @@ export class Exports extends Selection<Export> {
                 exportEdit.created = moment(exportResponse.created).format("YYYY-MM-DD HH:mm:ss");
                 if(!exportEdit.typeObject)
                     exportEdit.typeObject = "INSTRUCTION";
+                if(!exportEdit.extension)
+                    exportEdit.extension = "xlsx"
                 return exportEdit;
             });
             this.all = Mix.castArrayAs(Export, response);

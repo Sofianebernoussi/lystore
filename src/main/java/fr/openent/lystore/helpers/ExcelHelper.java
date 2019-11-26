@@ -1015,6 +1015,9 @@ public class ExcelHelper {
         setTotalXWithStyle(lineStart, lineEnd, column, lineInsert, column, style);
     }
 
+    public void setRowBreak(int line){
+        sheet.setRowBreak(line);
+    }
 
     /**
      * Set total of a line
@@ -1045,89 +1048,5 @@ public class ExcelHelper {
             log.error("Trying to sum a non init cell , init cells before calling this function");
         }
     }
-
-    public static String makeTheNameExcelExport(String nameFile) {
-        return getDate() + nameFile + ".xlsx";
-    }
-
-    public static String makeTheNameExcelExport(String nameFile, String type) {
-        return getDate() + nameFile + type + ".xlsx";
-    }
-
-    public static void catchError(ExportService exportService, String idFile, Exception errorCatch) {
-        exportService.updateWhenError(idFile, makeError -> {
-            if (makeError.isLeft()) {
-                log.error("Error for create file export excel " + makeError.left() + errorCatch);
-            }
-        });
-        log.error("Error for create file export excel " + errorCatch);
-    }
-    public static void catchError(ExportService exportService, String idFile, String errorCatchTextOutput) {
-        exportService.updateWhenError(idFile, makeError -> {
-            if (makeError.isLeft()) {
-                log.error("Error for create file export excel " + makeError.left() + errorCatchTextOutput);
-            }
-        });
-        log.error("Error for create file export excel " + errorCatchTextOutput);
-    }
-    public static void catchError(ExportService exportService, String idFile, String errorCatchTextOutput, Handler<Either<String,Boolean>> handler) {
-        exportService.updateWhenError(idFile,handler);
-        log.error("Error for create file export excel " + errorCatchTextOutput);
-    }
-
-    private static String getDate() {
-        java.util.Date date = Calendar.getInstance().getTime();
-        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-        return formatter.format(date);
-    }
-
-    public static void makeExportExcel(HttpServerRequest request, EventBus eb, ExportService exportService, String typeObject, String
-            action, String name) {
-        String id="-1";
-        boolean withType = request.getParam("type") != null;
-        if(request.getParam("id")!=null && typeObject.equals(Lystore.INSTRUCTIONS))
-            id = request.getParam("id");
-        if(request.params().getAll("number_validation") != null && !request.params().getAll("number_validation").isEmpty() ){
-            id = request.params().getAll("number_validation").get(0);
-        }
-        String type = "";
-        JsonObject infoFile = new JsonObject();
-        if (withType) {
-            type = request.getParam("type");
-            infoFile.put("type", type);
-        }
-        String titleFile = withType ? ExcelHelper.makeTheNameExcelExport(name, type) : ExcelHelper.makeTheNameExcelExport(name);
-        log.info("makeExportExcel");
-        String finalId = id;
-
-
-
-
-        UserUtils.getUserInfos(eb, request, user -> {
-            exportService.createWhenStart(typeObject, infoFile, finalId, titleFile, user.getUserId(), action, newExport -> {
-                if (newExport.isRight()) {
-                    String idExport = newExport.right().getValue().getString("id");
-                    try {
-                        Logging.insert(eb,
-                                request,
-                                Contexts.EXPORT.toString(),
-                                Actions.CREATE.toString(),
-                                idExport.toString(),
-                                new JsonObject().put("ids", idExport).put("fileName", titleFile));
-                        log.info("J'envoie la demande d export");
-                        Lystore.launchWorker(eb);
-                        request.response().setStatusCode(201).end("Import started " + idExport);
-                    } catch (Exception error) {
-                        catchError(exportService, idExport, error);
-                    }
-                } else {
-                    log.error("Fail to insert file in SQL " + newExport.left());
-                }
-            });
-        });
-    }
-
-    ;
-
 
 }

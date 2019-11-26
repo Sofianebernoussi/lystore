@@ -69,7 +69,7 @@ export class Instruction implements Selectable {
                 operation.label.toString() !== 'null' && operation.label !== null ?
                     operation.label = Mix.castAs(label, JSON.parse(operation.label.toString()))
                     : operation.label = new label();
-                operation.status = operation.status? true : false;
+                operation.status = JSON.parse(String(operation.status));
                 operation.nbOrberSub = operation.number_sub || 0;
             });
         } catch (e) {

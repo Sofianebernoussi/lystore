@@ -1,4 +1,5 @@
 import {_, $,idiom as lang,angular, model, ng, template, toasts} from 'entcore';
+import http from "axios";
 import {
     Campaign, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD, Userbook, Order,
     Utils
@@ -289,9 +290,9 @@ export const orderController = ng.controller('orderController',
         };
         $scope.sendOrders = async (orders: OrdersClient) => {
             let { status, data } = await orders.updateStatus('SENT');
-            $scope.saveByteArray(`BC_${orders.bc_number}`, data);
-            if (status === 200) {
-                toasts.confirm( 'lystore.sent.notif');
+            if (status === 201) {
+                toasts.confirm( 'lystore.sent.order');
+                toasts.info( 'lystore.sent.export.BC');
             }
             $scope.redirectTo('/order/valid');
             Utils.safeApply($scope);
@@ -342,15 +343,47 @@ export const orderController = ng.controller('orderController',
             }
         };
 
-        $scope.exportOrder = (orders: OrderClient[]) => {
-            if (_.where(orders, { status : 'SENT' }).length === orders.length && $scope.validateSentOrders(orders)) {
+        $scope.exportOrder = async (orders: OrderClient[]) => {
+
+            if ((_.where(orders, { status : 'SENT' }).length === orders.length || (_.where(orders, { status : 'DONE' }).length === orders.length ) && $scope.validateSentOrders(orders))) {
                 let orderNumber = _.uniq(_.pluck(orders, 'order_number'));
-                window.location = `/lystore/order?number=${orderNumber}`;
+                let  {status, data} =  await http.get(`/lystore/order?bc_number=${orderNumber}`);
+                if(status === 201){
+                    toasts.info('lystore.sent.export.BC');
+                }
             } else {
                 $scope.exportValidOrders(orders, 'order');
             }
+            $scope.displayedOrders.selected.map(order => {
+                order.selected = false;
+            });
+            Utils.safeApply($scope);
         };
 
+        $scope.exportOrderStruct = async (orders: OrderClient[]) => {
+
+            if ((_.where(orders, { status : 'SENT' }).length === orders.length || (_.where(orders, { status : 'DONE' }).length === orders.length ) && $scope.validateSentOrders(orders))) {
+                let orderNumber = _.uniq(_.pluck(orders, 'order_number'));
+                let  {status, data} =  await http.get(`/lystore/order/struct?bc_number=${orderNumber}`);
+                if(status === 201){
+                    toasts.info('lystore.sent.export.BC');
+                }
+            } else {
+                let filter = "";
+                orders.forEach(order => {
+                    filter +="number_validation=" +  order.number_validation + "&";
+                });
+                filter = filter.substring(filter.length-1,0);
+                let  {status, data} = await http.get(`/lystore/order/struct?${filter}`);
+                if(status === 201){
+                    toasts.info('lystore.sent.export.BC');
+                }
+            }
+            $scope.displayedOrders.selected.map(order => {
+                order.selected = false;
+            });
+            Utils.safeApply($scope);
+        };
         $scope.exportValidOrders = async  (orders: OrderClient[], fileType: string) => {
             let params = '';
             orders.map((order: OrderClient) => {
@@ -358,12 +391,15 @@ export const orderController = ng.controller('orderController',
             });
             params = params.slice(0, -1);
             if(fileType ==='structure_list'){
-                toasts.info('lystore.export.notif');
+                toasts.info('lystore.sent.export.BC');
                 await orders[0].exportListLycee(params);
                 $scope.displayedOrders.selected[0].selected = false;
                 Utils.safeApply($scope);
             }else{
-                window.location = `/lystore/orders/valid/export/${fileType}?${params}`;
+                let  {status, data} = await http.get(`/lystore/orders/valid/export/${fileType}?${params}`);
+                if(status === 201){
+                    toasts.info('lystore.sent.export.BC');
+                }
             }
         };
 
@@ -400,7 +436,7 @@ export const orderController = ng.controller('orderController',
 
         $scope.selectOperationForOrder = async () =>{
             await $scope.initOperation();
-            $scope.isOperationsIsEmpty = !$scope.operations.all.some(operation => operation.status === 'true');
+            $scope.isOperationsIsEmpty = !$scope.operations.all.some(operation => operation.status === 'true' && !operation.id_instruction);
             template.open('validOrder.lightbox', 'administrator/order/order-select-operation');
             $scope.display.lightbox.validOrder = true;
         };

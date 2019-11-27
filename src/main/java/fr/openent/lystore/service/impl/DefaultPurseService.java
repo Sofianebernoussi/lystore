@@ -10,6 +10,8 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.logging.Logger;
+
 public class DefaultPurseService implements PurseService {
     private Boolean invalidDatas= false;
     @Override
@@ -209,7 +211,7 @@ public class DefaultPurseService implements PurseService {
                 "         WHERE  orders.id_campaign = ?)  " +
                 "SELECT Array_to_json(Array_agg(values.*))                               AS  " +
                 "       orders,  " +
-                "       ( purse.initial_amount - ( Sum(values.total ) + purse.amount ) ) AS total  " +
+                "       ( purse.initial_amount - ( Sum(values.total ) + purse.amount ) ) AS substraction  " +
                 "       ,  " +
                 "       purse.id_structure,  " +
                 "       purse.id_campaign  " +
@@ -230,8 +232,11 @@ public class DefaultPurseService implements PurseService {
                     JsonArray results = event.right().getValue();
                     for(int i =0;i<results.size();i++){
                        JsonObject result = results.getJsonObject(i);
-
-
+                       try {
+                           Double.parseDouble(result.getString("substraction"));
+                       }catch (NullPointerException e){
+                            result.put("substraction",0.d);
+                       }
                     }
                     handler.handle(new Either.Right<>(results));
                 }else {

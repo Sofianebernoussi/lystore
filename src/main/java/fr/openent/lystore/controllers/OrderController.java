@@ -192,7 +192,11 @@ public class OrderController extends ControllerHelper {
         JsonObject item;
         for (int i = 0; i < orders.size(); i++) {
             item = orders.getJsonObject(i);
-            map.put(item.getString("number_validation"), new fr.wseduc.webutils.collections.JsonArray());
+            try {
+                map.put(item.getString("number_validation"), new fr.wseduc.webutils.collections.JsonArray());
+            }catch (NullPointerException e){
+                log.error("Number validation is null");
+            }
         }
         return map;
     }
@@ -208,12 +212,8 @@ public class OrderController extends ControllerHelper {
         JsonArray equipmentList;
         for (int i = 0; i < equipments.size(); i++) {
             equipment = equipments.getJsonObject(i);
-//            if (equipment.containsKey("number_validation")) {
-//                if (numbers.containsKey(equipment.getString("number_validation"))) {
             equipmentList = numbers.getJsonArray(equipment.getString("number_validation"));
             numbers.put(equipment.getString("number_validation"), equipmentList.add(equipment));
-//                }
-//            }
         }
         return numbers;
     }

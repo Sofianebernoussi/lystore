@@ -64,6 +64,7 @@ export const instructionController = ng.controller('instructionController',
                     return  a.label.label.localeCompare(b.label.label);
                 });
             }
+            console.log($scope.operations.all)
             $scope.knowOperationIsEmpty();
             $scope.loadingArray = false;
             Utils.safeApply($scope);

@@ -436,7 +436,7 @@ export const orderController = ng.controller('orderController',
 
         $scope.selectOperationForOrder = async () =>{
             await $scope.initOperation();
-            $scope.isOperationsIsEmpty = !$scope.operations.all.some(operation => operation.status === 'true');
+            $scope.isOperationsIsEmpty = !$scope.operations.all.some(operation => operation.status === 'true' && !operation.id_instruction);
             template.open('validOrder.lightbox', 'administrator/order/order-select-operation');
             $scope.display.lightbox.validOrder = true;
         };

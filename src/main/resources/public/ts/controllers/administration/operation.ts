@@ -76,7 +76,9 @@ export const operationController = ng.controller('operationController',
             let operationMomentDate = moment(operation.date_cp);
             let isValid = true;
             $scope.operations.all.forEach(operationn => {
-                if(moment(operationMomentDate).format("dd/MM/YYYY") === moment(operationn.date_cp).format("dd/MM/YYYY") && operationn.id != operation.id){
+                if(!isNaN(operationMomentDate)
+                    && moment(operationMomentDate).format("DD/MM/YYYY") === moment(operationn.date_cp).format("DD/MM/YYYY")
+                    && operationn.id != operation.id){
                     isValid = false;
                 }
             });
@@ -86,17 +88,17 @@ export const operationController = ng.controller('operationController',
             return  operation.id_label && $scope.isValidOperationDate(operation);
         };
 
-        $scope.cancelOperationForm = async () =>{
+        $scope.cancelOperationForm = async (id_label?) =>{
             $scope.display.lightbox.operation = false;
-            template.close('operation.lightbox');
             await $scope.initOperation();
+            Utils.safeApply($scope);
+            template.close('operation.lightbox');
             Utils.safeApply($scope);
         };
 
         $scope.validOperation = async (operation:Operation) =>{
             await operation.save();
-            $scope.cancelOperationForm();
-            await $scope.initOperation();
+            await $scope.cancelOperationForm(operation.id_label);
             Utils.safeApply($scope);
         };
 

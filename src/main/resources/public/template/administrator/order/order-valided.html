@@ -47,17 +47,17 @@
                     <i class="up-open" ng-show="sort.order.type === 'order_number' && !sort.order.reverse"></i>
                     <i class="down-open" ng-show="sort.order.type === 'order_number' && sort.order.reverse"></i>
                 </td>
-                <td ng-click="sort.order.type = 'contract.name';
+                <td ng-click="sort.order.type = 'contract_name';
                     sort.order.reverse = !sort.order.reverse">
                     <i18n>contract</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'contract.name' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'contract.name' && sort.order.reverse"></i>
+                    <i class="up-open" ng-show="sort.order.type === 'contract_name' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'contract_name' && sort.order.reverse"></i>
                 </td>
-                <td ng-click="sort.order.type = 'supplier.name';
+                <td ng-click="sort.order.type = 'supplier_name';
                     sort.order.reverse = !sort.order.reverse">
                     <i18n>supplier</i18n>
-                    <i class="up-open" ng-show="sort.order.type === 'supplier.name' && !sort.order.reverse"></i>
-                    <i class="down-open" ng-show="sort.order.type === 'supplier.name' && sort.order.reverse"></i>
+                    <i class="up-open" ng-show="sort.order.type === 'supplier_name' && !sort.order.reverse"></i>
+                    <i class="down-open" ng-show="sort.order.type === 'supplier_name' && sort.order.reverse"></i>
                 </td>
                 <td ng-click="sort.order.type = 'structure_count';
                     sort.order.reverse = !sort.order.reverse">
@@ -81,7 +81,7 @@
             </thead>
             <tbody>
             <tr ng-repeat="order in displayedOrders.all | orderBy:sort.order.type:sort.order.reverse"
-                class="[[order.status]]">
+                class="[[order.status]] [[sort.order.type]]">
                 <td workflow="lystore.manager">
                     <label class="checkbox">
                         <input type="checkbox" ng-model="order.selected">

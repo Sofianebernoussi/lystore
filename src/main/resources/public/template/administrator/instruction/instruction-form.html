@@ -74,14 +74,15 @@
                         <tbody>
                         <tr ng-repeat="operationAdd in instruction.operations">
                             <td>[[operationAdd.label.label]]</td>
-                            <td>[[operationAdd.nb_orders]]</td>
+                            <td ng-show="operationAdd.nb_orders">[[operationAdd.nb_orders]]</td>
+                            <td ng-show="!operationAdd.nb_orders">0</td>
                             <td>[[operationAdd.nbOrberSub]]</td>
                             <td ><span ng-bind="operationAdd.amount | currency"></span></td>
                             <td>
-                                <span ng-show="operationAdd.status === true">
+                                <span ng-show="operationAdd.status === true || operationAdd.status === 'true'">
                                     <i18n>open</i18n>
                                 </span>
-                                <span ng-show="operationAdd.status === false">
+                                <span ng-show="operationAdd.status === false || operationAdd.status === 'false'">
                                     <i18n>close</i18n>
                                 </span>
                             </td>

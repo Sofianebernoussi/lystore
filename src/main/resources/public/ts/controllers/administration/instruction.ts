@@ -64,6 +64,7 @@ export const instructionController = ng.controller('instructionController',
                     return  a.label.label.localeCompare(b.label.label);
                 });
             }
+            console.log($scope.operations.all)
             $scope.knowOperationIsEmpty();
             $scope.loadingArray = false;
             Utils.safeApply($scope);
@@ -84,6 +85,7 @@ export const instructionController = ng.controller('instructionController',
             $scope.operation.id_label = $scope.operationAdd.id_label;
             $scope.operation.amount = $scope.operationAdd.amount;
             $scope.operation.status = $scope.operationAdd.status;
+            console.log($scope.operationAdd);
             $scope.operations.all = $scope.operations.all.filter( operation => operation.id !== $scope.operation.id);
             $scope.instruction.operations.push($scope.operation);
             $scope.isNewOperation = false;

@@ -10,9 +10,9 @@ import org.entcore.common.user.UserInfos;
 public interface ExportService {
     void getExports(Handler<Either<String, JsonArray>> handler, UserInfos user);
 
-    void getXlsx(String fileId, Handler<Buffer> handler);
+    void getExport(String fileId, Handler<Buffer> handler);
 
-    void getXlsxName(String fileId, Handler<Either<String, JsonArray>> handler);
+    void getExportName(String fileId, Handler<Either<String, JsonArray>> handler);
 
     void deleteExport(JsonArray filesIds, Handler<JsonObject> handler);
 

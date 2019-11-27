@@ -38,13 +38,13 @@ public class DefaultExportServiceService implements ExportService {
 
 
     @Override
-    public void getXlsx(String fileId, Handler<Buffer> handler) {
+    public void getExport(String fileId, Handler<Buffer> handler) {
         storage.readFile(fileId, handler);
 
     }
 
     @Override
-    public void getXlsxName(String fileId, Handler<Either<String, JsonArray>> handler) {
+    public void getExportName(String fileId, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT filename " +
                 "FROM " + Lystore.lystoreSchema + ".export " +
                 "WHERE fileId = ?";

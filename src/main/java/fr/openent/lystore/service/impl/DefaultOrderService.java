@@ -166,7 +166,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                 params.add(structureId);
             }
         }
-
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
@@ -250,7 +249,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
     @Override
     public void cancelValidation(JsonArray validationNumbers, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE lystore.order_client_equipment SET number_validation = '', status = 'WAITING' " +
+        String query = "UPDATE lystore.order_client_equipment SET number_validation = '', status = 'WAITING' ,id_order = NULL " +
                 "WHERE number_validation IN " + Sql.listPrepared(validationNumbers.getList());
 
         this.sql.prepared(query, validationNumbers, SqlResult.validUniqueResultHandler(handler));
@@ -486,7 +485,7 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
     @Override
     public void updateStatusToSent(final List<String> ids, String status, final String engagementNumber, final String labelProgram, final String dateCreation,
-                                   final String orderNumber, final String fileId, final String owner, final Handler<Either<String, JsonObject>> handler) {
+                                   final String orderNumber, final Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT distinct id_order " +
                 "FROM " + Lystore.lystoreSchema + ".order_client_equipment " +
                 "WHERE order_client_equipment.number_validation IN " + Sql.listPrepared(ids.toArray());
@@ -506,7 +505,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                                     JsonArray statements = new fr.wseduc.webutils.collections.JsonArray()
                                             .add(getOrderCreateStatement(orderId, engagementNumber, labelProgram, dateCreation, orderNumber))
                                             .add(getAddOrderClientRef(orderId, ids))
-                                            .add(getAddFileStatement(fileId, owner, orderId))
                                             .add(getUpdateClientOrderStatement(new fr.wseduc.webutils.collections.JsonArray(ids), "SENT"));
 
                                     Sql.getInstance().transaction(statements, SqlResult.validRowsResultHandler(handler));
@@ -519,7 +517,6 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
                         Number orderId = (orderIds.getJsonObject(0)).getInteger("id_order");
                         JsonArray statements = new fr.wseduc.webutils.collections.JsonArray()
                                 .add(getUpdateOrderStatement(engagementNumber, labelProgram, dateCreation, orderNumber, orderId))
-                                .add(getAddFileStatement(fileId, owner, orderId))
                                 .add(getUpdateClientOrderStatement(new fr.wseduc.webutils.collections.JsonArray(ids), "SENT"));
 
                         Sql.getInstance().transaction(statements, SqlResult.validRowsResultHandler(handler));

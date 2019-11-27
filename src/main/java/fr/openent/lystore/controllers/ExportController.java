@@ -1,6 +1,7 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
+import fr.openent.lystore.export.ExportTypes;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
@@ -55,15 +56,27 @@ public class ExportController extends ControllerHelper {
     @ResourceFilter(AccessExportDownload.class)
     public void getExport(HttpServerRequest request) {
         String fileId = request.getParam("fileId");
-        exportService.getXlsxName(fileId, new Handler<Either<String, JsonArray>>() {
+        exportService.getExportName(fileId, new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> event) {
-                exportService.getXlsx(fileId, file ->
-                        request.response()
-                                .putHeader("Content-type", "application/vnd.ms-excel; charset=utf-8")
-                                .putHeader("Content-Length", file.length() + "")
-                                .putHeader("Content-Disposition", "filename=" + event.right().getValue().getJsonObject(0).getString("filename"))
-                                .end(file));
+                if(event.isRight()) {
+                    if(event.right().getValue().getJsonObject(0).getString("extension").equals(Lystore.PDF)){
+                        exportService.getExport(fileId, file ->
+                                request.response()
+                                        .putHeader("Content-Type", "application/pdf; charset=utf-8")
+                                        .putHeader("Content-Length", file.length() + "")
+                                        .putHeader("Content-Disposition", "filename=" + event.right().getValue().getJsonObject(0).getString("filename"))
+                                        .end(file));
+                    }else {
+                        exportService.getExport(fileId, file ->
+                                request.response()
+                                        .putHeader("Content-type", "application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=utf-8")
+                                        .putHeader("Content-Length", file.length() + "")
+                                        .putHeader("Content-Disposition", "filename=" + event.right().getValue().getJsonObject(0).getString("filename"))
+                                        .end(file));
+                    }
+                } else
+                    badRequest(request);
             }
         });
 
@@ -75,18 +88,18 @@ public class ExportController extends ControllerHelper {
     @ResourceFilter(ManagerRight.class)
     public void deleteExportExcel(HttpServerRequest request) {
         RequestUtils.bodyToJson( request, ids -> exportService.deleteExport( ids.getJsonArray("idsFiles"), event -> {
-                if (event.getString("status").equals("ok")) {
-                    exportService.deleteExportMongo( ids.getJsonArray("idsExport"), Logging.defaultResponseHandler(eb,
-                            request,
-                            Contexts.EXPORT.toString(),
-                            Actions.DELETE.toString(),
-                            ids.getJsonArray("idsExport").toString(),
-                            new JsonObject().put("ids", ids)));
-                } else {
-                    badRequest(request);
-                    log.error("Erreur deleting file in storage");
-                    log.error(event.getString("message"));
-                }
+            if (event.getString("status").equals("ok")) {
+                exportService.deleteExportMongo( ids.getJsonArray("idsExport"), Logging.defaultResponseHandler(eb,
+                        request,
+                        Contexts.EXPORT.toString(),
+                        Actions.DELETE.toString(),
+                        ids.getJsonArray("idsExport").toString(),
+                        new JsonObject().put("ids", ids)));
+            } else {
+                badRequest(request);
+                log.error("Erreur deleting file in storage");
+                log.error(event.getString("message"));
+            }
         }));
     }
 }

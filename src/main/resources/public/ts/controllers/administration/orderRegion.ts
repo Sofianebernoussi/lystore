@@ -64,7 +64,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                 if (status === 200) {
                     toasts.confirm('lystore.order.region.update');
                     await $scope.ordersClient.addOperationInProgress(operation.id, [$routeParams.idOrder]);
-                    $scope.operationId =  $scope.operation.id
+                    // $scope.operationId =  $scope.operation.id
                     $scope.cancelUpdate();
                 }
                 else {
@@ -171,15 +171,16 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.duplicateRow = (index:number):void => {
             let row = JSON.parse(JSON.stringify($scope.orderToCreate.rows[index]));
             row.equipments = new Equipments();
-
-            if (row.structure.structures) {
-                row.structure = $scope.structure_groups.all.find(struct => row.structure.id === struct.id);
-            } else {
-                row.structure = $scope.structures.all.find(struct => row.structure.id === struct.id);
+            if (row.structure){
+                if (row.structure.structures) {
+                    row.structure = $scope.structure_groups.all.find(struct => row.structure.id === struct.id);
+                } else {
+                    row.structure = $scope.structures.all.find(struct => row.structure.id === struct.id);
+                }
             }
             $scope.orderToCreate.rows[index].equipments.forEach(equipment => {
                 row.equipments.push(equipment);
-                if (row.equipment.id === equipment.id)
+                if (row.equipment && row.equipment.id === equipment.id)
                     row.equipment = equipment;
             });
             $scope.orderToCreate.rows.splice(index + 1, 0, row)
@@ -200,6 +201,11 @@ export const orderRegionController = ng.controller('orderRegionController',
         };
         $scope.swapTypeStruct = (row):void => {
             row.display.struct = !row.display.struct;
+            row.equipment = undefined;
+            row.price = undefined;
+            row.amount = undefined;
+            row.comment ="";
+            row.structure = undefined;
             Utils.safeApply($scope);
         };
 

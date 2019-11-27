@@ -1,4 +1,4 @@
-package fr.openent.lystore.export.validOrders.lisyLycee;
+package fr.openent.lystore.export.validOrders.listLycee;
 
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.TabHelper;

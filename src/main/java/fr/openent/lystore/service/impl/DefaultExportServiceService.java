@@ -33,18 +33,18 @@ public class DefaultExportServiceService implements ExportService {
 
     @Override
     public void getExports(Handler<Either<String, JsonArray>> handler, UserInfos user) {
-      mongo.getExports(handler,user.getUserId());
+        mongo.getExports(handler,user.getUserId());
     }
 
 
     @Override
-    public void getXlsx(String fileId, Handler<Buffer> handler) {
+    public void getExport(String fileId, Handler<Buffer> handler) {
         storage.readFile(fileId, handler);
 
     }
 
     @Override
-    public void getXlsxName(String fileId, Handler<Either<String, JsonArray>> handler) {
+    public void getExportName(String fileId, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT filename " +
                 "FROM " + Lystore.lystoreSchema + ".export " +
                 "WHERE fileId = ?";
@@ -62,7 +62,8 @@ public class DefaultExportServiceService implements ExportService {
         }
         mongo.deleteExports(values,handler);
     }
-    public void createWhenStart (String typeObject, JsonObject infoFile, String object_id, String nameFile, String userId, String action, Handler<Either<String, JsonObject>> handler){
+    public void createWhenStart (String typeObject, String extension, JsonObject infoFile, String object_id, String nameFile,
+                                 String userId, String action, JsonObject requestParams, Handler<Either<String, JsonObject>> handler){
         try {
             JsonArray params = new JsonArray();
             String  nameQuery = getQueryAndParams(typeObject,params,object_id);
@@ -82,7 +83,9 @@ public class DefaultExportServiceService implements ExportService {
                                 .put("created",dtf.format(now))
                                 .put("action",action)
                                 .put("typeObject",typeObject)
-                                .put("NbIterationsLeft",Lystore.iterationWorker);
+                                .put("extension",extension)
+                                .put("NbIterationsLeft",Lystore.iterationWorker)
+                                .put("externalParams",requestParams);
 
                         if(infoFile.containsKey("type"))
                             params.put("type",infoFile.getString("type"));
@@ -110,11 +113,18 @@ public class DefaultExportServiceService implements ExportService {
 
     private String getQueryAndParams(String typeObject, JsonArray params, String object_id) {
         String nameQuery= "";
-        if (typeObject.equals(Lystore.INSTRUCTIONS)) {
-            nameQuery = "SELECT object from "+Lystore.lystoreSchema+".instruction where id= ?";
-            params.add(Integer.parseInt(object_id));
-        }else{
-            nameQuery = "SELECT 'numéro de validation' as object";
+        switch (typeObject) {
+            case Lystore.INSTRUCTIONS:
+                nameQuery = "SELECT object from " + Lystore.lystoreSchema + ".instruction where id= ?";
+                params.add(Integer.parseInt(object_id));
+                break;
+            case Lystore.ORDERSSENT:
+                nameQuery = "SELECT 'Bon de commande' as object from  " + Lystore.lystoreSchema + ".order_client_equipment LIMIT 1";
+
+                break;
+            case Lystore.ORDERS:
+                nameQuery = "SELECT 'numéro de validation' as object from " + Lystore.lystoreSchema + ".order_client_equipment LIMIT 1";
+                break;
         }
         return nameQuery;
     }

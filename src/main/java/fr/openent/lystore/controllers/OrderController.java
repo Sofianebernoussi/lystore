@@ -1,7 +1,8 @@
 package fr.openent.lystore.controllers;
 
 import fr.openent.lystore.Lystore;
-import fr.openent.lystore.helpers.ExcelHelper;
+import fr.openent.lystore.export.ExportTypes;
+import fr.openent.lystore.helpers.ExportHelper;
 import fr.openent.lystore.logging.Actions;
 import fr.openent.lystore.logging.Contexts;
 import fr.openent.lystore.logging.Logging;
@@ -107,6 +108,7 @@ public class OrderController extends ControllerHelper {
             }
         });
     }
+
     @Get("/orders")
     @ApiDoc("Get the list of orders")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
@@ -155,35 +157,31 @@ public class OrderController extends ControllerHelper {
         }
     }
 
-
     @Get("/order")
-    @ApiDoc("Get the list of orders")
+    @ApiDoc("Get the pdf of orders")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void getOrderPDF (final HttpServerRequest request) {
-        final String orderNumber = request.params().get("number");
-        orderService.getOrderFileId(orderNumber, new Handler<Either<String, JsonObject>>() {
-            @Override
-            public void handle(Either<String, JsonObject> event) {
-                if (event.isRight()) {
-                    JsonObject objRes = event.right().getValue();
-                    String fileId = objRes.getString("id_mongo");
-                    storage.readFile(fileId, new Handler<Buffer>() {
-                        @Override
-                        public void handle(Buffer buffer) {
-                            request.response()
-                                    .putHeader("Content-Type", "application/pdf; charset=utf-8")
-                                    .putHeader("Content-Disposition", "attachment; filename=BC_" + orderNumber + ".pdf")
-                                    .end(buffer);
-                        }
-                    });
-                } else {
-                    badRequest(request);
-                }
-            }
-        });
+        final String orderNumber = request.params().get("bc_number");
+        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,ExportTypes.BC_AFTER_VALIDATION, "_BC_" + orderNumber);
     }
 
+    @Get("/order/struct")
+    @ApiDoc("Get the pdf of orders by structure")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ManagerRight.class)
+    public void getOrderPDFStruct (final HttpServerRequest request) {
+        final String orderNumber = request.params().get("bc_number");
+        try {
+            if(!request.getParam("bc_number").isEmpty()) {
+                ExportHelper.makeExport(request, eb, exportService, Lystore.ORDERSSENT, Lystore.PDF, ExportTypes.BC_AFTER_VALIDATION_STRUCT, "_STRUCTURES_BC_" + orderNumber);
+            }
+
+        }catch (NullPointerException e){
+            ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,ExportTypes.BC_BEFORE_VALIDATION_STRUCT, "_STRUCTURES_BC" );
+        }
+//
+    }
     /**
      * Init map with numbers validation
      * @param orders order list containing numbers
@@ -194,7 +192,11 @@ public class OrderController extends ControllerHelper {
         JsonObject item;
         for (int i = 0; i < orders.size(); i++) {
             item = orders.getJsonObject(i);
-            map.put(item.getString("number_validation"), new fr.wseduc.webutils.collections.JsonArray());
+            try {
+                map.put(item.getString("number_validation"), new fr.wseduc.webutils.collections.JsonArray());
+            }catch (NullPointerException e){
+                log.error("Number validation is null");
+            }
         }
         return map;
     }
@@ -210,12 +212,8 @@ public class OrderController extends ControllerHelper {
         JsonArray equipmentList;
         for (int i = 0; i < equipments.size(); i++) {
             equipment = equipments.getJsonObject(i);
-//            if (equipment.containsKey("number_validation")) {
-//                if (numbers.containsKey(equipment.getString("number_validation"))) {
             equipmentList = numbers.getJsonArray(equipment.getString("number_validation"));
             numbers.put(equipment.getString("number_validation"), equipmentList.add(equipment));
-//                }
-//            }
         }
         return numbers;
     }
@@ -389,11 +387,58 @@ public class OrderController extends ControllerHelper {
 
     }
 
+
+    private void logSendingOrder(JsonArray ids, final HttpServerRequest request) {
+        orderService.getOrderByValidatioNumber(ids, new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(Either<String, JsonArray> event) {
+                if (event.isRight()) {
+                    JsonArray orders = event.right().getValue();
+                    JsonObject order;
+                    for (int i = 0; i < orders.size(); i++) {
+                        order = orders.getJsonObject(i);
+                        Logging.insert(eb, request, Contexts.ORDER.toString(), Actions.UPDATE.toString(),
+                                order.getInteger("id").toString(), order);
+                    }
+                }
+            }
+        });
+    }
+
+
+
+    private void sentOrders(HttpServerRequest request,
+                            final JsonArray ids, final String engagementNumber, final Number programId, final String dateCreation,
+                            final String orderNumber) {
+        programService.getProgramById(programId, new Handler<Either<String, JsonObject>>() {
+            @Override
+            public void handle(Either<String, JsonObject> programEvent) {
+                if (programEvent.isRight()) {
+                    JsonObject program = programEvent.right().getValue();
+                    orderService.updateStatusToSent(ids.getList(), "SENT", engagementNumber, program.getString("name"),
+                            dateCreation, orderNumber,  new Handler<Either<String, JsonObject>>() {
+                                @Override
+                                public void handle(Either<String, JsonObject> event) {
+                                    if (event.isRight()) {
+                                        logSendingOrder(ids,request);
+                                        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERSSENT,  Lystore.PDF,ExportTypes.BC_DURING_VALIDATION, "_BC");
+                                    } else {
+                                        badRequest(request);
+                                    }
+                                }
+                            });
+                } else {
+                    badRequest(request);
+                }
+            }
+        });
+    }
     @Put("/orders/sent")
     @ApiDoc("send orders")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ManagerRight.class)
     public void sendOrders (final HttpServerRequest request){
+//        ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF,"exportBCOrders", "_BC");
         RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {
             @Override
             public void handle(final JsonObject orders) {
@@ -403,25 +448,44 @@ public class OrderController extends ControllerHelper {
                 final String dateGeneration = orders.getString("dateGeneration");
                 Number supplierId = orders.getInteger("supplierId");
                 final Number programId = orders.getInteger("id_program");
-
                 getOrdersData(request, nbrBc, nbrEngagement, dateGeneration, supplierId, ids,
                         new Handler<JsonObject>() {
                             @Override
                             public void handle(JsonObject data) {
                                 data.put("print_order", true);
-                                exportPDFService.generatePDF(request, data,
-                                        "BC.xhtml", "Bon_Commande_",
-                                        new Handler<Buffer>() {
-                                            @Override
-                                            public void handle(final Buffer pdf) {
-                                                manageFileAndUpdateStatus(request, pdf, ids, nbrEngagement, programId, dateGeneration, nbrBc);
-                                            }
-                                        }
-                                );
+                                sentOrders(request,ids,nbrEngagement,programId,dateGeneration,nbrBc);
                             }
                         });
             }
         });
+//
+//        RequestUtils.bodyToJson(request, pathPrefix + "orderIds", new Handler<JsonObject>() {
+//            @Override
+//            public void handle(final JsonObject orders) {
+//                final JsonArray ids = orders.getJsonArray("ids");
+//                final String nbrBc = orders.getString("bc_number");
+//                final String nbrEngagement = orders.getString("engagement_number");
+//                final String dateGeneration = orders.getString("dateGeneration");
+//                Number supplierId = orders.getInteger("supplierId");
+//                final Number programId = orders.getInteger("id_program");
+//                getOrdersData(request, nbrBc, nbrEngagement, dateGeneration, supplierId, ids,
+//                        new Handler<JsonObject>() {
+//                            @Override
+//                            public void handle(JsonObject data) {
+//                                data.put("print_order", true);
+//                                exportPDFService.generatePDF(request, data,
+//                                        "BC.xhtml", "Bon_Commande_",
+//                                        new Handler<Buffer>() {
+//                                            @Override
+//                                            public void handle(final Buffer pdf) {
+//                                                manageFileAndUpdateStatus(request, pdf, ids, nbrEngagement, programId, dateGeneration, nbrBc);
+//                                            }
+//                                        }
+//                                );
+//                            }
+//                        });
+//            }
+//        });
     }
 
     @Put("/orders/inprogress")
@@ -469,39 +533,43 @@ public class OrderController extends ControllerHelper {
 
     private void exportDocuments(final HttpServerRequest request, final Boolean printOrder,
                                  final Boolean printCertificates, final List<String> validationNumbers) {
-        supplierService.getSupplierByValidationNumbers(new fr.wseduc.webutils.collections.JsonArray(validationNumbers), new Handler<Either<String, JsonObject>>() {
-            @Override
-            public void handle(Either<String, JsonObject> event) {
-                if (event.isRight()) {
-                    JsonObject supplier = event.right().getValue();
-                    getOrdersData(request, "", "", "", supplier.getInteger("id"), new fr.wseduc.webutils.collections.JsonArray(validationNumbers),
-                            new Handler<JsonObject>() {
-                                @Override
-                                public void handle(JsonObject data) {
-                                    data.put("print_order", printOrder);
-                                    data.put("print_certificates", printCertificates);
-                                    exportPDFService.generatePDF(request, data,
-                                            "BC.xhtml", "CSF_",
-                                            new Handler<Buffer>() {
-                                                @Override
-                                                public void handle(final Buffer pdf) {
-                                                    request.response()
-                                                            .putHeader("Content-Type", "application/pdf; charset=utf-8")
-                                                            .putHeader("Content-Disposition", "attachment; filename="
-                                                                    + generateExportName(validationNumbers, "" +
-                                                                    (printOrder ? "BC" : "") + (printCertificates ? "CSF" : "")) + ".pdf")
-                                                            .end(pdf);
+        if(printOrder){
+            ExportHelper.makeExport(request,eb,exportService,Lystore.ORDERS,  Lystore.PDF, ExportTypes.BC_BEFORE_VALIDATION, "_BC");
+        }else {
+            supplierService.getSupplierByValidationNumbers(new fr.wseduc.webutils.collections.JsonArray(validationNumbers), new Handler<Either<String, JsonObject>>() {
+                @Override
+                public void handle(Either<String, JsonObject> event) {
+                    if (event.isRight()) {
+                        JsonObject supplier = event.right().getValue();
+                        getOrdersData(request, "", "", "", supplier.getInteger("id"), new fr.wseduc.webutils.collections.JsonArray(validationNumbers),
+                                new Handler<JsonObject>() {
+                                    @Override
+                                    public void handle(JsonObject data) {
+                                        data.put("print_order", printOrder);
+                                        data.put("print_certificates", printCertificates);
+                                        exportPDFService.generatePDF(request, data,
+                                                "BC.xhtml", "CSF_",
+                                                new Handler<Buffer>() {
+                                                    @Override
+                                                    public void handle(final Buffer pdf) {
+                                                        request.response()
+                                                                .putHeader("Content-Type", "application/pdf; charset=utf-8")
+                                                                .putHeader("Content-Disposition", "attachment; filename="
+                                                                        + generateExportName(validationNumbers, "" +
+                                                                        (printCertificates ? "CSF" : "")) + ".pdf")
+                                                                .end(pdf);
+                                                    }
                                                 }
-                                            }
-                                    );
-                                }
-                            });
-                } else {
-                    log.error("An error occurred when collecting supplier Id", new Throwable(event.left().getValue()));
-                    badRequest(request);
+                                        );
+                                    }
+                                });
+                    } else {
+                        log.error("An error occurred when collecting supplier Id", new Throwable(event.left().getValue()));
+                        badRequest(request);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private String generateExportName(List<String> validationNumbers, String prefix) {
@@ -514,7 +582,7 @@ public class OrderController extends ControllerHelper {
     }
 
     private void exportStructuresList(final HttpServerRequest request) {
-                    ExcelHelper.makeExportExcel(request, eb, exportService,Lystore.ORDERS, "exportListLycOrders", "_list_bdc");
+        ExportHelper.makeExport(request, eb, exportService,Lystore.ORDERS,  Lystore.XLSX,ExportTypes.LIST_LYCEE, "_list_bdc");
     }
 
     @Delete("/orders/valid")
@@ -602,67 +670,6 @@ public class OrderController extends ControllerHelper {
                 "\n";
     }
 
-
-    private void manageFileAndUpdateStatus(final HttpServerRequest request, final Buffer pdf,
-                                           final JsonArray ids, final String engagementNumber, final Number programId, final String dateCreation,
-                                           final String orderNumber) {
-        final String id = UUID.randomUUID().toString();
-        storage.writeBuffer(id, pdf, "application/pdf",
-                "BC_" + orderNumber, new Handler<JsonObject>() {
-                    @Override
-                    public void handle(final JsonObject file) {
-                        if ("ok".equals(file.getString("status"))) {
-                            UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-                                @Override
-                                public void handle(final UserInfos user) {
-                                    programService.getProgramById(programId, new Handler<Either<String, JsonObject>>() {
-                                        @Override
-                                        public void handle(Either<String, JsonObject> programEvent) {
-                                            if (programEvent.isRight()) {
-                                                JsonObject program = programEvent.right().getValue();
-                                                orderService.updateStatusToSent(ids.getList(), "SENT", engagementNumber, program.getString("name"),
-                                                        dateCreation, orderNumber, id, user.getUsername(), new Handler<Either<String, JsonObject>>() {
-                                                            @Override
-                                                            public void handle(Either<String, JsonObject> event) {
-                                                                if (event.isRight()) {
-                                                                    request.response().end(pdf);
-                                                                    logSendingOrder(ids, request);
-                                                                } else {
-                                                                    badRequest(request);
-                                                                }
-                                                            }
-                                                        });
-                                            } else {
-                                                renderError(request);
-                                            }
-                                        }
-                                    });
-                                }
-                            });
-                        } else {
-                            log.error("An error occurred when inserting pdf in mongo");
-                            badRequest(request);
-                        }
-                    }
-                });
-    }
-
-    private void logSendingOrder(JsonArray ids, final HttpServerRequest request) {
-        orderService.getOrderByValidatioNumber(ids, new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> event) {
-                if (event.isRight()) {
-                    JsonArray orders = event.right().getValue();
-                    JsonObject order;
-                    for (int i = 0; i < orders.size(); i++) {
-                        order = orders.getJsonObject(i);
-                        Logging.insert(eb, request, Contexts.ORDER.toString(), Actions.UPDATE.toString(),
-                                order.getInteger("id").toString(), order);
-                    }
-                }
-            }
-        });
-    }
 
     private void retrieveContract(final HttpServerRequest request, JsonArray ids,
                                   final Handler<JsonObject> handler) {
@@ -756,7 +763,7 @@ public class OrderController extends ControllerHelper {
         });
     }
 
-    private static String getReadableNumber(Double number) {
+    public static String getReadableNumber(Double number) {
         DecimalFormat instance = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.FRENCH);
         DecimalFormatSymbols symbols = instance.getDecimalFormatSymbols();
         symbols.setCurrencySymbol("");
@@ -799,7 +806,7 @@ public class OrderController extends ControllerHelper {
         return sum;
     }
 
-    private static JsonArray formatOrders(JsonArray orders) {
+    public static JsonArray formatOrders(JsonArray orders) {
         JsonObject order;
         for (int i = 0; i < orders.size(); i++) {
             order = orders.getJsonObject(i);
@@ -823,16 +830,16 @@ public class OrderController extends ControllerHelper {
         return orders;
     }
 
-    private static Double getTotalPrice(Double price, Double amount) {
+    public static Double getTotalPrice(Double price, Double amount) {
         return price * amount;
     }
 
-    private static Double getTaxIncludedPrice(Double price, Double taxAmount) {
+    public static Double getTaxIncludedPrice(Double price, Double taxAmount) {
         Double multiplier = taxAmount / 100 + 1;
         return roundWith2Decimals(price) * multiplier;
     }
 
-    private static Double roundWith2Decimals(Double numberToRound) {
+    public static Double roundWith2Decimals(Double numberToRound) {
         BigDecimal bd = new BigDecimal(numberToRound);
         return bd.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }

@@ -4,7 +4,7 @@ import {Export, Notification, Utils, STATUS, Userbook, OrderClient} from "../../
 declare let window: any;
 
 export const exportCtrl = ng.controller('exportCtrl', [
-    '$scope', async ($scope) => {
+    '$scope','$window', async ($scope,$window) => {
         $scope.display = {
             delete: false
         };
@@ -24,7 +24,7 @@ export const exportCtrl = ng.controller('exportCtrl', [
 
         $scope.getExport = (exportTemp: Export) => {
             if(exportTemp.status === STATUS.SUCCESS){
-                window.location = `lystore/export/${exportTemp.fileId}`;
+                 $window.open(`lystore/export/${exportTemp.fileId}`, '_blank');
             }
         };
 
@@ -102,6 +102,7 @@ export const exportCtrl = ng.controller('exportCtrl', [
                             || ('typeObject' in exportToHandle ? regex.test(lang.translate(exportToHandle.typeObject).toLowerCase()) : false)
                             || ('created' in exportToHandle ? regex.test(exportToHandle.created.toLowerCase()) : false)
                             || ('filename' in exportToHandle ? regex.test(exportToHandle.filename.toLowerCase()) : false)
+                            || ('extension' in exportToHandle ? regex.test(lang.translate(exportToHandle.extension.toLowerCase())) : false)
                     });
                 });
                 $scope.displayExports = searchResult;

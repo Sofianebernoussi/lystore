@@ -1,4 +1,4 @@
-import {_, ng, template, idiom as lang, toasts} from 'entcore';
+import {_, ng, template,moment, idiom as lang, toasts} from 'entcore';
 import {Notification, Operation, OrderClient, OrderRegion, OrdersRegion, Utils} from "../../model";
 import {Mix} from 'entcore-toolkit';
 
@@ -65,27 +65,40 @@ export const operationController = ng.controller('operationController',
             } else if (action === 'edit'){
                 $scope.operation = $scope.operations.selected[0];
                 $scope.operation.status = ($scope.operation.status === 'true');
+                $scope.labelOperation.all.push($scope.operation.label);
             }
             $scope.display.lightbox.operation = true;
             template.open('operation.lightbox', 'administrator/operation/operation-form');
             Utils.safeApply($scope);
         };
 
+        $scope.isValidOperationDate = (operation:Operation) =>{
+            let operationMomentDate = moment(operation.date_cp);
+            let isValid = true;
+            $scope.operations.all.forEach(operationn => {
+                if(!isNaN(operationMomentDate)
+                    && moment(operationMomentDate).format("DD/MM/YYYY") === moment(operationn.date_cp).format("DD/MM/YYYY")
+                    && operationn.id != operation.id){
+                    isValid = false;
+                }
+            });
+            return isValid
+        };
         $scope.validOperationForm = (operation:Operation) =>{
-            return  operation.id_label;
+            return  operation.id_label && $scope.isValidOperationDate(operation);
         };
 
-        $scope.cancelOperationForm = async () =>{
+        $scope.cancelOperationForm = async (id_label?) =>{
             $scope.display.lightbox.operation = false;
-            template.close('operation.lightbox');
             await $scope.initOperation();
+            Utils.safeApply($scope);
+            template.close('operation.lightbox');
             Utils.safeApply($scope);
         };
 
         $scope.validOperation = async (operation:Operation) =>{
             await operation.save();
-            $scope.cancelOperationForm();
-            await $scope.initOperation();
+            await $scope.cancelOperationForm(operation.id_label);
             Utils.safeApply($scope);
         };
 
@@ -208,8 +221,20 @@ export const operationController = ng.controller('operationController',
         };
         $scope.operationSelected = async (operation:Operation) => {
             template.close('operation.lightbox');
-            let idsOrdersClient = $scope.ordersClientByOperation.filter(order => order.selected && !(order.typeOrder === "client")).map(order => order.id);
-            let idsOrdersRegion = $scope.ordersClientByOperation.filter(order => order.selected && (order.typeOrder === "region")).map(order => order.id);
+            let idsOrdersClient = [];
+            let idsOrdersRegion = [];
+            $scope.ordersClientByOperation.map(order=>{
+                if(order.selected){
+                    if(order.typeOrder === "client")
+                    {
+                        idsOrdersClient.push(order.id)
+                    }
+                    if(order.typeOrder === "region"){
+                        idsOrdersRegion.push(order.id)
+                    }
+                }
+            });
+
             if(idsOrdersClient.length !== 0){
                 await $scope.ordersClient.addOperation(operation.id, idsOrdersClient);
             }
@@ -219,6 +244,7 @@ export const operationController = ng.controller('operationController',
             $scope.ordersClientByOperation = await $scope.operation.getOrders();
             $scope.display.lightbox.operation = false;
             toasts.info('lystore.operation.order.affect');
+            $scope.redirectTo(`/operation/order/${operation.id}`)
             Utils.safeApply($scope);
         };
         $scope.openOrders = () => {

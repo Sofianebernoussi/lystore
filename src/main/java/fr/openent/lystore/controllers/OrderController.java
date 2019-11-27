@@ -191,6 +191,7 @@ public class OrderController extends ControllerHelper {
         JsonObject map = new JsonObject();
         JsonObject item;
         for (int i = 0; i < orders.size(); i++) {
+            log.info(orders);
             item = orders.getJsonObject(i);
             map.put(item.getString("number_validation"), new fr.wseduc.webutils.collections.JsonArray());
         }

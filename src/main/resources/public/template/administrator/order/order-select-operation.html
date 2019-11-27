@@ -6,7 +6,6 @@
             ng-class="{ greyRow: $index % 2 === 1 }"
             ng-if="operation.status == 'true' && operation.id_instruction === null"
             ng-click="operationSelected(operation)">
-            <i18n>lystore.instruction</i18n>&nbsp
             [[operation.label.label]]
         </td>
     </tr>

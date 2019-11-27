@@ -4,7 +4,7 @@ import {Export, Notification, Utils, STATUS, Userbook, OrderClient} from "../../
 declare let window: any;
 
 export const exportCtrl = ng.controller('exportCtrl', [
-    '$scope', async ($scope) => {
+    '$scope','$window', async ($scope,$window) => {
         $scope.display = {
             delete: false
         };
@@ -24,7 +24,7 @@ export const exportCtrl = ng.controller('exportCtrl', [
 
         $scope.getExport = (exportTemp: Export) => {
             if(exportTemp.status === STATUS.SUCCESS){
-                window.location = `lystore/export/${exportTemp.fileId}`;
+                 $window.open(`lystore/export/${exportTemp.fileId}`, '_blank');
             }
         };
 

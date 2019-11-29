@@ -302,8 +302,10 @@ public class PurseController extends ControllerHelper {
                 public void handle(Either<String, JsonArray> event) {
                     if(event.isRight())
                     {
+                        request.response().setStatusCode(201).end(event.right().getValue().toString());
+                    }else{
+                        badRequest(request);
                     }
-                    request.response().setStatusCode(201).end(event.right().getValue().toString());
                 }
             });
 

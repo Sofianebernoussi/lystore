@@ -3,6 +3,7 @@ package fr.openent.lystore.service.impl;
 import fr.openent.lystore.Lystore;
 import fr.openent.lystore.service.PurseService;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.eventbus.DeliveryOptions;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import io.vertx.core.Handler;
@@ -146,35 +147,7 @@ public class DefaultPurseService implements PurseService {
                 "                orders.id_structure,  " +
                 "                orders.id_operation                                AS  " +
                 "                id_operation  " +
-                "         FROM   ((SELECT ore.id,  " +
-                "                         true      AS isregion,  " +
-                "                         ore.price AS \"price TTC\",  " +
-                "                         ore.amount,  " +
-                "                         ore.creation_date,  " +
-                "                         ore.modification_date,  " +
-                "                         ore.NAME,  " +
-                "                         ore.summary,  " +
-                "                         ore.description,  " +
-                "                         ore.image,  " +
-                "                         ore.status,  " +
-                "                         ore.id_contract,  " +
-                "                         ore.equipment_key,  " +
-                "                         ore.id_campaign,  " +
-                "                         ore.id_structure,  " +
-                "                         ore.cause_status,  " +
-                "                         ore.number_validation,  " +
-                "                         ore.id_order,  " +
-                "                         ore.comment,  " +
-                "                         ore.rank  AS \"prio\",  " +
-                "                         NULL      AS price_proposal,  " +
-                "                         ore.id_project,  " +
-                "                         ore.id_order_client_equipment,  " +
-                "                         NULL      AS program,  " +
-                "                         NULL      AS action,  " +
-                "                         ore.id_operation,  " +
-                "                         NULL      AS override_region  " +
-                "                  FROM    " + Lystore.lystoreSchema + ".\"order-region-equipment\" ore)  " +
-                "                 UNION  " +
+                "         FROM   ( " +
                 "                 (SELECT oce.id,  " +
                 "                         false AS isregion,  " +
                 "                         CASE  " +
@@ -224,7 +197,7 @@ public class DefaultPurseService implements PurseService {
                 "          purse.initial_amount,  " +
                 "          purse.amount,  " +
                 "          purse.id_campaign ";
-        Sql.getInstance().prepared(query,new JsonArray().add(id).add(id),SqlResult.validResultHandler(new Handler<Either<String, JsonArray>>() {
+        Sql.getInstance().prepared(query,new JsonArray().add(id).add(id), new DeliveryOptions().setSendTimeout(Lystore.timeout * 1000000000L),SqlResult.validResultHandler(new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> event) {
                 if (event.isRight())
@@ -233,7 +206,7 @@ public class DefaultPurseService implements PurseService {
                     for(int i =0;i<results.size();i++){
                        JsonObject result = results.getJsonObject(i);
                        try {
-                           Double.parseDouble(result.getString("substraction"));
+                           result.put("substraction",  Double.parseDouble(result.getString("substraction")));
                        }catch (NullPointerException e){
                             result.put("substraction",0.d);
                        }

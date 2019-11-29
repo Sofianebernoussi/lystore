@@ -24,3 +24,29 @@
     }
   }
 }
+
+.tr-warning{
+  background: #ffe7cc;
+}
+.warning-icon{
+  @include fonticon();
+  &:before {
+    content: '\e903';
+  }
+}
+
+vald-icon{
+  @include fonticon();
+  &:before {
+    content: '\e871';
+  }
+}
+.tr-valid{
+  background: #c7f0c7;
+}
+.tr-error{
+  background-color: #ffa6a6;
+  .content:before {
+    content: '\e903';
+  }
+}

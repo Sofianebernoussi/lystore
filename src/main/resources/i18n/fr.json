@@ -553,7 +553,8 @@
   "lystore.sent.order": "Votre commande est bien validée",
   "lystore.sent.export.BC": "Votre bon de commande est en cours de création, une fois créé il sera disponible dans l'onglet 'Mes exports'. Cette opération peut prendre du temps",
   "lystore.order.valided.generateBC.struct": "Export BC par établissement",
-  "lystore.campaign.check.purses": "Verifier les cagnottes "
+  "lystore.campaign.check.purses": "Verifier les cagnottes ",
+  "difference": "Différence Cagnotte/Commandes"
 
 
 }

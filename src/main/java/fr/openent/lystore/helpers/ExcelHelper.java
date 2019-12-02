@@ -438,7 +438,7 @@ public class ExcelHelper {
         this.blackOnBlueHeader.setAlignment(HorizontalAlignment.CENTER);
         this.blackOnBlueHeader.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         this.blackOnBlueHeader.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
-        this.blackOnBlueHeader.setFont(headerFont);
+        this.blackOnBlueHeader.setFont(titleHeadFont);
 
 
     }

@@ -108,7 +108,10 @@ public class RecapListLycee extends TabHelper {
     }
 
     private void insertHeader() {
-        String title ="MARCHE N°";
+        String title ="MARCHE N°" + datas.getJsonObject(0).getString("market_reference") +" - "+ datas.getJsonObject(0).getString("market_name") + ", \n";
+        if(true == false)
+            title+= "BON DE COMMANDE N°"
+                    ;
         excel.insertWithStyle(2,0,title,excel.blackOnBlueHeader);
         sizeMergeRegionWithStyle(0,2,5,excel.blackOnBlueHeader);
     }
@@ -224,10 +227,14 @@ public class RecapListLycee extends TabHelper {
                 "       oce.id_contract,  " +
                 "       Sum(oce.amount) AS amount,  " +
                 "       oce.id_structure,  " +
-                "       et.NAME  as typeequipment" +
-                "   FROM   "+ Lystore.lystoreSchema +".order_client_equipment oce  " +
+                "       et.NAME  as typeequipment," +
+                "       market.name as market_name," +
+                "       market.reference as market_reference " +
+                "       FROM   "+ Lystore.lystoreSchema +".order_client_equipment oce  " +
                 "       INNER JOIN "+ Lystore.lystoreSchema +".equipment_type et  " +
                 "               ON oce.id_type = et.id  " +
+                "       INNER JOIN "+ Lystore.lystoreSchema +".contract market  " +
+                "               ON oce.id_contract = market.id  " +
                 "WHERE  number_validation = ?  " +
                 "GROUP  BY oce.equipment_key,  " +
                 "          oce.price,  " +
@@ -235,7 +242,9 @@ public class RecapListLycee extends TabHelper {
                 "          oce.NAME,  " +
                 "          oce.id_contract,  " +
                 "          oce.id_structure,  " +
-                "          et.NAME  " +
+                "          et.NAME ," +
+                "          market_name," +
+                "          market_reference " +
                 "UNION  " +
                 "SELECT opt.price,  " +
                 "       opt.tax_amount,  " +
@@ -243,7 +252,9 @@ public class RecapListLycee extends TabHelper {
                 "       opt.id_contract,  " +
                 "       Sum(opt.amount) AS amount,  " +
                 "       opt.id_structure,  " +
-                "       opt.typeequipment  " +
+                "       opt.typeequipment," +
+                "       opt.market_name," +
+                "       opt.market_reference      " +
                 "FROM   (SELECT options.price,  " +
                 "               options.tax_amount,  " +
                 "               options.NAME,  " +
@@ -251,12 +262,16 @@ public class RecapListLycee extends TabHelper {
                 "               oce.amount,  " +
                 "               options.id_order_client_equipment,  " +
                 "               oce.id_structure,  " +
+                "               market.name as market_name," +
+                "               market.reference as market_reference, " +
                 "               et.NAME AS typeequipment  " +
                 "        FROM   "+ Lystore.lystoreSchema +".order_client_options options  " +
                 "               INNER JOIN "+ Lystore.lystoreSchema +".order_client_equipment oce  " +
                 "                       ON ( options.id_order_client_equipment = oce.id )  " +
                 "               INNER JOIN "+ Lystore.lystoreSchema +".equipment_type et  " +
-                "                       ON options.id_type = et.id  " +
+                "                       ON options.id_type = et.id " +
+                "               INNER JOIN " + Lystore.lystoreSchema + ".contract market " +
+                "                       ON oce.id_contract = market.id "  +
                 "        WHERE  number_validation = ? ) AS opt  " +
                 "       INNER JOIN "+ Lystore.lystoreSchema +".order_client_equipment equipment  " +
                 "               ON ( opt.id_order_client_equipment = equipment.id )  " +
@@ -265,7 +280,9 @@ public class RecapListLycee extends TabHelper {
                 "          opt.tax_amount,  " +
                 "          opt.id_contract,  " +
                 "          opt.id_structure,  " +
-                "          opt.typeequipment ";
+                "          opt.typeequipment ," +
+                "           opt.market_name," +
+                "           market_reference";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray();
         params.add(this.numberValidation).add(this.numberValidation);

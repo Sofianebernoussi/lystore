@@ -1,30 +1,13 @@
 package fr.openent.lystore.helpers;
 
-import fr.openent.lystore.Lystore;
-import fr.openent.lystore.logging.Actions;
-import fr.openent.lystore.logging.Contexts;
-import fr.openent.lystore.logging.Logging;
-import fr.openent.lystore.service.ExportService;
-import fr.openent.lystore.service.impl.DefaultExportServiceService;
-import fr.wseduc.webutils.Either;
-import io.vertx.core.Handler;
-import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.RegionUtil;
-import org.entcore.common.user.UserUtils;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 public class ExcelHelper {
-    private static DefaultExportServiceService exportService;
     private Workbook wb;
     private Sheet sheet;
     public final CellStyle headCellStyle;
@@ -56,6 +39,8 @@ public class ExcelHelper {
     public final CellStyle labelBoldStyle;
     public final CellStyle tabIntStyleCenterBold;
     public final CellStyle standardTextStyle;
+    public final CellStyle blackOnBlueHeader;
+
 
     protected static Logger log = LoggerFactory.getLogger(ExcelHelper.class);
 
@@ -96,7 +81,7 @@ public class ExcelHelper {
         this.labelBoldStyle = wb.createCellStyle();
         this.tabIntStyleCenterBold = wb.createCellStyle();
         this.standardTextStyle = wb.createCellStyle();
-
+        this.blackOnBlueHeader = wb.createCellStyle();
         format = wb.createDataFormat();
         format.getFormat("#.#");
 
@@ -443,6 +428,18 @@ public class ExcelHelper {
         this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setFont(blueTitleHeadFont);
         this.blueTitleHeaderBorderlessCenteredCurrencyStyle.setDataFormat(format.getFormat("#,##0.00 €"));
+
+        this.blackOnBlueHeader.setWrapText(true);
+        this.blackOnBlueHeader.setBorderLeft(BorderStyle.THIN);
+        this.blackOnBlueHeader.setBorderRight(BorderStyle.THIN);
+        this.blackOnBlueHeader.setBorderTop(BorderStyle.THIN);
+        this.blackOnBlueHeader.setBorderBottom(BorderStyle.THIN);
+        this.blackOnBlueHeader.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.blackOnBlueHeader.setAlignment(HorizontalAlignment.CENTER);
+        this.blackOnBlueHeader.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        this.blackOnBlueHeader.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
+        this.blackOnBlueHeader.setFont(headerFont);
+
 
     }
     public void setBold(Cell cell) {

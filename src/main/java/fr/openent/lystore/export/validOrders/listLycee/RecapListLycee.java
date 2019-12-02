@@ -67,8 +67,9 @@ public class RecapListLycee extends TabHelper {
     private void writeArray(Handler<Either<String, Boolean>> handler) {
         setTitle();
 
+        insertHeader();
         String oldIdStruct = "";
-        int currentI = 1,initx = 1 ;
+        int currentI = 2,initx = 2 ;
         String typeEquipment;
         String oldUai = "";
         for(int i=0;i<datas.size();i++){
@@ -103,9 +104,14 @@ public class RecapListLycee extends TabHelper {
         excel.insertWithStyle(0,currentI ,"Total " + oldUai,excel.labelHeadStyle);
         inserTotal(initx,currentI);
         insertFinalTotal(currentI+2);
-        excel.autoSize(18);
+        excel.autoSize(20);
     }
 
+    private void insertHeader() {
+        String title ="MARCHE N°";
+        excel.insertWithStyle(2,0,title,excel.blackOnBlueHeader);
+        sizeMergeRegionWithStyle(0,2,5,excel.blackOnBlueHeader);
+    }
 
 
     private void insertFinalTotal(int line) {
@@ -188,24 +194,26 @@ public class RecapListLycee extends TabHelper {
 
 
     private void setTitle() {
-        excel.insertWithStyle(1,0,"UAI",excel.yellowLabel);
-        excel.insertWithStyle(2,0,"Nom de l'établissement",excel.yellowLabel);
-        excel.insertWithStyle(3,0,"Commune",excel.yellowLabel);
-        excel.insertWithStyle(4,0,"Tel",excel.yellowLabel);
-        excel.insertWithStyle(5,0,"Equipment",excel.yellowLabel);
-        excel.insertWithStyle(6,0,"Qté",excel.yellowLabel);
-        // PRIX TOTAL EQUIPEMENT HT 	 PRIX TOTAL PRESTATION HT 	 PRIX TOTAL HT 	 PRIX TOTAL TTC 	DATE ARC	DATE LIMITE -LIVRAISON	DATE CSF	FACTURE	DATE FACTURE	FACTURE / RECAP	MONTANT FACTURE
-        excel.insertWithStyle(7,0,"PRIX TOTAL EQUIPEMENT HT",excel.yellowLabel);
-        excel.insertWithStyle(8,0,"PRIX TOTAL PRESTATION HT",excel.yellowLabel);
-        excel.insertWithStyle(9,0,"PRIX TOTAL HT ",excel.yellowLabel);
-        excel.insertWithStyle(10,0,"PRIX TOTAL TTC",excel.yellowLabel);
-        excel.insertWithStyle(11,0,"DATE ARC",excel.yellowLabel);
-        excel.insertWithStyle(12,0,"DATE LIMITE -LIVRAISON",excel.yellowLabel);
-        excel.insertWithStyle(13,0,"DATE CSF",excel.yellowLabel);
-        excel.insertWithStyle(14,0,"FACTURE ",excel.yellowLabel);
-        excel.insertWithStyle(15,0,"DATE FACTURE",excel.yellowLabel);
-        excel.insertWithStyle(16,0,"FACTURE / RECAP ",excel.yellowLabel);
-        excel.insertWithStyle(17,0,"MONTANT FACTURE",excel.yellowLabel);
+        excel.insertWithStyle(1,1,"UAI",excel.yellowLabel);
+        excel.insertWithStyle(2,1,"Nom de l'établissement",excel.yellowLabel);
+        excel.insertWithStyle(3,1,"Commune",excel.yellowLabel);
+        excel.insertWithStyle(4,1,"Tel",excel.yellowLabel);
+        excel.insertWithStyle(5,1,"Equipement",excel.yellowLabel);
+        excel.insertWithStyle(6,1,"Qté",excel.yellowLabel);
+        // PRIX TOTAL EQUIPEMENT1T 	 PRIX TOTAL PRESTATION HT 	 PRIX TOTAL HT 	 PRIX TOTAL TTC 	DATE ARC	DATE LIMITE -LIVRAISON	DATE CSF	FACTURE	DATE FACTURE	FACTURE / RECAP	MONTANT FACTURE
+        excel.insertWithStyle(7,1,"PRIX TOTAL FOURNITURE HT",excel.yellowLabel);
+        excel.insertWithStyle(8,1,"PRIX TOTAL MISE EN SERVICE HT",excel.yellowLabel);
+        excel.insertWithStyle(9,1,"PRIX TOTAL HT ",excel.yellowLabel);
+        excel.insertWithStyle(10,1,"PRIX TOTAL TTC",excel.yellowLabel);
+        excel.insertWithStyle(11,1,"DATE ARC",excel.yellowLabel);
+        excel.insertWithStyle(12,1,"DATE LIMITE -LIVRAISON",excel.yellowLabel);
+        excel.insertWithStyle(13,1,"DATE CSF",excel.yellowLabel);
+        excel.insertWithStyle(14,1,"NUMERO FACTURE ",excel.yellowLabel);
+        excel.insertWithStyle(15,1,"DATE FACTURE",excel.yellowLabel);
+        excel.insertWithStyle(16,1,"MONTANT FACTURE",excel.yellowLabel);
+        excel.insertWithStyle(17,1,"FACTURE / RECAP ",excel.yellowLabel);
+        excel.insertWithStyle(18,1,"RETARD DE LIVRAISON ",excel.yellowLabel);
+        excel.insertWithStyle(19,1,"PENALITE DE RETARD ",excel.yellowLabel);
     }
 
     @Override

@@ -81,10 +81,7 @@ public class RecapListLycee extends TabHelper {
                 }
                 if(i!=0){
                     initx = inserTotal(initx,currentI);
-                    excel.insertWithStyle(1,currentI ,"",excel.yellowHeader);
-                    excel.insertWithStyle(2,currentI ,"",excel.yellowHeader);
-                    excel.insertWithStyle(3,currentI ,"",excel.yellowHeader);
-                    excel.insertWithStyle(4,currentI ,"",excel.yellowHeader);
+                    fillYellowCells(currentI);
                     excel.insertWithStyle(0,currentI,"Total " + oldUai,excel.labelHeadStyle);
                     currentI ++;
                     excel.autoSize(20);
@@ -92,26 +89,34 @@ public class RecapListLycee extends TabHelper {
 
                 insertStructureInfos(currentI, data);
             }
-            excel.insertWithStyle(6,currentI, Integer.parseInt(data.getString("amount")),excel.tabStringStyleRight);
+            excel.insertWithStyle(5,currentI, Integer.parseInt(data.getString("amount")),excel.tabStringStyleRight);
             typeEquipment = data.getString("typeequipment");
             Double priceAmount = Double.parseDouble(data.getString("price")) * Double.parseDouble(data.getString("amount"));
             if(typeEquipment.equals("EQUIPEMENT")) {
-                excel.insertWithStyle(7,currentI,priceAmount ,excel.tabStringStyleRight);
+                excel.insertWithStyle(6,currentI,priceAmount ,excel.tabStringStyleRight);
             }else{
-                excel.insertWithStyle(8,currentI,priceAmount,excel.tabStringStyleRight);
+                excel.insertWithStyle(7,currentI,priceAmount,excel.tabStringStyleRight);
             }
-            excel.insertWithStyle(10,currentI,priceAmount + (priceAmount * Double.parseDouble(data.getString("tax_amount"))/100),excel.tabStringStyleRight);
+            excel.insertWithStyle(9,currentI,priceAmount + (priceAmount * Double.parseDouble(data.getString("tax_amount"))/100),excel.tabCurrencyStyle);
             oldUai = data.getString("uai");
             currentI ++;
         }
 
         mergeStructures(currentI, initx);
         //handle last struct
+        fillYellowCells(currentI);
         excel.insertWithStyle(0,currentI ,"Total " + oldUai,excel.labelHeadStyle);
         inserTotal(initx,currentI);
         insertFinalTotal(currentI+2);
         insertHeader();
 
+    }
+
+    private void fillYellowCells(int currentI) {
+        excel.insertWithStyle(1,currentI ,"",excel.yellowTab);
+        excel.insertWithStyle(2,currentI ,"",excel.yellowTab);
+        excel.insertWithStyle(3,currentI ,"",excel.yellowTab);
+        excel.insertWithStyle(4,currentI ,"",excel.yellowTab);
     }
 
     private void mergeStructures(int currentI, int initx) {
@@ -151,11 +156,11 @@ public class RecapListLycee extends TabHelper {
 
         for(int i = 0; i< totalsXQty.size(); i++){
             int x = totalsXQty.get(i);
-            String qtyRef =  excel.getCellReference(x,6);
-            String priceEquipmentHTRef =  excel.getCellReference(x,7);
-            String pricePrestaHTRef =  excel.getCellReference(x,8);
-            String priceHTCellRef =  excel.getCellReference(x,9);
-            String priceTTCCellRef =  excel.getCellReference(x,10);
+            String qtyRef =  excel.getCellReference(x,5);
+            String priceEquipmentHTRef =  excel.getCellReference(x,6);
+            String pricePrestaHTRef =  excel.getCellReference(x,7);
+            String priceHTCellRef =  excel.getCellReference(x,8);
+            String priceTTCCellRef =  excel.getCellReference(x,9);
 
             qtyRef = qtyRef.replace("'Liste Commandes avec Prix'!", "");
             priceEquipmentHTRef = priceEquipmentHTRef.replace("'Liste Commandes avec Prix'!", "");
@@ -203,26 +208,26 @@ public class RecapListLycee extends TabHelper {
     }
 
     private void insertPircesAndFormula(int line, String formulaQty, String formulaEquipmentHT, String formulaPrestaHT, String formulaTotalHT, String formulaTotalTTC) {
-        excel.insertFormulaWithStyle(line,6, formulaQty,excel.labelHeadStyle);
-        excel.insertFormula(line,7, formulaEquipmentHT);
-        excel.insertFormula(line,8, formulaPrestaHT);
-        excel.insertFormula(line,9, formulaTotalHT);
-        excel.insertFormula(line,10, formulaTotalTTC);
+        excel.insertFormulaWithStyle(line,5, formulaQty,excel.labelHeadStyle);
+        excel.insertFormula(line,6, formulaEquipmentHT);
+        excel.insertFormula(line,7, formulaPrestaHT);
+        excel.insertFormula(line,8, formulaTotalHT);
+        excel.insertFormula(line,9, formulaTotalTTC);
     }
 
     private int inserTotal(int initx, int currentI) {
         //faire le TTC
-        excel.fillTab(6,10, initx,currentI );
-        excel.setTotalXWithStyle(initx,currentI - 1,6,currentI,excel.totalStyle);
-        excel.setTotal(initx, currentI , 7, 9,currentI,9,excel.tabCurrencyStyle);
-        excel.setTotalX(initx,currentI-1,10,currentI);
+        excel.fillTab(5,9, initx,currentI );
+        excel.setTotalXWithStyle(initx,currentI - 1,5,currentI,excel.yellowTab);
+        excel.setTotalWithStyle(initx, currentI , 6, 8,currentI,8,excel.tabCurrencyStyle,excel.yellowTabPrice,excel.yellowTabPrice);
+        excel.setTotalXWithStyle(initx,currentI-1,9,currentI,excel.yellowTabPrice);
         totalsXQty.add(currentI);
         return currentI + 1;
     }
 
 
     private void setTitle() {
-        excel.insertWithStyle(1,1,"UAI",excel.yellowLabel);
+        excel.insertWithStyle(1,1,"      UAI        ",excel.yellowLabel);
         excel.insertWithStyle(2,1,"Nom de l'établissement",excel.yellowLabel);
         excel.insertWithStyle(3,1,"Commune",excel.yellowLabel);
         excel.insertWithStyle(4,1,"Equipement",excel.yellowLabel);

@@ -65,7 +65,7 @@ export const operationController = ng.controller('operationController',
             } else if (action === 'edit'){
                 $scope.operation = $scope.operations.selected[0];
                 $scope.operation.status = ($scope.operation.status === 'true');
-                $scope.labelOperation.all.push($scope.operation.label);
+                // $scope.labelOperation.all.push($scope.operation.label);
             }
             $scope.display.lightbox.operation = true;
             template.open('operation.lightbox', 'administrator/operation/operation-form');
@@ -78,7 +78,8 @@ export const operationController = ng.controller('operationController',
             $scope.operations.all.forEach(operationn => {
                 if(!isNaN(operationMomentDate)
                     && moment(operationMomentDate).format("DD/MM/YYYY") === moment(operationn.date_cp).format("DD/MM/YYYY")
-                    && operationn.id != operation.id){
+                    && operationn.id != operation.id
+                    && operationn.id_label === operation.id_label){
                     isValid = false;
                 }
             });

@@ -1,4 +1,4 @@
-import {_, $,idiom as lang,angular, model, ng, template, toasts} from 'entcore';
+import {_, $,idiom as lang,angular, model, ng, template, toasts,moment} from 'entcore';
 import http from "axios";
 import {
     Campaign, Notification, Operation, OrderClient, OrdersClient, orderWaiting, PRIORITY_FIELD, Userbook, Order,

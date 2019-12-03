@@ -95,7 +95,7 @@
                                 <select ng-model="instruction.operation" class="twelve" ng-change="operationIsSelect()">
                                     <option value="" disabled selected ><i18n>Selectionnez une opération</i18n></option>
                                     <option ng-repeat="operationSelect in operations.all" value=[[operationSelect]]>
-                                        [[operationSelect.label.label]]
+                                        [[operationSelect.label.label]] ( [[formatDate(operationSelect.date_cp)]] )
                                     </option>
                                 </select>
                             </td>

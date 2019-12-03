@@ -372,21 +372,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 template.open('order-list', 'customer/campaign/order/orders-by-project');
             }
         };
-        $scope.filterLabelUsed = (id_label? ) =>{
-            //MAP pour save dates
-            $scope.operations.all.map(operation => {
-                $scope.labelOperation.all =  $scope.labelOperation.all.filter(label =>
-                    (id_label)
-                        ? (label.id !== operation.label.id  && label.id != id_label )
-                        : (label.id !== operation.label.id)
-                )
-            })
-        };
+
         $scope.initOperation = async (id_label? ) =>{
             $scope.labelOperation = new labels();
             await $scope.labelOperation.sync();
             await $scope.operations.sync();
-            $scope.filterLabelUsed(id_label);
         };
         $scope.initBasketItem = async (idEquipment: number, idCampaign: number, structure) => {
             $scope.equipment = _.findWhere($scope.equipments.all, {id: idEquipment});
@@ -559,4 +549,12 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
             template.open('main-profile', 'customer/campaign/campaign-list');
         }
         Utils.safeApply($scope);
+
+        $scope.formatDate = (date) => {
+            if(date)
+                return moment(date).format("DD/MM/YYYY");
+            else{
+                return lang.translate("no.date");
+            }
+        }
     }]);

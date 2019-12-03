@@ -6,7 +6,7 @@
             ng-class="{ greyRow: $index % 2 === 1 }"
             ng-if="operation.status == 'true' && operation.id_instruction === null"
             ng-click="operationSelected(operation)">
-            [[operation.label.label]]
+            [[operation.label.label]] -  [[formatDate(operation.date_cp)]]
         </td>
     </tr>
     <tr ng-show="isOperationsIsEmpty">

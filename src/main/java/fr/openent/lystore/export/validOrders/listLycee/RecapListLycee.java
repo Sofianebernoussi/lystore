@@ -85,7 +85,6 @@ public class RecapListLycee extends TabHelper {
                     excel.insertWithStyle(2,currentI ,"",excel.yellowHeader);
                     excel.insertWithStyle(3,currentI ,"",excel.yellowHeader);
                     excel.insertWithStyle(4,currentI ,"",excel.yellowHeader);
-                    excel.insertWithStyle(5,currentI ,"",excel.yellowHeader);
                     excel.insertWithStyle(0,currentI,"Total " + oldUai,excel.labelHeadStyle);
                     currentI ++;
                     excel.autoSize(20);
@@ -120,15 +119,13 @@ public class RecapListLycee extends TabHelper {
         sizeMergeRegionLinesWithStyle(2,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
         sizeMergeRegionLinesWithStyle(3,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
         sizeMergeRegionLinesWithStyle(4,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
-        sizeMergeRegionLinesWithStyle(5,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
     }
 
     private void insertStructureInfos(int currentI, JsonObject data) {
         excel.insertWithStyle(1,currentI,makeCellWithoutNull(data.getString("uai")),excel.tabStringStyleCenterBold);
         excel.insertWithStyle(2,currentI,makeCellWithoutNull(data.getString("nameEtab")),excel.tabStringStyleCenterBold);
         excel.insertWithStyle(3,currentI,makeCellWithoutNull(data.getString("city")),excel.tabStringStyleCenterBold);
-        excel.insertWithStyle(4,currentI,makeCellWithoutNull(data.getString("phone")),excel.tabStringStyleCenterBold);
-        excel.insertWithStyle(5,currentI,makeCellWithoutNull(data.getString("name")),excel.tabStringStyleCenterBold);
+        excel.insertWithStyle(4,currentI,makeCellWithoutNull(data.getString("name")),excel.tabStringStyleCenterBold);
     }
 
     private void insertHeader() {
@@ -228,23 +225,22 @@ public class RecapListLycee extends TabHelper {
         excel.insertWithStyle(1,1,"UAI",excel.yellowLabel);
         excel.insertWithStyle(2,1,"Nom de l'établissement",excel.yellowLabel);
         excel.insertWithStyle(3,1,"Commune",excel.yellowLabel);
-        excel.insertWithStyle(4,1,"Tel",excel.yellowLabel);
-        excel.insertWithStyle(5,1,"Equipement",excel.yellowLabel);
-        excel.insertWithStyle(6,1,"Qté",excel.yellowLabel);
+        excel.insertWithStyle(4,1,"Equipement",excel.yellowLabel);
+        excel.insertWithStyle(5,1,"Qté",excel.yellowLabel);
         // PRIX TOTAL EQUIPEMENT1T 	 PRIX TOTAL PRESTATION HT 	 PRIX TOTAL HT 	 PRIX TOTAL TTC 	DATE ARC	DATE LIMITE -LIVRAISON	DATE CSF	FACTURE	DATE FACTURE	FACTURE / RECAP	MONTANT FACTURE
-        excel.insertWithStyle(7,1,"PRIX TOTAL FOURNITURE HT",excel.yellowLabel);
-        excel.insertWithStyle(8,1,"PRIX TOTAL MISE EN SERVICE HT",excel.yellowLabel);
-        excel.insertWithStyle(9,1,"PRIX TOTAL HT ",excel.yellowLabel);
-        excel.insertWithStyle(10,1,"PRIX TOTAL TTC",excel.yellowLabel);
-        excel.insertWithStyle(11,1,"DATE ARC",excel.yellowLabel);
-        excel.insertWithStyle(12,1,"DATE LIMITE -LIVRAISON",excel.yellowLabel);
-        excel.insertWithStyle(13,1,"DATE CSF",excel.yellowLabel);
-        excel.insertWithStyle(14,1,"NUMERO FACTURE ",excel.yellowLabel);
-        excel.insertWithStyle(15,1,"DATE FACTURE",excel.yellowLabel);
-        excel.insertWithStyle(16,1,"MONTANT FACTURE",excel.yellowLabel);
-        excel.insertWithStyle(17,1,"FACTURE / RECAP ",excel.yellowLabel);
-        excel.insertWithStyle(18,1,"RETARD DE LIVRAISON ",excel.yellowLabel);
-        excel.insertWithStyle(19,1,"PENALITE DE RETARD ",excel.yellowLabel);
+        excel.insertWithStyle(6,1,"PRIX TOTAL FOURNITURE HT",excel.yellowLabel);
+        excel.insertWithStyle(7,1,"PRIX TOTAL MISE EN SERVICE HT",excel.yellowLabel);
+        excel.insertWithStyle(8,1,"PRIX TOTAL HT ",excel.yellowLabel);
+        excel.insertWithStyle(9,1,"PRIX TOTAL TTC",excel.yellowLabel);
+        excel.insertWithStyle(10,1,"DATE ARC",excel.yellowLabel);
+        excel.insertWithStyle(11,1,"DATE LIMITE -LIVRAISON",excel.yellowLabel);
+        excel.insertWithStyle(12,1,"DATE CSF",excel.yellowLabel);
+        excel.insertWithStyle(13,1,"NUMERO FACTURE ",excel.yellowLabel);
+        excel.insertWithStyle(14,1,"DATE FACTURE",excel.yellowLabel);
+        excel.insertWithStyle(15,1,"MONTANT FACTURE",excel.yellowLabel);
+        excel.insertWithStyle(16,1,"FACTURE / RECAP ",excel.yellowLabel);
+        excel.insertWithStyle(17,1,"RETARD DE LIVRAISON ",excel.yellowLabel);
+        excel.insertWithStyle(18,1,"PENALITE DE RETARD ",excel.yellowLabel);
     }
 
     @Override

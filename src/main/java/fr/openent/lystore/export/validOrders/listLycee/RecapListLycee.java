@@ -77,17 +77,16 @@ public class RecapListLycee extends TabHelper {
             String idStruct = data.getString("id_structure");
             if (!oldIdStruct.equals(idStruct)){
                 oldIdStruct = idStruct;
+                if(initx != currentI){
+                    mergeStructures(currentI, initx);
+                }
                 if(i!=0){
                     initx = inserTotal(initx,currentI);
                     excel.insertWithStyle(0,currentI,"Total " + oldUai,excel.labelHeadStyle);
                     currentI ++;
                 }
+                insertStructureInfos(currentI, data);
             }
-            excel.insertCellTab(1,currentI,makeCellWithoutNull(data.getString("uai")));
-            excel.insertCellTab(2,currentI,makeCellWithoutNull(data.getString("nameEtab")));
-            excel.insertCellTab(3,currentI,makeCellWithoutNull(data.getString("city")));
-            excel.insertCellTab(4,currentI,makeCellWithoutNull(data.getString("phone")));
-            excel.insertCellTab(5,currentI,makeCellWithoutNull(data.getString("name")));
             excel.insertWithStyle(6,currentI, Integer.parseInt(data.getString("amount")),excel.tabStringStyleRight);
             typeEquipment = data.getString("typeequipment");
             Double priceAmount = Double.parseDouble(data.getString("price")) * Double.parseDouble(data.getString("amount"));
@@ -100,11 +99,29 @@ public class RecapListLycee extends TabHelper {
             oldUai = data.getString("uai");
             currentI ++;
         }
+
+        mergeStructures(currentI, initx);
         //handle last struct
         excel.insertWithStyle(0,currentI ,"Total " + oldUai,excel.labelHeadStyle);
         inserTotal(initx,currentI);
         insertFinalTotal(currentI+2);
         excel.autoSize(20);
+    }
+
+    private void mergeStructures(int currentI, int initx) {
+        sizeMergeRegionLinesWithStyle(1,initx,currentI - 1 ,excel.tabStringStyle);
+        sizeMergeRegionLinesWithStyle(2,initx,currentI - 1 ,excel.tabStringStyle);
+        sizeMergeRegionLinesWithStyle(3,initx,currentI - 1 ,excel.tabStringStyle);
+        sizeMergeRegionLinesWithStyle(4,initx,currentI - 1 ,excel.tabStringStyle);
+        sizeMergeRegionLinesWithStyle(5,initx,currentI - 1 ,excel.tabStringStyle);
+    }
+
+    private void insertStructureInfos(int currentI, JsonObject data) {
+        excel.insertCellTab(1,currentI,makeCellWithoutNull(data.getString("uai")));
+        excel.insertCellTab(2,currentI,makeCellWithoutNull(data.getString("nameEtab")));
+        excel.insertCellTab(3,currentI,makeCellWithoutNull(data.getString("city")));
+        excel.insertCellTab(4,currentI,makeCellWithoutNull(data.getString("phone")));
+        excel.insertCellTab(5,currentI,makeCellWithoutNull(data.getString("name")));
     }
 
     private void insertHeader() {
@@ -177,12 +194,16 @@ public class RecapListLycee extends TabHelper {
         formulaTotalHT = formulaTotalHT.substring(0, formulaTotalHT.length() - 1);
         formulaTotalTTC = formulaTotalTTC.substring(0, formulaTotalTTC.length() - 1);
 
+        insertPircesAndFormula(line, formulaQty, formulaEquipmentHT, formulaPrestaHT, formulaTotalHT, formulaTotalTTC);
+
+    }
+
+    private void insertPircesAndFormula(int line, String formulaQty, String formulaEquipmentHT, String formulaPrestaHT, String formulaTotalHT, String formulaTotalTTC) {
         excel.insertFormulaWithStyle(line,6, formulaQty,excel.labelHeadStyle);
         excel.insertFormula(line,7, formulaEquipmentHT);
         excel.insertFormula(line,8, formulaPrestaHT);
         excel.insertFormula(line,9, formulaTotalHT);
         excel.insertFormula(line,10, formulaTotalTTC);
-
     }
 
     private int inserTotal(int initx, int currentI) {

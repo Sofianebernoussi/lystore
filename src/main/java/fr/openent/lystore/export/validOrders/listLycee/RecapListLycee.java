@@ -67,7 +67,6 @@ public class RecapListLycee extends TabHelper {
     private void writeArray(Handler<Either<String, Boolean>> handler) {
         setTitle();
 
-        insertHeader();
         String oldIdStruct = "";
         int currentI = 2,initx = 2 ;
         String typeEquipment;
@@ -82,9 +81,16 @@ public class RecapListLycee extends TabHelper {
                 }
                 if(i!=0){
                     initx = inserTotal(initx,currentI);
+                    excel.insertWithStyle(1,currentI ,"",excel.yellowHeader);
+                    excel.insertWithStyle(2,currentI ,"",excel.yellowHeader);
+                    excel.insertWithStyle(3,currentI ,"",excel.yellowHeader);
+                    excel.insertWithStyle(4,currentI ,"",excel.yellowHeader);
+                    excel.insertWithStyle(5,currentI ,"",excel.yellowHeader);
                     excel.insertWithStyle(0,currentI,"Total " + oldUai,excel.labelHeadStyle);
                     currentI ++;
+                    excel.autoSize(20);
                 }
+
                 insertStructureInfos(currentI, data);
             }
             excel.insertWithStyle(6,currentI, Integer.parseInt(data.getString("amount")),excel.tabStringStyleRight);
@@ -105,23 +111,24 @@ public class RecapListLycee extends TabHelper {
         excel.insertWithStyle(0,currentI ,"Total " + oldUai,excel.labelHeadStyle);
         inserTotal(initx,currentI);
         insertFinalTotal(currentI+2);
-        excel.autoSize(20);
+        insertHeader();
+
     }
 
     private void mergeStructures(int currentI, int initx) {
-        sizeMergeRegionLinesWithStyle(1,initx,currentI - 1 ,excel.tabStringStyle);
-        sizeMergeRegionLinesWithStyle(2,initx,currentI - 1 ,excel.tabStringStyle);
-        sizeMergeRegionLinesWithStyle(3,initx,currentI - 1 ,excel.tabStringStyle);
-        sizeMergeRegionLinesWithStyle(4,initx,currentI - 1 ,excel.tabStringStyle);
-        sizeMergeRegionLinesWithStyle(5,initx,currentI - 1 ,excel.tabStringStyle);
+        sizeMergeRegionLinesWithStyle(1,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
+        sizeMergeRegionLinesWithStyle(2,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
+        sizeMergeRegionLinesWithStyle(3,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
+        sizeMergeRegionLinesWithStyle(4,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
+        sizeMergeRegionLinesWithStyle(5,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
     }
 
     private void insertStructureInfos(int currentI, JsonObject data) {
-        excel.insertCellTab(1,currentI,makeCellWithoutNull(data.getString("uai")));
-        excel.insertCellTab(2,currentI,makeCellWithoutNull(data.getString("nameEtab")));
-        excel.insertCellTab(3,currentI,makeCellWithoutNull(data.getString("city")));
-        excel.insertCellTab(4,currentI,makeCellWithoutNull(data.getString("phone")));
-        excel.insertCellTab(5,currentI,makeCellWithoutNull(data.getString("name")));
+        excel.insertWithStyle(1,currentI,makeCellWithoutNull(data.getString("uai")),excel.tabStringStyleCenterBold);
+        excel.insertWithStyle(2,currentI,makeCellWithoutNull(data.getString("nameEtab")),excel.tabStringStyleCenterBold);
+        excel.insertWithStyle(3,currentI,makeCellWithoutNull(data.getString("city")),excel.tabStringStyleCenterBold);
+        excel.insertWithStyle(4,currentI,makeCellWithoutNull(data.getString("phone")),excel.tabStringStyleCenterBold);
+        excel.insertWithStyle(5,currentI,makeCellWithoutNull(data.getString("name")),excel.tabStringStyleCenterBold);
     }
 
     private void insertHeader() {

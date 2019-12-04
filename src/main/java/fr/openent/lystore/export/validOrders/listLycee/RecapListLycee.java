@@ -78,15 +78,14 @@ public class RecapListLycee extends TabHelper {
                 oldIdStruct = idStruct;
                 if(initx != currentI){
                     mergeStructures(currentI, initx);
+                    excel.insertWithStyle(0,currentI,"Total " + oldUai,excel.labelHeadStyle);
                 }
                 if(i!=0){
                     initx = inserTotal(initx,currentI);
                     fillYellowCells(currentI);
-                    excel.insertWithStyle(0,currentI,"Total " + oldUai,excel.labelHeadStyle);
                     currentI ++;
                     excel.autoSize(20);
                 }
-
                 insertStructureInfos(currentI, data);
             }
             excel.insertWithStyle(5,currentI, Integer.parseInt(data.getString("amount")),excel.tabStringStyleRight);
@@ -124,6 +123,15 @@ public class RecapListLycee extends TabHelper {
         sizeMergeRegionLinesWithStyle(2,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
         sizeMergeRegionLinesWithStyle(3,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
         sizeMergeRegionLinesWithStyle(4,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
+        sizeMergeRegionLines(10,initx,currentI);
+        sizeMergeRegionLines(11,initx,currentI);
+        sizeMergeRegionLines(12,initx,currentI);
+        sizeMergeRegionLines(13,initx,currentI);
+        sizeMergeRegionLines(14,initx,currentI);
+        sizeMergeRegionLines(15,initx,currentI);
+        sizeMergeRegionLines(16,initx,currentI);
+        sizeMergeRegionLines(17,initx,currentI);
+        sizeMergeRegionLines(18,initx,currentI);
     }
 
     private void insertStructureInfos(int currentI, JsonObject data) {
@@ -227,7 +235,7 @@ public class RecapListLycee extends TabHelper {
 
 
     private void setTitle() {
-        excel.insertWithStyle(1,1,"      UAI        ",excel.yellowLabel);
+        excel.insertWithStyle(1,1,"UAI        ",excel.yellowLabel);
         excel.insertWithStyle(2,1,"Nom de l'établissement",excel.yellowLabel);
         excel.insertWithStyle(3,1,"Commune",excel.yellowLabel);
         excel.insertWithStyle(4,1,"Equipement",excel.yellowLabel);

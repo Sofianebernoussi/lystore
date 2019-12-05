@@ -197,6 +197,16 @@ public abstract class TabHelper {
 
     }
 
+    protected void sizeMergeRegionLines(int cellColumn,int lineStart,int lineEnd ){
+        sizeMergeRegionLinesWithStyle(cellColumn,lineStart,lineEnd,excel.standardTextStyle);
+    }
+
+    protected void sizeMergeRegionLinesWithStyle(int cellColumn,int lineStart,int lineEnd ,CellStyle style){
+        CellRangeAddress merge = new CellRangeAddress(lineStart, lineEnd, cellColumn, cellColumn);
+        sheet.addMergedRegion(merge);
+        excel.setRegionHeaderStyle(merge, sheet, style);
+    }
+
     // doing \n when the str is too long
     protected String formatStrToCell(String str, int nbWords) {
         try {

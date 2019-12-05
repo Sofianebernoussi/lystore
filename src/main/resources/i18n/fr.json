@@ -546,7 +546,7 @@
   "INSTRUCTION": "Rapport",
   "Select": "Selectionner",
   "not.valid.campaign.form": "Saisir le nom de la campagne et au moins un type d'équipements visible par regroupement.",
-  "operation.form.warning": "Une opération ne peut pas être créée sur une date déjà utilisée par une autre opération",
+  "operation.form.warning": "Une opération ne peut pas être créée sur une date déjà utilisée par une autre opération du même nom",
   "open" : "Ouvert",
   "INSTRUCTION": "Rapport",
   "ORDERSSENT": "Commandes/Demandes validées",
@@ -554,7 +554,8 @@
   "lystore.sent.export.BC": "Votre bon de commande est en cours de création, une fois créé il sera disponible dans l'onglet 'Mes exports'. Cette opération peut prendre du temps",
   "lystore.order.valided.generateBC.struct": "Export BC par établissement",
   "lystore.campaign.check.purses": "Verifier les cagnottes ",
-  "difference": "Différence Cagnotte/Commandes"
+  "difference": "Différence Cagnotte/Commandes",
+  "no.date": "Pas de date"
 
 
 }

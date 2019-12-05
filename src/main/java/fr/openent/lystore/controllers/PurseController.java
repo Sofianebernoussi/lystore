@@ -38,6 +38,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.UUID;
 
+import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
+import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
 import static org.entcore.common.utils.FileUtils.deleteImportPath;
 
 public class PurseController extends ControllerHelper {
@@ -108,7 +110,8 @@ public class PurseController extends ControllerHelper {
 
     /**
      * Match ids between structure campaign ids and provided ids.
-     * @param realIds provided ids
+     *
+     * @param realIds     provided ids
      * @param expectedIds expected ids
      * @return JsonArray containing structure campaign ids specified in CSV file.
      */
@@ -132,10 +135,11 @@ public class PurseController extends ControllerHelper {
 
     /**
      * Match structure UAI with its Neo4j id.
+     *
      * @param request Http request
-     * @param path Directory path
-     * @param uais UAIs list
-     * @param amount Object containing UAI as key and purse amount as value
+     * @param path    Directory path
+     * @param uais    UAIs list
+     * @param amount  Object containing UAI as key and purse amount as value
      */
     private void matchUAIID(final HttpServerRequest request, final String path, JsonArray uais,
                             final JsonObject amount, final String contentFile) {
@@ -146,28 +150,28 @@ public class PurseController extends ControllerHelper {
                     final JsonArray ids = event.right().getValue();
                     campaignService.getCampaignStructures(Integer.parseInt(request.params().get("id")),
                             new Handler<Either<String, JsonArray>>() {
-                        @Override
-                        public void handle(Either<String, JsonArray> event) {
-                            if (event.isRight()) {
-                                JsonArray correctIds = deleteWrongIds(ids, event.right().getValue());
-                                if (correctIds.size() == 0) {
-                                    returnErrorMessage(request, new Throwable("lystore.statements.empty"), path);
-                                    return;
-                                }
+                                @Override
+                                public void handle(Either<String, JsonArray> event) {
+                                    if (event.isRight()) {
+                                        JsonArray correctIds = deleteWrongIds(ids, event.right().getValue());
+                                        if (correctIds.size() == 0) {
+                                            returnErrorMessage(request, new Throwable("lystore.statements.empty"), path);
+                                            return;
+                                        }
 
-                                JsonObject statementsValues = new JsonObject();
-                                JsonObject id;
-                                for (int i = 0; i < correctIds.size(); i++) {
-                                    id = correctIds.getJsonObject(i);
-                                    statementsValues.put(id.getString("id"),
-                                            amount.getString(id.getString("uai")));
+                                        JsonObject statementsValues = new JsonObject();
+                                        JsonObject id;
+                                        for (int i = 0; i < correctIds.size(); i++) {
+                                            id = correctIds.getJsonObject(i);
+                                            statementsValues.put(id.getString("id"),
+                                                    amount.getString(id.getString("uai")));
+                                        }
+                                        launchImport(request, path, statementsValues, contentFile);
+                                    } else {
+                                        returnErrorMessage(request, new Throwable(event.left().getValue()), path);
+                                    }
                                 }
-                                launchImport(request, path, statementsValues, contentFile);
-                            } else {
-                                returnErrorMessage(request, new Throwable(event.left().getValue()), path);
-                            }
-                        }
-                    });
+                            });
                 } else {
                     returnErrorMessage(request, new Throwable(event.left().getValue()), path);
                 }
@@ -177,8 +181,9 @@ public class PurseController extends ControllerHelper {
 
     /**
      * Launch database import
-     * @param request Http request
-     * @param path Directory path
+     *
+     * @param request          Http request
+     * @param path             Directory path
      * @param statementsValues Object containing statement values
      */
     private void launchImport(final HttpServerRequest request, final String path,
@@ -187,19 +192,19 @@ public class PurseController extends ControllerHelper {
             final Integer campaignId = Integer.parseInt(request.params().get("id"));
             purseService.launchImport(campaignId,
                     statementsValues, new Handler<Either<String, JsonObject>>() {
-                @Override
-                public void handle(Either<String, JsonObject> event) {
-                    if (event.isRight()) {
-                        Renders.renderJson(request, event.right().getValue());
-                        JsonObject contentObject = new JsonObject().put("content", contentFile);
-                        Logging.insert(eb, request, Contexts.PURSE.toString(),
-                                Actions.IMPORT.toString(), campaignId.toString(), contentObject);
-                        deleteImportPath(vertx, path);
-                    } else {
-                        returnErrorMessage(request, new Throwable(event.left().getValue()), path);
-                    }
-                }
-            });
+                        @Override
+                        public void handle(Either<String, JsonObject> event) {
+                            if (event.isRight()) {
+                                Renders.renderJson(request, event.right().getValue());
+                                JsonObject contentObject = new JsonObject().put("content", contentFile);
+                                Logging.insert(eb, request, Contexts.PURSE.toString(),
+                                        Actions.IMPORT.toString(), campaignId.toString(), contentObject);
+                                deleteImportPath(vertx, path);
+                            } else {
+                                returnErrorMessage(request, new Throwable(event.left().getValue()), path);
+                            }
+                        }
+                    });
         } catch (NumberFormatException e) {
             log.error("[Lystore@launchImport] : An error occurred when parsing campaign id", e);
             returnErrorMessage(request, e.getCause(), path);
@@ -208,9 +213,10 @@ public class PurseController extends ControllerHelper {
 
     /**
      * End http request and returns message error. It delete the directory.
+     *
      * @param request Http request
-     * @param cause Throwable message
-     * @param path Directory path to delete
+     * @param cause   Throwable message
+     * @param path    Directory path to delete
      */
     private void returnErrorMessage(HttpServerRequest request, Throwable cause, String path) {
         renderErrorMessage(request, cause);
@@ -219,8 +225,9 @@ public class PurseController extends ControllerHelper {
 
     /**
      * Render a message error based on cause message
+     *
      * @param request Http request
-     * @param cause Cause error
+     * @param cause   Cause error
      */
     private static void renderErrorMessage(HttpServerRequest request, Throwable cause) {
         renderError(request, new JsonObject().put("message", cause.getMessage()));
@@ -263,7 +270,7 @@ public class PurseController extends ControllerHelper {
     @ApiDoc("Update a purse based on his id")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AdministratorRight.class)
-    public void updateHolder (final HttpServerRequest request) {
+    public void updateHolder(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "purse", new Handler<JsonObject>() {
             @Override
             public void handle(JsonObject body) {
@@ -281,6 +288,31 @@ public class PurseController extends ControllerHelper {
                 }
             }
         });
+    }
+
+    @Get("/campaign/:id/purse/check")
+    @ApiDoc("Get purses checks")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdministratorRight.class)
+    public void checkPurse(final HttpServerRequest request) {
+        try {
+            Integer idCampaign = Integer.parseInt(request.params().get("id"));
+            purseService.checkPurses(idCampaign, new Handler<Either<String, JsonArray>>() {
+                @Override
+                public void handle(Either<String, JsonArray> event) {
+                    if(event.isRight())
+                    {
+                        request.response().setStatusCode(201).end(event.right().getValue().toString());
+                    }else{
+                        badRequest(request);
+                    }
+                }
+            });
+
+        } catch (NumberFormatException e) {
+            log.error("[Lystore@purses] : An error occurred when casting campaign id", e);
+            badRequest(request);
+        }
     }
 
     @Get("/campaign/:id/purses/list")

@@ -39,4 +39,6 @@ public interface PurseService {
      * @return Statment
      */
      JsonObject updatePurseAmountStatement(Double price,Integer idCampaign, String idStructure, String operation);
+
+    void checkPurses(Integer id, Handler<Either<String, JsonArray>> handler);
 }

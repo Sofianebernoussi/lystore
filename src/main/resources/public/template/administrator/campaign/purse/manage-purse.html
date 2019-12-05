@@ -3,6 +3,7 @@
     <div class="tools right-magnet eleven-mobile">
         <button class="five-mobile" ng-click="openPurseImporter()"><i18n>lystore.campaign.purse.import</i18n></button>
         <button class="five-mobile" ng-click="exportPurses(campaign.id)"><i18n>lystore.campaign.purse.export</i18n></button>
+            <button class="five-mobile" ng-click="checkPurses(campaign.id)"><i18n>lystore.campaign.check.purses</i18n></button>
     </div>
 
     <div class="six centered twelve-mobile">
@@ -66,9 +67,6 @@
                 </tbody>
             </table>
         </article>
-        <div class=" eleven-mobile right-magnet">
-            <button class="five-mobile" ng-click="checkPurses(campaign.id)"><i18n>lystore.campaign.check.purses</i18n></button>
-        </div>
     </div>
     <lightbox show="lightbox.open" on-close="lightbox.open = false">
         <container template="purse.lightbox"></container>

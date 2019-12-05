@@ -9,6 +9,8 @@ export class Purse implements Selectable {
     id_campaign: number;
 
     selected: boolean;
+    substraction?: any;
+    bigDifference: boolean;
 
     constructor (id_structure?: string, amount?: number, id_campaign?: number) {
         if (id_structure) this.id_structure = id_structure;
@@ -48,6 +50,26 @@ export class Purses extends Selection<Purse> {
     async sync () {
         let {data} = await http.get(`/lystore/campaign/${this.id_campaign}/purses/list`);
         this.all = Mix.castArrayAs(Purse, data);
+    }
+
+    async check(id_campaign){
+        let {data, status} =  await  http.get(`/lystore/campaign/${id_campaign}/purse/check`);
+        if(status===201){
+            this.all.map(purse => {
+                data.map( back_data =>{
+                    if (back_data.id_structure && back_data.id_structure === purse.id_structure){
+                        purse.substraction = back_data.substraction;
+                        if(purse.substraction !== 0){
+                            if(Math.abs(purse.substraction) < 2){
+                                purse.bigDifference = false;
+                            }else{
+                                purse.bigDifference = true;
+                            }
+                        }
+                    }
+                })
+            })
+        }
     }
 }
 

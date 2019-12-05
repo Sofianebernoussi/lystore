@@ -42,6 +42,10 @@ public class ExcelHelper {
     public final CellStyle blackOnBlueHeader;
     public final CellStyle yellowTab;
     public final CellStyle yellowTabPrice;
+    public final CellStyle dateFormatStyle;
+    public final CellStyle currencyFormatStyle;
+    public final CellStyle numberFormatStyle;
+
 
 
     protected static Logger log = LoggerFactory.getLogger(ExcelHelper.class);
@@ -86,6 +90,9 @@ public class ExcelHelper {
         this.blackOnBlueHeader = wb.createCellStyle();
         this.yellowTab = wb.createCellStyle();
         this.yellowTabPrice = wb.createCellStyle();
+        this.dateFormatStyle = wb.createCellStyle();
+        this.currencyFormatStyle = wb.createCellStyle();
+        this.numberFormatStyle = wb.createCellStyle();
         format = wb.createDataFormat();
         format.getFormat("#.#");
 
@@ -468,6 +475,44 @@ public class ExcelHelper {
         this.yellowTabPrice.setDataFormat(format.getFormat("#,##0.00 €"));
 
 
+        this.dateFormatStyle.setWrapText(true);
+        this.dateFormatStyle.setBorderLeft(BorderStyle.THIN);
+        this.dateFormatStyle.setBorderRight(BorderStyle.THIN);
+        this.dateFormatStyle.setBorderTop(BorderStyle.THIN);
+        this.dateFormatStyle.setBorderBottom(BorderStyle.THIN);
+        this.dateFormatStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.dateFormatStyle.setAlignment(HorizontalAlignment.CENTER);
+        this.dateFormatStyle.setFont(tabFont);
+        this.dateFormatStyle.setDataFormat(format.getFormat("m/d/yy"));
+
+        this.currencyFormatStyle.setWrapText(true);
+        this.currencyFormatStyle.setBorderLeft(BorderStyle.THIN);
+        this.currencyFormatStyle.setBorderRight(BorderStyle.THIN);
+        this.currencyFormatStyle.setBorderTop(BorderStyle.THIN);
+        this.currencyFormatStyle.setBorderBottom(BorderStyle.THIN);
+        this.currencyFormatStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.currencyFormatStyle.setAlignment(HorizontalAlignment.CENTER);
+        this.currencyFormatStyle.setFont(tabFont);
+        this.currencyFormatStyle.setDataFormat(format.getFormat("#,##0.00€"));
+
+
+        this.numberFormatStyle.setWrapText(true);
+        this.numberFormatStyle.setBorderLeft(BorderStyle.THIN);
+        this.numberFormatStyle.setBorderRight(BorderStyle.THIN);
+        this.numberFormatStyle.setBorderTop(BorderStyle.THIN);
+        this.numberFormatStyle.setBorderBottom(BorderStyle.THIN);
+        this.numberFormatStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.numberFormatStyle.setAlignment(HorizontalAlignment.CENTER);
+        this.numberFormatStyle.setFont(tabFont);
+        this.numberFormatStyle.setDataFormat(format.getFormat("0"));
+
+        this.standardTextStyle.setWrapText(true);
+        this.standardTextStyle.setBorderLeft(BorderStyle.THIN);
+        this.standardTextStyle.setBorderRight(BorderStyle.THIN);
+        this.standardTextStyle.setBorderTop(BorderStyle.THIN);
+        this.standardTextStyle.setBorderBottom(BorderStyle.THIN);
+        this.standardTextStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.standardTextStyle.setAlignment(HorizontalAlignment.CENTER);
     }
 
     public void setBold(Cell cell) {
@@ -597,11 +642,11 @@ public class ExcelHelper {
     }
 
 
-    public void insertFormula(int line, int cellColumn, String data) {
-        insertFormulaWithStyle(line, cellColumn, data, this.currencyStyle);
+    public void insertFormula(int cellColumn, int line, String data) {
+        insertFormulaWithStyle(cellColumn, line, data, this.currencyStyle);
     }
 
-    public void insertFormulaWithStyle(int line, int cellColumn, String data, CellStyle style) {
+    public void insertFormulaWithStyle(int cellColumn, int line, String data, CellStyle style) {
         Row tab;
         try {
             tab = sheet.getRow(line);

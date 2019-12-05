@@ -81,10 +81,11 @@ public class RecapListLycee extends TabHelper {
                     excel.insertWithStyle(0,currentI,"Total " + oldUai,excel.labelHeadStyle);
                 }
                 if(i!=0){
+                    int oldinitx = initx;
                     initx = inserTotal(initx,currentI);
                     fillYellowCells(currentI);
+                    mergeFinalCells(currentI, oldinitx);
                     currentI ++;
-                    excel.autoSize(20);
                 }
                 insertStructureInfos(currentI, data);
             }
@@ -101,12 +102,14 @@ public class RecapListLycee extends TabHelper {
             currentI ++;
         }
 
-        mergeStructures(currentI, initx);
         //handle last struct
         fillYellowCells(currentI);
         excel.insertWithStyle(0,currentI ,"Total " + oldUai,excel.labelHeadStyle);
         inserTotal(initx,currentI);
+        mergeStructures(currentI, initx);
+        mergeFinalCells(currentI, initx);
         insertFinalTotal(currentI+2);
+        excel.autoSize(20);
         insertHeader();
 
     }
@@ -123,14 +126,32 @@ public class RecapListLycee extends TabHelper {
         sizeMergeRegionLinesWithStyle(2,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
         sizeMergeRegionLinesWithStyle(3,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
         sizeMergeRegionLinesWithStyle(4,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
-        sizeMergeRegionLines(10,initx,currentI);
-        sizeMergeRegionLines(11,initx,currentI);
-        sizeMergeRegionLines(12,initx,currentI);
-        sizeMergeRegionLines(13,initx,currentI);
-        sizeMergeRegionLines(14,initx,currentI);
-        sizeMergeRegionLines(15,initx,currentI);
-        sizeMergeRegionLines(16,initx,currentI);
-        sizeMergeRegionLines(17,initx,currentI);
+    }
+
+    private void mergeFinalCells(int currentI, int initx) {
+        excel.insertWithStyle(10,initx,"",excel.dateFormatStyle);
+        sizeMergeRegionLinesWithStyle(10,initx,currentI,excel.dateFormatStyle);
+
+        excel.insertWithStyle(11,initx,"",excel.dateFormatStyle);
+        sizeMergeRegionLinesWithStyle(11,initx,currentI,excel.dateFormatStyle);//D
+
+        excel.insertWithStyle(12,initx,"",excel.dateFormatStyle);
+        sizeMergeRegionLinesWithStyle(12,initx,currentI,excel.dateFormatStyle);
+
+        excel.insertWithStyle(13,initx,"",excel.standardTextStyle);
+        sizeMergeRegionLinesWithStyle(13,initx,currentI,excel.standardTextStyle);//D
+        excel.insertWithStyle(14,initx,"",excel.dateFormatStyle);
+
+        sizeMergeRegionLinesWithStyle(14,initx,currentI,excel.dateFormatStyle);
+        excel.insertWithStyle(15,initx,"",excel.currencyFormatStyle);
+
+        sizeMergeRegionLinesWithStyle(15,initx,currentI,excel.currencyFormatStyle);
+        excel.insertWithStyle(16,initx,"",excel.standardTextStyle);
+        sizeMergeRegionLinesWithStyle(16,initx,currentI,excel.standardTextStyle);
+        excel.insertWithStyle(17,initx,"",excel.numberFormatStyle);
+        sizeMergeRegionLinesWithStyle(17,initx,currentI,excel.numberFormatStyle);
+        String formula = "(" + excel.getCellReference(initx,17) + "*" + excel.getCellReference(currentI,8)+")/1000";
+        excel.insertFormulaWithStyle(18, initx, formula,excel.currencyFormatStyle);
         sizeMergeRegionLines(18,initx,currentI);
     }
 
@@ -185,23 +206,23 @@ public class RecapListLycee extends TabHelper {
 
             } else { //Substring
                 formulaQty = formulaQty.substring(0, formulaQty.length() - 1);
-                excel.insertFormula( 40,1589 + i, formulaQty);
+                excel.insertFormula(1589 + i, 40, formulaQty);
                 formulaQty = excel.getCellReference(40,1589 + i ) + " +" + qtyRef +"+";
 
                 formulaEquipmentHT = formulaEquipmentHT.substring(0, formulaEquipmentHT.length() - 1);
-                excel.insertFormula( 41,1589 + i, formulaEquipmentHT);
+                excel.insertFormula(1589 + i, 41, formulaEquipmentHT);
                 formulaEquipmentHT = excel.getCellReference(41,1589 + i ) + " +" + priceEquipmentHTRef +"+";
 
                 formulaPrestaHT = formulaPrestaHT.substring(0, formulaPrestaHT.length() - 1);
-                excel.insertFormula( 42,1589 + i, formulaPrestaHT);
+                excel.insertFormula(1589 + i, 42, formulaPrestaHT);
                 formulaPrestaHT = excel.getCellReference(42,1589 + i ) + " +" + pricePrestaHTRef +"+";
 
                 formulaTotalHT = formulaTotalHT.substring(0, formulaTotalHT.length() - 1);
-                excel.insertFormula( 43,1589 + i, formulaTotalHT);
+                excel.insertFormula(1589 + i, 43, formulaTotalHT);
                 formulaTotalHT = excel.getCellReference(43,1589 + i ) + " +" + priceHTCellRef +"+";
 
                 formulaTotalTTC = formulaTotalTTC.substring(0, formulaTotalTTC.length() - 1);
-                excel.insertFormula( 44,1589 + i, formulaTotalTTC);
+                excel.insertFormula(1589 + i, 44, formulaTotalTTC);
                 formulaTotalTTC = excel.getCellReference(44,1589 + i ) + " +" + priceTTCCellRef +"+";
             }
         }
@@ -216,11 +237,11 @@ public class RecapListLycee extends TabHelper {
     }
 
     private void insertPircesAndFormula(int line, String formulaQty, String formulaEquipmentHT, String formulaPrestaHT, String formulaTotalHT, String formulaTotalTTC) {
-        excel.insertFormulaWithStyle(line,5, formulaQty,excel.labelHeadStyle);
-        excel.insertFormula(line,6, formulaEquipmentHT);
-        excel.insertFormula(line,7, formulaPrestaHT);
-        excel.insertFormula(line,8, formulaTotalHT);
-        excel.insertFormula(line,9, formulaTotalTTC);
+        excel.insertFormulaWithStyle(5, line, formulaQty,excel.labelHeadStyle);
+        excel.insertFormula(6, line, formulaEquipmentHT);
+        excel.insertFormula(7, line, formulaPrestaHT);
+        excel.insertFormula(8, line, formulaTotalHT);
+        excel.insertFormula(9, line, formulaTotalTTC);
     }
 
     private int inserTotal(int initx, int currentI) {

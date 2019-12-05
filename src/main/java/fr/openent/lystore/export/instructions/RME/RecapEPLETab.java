@@ -179,14 +179,14 @@ public class RecapEPLETab extends TabHelper {
             totalLabelInt += cellToAdd;
         } else {
             totalLabelInt = totalLabelInt.substring(0, totalLabelInt.length() - 1);
-            excel.insertFormula(yProgramLabel + 3,1589,  totalLabelInt);
+            excel.insertFormula(1589, yProgramLabel + 3, totalLabelInt);
             totalLabelInt = excel.getCellReference(yProgramLabel + 3, 1589) + " +" + cellToAdd;
         }
     }
 
     private void settingSumLabel() {
         totalLabelInt = totalLabelInt.substring(0, totalLabelInt.length() - 1);
-        excel.insertFormula(xlabel, yTotalLabel, totalLabelInt);
+        excel.insertFormula(yTotalLabel, xlabel, totalLabelInt);
         totalLabelInt = "";
     }
 

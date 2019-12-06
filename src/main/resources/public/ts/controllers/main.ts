@@ -214,6 +214,14 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.current.structure
                     ? await $scope.ordersClient.sync(null, [], idCampaign, $scope.current.structure.id)
                     : null;
+                if(!$scope.campaign.id) {
+                    await $scope.campaigns.sync($scope.current.structure.id);
+                    $scope.campaigns.all.forEach(campaign => {
+                        if (campaign.id == idCampaign) {
+                            $scope.campaign = campaign;
+                        }
+                    });
+                }
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/order/manage-order');
                 $scope.initCampaignOrderView();
@@ -225,6 +233,14 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                 $scope.current.structure
                     ? await $scope.baskets.sync(idCampaign, $scope.current.structure.id)
                     : null;
+                if(!$scope.campaign.id) {
+                    await $scope.campaigns.sync($scope.current.structure.id);
+                    $scope.campaigns.all.forEach(campaign => {
+                        if (campaign.id == idCampaign) {
+                            $scope.campaign = campaign;
+                        }
+                    });
+                }
                 template.open('main-profile', 'customer/campaign/campaign-detail');
                 template.open('campaign-main', 'customer/campaign/basket/manage-basket');
                 Utils.safeApply($scope);

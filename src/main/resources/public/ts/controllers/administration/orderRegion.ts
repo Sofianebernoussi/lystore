@@ -193,6 +193,8 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.switchStructure = async (row:any, structure:Structure):Promise<void> => {
             await row.equipments.syncAll($scope.orderToCreate.campaign.id, (structure) ? structure.id : undefined);
             row.equipment = undefined;
+            row.price = undefined;
+            row.amount = undefined;
             Utils.safeApply($scope);
         };
         $scope.initEquipmentData = (row:OrderRegion):void => {

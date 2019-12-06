@@ -36,9 +36,9 @@
   }
 
   &.DONE{
-    background: #000000;
+    background: #ff781f;
     >i:after{
-      content: '\e842';
+      content: '\e871';
     }
   }
 
@@ -60,9 +60,9 @@
 
   &.VALID{
     background: $green;
-    //>i:after{
-    //  content: '\e871';
-    //}
+    >i:after{
+      content: '\e871';
+    }
   }
 }
 

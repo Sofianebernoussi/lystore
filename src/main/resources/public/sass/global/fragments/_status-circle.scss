@@ -1,4 +1,4 @@
-.status-cirle {
+.status-circle {
   width:80px;
   height:80px;
   border-radius:50%;
@@ -19,10 +19,27 @@
 
   &.WAITING{
     background: $grey;
+    //>i:after{
+    //  content: '\e85a';
+    //}
   }
 
   &.PROGRESS{
     background: $yellow;
+  }
+
+  &.SENT{
+    background:#4bafd5;
+    >i:after{
+      content: '\e807';
+    }
+  }
+
+  &.DONE{
+    background: #000000;
+    >i:after{
+      content: '\e842';
+    }
   }
 
   &.REJECTED{
@@ -43,9 +60,9 @@
 
   &.VALID{
     background: $green;
-    >i:after{
-      content: '\e871';
-    }
+    //>i:after{
+    //  content: '\e871';
+    //}
   }
 }
 

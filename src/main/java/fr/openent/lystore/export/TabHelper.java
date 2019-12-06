@@ -120,7 +120,7 @@ public abstract class TabHelper {
     protected void setArray(JsonArray programs) {
     }
 
-    protected JsonArray sortByCity(JsonArray values) {
+    protected JsonArray sortByCity(JsonArray values, boolean byZipCode) {
         JsonArray sortedJsonArray = new JsonArray();
 
         List<JsonObject> jsonValues = new ArrayList<JsonObject>();
@@ -141,10 +141,18 @@ public abstract class TabHelper {
                 String nameB = "";
                 try {
                     if (a.containsKey(KEY_NAME)) {
-                        valA = a.getString(KEY_NAME);
+                        if(byZipCode){
+                            valA = a.getString(KEY_NAME);
+                        }else {
+                            valA = a.getString(KEY_NAME).substring(0, 2);
+                        }
                     }
                     if (b.containsKey(KEY_NAME)) {
-                        valB = b.getString(KEY_NAME);
+                        if(byZipCode){
+                            valB = b.getString(KEY_NAME);
+                        }else {
+                            valB = b.getString(KEY_NAME).substring(0, 2);
+                        }
                     }
                 } catch (NullPointerException e) {
                     log.error("error when sorting structures during export");
@@ -157,11 +165,11 @@ public abstract class TabHelper {
                         cityB = b.getString("city");
                     }
                     if (cityA.compareTo(cityB) == 0) {
-                        if (a.containsKey("nameEtab")) {
-                            nameA = a.getString("nameEtab");
+                        if (a.containsKey("uai")) {
+                            nameA = a.getString("uai");
                         }
-                        if (b.containsKey("nameEtab")) {
-                            nameB = b.getString("nameEtab");
+                        if (b.containsKey("uai")) {
+                            nameB = b.getString("uai");
                         }
                         return nameA.compareTo(nameB);
                     }
@@ -176,6 +184,7 @@ public abstract class TabHelper {
         }
         return sortedJsonArray;
     }
+
 
     protected void sizeMergeRegion(int line, int columnStart, int columnEnd) {
         CellRangeAddress merge = new CellRangeAddress(line, line, columnStart, columnEnd);
@@ -287,6 +296,37 @@ public abstract class TabHelper {
 
     }
 
+    protected JsonArray sortByUai(JsonArray values) {
+        JsonArray sortedJsonArray = new JsonArray();
+
+        List<JsonObject> jsonValues = new ArrayList<JsonObject>();
+        for (int i = 0; i < values.size(); i++) {
+            jsonValues.add(values.getJsonObject(i));
+        }
+        Collections.sort(jsonValues, new Comparator<JsonObject>() {
+            private static final String KEY_NAME = "uai";
+            @Override
+            public int compare(JsonObject a, JsonObject b) {
+                String valA = "";
+                String valB = "";
+                try {
+                    if (a.containsKey(KEY_NAME)) {
+                        valA = a.getString(KEY_NAME);
+                    }
+                    if (b.containsKey(KEY_NAME)) {
+                        valB = b.getString(KEY_NAME);
+                    }
+                } catch (NullPointerException e) {
+                    log.error("error when sorting values by id_campaign during export");
+                }
+                return valA.compareTo(valB);
+            }
+        });
+        for (int i = 0; i < values.size(); i++) {
+            sortedJsonArray.add(jsonValues.get(i));
+        }
+        return sortedJsonArray;
+    }
     protected void setStructuresFromDatas(JsonArray structures) {
         JsonArray actions;
         JsonObject  structure;

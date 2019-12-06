@@ -151,7 +151,7 @@ public class VerifBudgetTab extends TabHelper {
 
     private void insertArrays(JsonObject data) {
         JsonArray values = data.getJsonArray("actionsJO");
-        values = sortByCity(values);
+        values = sortByCity(values, false);
         String previousZip = "", previousCity = "";
         CellRangeAddress merge;
         for (int i = 0; i < values.size(); i++) {

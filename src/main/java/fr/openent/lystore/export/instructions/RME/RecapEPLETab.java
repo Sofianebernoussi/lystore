@@ -13,6 +13,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 
 public class RecapEPLETab extends TabHelper {
@@ -99,6 +102,7 @@ public class RecapEPLETab extends TabHelper {
         JsonObject program;
         String id_structure = "";
 
+        datas = sort(datas);
         for (int i = 0; i <  datas.size(); i++) {
             program =  datas.getJsonObject(i);
 
@@ -119,6 +123,66 @@ public class RecapEPLETab extends TabHelper {
             settingSumLabel();
         }
     }
+
+    private JsonArray sort(JsonArray values) {
+        JsonArray sortedJsonArray = new JsonArray();
+
+        values = sortByCity(values, false);
+
+            List<JsonObject> jsonValues = new ArrayList<JsonObject>();
+            for (int i = 0; i < values.size(); i++) {
+                jsonValues.add(values.getJsonObject(i));
+            }
+
+            Collections.sort(jsonValues, new Comparator<JsonObject>() {
+                private static final String KEY_NAME = "program_name";
+
+                @Override
+                public int compare(JsonObject a, JsonObject b) {
+                    String valA = "";
+                    String valB = "";
+                    String cityA = "";
+                    String cityB = "";
+                    String nameA = "";
+                    String nameB = "";
+                    try {
+                        if (a.containsKey(KEY_NAME)) {
+                            valA = a.getString(KEY_NAME);
+                        }
+                        if (b.containsKey(KEY_NAME)) {
+                            valB = b.getString(KEY_NAME);
+                        }
+                    } catch (NullPointerException e) {
+                        log.error("error when sorting structures during export");
+                    }
+                    if (valA.compareTo(valB) == 0) {
+                        if (a.containsKey("action_code")) {
+                            cityA = a.getString("action_code");
+                        }
+                        if (b.containsKey("action_code")) {
+                            cityB = b.getString("action_code");
+                        }
+                        if (cityA.compareTo(cityB) == 0) {
+                            if (a.containsKey("contract_code")) {
+                                nameA = a.getString("contract_code");
+                            }
+                            if (b.containsKey("contract_code")) {
+                                nameB = b.getString("contract_code");
+                            }
+                            return nameA.compareTo(nameB);
+                        }
+                        return cityA.compareTo(cityB);
+                    }
+                    return valA.compareTo(valB);
+                }
+            });
+
+            for (int i = 0; i < values.size(); i++) {
+                sortedJsonArray.add(jsonValues.get(i));
+            }
+            return sortedJsonArray;
+    }
+
 
     private String newTab(JsonObject program, boolean isLast) {
 

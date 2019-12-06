@@ -105,7 +105,7 @@ public class Market extends TabHelper {
         for (int i = 0; i < datas.size(); i++) {
             JsonObject campaignData = datas.getJsonObject(i);
             JsonArray orders = campaignData.getJsonArray("actionsJO");
-            orders = sortByCity(orders);
+            orders = sortByCity(orders, false);
             String campaign = campaignData.getString("campaign");
             lineNumber++;
             excel.insertUnderscoreHeader(0, lineNumber, campaign);

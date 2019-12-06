@@ -10,6 +10,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 
 public class LinesBudget extends TabHelper {
@@ -82,9 +84,8 @@ public class LinesBudget extends TabHelper {
             int nbTotaux = 0;
             String previousCode = "";
 
-
+            orders = sortByUai(orders);
             for (int j = 0; j < orders.size(); j++) {
-
                 JsonObject order = orders.getJsonObject(j);
                 String currentStructure = order.getString("id_structure");
                 String code = order.getString("code");
@@ -128,6 +129,8 @@ public class LinesBudget extends TabHelper {
         }
         excel.autoSize(arrayLength + 1);
     }
+
+
 
     protected void setLabels() {
         for (int i = 0; i < datas.size(); i++) {

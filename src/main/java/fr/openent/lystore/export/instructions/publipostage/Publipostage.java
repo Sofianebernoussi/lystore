@@ -56,6 +56,7 @@ public class Publipostage extends TabHelper {
         getStructures(structuresId, structuresGet -> {
             if (structuresGet.isRight()) {
                 JsonArray structures = structuresGet.right().getValue();
+                structures = sortByUai(structures);
                 makeBody(structures);
                 handler.handle(new Either.Right<>(true));
             } else {

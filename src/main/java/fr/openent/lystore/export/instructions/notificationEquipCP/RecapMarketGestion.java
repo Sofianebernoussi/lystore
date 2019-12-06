@@ -107,7 +107,7 @@ public class RecapMarketGestion extends TabHelper {
             JsonArray orders = market.getJsonArray("actionsJO");
 
 
-            orders = sortByCity(orders);
+            orders = sortByCity(orders, false);
             String previousCampaign = "";
             String previousZip = orders.getJsonObject(0).getString("zipCode").substring(0, 2);//check if orders > 0
             String previousCode = "";

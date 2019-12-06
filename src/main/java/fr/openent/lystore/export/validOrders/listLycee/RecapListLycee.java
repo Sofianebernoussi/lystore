@@ -46,7 +46,7 @@ public class RecapListLycee extends TabHelper {
                         if (datas.isEmpty()) {
                             handler.handle(new Either.Left<>("No data in database"));
                         } else {
-                            datas = sortByCity(datas);
+                            datas = sortByCity(datas, false);
                             writeArray(handler);
                         }
                     }catch (Exception e){

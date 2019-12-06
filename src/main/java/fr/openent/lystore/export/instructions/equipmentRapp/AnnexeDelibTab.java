@@ -43,7 +43,6 @@ public class AnnexeDelibTab extends TabHelper {
                 structuresId.add(structuresId.size(), data.getString("id_structure"));
 
         }
-        logger.info("structid add");
         getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> repStructures) {
@@ -72,6 +71,7 @@ public class AnnexeDelibTab extends TabHelper {
     @Override
     protected void setArray(JsonArray datas) {
         setLabels();
+        datas = sortByCity(datas, true);
         if (datas.isEmpty()) {
             return;
         }

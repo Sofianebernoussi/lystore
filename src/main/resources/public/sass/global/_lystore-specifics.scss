@@ -982,6 +982,9 @@ i.groups {
 .input-in-row {
   width: 100px;
 }
+.input-in-row-number{
+  width: 35px;
+}
 
 i.downloadButton {
   @include fonticon();

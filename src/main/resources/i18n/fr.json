@@ -481,7 +481,7 @@
   "lystore.structure.label": "Établissement",
   "lystore.project.origin": "Nature du projet",
   "lystore.admin.order.update.err": "Erreur lors de la modification de la commande",
-  "lystore.project.priority.order": "Priorité demande",
+  "lystore.project.priority.order": "Priorité",
   "lystore.order.priority": "N° Prio",
   "lystore.no.comment": "Pas de commentaire",
   "lystore.room": "Salle",
@@ -555,7 +555,8 @@
   "lystore.order.valided.generateBC.struct": "Export BC par établissement",
   "lystore.campaign.check.purses": "Verifier les cagnottes ",
   "difference": "Différence Cagnotte/Commandes",
-  "no.date": "Pas de date"
+  "no.date": "Pas de date",
+  "support.market": "Marché Support"
 
 
 }

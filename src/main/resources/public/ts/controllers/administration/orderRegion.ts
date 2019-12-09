@@ -10,7 +10,7 @@ import {
     Structures,
     Titles,
     Utils,
-    Equipments
+    Equipments, ContractType, ContractTypes
 } from "../../model";
 
 declare let window: any;
@@ -149,6 +149,8 @@ export const orderRegionController = ng.controller('orderRegionController',
             let row = {
                 equipment: undefined,
                 equipments: new Equipments(),
+                allEquipments : [],
+                contract_types : new ContractTypes(),
                 structure: undefined,
                 price: undefined,
                 amount: undefined,
@@ -178,6 +180,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                     row.structure = $scope.structures.all.find(struct => row.structure.id === struct.id);
                 }
             }
+            //duplicate contracttypes
             $scope.orderToCreate.rows[index].equipments.forEach(equipment => {
                 row.equipments.push(equipment);
                 if (row.equipment && row.equipment.id === equipment.id)
@@ -192,6 +195,19 @@ export const orderRegionController = ng.controller('orderRegionController',
 
         $scope.switchStructure = async (row:any, structure:Structure):Promise<void> => {
             await row.equipments.syncAll($scope.orderToCreate.campaign.id, (structure) ? structure.id : undefined);
+            await row.contract_types.sync();
+            let ct = [];
+            row.equipments.all.forEach(e => {
+                row.allEquipments.push(e);
+                row.contract_types.all.map(contract_type =>{
+                    if(contract_type.name === e.contract_type_name && !contract_type.isPresent ){
+                        contract_type.isPresent = true;
+                        ct.push(contract_type);
+                    }
+                })
+            });
+            row.contract_types.all = ct;
+            console.log(row.contract_types);
             row.equipment = undefined;
             row.price = undefined;
             row.amount = undefined;
@@ -201,6 +217,15 @@ export const orderRegionController = ng.controller('orderRegionController',
             row.price = row.equipment.priceTTC;
             row.amount = 1;
         };
+        $scope.initContractType = async (row) =>{
+            row.ct_enabled = true ;
+            console.log(row.contract_type);
+            row.equipment = undefined;
+            row.equipments.all = row.allEquipments.filter(equipment => row.contract_type.name === equipment.contract_type_name);
+            Utils.safeApply($scope);
+            console.log(row.equipments);
+        };
+
         $scope.swapTypeStruct = (row):void => {
             row.display.struct = !row.display.struct;
             row.equipment = undefined;
@@ -210,6 +235,7 @@ export const orderRegionController = ng.controller('orderRegionController',
             row.structure = undefined;
             Utils.safeApply($scope);
         };
+
 
         $scope.createOrder = async ():Promise<void> => {
             let ordersToCreate = new OrdersRegion();

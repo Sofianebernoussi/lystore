@@ -556,7 +556,8 @@
   "lystore.campaign.check.purses": "Verifier les cagnottes ",
   "difference": "Différence Cagnotte/Commandes",
   "no.date": "Pas de date",
-  "support.market": "Marché Support"
+  "support.market": "Marché Support",
+  "lystore.contract.type.placeholder": "Sélectionner le marché support"
 
 
 }

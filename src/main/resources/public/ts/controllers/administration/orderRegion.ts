@@ -173,6 +173,7 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.duplicateRow = (index:number):void => {
             let row = JSON.parse(JSON.stringify($scope.orderToCreate.rows[index]));
             row.equipments = new Equipments();
+            row.contract_types = new ContractTypes();
             if (row.structure){
                 if (row.structure.structures) {
                     row.structure = $scope.structure_groups.all.find(struct => row.structure.id === struct.id);
@@ -181,6 +182,14 @@ export const orderRegionController = ng.controller('orderRegionController',
                 }
             }
             //duplicate contracttypes
+            row.ct_enabled =  $scope.orderToCreate.rows[index].ct_enabled;
+
+            $scope.orderToCreate.rows[index].contract_types.all.forEach(ct=>{
+                row.contract_types.all.push(ct);
+            })
+            if($scope.orderToCreate.rows[index].contract_type)
+                row.contract_type = $scope.orderToCreate.rows[index].contract_type ;
+
             $scope.orderToCreate.rows[index].equipments.forEach(equipment => {
                 row.equipments.push(equipment);
                 if (row.equipment && row.equipment.id === equipment.id)
@@ -196,6 +205,8 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.switchStructure = async (row:any, structure:Structure):Promise<void> => {
             await row.equipments.syncAll($scope.orderToCreate.campaign.id, (structure) ? structure.id : undefined);
             await row.contract_types.sync();
+            row.contract_type = undefined;
+            row.ct_enabled = undefined;
             let ct = [];
             row.equipments.all.forEach(e => {
                 row.allEquipments.push(e);
@@ -217,13 +228,14 @@ export const orderRegionController = ng.controller('orderRegionController',
             row.price = row.equipment.priceTTC;
             row.amount = 1;
         };
-        $scope.initContractType = async (row) =>{
-            row.ct_enabled = true ;
-            console.log(row.contract_type);
-            row.equipment = undefined;
-            row.equipments.all = row.allEquipments.filter(equipment => row.contract_type.name === equipment.contract_type_name);
-            Utils.safeApply($scope);
-            console.log(row.equipments);
+        $scope.initContractType = async (row) => {
+            if (row.contract_type) {
+                row.ct_enabled = true;
+                console.log(row.contract_type);
+                row.equipment = undefined;
+                row.equipments.all = row.allEquipments.filter(equipment => row.contract_type.name === equipment.contract_type_name);
+                Utils.safeApply($scope);
+            }
         };
 
         $scope.swapTypeStruct = (row):void => {

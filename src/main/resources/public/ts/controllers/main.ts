@@ -361,6 +361,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
                     }
                 });
 
+                await $scope.contractTypes.sync();
                 $scope.operations.all = operations;
                 await $scope.structures.sync();
                 template.open('administrator-main', 'administrator/orderRegion/order-region-create-form');

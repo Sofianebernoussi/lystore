@@ -52,15 +52,19 @@
                         [[translate('lystore.structure.label')]] / [[translate('lystore.structureGroup.management')]]
                     </td>
                     <td class="two">
+                        [[translate('support.market')]]
+                    </td>
+                    <td class="four">
                         [[translate('EQUIPMENT')]]
                     </td>
+
                     <td class="one">
                         [[translate('price')]]
                     </td>
                     <td class="one">
                         [[translate('quantity')]]
                     </td>
-                    <td class="two" ng-if="orderToCreate.campaign.orderPriorityEnable()">
+                    <td class="one" ng-if="orderToCreate.campaign.orderPriorityEnable()">
                         [[translate('lystore.project.priority.order')]]
                     </td>
                     <td class="three">
@@ -111,15 +115,33 @@
                             </search-and-select >
                         </div>
                     </td>
-                    <td class="two ">
+                    <td class="four ">
+                        <div  style="min-width: 150px; max-width: 400px;">
+                            <search-and-select
+                                    class="twelve cell"
+                                    disabled="!row.structure || row.structure === undefined"
+                                    options="row.contract_types.all"
+                                    param1="name"
+                                    ng-model="row.contract_type"
+                                    search-on="name"
+                                    order-by="name"
+                                    placeholder="lystore.contract.type.placeholder"
+                                    class="cell horizontal-margin"
+                                    ng-change="initContractType(row)"
+                            >
+                            </search-and-select >
+                        </div>
+
+
+                    </td>
+                    <td class="four ">
                         <div  style="min-width: 150px; max-width: 400px;">
 
                             <search-and-select
                                     class="twelve cell"
-                                    disabled="!row.structure || row.structure === undefined"
+                                    disabled="!row.ct_enabled"
                                     options="row.equipments.all"
-                                    param1="contract_type_name"
-                                    param2="name"
+                                    param1="name"
                                     ng-model="row.equipment"
                                     search-on="name"
                                     order-by="name"
@@ -129,20 +151,22 @@
                             >
                             </search-and-select >
                         </div>
+
+
                     </td>
                     <td class="one ">
-                        <input ng-disabled="!row.equipment" class="input-in-row" ng-model="row.price" type="number"
+                        <input ng-disabled="!row.equipment" class="input-in-row-number" ng-model="row.price" type="number"
                                min="0" step="any"/>
                     </td>
-                    <td class="two ">
-                        <input ng-disabled="!row.equipment" class="input-in-row" ng-model="row.amount" type="number"
+                    <td class="one ">
+                        <input ng-disabled="!row.equipment" class="input-in-row-number" ng-model="row.amount" type="number"
                                min="1" step="1"/>
                     </td>
                     <td class="one " ng-if="orderToCreate.project.preference">
                         <input ng-model="row.priority" type="number" min="0" step="1"/>
                     </td>
-                    <td class="two" ng-if="orderToCreate.campaign.orderPriorityEnable()">
-                        <input class="input-in-row" ng-init="row.rank = 1" ng-model="row.rank" type="number"
+                    <td class="one" ng-if="orderToCreate.campaign.orderPriorityEnable()">
+                        <input class="input-in-row-number" ng-init="row.rank = 1" ng-model="row.rank" type="number"
                                min="1" step="1" max="10"/>
                     </td>
                     <td class="two">

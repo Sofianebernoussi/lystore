@@ -1,6 +1,7 @@
 <button class="search-and-select-button" ng-click="toggleVisibility()" ng-class="{'opened': show,'disabled':disabled}">
     <span ng-show="ngModel">
-        [[ ngModel[param1] + " - " + ngModel[param2] ]]
+
+        [[ (ngModel[param2]) ? ngModel[param1] + " - " + ngModel[param2] :  ngModel[param1]  ]]
     </span>
     <span ng-show="!ngModel">
           [[ i18nplaceholder ]]

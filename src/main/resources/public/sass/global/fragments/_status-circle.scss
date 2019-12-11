@@ -1,47 +1,59 @@
 .status-circle {
-  width:80px;
-  height:80px;
+  width:30px;
+  height:30px;
   border-radius:50%;
-
+  margin-right: 10px;
   > i {
-    margin-top: 30px;
-    margin-bottom: 20px;
+    margin-bottom: 3px;
     color: $white;
-    font-size:30px;
+    font-size:10px;
     display: block;
     font-weight:bold;
     text-align: center;
+    margin-top: 3px;
+    margin-left: 3px;
+    text-align: center;
+    background-repeat: no-repeat;
 
+    height: 90%;
+    width: 80%;
     &:after {
       color: $white;
     }
   }
 
-  &.WAITING{
+  &.WAITING {
     background: $grey;
-    //>i:after{
-    //  content: '\e85a';
-    //}
+
+    > i {
+
+      background-image: url(/lystore/public/img/scss/send.svg);
+    }
   }
 
   &.PROGRESS{
     background: $yellow;
-  }
 
-  &.SENT{
-    background:#4bafd5;
-    >i:after{
-      content: '\e807';
+    > i {
+      background-image: url(/lystore/public/img/scss/sync.svg);
     }
   }
 
-  &.DONE{
-    background: #ff781f;
-    >i:after{
-      content: '\e871';
+  &.SENT {
+    background: $yellow;
+
+    > i {
+      background-image: url(/lystore/public/img/scss/truck.svg);
     }
   }
 
+  &.DONE {
+    background: $green;
+    > i {
+      background-image: url(/lystore/public/img/scss/check-all.svg);
+      fill: white;
+    }
+  }
   &.REJECTED{
     background: $red;
     >i:after{
@@ -59,9 +71,9 @@
   }
 
   &.VALID{
-    background: $green;
-    >i:after{
-      content: '\e871';
+    background: $yellow;
+    >i{
+      background-image: url(/lystore/public/img/scss/check.svg);
     }
   }
 }

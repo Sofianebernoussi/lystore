@@ -1058,3 +1058,8 @@ tfoot .tabElem{
 thead > tr > td > label input[type=checkbox]:checked+span::before, thead > tr > td > label input[type=checkbox]:checked+i18n::before {
   border-color: #fff;
 }
+
+.flexbox {
+  display: flex;
+  align-items: center;
+}

@@ -128,7 +128,7 @@ public class Market extends TabHelper {
                         initLine = lineNumber + 1;
                         previousMarketId = marketId;
                         previousMarket = market;
-                        lineNumber++;
+                        lineNumber+=2;
                     }
                     String zip = order.getString("zipCode").substring(0, 2);
                     String structString = zip + " - " +

@@ -16,6 +16,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
 import java.text.DateFormat;
@@ -66,34 +67,16 @@ public class ExportHelper {
             action, String name) {
         String id="-1";
         JsonObject params = new JsonObject();
-        boolean multipleExport = false;
+        Boolean multipleExport = false;
         boolean withType = request.getParam("type") != null;
-        if(request.getParam("id")!=null && typeObject.equals(Lystore.INSTRUCTIONS))
-            id = request.getParam("id");
 
-        if(request.params().getAll("number_validation") != null && !request.params().getAll("number_validation").isEmpty() ){
-            if( request.params().getAll("number_validation").size() == 1)
-                id = request.params().getAll("number_validation").get(0);
-            if(request.params().getAll("number_validation").size()> 1){
-                multipleExport = true;
-                id = "";
-                for (String  number : request.params().getAll("number_validation")){
-                    id += number +",";
-                }
-                id =  id.substring(0,id.length()-1);
-            }
-            params.put("numberValidations",new JsonArray(request.params().getAll("number_validation")));
-        }
-
-        if(request.params().getAll("bc_number") != null && !request.params().getAll("bc_number").isEmpty() ){
-            id = request.params().getAll("bc_number").get(0);
-            if(id.contains(","))
-                multipleExport = true;
-            params.put("bc_number",new JsonArray(request.params().getAll("bc_number")));
-        }
+        GetIdAndMutliExport getIdAndMutliExport = new GetIdAndMutliExport(request, typeObject, id, params, multipleExport).invoke();
+        id = getIdAndMutliExport.getId();
+        multipleExport = getIdAndMutliExport.getMultipleExport();
 
         String type = "";
         JsonObject infoFile = new JsonObject();
+
         if (withType) {
             type = request.getParam("type");
             infoFile.put("type", type);
@@ -119,59 +102,66 @@ public class ExportHelper {
     }
 
 
-
     private static void sendExportRequest(EventBus eb, HttpServerRequest request, ExportService exportService, String typeObject, String extension, String
-            action, JsonObject infoFile, String finalId, String titleFile, JsonObject finalParams, boolean multipleExport){
+            action, JsonObject infoFile, String finalId, String titleFile, JsonObject finalParams, boolean isMultipleExport){
         UserUtils.getUserInfos(eb, request, user -> {
-            if (!multipleExport){
-                exportService.createWhenStart(typeObject, extension, infoFile, finalId, titleFile, user.getUserId(), action, finalParams, newExport -> {
-                    if (newExport.isRight()) {
-                        String idExport = newExport.right().getValue().getString("id");
-                        try {
-                            Logging.insert(eb,
-                                    request,
-                                    Contexts.EXPORT.toString(),
-                                    Actions.CREATE.toString(),
-                                    idExport.toString(),
-                                    new JsonObject().put("ids", idExport).put("fileName", titleFile));
-                            log.info("J'envoie la demande d export");
-                            Lystore.launchWorker(eb);
-                            request.response().setStatusCode(201).end("Import started " + idExport);
-                        } catch (Exception error) {
-                            catchError(exportService, idExport, error);
-                        }
-                    } else {
-                        log.error("Fail to insert file in SQL " + newExport.left());
-                    }
-                });
+            if (!isMultipleExport){
+                soloExport(eb, request, exportService, typeObject, extension, action, infoFile, finalId, titleFile, finalParams, user);
             }else{
-                String [] objectsId = finalId.split(",");
-                for (String currentId : objectsId) {
-                    String nameFile = getFileNameMultiExport(extension, action, currentId);
-
-                    exportService.createWhenStart(typeObject, extension, infoFile, currentId, nameFile, user.getUserId(), action, finalParams, newExport -> {
-                        if (newExport.isRight()) {
-                            String idExport = newExport.right().getValue().getString("id");
-                            try {
-                                Logging.insert(eb,
-                                        request,
-                                        Contexts.EXPORT.toString(),
-                                        Actions.CREATE.toString(),
-                                        idExport.toString(),
-                                        new JsonObject().put("ids", idExport).put("fileName", titleFile));
-                                log.info("J'envoie la demande d export");
-                                Lystore.launchWorker(eb);
-                            } catch (Exception error) {
-                                catchError(exportService, idExport, error);
-                            }
-                        } else {
-                            log.error("Fail to insert file in SQL " + newExport.left());
-                        }
-                    });
-                }
-                request.response().setStatusCode(201).end("Multi Import started ");
+                mutliExport(eb, request, exportService, typeObject, extension, action, infoFile, finalId, titleFile, finalParams, user);
             }
         });
+    }
+
+    private static void soloExport(EventBus eb, HttpServerRequest request, ExportService exportService, String typeObject, String extension, String action, JsonObject infoFile, String finalId, String titleFile, JsonObject finalParams, UserInfos user) {
+        exportService.createWhenStart(typeObject, extension, infoFile, finalId, titleFile, user.getUserId(), action, finalParams, newExport -> {
+            if (newExport.isRight()) {
+                String idExport = newExport.right().getValue().getString("id");
+                try {
+                    Logging.insert(eb,
+                            request,
+                            Contexts.EXPORT.toString(),
+                            Actions.CREATE.toString(),
+                            idExport.toString(),
+                            new JsonObject().put("ids", idExport).put("fileName", titleFile));
+                    log.info("J'envoie la demande d export");
+                    Lystore.launchWorker(eb);
+                    request.response().setStatusCode(201).end("Import started " + idExport);
+                } catch (Exception error) {
+                    catchError(exportService, idExport, error);
+                }
+            } else {
+                log.error("Fail to insert file in SQL " + newExport.left());
+            }
+        });
+    }
+
+    private static void mutliExport(EventBus eb, HttpServerRequest request, ExportService exportService, String typeObject, String extension, String action, JsonObject infoFile, String finalId, String titleFile, JsonObject finalParams, UserInfos user) {
+        String [] objectsId = finalId.split(",");
+        for (String currentId : objectsId) {
+            String nameFile = getFileNameMultiExport(extension, action, currentId);
+
+            exportService.createWhenStart(typeObject, extension, infoFile, currentId, nameFile, user.getUserId(), action, finalParams, newExport -> {
+                if (newExport.isRight()) {
+                    String idExport = newExport.right().getValue().getString("id");
+                    try {
+                        Logging.insert(eb,
+                                request,
+                                Contexts.EXPORT.toString(),
+                                Actions.CREATE.toString(),
+                                idExport.toString(),
+                                new JsonObject().put("ids", idExport).put("fileName", titleFile));
+                        log.info("J'envoie la demande d export");
+                        Lystore.launchWorker(eb);
+                    } catch (Exception error) {
+                        catchError(exportService, idExport, error);
+                    }
+                } else {
+                    log.error("Fail to insert file in SQL " + newExport.left());
+                }
+            });
+        }
+        request.response().setStatusCode(201).end("Multi Import started ");
     }
 
     private static String getFileNameMultiExport(String extension, String action, String currentId) {
@@ -224,5 +214,56 @@ public class ExportHelper {
 
             }
         });
+    }
+
+    private static class GetIdAndMutliExport {
+        private HttpServerRequest request;
+        private String typeObject;
+        private String id;
+        private JsonObject params;
+        private Boolean multipleExport;
+
+        public GetIdAndMutliExport(HttpServerRequest request, String typeObject, String id, JsonObject params, Boolean multipleExport) {
+            this.request = request;
+            this.typeObject = typeObject;
+            this.id = id;
+            this.params = params;
+            this.multipleExport = multipleExport;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public Boolean getMultipleExport() {
+            return multipleExport;
+        }
+
+        public GetIdAndMutliExport invoke() {
+            if(request.getParam("id")!=null && typeObject.equals(Lystore.INSTRUCTIONS))
+                id = request.getParam("id");
+
+            if(request.params().getAll("number_validation") != null && !request.params().getAll("number_validation").isEmpty() ){
+                if( request.params().getAll("number_validation").size() == 1)
+                    id = request.params().getAll("number_validation").get(0);
+                if(request.params().getAll("number_validation").size()> 1){
+                    multipleExport = true;
+                    id = "";
+                    for (String  number : request.params().getAll("number_validation")){
+                        id += number +",";
+                    }
+                    id =  id.substring(0,id.length()-1);
+                }
+                params.put("numberValidations",new JsonArray(request.params().getAll("number_validation")));
+            }
+
+            if(request.params().getAll("bc_number") != null && !request.params().getAll("bc_number").isEmpty() ){
+                id = request.params().getAll("bc_number").get(0);
+                if(id.contains(","))
+                    multipleExport = true;
+                params.put("bc_number",new JsonArray(request.params().getAll("bc_number")));
+            }
+            return this;
+        }
     }
 }

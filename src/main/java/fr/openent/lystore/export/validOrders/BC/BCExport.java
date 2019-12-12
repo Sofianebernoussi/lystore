@@ -45,13 +45,13 @@ public class BCExport extends PDF_OrderHElper {
     public BCExport(EventBus eb, Vertx vertx, JsonObject config)
 
     {
-      super(eb,vertx,config);
+        super(eb,vertx,config);
 
     }
 
 
     public void create(JsonArray validationNumbersArray, Handler<Either<String, Buffer>> exportHandler){
-       List<String> validationNumbers = validationNumbersArray.getList();
+        List<String> validationNumbers = validationNumbersArray.getList();
         supplierService.getSupplierByValidationNumbers(new fr.wseduc.webutils.collections.JsonArray(validationNumbers), new Handler<Either<String, JsonObject>>() {
             @Override
             public void handle(Either<String, JsonObject> event) {

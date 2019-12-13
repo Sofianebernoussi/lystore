@@ -6,12 +6,11 @@
   > i {
     margin-bottom: 3px;
     color: $white;
-    font-size:10px;
     display: block;
-    font-weight:bold;
     text-align: center;
     margin-top: 3px;
     margin-left: 3px;
+    font-size: 25px;
     text-align: center;
     background-repeat: no-repeat;
 
@@ -25,33 +24,35 @@
   &.WAITING {
     background: $grey;
 
-    > i {
-
-      background-image: url(/lystore/public/img/scss/send.svg);
+    > i::before {
+      font-family: 'material-icons';
+      content: "\F48A";
     }
   }
 
   &.PROGRESS{
     background: $yellow;
 
-    > i {
-      background-image: url(/lystore/public/img/scss/sync.svg);
+    > i::before {
+      font-family: 'material-icons';
+      content: "\F4E6";
     }
   }
 
   &.SENT {
     background: $yellow;
 
-    > i {
-      background-image: url(/lystore/public/img/scss/truck.svg);
+    > i::before {
+      font-family: 'material-icons';
+      content: "\F53D";
     }
   }
 
   &.DONE {
     background: $green;
-    > i {
-      background-image: url(/lystore/public/img/scss/check-all.svg);
-      fill: white;
+    > i::before {
+      font-family: 'material-icons';
+      content: "\F12D";
     }
   }
   &.REJECTED{
@@ -72,8 +73,9 @@
 
   &.VALID{
     background: $yellow;
-    >i{
-      background-image: url(/lystore/public/img/scss/check.svg);
+    > i::before {
+      font-family: 'material-icons';
+      content: "\F12C";
     }
   }
 }

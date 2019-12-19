@@ -997,6 +997,10 @@ i.groups {
 .input-in-row-number{
   width: 35px;
 }
+.input-in-row-number-price{
+  width: 76px;
+
+}
 
 i.downloadButton {
   @include fonticon();

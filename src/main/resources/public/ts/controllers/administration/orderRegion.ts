@@ -29,6 +29,7 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.translate = (key: string):string => lang.translate(key);
 
         $scope.updateCampaign = async ():Promise<void> => {
+            $scope.orderToCreate.rows = undefined;
             $scope.orderToCreate.project = undefined;
             await $scope.titles.syncAdmin($scope.orderToCreate.campaign.id);
             await $scope.structure_groups.syncByCampaign($scope.orderToCreate.campaign.id);
@@ -218,20 +219,20 @@ export const orderRegionController = ng.controller('orderRegionController',
                 })
             });
             row.contract_types.all = ct;
-            console.log(row.contract_types);
             row.equipment = undefined;
             row.price = undefined;
             row.amount = undefined;
             Utils.safeApply($scope);
         };
         $scope.initEquipmentData = (row:OrderRegion):void => {
-            row.price = row.equipment.priceTTC;
+            let roundedString = row.equipment.priceTTC.toFixed(2);
+            let rounded = Number(roundedString);
+            row.price = Number(rounded);
             row.amount = 1;
         };
         $scope.initContractType = async (row) => {
             if (row.contract_type) {
                 row.ct_enabled = true;
-                console.log(row.contract_type);
                 row.equipment = undefined;
                 row.equipments.all = row.allEquipments.filter(equipment => row.contract_type.name === equipment.contract_type_name);
                 Utils.safeApply($scope);

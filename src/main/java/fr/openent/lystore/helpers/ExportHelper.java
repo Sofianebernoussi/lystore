@@ -39,15 +39,15 @@ public class ExportHelper {
     public static void catchError(ExportService exportService, String idFile, Exception errorCatch) {
         exportService.updateWhenError(idFile, makeError -> {
             if (makeError.isLeft()) {
-                log.error("Error for create file export excel " + makeError.left() + errorCatch);
+                log.error("Error for create file export excel " + makeError.left()+ " " + errorCatch.getMessage());
             }
         });
-        log.error("Error for create file export excel " + errorCatch);
+        log.error("Error for create file export excel " + errorCatch.getMessage());
     }
     public static void catchError(ExportService exportService, String idFile, String errorCatchTextOutput) {
         exportService.updateWhenError(idFile, makeError -> {
             if (makeError.isLeft()) {
-                log.error("Error for create file export excel " + makeError.left() + errorCatchTextOutput);
+                log.error("Error for create file export excel " + makeError.left().getValue() + errorCatchTextOutput);
             }
         });
         log.error("Error for create file export excel " + errorCatchTextOutput);

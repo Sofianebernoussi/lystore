@@ -24,35 +24,33 @@
   &.WAITING {
     background: $grey;
 
-    > i::before {
-      font-family: 'material-icons';
-      content: "\F48A";
+    > i {
+
+      background-image: url(/lystore/public/img/scss/send.svg);
     }
   }
 
   &.PROGRESS{
     background: $yellow;
 
-    > i::before {
-      font-family: 'material-icons';
-      content: "\F4E6";
+    > i {
+      background-image: url(/lystore/public/img/scss/sync.svg);
     }
   }
 
   &.SENT {
     background: $yellow;
 
-    > i::before {
-      font-family: 'material-icons';
-      content: "\F53D";
+    > i {
+      background-image: url(/lystore/public/img/scss/truck.svg);
     }
   }
 
   &.DONE {
     background: $green;
-    > i::before {
-      font-family: 'material-icons';
-      content: "\F12D";
+    > i {
+      background-image: url(/lystore/public/img/scss/check-all.svg);
+      fill: white;
     }
   }
   &.REJECTED{
@@ -73,9 +71,8 @@
 
   &.VALID{
     background: $yellow;
-    > i::before {
-      font-family: 'material-icons';
-      content: "\F12C";
+    >i{
+      background-image: url(/lystore/public/img/scss/check.svg);
     }
   }
 }

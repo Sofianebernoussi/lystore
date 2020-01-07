@@ -31,6 +31,7 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.updateCampaign = async ():Promise<void> => {
             $scope.orderToCreate.rows = undefined;
             $scope.orderToCreate.project = undefined;
+            $scope.orderToCreate.operation = undefined;
             await $scope.titles.syncAdmin($scope.orderToCreate.campaign.id);
             await $scope.structure_groups.syncByCampaign($scope.orderToCreate.campaign.id);
             let structures = new Structures();

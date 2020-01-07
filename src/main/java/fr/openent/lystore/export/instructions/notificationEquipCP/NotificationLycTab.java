@@ -86,7 +86,7 @@ public class NotificationLycTab extends TabHelper {
             }
         });
 
-        datas = sortByCity(datas);
+        datas = sortByCity(datas, false);
     }
 
     private void writeArray(Handler<Either<String, Boolean>> handler) {

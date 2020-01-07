@@ -1,3 +1,15 @@
+
+@font-face {
+  font-family: 'material-icons';
+  src: url('/lystore/public/fonts/materialdesignicons-webfont.eot');
+  src: url('/lystore/public/fonts/materialdesignicons-webfont.eot') format('embedded-opentype'),
+  url('/lystore/public/fonts/materialdesignicons-webfont.woff2') format('woff2'),
+  url('/lystore/public/fonts/materialdesignicons-webfont.woff2') format('woff'),
+  url('/lystore/public/fonts/materialdesignicons-webfont.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 body.lystore {
   @import 'components/index';
   @import 'fragments/index';
@@ -982,6 +994,13 @@ i.groups {
 .input-in-row {
   width: 100px;
 }
+.input-in-row-number{
+  width: 35px;
+}
+.input-in-row-number-price{
+  width: 76px;
+
+}
 
 i.downloadButton {
   @include fonticon();
@@ -1054,4 +1073,9 @@ tfoot .tabElem{
 
 thead > tr > td > label input[type=checkbox]:checked+span::before, thead > tr > td > label input[type=checkbox]:checked+i18n::before {
   border-color: #fff;
+}
+
+.flexbox {
+  display: flex;
+  align-items: center;
 }

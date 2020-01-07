@@ -73,7 +73,7 @@ public class BCExportAfterValidationStructure extends PDF_OrderHElper {
     }
     @Override
     protected void retrieveOrderData(final Handler<Either<String, Buffer>> exportHandler, JsonArray ids,boolean groupByStructure,
-                                       final Handler<JsonObject> handler) {
+                                     final Handler<JsonObject> handler) {
         orderService.getOrders(ids, null, true, groupByStructure, new Handler<Either<String, JsonArray>>() {
             @Override
             public void handle(Either<String, JsonArray> event) {
@@ -124,8 +124,8 @@ public class BCExportAfterValidationStructure extends PDF_OrderHElper {
 
     private void sortOrdersBySturcuture(JsonObject order, ArrayList<String> listStruct, JsonArray orders) {
         for(int i=0;i<orders.size();i++){
-        JsonObject orderSorted = orders.getJsonObject(i);
-        String idStruct = orderSorted.getString("id_structure");
+            JsonObject orderSorted = orders.getJsonObject(i);
+            String idStruct = orderSorted.getString("id_structure");
             if(order.containsKey(idStruct)){
                 JsonArray tempOrders = order.getJsonObject(idStruct).getJsonArray("orders").add(orderSorted);
                 order.put(orderSorted.getString("id_structure"),new JsonObject().put("orders",tempOrders));

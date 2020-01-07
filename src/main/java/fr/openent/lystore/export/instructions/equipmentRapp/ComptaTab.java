@@ -11,6 +11,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class ComptaTab extends TabHelper {
     private String type;
@@ -89,6 +92,7 @@ public class ComptaTab extends TabHelper {
 
 //            //Insert datas
 //
+           actions =  sort(actions);
             for (int j = 0; j < actions.size(); j++) {
                 JsonObject action = actions.getJsonObject(j);
                 if (!action.getString("campaign").equals(campaign)) {
@@ -160,6 +164,41 @@ public class ComptaTab extends TabHelper {
             yProgramLabel += 2;
         }
         excel.autoSize(arrayLength);
+    }
+
+    private JsonArray sort(JsonArray values) {
+        JsonArray sortedJsonArray = new JsonArray();
+
+        values = sortByCity(values, false);
+        List<JsonObject> jsonValues = new ArrayList<JsonObject>();
+        for (int i = 0; i < values.size(); i++) {
+            jsonValues.add(values.getJsonObject(i));
+        }
+
+        Collections.sort(jsonValues, new Comparator<JsonObject>() {
+            private static final String KEY_NAME = "campaign";
+            @Override
+            public int compare(JsonObject a, JsonObject b) {
+                String valA = "";
+                String valB = "";
+                try {
+                    if (a.containsKey(KEY_NAME)) {
+                        valA = a.getString(KEY_NAME);
+                    }
+                    if (b.containsKey(KEY_NAME)) {
+                        valB = b.getString(KEY_NAME);
+                    }
+                } catch (NullPointerException e) {
+                    log.error("error when sorting values by id_campaign during export");
+                }
+                return valA.compareTo(valB);
+            }
+        });
+
+        for (int i = 0; i < values.size(); i++) {
+            sortedJsonArray.add(jsonValues.get(i));
+        }
+        return sortedJsonArray;
     }
 
     private void setCampaign(String campaign, int y) {

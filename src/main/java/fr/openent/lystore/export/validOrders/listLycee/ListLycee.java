@@ -59,6 +59,7 @@ public class ListLycee extends TabHelper {
                 } else {
                     handler.handle(new Either.Left<>("Error when casting neo"));
 //
+
                 }
             }
 //

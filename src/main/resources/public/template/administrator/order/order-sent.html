@@ -86,7 +86,7 @@
                 <td >[[order.contract.name]]</td>
                 <td> [[order.supplier.name]]</td>
                 <td>[[order.amount ]]</td>
-                <td><span ng-bind="order.price | currency"></span></td>
+                <td><span ng-bind="order.price + (order.price * order.tax_amount)/100 | currency"></span></td>
             </tr>
             </tbody>
         </table>

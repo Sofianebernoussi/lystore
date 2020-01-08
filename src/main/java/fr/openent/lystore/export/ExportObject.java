@@ -37,12 +37,10 @@ public class ExportObject {
                     buff.appendBytes(fileOut.toByteArray());
                     handler.handle(new Either.Right<>(buff));
                 } catch (IOException e) {
-                    ExportHelper.catchError(exportService, idFile, e.getMessage());
                     handler.handle(new Either.Left<>(e.getMessage()));
                 }
             } else {
-                ExportHelper.catchError(exportService, idFile, "Error when resolving futures");
-                handler.handle(new Either.Left<>("Error when resolving futures"));
+                handler.handle(new Either.Left<>("Error when resolving futures : " + event.cause().getMessage()));
             }
         });
     }

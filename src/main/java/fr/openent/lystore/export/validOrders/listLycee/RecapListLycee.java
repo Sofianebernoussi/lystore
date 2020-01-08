@@ -40,6 +40,7 @@ public class RecapListLycee extends TabHelper {
             public void handle(Either<String, JsonArray> repStructures) {
                 boolean errorCatch= false;
                 if (repStructures.isRight()) {
+                    String errorMessage = "";
                     try {
                         JsonArray structures = repStructures.right().getValue();
                         setStructuresFromDatas(structures);
@@ -51,9 +52,10 @@ public class RecapListLycee extends TabHelper {
                         }
                     }catch (Exception e){
                         errorCatch = true;
+                        errorMessage = e.getMessage();
                     }
                     if(errorCatch)
-                        handler.handle(new Either.Left<>("Error when writting files"));
+                        handler.handle(new Either.Left<>("\n Error Exception in RecapListLycee : "+ errorMessage));
                     else
                         handler.handle(new Either.Right<>(true));
                 } else {

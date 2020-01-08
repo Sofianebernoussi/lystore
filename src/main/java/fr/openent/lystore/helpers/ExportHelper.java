@@ -39,6 +39,8 @@ public class ExportHelper {
     public static void catchError(ExportService exportService, String idFile, Exception errorCatch) {
         exportService.updateWhenError(idFile, makeError -> {
             if (makeError.isLeft()) {
+                log.info("1");
+
                 log.error("Error for create file export excel " + makeError.left()+ " " + errorCatch.getMessage());
             }
         });
@@ -47,6 +49,7 @@ public class ExportHelper {
     public static void catchError(ExportService exportService, String idFile, String errorCatchTextOutput) {
         exportService.updateWhenError(idFile, makeError -> {
             if (makeError.isLeft()) {
+                log.info("2");
                 log.error("Error for create file export excel " + makeError.left().getValue() + errorCatchTextOutput);
             }
         });
@@ -54,7 +57,8 @@ public class ExportHelper {
     }
     public static void catchError(ExportService exportService, String idFile, String errorCatchTextOutput, Handler<Either<String,Boolean>> handler) {
         exportService.updateWhenError(idFile,handler);
-        log.error("Error for create file export excel " + errorCatchTextOutput);
+
+        log.error("Error for create file export excel :\n" + errorCatchTextOutput);
     }
 
     private static String getDate() {
@@ -124,7 +128,7 @@ public class ExportHelper {
                             Actions.CREATE.toString(),
                             idExport.toString(),
                             new JsonObject().put("ids", idExport).put("fileName", titleFile));
-                    log.info("J'envoie la demande d export");
+                    log.info("Send export request");
                     Lystore.launchWorker(eb);
                     request.response().setStatusCode(201).end("Import started " + idExport);
                 } catch (Exception error) {
@@ -151,7 +155,7 @@ public class ExportHelper {
                                 Actions.CREATE.toString(),
                                 idExport.toString(),
                                 new JsonObject().put("ids", idExport).put("fileName", titleFile));
-                        log.info("J'envoie la demande d export");
+                        log.info("Send export request");
                         Lystore.launchWorker(eb);
                     } catch (Exception error) {
                         catchError(exportService, idExport, error);

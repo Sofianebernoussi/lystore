@@ -174,12 +174,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
 
         this.validOrders = new ValidOrders(exportService,params,idNewFile,this.eb,this.vertx,this.config);
         this.validOrders.exportBCBeforeValidationByStructures(event1 -> {
-            if (event1.isLeft()) {
-                ExportHelper.catchError(exportService, idNewFile, "error when creating PDF " + event1.left().getValue(),exportHandler);
-            } else {
-                Buffer xlsx = event1.right().getValue();
-                saveBuffer(xlsx,  titleFile ,exportHandler,PDFHEADER);
-            }
+            saveExportHandler(titleFile, exportHandler, event1, "error when creating BCOrdersBeforeValidationStruct PDF ", PDFHEADER);
         });
     }
     private void exportBCOrdersAfterValidationStruct(String object_id, String titleFile, Handler<Either<String, Boolean>> exportHandler) {
@@ -188,12 +183,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
 
         this.validOrders = new ValidOrders(exportService,object_id,idNewFile,this.eb,this.vertx,this.config,false);
         this.validOrders.exportBCAfterValidationByStructures(event1 -> {
-            if (event1.isLeft()) {
-                ExportHelper.catchError(exportService, idNewFile, "error when creating PDF " + event1.left().getValue(),exportHandler);
-            } else {
-                Buffer xlsx = event1.right().getValue();
-                saveBuffer(xlsx,  titleFile ,exportHandler,PDFHEADER);
-            }
+            saveExportHandler(titleFile, exportHandler, event1, "error when creating BCOrdersAfterValidationStruct PDF ", PDFHEADER);
         });
     }
 
@@ -202,12 +192,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
 
         this.validOrders = new ValidOrders(exportService,object_id,idNewFile,this.eb,this.vertx,this.config,false);
         this.validOrders.exportBCAfterValidation(event1 -> {
-            if (event1.isLeft()) {
-                ExportHelper.catchError(exportService, idNewFile, "error when creating PDF " + event1.left().getValue(),handler);
-            } else {
-                Buffer xlsx = event1.right().getValue();
-                saveBuffer(xlsx,  titleFile ,handler,PDFHEADER);
-            }
+            saveExportHandler(titleFile, handler, event1, "error when creating BCOrdersAfterValidation PDF ", PDFHEADER);
         });
     }
 
@@ -215,12 +200,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         logger.info("Export BC from Orders during validation started");
         this.validOrders = new ValidOrders(exportService,params,idNewFile,this.eb,this.vertx,this.config);
         this.validOrders.exportBCDuringValidation(event1 -> {
-            if (event1.isLeft()) {
-                ExportHelper.catchError(exportService, idNewFile, "error when creating PDF " + event1.left().getValue(),handler);
-            } else {
-                Buffer xlsx = event1.right().getValue();
-                saveBuffer(xlsx,  titleFile ,handler,PDFHEADER);
-            }
+            saveExportHandler(titleFile, handler, event1, "error when creating BCOrdersDuringValidation PDF ", PDFHEADER);
         });
     }
 
@@ -228,12 +208,7 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         logger.info("Export BC from Orders started");
         this.validOrders = new ValidOrders(exportService,params,idNewFile,this.eb,this.vertx,this.config);
         this.validOrders.exportBC(event1 -> {
-            if (event1.isLeft()) {
-                ExportHelper.catchError(exportService, idNewFile, "error when creating PDF " + event1.left().getValue(),handler);
-            } else {
-                Buffer xlsx = event1.right().getValue();
-                saveBuffer(xlsx,  titleFile ,handler,PDFHEADER);
-            }
+            saveExportHandler(titleFile, handler, event1, "error when creating BCorders PDF ", PDFHEADER);
         });
     }
 
@@ -241,26 +216,18 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         logger.info("Export list lycee from Orders started");
         this.validOrders = new ValidOrders(exportService,object_id,idNewFile,this.eb,this.vertx,this.config,true);
         this.validOrders.exportListLycee(event1 -> {
-            if (event1.isLeft()) {
-                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
-            } else {
-                Buffer xlsx = event1.right().getValue();
-                saveBuffer(xlsx, titleFile,handler,XLSXHEADER);
-            }
+            saveExportHandler(titleFile, handler, event1, "error when creating ListLycOrder xlsx :", XLSXHEADER);
         });
 
     }
+
+
 
     private void exportIris(Integer instructionId, String titleFile, Handler<Either<String, Boolean>> handler) {
         logger.info("Export Iris started");
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportIris(event1 -> {
-            if (event1.isLeft()) {
-                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
-            } else {
-                Buffer xlsx = event1.right().getValue();
-                saveBuffer(xlsx, titleFile,handler,XLSXHEADER);
-            }
+            saveExportHandler(titleFile, handler, event1, "error when creating IRIS xlsx :", XLSXHEADER);
         });
     }
 
@@ -269,32 +236,15 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
 
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportNotficationCp(event1 -> {
-            if (event1.isLeft()) {
-                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
-            } else {
-                logger.info("Export NotificationCP ended");
-
-                Buffer xlsx = event1.right().getValue();
-                saveBuffer(xlsx, titleFile,handler,XLSXHEADER);
-
-            }
+            saveExportHandler(titleFile, handler, event1, "error when creating NotificationCP xlsx :", XLSXHEADER);
         });
     }
 
     private void exportSubvention(Integer instructionId, String titleFile, Handler<Either<String, Boolean>> handler) {
         logger.info("Export Subvention started");
-
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportSubvention(event1 -> {
-            if (event1.isLeft()) {
-                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event1.left(),handler);
-            } else {
-                logger.info("Export Subvention ended");
-
-                Buffer xlsx = event1.right().getValue();
-                saveBuffer(xlsx, titleFile,handler,XLSXHEADER);
-
-            }
+            saveExportHandler(titleFile, handler, event1, "error when creating Subvention xlsx :", XLSXHEADER);
         });
     }
 
@@ -302,16 +252,8 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         logger.info("Export Publipostage started");
 
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
-        this.instruction.exportPublipostage(file -> {
-            if (file.isLeft()) {
-                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + file.left(),handler);
-            } else {
-                logger.info("Export Publipostage ended");
-
-                Buffer xlsx = file.right().getValue();
-                saveBuffer(xlsx, titleFile,handler,XLSXHEADER);
-
-            }
+        this.instruction.exportPublipostage(event1 -> {
+            saveExportHandler(titleFile, handler, event1, "error when creating Publipostage xlsx :", XLSXHEADER);
         });
     }
 
@@ -320,16 +262,18 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
 
         this.instruction = new Instruction(exportService, idNewFile, instructionId);
         this.instruction.exportInvestissement(event -> {
-            if (event.isLeft()) {
-                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx" + event.left(),handler);
-            } else {
-                logger.info("Export RME ended");
-
-                Buffer xlsx = event.right().getValue();
-                saveBuffer(xlsx, titleFile,handler,XLSXHEADER);
-
-            }
+            saveExportHandler(titleFile, handler, event, "error when creating RME xlsx :", XLSXHEADER);
         });
+    }
+
+
+
+    private void exportEquipment(int instructionId, String type, String titleFile, Handler<Either<String, Boolean>> handler) {
+        logger.info("Export Equipment started");
+        this.instruction = new Instruction(exportService, idNewFile, instructionId);
+        this.instruction.exportEquipmentRapp(event1 -> {
+            saveExportHandler(titleFile, handler, event1, "error when creating ExportEquipment xlsx :", XLSXHEADER);
+        }, type);
     }
 
     private void saveBuffer(Buffer buff, String fileName,Handler<Either<String,Boolean>> handler,String fileType) {
@@ -344,20 +288,14 @@ public class ExportLystoreWorker extends BusModBase implements Handler<Message<J
         });
     }
 
-    private void exportEquipment(int instructionId, String type, String titleFile, Handler<Either<String, Boolean>> handler) {
-        logger.info("Export Equipment started");
-        this.instruction = new Instruction(exportService, idNewFile, instructionId);
-        this.instruction.exportEquipmentRapp(event1 -> {
-            if (event1.isLeft()) {
-                ExportHelper.catchError(exportService, idNewFile, "error when creating xlsx",handler);
-                handler.handle(new Either.Left<>("An error occurred when creating xlsx"));
-            } else {
-                Buffer xlsx = event1.right().getValue();
-                logger.info("Export Equipment ended");
-                saveBuffer(xlsx, titleFile,handler,XLSXHEADER);
-            }
-        }, type);
+    private void saveExportHandler(String titleFile, Handler<Either<String, Boolean>> handler, Either<String, Buffer> event1, String errorMessage, String fileType) {
+        if (event1.isLeft()) {
+            ExportHelper.catchError(exportService, idNewFile, errorMessage +"\n" + event1.left().getValue(), handler);
+        } else {
+            logger.info(titleFile + " created ");
+            Buffer buffer = event1.right().getValue();
+            saveBuffer(buffer, titleFile, handler, fileType);
+        }
     }
-
 
 }

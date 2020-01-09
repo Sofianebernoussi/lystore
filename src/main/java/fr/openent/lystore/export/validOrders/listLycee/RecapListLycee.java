@@ -124,10 +124,12 @@ public class RecapListLycee extends TabHelper {
     }
 
     private void mergeStructures(int currentI, int initx) {
+        if(currentI-1 != initx) {
         sizeMergeRegionLinesWithStyle(1,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
         sizeMergeRegionLinesWithStyle(2,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
         sizeMergeRegionLinesWithStyle(3,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
         sizeMergeRegionLinesWithStyle(4,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
+        }
     }
 
     private void mergeFinalCells(int currentI, int initx) {

@@ -47,7 +47,7 @@ export class OrderClient implements Order  {
     tax_amount: number;
     title:Title;
     typeOrder:string;
-
+    total?:number;
     action?:string;
     cause_status?:string;
     contract_name?: string;

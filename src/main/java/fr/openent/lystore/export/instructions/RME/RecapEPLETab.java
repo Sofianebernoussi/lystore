@@ -52,7 +52,7 @@ public class RecapEPLETab extends TabHelper {
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
         excel.setDefaultFont();
-        excel.setCPNumber(makeCellWithoutNull(instruction.getString("cp_number")));
+        excel.setInstructionNumber(makeCellWithoutNull(instruction.getString("cp_number")));
         getDatas(event -> {
             try {
                 if (event.isLeft()) {

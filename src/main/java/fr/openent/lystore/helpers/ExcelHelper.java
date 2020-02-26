@@ -479,10 +479,7 @@ public class ExcelHelper {
     }
 
     public void setCPNumber(String number) {
-        Row row = sheet.createRow(1);
-        Cell cell = row.createCell(0);
-        cell.setCellValue("N° CP " + number);
-        this.setBold(cell);
+            setCPNumber(number,1,0);
     }
 
     /**
@@ -503,6 +500,24 @@ public class ExcelHelper {
             tab = sheet.createRow(line);
             Cell cell = tab.createCell(column);
             cell.setCellValue("N° CP " + number);
+            this.setBold(cell);
+        }
+    }
+    public void setInstructionNumber(String number) {
+        setInstructionNumber(number,1,0);
+
+    }
+    public void setInstructionNumber(String number, int line, int column) {
+        Row tab;
+        try {
+            tab = sheet.getRow(line);
+            Cell cell = tab.createCell(column);
+            cell.setCellValue("Numéro du rapport : " + number);
+            this.setBold(cell);
+        } catch (NullPointerException e) {
+            tab = sheet.createRow(line);
+            Cell cell = tab.createCell(column);
+            cell.setCellValue("Numéro du rapport : " + number);
             this.setBold(cell);
         }
     }

@@ -395,7 +395,11 @@ export const orderController = ng.controller('orderController',
                 await orders[0].exportListLycee(params);
                 $scope.displayedOrders.selected[0].selected = false;
                 Utils.safeApply($scope);
-            }else{
+            }else
+            if(fileType === 'certificates'){
+                window.location = `/lystore/orders/valid/export/${fileType}?${params}`;
+            }
+            else{
                 let  {status, data} = await http.get(`/lystore/orders/valid/export/${fileType}?${params}`);
                 if(status === 201){
                     toasts.info('lystore.sent.export.BC');

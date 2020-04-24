@@ -2791,3 +2791,9 @@ INSERT INTO lystore.specific_structures(
  ON CONFLICT (id) DO
   UPDATE SET uai='0750558Z' ,code_coriolis = 'R3230'
  WHERE specific_structures.id = EXCLUDED.id ;
+INSERT INTO lystore.specific_structures(
+	uai, id,   code_coriolis, type)
+	VALUES (  '0780000C' ,'c3f3fbd7-26b5-443d-b8a3-07df3460716b','R2896','LYC')
+ ON CONFLICT (id) DO
+  UPDATE SET uai='0780000C',type='LYC',code_coriolis = 'R2896'
+ WHERE specific_structures.id = EXCLUDED.id ;

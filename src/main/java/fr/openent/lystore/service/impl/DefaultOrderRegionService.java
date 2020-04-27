@@ -70,7 +70,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
                 "       description, " +
                 "       image, " +
                 "       technical_spec, " +
-                "       id_contract, " +
+                "       ? as id_contract, " +
                 "       cause_status, " +
                 "       number_validation, " +
                 "       id_order, " +
@@ -94,6 +94,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
         if (order.containsKey("id_operation")) {
             params.add(order.getInteger("id_operation"));
         }
+        params.add(order.getInteger("id_contract"));
         params.add(order.getInteger("id_order_client_equipment"));
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
@@ -115,6 +116,7 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
 
         query += order.getInteger("rank") != -1 ? "rank=?," : "rank = NULL, ";
         query += order.containsKey("id_operation") ? "id_operation = ?, " : "";
+        query += order.containsKey("id_contract") ? "id_contract = ?, " : "";
         query += "comment = ? " +
                 "WHERE id = ?" +
                 "RETURNING id;";
@@ -131,6 +133,9 @@ public class DefaultOrderRegionService extends SqlCrudService implements OrderRe
         }
         if (order.containsKey("id_operation")) {
             params.add(order.getInteger("id_operation"));
+        }
+        if (order.containsKey("id_contract")) {
+            params.add(order.getInteger("id_contract"));
         }
         params.add(order.getString("comment"))
                 .add(idOrder);

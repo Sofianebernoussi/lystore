@@ -348,6 +348,8 @@ INSERT INTO lystore.label_operation(label)
 ('VOLS ET SINISTRES'),
 ('VOLS ET SINISTRES REMPLACEMENT'),
 ('VOLS SINISTRES MOB DIRECTION'),
-('VOLS SINISTRES MOB SCOLAIRES');
+('VOLS SINISTRES MOB SCOLAIRES'),
+('PR Bac Pro Métiers de la Coiffure'),
+('PR Bac Pro Animation');
 
 INSERT INTO lystore.exercise(year) VALUES ('2018/2019'), ('2019/2020'), ('2020/2021');

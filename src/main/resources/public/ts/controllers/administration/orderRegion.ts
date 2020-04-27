@@ -62,6 +62,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                 orderRegionCreate.id_operation = operation.id;
                 orderRegionCreate.equipment_key = $scope.orderToUpdate.equipment_key;
                 orderRegionCreate.technical_spec = $scope.orderToUpdate.equipment.technical_specs;
+                orderRegionCreate.id_contract = $scope.orderToUpdate.equipment.id_contract;
                 const { status } = await orderRegionCreate.create();
                 if (status === 200) {
                     toasts.confirm('lystore.order.region.update');
@@ -103,6 +104,7 @@ export const orderRegionController = ng.controller('orderRegionController',
             let orderRegion = new OrderRegion();
             orderRegion.createFromOrderClient($scope.orderToUpdate);
             orderRegion.equipment_key = $scope.orderToUpdate.equipment_key;
+            orderRegion.id_contract = orderRegion.equipment.id_contract;
             $scope.cancelUpdate();
             if($scope.orderToUpdate.typeOrder === "region"){
                 await orderRegion.update($scope.orderToUpdate.id);

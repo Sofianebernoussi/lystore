@@ -75,13 +75,14 @@ public class RecapMarketGestion extends TabHelper {
                         }
                     }catch (Exception e){
                         errorCatch = true;
-                        logger.error(e.getMessage()+" Recap");
+                        logger.error( "["+ e.getClass() +"] "+ e.getMessage()+" Recap");
                     }
                     if(errorCatch)
                         handler.handle(new Either.Left<>("Error when writting files"));
                     else
                         handler.handle(new Either.Right<>(true));
                 } else {
+                    log.error("[RecapMarketGestion] getStructuresLeft");
                     handler.handle(new Either.Left<>("Error when casting neo"));
 
                 }

@@ -332,6 +332,7 @@ public abstract class TabHelper {
         JsonObject  structure;
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
+            initEmptyStructures(data);
             if(data.containsKey("actions"))
                 actions = new JsonArray(data.getString("actions"));
             else
@@ -344,15 +345,6 @@ public abstract class TabHelper {
     protected  void getElemsStructure(JsonArray structures,JsonObject data){
         JsonObject  structure;
         for (int j = 0; j < structures.size(); j++) {
-            if(j == 0) {
-                data.put("nameEtab", NULL_DATA);
-                data.put("uai", NULL_DATA);
-                data.put("city", NULL_DATA);
-                data.put("type", NULL_DATA);
-                data.put("address",NULL_DATA);
-                data.put("zipCode", "??");
-                data.put("phone", NULL_DATA);
-            }
             structure = structures.getJsonObject(j);
             if (data.getString("id_structure").equals(structure.getString("id"))) {
                 data.put("nameEtab", structure.getString("name"));
@@ -365,6 +357,17 @@ public abstract class TabHelper {
             }
         }
     }
+
+    private void initEmptyStructures(JsonObject data) {
+        data.put("nameEtab", NULL_DATA);
+        data.put("uai", NULL_DATA);
+        data.put("city", NULL_DATA);
+        data.put("type", NULL_DATA);
+        data.put("address",NULL_DATA);
+        data.put("zipCode", "??");
+        data.put("phone", NULL_DATA);
+    }
+
     protected void setStructures(JsonArray structures) {
         JsonObject  structure;
         JsonArray actions;
@@ -373,6 +376,7 @@ public abstract class TabHelper {
             actions = new JsonArray(data.getString("actions"));
             for (int k = 0; k < actions.size(); k++) {
                 JsonObject action = actions.getJsonObject(k);
+                initEmptyStructures(action);
                 for (int j = 0; j < structures.size(); j++) {
                     getElemsStructure(structures,action);
                 }

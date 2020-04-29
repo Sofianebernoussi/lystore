@@ -42,6 +42,7 @@ public class NotificationLycTab extends TabHelper {
 
     @Override
     public void create(Handler<Either<String, Boolean>> handler) {
+        log.info("[NotificationsLycTab] create");
         excel.setDefaultFont();
         getDatas(event -> handleDatasDefault(event, handler));
     }
@@ -72,7 +73,7 @@ public class NotificationLycTab extends TabHelper {
                             writeArray(handler);
                         }
                     }catch (Exception e){
-                        logger.error(e.getMessage() + " Notification");
+                        logger.error("["+ e.getClass() +"] "+ e.getMessage() + " Notification");
                         errorCatch = true;
                     }
                     if(errorCatch)

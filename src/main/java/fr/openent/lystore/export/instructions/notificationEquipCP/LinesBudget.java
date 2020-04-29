@@ -53,7 +53,7 @@ public class LinesBudget extends TabHelper {
                         setLabels();
                         setArray(datas);
                     }catch (Exception e){
-                        logger.error(e.getMessage() +" Lines");
+                        logger.error( "["+ e.getClass() +"] "+e.getMessage() +" LinesBUDGET");
                         errorCatch = true;
                     }
                     if(errorCatch)
@@ -102,13 +102,12 @@ public class LinesBudget extends TabHelper {
                     excel.insertWhiteOnBlueTab(2, lineNumber, order.getString("uai"));
                     excel.insertWhiteOnBlueTab(3, lineNumber, order.getString("type"));
                     excel.insertWhiteOnBlueTab(4, lineNumber, order.getString("nameEtab"));
-
                 }
                 if (!previousCode.equals(code)) {
                     previousCode = code;
                     totalToInsert = 0.d;
                 }
-                totalToInsert += safeGetDouble(order,"total", "LinesBudget");
+                totalToInsert += safeGetDouble(order, "total", "LinesBudget");
                 excel.insertDoubleYellow(5 + codes.indexOf(Integer.parseInt(code)), lineNumber,
                         totalToInsert);
             }

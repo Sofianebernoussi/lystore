@@ -392,6 +392,7 @@ public abstract class TabHelper {
     }
 
     protected void getStructures(JsonArray ids, Handler<Either<String, JsonArray>> handler)  {
+        log.info("Array structures id to send SIZE : " + ids.size());
         String query = "" +
                 "MATCH (s:Structure) " +
                 "WHERE s.id IN {ids} " +

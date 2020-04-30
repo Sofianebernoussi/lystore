@@ -61,6 +61,8 @@ public class Subventions extends TabHelper {
                 if (repStructures.isRight()) {
                     try {
                         JsonArray structures = repStructures.right().getValue();
+                        log.info("Structures Get size : "  +structures.size());
+
                         setStructuresFromDatas(structures);
                         if (datas.isEmpty()) {
                             handler.handle(new Either.Left<>("No data in database"));

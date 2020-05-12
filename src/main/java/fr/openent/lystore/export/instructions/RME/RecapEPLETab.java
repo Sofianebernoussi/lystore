@@ -84,19 +84,13 @@ public class RecapEPLETab extends TabHelper {
             if (!structuresId.contains(program.getString(id_structureStr)))
                 structuresId.add(structuresId.size(), program.getString(id_structureStr));
         }
-        structureService.getStructureById(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> repStructures) {
-                if (repStructures.isRight()) {
-                    JsonArray structures = repStructures.right().getValue();
-                    setStructuresFromDatas(structures);
-                    setTab();
-                    handler.handle(new Either.Right<>(true));
-                }
-            }
-        });
-
-
+        log.info("Array structures id to send SIZE : " + structuresId.size());
+        getStructures(new JsonArray(structuresId), getStructureHandler(structuresId,handler));
+    }
+    @Override
+    protected void fillPage(JsonArray structures){
+        setStructuresFromDatas(structures);
+        setTab();
     }
     private void setTab() {
         JsonObject program;

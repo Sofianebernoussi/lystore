@@ -52,36 +52,42 @@ public class Market extends TabHelper {
 
             }
         }
-        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> repStructures) {
-                boolean errorCatch= false;
-                if (repStructures.isRight()) {
-                    try {
-                        JsonArray structures = repStructures.right().getValue();
-                        setStructures(structures);
-                        if (datas.isEmpty()) {
-                            handler.handle(new Either.Left<>("No data in database"));
-                        } else {
-//                            datas = sortByCity(datas);
-                            setTitle();
-                            writeArray(handler);
-                        }
-                    }catch (Exception e){
-                        errorCatch = true;
-                    }
-                    if(errorCatch)
-                        handler.handle(new Either.Left<>("Error when writting files"));
-                    else
-                        handler.handle(new Either.Right<>(true));
-                } else {
-                    handler.handle(new Either.Left<>("Error when casting neo"));
-                }
-            }
+        getStructures(new JsonArray(structuresId), getStructureHandler(structuresId,handler));
+//
+//        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+//            @Override
+//            public void handle(Either<String, JsonArray> repStructures) {
+//                boolean errorCatch= false;
+//                if (repStructures.isRight()) {
+//                    try {
+//                        JsonArray structures = repStructures.right().getValue();
+//                        if (datas.isEmpty()) {
+//                            handler.handle(new Either.Left<>("No data in database"));
+//                        } else {
+////                            datas = sortByCity(datas);
+//                        }
+//                    }catch (Exception e){
+//                        errorCatch = true;
+//                    }
+//                    if(errorCatch)
+//                        handler.handle(new Either.Left<>("Error when writting files"));
+//                    else
+//                        handler.handle(new Either.Right<>(true));
+//                } else {
+//                    handler.handle(new Either.Left<>("Error when casting neo"));
+//                }
+//            }
+//
+//
+//        });
+//
+    }
 
-
-        });
-
+    @Override
+    protected void fillPage(JsonArray structures){
+        setStructures(structures);
+        setTitle();
+        writeArray();
     }
 
     private void setTitle() {
@@ -101,7 +107,7 @@ public class Market extends TabHelper {
 
     }
 
-    private void writeArray(Handler<Either<String, Boolean>> handler) {
+    private void writeArray() {
         for (int i = 0; i < datas.size(); i++) {
             JsonObject campaignData = datas.getJsonObject(i);
             JsonArray orders = campaignData.getJsonArray("actionsJO");

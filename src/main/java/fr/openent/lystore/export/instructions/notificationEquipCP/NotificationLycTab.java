@@ -59,39 +59,44 @@ public class NotificationLycTab extends TabHelper {
                     structuresId.add(structuresId.size(), action.getString("id_structure"));
             }
         }
-        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> repStructures) {
-                boolean errorCatch= false;
-                if (repStructures.isRight()) {
-                    try {
-                        JsonArray structures = repStructures.right().getValue();
-                        log.info("Structures Get size : "  +structures.size());
-                        setStructuresFromDatas(structures);
-                        if (datas.isEmpty()) {
-                            handler.handle(new Either.Left<>("No data in database"));
-                        } else {
-                            writeArray(handler);
-                        }
-                    }catch (Exception e){
-                        logger.error("["+ e.getClass() +"] "+ e.getMessage() + " Notification");
-                        errorCatch = true;
-                    }
-                    if(errorCatch)
-                        handler.handle(new Either.Left<>("Error when writting files"));
-                    else
-                        handler.handle(new Either.Right<>(true));
-                } else {
-                    handler.handle(new Either.Left<>("Error when casting neo"));
+        getStructures(new JsonArray(structuresId), getStructureHandler(structuresId,handler));
 
-                }
-            }
-        });
+//        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+//            @Override
+//            public void handle(Either<String, JsonArray> repStructures) {
+//                boolean errorCatch= false;
+//                if (repStructures.isRight()) {
+//                    try {
+//                        JsonArray structures = repStructures.right().getValue();
+//                        if (datas.isEmpty()) {
+//                            handler.handle(new Either.Left<>("No data in database"));
+//                        } else {
+//                        }
+//                    }catch (Exception e){
+//                        logger.error("["+ e.getClass() +"] "+ e.getMessage() + " Notification");
+//                        errorCatch = true;
+//                    }
+//                    if(errorCatch)
+//                        handler.handle(new Either.Left<>("Error when writting files"));
+//                    else
+//                        handler.handle(new Either.Right<>(true));
+//                } else {
+//                    handler.handle(new Either.Left<>("Error when casting neo"));
+//
+//                }
+//            }
+//        });
 
         datas = sortByCity(datas, false);
     }
 
-    private void writeArray(Handler<Either<String, Boolean>> handler) {
+    @Override
+    protected void fillPage(JsonArray structures){
+        setStructuresFromDatas(structures);
+        writeArray();
+    }
+//    private void writeArray(Handler<Either<String, Boolean>> handler) {
+    private void writeArray() {
         for (int i = 0; i < datas.size(); i++) {
             if(i!=0)
                 excel.setRowBreak(lineNumber + 1);
@@ -105,7 +110,7 @@ public class NotificationLycTab extends TabHelper {
             String previousCode = "";
 
             if (orders.isEmpty()) {
-                handler.handle(new Either.Left<>("no orders linked to this Struct"));
+                return;
             } else {
                 for (int j = 0; j < orders.size(); j++) {
                     JsonObject order = orders.getJsonObject(j);

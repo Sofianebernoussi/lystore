@@ -53,17 +53,11 @@ public class Publipostage extends TabHelper {
                 structuresId.add(data.getString("id_structure"));
             }
         }
-        getStructures(structuresId, structuresGet -> {
-            if (structuresGet.isRight()) {
-                JsonArray structures = structuresGet.right().getValue();
-                structures = sortByUai(structures);
-                makeBody(structures);
-                handler.handle(new Either.Right<>(true));
-            } else {
-                logger.error("error when get structuresId" + structuresGet.left());
-                handler.handle(new Either.Right<>(false));
-            }
-        });
+        getStructures(structuresId, getStructureHandler(structuresId,handler));
+    }
+    @Override
+    protected void fillPage(JsonArray structures){
+        makeBody(structures);
     }
 
     private void makeHeader(){

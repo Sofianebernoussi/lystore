@@ -53,43 +53,49 @@ public class Subventions extends TabHelper {
 
             }
         }
-        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> repStructures) {
+        getStructures(new JsonArray(structuresId), getStructureHandler(structuresId,handler));
 
-                boolean errorCatch= false;
-                if (repStructures.isRight()) {
-                    try {
-                        JsonArray structures = repStructures.right().getValue();
-                        log.info("Structures Get size : "  +structures.size());
+//        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+//            @Override
+//            public void handle(Either<String, JsonArray> repStructures) {
+//
+//                boolean errorCatch= false;
+//                if (repStructures.isRight()) {
+//                    try {
+//                        JsonArray structures = repStructures.right().getValue();
+//                        log.info("Structures Get size : "  +structures.size());
+//
+//                        if (datas.isEmpty()) {
+//                            handler.handle(new Either.Left<>("No data in database"));
+//                        } else {
+//
+//                        }
+//                    }catch (Exception e){
+//                        errorCatch = true;
+//                    }
+//                    if(errorCatch)
+//                        handler.handle(new Either.Left<>("Error when writting files"));
+//                    else
+//                        handler.handle(new Either.Right<>(true));
+//                } else {
+//                    handler.handle(new Either.Left<>("Error when casting neo"));
+//
+//                }
+//            }
+//
+//
+//        });
 
-                        setStructuresFromDatas(structures);
-                        if (datas.isEmpty()) {
-                            handler.handle(new Either.Left<>("No data in database"));
-                        } else {
-                            datas = sortByCity(datas, false);
-                            setTitle();
-                            writeArray(handler);
-                        }
-                    }catch (Exception e){
-                        errorCatch = true;
-                    }
-                    if(errorCatch)
-                        handler.handle(new Either.Left<>("Error when writting files"));
-                    else
-                        handler.handle(new Either.Right<>(true));
-                } else {
-                    handler.handle(new Either.Left<>("Error when casting neo"));
-
-                }
-            }
-
-
-        });
-
+    }
+    @Override
+    protected void fillPage(JsonArray structures){
+        setStructuresFromDatas(structures);
+        setTitle();
+        writeArray();
     }
 
     private void setTitle() {
+        datas = sortByCity(datas, false);
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
             totalSubv += Double.parseDouble(data.getString("totalprice"));
@@ -107,7 +113,7 @@ public class Subventions extends TabHelper {
 
     }
 
-    private void writeArray(Handler<Either<String, Boolean>> handler) {
+    private void writeArray() {
 
         for (int i = 0; i < datas.size(); i++) {
             JsonObject structureDatas = datas.getJsonObject(i);

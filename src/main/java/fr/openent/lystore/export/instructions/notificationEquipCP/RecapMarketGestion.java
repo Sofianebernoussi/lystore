@@ -60,37 +60,42 @@ public class RecapMarketGestion extends TabHelper {
 
             }
         }
-        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> repStructures) {
-                boolean errorCatch= false;
-                if (repStructures.isRight()) {
-                    try {
-                        JsonArray structures = repStructures.right().getValue();
-                        setStructures(structures);
-                        if (datas.isEmpty()) {
-                            handler.handle(new Either.Left<>("No data in database"));
-                        } else {
-                            writeArray(handler);
-                        }
-                    }catch (Exception e){
-                        errorCatch = true;
-                        logger.error( "["+ e.getClass() +"] "+ e.getMessage()+" Recap");
-                    }
-                    if(errorCatch)
-                        handler.handle(new Either.Left<>("Error when writting files"));
-                    else
-                        handler.handle(new Either.Right<>(true));
-                } else {
-                    log.error("[RecapMarketGestion] getStructuresLeft");
-                    handler.handle(new Either.Left<>("Error when casting neo"));
+        getStructures(new JsonArray(structuresId), getStructureHandler(structuresId,handler));
 
-                }
-            }
-        });
+//        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
+//            @Override
+//            public void handle(Either<String, JsonArray> repStructures) {
+//                boolean errorCatch= false;
+//                if (repStructures.isRight()) {
+//                    try {
+//                        JsonArray structures = repStructures.right().getValue();
+//                        if (datas.isEmpty()) {
+//                            handler.handle(new Either.Left<>("No data in database"));
+//                        } else {
+//                        }
+//                    }catch (Exception e){
+//                        errorCatch = true;
+//                        logger.error( "["+ e.getClass() +"] "+ e.getMessage()+" Recap");
+//                    }
+//                    if(errorCatch)
+//                        handler.handle(new Either.Left<>("Error when writting files"));
+//                    else
+//                        handler.handle(new Either.Right<>(true));
+//                } else {
+//                    log.error("[RecapMarketGestion] getStructuresLeft");
+//                    handler.handle(new Either.Left<>("Error when casting neo"));
+//
+//                }
+//            }
+//        });
     }
 
-    private void writeArray(Handler<Either<String, Boolean>> handler) {
+    @Override
+    protected  void fillPage(JsonArray structures){
+        setStructures(structures);
+        writeArray();
+    }
+    private void writeArray() {
         SimpleDateFormat formatterDate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         SimpleDateFormat formatterDateExcel = new SimpleDateFormat("dd/MM/yyyy");
         Date orderDate = null;

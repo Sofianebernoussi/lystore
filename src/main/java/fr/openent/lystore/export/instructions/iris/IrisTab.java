@@ -58,33 +58,17 @@ public class IrisTab extends TabHelper {
         }
 
         try {
-            getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
-                @Override
-                public void handle(Either<String, JsonArray> repStructures) {
-                    boolean errorCatch= false;
-                    if (repStructures.isRight()) {
-                        try {
-                            JsonArray structures = repStructures.right().getValue();
-                            setStructuresFromDatas(structures);
-                            setArray(datas);
-                        }catch (Exception e){
-                            errorCatch = true;
-                        }
-                        if(errorCatch)
-                            handler.handle(new Either.Left<>("Error when writting files"));
-                        else
-                            handler.handle(new Either.Right<>(true));
-                    } else {
-                        handler.handle(new Either.Left<>("Error when casting neo"));
-
-                    }
-                }
-            });
+            getStructures(new JsonArray(structuresId), getStructureHandler(structuresId,handler));
         }catch (Exception e){
             initDatas(handler);
         }
     }
 
+    @Override
+    protected void fillPage(JsonArray structures){
+        setStructuresFromDatas(structures);
+        setArray(datas);
+    }
     @Override
     protected void setArray(JsonArray datas){
         excel.insertStandardText(0, 0, IDDOS);

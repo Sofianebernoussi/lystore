@@ -35,7 +35,7 @@ public class AnnexeDelibTab extends TabHelper {
     }
 
     @Override
-    protected void initDatas(Handler<Either<String, Boolean>> handler) {
+      protected void initDatas(Handler<Either<String, Boolean>> handler) {
         ArrayList structuresId = new ArrayList<>();
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
@@ -43,29 +43,13 @@ public class AnnexeDelibTab extends TabHelper {
                 structuresId.add(structuresId.size(), data.getString("id_structure"));
 
         }
-        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> repStructures) {
-                boolean errorCatch= false;
-                if (repStructures.isRight()) {
-                    try {
-                        JsonArray structures = repStructures.right().getValue();
-                        setStructuresFromDatas(structures);
-                        setArray(datas);
-                    }catch (Exception e){
-                        errorCatch = true;
-                        log.error(e.getMessage());
-                    }
-                    if(errorCatch)
-                        handler.handle(new Either.Left<>("Error when writting files"));
-                    else
-                        handler.handle(new Either.Right<>(true));
-                } else {
-                    handler.handle(new Either.Left<>("Error when casting neo"));
+        getStructures(new JsonArray(structuresId),getStructureHandler(structuresId,handler));
+    }
 
-                }
-            }
-        });
+    @Override
+    protected void fillPage(JsonArray structures){
+        setStructuresFromDatas(structures);
+        setArray(datas);
     }
 
     @Override

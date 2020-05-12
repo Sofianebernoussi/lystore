@@ -4,6 +4,7 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.TabHelper;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -45,31 +46,16 @@ public class ListForTextTab extends TabHelper {
 
             }
         }
-        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> repStructures) {
+        getStructures(new JsonArray(structuresId), getStructureHandler(structuresId,handler));
 
-                boolean errorCatch= false;
-                if (repStructures.isRight()) {
-                    try {
-                        JsonArray structures = repStructures.right().getValue();
-                        setStructures(structures);
-                        setLabels();
-                    }catch (Exception e){
-                        errorCatch = true;
-                    }
-                    if(errorCatch)
-                        handler.handle(new Either.Left<>("Error when writting files"));
-                    else
-                        handler.handle(new Either.Right<>(true));
-                } else {
-                    handler.handle(new Either.Left<>("Error when casting neo"));
 
-                }
-            }
-        });
     }
 
+    @Override
+    protected void fillPage(JsonArray structures){
+        setStructures(structures);
+        setLabels();
+    }
 
 
     @Override

@@ -4,6 +4,7 @@ import fr.openent.lystore.Lystore;
 import fr.openent.lystore.export.TabHelper;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -49,27 +50,15 @@ public class VerifBudgetTab extends TabHelper {
 
             }
         }
-        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> repStructures) {
-                if (repStructures.isRight()) {
-                    try {
-                        JsonArray structures = repStructures.right().getValue();
-                        setStructures(structures);
-                        setArray(datas);
-                        handler.handle(new Either.Right<>(true));
-                    }catch (Exception e){
-                        handler.handle(new Either.Left<>(e.getMessage()));
-                        logger.error("Error when creating VerifBudgetTAb");
-                    }
-                } else {
-                    handler.handle(new Either.Left<>("Error when casting neo"));
 
-                }
-            }
-        });
+        getStructures(new JsonArray(structuresId), getStructureHandler(structuresId,handler));
     }
 
+    @Override
+    protected void fillPage(JsonArray structures){
+        setStructures(structures);
+        setArray(datas);
+    }
     @Override
     protected void setArray(JsonArray datas) {
         String previousProgramCode = "";

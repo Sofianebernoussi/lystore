@@ -143,9 +143,9 @@ public class Instruction extends ExportObject {
                     Future<Boolean> AnnexeDelibFuture = Future.future();
                     Future<Boolean> RecapMarketFuture = Future.future();
                     Future<Boolean> VerifBudgetFuture = Future.future();
+                    futures.add(ComptaFuture);
                     futures.add(ListForTextFuture);
                     futures.add(RecapFuture);
-                    futures.add(ComptaFuture);
                     futures.add(AnnexeDelibFuture);
                     futures.add(RecapMarketFuture);
                     futures.add(VerifBudgetFuture);

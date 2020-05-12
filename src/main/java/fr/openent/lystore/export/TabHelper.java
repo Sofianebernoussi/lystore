@@ -49,8 +49,8 @@ public abstract class TabHelper {
     protected long timeout = 999999999;
     protected JsonArray datas;
     protected final int LIMIT_FORMULA_SIZE = 8000;
-
-
+    protected final int LIMIT_ATTEMPTS_CREATION = 3;
+    protected int attemptNumber = 0;
     /**
      * Format : H-code
      */
@@ -330,6 +330,7 @@ public abstract class TabHelper {
     protected void setStructuresFromDatas(JsonArray structures) {
         JsonArray actions;
         JsonObject  structure;
+        log.info("STRUCTURES GET FROM NEO "+ structures.size());
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
             initEmptyStructures(data);
@@ -370,6 +371,7 @@ public abstract class TabHelper {
 
     protected void setStructures(JsonArray structures) {
         JsonObject  structure;
+        log.info("STRUCTURES GET FROM NEO "+ structures.size());
         JsonArray actions;
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
@@ -391,6 +393,12 @@ public abstract class TabHelper {
         return valueGet != null? valueGet : "Pas d'informations";
     }
 
+    /**
+     * get structures from neo
+     * @param ids
+     * @param handler
+     */
+    //TODO next improve : make futures for each structs
     protected void getStructures(JsonArray ids, Handler<Either<String, JsonArray>> handler)  {
         log.info("Array structures id to send SIZE : " + ids.size());
         String query = "" +
@@ -408,8 +416,83 @@ public abstract class TabHelper {
         try {
             Neo4j.getInstance().execute(query, new JsonObject().put("ids", ids), Neo4jResult.validResultHandler(handler));
         }catch (VertxException e){
+            logger.error( "@LystoreWorker["+ e.getClass() +"] " + e.getMessage() +" tabHelper");
+            getStructures(ids,handler);
+        }
+        catch (NullPointerException e){
+            logger.error( "@LystoreWorker["+ e.getClass() +"] " + e.getMessage() +" tabHelper");
             getStructures(ids,handler);
         }
     }
+    /**
+     *
+     * @param structures Result of getStructures ( neoStructures)
+     *
+     * Method called when all the data are init to write an excel Page
+     */
+    protected  void fillPage(JsonArray structures){
 
+    }
+
+
+    protected Handler<Either<String, JsonArray>> getStructureHandler(JsonArray structuresId, Handler<Either<String, Boolean>> handler) {
+        return new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(Either<String, JsonArray> repStructures) {
+                boolean errorCatch = false;
+                String errorSTR = "" ;
+                if (repStructures.isRight()) {
+                    try {
+                        JsonArray structures = repStructures.right().getValue();
+                        structures = sortByUai(structures);
+                        fillPage(structures);
+                    }catch (Exception e){
+                        errorCatch = true;
+                        errorSTR = e.getMessage();
+                    }
+                    HandleCatchResult(errorCatch, errorSTR, structuresId, handler);
+                } else {
+                    handler.handle(new Either.Left<>("Error when casting neo"));
+                }
+            }
+        };
+    }
+
+
+
+    protected Handler<Either<String, JsonArray>> getStructureHandler(ArrayList structuresId, Handler<Either<String, Boolean>> handler) {
+        return new Handler<Either<String, JsonArray>>() {
+            @Override
+            public void handle(Either<String, JsonArray> repStructures) {
+                boolean errorCatch = false;
+                String errorSTR = "" ;
+                if (repStructures.isRight()) {
+                    try {
+                        JsonArray structures = repStructures.right().getValue();
+                        fillPage(structures);
+                    }catch (Exception e){
+                        errorCatch = true;
+                        errorSTR = e.getMessage();
+                    }
+                    HandleCatchResult(errorCatch, errorSTR, new JsonArray(structuresId), handler);
+                } else {
+                    handler.handle(new Either.Left<>("Error when casting neo"));
+                }
+            }
+        };
+    }
+
+
+    protected void HandleCatchResult(boolean errorCatch, String errorSTR, JsonArray structuresId, Handler<Either<String, Boolean>> handler) {
+        if(errorCatch && attemptNumber < LIMIT_ATTEMPTS_CREATION){
+            getStructures(structuresId,getStructureHandler(structuresId, handler));
+            attemptNumber ++;
+        }
+        else if(errorCatch && attemptNumber == LIMIT_ATTEMPTS_CREATION){
+            handler.handle(new Either.Left<>(errorSTR));
+            log.info(attemptNumber + " " + this.getClass()) ;
+        }else{
+            handler.handle(new Either.Right<>(true));
+        }
+    }
 }

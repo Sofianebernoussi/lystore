@@ -46,30 +46,14 @@ public class ComptaTab extends TabHelper {
 
             }
         }
-        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
-            @Override
-            public void handle(Either<String, JsonArray> repStructures) {
-                boolean errorCatch= false;
-                if (repStructures.isRight()) {
-                    try {
-                        JsonArray structures = repStructures.right().getValue();
-                        setStructures(structures);
-                        setLabels();
-                    }catch (Exception e){
-                        errorCatch = true;
-                    }
-                    if(errorCatch)
-                        handler.handle(new Either.Left<>("Error when writting files"));
-                    else
-                        handler.handle(new Either.Right<>(true));
-                } else {
-                    handler.handle(new Either.Left<>("Error when casting neo"));
-
-                }
-            }
-        });
+        getStructures(new JsonArray(structuresId), getStructureHandler(structuresId,handler));
     }
 
+    @Override
+    protected void fillPage(JsonArray structures){
+        setStructures(structures);
+        setLabels();
+    }
 
 
     @Override
@@ -92,7 +76,7 @@ public class ComptaTab extends TabHelper {
 
 //            //Insert datas
 //
-           actions =  sort(actions);
+            actions = sort(actions);
             for (int j = 0; j < actions.size(); j++) {
                 JsonObject action = actions.getJsonObject(j);
                 if (!action.getString("campaign").equals(campaign)) {

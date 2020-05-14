@@ -113,6 +113,7 @@ public class NotificationLycTab extends TabHelper {
                 return;
             } else {
                 for (int j = 0; j < orders.size(); j++) {
+                    try{
                     JsonObject order = orders.getJsonObject(j);
                     String market = order.getString("market");
                     String code = order.getString("code");
@@ -163,7 +164,10 @@ public class NotificationLycTab extends TabHelper {
 
                     lineNumber++;
 
-
+                    }catch (NullPointerException e){
+                        log.error("@LystoreWorker["+ this.getClass() +"] error in second for loop data : \n" + orders.getJsonObject(j));
+                        throw e;
+                    }
                 }
             }
         }

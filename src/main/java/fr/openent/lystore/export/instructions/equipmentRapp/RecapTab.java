@@ -88,13 +88,17 @@ public class RecapTab extends TabHelper {
             if (actions.isEmpty()) continue;
 
             for (int j = 0; j < actions.size(); j++) {
+                try{
                 JsonObject action = actions.getJsonObject(j);
                 String program = action.getString("program");
                 String code = action.getString("code");
                 String key = program + " - " + code;
                 if (!programsActionList.contains(key))
                     programsActionList.add(key);
-
+                }catch (NullPointerException e){
+                    log.error("@LystoreWorker["+ this.getClass() +"] error in second for loop data : \n" + actions.getJsonObject(j));
+                    throw e;
+                }
             }
             Collections.sort(programsActionList);
 

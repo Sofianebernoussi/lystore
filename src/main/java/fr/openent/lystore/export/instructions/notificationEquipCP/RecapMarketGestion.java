@@ -56,7 +56,8 @@ public class RecapMarketGestion extends TabHelper {
             JsonArray actions = new JsonArray(data.getString("actions"));
             for (int j = 0; j < actions.size(); j++) {
                 JsonObject action = actions.getJsonObject(j);
-                structuresId.add(structuresId.size(), action.getString("id_structure"));
+                if(!structuresId.contains(action.getString("id_structure")))
+                    structuresId.add(structuresId.size(), action.getString("id_structure"));
 
             }
         }
@@ -120,80 +121,93 @@ public class RecapMarketGestion extends TabHelper {
             String zip = "";
             int startLine = lineNumber;
             for (int j = 0; j < orders.size(); j++) {
-                String address;
-                JsonObject order = orders.getJsonObject(j);
-                try {
-                    address = order.getString("address").replace(",", ",\n");
-                } catch (NullPointerException e) {
-                    address = order.getString("address");
-                }
+                try{
+                    String address;
+                    JsonObject order = orders.getJsonObject(j);
+                    try {
+                        address = order.getString("address").replace(",", ",\n");
+                    } catch (NullPointerException e) {
+                        address = order.getString("address");
+                    }
 
-                zip = order.getString("zipCode").substring(0, 2);
-                String code = order.getString("code");
-                String campaign = order.getString("campaign");
+                    zip = order.getString("zipCode").substring(0, 2);
+                    String code = order.getString("code");
+                    String campaign = order.getString("campaign");
 
 
-                if (!previousCampaign.equals(campaign)) {
-                    if (j != 0) {
+                    if (!previousCampaign.equals(campaign)) {
+                        if (j != 0) {
+                            excel.insertHeader(0, lineNumber, previousZip);
+                            previousZip = zip;
+                            excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
+                            lineNumber++;
+                            startLine = lineNumber;
+
+                        }
+                        lineNumber++;
+                        excel.insertUnderscoreHeader(0, lineNumber, campaign);
+                        mergeCurrentLine(true);
+                        previousCampaign = campaign;
+                        previousCode = "";
+
+                        lineNumber += 2;
+                    }
+
+                    if (!previousCode.equals(code)) {
+                        lineNumber++;
+                        previousCode = code;
+                        excel.insertHeader(0, lineNumber, code);
+                        mergeCurrentLine(false);
+                        lineNumber++;
+                        insertHeaders();
+                        startLine = lineNumber;
+
+                    }
+
+                    if (!previousZip.equals(zip)) {
                         excel.insertHeader(0, lineNumber, previousZip);
                         previousZip = zip;
                         excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
                         lineNumber++;
                         startLine = lineNumber;
 
+
+                    }
+                    try{
+                        excel.insertCellTabCenter(0, lineNumber, zip);
+                        excel.insertCellTabCenter(1, lineNumber, order.getString("uai") + "\n" + order.getString("nameEtab") + "\n" + order.getString("city"));
+
+                        excel.insertCellTabCenter(2, lineNumber, CIVILITY + "\n" + address + "\n TEL: " + makeCellWithoutNull(order.getString("phone")));
+                        excel.insertCellTabCenterBold(3, lineNumber, formatterDateExcel.format(orderDate));
+                        excel.insertCellTabCenter(4, lineNumber, order.getString("market") + " \nCP " + makeCellWithoutNull(instruction.getString("cp_number")));
+                        if (order.getBoolean("isregion")) {
+                            excel.insertCellTabCenter(5, lineNumber,
+                                    "OPE : " + order.getString("operation") + "\nDDE : R-" + order.getInteger("id").toString());
+                        } else {
+                            excel.insertCellTabCenter(5, lineNumber,
+                                    "OPE : " + order.getString("operation") + "\nDDE : C-" + order.getInteger("id").toString());
+                        }
+                    }catch (NullPointerException e){
+                        log.error("@LystoreWorker["+ this.getClass() +"] error in inserting neo params of an order ");
+                        throw e;
+                    }
+                    try{
+                    excel.insertCellTabCenter(6, lineNumber, formatStrToCell(campaign, 5));
+                    excel.insertCellTabCenter(7, lineNumber, formatStrToCell(order.getInteger("amount").toString(), 5));
+                    excel.insertCellTabDouble(8, lineNumber, safeGetDouble(order, "total", "RecapMarketGestion"));
+                    excel.insertCellTabCenter(9, lineNumber, formatStrToCell(order.getString("name_equipment"), 5));
+                    excel.insertCellTabCenter(10, lineNumber, order.getString("cite_mixte"));
+                    excel.insertCellTabCenter(11, lineNumber, formatStrToCell(order.getString("market"), 5));
+                    excel.insertCellTabCenter(12, lineNumber,formatStrToCell( makeCellWithoutNull(order.getString("comment")), 5));
+                    }catch (NullPointerException e){
+                        log.error("@LystoreWorker["+ this.getClass() +"] error in getting param from sql");
+                        throw e;
                     }
                     lineNumber++;
-                    excel.insertUnderscoreHeader(0, lineNumber, campaign);
-                    mergeCurrentLine(true);
-                    previousCampaign = campaign;
-                    previousCode = "";
-
-                    lineNumber += 2;
+                }catch (NullPointerException e){
+                    log.error("@LystoreWorker["+ this.getClass() +"] error in second for loop data : \n" + orders.getJsonObject(j));
+                    throw e;
                 }
-
-                if (!previousCode.equals(code)) {
-                    lineNumber++;
-                    previousCode = code;
-                    excel.insertHeader(0, lineNumber, code);
-                    mergeCurrentLine(false);
-                    lineNumber++;
-                    insertHeaders();
-                    startLine = lineNumber;
-
-                }
-
-                if (!previousZip.equals(zip)) {
-                    excel.insertHeader(0, lineNumber, previousZip);
-                    previousZip = zip;
-                    excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
-                    lineNumber++;
-                    startLine = lineNumber;
-
-
-                }
-
-                excel.insertCellTabCenter(0, lineNumber, zip);
-                excel.insertCellTabCenter(1, lineNumber, order.getString("uai") + "\n" + order.getString("nameEtab") + "\n" + order.getString("city"));
-
-                excel.insertCellTabCenter(2, lineNumber, CIVILITY + "\n" + address + "\n TEL: " + makeCellWithoutNull(order.getString("phone")));
-                excel.insertCellTabCenterBold(3, lineNumber, formatterDateExcel.format(orderDate));
-                excel.insertCellTabCenter(4, lineNumber, order.getString("market") + " \nCP " + makeCellWithoutNull(instruction.getString("cp_number")));
-                if (order.getBoolean("isregion")) {
-                    excel.insertCellTabCenter(5, lineNumber,
-                            "OPE : " + order.getString("operation") + "\nDDE : R-" + order.getInteger("id").toString());
-                } else {
-                    excel.insertCellTabCenter(5, lineNumber,
-                            "OPE : " + order.getString("operation") + "\nDDE : C-" + order.getInteger("id").toString());
-                }
-
-                excel.insertCellTabCenter(6, lineNumber, formatStrToCell(campaign, 5));
-                excel.insertCellTabCenter(7, lineNumber, formatStrToCell(order.getInteger("amount").toString(), 5));
-                excel.insertCellTabDouble(8, lineNumber, safeGetDouble(order, "total", "RecapMarketGestion"));
-                excel.insertCellTabCenter(9, lineNumber, formatStrToCell(order.getString("name_equipment"), 5));
-                excel.insertCellTabCenter(10, lineNumber, order.getString("cite_mixte"));
-                excel.insertCellTabCenter(11, lineNumber, formatStrToCell(order.getString("market"), 5));
-                excel.insertCellTabCenter(12, lineNumber,formatStrToCell( makeCellWithoutNull(order.getString("comment")), 5));
-                lineNumber++;
             }
             excel.insertHeader(0, lineNumber, zip);
             excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);

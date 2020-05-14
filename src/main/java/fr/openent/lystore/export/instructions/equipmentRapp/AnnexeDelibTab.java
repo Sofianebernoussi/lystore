@@ -64,7 +64,9 @@ public class AnnexeDelibTab extends TabHelper {
         String key = "", oldkey = "";
         Double oldTotal = 0.d;
         for (int i = 0; i < datas.size(); i++) {
-            JsonObject action = datas.getJsonObject(i);
+            try{
+
+                JsonObject action = datas.getJsonObject(i);
             key = action.getString("program") + " - " + action.getString("code");
             int columnToInsert = programMarket.getInteger(key);
             if (!checkIdPassed(idPassed, action.getString("id_structure"))) {
@@ -83,7 +85,10 @@ public class AnnexeDelibTab extends TabHelper {
             oldTotal += Double.parseDouble(action.getString("total"));
 
             excel.insertCellTabDouble(columnToInsert + 4, lineToInsert, oldTotal);
-
+            }catch (NullPointerException e){
+                log.error("@LystoreWorker["+ this.getClass() +"] error in second for loop data : \n" + datas.getJsonObject(i));
+                throw e;
+            }
         }
 
         excel.fillTab(0, arrayLength, 6, lineToInsert + 1);

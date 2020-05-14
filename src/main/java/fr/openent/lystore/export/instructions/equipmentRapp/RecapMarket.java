@@ -80,6 +80,7 @@ public class RecapMarket extends TabHelper {
             JsonArray actions = new JsonArray(actionsStrToArray);
             if (actions.isEmpty()) continue;
             for (int j = 0; j < actions.size(); j++) { // datas of the array
+                try{
                 JsonObject action = actions.getJsonObject(j);
                 //get the key to insert the data
                 String key = action.getString("market") + " - " + action.getString("program") + " - " + action.getString("code");
@@ -90,6 +91,10 @@ public class RecapMarket extends TabHelper {
                     oldkey = key;
                     oldTotal += safeGetDouble(action, "total", "RecapMarket");
                     excel.insertCellTabDouble(1 + programMarket.getInteger(key), i + 9, oldTotal);
+                }
+                }catch (NullPointerException e){
+                    log.error("@LystoreWorker["+ this.getClass() +"] error in second for loop data : \n" + actions.getJsonObject(j));
+                    throw e;
                 }
             }
         }

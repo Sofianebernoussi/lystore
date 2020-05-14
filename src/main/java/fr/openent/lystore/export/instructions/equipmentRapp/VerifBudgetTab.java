@@ -63,6 +63,7 @@ public class VerifBudgetTab extends TabHelper {
     protected void setArray(JsonArray datas) {
         String previousProgramCode = "";
         for (int i = 0; i < datas.size(); i++) {
+            try{
             JsonObject data = datas.getJsonObject(i);
             String actualProgramCode = data.getString("program") + "/" + data.getString("code");
             if (actualProgramCode.equals(previousProgramCode)) {
@@ -75,6 +76,10 @@ public class VerifBudgetTab extends TabHelper {
                 insertNewProgramCode(actualProgramCode, data);
                 previousProgramCode = actualProgramCode;
 
+            }
+            }catch (NullPointerException e){
+                log.error("@LystoreWorker["+ this.getClass() +"] error in second for loop data : \n" + datas.getJsonObject(i));
+                throw e;
             }
         }
         insertProgramPrice();

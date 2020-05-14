@@ -78,6 +78,7 @@ public class ComptaTab extends TabHelper {
 //
             actions = sort(actions);
             for (int j = 0; j < actions.size(); j++) {
+                try{
                 JsonObject action = actions.getJsonObject(j);
                 if (!action.getString("campaign").equals(campaign)) {
                     if (j != 0) {
@@ -139,7 +140,10 @@ public class ComptaTab extends TabHelper {
 
                 columnTotal++;
                 yProgramLabel++;
-
+                }catch (NullPointerException e){
+                    log.error("@LystoreWorker["+ this.getClass() +"] error in second for loop data : \n" + actions.getJsonObject(j));
+                    throw e;
+                }
             }
             if (arrayLength - 4 < columnTotal) {
                 arrayLength += columnTotal;

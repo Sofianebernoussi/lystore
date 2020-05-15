@@ -358,14 +358,23 @@ public abstract class TabHelper {
         for (int j = 0; j < structures.size(); j++) {
             structure = structures.getJsonObject(j);
             if (data.getString("id_structure").equals(structure.getString("id"))) {
-                data.put("nameEtab", structure.getString("name"));
-                data.put("uai", structure.getString("uai"));
-                data.put("city", structure.getString("city"));
-                data.put("type", structure.getString("type"));
-                data.put("address",structure.getString("address"));
-                data.put("zipCode", structure.getString("zipCode"));
-                data.put("phone", structure.getString("phone"));
+
+                if(data.getString("name") != null){
+                    data.put("nameEtab", structure.getString("name"));
+                }
+                putDataIfNotNull("uai",data, structure);
+                putDataIfNotNull("city",data, structure);
+                    putDataIfNotNull("type",data, structure);
+                putDataIfNotNull("address",data, structure);
+                putDataIfNotNull("zipCode",data, structure);
+                putDataIfNotNull("phone",data, structure);
             }
+        }
+    }
+
+    private void putDataIfNotNull(String key,JsonObject data, JsonObject structure) {
+        if(structure.getString(key) != null){
+            data.put(key, structure.getString(key));
         }
     }
 

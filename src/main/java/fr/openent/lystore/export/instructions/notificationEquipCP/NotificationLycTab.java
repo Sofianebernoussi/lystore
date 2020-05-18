@@ -97,10 +97,14 @@ public class NotificationLycTab extends TabHelper {
     }
 //    private void writeArray(Handler<Either<String, Boolean>> handler) {
     private void writeArray() {
+
+        log.info("NotificationLYC  writeArray");
         for (int i = 0; i < datas.size(); i++) {
             if(i!=0)
                 excel.setRowBreak(lineNumber + 1);
-            lineNumber += 3;
+            try{
+
+                lineNumber += 3;
             excel.insertBlackTitleHeaderBorderless(0, lineNumber, datas.getJsonObject(i).getString("city"));
             excel.insertBlackTitleHeaderBorderless(2, lineNumber, datas.getJsonObject(i).getString("nameEtab"));
             excel.insertBlackTitleHeaderBorderless(4, lineNumber, datas.getJsonObject(i).getString("uai"));
@@ -169,6 +173,10 @@ public class NotificationLycTab extends TabHelper {
                         throw e;
                     }
                 }
+            }
+            }catch (NullPointerException e){
+                log.error("@LystoreWorker["+ this.getClass() +"] error in first loop: \n" );
+                throw e;
             }
         }
         excel.autoSize(8);

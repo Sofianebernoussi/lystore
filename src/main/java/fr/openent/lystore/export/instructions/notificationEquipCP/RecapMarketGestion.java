@@ -97,6 +97,8 @@ public class RecapMarketGestion extends TabHelper {
         writeArray();
     }
     private void writeArray() {
+        log.info("RECAP MARKT  writeArray");
+
         SimpleDateFormat formatterDate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         SimpleDateFormat formatterDateExcel = new SimpleDateFormat("dd/MM/yyyy");
         Date orderDate = null;
@@ -108,6 +110,7 @@ public class RecapMarketGestion extends TabHelper {
 
         for (int i = 0; i < datas.size(); i++) {
             lineNumber++;
+            try{
 
             JsonObject market = datas.getJsonObject(i);
             setLabel(market.getString("market"));
@@ -192,13 +195,13 @@ public class RecapMarketGestion extends TabHelper {
                         throw e;
                     }
                     try{
-                    excel.insertCellTabCenter(6, lineNumber, formatStrToCell(campaign, 5));
-                    excel.insertCellTabCenter(7, lineNumber, formatStrToCell(order.getInteger("amount").toString(), 5));
-                    excel.insertCellTabDouble(8, lineNumber, safeGetDouble(order, "total", "RecapMarketGestion"));
-                    excel.insertCellTabCenter(9, lineNumber, formatStrToCell(order.getString("name_equipment"), 5));
-                    excel.insertCellTabCenter(10, lineNumber, order.getString("cite_mixte"));
-                    excel.insertCellTabCenter(11, lineNumber, formatStrToCell(order.getString("market"), 5));
-                    excel.insertCellTabCenter(12, lineNumber,formatStrToCell( makeCellWithoutNull(order.getString("comment")), 5));
+                        excel.insertCellTabCenter(6, lineNumber, formatStrToCell(campaign, 5));
+                        excel.insertCellTabCenter(7, lineNumber, formatStrToCell(order.getInteger("amount").toString(), 5));
+                        excel.insertCellTabDouble(8, lineNumber, safeGetDouble(order, "total", "RecapMarketGestion"));
+                        excel.insertCellTabCenter(9, lineNumber, formatStrToCell(order.getString("name_equipment"), 5));
+                        excel.insertCellTabCenter(10, lineNumber, order.getString("cite_mixte"));
+                        excel.insertCellTabCenter(11, lineNumber, formatStrToCell(order.getString("market"), 5));
+                        excel.insertCellTabCenter(12, lineNumber,formatStrToCell( makeCellWithoutNull(order.getString("comment")), 5));
                     }catch (NullPointerException e){
                         log.error("@LystoreWorker["+ this.getClass() +"] error in getting param from sql");
                         throw e;
@@ -212,7 +215,10 @@ public class RecapMarketGestion extends TabHelper {
             excel.insertHeader(0, lineNumber, zip);
             excel.setTotalX(startLine, lineNumber - 1, 8, lineNumber, 1);
             lineNumber++;
-
+            }catch (NullPointerException e){
+                log.error("@LystoreWorker["+ this.getClass() +"] error in first loop : \n" );
+                throw e;
+            }
         }
         excel.autoSize(13);
     }

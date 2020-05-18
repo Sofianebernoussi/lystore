@@ -54,6 +54,8 @@ public class LinesBudget extends TabHelper {
     }
     @Override
     protected void setArray(JsonArray datas) {
+        log.info("LINESBUDGET  setArray");
+
         int initLineNumber;
         for (int i = 0; i < datas.size(); i++) {
             try{

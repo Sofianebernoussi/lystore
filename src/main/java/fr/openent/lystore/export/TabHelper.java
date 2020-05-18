@@ -308,32 +308,40 @@ public abstract class TabHelper {
         JsonArray sortedJsonArray = new JsonArray();
 
         List<JsonObject> jsonValues = new ArrayList<JsonObject>();
-        for (int i = 0; i < values.size(); i++) {
-            jsonValues.add(values.getJsonObject(i));
-        }
-        Collections.sort(jsonValues, new Comparator<JsonObject>() {
-            private static final String KEY_NAME = "uai";
-            @Override
-            public int compare(JsonObject a, JsonObject b) {
-                String valA = "";
-                String valB = "";
-                try {
-                    if (a.containsKey(KEY_NAME)) {
-                        valA = a.getString(KEY_NAME);
-                    }
-                    if (b.containsKey(KEY_NAME)) {
-                        valB = b.getString(KEY_NAME);
-                    }
-                } catch (NullPointerException e) {
-                    log.error("error when sorting values by id_campaign during export");
-                }
-                return valA.compareTo(valB);
+        try {
+            for (int i = 0; i < values.size(); i++) {
+                jsonValues.add(values.getJsonObject(i));
             }
-        });
-        for (int i = 0; i < values.size(); i++) {
-            sortedJsonArray.add(jsonValues.get(i));
+            Collections.sort(jsonValues, new Comparator<JsonObject>() {
+                private static final String KEY_NAME = "uai";
+
+                @Override
+                public int compare(JsonObject a, JsonObject b) {
+                    String valA = "";
+                    String valB = "";
+                    try {
+                        if (a.containsKey(KEY_NAME)) {
+                            valA = a.getString(KEY_NAME);
+                        }
+                        if (b.containsKey(KEY_NAME)) {
+                            valB = b.getString(KEY_NAME);
+                        }
+                    } catch (NullPointerException e) {
+                        log.error("error when sorting values by id_campaign during export");
+                    }
+                    return valA.compareTo(valB);
+                }
+            });
+            for (int i = 0; i < values.size(); i++) {
+                sortedJsonArray.add(jsonValues.get(i));
+            }
+        }
+        catch(NullPointerException e){
+            log.error("error in sorting by uai " + values);
+           throw e;
         }
         return sortedJsonArray;
+
     }
     protected void setStructuresFromDatas(JsonArray structures) {
         JsonArray actions;
@@ -491,14 +499,14 @@ public abstract class TabHelper {
                 " s.phone as phone";
         try {
             Neo4j.getInstance().execute(query, new JsonObject().put("id", id), Neo4jResult.validResultHandler(handler));
-        }catch (VertxException e){
+        }catch (Exception e){
             logger.error( "@LystoreWorker["+ e.getClass() +"] " + e.getMessage() +" tabHelper");
             getStructure(id,handler);
         }
-        catch (NullPointerException e){
-            logger.error( "@LystoreWorker["+ e.getClass() +"] " + e.getMessage() +" tabHelper");
-            getStructure(id, handler);
-        }
+//        catch (NullPointerException e){
+//            logger.error( "@LystoreWorker["+ e.getClass() +"] " + e.getMessage() +" tabHelper");
+//            getStructure(id, handler);
+//        }
     }
     protected Handler<Either<String, JsonArray>> getHandler(Future<JsonArray> future) {
         return event -> {
@@ -535,7 +543,9 @@ public abstract class TabHelper {
                         errorCatch = true;
                         errorSTR = e.getMessage();
                         log.error("------------------------------ERROR---------------------------");
-                        e.printStackTrace();
+                        for (StackTraceElement elem : e.getStackTrace()) {
+                            log.error("\t\t"+ elem);
+                        }
                         log.error("-------------------------END ERROR---------------------------");
 
                     }

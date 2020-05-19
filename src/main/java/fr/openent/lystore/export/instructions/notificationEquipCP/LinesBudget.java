@@ -58,7 +58,7 @@ public class LinesBudget extends TabHelper {
 
         int initLineNumber;
         for (int i = 0; i < datas.size(); i++) {
-            try{
+            try {
                 Double totalToInsert = 0.d;
                 String previousStructure = "";
                 JsonObject operationData = datas.getJsonObject(i);
@@ -71,94 +71,63 @@ public class LinesBudget extends TabHelper {
 
                 orders = sortByUai(orders);
                 for (int j = 0; j < orders.size(); j++) {
-                    try{
+                    try {
+
                         JsonObject order = orders.getJsonObject(j);
-                        String currentStructure="";
-                        String code="";
-                        try{
-                            currentStructure = order.getString("id_structure");
-                            code = order.getString("code");
-                        }catch (NullPointerException e){
-                            log.error("@LystoreWorker["+ this.getClass() +"] error in getting code and id_struct");
-                            throw e;
-                        }
-                        if (!previousStructure.equals(currentStructure)) {
-                            nbTotaux++;
-                            lineNumber++;
-                            if (!operationAdded) {
-                                try {
-                                    excel.insertWhiteOnBlueTab(1, lineNumber, labelOperation);
-                                }catch (NullPointerException e){
-                                    log.error("@LystoreWorker["+ this.getClass() +"] error in insertWhiteOnBlueTab");
-                                    throw e;
-                                }
-                                operationAdded = true;
-                            }
-                            totalToInsert = 0.d;
-                            previousCode = "";
-                            previousStructure = currentStructure;
-                            insertStructurePArams(order);
-                        }
-                        if (!previousCode.equals(code)) {
-                            previousCode = code;
-                            totalToInsert = 0.d;
-                        }
-                        try {
-                            totalToInsert += safeGetDouble(order, "total", "LinesBudget");
-                            excel.insertDoubleYellow(5 + codes.indexOf(Integer.parseInt(code)), lineNumber,
-                                    totalToInsert);
-                        }catch (NullPointerException e){
-                            log.error("@LystoreWorker["+ this.getClass() +"] error in insertDoubleYellow");
-                            throw e;
-                        }
-
-                        //insert Total.
+                    String currentStructure = order.getString("id_structure");
+                    String code = order.getString("code");
+                    if (!previousStructure.equals(currentStructure)) {
+                        nbTotaux++;
                         lineNumber++;
-
-                        insertTotal(initLineNumber, labelOperation, nbTotaux);
-                        lineNumber++;
-                    }catch (NullPointerException e){
-                        log.error("@LystoreWorker["+ this.getClass() +"] error in second for loop data : \n" + orders.getJsonObject(j));
+                        if (!operationAdded) {
+                            excel.insertWhiteOnBlueTab(1, lineNumber, labelOperation);
+                            operationAdded = true;
+                        }
+                        totalToInsert = 0.d;
+                        previousCode = "";
+                        previousStructure = currentStructure;
+                        insertStructureParam(order);
+                    }
+                    if (!previousCode.equals(code)) {
+                        previousCode = code;
+                        totalToInsert = 0.d;
+                    }
+                    totalToInsert += safeGetDouble(order, "total", "LinesBudget");
+                    excel.insertDoubleYellow(5 + codes.indexOf(Integer.parseInt(code)), lineNumber,
+                            totalToInsert);
+                    } catch (NullPointerException e) {
+                        log.error("@LystoreWorker[" + this.getClass() + "] error in second for loop  data : " +  orders.getJsonObject(j));
                         throw e;
                     }
                 }
-            }catch (NullPointerException e){
-                log.error("@LystoreWorker["+ this.getClass() +"] error in first for loop " );
+                //insert Total
+                excel.fillTabWithStyle(1, 4, initLineNumber + 1, lineNumber + 1, excel.whiteOnBlueLabel);
+                excel.fillTabWithStyle(5, arraylength, initLineNumber + 1, lineNumber + 1, excel.doubleOnYellowStyle);
+
+                lineNumber++;
+                excel.insertHeader(1, lineNumber, excel.totalLabel + " : " + labelOperation);
+                for (int nbTotal = 0; nbTotal < codes.size(); nbTotal++) {
+                    excel.setTotalX(initLineNumber + 1, lineNumber - 1, 5 + nbTotal, lineNumber);
+                }
+                for (int nbTotal = 0; nbTotal <= nbTotaux; nbTotal++) {
+                    excel.setTotalY(5, arraylength - 1, initLineNumber + 1 + nbTotal, arraylength);
+                }
+                lineNumber++;
+
+            } catch (NullPointerException e) {
+                log.error("@LystoreWorker[" + this.getClass() + "] error in first for loop ");
                 throw e;
             }
-            if (i == 1){
+            if (i == 1) {
                 excel.autoSize(10);
             }
         }
     }
 
-    private void insertTotal(int initLineNumber, String labelOperation, int nbTotaux) {
-        try {
-            excel.fillTabWithStyle(1, 4, initLineNumber + 1, lineNumber + 1, excel.whiteOnBlueLabel);
-            excel.fillTabWithStyle(5, arraylength, initLineNumber + 1, lineNumber + 1, excel.doubleOnYellowStyle);
-
-            excel.insertHeader(1, lineNumber, excel.totalLabel + " : " + labelOperation);
-            for (int nbTotal = 0; nbTotal < codes.size(); nbTotal++) {
-                excel.setTotalX(initLineNumber + 1, lineNumber - 1, 5 + nbTotal, lineNumber);
-            }
-            for (int nbTotal = 0; nbTotal <= nbTotaux; nbTotal++) {
-                excel.setTotalY(5, arraylength - 1, initLineNumber + 1 + nbTotal, arraylength);
-            }
-        }catch (NullPointerException e){
-            log.error("@LystoreWorker["+ this.getClass() +"] error in insertTotal");
-            throw e;
-        }
-    }
-
-    private void insertStructurePArams(JsonObject order) {
-        try {
-            excel.insertWhiteOnBlueTab(2, lineNumber, order.getString("uai"));
-            excel.insertWhiteOnBlueTab(3, lineNumber, order.getString("type"));
-            excel.insertWhiteOnBlueTab(4, lineNumber, order.getString("nameEtab"));
-        }catch (NullPointerException e){
-            log.error("@LystoreWorker["+ this.getClass() +"] error in insertStructureParams");
-            throw e;
-        }
+    private void insertStructureParam(JsonObject order) {
+        excel.insertWhiteOnBlueTab(2, lineNumber, order.getString("uai"));
+        excel.insertWhiteOnBlueTab(3, lineNumber, order.getString("type"));
+        excel.insertWhiteOnBlueTab(4, lineNumber, order.getString("nameEtab"));
     }
 
 

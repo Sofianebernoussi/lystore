@@ -97,6 +97,9 @@ public class RecapMarket extends TabHelper {
                     throw e;
                 }
             }
+            if(i == 1) {
+                excel.autoSize(arrayLength+1);
+            }
         }
         //Setting total
         excel.insertYellowLabel(0, operationsRowNumber, ExcelHelper.totalLabel);
@@ -112,7 +115,6 @@ public class RecapMarket extends TabHelper {
             excel.setTotalY(1, programMarket.size(), 9 + i, programMarket.size() + 1);
         }
 
-        excel.autoSize(arrayLength + 1); // size all the colmuns wich contains datas to display
 
     }
 

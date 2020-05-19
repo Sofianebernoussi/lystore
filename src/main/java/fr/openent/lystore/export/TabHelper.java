@@ -367,7 +367,7 @@ public abstract class TabHelper {
             structure = structures.getJsonObject(j);
             if (data.getString("id_structure").equals(structure.getString("id"))) {
 
-                if(data.getString("name") != null){
+                if(structure.getString("name") != null){
                     data.put("nameEtab", structure.getString("name"));
                 }
                 putDataIfNotNull("uai",data, structure);

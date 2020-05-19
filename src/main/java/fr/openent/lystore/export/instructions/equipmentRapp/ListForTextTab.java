@@ -151,8 +151,10 @@ public class ListForTextTab extends TabHelper {
             }
             setTotal(programLabel.size() + 4, initYProgramLabel);
             yProgramLabel += 2;
+            if(i == 1) {
+                excel.autoSize(arrayLength);
+            }
         }
-        excel.autoSize(arrayLength);
     }
 
     private void setOperation(String operation, int y) {

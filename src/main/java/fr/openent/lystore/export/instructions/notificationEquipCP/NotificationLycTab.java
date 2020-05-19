@@ -178,8 +178,10 @@ public class NotificationLycTab extends TabHelper {
                 log.error("@LystoreWorker["+ this.getClass() +"] error in first loop: \n" );
                 throw e;
             }
+            if(i == 1){
+                excel.autoSize(8);
+            }
         }
-        excel.autoSize(8);
     }
 
 

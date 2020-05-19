@@ -162,6 +162,9 @@ public class RecapTab extends TabHelper {
                         2 + i,
                         safeGetDouble(oldTotals, key, "RecapTab"));
             }
+            if(i == 1 ){
+                excel.autoSize(programLabel.size() + 3);
+            }
         }
 
         excel.fillTab(2, programLabel.size() + 2, 2, operationsRowNumber);
@@ -177,7 +180,6 @@ public class RecapTab extends TabHelper {
             excel.setTotalY(2, programLabel.size() + 1, 2 + i, programLabel.size() + 2);
         }
 
-        excel.autoSize(programLabel.size() + 3);
     }
     @Override
     public void getDatas(Handler<Either<String, JsonArray>> handler) {

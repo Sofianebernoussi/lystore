@@ -140,9 +140,11 @@ public class Subventions extends TabHelper {
             lineNumber += 2;
 
 
+            if(i==1){
+                excel.autoSize(4);
+            }
         }
 
-        excel.autoSize(4);
     }
 
 

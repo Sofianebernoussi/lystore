@@ -35,7 +35,7 @@ public class AnnexeDelibTab extends TabHelper {
     }
 
     @Override
-      protected void initDatas(Handler<Either<String, Boolean>> handler) {
+    protected void initDatas(Handler<Either<String, Boolean>> handler) {
         ArrayList structuresId = new ArrayList<>();
         for (int i = 0; i < datas.size(); i++) {
             JsonObject data = datas.getJsonObject(i);
@@ -67,28 +67,30 @@ public class AnnexeDelibTab extends TabHelper {
             try{
 
                 JsonObject action = datas.getJsonObject(i);
-            key = action.getString("program") + " - " + action.getString("code");
-            int columnToInsert = programMarket.getInteger(key);
-            if (!checkIdPassed(idPassed, action.getString("id_structure"))) {
-                idPassed.put(action.getString("id_structure"), 1);
-                lineToInsert++;
-                excel.insertCellTab(0, lineToInsert, action.getString("zipCode"));
-                excel.insertCellTab(1, lineToInsert, action.getString("city"));
-                excel.insertCellTab(2, lineToInsert, action.getString("nameEtab"));
-                excel.insertCellTab(3, lineToInsert, action.getString("uai"));
-                oldkey = "";
-            }
-            if (!oldkey.equals(key)) {
-                oldTotal = 0.d;
-            }
-            oldkey = key;
-            oldTotal += Double.parseDouble(action.getString("total"));
+                key = action.getString("program") + " - " + action.getString("code");
+                int columnToInsert = programMarket.getInteger(key);
+                if (!checkIdPassed(idPassed, action.getString("id_structure"))) {
+                    idPassed.put(action.getString("id_structure"), 1);
+                    lineToInsert++;
+                    excel.insertCellTab(0, lineToInsert, action.getString("zipCode"));
+                    excel.insertCellTab(1, lineToInsert, action.getString("city"));
+                    excel.insertCellTab(2, lineToInsert, action.getString("nameEtab"));
+                    excel.insertCellTab(3, lineToInsert, action.getString("uai"));
+                    oldkey = "";
+                }
+                if (!oldkey.equals(key)) {
+                    oldTotal = 0.d;
+                }
+                oldkey = key;
+                oldTotal += Double.parseDouble(action.getString("total"));
 
-            excel.insertCellTabDouble(columnToInsert + 4, lineToInsert, oldTotal);
+                excel.insertCellTabDouble(columnToInsert + 4, lineToInsert, oldTotal);
             }catch (NullPointerException e){
                 log.error("@LystoreWorker["+ this.getClass() +"] error in second for loop data : \n" + datas.getJsonObject(i));
                 throw e;
             }
+            if(i==1)
+                excel.autoSize(arrayLength + 1);
         }
 
         excel.fillTab(0, arrayLength, 6, lineToInsert + 1);
@@ -101,7 +103,6 @@ public class AnnexeDelibTab extends TabHelper {
             excel.setTotalX(6, lineToInsert, 4 + i, lineToInsert + 1);
 
         }
-        excel.autoSize(arrayLength + 1);
     }
 
     private boolean checkIdPassed(JsonObject idPassed, String id) {

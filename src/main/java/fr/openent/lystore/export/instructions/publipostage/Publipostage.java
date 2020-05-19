@@ -100,8 +100,10 @@ public class Publipostage extends TabHelper {
                 }
             }
             lengthGlobalRows++;
+            if(rowNumber == 10){
+                excel.autoSize(lengthGlobalCols);
+            }
         }
-        excel.autoSize(lengthGlobalCols);
     }
 
 

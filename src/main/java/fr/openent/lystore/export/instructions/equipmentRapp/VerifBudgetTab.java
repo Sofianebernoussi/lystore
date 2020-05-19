@@ -81,9 +81,11 @@ public class VerifBudgetTab extends TabHelper {
                 log.error("@LystoreWorker["+ this.getClass() +"] error in second for loop data : \n" + datas.getJsonObject(i));
                 throw e;
             }
+            if(i == 1){
+                excel.autoSize(7);
+            }
         }
         insertProgramPrice();
-        excel.autoSize(7);
     }
 
     private void insertProgramPrice() {

@@ -1014,8 +1014,12 @@ public class ExcelHelper {
      * @param arrayLength number of columns to autosize
      */
     public void autoSize(int arrayLength) {
-        for (int i = 0; i < arrayLength; i++) {
-            sheet.autoSizeColumn(i);
+        try {
+            for (int i = 0; i < arrayLength; i++) {
+                sheet.autoSizeColumn(i);
+            }
+        }catch (Exception e){
+            return;
         }
     }
 

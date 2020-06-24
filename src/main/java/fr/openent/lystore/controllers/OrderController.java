@@ -42,6 +42,7 @@ import java.math.BigDecimal;
 import java.text.*;
 import java.util.*;
 
+import static fr.openent.lystore.utils.OrderUtils.getValidOrdersCSVExportHeader;
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
 
@@ -545,10 +546,9 @@ public class OrderController extends ControllerHelper {
                                 new Handler<JsonObject>() {
                                     @Override
                                     public void handle(JsonObject data) {
-                                        data.put("print_order", printOrder);
                                         data.put("print_certificates", printCertificates);
                                         exportPDFService.generatePDF(request, data,
-                                                "BC.xhtml", "CSF_",
+                                                "BC_CSF.xhtml", "CSF_",
                                                 new Handler<Buffer>() {
                                                     @Override
                                                     public void handle(final Buffer pdf) {
@@ -647,27 +647,6 @@ public class OrderController extends ControllerHelper {
                 + ";"
                 + equipment.getString("amount")
                 + "\n";
-    }
-
-    private String getValidOrdersCSVExportHeader(HttpServerRequest request) {
-        return I18n.getInstance().
-                translate("UAI", getHost(request), I18n.acceptLanguage(request)) +
-                ";" +
-                I18n.getInstance().
-                        translate("lystore.structure.name", getHost(request), I18n.acceptLanguage(request)) +
-                ";" +
-                I18n.getInstance().
-                        translate("city", getHost(request), I18n.acceptLanguage(request)) +
-                ";" +
-                I18n.getInstance().
-                        translate("phone", getHost(request), I18n.acceptLanguage(request)) +
-                ";" +
-                I18n.getInstance().
-                        translate("EQUIPMENT", getHost(request), I18n.acceptLanguage(request)) +
-                ";" +
-                I18n.getInstance().
-                        translate("lystore.amount", getHost(request), I18n.acceptLanguage(request)) +
-                "\n";
     }
 
 
@@ -893,25 +872,37 @@ public class OrderController extends ControllerHelper {
                                         retrieveContract(request, ids, new Handler<JsonObject>() {
                                             @Override
                                             public void handle(JsonObject contract) {
-                                                JsonObject certificate;
-                                                for (int i = 0; i < certificates.size(); i++) {
-                                                    certificate = certificates.getJsonObject(i);
-                                                    certificate.put("agent", managmentInfo.getJsonObject("userInfo"));
-                                                    certificate.put("supplier",
-                                                            managmentInfo.getJsonObject("supplierInfo"));
-                                                    addStructureToOrders(certificate.getJsonArray("orders"),
-                                                            certificate.getJsonObject("structure"));
-                                                }
-                                                data.put("supplier", managmentInfo.getJsonObject("supplierInfo"))
-                                                        .put("agent", managmentInfo.getJsonObject("userInfo"))
-                                                        .put("order", order)
-                                                        .put("certificates", certificates)
-                                                        .put("contract", contract)
-                                                        .put("nbr_bc", nbrBc)
-                                                        .put("nbr_engagement", nbrEngagement)
-                                                        .put("date_generation", dateGeneration);
+                                                retrieveOrderParam(ids, new Handler<JsonObject>() {
+                                                    @Override
+                                                    public void handle(JsonObject event) {
 
-                                                handler.handle(data);
+
+                                                        JsonObject certificate;
+                                                        for (int i = 0; i < certificates.size(); i++) {
+                                                            certificate = certificates.getJsonObject(i);
+                                                            certificate.put("agent", managmentInfo.getJsonObject("userInfo"));
+                                                            certificate.put("supplier",
+                                                                    managmentInfo.getJsonObject("supplierInfo"));
+                                                            addStructureToOrders(certificate.getJsonArray("orders"),
+                                                                    certificate.getJsonObject("structure"));
+                                                        }
+                                                        data.put("supplier", managmentInfo.getJsonObject("supplierInfo"))
+                                                                .put("agent", managmentInfo.getJsonObject("userInfo"))
+                                                                .put("order", order)
+                                                                .put("certificates", certificates)
+                                                                .put("contract", contract)
+                                                                .put("nbr_bc", nbrBc)
+                                                                .put("nbr_engagement", nbrEngagement)
+                                                                .put("date_generation", dateGeneration);
+                                                        if(nbrBc.equals("")){
+                                                            data.put("nbr_bc",  event.getString("order_number"))
+                                                                    .put("nbr_engagement", event.getString("engagement_number"));
+
+
+                                                        }
+                                                        handler.handle(data);
+                                                    }
+                                                });
                                             }
                                         });
                                     }
@@ -920,6 +911,18 @@ public class OrderController extends ControllerHelper {
                         });
                     }
                 });
+            }
+        });
+    }
+
+    private void retrieveOrderParam(JsonArray validationNumbers, Handler<JsonObject> jsonObjectHandler) {
+        orderService.getOrderBCParams(validationNumbers, new Handler<Either<String, JsonObject>>() {
+            @Override
+            public void handle(Either<String, JsonObject> event) {
+                if(event.isRight()) {
+                    jsonObjectHandler.handle(event.right().getValue());
+                }
+
             }
         });
     }

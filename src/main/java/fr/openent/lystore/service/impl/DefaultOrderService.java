@@ -1092,5 +1092,17 @@ public class DefaultOrderService extends SqlCrudService implements OrderService 
 
         Sql.getInstance().prepared(query, new JsonArray().add(idOrder), SqlResult.validUniqueResultHandler(handler));
     }
+
+    @Override
+    public void getOrderBCParams(JsonArray validationNumbers, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT DISTINCT engagement_number, label_program , order_number " +
+                " FROM " + Lystore.lystoreSchema + ".order od " +
+                " INNER JOIN " + Lystore.lystoreSchema + ".order_client_equipment oce on oce.id_order = od.id " +
+                " WHERE oce.number_validation = ?";
+
+        JsonArray params = new JsonArray().add(validationNumbers.getString(0));
+
+        Sql.getInstance().prepared(query,params,SqlResult.validUniqueResultHandler(handler));
+    }
 }
 

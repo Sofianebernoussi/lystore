@@ -42,6 +42,7 @@ import java.math.BigDecimal;
 import java.text.*;
 import java.util.*;
 
+import static fr.openent.lystore.utils.OrderUtils.getValidOrdersCSVExportHeader;
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static fr.wseduc.webutils.http.response.DefaultResponseHandler.defaultResponseHandler;
 
@@ -646,27 +647,6 @@ public class OrderController extends ControllerHelper {
                 + ";"
                 + equipment.getString("amount")
                 + "\n";
-    }
-
-    private String getValidOrdersCSVExportHeader(HttpServerRequest request) {
-        return I18n.getInstance().
-                translate("UAI", getHost(request), I18n.acceptLanguage(request)) +
-                ";" +
-                I18n.getInstance().
-                        translate("lystore.structure.name", getHost(request), I18n.acceptLanguage(request)) +
-                ";" +
-                I18n.getInstance().
-                        translate("city", getHost(request), I18n.acceptLanguage(request)) +
-                ";" +
-                I18n.getInstance().
-                        translate("phone", getHost(request), I18n.acceptLanguage(request)) +
-                ";" +
-                I18n.getInstance().
-                        translate("EQUIPMENT", getHost(request), I18n.acceptLanguage(request)) +
-                ";" +
-                I18n.getInstance().
-                        translate("lystore.amount", getHost(request), I18n.acceptLanguage(request)) +
-                "\n";
     }
 
 

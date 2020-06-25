@@ -59,7 +59,9 @@ public class NotificationLycTab extends TabHelper {
                     structuresId.add(structuresId.size(), action.getString("id_structure"));
             }
         }
+
         getStructures(new JsonArray(structuresId), getStructureHandler(structuresId,handler));
+
 
 //        getStructures(new JsonArray(structuresId), new Handler<Either<String, JsonArray>>() {
 //            @Override
@@ -87,12 +89,12 @@ public class NotificationLycTab extends TabHelper {
 //            }
 //        });
 
-        datas = sortByCity(datas, false);
     }
 
     @Override
     protected void fillPage(JsonArray structures){
         setStructuresFromDatas(structures);
+        datas = sortByUai(datas);
         writeArray();
     }
 //    private void writeArray(Handler<Either<String, Boolean>> handler) {

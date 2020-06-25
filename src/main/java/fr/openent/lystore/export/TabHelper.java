@@ -327,7 +327,7 @@ public abstract class TabHelper {
                             valB = b.getString(KEY_NAME);
                         }
                     } catch (NullPointerException e) {
-                        log.error("error when sorting values by id_campaign during export");
+                        log.error("error when sorting values by uai during export");
                     }
                     return valA.compareTo(valB);
                 }

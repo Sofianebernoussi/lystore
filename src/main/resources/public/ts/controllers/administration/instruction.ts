@@ -45,11 +45,16 @@ export const instructionController = ng.controller('instructionController',
                 .filter(operation => operation.instruction === null && operation.status === 'false');
             $scope.instructions.all.map(instruction => {
                 instruction.operations.map(idOperation => {
-                    $scope.operations.all.filter(operation => operation.id !== idOperation)
+                    $scope.operations.all.filter(operation => operation.id !== idOperation )
                 });
             });
             $scope.operations.all.sort(function (a, b) {
                 return  a.label.label.localeCompare(b.label.label);
+            });
+
+            $scope.allOperations =  [] ;
+            $scope.operations.all.forEach(op =>{
+                $scope.allOperations.push(op);
             });
 
             if(action === 'create'){
@@ -64,7 +69,9 @@ export const instructionController = ng.controller('instructionController',
                     return  a.label.label.localeCompare(b.label.label);
                 });
             }
-            console.log($scope.operations.all)
+            $scope.instruction.operations.forEach( op =>{
+                $scope.operations.all =   $scope.operations.all.filter(operation => operation.id_label !== op.id_label )
+            });
             $scope.knowOperationIsEmpty();
             $scope.loadingArray = false;
             Utils.safeApply($scope);
@@ -85,8 +92,8 @@ export const instructionController = ng.controller('instructionController',
             $scope.operation.id_label = $scope.operationAdd.id_label;
             $scope.operation.amount = $scope.operationAdd.amount;
             $scope.operation.status = $scope.operationAdd.status;
-            console.log($scope.operationAdd);
-            $scope.operations.all = $scope.operations.all.filter( operation => operation.id !== $scope.operation.id);
+            $scope.operations.all = $scope.operations.all.filter( operation => operation.id !== $scope.operation.id );
+            $scope.operations.all = $scope.operations.all.filter( operation => operation.id_label !== $scope.operation.id_label)
             $scope.instruction.operations.push($scope.operation);
             $scope.isNewOperation = false;
             if($scope.isOperationEdit) {
@@ -95,7 +102,6 @@ export const instructionController = ng.controller('instructionController',
             }
             $scope.instruction.operation = undefined;
             $scope.knowOperationIsEmpty();
-
         };
         $scope.knowOperationIsEmpty =() => {
             $scope.isOperationsIsEmpty =  $scope.operations.all.length === 0 ?  true : false;
@@ -107,6 +113,11 @@ export const instructionController = ng.controller('instructionController',
             $scope.operations.all.push(operation);
             $scope.operations.all.sort(function (a, b) {
                 return  a.label.label.localeCompare(b.label.label);
+            });
+            $scope.allOperations.forEach(op =>{
+                if(op.id_label== operation.id_label){
+                    $scope.operations.all.push(op);
+                }
             });
 
             $scope.knowOperationIsEmpty();

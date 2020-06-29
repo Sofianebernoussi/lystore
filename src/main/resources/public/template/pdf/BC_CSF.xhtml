@@ -28,7 +28,7 @@
         }
         .left {
             position: relative;
-            width: 45%;
+            width: 40%;
             margin-right: 5%;
             display: inline-block;
         }
@@ -52,6 +52,10 @@
         }
         .header {
             width: 100%;
+            vertical-align: top;
+            display: flex;
+            align-items: start;
+            justify-content: center;
         }
         .foot {
             width: 100%;
@@ -168,16 +172,26 @@
 <div class="break">
     <div class="service-fait" >
         <div class="header">
-            <div>
-                <div class="left center-text">
-                    <img  class="logo-region" src="data:image/png;base64, {{logo-data}}" alt="ile de france" />
-                    <h4>REGION ILE DE FRANCE</h4>
-                    <h5>PÔLE LYCÉES</h5>
-                    <p>
-                        <span class="uppercase">Mission administration, pilotage et projets transverses</span><br />
-                        Service administratif et juridique<br />
-                        2, rue Simone Veil, 93400 Saint-Ouen
-                    </p>
+                <div class="left">
+                    <div class=" center-text">
+                        <img  class="logo-region" src="data:image/png;base64, {{logo-data}}" alt="ile de france" />
+                        <h4>REGION ILE DE FRANCE</h4>
+                        <h5>PÔLE LYCÉES</h5>
+                        <p>
+                            <span class="uppercase">Mission administration, pilotage et projets transverses</span><br />
+                            Service administratif et juridique<br />
+                            2, rue Simone Veil, 93400 Saint-Ouen
+                        </p>
+                    </div>
+                    <div class="order-info">
+                        <div class="agent-info">
+                            {{#agent}}
+                            <strong>{{name}} <br/> </strong>
+                            {{email}} <br/>
+                            Tel : {{phone}}  <br/>
+                            {{/agent}}
+                        </div>
+                    </div>
                 </div>
                 <div class="right">
                     <h1>
@@ -204,16 +218,6 @@
                     </strong>
                 </div>
             </div>
-            <div class="order-info">
-                <div class="agent-info">
-                    {{#agent}}
-                    <strong>{{name}} <br/> </strong>
-                    {{email}} <br/>
-                    Tel : {{phone}}  <br/>
-                    {{/agent}}
-                </div>
-            </div>
-        </div>
 
         <br/>
         <strong>Description de l'équipement livré et installé</strong>

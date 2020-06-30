@@ -556,7 +556,8 @@
   "difference": "Différence Cagnotte/Commandes",
   "no.date": "Pas de date",
   "support.market": "Marché Support",
-  "lystore.contract.type.placeholder": "Sélectionner le marché support"
+  "lystore.contract.type.placeholder": "Sélectionner le marché support",
+  "basket.price.null": "Prix TTC de l'équipement égal à zéro non autorisé"
 
 
 }

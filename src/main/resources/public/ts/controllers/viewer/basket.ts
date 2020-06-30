@@ -194,8 +194,21 @@ export const basketController = ng.controller('basketController',
                 &&  _.findWhere( equipmentsBasket, {status : 'UNAVAILABLE'}) === undefined;
         };
         $scope.takeClientProject = async (baskets: Baskets) => {
-            template.open('basket.project', 'customer/campaign/basket/project-confirmation');
-            $scope.display.lightbox.createProject = true;
+            let priceIs0 = false;
+            baskets.all.forEach(basket =>{
+                console.log(basket)
+                if(basket.price_proposal === null && basket.equipment.price === 0 || basket.price_proposal === 0 ){
+                    priceIs0 = true;
+                }
+            })
+            if(priceIs0){
+                toasts.warning("basket.price.null")
+            }else{
+                template.open('basket.project', 'customer/campaign/basket/project-confirmation');
+                $scope.display.lightbox.createProject = true;
+            }
+
+
         }
         $scope.cancelProjectCreate = () => {
             $scope.display.lightbox.createProject = false;

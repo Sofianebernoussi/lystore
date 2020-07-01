@@ -10,7 +10,7 @@ import {
     Structures,
     Titles,
     Utils,
-    Equipments, ContractType, ContractTypes
+    Equipments, ContractType, ContractTypes, Contracts
 } from "../../model";
 
 declare let window: any;
@@ -154,7 +154,7 @@ export const orderRegionController = ng.controller('orderRegionController',
                 equipment: undefined,
                 equipments: new Equipments(),
                 allEquipments : [],
-                contract_types : new ContractTypes(),
+                contracts : new Contracts(),
                 structure: undefined,
                 price: undefined,
                 amount: undefined,
@@ -177,7 +177,7 @@ export const orderRegionController = ng.controller('orderRegionController',
         $scope.duplicateRow = (index:number):void => {
             let row = JSON.parse(JSON.stringify($scope.orderToCreate.rows[index]));
             row.equipments = new Equipments();
-            row.contract_types = new ContractTypes();
+            row.contracts = new Contracts();
             if (row.structure){
                 if (row.structure.structures) {
                     row.structure = $scope.structure_groups.all.find(struct => row.structure.id === struct.id);
@@ -188,8 +188,8 @@ export const orderRegionController = ng.controller('orderRegionController',
             //duplicate contracttypes
             row.ct_enabled =  $scope.orderToCreate.rows[index].ct_enabled;
 
-            $scope.orderToCreate.rows[index].contract_types.all.forEach(ct=>{
-                row.contract_types.all.push(ct);
+            $scope.orderToCreate.rows[index].contracts.all.forEach(ct=>{
+                row.contracts.all.push(ct);
             })
             if($scope.orderToCreate.rows[index].contract_type)
                 row.contract_type = $scope.orderToCreate.rows[index].contract_type ;
@@ -208,20 +208,20 @@ export const orderRegionController = ng.controller('orderRegionController',
 
         $scope.switchStructure = async (row:any, structure:Structure):Promise<void> => {
             await row.equipments.syncAll($scope.orderToCreate.campaign.id, (structure) ? structure.id : undefined);
-            await row.contract_types.sync();
+            await row.contracts.sync();
             row.contract_type = undefined;
             row.ct_enabled = undefined;
-            let ct = [];
+            let contracts = [];
             row.equipments.all.forEach(e => {
                 row.allEquipments.push(e);
-                row.contract_types.all.map(contract_type =>{
-                    if(contract_type.name === e.contract_type_name && !contract_type.isPresent ){
-                        contract_type.isPresent = true;
-                        ct.push(contract_type);
+                row.contracts.all.map(contract =>{
+                    if(contract.id === e.id_contract  && !contract.isPresent ){
+                        contract.isPresent = true;
+                        contracts.push(contract);
                     }
                 })
             });
-            row.contract_types.all = ct;
+            row.contracts.all = contracts;
             row.equipment = undefined;
             row.price = undefined;
             row.amount = undefined;
@@ -234,11 +234,12 @@ export const orderRegionController = ng.controller('orderRegionController',
             row.amount = 1;
         };
         $scope.initContractType = async (row) => {
-            if (row.contract_type) {
+            if (row.contract) {
                 row.ct_enabled = true;
                 row.equipment = undefined;
-                row.equipments.all = row.allEquipments.filter(equipment => row.contract_type.name === equipment.contract_type_name);
+                row.equipments.all = row.allEquipments.filter(equipment => row.contract.id === equipment.id_contract);
                 Utils.safeApply($scope);
+
             }
         };
 

@@ -166,7 +166,7 @@ public class Market extends TabHelper {
             initLine = lineNumber + 2;
 //            excel.insertCellTabDoubleWithPrice(3, lineNumber, Double.parseDouble(campaignData.getString("totalprice")));
             lineNumber += 2;
-            if(i == 1){
+            if(i <= 1){
                 excel.autoSize(4);
             }
         }

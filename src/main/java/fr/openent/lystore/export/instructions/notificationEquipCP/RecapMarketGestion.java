@@ -219,7 +219,7 @@ public class RecapMarketGestion extends TabHelper {
                 log.error("@LystoreWorker["+ this.getClass() +"] error in first loop : \n" );
                 throw e;
             }
-            if(i==1){
+            if(i<=1){
                 excel.autoSize(13);
             }
         }

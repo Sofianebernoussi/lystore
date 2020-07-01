@@ -162,7 +162,7 @@ public class RecapTab extends TabHelper {
                         2 + i,
                         safeGetDouble(oldTotals, key, "RecapTab"));
             }
-            if(i == 1 ){
+            if(i <= 1 ){
                 excel.autoSize(programLabel.size() + 3);
             }
         }

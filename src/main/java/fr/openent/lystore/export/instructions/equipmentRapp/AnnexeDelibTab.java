@@ -89,7 +89,7 @@ public class AnnexeDelibTab extends TabHelper {
                 log.error("@LystoreWorker["+ this.getClass() +"] error in second for loop data : \n" + datas.getJsonObject(i));
                 throw e;
             }
-            if(i==1)
+            if(i<=1)
                 excel.autoSize(arrayLength + 1);
         }
 

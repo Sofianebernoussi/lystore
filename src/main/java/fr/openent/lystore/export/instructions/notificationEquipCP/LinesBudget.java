@@ -118,7 +118,7 @@ public class LinesBudget extends TabHelper {
                 log.error("@LystoreWorker[" + this.getClass() + "] error in first for loop ");
                 throw e;
             }
-            if (i == 1) {
+            if (i <= 1) {
                 excel.autoSize(10);
             }
         }

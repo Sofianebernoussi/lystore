@@ -97,7 +97,7 @@ public class RecapMarket extends TabHelper {
                     throw e;
                 }
             }
-            if(i == 1) {
+            if(i <= 1) {
                 excel.autoSize(arrayLength+1);
             }
         }

@@ -97,7 +97,8 @@ export const basketController = ng.controller('basketController',
         };
 
         $scope.priceDisplay = (basket: Basket) => {
-            if (basket.price_proposal === false) {
+            console.log(basket.price_proposal)
+            if (basket.price_proposal === false || basket.price_proposal ===  null || basket.price_proposal === undefined) {
                 return $scope.calculatePriceOfBasketUnity(basket, 2, true);
             } else {
                 return basket.price_proposal;

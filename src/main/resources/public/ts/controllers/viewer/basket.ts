@@ -97,7 +97,7 @@ export const basketController = ng.controller('basketController',
         };
 
         $scope.priceDisplay = (basket: Basket) => {
-            if (!basket.price_proposal) {
+            if (basket.price_proposal === false) {
                 return $scope.calculatePriceOfBasketUnity(basket, 2, true);
             } else {
                 return basket.price_proposal;
@@ -161,6 +161,7 @@ export const basketController = ng.controller('basketController',
 
         $scope.updateBasketPriceProposal = (basket: Basket) => {
             basket.updatePriceProposal();
+            console.log(basket)
             basket.display_price_editable = false;
             Utils.safeApply($scope);
         }

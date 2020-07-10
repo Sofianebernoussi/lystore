@@ -58,6 +58,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
             }
         }
 
+        //TODO trop long => essayez avec des statements
         String queryOperation = "" +
                 "SELECT operation.*,  " +
                 "       to_json(label.*) AS label,  " +

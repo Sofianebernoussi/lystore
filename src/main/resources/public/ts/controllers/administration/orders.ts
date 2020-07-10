@@ -202,8 +202,13 @@ export const orderController = ng.controller('orderController',
         $scope.cancelBasketDelete = () => {
             $scope.display.lightbox.validOrder = false;
             template.close('validOrder.lightbox');
+            let indexToSplice = 0
             if($scope.operationId) {
-                $scope.redirectTo(`/operation/order/${$scope.operationId}`)
+                $scope.ordersClient.selected.map(orderSelected =>{
+                    $scope.displayedOrders.all = $scope.displayedOrders.all.filter(order => order.id !== orderSelected.id)
+                    $scope.ordersClient.all = $scope.ordersClient.all.filter(order => order.id !== orderSelected.id)
+                    orderSelected.selected = false ;
+                })
                 $scope.operationId = undefined;
             }
             Utils.safeApply($scope);
@@ -449,7 +454,7 @@ export const orderController = ng.controller('orderController',
             $scope.operation = operation;
             let idsOrder = $scope.ordersClient.selected.map(order => order.id);
             await $scope.ordersClient.addOperationInProgress(operation.id, idsOrder);
-            await $scope.getOrderWaitingFiltered($scope.campaign);
+            // await $scope.getOrderWaitingFiltered($scope.campaign);
             template.open('validOrder.lightbox', 'administrator/order/order-valid-add-operation');
             $scope.operationId= operation.id;
         };

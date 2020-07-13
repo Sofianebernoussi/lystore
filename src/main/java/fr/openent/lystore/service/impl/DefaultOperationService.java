@@ -10,16 +10,12 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.entcore.common.neo4j.Neo4j;
-import org.entcore.common.neo4j.Neo4jResult;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.List;
 
 public class DefaultOperationService extends SqlCrudService implements OperationService {
@@ -27,7 +23,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
     public DefaultOperationService(String schema, String table) {
         super(schema, table);
     }
-    private static final Logger LOGGER = LoggerFactory.getLogger (DefaultOrderService.class);
+    private static final Logger log = LoggerFactory.getLogger (DefaultOrderService.class);
     public void getLabels (Handler<Either<String, JsonArray>> handler) {
 
         String query = "SELECT * FROM " + Lystore.lystoreSchema +".label_operation";
@@ -146,7 +142,7 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                     handler.handle(new Either.Left<>("404"));
                 }
             } catch( Exception e){
-                LOGGER.error("An error when you want get all operation", e);
+                log.error("An error when you want get all operation", e);
                 handler.handle(new Either.Left<>("An error when you want get all operation" + e));
             }
         }));
@@ -200,13 +196,13 @@ public class DefaultOperationService extends SqlCrudService implements Operation
 
     public void create(JsonObject operation, Handler<Either<String, JsonObject>> handler){
         String query = "INSERT INTO " +
-                Lystore.lystoreSchema + ".operation(id_label, status, date_cp) " +
+                Lystore.lystoreSchema + ".operation(id_label, status, date_operation) " +
                 "VALUES (?, ?, ?) RETURNING id;";
 
         JsonArray params = new fr.wseduc.webutils.collections.JsonArray()
                 .add(operation.getInteger("id_label"))
                 .add(operation.getBoolean("status"))
-                .add(operation.getString("date_cp"));
+                .add(operation.getString("date_operation"));
 
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
@@ -216,14 +212,14 @@ public class DefaultOperationService extends SqlCrudService implements Operation
                 "SET id_label = ?, " +
                 "status = ?, " +
                 "id_instruction = ?, " +
-                "date_cp = ? " +
+                "date_operation = ? " +
                 "WHERE id = ? " +
                 "RETURNING id";
         JsonArray values = new fr.wseduc.webutils.collections.JsonArray()
                 .add(operation.getInteger("id_label"))
                 .add(operation.getBoolean("status"))
                 .add(operation.getInteger("id_instruction"))
-                .add(operation.getString("date_cp"))
+                .add(operation.getString("date_operation"))
                 .add(id);
         sql.prepared(query, values, SqlResult.validRowsResultHandler(handler));
     }

@@ -73,11 +73,11 @@ export const operationController = ng.controller('operationController',
         };
 
         $scope.isValidOperationDate = (operation:Operation) =>{
-            let operationMomentDate = moment(operation.date_cp);
+            let operationMomentDate = moment(operation.date_operation);
             let isValid = true;
             $scope.operations.all.forEach(operationn => {
                 if(!isNaN(operationMomentDate)
-                    && moment(operationMomentDate).format("DD/MM/YYYY") === moment(operationn.date_cp).format("DD/MM/YYYY")
+                    && moment(operationMomentDate).format("DD/MM/YYYY") === moment(operationn.date_operation).format("DD/MM/YYYY")
                     && operationn.id != operation.id
                     && operationn.id_label === operation.id_label){
                     isValid = false;

@@ -557,7 +557,8 @@
   "no.date": "Pas de date",
   "support.market": "Marché Support",
   "lystore.contract.type.placeholder": "Sélectionner le marché support",
-  "basket.price.null": "Prix TTC de l'équipement égal à zéro non autorisé"
+  "basket.price.null": "Prix TTC de l'équipement égal à zéro non autorisé",
+  "lystore.instruction.date_operation": "Date Opération"
 
 
 }

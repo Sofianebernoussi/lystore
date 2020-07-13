@@ -24,6 +24,7 @@ export class Operation implements Selectable {
     id_instruction: number;
     instruction: Instruction;
     date_cp: Date;
+    date_operation: Date;
     nbOrberSub: Number;
     number_sub : Number;
     constructor(){
@@ -100,7 +101,7 @@ export class Operation implements Selectable {
             id_label : this.id_label,
             status : this.status,
             id_instruction: this.id_instruction,
-            date_cp: this.date_cp? Utils.formatDatePost(this.date_cp) : null,
+            date_operation: this.date_operation? Utils.formatDatePost(this.date_operation) : null,
         };
     }
 
@@ -125,7 +126,8 @@ export class Operations extends Selection<Operation>{
             let { data } = await http.get(`/lystore/operations/?${queriesFilter}`);
             this.all = Mix.castArrayAs(Operation, data);
             this.all.map( operation => {
-                operation.date_cp = operation.date_cp !== null ? moment(operation.date_cp) : null;
+                operation.date_cp = operation.date_cp !== null  && operation.instruction ? moment(operation.instruction.date_cp) : null;
+                operation.date_operation = operation.date_operation !== null ? moment(operation.date_operation) : null;
                 operation.label.toString() !== 'null' && operation.label !== null ?
                     operation.label = Mix.castAs(label, JSON.parse(operation.label.toString()))
                     : operation.label = new label();

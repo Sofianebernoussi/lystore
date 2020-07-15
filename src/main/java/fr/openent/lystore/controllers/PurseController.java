@@ -275,17 +275,37 @@ public class PurseController extends ControllerHelper {
             @Override
             public void handle(JsonObject body) {
                 try {
-                    purseService.update(Integer.parseInt(request.params().get("id")), body,
-                            Logging.defaultResponseHandler(eb,
-                                    request,
-                                    Contexts.PURSE.toString(),
-                                    Actions.UPDATE.toString(),
-                                    request.params().get("id"),
-                                    body));
+                    purseService.update(Integer.parseInt(request.params().get("id")), body, new Handler<Either<String, JsonObject>>() {
+                                @Override
+                                public void handle(Either<String, JsonObject> event) {
+                                    if(event.isRight()){
+                                        Logging.defaultResponseHandler(eb,
+                                                request,
+                                                Contexts.PURSE.toString(),
+                                                Actions.UPDATE.toString(),
+                                                request.params().get("id"),
+                                                body).handle(new Either.Right<>(event.right().getValue()));
+                                    }else{
+                                        if(event.left().getValue().contains("Check_amount_positive")){
+                                            request.response().setStatusMessage("Amount negative").setStatusCode(202).end();
+                                        }else{
+                                            badRequest(request);
+                                        }
+                                    }
+                                }
+                            }
+                    );
+//                    purseService.update(Integer.parseInt(request.params().get("id")), body, Logging.defaultResponseHandler(eb,
+//                                                request,
+//                                                Contexts.PURSE.toString(),
+//                                                Actions.UPDATE.toString(),
+//                                                request.params().get("id"),
+//                                                body));
                 } catch (NumberFormatException e) {
                     log.error("An error occurred when casting purse id", e);
                     badRequest(request);
                 }
+
             }
         });
     }

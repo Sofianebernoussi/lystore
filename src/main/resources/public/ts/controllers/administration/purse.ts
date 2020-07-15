@@ -35,11 +35,15 @@ export const purseController = ng.controller('PurseController',
         };
 
         $scope.validPurse = async (purse: Purse) => {
-            await purse.save();
-            await $scope.campaign.purses.sync($scope.campaign.id);
-            delete $scope.purse;
-            // $scope.allHolderSelected = false;
-            $scope.lightbox.open = false;
+            let status = await purse.save();
+            if(status === 202){
+                $scope.isNegativePurse = true;
+            }else{
+                $scope.lightbox.open = false;
+                await $scope.campaign.purses.sync($scope.campaign.id);
+                delete $scope.purse;
+            }
+            $scope.allHolderSelected = false;
             Utils.safeApply($scope);
         };
 

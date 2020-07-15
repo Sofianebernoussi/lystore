@@ -1,4 +1,4 @@
-import { notify } from 'entcore';
+import { notify,toasts } from 'entcore';
 import http from 'axios';
 import {Mix, Selectable, Selection} from 'entcore-toolkit';
 
@@ -20,12 +20,17 @@ export class Purse implements Selectable {
         this.selected = false;
     }
 
-    async save (): Promise<void> {
+    async save (): Promise<number> {
         try {
-            let purse = await http.put(`/lystore/purse/${this.id}`, this.toJson());
-            let { amount } = purse.data;
-            this.amount = amount;
+            let {status, data} = await http.put(`/lystore/purse/${this.id}`, this.toJson());
+            if(status===200) {
+                let {amount} = data.amount;
+                this.amount = amount;
+            }else{
+                return status;
+            }
         } catch (e) {
+            console.log(e)
             notify.error('lystore.purse.update.err');
         }
     }

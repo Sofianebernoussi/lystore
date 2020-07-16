@@ -91,7 +91,10 @@ public class RecapListLycee extends TabHelper {
                 }
                 insertStructureInfos(currentI, data);
             }
+
+            excel.insertWithStyle(4,currentI,makeCellWithoutNull(data.getString("name")),excel.tabStringStyleCenterBold);
             excel.insertWithStyle(5,currentI, Integer.parseInt(data.getString("amount")),excel.tabStringStyleRight);
+
             typeEquipment = data.getString("typeequipment");
             Double priceAmount = Double.parseDouble(data.getString("price")) * Double.parseDouble(data.getString("amount"));
             if(typeEquipment.equals("EQUIPEMENT")) {
@@ -128,7 +131,7 @@ public class RecapListLycee extends TabHelper {
         sizeMergeRegionLinesWithStyle(1,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
         sizeMergeRegionLinesWithStyle(2,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
         sizeMergeRegionLinesWithStyle(3,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
-        sizeMergeRegionLinesWithStyle(4,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
+//        sizeMergeRegionLinesWithStyle(4,initx,currentI - 1 ,excel.tabStringStyleCenterBold);
         }
     }
 
@@ -163,7 +166,6 @@ public class RecapListLycee extends TabHelper {
         excel.insertWithStyle(1,currentI,makeCellWithoutNull(data.getString("uai")),excel.tabStringStyleCenterBold);
         excel.insertWithStyle(2,currentI,makeCellWithoutNull(data.getString("nameEtab")),excel.tabStringStyleCenterBold);
         excel.insertWithStyle(3,currentI,makeCellWithoutNull(data.getString("city")),excel.tabStringStyleCenterBold);
-        excel.insertWithStyle(4,currentI,makeCellWithoutNull(data.getString("name")),excel.tabStringStyleCenterBold);
     }
 
     private void insertHeader() {

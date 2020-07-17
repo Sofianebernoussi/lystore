@@ -72,6 +72,12 @@
                 <i class="up-open" ng-show="sort.operation.type === 'date_operation' && !sort.operation.reverse"></i>
                 <i class="down-open" ng-show="sort.operation.type === 'date_operation' && sort.operation.reverse"></i>
             </td>
+            <td ng-click="sort.operation.type = 'instruction.cp_number';
+                    sort.operation.reverse = !sort.operation.reverse">
+                <i18n>lystore.instruction.official.number</i18n>
+                <i class="up-open" ng-show="sort.operation.type === 'instruction.cp_number' && !sort.operation.reverse"></i>
+                <i class="down-open" ng-show="sort.operation.type === 'instruction.cp_number' && sort.operation.reverse"></i>
+            </td>
             <td ng-click="sort.operation.type = 'contracts';
                     sort.operation.reverse = !sort.operation.reverse">
                 <i18n>lystore.operation.contracts</i18n>
@@ -102,6 +108,7 @@
             <td >[[operation.bc_numbers || '-']]</td>
             <td >[[formatDate(operation.date_cp)]]</td>
             <td >[[formatDate(operation.date_operation)]]</td>
+            <td >[[operation.instruction.cp_number]]</td>
             <td tooltip=[[formatArrayToolTip(operation.contracts)]] >
                 [[getFirstElement(operation.contracts)]]
             </td>
